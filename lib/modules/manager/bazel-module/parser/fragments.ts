@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord } from '../../../../util/schema-utils';
 import * as starlark from './starlark';
 
 export const StringFragmentSchema = z.object({

@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import * as fragments from '../fragments';
+import * as fragments from './fragments';
 import { parse } from '.';
 
 describe('modules/manager/bazel-module/parser/index', () => {
