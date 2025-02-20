@@ -2143,7 +2143,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       expect(
         await gitlab.createPr({
@@ -2187,7 +2187,9 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
       const pr = await gitlab.createPr({
@@ -2213,7 +2215,12 @@ describe('modules/platform/gitlab/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [100],
+        [400],
+        [900],
+        [100],
+      ]);
     });
 
     it('should parse detailed_merge_status attribute on >= 15.6', async () => {
@@ -2238,7 +2245,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
       const pr = await gitlab.createPr({
@@ -2267,6 +2274,75 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
     });
 
+    it('should retry auto merge creation on 405 method not allowed', async () => {
+      await initPlatform('15.6.0-ee');
+      const reply_body = {
+        detailed_merge_status: 'pending',
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200, {});
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformPrOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 2',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 3',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Automerge on PR creation failed. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Automerge on PR creation failed. Retrying 2',
+      );
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [100],
+        [400],
+        [900],
+        [100],
+        [400],
+      ]);
+    });
+
     it('should not retry if MR is mergeable and pipeline is running', async () => {
       await initPlatform('15.6.0-ee');
       const reply_body = {
@@ -2288,7 +2364,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, reply_body)
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -2410,7 +2486,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [])
@@ -2504,7 +2580,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2562,7 +2638,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2631,7 +2707,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2710,7 +2786,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [
@@ -2760,7 +2836,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200, [])
@@ -3300,7 +3376,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'running',
           },
         })
-        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
 
       await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();

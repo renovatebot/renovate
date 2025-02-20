@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
+import { api as gradleVersioning } from '../../versioning/gradle';
 import type { PackageDependency } from '../types';
 import type {
   GradleManagerData,
@@ -11,7 +12,7 @@ const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
-const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
+const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+ ]+)');
 
 // Extracts version-like and range-like strings from the beginning of input
 export function versionLikeSubstring(
@@ -22,8 +23,12 @@ export function versionLikeSubstring(
   }
 
   const match = versionLikeRegex.exec(input);
-  const version = match?.groups?.version;
+  const version = match?.groups?.version?.trim();
   if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  if (!gradleVersioning.isValid(version)) {
     return null;
   }
 
