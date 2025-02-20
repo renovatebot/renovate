@@ -235,6 +235,7 @@ describe('workers/repository/reconfigure/validate', () => {
               "matchPackageNames": ["pkg"],
               "enabled": false
             }
+          ]
         }
         `);
     await validateReconfigureBranch(config);
