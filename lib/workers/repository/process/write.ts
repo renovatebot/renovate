@@ -145,7 +145,7 @@ export async function writeUpdates(
     const { baseBranch, branchName } = branch;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
-      meta['baseBranch'] = baseBranch;
+      meta.baseBranch = baseBranch;
     }
     addMeta(meta);
     const branchExisted = await scm.branchExists(branchName);

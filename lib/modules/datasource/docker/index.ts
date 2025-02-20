@@ -976,7 +976,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    let needNextPage: boolean = true;
+    let needNextPage = true;
     while (needNextPage) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
