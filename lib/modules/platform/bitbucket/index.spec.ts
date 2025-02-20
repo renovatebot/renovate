@@ -33,7 +33,6 @@ describe('modules/platform/bitbucket/index', () => {
     memCache = await import('../../../util/cache/memory');
     hostRules = jest.requireMock('../../../util/host-rules');
     bitbucket = await import('.');
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     logger = (await import('../../../logger')).logger as any;
     git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
