@@ -51,30 +51,31 @@ RUN set -ex; \
   cp ${temp_dir}/bin/node ./node; \
   true
 
-# fetch npm packages
+# prepare pnpm env
 ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
 
-
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
-
-COPY --link pnpm-lock.yaml ./
-
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
+COPY --link pnpm-lock.yaml ./
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  pnpm fetch --prod; \
+  pnpm fetch --prod --ignore-scripts; \
   true
 
 COPY --link . ./
 
+# disable prepare script
+RUN sed -i -e "s/run-s 'prepare:*'//" package.json
+
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline; \
   true
 
 # --------------------------------------
