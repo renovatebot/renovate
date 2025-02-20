@@ -10,13 +10,13 @@ import { exec } from './exec';
 const file = 'tools/docker/bake.hcl';
 const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
 
-export type MetaDataItem = {
+export interface MetaDataItem {
   'containerimage.digest'?: string;
-};
-export type MetaData = {
+}
+export interface MetaData {
   'push-slim'?: MetaDataItem;
   'push-full'?: MetaDataItem;
-};
+}
 
 export async function bake(
   target: string,

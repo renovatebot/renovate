@@ -297,7 +297,7 @@ describe('workers/global/config/parse/env', () => {
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
-          .mockImplementation((async () => {}) as never);
+          .mockImplementation((() => void 0) as never);
       });
 
       afterAll(() => {

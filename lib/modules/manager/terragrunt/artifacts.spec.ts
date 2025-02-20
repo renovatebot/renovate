@@ -38,7 +38,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
 
   it('calls terraform updateArtifacts if the update type is lockfileMaintenance', async () => {
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 

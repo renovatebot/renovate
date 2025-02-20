@@ -1,7 +1,17 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../context';
 import { kvParams } from './common';
+import type { Ctx } from './context';
+
+// For the purpose of parsing bazel module files in Renovate, we consider a rule
+// to be any "direct function application". For example:
+//
+//     bazel_dep(name = "platforms", version = "0.0.11")
+//     ^^^^^^^^^ --> the "rule"
+//
+// In bazel, rules have typically a more narrow definition. However:
+// - They are syntactically indistinguishable from, say, macros.
+// - In informal speech, "rule" is often used as umbrella term.
 
 const supportedRules = [
   'archive_override',
@@ -13,7 +23,7 @@ const supportedRules = [
 ];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
-export const moduleRules = q
+export const rules = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) => ctx.startRule(token.value))
   .join(
     q.tree({

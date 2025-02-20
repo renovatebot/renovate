@@ -8,7 +8,7 @@ import { regEx } from '../../../util/regex';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
-import { RecordFragmentSchema, StringFragmentSchema } from './fragments';
+import { RuleFragmentSchema, StringFragmentSchema } from './parser/fragments';
 
 // Rule Schemas
 
@@ -63,39 +63,36 @@ export function bazelModulePackageDepToPackageDependency(
   return copy;
 }
 
-const BazelDepToPackageDep = RecordFragmentSchema.extend({
+const BazelDepToPackageDep = RuleFragmentSchema.extend({
+  rule: z.literal('bazel_dep'),
   children: z.object({
-    rule: StringFragmentSchema.extend({
-      value: z.literal('bazel_dep'),
-    }),
     name: StringFragmentSchema,
     version: StringFragmentSchema.optional(),
   }),
 }).transform(
-  ({ children: { rule, name, version } }): BasePackageDep => ({
+  ({ rule, children: { name, version } }): BasePackageDep => ({
     datasource: BazelDatasource.id,
-    depType: rule.value,
+    depType: rule,
     depName: name.value,
     currentValue: version?.value,
     ...(version ? {} : { skipReason: 'unspecified-version' }),
   }),
 );
 
-const GitOverrideToPackageDep = RecordFragmentSchema.extend({
+const GitOverrideToPackageDep = RuleFragmentSchema.extend({
+  rule: z.literal('git_override'),
   children: z.object({
-    rule: StringFragmentSchema.extend({
-      value: z.literal('git_override'),
-    }),
     module_name: StringFragmentSchema,
     remote: StringFragmentSchema,
     commit: StringFragmentSchema,
   }),
 }).transform(
   ({
-    children: { rule, module_name: moduleName, remote, commit },
+    rule,
+    children: { module_name: moduleName, remote, commit },
   }): OverridePackageDep => {
     const override: OverridePackageDep = {
-      depType: rule.value,
+      depType: rule,
       depName: moduleName.value,
       bazelDepSkipReason: 'git-dependency',
       currentDigest: commit.value,
@@ -111,21 +108,20 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   },
 );
 
-const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
+const SingleVersionOverrideToPackageDep = RuleFragmentSchema.extend({
+  rule: z.literal('single_version_override'),
   children: z.object({
-    rule: StringFragmentSchema.extend({
-      value: z.literal('single_version_override'),
-    }),
     module_name: StringFragmentSchema,
     version: StringFragmentSchema.optional(),
     registry: StringFragmentSchema.optional(),
   }),
 }).transform(
   ({
-    children: { rule, module_name: moduleName, version, registry },
+    rule,
+    children: { module_name: moduleName, version, registry },
   }): BasePackageDep => {
     const base: BasePackageDep = {
-      depType: rule.value,
+      depType: rule,
       depName: moduleName.value,
       skipReason: 'ignored',
     };
@@ -145,17 +141,15 @@ const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
   },
 );
 
-const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
+const UnsupportedOverrideToPackageDep = RuleFragmentSchema.extend({
+  rule: z.enum(['archive_override', 'local_path_override']),
   children: z.object({
-    rule: StringFragmentSchema.extend({
-      value: z.enum(['archive_override', 'local_path_override']),
-    }),
     module_name: StringFragmentSchema,
   }),
 }).transform(
-  ({ children: { rule, module_name: moduleName } }): OverridePackageDep => {
+  ({ rule, children: { module_name: moduleName } }): OverridePackageDep => {
     let bazelDepSkipReason: SkipReason = 'unsupported';
-    switch (rule.value) {
+    switch (rule) {
       case 'archive_override':
         bazelDepSkipReason = 'file-dependency';
         break;
@@ -164,7 +158,7 @@ const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
         break;
     }
     return {
-      depType: rule.value,
+      depType: rule,
       depName: moduleName.value,
       skipReason: 'unsupported-datasource',
       bazelDepSkipReason,
@@ -244,18 +238,16 @@ export function toPackageDependencies(
   return collectByModule(packageDeps).map(processModulePkgDeps).flat();
 }
 
-export const GitRepositoryToPackageDep = RecordFragmentSchema.extend({
+export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
+  rule: z.literal('git_repository'),
   children: z.object({
-    rule: StringFragmentSchema.extend({
-      value: z.literal('git_repository'),
-    }),
     name: StringFragmentSchema,
     remote: StringFragmentSchema,
     commit: StringFragmentSchema,
   }),
-}).transform(({ children: { rule, name, remote, commit } }): BasePackageDep => {
+}).transform(({ rule, children: { name, remote, commit } }): BasePackageDep => {
   const gitRepo: BasePackageDep = {
-    depType: rule.value,
+    depType: rule,
     depName: name.value,
     currentDigest: commit.value,
   };
