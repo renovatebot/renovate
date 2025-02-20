@@ -57,10 +57,10 @@ target "settings" {
 }
 
 target "slim" {
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-  ]
+  # cache-from = [
+  #   "type=registry,ref=ghcr.io/${OWNER}/${FILE}",
+  #   "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
+  # ]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
     "${FILE}/${FILE}",
@@ -81,10 +81,10 @@ target "full" {
   args = {
     BASE_IMAGE_TYPE = "full"
   }
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/${FILE}:full",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
-  ]
+  # cache-from = [
+  #   "type=registry,ref=ghcr.io/${OWNER}/${FILE}:full",
+  #   "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
+  # ]
   tags = [
     "ghcr.io/${OWNER}/${FILE}:full",
     "${FILE}/${FILE}:full",

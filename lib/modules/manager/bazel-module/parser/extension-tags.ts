@@ -1,7 +1,7 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../context';
 import { kvParams } from './common';
+import type { Ctx } from './context';
 
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven';
 import { ociExtensionPrefix, ociExtensionTags } from './oci';
