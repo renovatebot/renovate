@@ -1084,10 +1084,10 @@ describe('util/git/index', () => {
     it('creates custom section for renovate ref', async () => {
       const commit = git.getBranchCommit('develop')!;
 
-      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar/baz');
 
       const renovateRefs = await lsRenovateRefs();
-      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
+      expect(renovateRefs).toContain('refs/renovate/branches/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -1104,11 +1104,16 @@ describe('util/git/index', () => {
     it('clears remote Renovate refs', async () => {
       const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
-      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
-      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+      await tmpGit.raw(['update-ref', 'refs/renovate/branches/aaa', commit]);
+      await tmpGit.raw([
+        'push',
+        '--force',
+        'origin',
+        'refs/renovate/branches/aaa',
+      ]);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
-      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+      await git.pushCommitToRenovateRef(commit, 'ccc');
 
       const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
 
