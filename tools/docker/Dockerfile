@@ -76,6 +76,7 @@ RUN sed -i -e "s/run-s 'prepare:\*'/true/" package.json
 # install npm packages
 RUN set -ex; \
   pnpm install --prod --offline; \
+  pnpm rebuild; \
   true
 
 # --------------------------------------
