@@ -492,12 +492,12 @@ describe('workers/repository/init/merge', () => {
     });
 
     describe('mergeStaticRepoEnvConfig()', () => {
-      type MergeRepoEnvTestCase = {
+      interface MergeRepoEnvTestCase {
         name: string;
         currentConfig: AllConfig;
         env: NodeJS.ProcessEnv;
         want: AllConfig;
-      };
+      }
 
       const testCases: MergeRepoEnvTestCase[] = [
         {
@@ -540,13 +540,13 @@ describe('workers/repository/init/merge', () => {
         scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       });
 
-      type MergeRepoFileAndEnvConfigTestCase = {
+      interface MergeRepoFileAndEnvConfigTestCase {
         name: string;
         currentConfig: AllConfig;
         repoFileConfig: AllConfig;
         staticConfig: AllConfig;
         wantConfig: AllConfig;
-      };
+      }
 
       it.each<MergeRepoFileAndEnvConfigTestCase>([
         {
