@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.13.0@sha256:426b85b823c113372f766a963f68cfd9cd4878e1bcc0fda58779127ee98a28eb
+# syntax=docker/dockerfile:1.14.0@sha256:0232be24407cc42c983b9b269b1534a3b98eea312aad9464dd0f1a9e547e15a7
 
 ARG BASE_IMAGE_TYPE=slim
 
@@ -21,11 +21,11 @@ FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.41.2@sha256:f526
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.13.1
+RUN install-tool node 22.14.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.3.0
+RUN install-tool pnpm 9.15.5
 
 WORKDIR /usr/local/renovate
 
@@ -59,7 +59,7 @@ ENV CI=1 npm_config_modules_cache_max_age=0 \
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
 
-COPY --link package.json pnpm-lock.yaml ./
+COPY --link pnpm-lock.yaml ./
 
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
@@ -102,7 +102,7 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
-RUN mkdir -p /tmp/renovate/cache /runner/cache && \
+RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
   chmod -R 777 /tmp/renovate /runner
 
 # test

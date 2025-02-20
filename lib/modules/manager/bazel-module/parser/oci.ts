@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DockerDatasource } from '../../../datasource/docker';
 import type { PackageDependency } from '../../types';
-import { ExtensionTagFragmentSchema, StringFragmentSchema } from '../fragments';
+import { ExtensionTagFragmentSchema, StringFragmentSchema } from './fragments';
 
 export const ociExtensionPrefix = 'oci';
 
