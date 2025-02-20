@@ -355,22 +355,22 @@ describe('modules/datasource/npm/get', () => {
     );
     expect(dep?.sourceDirectory).toBeUndefined();
 
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
-            "authorization": "Bearer XXX",
-            "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
+    expect(httpMock.getTrace()).toEqual([
+      {
+        headers: {
+          accept: 'application/json',
+          'accept-encoding': 'gzip, deflate, br',
+          authorization: 'Bearer XXX',
+          connection: 'close',
+          host: 'test.org',
+          'user-agent':
+            'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
         },
-      ]
-    `);
+        method: 'GET',
+        status: 200,
+        url: 'https://test.org/@neutrinojs%2Freact',
+      },
+    ]);
   });
 
   it('handles missing dist-tags latest', async () => {
@@ -502,22 +502,22 @@ describe('modules/datasource/npm/get', () => {
     );
     expect(dep?.sourceDirectory).toBe('packages/foo');
 
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
-            "authorization": "Bearer XXX",
-            "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
+    expect(httpMock.getTrace()).toEqual([
+      {
+        headers: {
+          accept: 'application/json',
+          'accept-encoding': 'gzip, deflate, br',
+          authorization: 'Bearer XXX',
+          connection: 'close',
+          host: 'test.org',
+          'user-agent':
+            'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
         },
-      ]
-    `);
+        method: 'GET',
+        status: 200,
+        url: 'https://test.org/@neutrinojs%2Freact',
+      },
+    ]);
   });
 
   it('does not massage non-github non-compliant repository urls', async () => {
@@ -543,22 +543,22 @@ describe('modules/datasource/npm/get', () => {
     );
     expect(dep?.sourceDirectory).toBeUndefined();
 
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br",
-            "authorization": "Bearer XXX",
-            "host": "test.org",
-            "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
+    expect(httpMock.getTrace()).toEqual([
+      {
+        headers: {
+          accept: 'application/json',
+          'accept-encoding': 'gzip, deflate, br',
+          authorization: 'Bearer XXX',
+          connection: 'close',
+          host: 'test.org',
+          'user-agent':
+            'RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
         },
-      ]
-    `);
+        method: 'GET',
+        status: 200,
+        url: 'https://test.org/@neutrinojs%2Freact',
+      },
+    ]);
   });
 
   it('discards cache with no revision', async () => {
