@@ -137,11 +137,11 @@
   "homepage": "https://renovatebot.com",
   "engines": {
     "node": "^20.15.1 || ^22.11.0",
-    "pnpm": "^9.0.0"
+    "pnpm": "^10.0.0"
   },
   "volta": {
     "node": "22.14.0",
-    "pnpm": "9.15.5"
+    "pnpm": "10.3.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.738.0",
@@ -352,7 +352,7 @@
     "typescript": "5.7.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.15.5",
+  "packageManager": "pnpm@10.3.0",
   "files": [
     "dist",
     "renovate-schema.json"
