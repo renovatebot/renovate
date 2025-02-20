@@ -225,4 +225,24 @@ describe('workers/repository/reconfigure/validate', () => {
       state: 'green',
     });
   });
+
+  it('handles array fields which accept strings', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(`
+        {
+          "packageRules": [
+            {
+              "description": "test",
+              "matchPackageNames": ["pkg"],
+              "enabled": false
+            }
+        }
+        `);
+    await validateReconfigureBranch(config);
+    expect(platform.setBranchStatus).toHaveBeenCalledWith({
+      branchName: 'prefix/reconfigure',
+      context: 'renovate/config-validation',
+      description: 'Validation Successful',
+      state: 'green',
+    });
+  });
 });
