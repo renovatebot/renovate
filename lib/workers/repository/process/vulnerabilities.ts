@@ -43,7 +43,9 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  private constructor() {}
+  private constructor() {
+    // private constructor
+  }
 
   private async initialize(): Promise<void> {
     this.osvOffline = await OsvOffline.create();

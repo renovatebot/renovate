@@ -55,10 +55,10 @@ async function validate(
   }
 }
 
-type PackageJson = {
+interface PackageJson {
   renovate?: RenovateConfig;
   'renovate-config'?: Record<string, RenovateConfig>;
-};
+}
 
 (async () => {
   const strictArgIndex = process.argv.indexOf('--strict');

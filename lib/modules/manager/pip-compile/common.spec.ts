@@ -149,7 +149,7 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
-    it.each(allowedOptions['uv'])(
+    it.each(allowedOptions.uv)(
       'returned sourceFiles must not contain options (uv)',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
