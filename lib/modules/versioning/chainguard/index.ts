@@ -1,5 +1,6 @@
 import { regEx } from '../../../util/regex';
-import { AlpineVersion, AlpineVersioningApi } from '../alpine';
+import { AlpineVersion } from '../alpine';
+import { AlpineVersioningApi } from '../alpine';
 import type { VersioningApi } from '../types';
 
 export const id = 'chainguard';
@@ -45,9 +46,9 @@ class ChainguardVersioningApi extends AlpineVersioningApi {
     if (cmpr !== 0) {
       return cmpr;
     }
-    if ((left.date || 0) > (right.date || 0)) {
+    if ((left.date ?? 0) > (right.date ?? 0)) {
       return 1;
-    } else if ((left.date || 0) < (right.date || 0)) {
+    } else if ((left.date ?? 0) < (right.date ?? 0)) {
       return -1;
     }
     return 0;

@@ -8,7 +8,7 @@ export const urls = [];
 export const supportsRanges = false;
 
 const pattern = regEx(
-  /^(?<digits>[\.0-9]*)(?<letter>[a-z])?(?<suffix>(?:_alpha|_beta|_pre|_rc|_cvs|_svn|_git|_hg|_p)(?<suffixNumber>[0-9]*))?(?:~(?<commitHash>[a-f0-9]+))?(?:-r(?<revisionNumber>[0-9]+))?$/,
+  /^(?<digits>[.0-9]*)(?<letter>[a-z])?(?<suffix>(?:_alpha|_beta|_pre|_rc|_cvs|_svn|_git|_hg|_p)(?<suffixNumber>[0-9]*))?(?:~(?<commitHash>[a-f0-9]+))?(?:-r(?<revisionNumber>[0-9]+))?$/,
 );
 
 // digit{.digit}...{letter}{_suf{#}}...{~hash}{-r#}
@@ -51,34 +51,34 @@ export class AlpineVersioningApi extends GenericVersioningApi<AlpineVersion> {
     left: AlpineVersion,
     right: AlpineVersion,
   ): number {
-    if ((left.letter || '') > (right.letter || '')) {
+    if ((left.letter ?? '') > (right.letter ?? '')) {
       return 1;
-    } else if ((left.letter || '') < (right.letter || '')) {
+    } else if ((left.letter ?? '') < (right.letter ?? '')) {
       return -1;
     }
 
-    if ((left.letter || '') > (right.letter || '')) {
+    if ((left.letter ?? '') > (right.letter ?? '')) {
       return 1;
-    } else if ((left.letter || '') < (right.letter || '')) {
+    } else if ((left.letter ?? '') < (right.letter ?? '')) {
       return -1;
     }
 
     // TODO: Implement correct comparison of suffix
-    if ((left.suffixNumber || 0) > (right.suffixNumber || 0)) {
+    if ((left.suffixNumber ?? 0) > (right.suffixNumber ?? 0)) {
       return 1;
-    } else if ((left.suffixNumber || 0) < (right.suffixNumber || 0)) {
+    } else if ((left.suffixNumber ?? 0) < (right.suffixNumber ?? 0)) {
       return -1;
     }
 
-    if ((left.commitHash || 0) > (right.commitHash || 0)) {
+    if ((left.commitHash ?? 0) > (right.commitHash ?? 0)) {
       return 1;
-    } else if ((left.commitHash || 0) < (right.commitHash || 0)) {
+    } else if ((left.commitHash ?? 0) < (right.commitHash ?? 0)) {
       return -1;
     }
 
-    if ((left.revisionNumber || 0) > (right.revisionNumber || 0)) {
+    if ((left.revisionNumber ?? 0) > (right.revisionNumber ?? 0)) {
       return 1;
-    } else if ((left.revisionNumber || 0) < (right.revisionNumber || 0)) {
+    } else if ((left.revisionNumber ?? 0) < (right.revisionNumber ?? 0)) {
       return -1;
     }
 
