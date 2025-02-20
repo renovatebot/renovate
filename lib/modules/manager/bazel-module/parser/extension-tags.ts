@@ -32,7 +32,7 @@ const supportedExtensionTagsRegex = regEx(
 export const extensionTags = q
   .sym<Ctx>(supportedExtensionRegex, (ctx, token) => {
     const rawExtension = token.value;
-    const match = rawExtension.match(supportedExtensionRegex)!;
+    const match = supportedExtensionRegex.exec(rawExtension)!;
     const extension = match[1];
     return ctx.prepareExtensionTag(extension, rawExtension);
   })

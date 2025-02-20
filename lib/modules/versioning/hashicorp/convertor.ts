@@ -16,11 +16,9 @@ export function hashicorp2npm(input: string): string {
   return input
     .split(',')
     .map((single) => {
-      const r = single.match(
-        regEx(
-          /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/,
-        ),
-      );
+      const r = regEx(
+        /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/,
+      ).exec(single);
       if (!r) {
         logger.warn(
           { constraint: input, element: single },
@@ -45,10 +43,10 @@ export function hashicorp2npm(input: string): string {
         case '=':
           return version;
         case '~>':
-          if (version.match(regEx(/^\d+$/))) {
+          if (regEx(/^\d+$/).test(version)) {
             return `>=${version}`;
           }
-          if (version.match(regEx(/^\d+\.\d+$/))) {
+          if (regEx(/^\d+\.\d+$/).test(version)) {
             return `^${version}`;
           }
           return `~${version}`;
@@ -71,9 +69,9 @@ export function npm2hashicorp(input: string): string {
   return input
     .split(' ')
     .map((single) => {
-      const r = single.match(
-        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/),
-      );
+      const r = regEx(
+        /^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/,
+      ).exec(single);
       if (!r) {
         throw new Error('invalid npm constraint');
       }
@@ -85,14 +83,14 @@ export function npm2hashicorp(input: string): string {
     .map(({ operator, version }) => {
       switch (operator) {
         case '^': {
-          if (version.match(regEx(/^\d+$/))) {
+          if (regEx(/^\d+$/).test(version)) {
             return `~> ${version}.0`;
           }
-          const withZero = version.match(regEx(/^(\d+\.\d+)\.0$/));
+          const withZero = regEx(/^(\d+\.\d+)\.0$/).exec(version);
           if (withZero) {
             return `~> ${withZero[1]}`;
           }
-          const nonZero = version.match(regEx(/^(\d+\.\d+)\.\d+$/));
+          const nonZero = regEx(/^(\d+\.\d+)\.\d+$/).exec(version);
           if (nonZero) {
             // not including`>= ${version}`, which makes this less accurate
             // but makes the results cleaner
@@ -101,10 +99,10 @@ export function npm2hashicorp(input: string): string {
           return `~> ${version}`;
         }
         case '~':
-          if (version.match(regEx(/^\d+$/))) {
+          if (regEx(/^\d+$/).test(version)) {
             return `~> ${version}.0`;
           }
-          if (version.match(regEx(/^\d+\.\d+$/))) {
+          if (regEx(/^\d+\.\d+$/).test(version)) {
             return `~> ${version}.0`;
           }
           return `~> ${version}`;

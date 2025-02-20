@@ -39,7 +39,7 @@ function filterByPrefix(packageName: string, releases: Release[]): Release[] {
       }
 
       const normalizedVersion = release.version.replace(prefix, '');
-      if (!normalizedVersion.match(regEx(/^v\d[^/]*/))) {
+      if (!regEx(/^v\d[^/]*/).test(normalizedVersion)) {
         continue;
       }
 

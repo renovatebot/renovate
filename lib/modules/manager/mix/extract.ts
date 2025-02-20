@@ -33,7 +33,7 @@ export async function extractPackageFile(
     .split(newlineRegex)
     .map((line) => line.replace(commentMatchRegExp, ''));
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
-    if (contentArr[lineNumber].match(depSectionRegExp)) {
+    if (depSectionRegExp.test(contentArr[lineNumber])) {
       let depBuffer = '';
       do {
         depBuffer += contentArr[lineNumber] + '\n';

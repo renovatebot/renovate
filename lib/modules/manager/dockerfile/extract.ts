@@ -285,7 +285,7 @@ export function extractPackageFile(
         '^#[ \\t]*syntax[ \\t]*=[ \\t]*(?<image>\\S+)',
         'im',
       );
-      const syntaxMatch = instruction.match(syntaxRegex);
+      const syntaxMatch = syntaxRegex.exec(instruction);
       if (syntaxMatch?.groups?.image) {
         const syntaxImage = syntaxMatch.groups.image;
         const lineNumberRanges: number[][] = [
@@ -347,7 +347,7 @@ export function extractPackageFile(
         '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?',
       'im',
     ); // TODO #12875 complex for re2 has too many not supported groups
-    const fromMatch = instruction.match(fromRegex);
+    const fromMatch = fromRegex.exec(instruction);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
       const lineNumberRanges: number[][] = [[lineNumberInstrStart, lineNumber]];
@@ -394,7 +394,7 @@ export function extractPackageFile(
         '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)',
       'im',
     ); // TODO #12875 complex for re2 has too many not supported groups
-    const copyFromMatch = instruction.match(copyFromRegex);
+    const copyFromMatch = copyFromRegex.exec(instruction);
     if (copyFromMatch?.groups?.image) {
       if (stageNames.includes(copyFromMatch.groups.image)) {
         logger.debug(
@@ -434,7 +434,7 @@ export function extractPackageFile(
         '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)',
       'im',
     );
-    const runMountFromMatch = instruction.match(runMountFromRegex);
+    const runMountFromMatch = runMountFromRegex.exec(instruction);
     if (runMountFromMatch?.groups?.image) {
       if (stageNames.includes(runMountFromMatch.groups.image)) {
         logger.debug(

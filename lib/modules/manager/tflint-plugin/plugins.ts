@@ -30,8 +30,8 @@ export function extractTFLintPlugin(
     if (is.string(line)) {
       // `{` will be counted with +1 and `}` with -1.
       // Therefore if we reach braceCounter == 0 then we found the end of the tflint configuration block.
-      const openBrackets = (line.match(regEx(/\{/g)) ?? []).length;
-      const closedBrackets = (line.match(regEx(/\}/g)) ?? []).length;
+      const openBrackets = regEx(/\{/g).exec(line)?.length ?? 0;
+      const closedBrackets = regEx(/\}/g).exec(line)?.length ?? 0;
       braceCounter = braceCounter + openBrackets - closedBrackets;
 
       // only update fields inside the root block

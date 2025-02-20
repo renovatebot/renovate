@@ -48,7 +48,7 @@ export function satisfiesDateRange(
   date: string,
   range: string,
 ): boolean | null {
-  const grps = range.trim().match(rangeRegex)?.groups;
+  const grps = rangeRegex.exec(range.trim())?.groups;
   if (!grps) {
     return null;
   }

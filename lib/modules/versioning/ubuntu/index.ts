@@ -53,7 +53,7 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const match = ver.match(regEx(/^\d+.\d+/));
+  const match = regEx(/^\d+.\d+/).exec(ver);
 
   if (!di.isReleased(coerceString(match?.[0], ver))) {
     return false;
