@@ -9,7 +9,7 @@ import {
 } from './fragments';
 import * as fragments from './fragments';
 
-describe('modules/manager/bazel-module/fragments', () => {
+describe('modules/manager/bazel-module/parser/fragments', () => {
   it('.string()', () => {
     const result = fragments.string('hello');
     expect(() => StringFragmentSchema.parse(result)).not.toThrow();

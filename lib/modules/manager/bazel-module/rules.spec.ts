@@ -2,7 +2,7 @@ import deepmerge from 'deepmerge';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
-import * as fragments from './fragments';
+import * as fragments from './parser/fragments';
 import type {
   BasePackageDep,
   BazelModulePackageDep,
