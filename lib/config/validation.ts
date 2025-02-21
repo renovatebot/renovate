@@ -83,6 +83,10 @@ function isManagerPath(parentPath: string): boolean {
   );
 }
 
+function isBumpVersionPath(parentPath: string): boolean {
+  return regEx(/^bumpVersions\[\d+]$/).test(parentPath);
+}
+
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -227,7 +231,7 @@ export async function validateConfig(
           topic: 'Config error',
           message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
         });
-      } else if (!isManagerPath(parentPath)) {
+      } else if (!isManagerPath(parentPath) && !isBumpVersionPath(parentPath)) {
         warnings.push({
           topic: 'Config warning',
           message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,

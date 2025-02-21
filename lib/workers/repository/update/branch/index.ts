@@ -41,6 +41,7 @@ import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
+import { bumpVersions } from './bump-versions';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
@@ -528,6 +529,9 @@ export async function processBranch(
         config.updatedArtifacts = updatedArtifacts;
         config.artifactErrors = artifactErrors;
       }
+
+      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+      await bumpVersions(config);
 
       removeMeta(['dep']);
 
