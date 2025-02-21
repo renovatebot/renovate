@@ -1,3 +1,5 @@
+import { fs as memfs } from 'memfs';
+
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
@@ -7,6 +9,20 @@ import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
+
+// use real fs to read wasm files for `@one-ini/wasm`
+jest.mock('fs', () => {
+  const realFs = jest.requireActual<typeof import('fs')>('fs');
+  return {
+    ...memfs,
+    readFileSync: (file: string, ...args: any[]) => {
+      if (file.endsWith('.wasm')) {
+        return realFs.readFileSync(file, ...args);
+      }
+      return memfs.readFileSync(file, ...args);
+    },
+  };
+});
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',
