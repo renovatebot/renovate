@@ -7,9 +7,9 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'jsonata',
-        fileFormat: 'json',
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
+        fileFormat: 'json',
         fileMatch: ['(^|/)biome.jsonc?$'],
         matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
