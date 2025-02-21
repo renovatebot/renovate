@@ -64,7 +64,7 @@ if [[ "$HAS_ISSUES_MISSING_LABELS" == "false" && "$HAS_ISSUES_MISSING_ISSUE_TYPE
     ISSUE_BODY="$ISSUE_BODY All checked issues are correctly labeled and have issue type.\n"
 fi
 
-ISSUE_NUMBER=32236
+ISSUE_NUMBER=33236
 
 # Edit the open issue, and update the list of issues.
 gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue."; exit 1; }
