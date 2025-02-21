@@ -29,10 +29,12 @@ export class CtxProcessingError extends Error {
 }
 
 export class Ctx implements CtxCompatible {
+  readonly source: string;
   results: ResultFragment[];
   stack: AllFragments[];
 
-  constructor() {
+  constructor(source: string) {
+    this.source = source;
     this.results = [];
     this.stack = [];
   }
@@ -152,23 +154,37 @@ export class Ctx implements CtxCompatible {
     return this.processStack();
   }
 
-  prepareExtensionTag(extension: string, rawExtension: string): Ctx {
-    const preppedTag = fragments.preparedExtensionTag(extension, rawExtension);
+  prepareExtensionTag(
+    extension: string,
+    rawExtension: string,
+    offset: number,
+  ): Ctx {
+    const preppedTag = fragments.preparedExtensionTag(
+      extension,
+      rawExtension,
+      offset,
+    );
     this.stack.push(preppedTag);
     return this;
   }
 
   startExtensionTag(tag: string): Ctx {
-    const { extension, rawExtension } = this.popPreparedExtensionTag();
+    const { extension, rawExtension, offset } = this.popPreparedExtensionTag();
 
-    const extensionTag = fragments.extensionTag(extension, rawExtension, tag);
+    const extensionTag = fragments.extensionTag(
+      extension,
+      rawExtension,
+      tag,
+      offset,
+    );
     this.stack.push(extensionTag);
     return this;
   }
 
-  endExtensionTag(): Ctx {
+  endExtensionTag(offset: number): Ctx {
     const tag = this.currentExtensionTag;
     tag.isComplete = true;
+    tag.rawString = this.source.slice(tag.offset, offset);
     return this.processStack();
   }
 
