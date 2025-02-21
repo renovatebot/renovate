@@ -19,3 +19,23 @@ exports[`modules/datasource/gitlab-packages/index getReleases returns package fr
   ],
 }
 `;
+
+exports[`modules/datasource/gitlab-packages/index getReleases returns conan package from custom registry 1`] = `
+{
+  "registryUrl": "https://gitlab.com",
+  "releases": [
+    {
+      "releaseTimestamp": "2020-03-04T18:01:37.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-04-04T18:01:37.000Z",
+      "version": "v1.1.0",
+    },
+    {
+      "releaseTimestamp": "2020-05-04T18:01:37.000Z",
+      "version": "v1.1.1",
+    },
+  ],
+}
+`;
