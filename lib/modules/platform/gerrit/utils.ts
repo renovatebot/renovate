@@ -101,13 +101,6 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
     }
   }
 
-  // for backwards compatibility
-  if (!sourceBranch) {
-    sourceBranch = change.hashtags
-      ?.find((tag) => tag.startsWith('sourceBranch-'))
-      ?.replace('sourceBranch-', '');
-  }
-
   return sourceBranch ?? undefined;
 }
 
