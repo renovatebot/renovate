@@ -6,7 +6,18 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
-jest.mock('fs', () => memfs);
+jest.mock('fs', () => {
+  const realFs = jest.requireActual<typeof import('fs')>('fs');
+  return {
+    ...memfs,
+    readFileSync: (file: string, ...args: any[]) => {
+      if (file.endsWith('.wasm')) {
+        return realFs.readFileSync(file, ...args);
+      }
+      return memfs.readFileSync(file, ...args);
+    },
+  };
+});
 jest.mock('fs-extra', () =>
   jest
     .requireActual<
