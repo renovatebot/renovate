@@ -10,35 +10,13 @@ import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
-// use real fs to read wasm files for conda versioning used wasm package
-jest.mock('fs', () => {
-  const realFs = jest.requireActual<typeof import('fs')>('fs');
-  return {
-    ...memfs,
-    readFileSync: (file: string, ...args: any[]) => {
-      if (file.endsWith('.wasm')) {
-        return realFs.readFileSync(file, ...args);
-      }
-      return memfs.readFileSync(file, ...args);
-    },
-  };
-});
-
-jest.mock('fs-extra', () => {
-  const realFs = jest.requireActual<typeof import('fs-extra')>('fs-extra');
-  return {
-    ensureDir: jest.fn(),
-    remove: jest.fn(),
-    readFile: jest.fn((file: string, options: any) => {
-      if (file.endsWith('.wasm.gz')) {
-        return realFs.readFile(file, options);
-      }
-      return undefined;
-    }),
-    writeFile: jest.fn(),
-    outputFile: jest.fn(),
-  };
-});
+jest.mock('fs-extra', () =>
+  jest
+    .requireActual<
+      typeof import('../../../test/fixtures')
+    >('../../../test/fixtures')
+    .fsExtra(),
+);
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',
