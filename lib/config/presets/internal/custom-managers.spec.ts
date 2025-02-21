@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { regexMatches } from '../../../../test/util';
-import { extractPackageFile } from '../../../modules/manager/custom/regex';
+import { extractPackageFile } from '../../../modules/manager';
 import { presets } from './custom-managers';
 
 describe('config/presets/internal/custom-managers', () => {
@@ -15,6 +15,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'jsonata',
         fileContent,
         'biome.json',
         customManager!,
@@ -25,7 +26,6 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '1.7.3',
           datasource: 'npm',
           depName: '@biomejs/biome',
-          replaceString: '"https://biomejs.dev/schemas/1.7.3/schema.json"',
         },
       ]);
     });
@@ -79,6 +79,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'bitbucket-pipelines.yml',
         customManager!,
@@ -194,6 +195,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'Dockerfile',
         customManager!,
@@ -302,6 +304,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'github-workflow.yaml',
         customManager!,
@@ -401,6 +404,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'gitlab-ci.yml',
         customManager!,
@@ -471,6 +475,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'Chart.yaml',
         customManager!,
@@ -533,6 +538,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'gitlab-ci.yml',
         customManager!,
@@ -603,6 +609,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'pom.xml',
         customManager!,
