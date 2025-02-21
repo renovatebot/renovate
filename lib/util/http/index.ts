@@ -17,6 +17,7 @@ import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { memCacheProvider } from './cache/memory-http-cache-provider';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
@@ -188,6 +189,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     const memCacheKey =
       options.memCache !== false &&
+      options.cacheProvider !== memCacheProvider &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
             `got-${JSON.stringify({
@@ -203,6 +205,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
+
+      // istanbul ignore next
+      if (resPromise && options.cacheProvider !== memCacheProvider) {
+        logger.trace({ url }, 'Cache hit on the obsolete memCache option');
+      }
     }
 
     // istanbul ignore else: no cache tests
