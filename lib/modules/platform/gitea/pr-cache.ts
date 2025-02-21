@@ -130,7 +130,7 @@ export class GiteaPrCache {
   }
 
   private async sync(http: GiteaHttp): Promise<GiteaPrCache> {
-    let query: string | undefined = getQueryString({
+    let query: string | null = getQueryString({
       state: 'all',
       sort: 'recentupdate',
       // Fetch 100 PRs on the first run to ensure we have the most recent PRs.
@@ -159,7 +159,7 @@ export class GiteaPrCache {
       }
 
       const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
-      query = uri ? uri.search : undefined;
+      query = uri ? uri.search : null;
     }
 
     this.updateItems();
