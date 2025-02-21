@@ -370,7 +370,7 @@
       "re2"
     ],
     "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.4.1"
+      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.4.2"
     }
   }
 }
