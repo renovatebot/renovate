@@ -20,7 +20,27 @@ export function processHostRules(): HostRulesResult {
     hostType: 'npm',
   });
   logger.debug(`Found ${npmHostRules.length} npm host rule(s)`);
-  for (const hostRule of npmHostRules) {
+  // Include host rules without specific type to mimic the behavior used when determining dependencies with updates.
+  const noTypeHostRules = hostRules
+    .getAll()
+    .filter((rule) => rule.hostType === null || rule.hostType === undefined);
+  logger.debug(
+    `Found ${noTypeHostRules.length} host rule(s) without host type`,
+  );
+  // Drop duplicates for the same matchHost while prefering the more specific rules with hostType npm.
+  const noTypeHostRulesWithoutDuplicates = noTypeHostRules.filter(
+    (rule) => !npmHostRules.some((elem) => elem.matchHost === rule.matchHost),
+  );
+  logger.debug(
+    `Found ${noTypeHostRulesWithoutDuplicates.length} host rule(s) without host type after dropping duplicates`,
+  );
+  const effectiveHostRules = npmHostRules.concat(
+    noTypeHostRulesWithoutDuplicates,
+  );
+  logger.trace(
+    `Found ${effectiveHostRules.length} effective npm host rule(s) after deduplication`,
+  );
+  for (const hostRule of effectiveHostRules) {
     if (!hostRule.resolvedHost) {
       logger.debug('Skipping host rule without resolved host');
       continue;
