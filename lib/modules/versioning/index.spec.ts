@@ -10,7 +10,7 @@ import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
-// use real fs to read wasm files for `@one-ini/wasm`
+// use real fs to read wasm files for conda versioning used wasm package
 jest.mock('fs', () => {
   const realFs = jest.requireActual<typeof import('fs')>('fs');
   return {
