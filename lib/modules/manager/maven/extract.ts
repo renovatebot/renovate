@@ -479,6 +479,13 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       }
       const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
+      if (dep.sharedVariableName) {
+        extractedDeps[name].push({
+          ...dep,
+          registryUrls: [...dep.registryUrls!],
+          fileReplacePosition: rawDep.fileReplacePosition,
+        });
+      }
     });
   });
 

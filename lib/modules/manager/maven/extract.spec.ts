@@ -284,6 +284,10 @@ describe('modules/manager/maven/extract', () => {
           depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
           currentValue: '1.4.11',
         },
+        {
+          depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
+          currentValue: '1.4.11',
+        },
       ]);
     });
 
@@ -294,6 +298,10 @@ describe('modules/manager/maven/extract', () => {
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
+          currentValue: '1.2.3',
+        },
         {
           depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
           currentValue: '1.2.3',
@@ -576,6 +584,20 @@ describe('modules/manager/maven/extract', () => {
               skipReason: 'name-placeholder',
             },
             {
+              currentValue: '1.2.3.4',
+              datasource: 'maven',
+              depName: 'org.example:quux',
+              depType: 'compile',
+              editFile: 'parent.pom.xml',
+              fileReplacePosition: 2426,
+              sharedVariableName: 'quuxVersion',
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
               currentValue: '1.2.3',
               datasource: 'maven',
               depName: 'org.example:quuz',
@@ -698,11 +720,25 @@ describe('modules/manager/maven/extract', () => {
               depName: 'org.example:quux',
               currentValue: '1.2.3.4',
               sharedVariableName: 'quuxVersion',
+              fileReplacePosition: 698,
+            },
+            {
+              depName: 'org.example:quux',
+              currentValue: '1.2.3.4',
+              sharedVariableName: 'quuxVersion',
+              fileReplacePosition: 2779,
             },
             {
               depName: 'org.example:quux-test',
               currentValue: '1.2.3.4',
               sharedVariableName: 'quuxVersion',
+              fileReplacePosition: 698,
+            },
+            {
+              depName: 'org.example:quux-test',
+              currentValue: '1.2.3.4',
+              sharedVariableName: 'quuxVersion',
+              fileReplacePosition: 2938,
             },
             {
               depName: 'org.example:quuz',
