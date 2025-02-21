@@ -393,6 +393,8 @@ jobs:
       - run: ls /home/runner/work/renovate/renovate/node_modules/.pnpm/@trim21+rattler@0.1.8/node_modules/@trim21/rattler/dist/ -ahl
       - run: stat /home/runner/work/renovate/renovate/node_modules/.pnpm/@trim21+rattler@0.1.8/node_modules/@trim21/rattler/dist/js_rattler_bg.wasm
 
+      - run: pnpm i
+
       - name: Unit tests
         shell: bash
         run: |
