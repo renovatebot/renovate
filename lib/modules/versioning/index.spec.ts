@@ -1,5 +1,3 @@
-import { fs as memfs } from 'memfs';
-
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
