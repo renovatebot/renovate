@@ -6,13 +6,12 @@ export const presets: Record<string, Preset> = {
   biomeVersions: {
     customManagers: [
       {
-        customType: 'regex',
+        customType: 'jsonata',
+        fileFormat: 'json',
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
         fileMatch: ['(^|/)biome.jsonc?$'],
-        matchStrings: [
-          '"https://biomejs.dev/schemas/(?<currentValue>[^"]+)/schema.json"',
-        ],
+        matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
     description:
