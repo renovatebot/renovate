@@ -8,6 +8,7 @@ import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
+import is from '@sindresorhus/is';
 
 export { composerVersioningId };
 
@@ -41,6 +42,22 @@ export function getComposerArguments(
 
   if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
     args += ' --no-plugins';
+  }
+
+  return args;
+}
+
+export function getComposerUpdateArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = getComposerArguments(config, toolConstraint);
+
+  if (
+    is.string(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '^2.7')
+  ) {
+      args += ' --minimal-changes';
   }
 
   return args;
