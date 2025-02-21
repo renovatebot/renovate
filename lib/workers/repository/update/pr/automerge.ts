@@ -69,6 +69,10 @@ export async function checkAutoMerge(
       prAutomergeBlockReason: 'PlatformNotReady',
     };
   }
+  if (config.autoApprove && platform.approvePrForAutomerge) {
+    logger.debug('Auto-approving PR for automerge');
+    await platform.approvePrForAutomerge(pr.number);
+  }
   const branchStatus = await resolveBranchStatus(
     branchName,
     !!config.internalChecksAsSuccess,
