@@ -144,6 +144,12 @@ describe('modules/platform/index', () => {
         gitAuthor: 'user@domain.com',
         hostRules: [
           {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
+            token: '123',
+          },
+          {
             hostType: 'docker',
             matchHost: 'ghcr.io',
             password: '123',
@@ -203,6 +209,12 @@ describe('modules/platform/index', () => {
         endpoint: 'https://api.github.com/',
         gitAuthor: 'user@domain.com',
         hostRules: [
+          {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
+            token: '123',
+          },
           {
             hostType: 'docker',
             matchHost: 'ghcr.io',
