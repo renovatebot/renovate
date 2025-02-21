@@ -34,9 +34,17 @@ export async function updateArtifacts(
     updateConfig.config.isLockFileMaintenance ||
     updateConfig.config.updateType === 'lockFileMaintenance'
   ) {
-    cmd += 'devbox update';
+    cmd += 'devbox update --no-install';
   } else if (is.nonEmptyArray(updateConfig.updatedDeps)) {
-    cmd += 'devbox install';
+    const updateCommands = updateConfig.updatedDeps
+      .map((dep) => dep.depName && `devbox update ${dep.depName} --no-install`)
+      .filter((dep) => dep);
+    if (updateCommands.length) {
+      cmd += updateCommands.join('; ');
+    } else {
+      logger.trace('No updated devbox packages - returning null');
+      return null;
+    }
   } else {
     logger.trace('No updated devbox packages - returning null');
     return null;
