@@ -24,6 +24,22 @@ jest.mock('fs', () => {
   };
 });
 
+jest.mock('fs-extra', () => {
+  const realFs = jest.requireActual<typeof import('fs-extra')>('fs-extra');
+  return {
+    ensureDir: jest.fn(),
+    remove: jest.fn(),
+    readFile: jest.fn((file: string, options: any) => {
+      if (file.endsWith('.wasm.gz')) {
+        return realFs.readFile(file, options);
+      }
+      return undefined;
+    }),
+    writeFile: jest.fn(),
+    outputFile: jest.fn(),
+  };
+});
+
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',
 )?.allowedValues;
