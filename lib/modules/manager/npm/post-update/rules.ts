@@ -37,7 +37,7 @@ export function processHostRules(): HostRulesResult {
   const effectiveHostRules = npmHostRules.concat(
     noTypeHostRulesWithoutDuplicates,
   );
-  logger.debug(
+  logger.trace(
     `Found ${effectiveHostRules.length} effective npm host rule(s) after deduplication`,
   );
   for (const hostRule of effectiveHostRules) {
