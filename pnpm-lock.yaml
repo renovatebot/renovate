@@ -7,6 +7,11 @@ settings:
 overrides:
   '@semantic-release/github>@octokit/plugin-paginate-rest': 11.4.2
 
+patchedDependencies:
+  re2:
+    hash: 018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1
+    path: patches/re2.patch
+
 importers:
 
   .:
@@ -624,7 +629,7 @@ importers:
         version: 6.1.0
       re2:
         specifier: 1.21.4
-        version: 1.21.4
+        version: 1.21.4(patch_hash=018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1)
 
 packages:
 
@@ -1209,7 +1214,6 @@ packages:
 
   '@ls-lint/ls-lint@2.2.3':
     resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
-    cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -12509,7 +12513,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.21.4:
+  re2@1.21.4(patch_hash=018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1):
     dependencies:
       install-artifact-from-github: 1.3.5
       nan: 2.22.0

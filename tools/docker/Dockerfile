@@ -61,6 +61,8 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
+COPY --link .npmrc ./
+COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
@@ -70,13 +72,10 @@ RUN set -ex; \
 
 COPY --link . ./
 
-# disable prepare script
-RUN sed -i -e "s/run-s 'prepare:\*'/true/" package.json
-
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline; \
-  pnpm rebuild; \
+  pnpm install --prod --offline --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3; \
   true
 
 # --------------------------------------
