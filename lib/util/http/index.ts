@@ -181,15 +181,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
-    const { cacheProvider } = options;
-    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
+    let { cacheProvider } = options;
 
     const memCacheKey =
-      options.memCache !== false &&
       options.cacheProvider !== memCacheProvider &&
+      options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
             `got-${JSON.stringify({
@@ -199,6 +195,15 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
             })}`,
           )
         : null;
+
+    if (memCacheKey) {
+      cacheProvider = undefined;
+    }
+
+    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
 
     let resPromise: Promise<HttpResponse<T>> | null = null;
 
