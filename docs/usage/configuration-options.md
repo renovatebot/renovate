@@ -863,7 +863,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
 }
 ```
 
-````json title="Parsing a YAML file with a custom manager"
+```json title="Parsing a YAML file with a custom manager"
 {
   "customManagers": [
     {
@@ -876,6 +876,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     }
   ]
 }
+```
 
 ```json title="Parsing a TOML file with a custom manager"
 {
@@ -890,7 +891,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     }
   ]
 }
-````
+```
 
 ### matchStrings
 
