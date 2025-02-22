@@ -4,6 +4,7 @@ import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import type { PackageDependency } from '../../types';
+import { GithubTagsDatasource } from '../../../datasource/github-tags';
 
 const githubUrlRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,
@@ -44,8 +45,12 @@ export const GitTarget = z
 
     const githubPackage = githubPackageName(remote);
     if (githubPackage) {
-      dep.datasource = GithubReleasesDatasource.id;
       dep.packageName = githubPackage;
+      if (dep.currentValue) {
+        dep.datasource = GithubReleasesDatasource.id;
+      } else {
+        dep.datasource = GithubTagsDatasource.id;
+      }
     }
 
     if (!dep.datasource) {
