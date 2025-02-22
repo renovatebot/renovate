@@ -14,8 +14,6 @@ import type {
 } from '../../../modules/manager/types';
 import type { VersioningApi } from '../../../modules/versioning';
 import { get as getVersioning } from '../../../modules/versioning';
-import { findGithubToken } from '../../../util/check-token';
-import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -45,18 +43,12 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  private constructor() {}
+  private constructor() {
+    // private constructor
+  }
 
   private async initialize(): Promise<void> {
-    // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
-    const token = findGithubToken(
-      find({
-        hostType: 'github',
-        url: 'https://api.github.com/',
-      }),
-    );
-
-    this.osvOffline = await OsvOffline.create(token);
+    this.osvOffline = await OsvOffline.create();
   }
 
   static async create(): Promise<Vulnerabilities> {
@@ -483,7 +475,7 @@ export class Vulnerabilities {
       packageFileConfig,
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
-      logger.info(
+      logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
       return null;

@@ -81,7 +81,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
@@ -98,7 +98,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('returns null if lockfile content unchanged', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');

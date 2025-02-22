@@ -60,7 +60,7 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = firstLine.match(/by Poetry ([\d\\.]+)/);
+  const poetryVersionMatch = /by Poetry ([\d\\.]+)/.exec(firstLine);
   if (poetryVersionMatch?.[1]) {
     const poetryVersion = poetryVersionMatch[1];
     logger.debug(
@@ -120,7 +120,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
   const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
-  if (hostRule) {
+  if (hostRule && Object.keys(hostRule).length !== 0) {
     return hostRule;
   }
 
@@ -132,7 +132,7 @@ async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
 
   if (parsedUrl.hostname.endsWith('.pkg.dev')) {
     const hostRule = await getGoogleAuthHostRule();
-    if (hostRule) {
+    if (hostRule && Object.keys(hostRule).length !== 0) {
       return hostRule;
     }
     logger.once.debug(`Could not get Google access token (url=${url})`);
@@ -172,7 +172,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');

@@ -3,6 +3,7 @@ import { regEx } from '../../../util/regex';
 const buildDependsRegex = regEx(
   /(?<buildDependsFieldName>build-depends[ \t]*:)/i,
 );
+const commentRegex = regEx(/^[ \t]*--/);
 function isNonASCII(str: string): boolean {
   for (let i = 0; i < str.length; i++) {
     if (str.charCodeAt(i) > 127) {
@@ -57,7 +58,7 @@ export interface CabalDependency {
  *    Note that it may be after the end of the string.
  */
 export function findExtents(indent: number, content: string): number {
-  let blockIdx: number = 0;
+  let blockIdx = 0;
   let mode: 'finding-newline' | 'finding-indention' = 'finding-newline';
   for (;;) {
     if (mode === 'finding-newline') {
@@ -86,6 +87,11 @@ export function findExtents(indent: number, content: string): number {
         break;
       }
       if (thisIndent < indent) {
+        if (content.slice(blockIdx - 1, blockIdx + 1) === '--') {
+          // not enough indention, but the line is a comment, so include it
+          mode = 'finding-newline';
+          continue;
+        }
         // go back to before the newline
         for (;;) {
           if (content[blockIdx--] === '\n') {
@@ -125,7 +131,8 @@ export function countPrecedingIndentation(
  *
  * @returns {{buildDependsContent: string, lengthProcessed: number}}
  *   buildDependsContent:
- *     the contents of the field, excluding the field name and the colon.
+ *     the contents of the field, excluding the field name and the colon,
+ *     and any comments within
  *
  *   lengthProcessed:
  *     points to after the end of the field. Note that the field does _not_
@@ -142,11 +149,20 @@ export function findDepends(
   }
   const indent = countPrecedingIndentation(content, matchObj.index);
   const ourIdx: number =
-    matchObj.index + matchObj.groups['buildDependsFieldName'].length;
-  const extent: number = findExtents(indent + 1, content.slice(ourIdx));
+    matchObj.index + matchObj.groups.buildDependsFieldName.length;
+  const extentLength: number = findExtents(indent + 1, content.slice(ourIdx));
+  const extent = content.slice(ourIdx, ourIdx + extentLength);
+  const lines = [];
+  // Windows-style line breaks are fine because
+  // carriage returns are before the line feed.
+  for (const maybeCommentLine of extent.split('\n')) {
+    if (!commentRegex.test(maybeCommentLine)) {
+      lines.push(maybeCommentLine);
+    }
+  }
   return {
-    buildDependsContent: content.slice(ourIdx, ourIdx + extent),
-    lengthProcessed: ourIdx + extent,
+    buildDependsContent: lines.join('\n'),
+    lengthProcessed: ourIdx + extentLength,
   };
 }
 

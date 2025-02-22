@@ -183,7 +183,7 @@ describe('modules/manager/pub/artifacts', () => {
         await pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
-          config: { ...config, updateType: 'lockFileMaintenance' },
+          config: { ...config, isLockFileMaintenance: true },
         }),
       ).toEqual([
         {

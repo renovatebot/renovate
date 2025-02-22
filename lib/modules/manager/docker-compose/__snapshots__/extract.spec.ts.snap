@@ -8,6 +8,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "packageName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   {
@@ -16,6 +17,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
+    "packageName": "node",
     "replaceString": "node:10.0.0",
   },
   {
@@ -24,6 +26,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
+    "packageName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
   {
@@ -32,6 +35,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
+    "packageName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   {
@@ -40,6 +44,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
+    "packageName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   {
@@ -48,6 +53,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
+    "packageName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
   {
@@ -56,6 +62,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
+    "packageName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
   {
@@ -75,6 +82,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "packageName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   {
@@ -83,6 +91,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
+    "packageName": "node",
     "replaceString": "node:10.0.0",
   },
   {
@@ -91,6 +100,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
+    "packageName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
   {
@@ -99,6 +109,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
+    "packageName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   {
@@ -107,6 +118,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
+    "packageName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   {
@@ -115,6 +127,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
+    "packageName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
   {
@@ -123,6 +136,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
+    "packageName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
   {
@@ -142,6 +156,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "packageName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
   {
@@ -150,6 +165,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
+    "packageName": "node",
     "replaceString": "node:10.0.0",
   },
   {
@@ -158,6 +174,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
+    "packageName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
   {
@@ -166,6 +183,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
+    "packageName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   {
@@ -174,6 +192,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
+    "packageName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   {
@@ -182,6 +201,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
+    "packageName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
   {
@@ -190,6 +210,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
+    "packageName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
   {

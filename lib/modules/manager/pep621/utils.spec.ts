@@ -10,6 +10,8 @@ describe('modules/manager/pep621/utils', () => {
       ${null}                                                      | ${false} | ${undefined}           | ${undefined}       | ${undefined}            | ${undefined}
       ${'blinker'}                                                 | ${true}  | ${'blinker'}           | ${undefined}       | ${undefined}            | ${undefined}
       ${'packaging==20.0.0'}                                       | ${true}  | ${'packaging'}         | ${'==20.0.0'}      | ${undefined}            | ${undefined}
+      ${'packaging (==20.0.0)'}                                    | ${true}  | ${'packaging'}         | ${'==20.0.0'}      | ${undefined}            | ${undefined}
+      ${'packaging (==20.0.0); python_version < "3.8"'}            | ${true}  | ${'packaging'}         | ${'==20.0.0'}      | ${undefined}            | ${'python_version < "3.8"'}
       ${'packaging>=20.9,!=22.0'}                                  | ${true}  | ${'packaging'}         | ${'>=20.9,!=22.0'} | ${undefined}            | ${undefined}
       ${'cachecontrol[filecache]>=0.12.11'}                        | ${true}  | ${'cachecontrol'}      | ${'>=0.12.11'}     | ${['filecache']}        | ${undefined}
       ${'private-depB[extra1, extra2]~=2.4'}                       | ${true}  | ${'private-depB'}      | ${'~=2.4'}         | ${['extra1', 'extra2']} | ${undefined}

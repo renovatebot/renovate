@@ -13,6 +13,7 @@ import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
@@ -52,7 +53,8 @@ export class NugetV3Api {
       );
       // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
+        servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
+          .body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,
@@ -132,7 +134,7 @@ export class NugetV3Api {
     let items = catalogPage.items;
     if (!items) {
       const url = catalogPage['@id'];
-      const catalogPageFull = await http.getJson<CatalogPage>(url);
+      const catalogPageFull = await http.getJsonUnchecked<CatalogPage>(url);
       items = catalogPageFull.body.items;
     }
     return items.map(({ catalogEntry }) => catalogEntry);
@@ -146,7 +148,8 @@ export class NugetV3Api {
   ): Promise<ReleaseResult | null> {
     const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
     const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
-    const packageRegistration = await http.getJson<PackageRegistration>(url);
+    const packageRegistration =
+      await http.getJsonUnchecked<PackageRegistration>(url);
     const catalogPages = packageRegistration.body.items || [];
     const catalogPagesQueue = catalogPages.map(
       (page) => (): Promise<CatalogEntry[]> => this.getCatalogEntry(http, page),
@@ -159,14 +162,9 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({
-        version,
-        published: releaseTimestamp,
-        projectUrl,
-        listed,
-        packageContent,
-      }) => {
+      ({ version, published, projectUrl, listed, packageContent }) => {
         const release: Release = { version: removeBuildMeta(version) };
+        const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }

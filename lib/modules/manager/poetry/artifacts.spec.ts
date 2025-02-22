@@ -239,6 +239,7 @@ describe('modules/manager/poetry/artifacts', () => {
           getAccessToken: jest.fn().mockResolvedValue('some-token'),
         })),
       );
+      hostRules.find.mockReturnValue({});
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -675,7 +676,7 @@ describe('modules/manager/poetry/artifacts', () => {
           newPackageFileContent: '{}',
           config: {
             ...config,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
         }),
       ).toEqual([

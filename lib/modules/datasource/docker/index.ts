@@ -10,6 +10,7 @@ import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string-match';
+import { asTimestamp } from '../../../util/timestamp';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -629,7 +630,7 @@ export class DockerDatasource extends Datasource {
 
       // typescript issue :-/
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const res = (await this.http.getJson<QuayRestDockerTags>(
+      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
@@ -671,7 +672,7 @@ export class DockerDatasource extends Datasource {
     do {
       let res: HttpResponse<{ tags: string[] }>;
       try {
-        res = await this.http.getJson<{ tags: string[] }>(url, {
+        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
           headers,
           noAuth: true,
         });
@@ -975,7 +976,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    let needNextPage: boolean = true;
+    let needNextPage = true;
     while (needNextPage) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
@@ -1001,13 +1002,10 @@ export class DockerDatasource extends Datasource {
 
     const items = cache.getItems();
     return items.map(
-      ({
-        name: version,
-        tag_last_pushed: releaseTimestamp,
-        digest: newDigest,
-      }) => {
+      ({ name: version, tag_last_pushed, digest: newDigest }) => {
         const release: Release = { version };
 
+        const releaseTimestamp = asTimestamp(tag_last_pushed);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }

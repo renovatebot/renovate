@@ -59,7 +59,7 @@ theme:
   # The custom_dir points to the overrides folder, this folder has the code for our announcement bar.
   # The easiest way to disable the announcement bar is to comment out the custom_dir: overrides entry in this mkdocs.yml file.
   # https://squidfunk.github.io/mkdocs-material/customization/#setup-and-theme-structure
-  # custom_dir: overrides
+  custom_dir: overrides
 
   logo: 'assets/images/logo.png'
   favicon: 'assets/images/logo.png'
@@ -91,8 +91,8 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to system preference
-      primary: 'teal'
-      accent: 'teal'
+      primary: 'indigo'
+      accent: 'indigo'
 
   features:
     # Navigation pruning (not compatible with navigation.expand)

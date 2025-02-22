@@ -54,9 +54,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       if (is.nonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
-    }
-
-    if (elemNames.has(name)) {
+    } else if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
 
       if (!depName) {
@@ -80,21 +78,21 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         dep.skipReason = 'invalid-version';
       }
 
-      let groupName: string | undefined;
+      let sharedVariableName: string | undefined;
 
       currentValue = currentValue
         ?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
           const val = vars.get(key);
           if (val) {
-            groupName = key;
+            sharedVariableName = key;
             return val;
           }
           return match;
         });
 
-      if (groupName) {
-        dep.groupName = groupName;
+      if (sharedVariableName) {
+        dep.sharedVariableName = sharedVariableName;
       }
 
       currentValue = checkVersion

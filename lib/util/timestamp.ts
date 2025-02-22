@@ -64,6 +64,15 @@ export function asTimestamp(input: unknown): Timestamp | null {
       return numberLikeDate.toISO() as Timestamp;
     }
 
+    const numberLikeOffsetDate = DateTime.fromFormat(
+      input,
+      'yyyyMMddHHmmssZZZ',
+      { zone: 'UTC' },
+    );
+    if (isValid(numberLikeOffsetDate)) {
+      return numberLikeOffsetDate.toISO() as Timestamp;
+    }
+
     const fallbackDate = DateTime.fromMillis(
       Date.parse(input) - timezoneOffset,
       { zone: 'UTC' },
@@ -78,7 +87,7 @@ export function asTimestamp(input: unknown): Timestamp | null {
   return null;
 }
 
-export const TimestampSchema = z.unknown().transform((input, ctx) => {
+export const Timestamp = z.unknown().transform((input, ctx) => {
   const timestamp = asTimestamp(input);
   if (!timestamp) {
     ctx.addIssue({
@@ -90,3 +99,4 @@ export const TimestampSchema = z.unknown().transform((input, ctx) => {
 
   return timestamp;
 });
+export const MaybeTimestamp = Timestamp.nullable().catch(null);

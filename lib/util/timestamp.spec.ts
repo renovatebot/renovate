@@ -1,4 +1,4 @@
-import { TimestampSchema, asTimestamp } from './timestamp';
+import { MaybeTimestamp, asTimestamp } from './timestamp';
 
 describe('util/timestamp', () => {
   describe('asTimestamp', () => {
@@ -17,6 +17,8 @@ describe('util/timestamp', () => {
       ${'2021-01-01'}                              | ${'2021-01-01T00:00:00.000Z'}
       ${'20210101000000'}                          | ${'2021-01-01T00:00:00.000Z'}
       ${'20211231235959'}                          | ${'2021-12-31T23:59:59.000Z'}
+      ${'20210101000000+0000'}                     | ${'2021-01-01T00:00:00.000Z'}
+      ${'20211231235959+0000'}                     | ${'2021-12-31T23:59:59.000Z'}
       ${'Jan 1, 2021'}                             | ${'2021-01-01T00:00:00.000Z'}
       ${'2021/01/01'}                              | ${'2021-01-01T00:00:00.000Z'}
       ${'2021-01-02T00:00:00+05:30'}               | ${'2021-01-01T18:30:00.000Z'}
@@ -31,9 +33,7 @@ describe('util/timestamp', () => {
       ${'202x0101000000'}                          | ${null}
     `('$input -> $expected', ({ input, expected }) => {
       expect(asTimestamp(input)).toBe(expected);
-      expect(TimestampSchema.nullable().catch(null).parse(input)).toBe(
-        expected,
-      );
+      expect(MaybeTimestamp.parse(input)).toBe(expected);
     });
   });
 });

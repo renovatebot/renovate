@@ -142,6 +142,57 @@ describe('workers/global/config/parse/file', () => {
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
     });
+
+    it('exports env variables to environment from processEnv object', async () => {
+      const configFile = upath.resolve(tmp.path, 'config2.js');
+      const fileContent1 = `module.exports = {
+        "processEnv": {
+        "SOME_KEY": "SOME_VALUE"
+        },
+        "labels": ["renovate"]
+      }`;
+      fs.writeFileSync(configFile, fileContent1, {
+        encoding: 'utf8',
+      });
+      const fileConfig = await file.getConfig({
+        RENOVATE_CONFIG_FILE: configFile,
+      });
+      expect(fileConfig).toMatchObject({
+        labels: ['renovate'],
+      });
+      expect(fileConfig.processEnv).toBeUndefined();
+      expect(process.env.SOME_KEY).toBe('SOME_VALUE');
+      fs.unlinkSync(configFile);
+      delete process.env.SOME_KEY;
+    });
+
+    it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
+      const configFile = upath.resolve(tmp.path, 'config3.js');
+      const fileContent1 = `module.exports = {
+        "processEnv": {
+        "SOME_KEY": "SOME_VALUE",
+        "SOME_OTHER_KEY": true,
+        "valid_Key": "true",
+        },
+        "labels": ["renovate"]
+      }`;
+      fs.writeFileSync(configFile, fileContent1, {
+        encoding: 'utf8',
+      });
+      const fileConfig = await file.getConfig({
+        RENOVATE_CONFIG_FILE: configFile,
+      });
+      expect(fileConfig).toMatchObject({
+        labels: ['renovate'],
+      });
+      expect(fileConfig.processEnv).toBeUndefined();
+      expect(process.env.SOME_KEY).toBe('SOME_VALUE');
+      expect(process.env.valid_Key).toBe('true');
+      expect(process.env.SOME_OTHER_KEY).toBeUndefined();
+      fs.unlinkSync(configFile);
+      delete process.env.SOME_KEY;
+      delete process.env.valid_Key;
+    });
   });
 
   describe('deleteConfigFile()', () => {

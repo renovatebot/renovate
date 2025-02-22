@@ -79,7 +79,7 @@ describe('modules/manager/index', () => {
       ...loadModules(__dirname, validate), // validate built-in managers
       ...loadModules(join(__dirname, 'custom'), validate), // validate custom managers
     };
-    delete loadedMgr['custom'];
+    delete loadedMgr.custom;
 
     expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
       Object.keys(loadedMgr).sort(),

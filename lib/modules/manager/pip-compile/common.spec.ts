@@ -2,7 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { hostRules } from '../../../../test/util';
 import { logger } from '../../../logger';
 import {
-  allowedPipOptions,
+  allowedOptions,
   extractHeaderCommand,
   extractPythonVersion,
   getRegistryCredVarsFromPackageFiles,
@@ -137,11 +137,23 @@ describe('modules/manager/pip-compile/common', () => {
       ).toEqual(exampleSourceFiles);
     });
 
-    it.each(allowedPipOptions)(
-      'returned sourceFiles must not contain options',
+    it.each(allowedOptions['pip-compile'])(
+      'returned sourceFiles must not contain options (pip-compile)',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
           getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
+          'reqs.txt',
+        ).sourceFiles;
+        expect(sourceFiles).not.toContainEqual(argument);
+        expect(sourceFiles).toEqual(['reqs.in']);
+      },
+    );
+
+    it.each(allowedOptions.uv)(
+      'returned sourceFiles must not contain options (uv)',
+      (argument: string) => {
+        const sourceFiles = extractHeaderCommand(
+          getCommandInHeader(`uv pip compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
@@ -155,7 +167,7 @@ describe('modules/manager/pip-compile/common', () => {
           getCommandInHeader(`./pip-compile-wrapper reqs.in`),
           'reqs.txt',
         ),
-      ).toHaveProperty('isCustomCommand', true);
+      ).toHaveProperty('commandType', 'custom');
     });
 
     it.each([
