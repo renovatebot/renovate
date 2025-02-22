@@ -1,0 +1,35 @@
+[project]
+description = "non pixi managed project, should match nothing"
+authors = [{ name = "ORGNAME", email = "orgname@orgname.org" }]
+classifiers = ["Development Status :: 1 - Planning"]
+dependencies = ["numpy"]
+dynamic = ["version"]
+license.file = "LICENSE"
+name = "foo"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest >=6", "pytest-cov >=3", "pre-commit"]
+test = ["pytest >=6", "pytest-cov >=3", "mypy"]
+
+[project.urls]
+Homepage = "https://github.com/ORGNAME/foo"
+
+[tool.setuptools_scm]
+write_to = "src/foo/_version.py"
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+filterwarnings = ["error"]
+log_cli_level = "INFO"
+minversion = "6.0"
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.coverage]
+report.exclude_also = ['\.\.\.', 'if typing.TYPE_CHECKING:']
+run.source = ["foo"]
+
+[tool.mypy]
+files = ["src", "tests"]
