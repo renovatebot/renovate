@@ -11,8 +11,8 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^20.15.1`
-- pnpm `^9.0.0`
+- Node.js `^22.13.0`
+- pnpm `^10.0.0`
 - C++ compiler
 
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
@@ -23,15 +23,15 @@ Volta will apply automatically the correct version of Node.js and pnpm when you 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
-npm install -g pnpm@latest-10
+npm install -g pnpm
 ```
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install -global pnpm@latest-10`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install --global pnpm`.
 
 #### Windows
 
@@ -40,8 +40,8 @@ If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Install pnpm with: `npm install -global pnpm@latest-10`
+- In an Administrator PowerShell prompt, run `npm install --global npm` and then `npm --debug install --global windows-build-tools`
+- Install pnpm with: `npm install --global pnpm`
 
   You can see what versions you're using like this:
 
