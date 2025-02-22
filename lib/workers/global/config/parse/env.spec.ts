@@ -156,6 +156,12 @@ describe('workers/global/config/parse/env', () => {
             matchHost: 'github.com',
             token: 'a github.com token',
           },
+          {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
+            token: 'a github.com token',
+          },
         ],
         token: 'a ghe token',
       });
@@ -172,6 +178,12 @@ describe('workers/global/config/parse/env', () => {
           {
             hostType: 'github',
             matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+          {
+            hostType: 'bitrise',
+            matchHost:
+              'https://api.github.com/repos/bitrise-io/bitrise-steplib/contents/',
             token: 'github_pat_XXXXXX',
           },
         ],

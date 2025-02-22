@@ -4,6 +4,7 @@ import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
+import { ensureTrailingSlash, joinUrlParts } from '../../../../util/url';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 import { migrateAndValidateConfig } from './util';
@@ -203,11 +204,30 @@ export async function getConfig(
   }
 
   if (env.GITHUB_COM_TOKEN) {
+    const token = env.GITHUB_COM_TOKEN;
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
       hostType: 'github',
       matchHost: 'github.com',
-      token: env.GITHUB_COM_TOKEN,
+      token,
+    });
+
+    // allow accessing the central bitrise repo via renovate token
+    logger.debug(
+      `Converting GITHUB_COM_TOKEN into a central bitrise repo host rule`,
+    );
+    config.hostRules.push({
+      hostType: 'bitrise',
+      matchHost: ensureTrailingSlash(
+        joinUrlParts(
+          'https://api.github.com',
+          'repos',
+          'bitrise-io',
+          'bitrise-steplib',
+          'contents',
+        ),
+      ),
+      token,
     });
   }
 
