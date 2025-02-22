@@ -92,7 +92,15 @@
   "tagFormat": "${version}",
   "branches": [
     {
+      "name": "maint/+([0-9])?(.{+([0-9]),x}).x",
+      "range": "${name.replace(/^maint\\//g, '')}"
+    },
+    {
       "name": "main"
+    },
+    {
+      "name": "next",
+      "prerelease": true
     }
   ]
 }

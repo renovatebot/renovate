@@ -39,7 +39,9 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
       'ext',
       'ext_01',
       'tag',
+      0,
       { name: fragments.string('bar') },
+      undefined,
       true,
     );
 
@@ -52,7 +54,7 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
   });
 
   it('.preparedExtensionTag()', () => {
-    const result = fragments.preparedExtensionTag('ext', 'ext_01');
+    const result = fragments.preparedExtensionTag('ext', 'ext_01', 0);
 
     expect(() =>
       PreparedExtensionTagFragmentSchema.parse(result),
@@ -78,25 +80,25 @@ describe('modules/manager/bazel-module/parser/fragments', () => {
   });
 
   it.each`
-    a                                                  | exp
-    ${fragments.string('hello')}                       | ${true}
-    ${fragments.boolean(true)}                         | ${true}
-    ${fragments.array()}                               | ${true}
-    ${fragments.rule('dummy')}                         | ${false}
-    ${fragments.extensionTag('ext', 'ext_01', 'tag')}  | ${false}
-    ${fragments.preparedExtensionTag('ext', 'ext_01')} | ${false}
+    a                                                     | exp
+    ${fragments.string('hello')}                          | ${true}
+    ${fragments.boolean(true)}                            | ${true}
+    ${fragments.array()}                                  | ${true}
+    ${fragments.rule('dummy')}                            | ${false}
+    ${fragments.extensionTag('ext', 'ext_01', 'tag', 0)}  | ${false}
+    ${fragments.preparedExtensionTag('ext', 'ext_01', 0)} | ${false}
   `('.isValue($a)', ({ a, exp }) => {
     expect(fragments.isValue(a)).toBe(exp);
   });
 
   it.each`
-    a                                                  | exp
-    ${fragments.string('hello')}                       | ${true}
-    ${fragments.boolean(true)}                         | ${true}
-    ${fragments.array()}                               | ${false}
-    ${fragments.rule('dummy')}                         | ${false}
-    ${fragments.extensionTag('ext', 'ext_01', 'tag')}  | ${false}
-    ${fragments.preparedExtensionTag('ext', 'ext_01')} | ${false}
+    a                                                     | exp
+    ${fragments.string('hello')}                          | ${true}
+    ${fragments.boolean(true)}                            | ${true}
+    ${fragments.array()}                                  | ${false}
+    ${fragments.rule('dummy')}                            | ${false}
+    ${fragments.extensionTag('ext', 'ext_01', 'tag', 0)}  | ${false}
+    ${fragments.preparedExtensionTag('ext', 'ext_01', 0)} | ${false}
   `('.isPrimitive($a)', ({ a, exp }) => {
     expect(fragments.isPrimitive(a)).toBe(exp);
   });
