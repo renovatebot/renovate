@@ -1,0 +1,5 @@
+[tool.poetry]
+name = "example 3"
+version = "0.1.0"
+description = ""
+authors = ["John Doe <john.doe@gmail.com>"]
