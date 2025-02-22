@@ -1,6 +1,22 @@
 import { getStaticTOMLValue, parseTOML } from 'toml-eslint-parser';
+import { regEx } from './regex';
 
-export function parse(input: string): unknown {
-  const ast = parseTOML(input);
+export interface TomlOptions {
+  removeTemplates?: boolean;
+}
+
+export function parse(input: string, options?: TomlOptions): unknown {
+  const massagedContent = massageContent(input, options);
+  const ast = parseTOML(massagedContent);
   return getStaticTOMLValue(ast);
+}
+
+function massageContent(content: string, options?: TomlOptions): string {
+  if (options?.removeTemplates) {
+    return content
+      .replaceAll(regEx(/{%.+?%}/gs), '')
+      .replaceAll(regEx(/{{.+?}}/gs), '')
+      .replaceAll(regEx(/{#.+?#}/gs), '');
+  }
+  return content;
 }
