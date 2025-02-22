@@ -32,8 +32,10 @@ export async function bake(
   if (opts.version) {
     console.log(`Using version: ${opts.version.version}`);
     process.env.RENOVATE_VERSION = opts.version.version;
-    process.env.RENOVATE_MAJOR_VERSION = `${opts.version.major}`;
-    process.env.RENOVATE_MAJOR_MINOR_VERSION = `${opts.version.major}.${opts.version.minor}`;
+    if (!opts.version.prerelease) {
+      process.env.RENOVATE_MAJOR_VERSION = `${opts.version.major}`;
+      process.env.RENOVATE_MAJOR_MINOR_VERSION = `${opts.version.major}.${opts.version.minor}`;
+    }
   }
 
   const metadataFile = path.join(await tmp, 'metadata.json');
