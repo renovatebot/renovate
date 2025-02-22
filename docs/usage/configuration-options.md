@@ -856,7 +856,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "fileFormat": "json",
       "fileMatch": [".renovaterc"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
@@ -871,7 +871,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "fileFormat": "yaml",
       "fileMatch": ["file.yml"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
@@ -886,7 +886,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "fileFormat": "toml",
       "fileMatch": ["file.toml"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
