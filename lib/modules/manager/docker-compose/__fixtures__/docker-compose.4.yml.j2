@@ -1,0 +1,26 @@
+---
+version: "3"
+
+networks:
+  {{ network_name }}:
+    external: true
+  frontend:
+    external: true
+
+services:
+  web:
+    image: "node:42.0.0"
+    networks:
+      - {{ network_name }}
+      - frontend
+    ports:
+      - "80:8000"
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      placement:
+        {{ placement | indent(8) }}
+      restart_policy:
+        condition: on-failure
