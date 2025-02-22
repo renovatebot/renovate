@@ -213,7 +213,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
       // istanbul ignore next
       if (resPromise && options.cacheProvider !== memCacheProvider) {
-        logger.trace({ url }, 'Cache hit on the obsolete memCache option');
+        logger.debug({ url }, 'Cache hit on the obsolete memCache option');
       }
     }
 
