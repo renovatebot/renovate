@@ -234,6 +234,15 @@ function subset(subRange: string, superRange: string): boolean | undefined {
   }
 }
 
+function intersects(subRange: string, superRange: string): boolean {
+  try {
+    return npm.intersects!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.intersects error');
+    return false;
+  }
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -393,5 +402,6 @@ export const api: VersioningApi = {
   getNewValue,
   sortVersions,
   subset,
+  intersects,
 };
 export default api;
