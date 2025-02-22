@@ -13,7 +13,7 @@ export function commitFilesToBranch(
   config: BranchConfig,
 ): Promise<LongCommitSha | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
-    config.updatedArtifacts!,
+    Object.values(config.updatedArtifacts!),
   );
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
