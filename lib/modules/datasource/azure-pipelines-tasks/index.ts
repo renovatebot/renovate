@@ -33,6 +33,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
+
     const { token } = hostRules.find({
       hostType: AzurePipelinesTasksDatasource.id,
       url: endpoint,
@@ -52,7 +53,17 @@ export class AzurePipelinesTasksDatasource extends Datasource {
       const result: ReleaseResult = { releases: [] };
 
       results.value
-        .filter((task) => task.name === packageName)
+        .filter((task) => {
+          const taskIdMatch = task.id === packageName
+          const taskNameMatch = task.name === packageName
+          const taskContributionAndIdMatch =
+            task.contributionIdentifier &&
+            `${task.contributionIdentifier}.${task.id}` === packageName
+          const taskContributionAndNameMatch =
+            task.contributionIdentifier &&
+            `${task.contributionIdentifier}.${task.name}` === packageName
+          return taskIdMatch || taskNameMatch || taskContributionAndIdMatch || taskContributionAndNameMatch
+        })
         .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
         .forEach((task) => {
           result.releases.push({
@@ -93,6 +104,8 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })
+
+
   async getTasks<Schema extends ZodType>(
     url: string,
     opts: HttpOptions,
