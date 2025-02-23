@@ -103,7 +103,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })
-
   async getTasks<Schema extends ZodType>(
     url: string,
     opts: HttpOptions,
