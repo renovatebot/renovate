@@ -990,7 +990,7 @@ export async function updatePr({
   bitbucketInvalidReviewers,
   targetBranch,
 }: UpdatePrConfig & {
-  bitbucketInvalidReviewers: string[] | undefined;
+  bitbucketInvalidReviewers?: string[] | undefined;
 }): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
