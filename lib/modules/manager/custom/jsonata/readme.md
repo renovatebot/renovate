@@ -1,4 +1,4 @@
-With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON, YAML and TOML files, that are not detected by its other built-in package managers.
+With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON, TOML and YAML files, that are not detected by its other built-in package managers.
 
 Renovate uses the `jsonata` package to process the file content using the queries, after the content has been parsed into `json` format.
 
