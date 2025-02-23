@@ -339,6 +339,11 @@ async function getUvIndexCredentials(
   const entries = [];
 
   for (const { name, url } of uv_indexes) {
+    // istanbul ignore if
+    if (!name) {
+      continue;
+    }
+
     const parsedUrl = parseUrl(url);
     // istanbul ignore if
     if (!parsedUrl) {
