@@ -1,4 +1,3 @@
-import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';

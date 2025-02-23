@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -34,12 +35,15 @@ describe('modules/manager/pixi/extract', () => {
     });
 
     it('returns parse pixi section from pyproject.toml', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.localPathExists.mockReturnValueOnce(Promise.resolve(true));
+
       expect(
         await extractPackageFile(pyprojectToml, 'pyproject.toml'),
       ).toMatchObject({
         deps: [],
         fileFormat: 'toml',
-        lockFiles: [],
+        lockFiles: ['pixi.lock'],
       });
     });
   });
