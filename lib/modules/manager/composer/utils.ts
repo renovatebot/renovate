@@ -1,6 +1,6 @@
 // TODO: types (#22198)
-import { quote } from 'shlex';
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { CombinedHostRule } from '../../../types';
@@ -26,7 +26,7 @@ export function getComposerArguments(
         is.string(toolConstraint.constraint) &&
         api.intersects!(toolConstraint.constraint, '^2.2')
       ) {
-        args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
+        args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'";
       } else {
         args += ' --ignore-platform-reqs';
       }
