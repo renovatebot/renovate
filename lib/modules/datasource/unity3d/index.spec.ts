@@ -11,16 +11,16 @@ describe('modules/datasource/unity3d/index', () => {
     ]),
   );
 
-  const mockUnityReleasesApi = (streams: { [keys: string]: string }) => {
-    Object.entries(streams).map(([stream, url]) => {
+  const mockUnityReleasesApi = (streams: Record<string, string>) => {
+    for (const stream in streams) {
       const content = fixtures[stream];
 
-      const uri = new URL(url);
+      const uri = new URL(streams[stream]);
       httpMock
         .scope(uri.origin)
         .get(`${uri.pathname}${uri.search}`)
         .reply(200, content);
-    });
+    }
   };
 
   it.each([

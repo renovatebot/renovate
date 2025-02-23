@@ -177,18 +177,18 @@ describe('workers/repository/updates/flatten', () => {
             is.number(upgrade.depIndex),
         ),
       ).toBeTrue();
-      expect(
-        res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug,
-      ).toBe('org-repo');
-      expect(res.filter((update) => update.sourceRepo)[0].sourceRepo).toBe(
+      expect(res.find((update) => update.sourceRepoSlug)!.sourceRepoSlug).toBe(
+        'org-repo',
+      );
+      expect(res.find((update) => update.sourceRepo)!.sourceRepo).toBe(
         'org/repo',
       );
-      expect(
-        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg,
-      ).toBe('org');
-      expect(
-        res.filter((update) => update.sourceRepoName)[0].sourceRepoName,
-      ).toBe('repo');
+      expect(res.find((update) => update.sourceRepoOrg)!.sourceRepoOrg).toBe(
+        'org',
+      );
+      expect(res.find((update) => update.sourceRepoName)!.sourceRepoName).toBe(
+        'repo',
+      );
       expect(
         res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug,
       ).toBe('org-repo');
@@ -202,7 +202,7 @@ describe('workers/repository/updates/flatten', () => {
         res.filter((update) => update.sourceRepoName)[1].sourceRepoName,
       ).toBe('repo');
       expect(
-        res.filter((update) => update.depName === '@monorepo/package')[0],
+        res.find((update) => update.depName === '@monorepo/package'),
       ).toEqual(
         expect.objectContaining({
           depName: '@monorepo/package',

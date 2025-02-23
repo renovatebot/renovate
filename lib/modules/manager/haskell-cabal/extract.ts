@@ -58,7 +58,7 @@ export interface CabalDependency {
  *    Note that it may be after the end of the string.
  */
 export function findExtents(indent: number, content: string): number {
-  let blockIdx: number = 0;
+  let blockIdx = 0;
   let mode: 'finding-newline' | 'finding-indention' = 'finding-newline';
   for (;;) {
     if (mode === 'finding-newline') {
@@ -149,7 +149,7 @@ export function findDepends(
   }
   const indent = countPrecedingIndentation(content, matchObj.index);
   const ourIdx: number =
-    matchObj.index + matchObj.groups['buildDependsFieldName'].length;
+    matchObj.index + matchObj.groups.buildDependsFieldName.length;
   const extentLength: number = findExtents(indent + 1, content.slice(ourIdx));
   const extent = content.slice(ourIdx, ourIdx + extentLength);
   const lines = [];

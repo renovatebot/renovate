@@ -10,10 +10,9 @@ import platforms from './api';
 import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 
-export * from './types';
+export type * from './types';
 
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
-export const getPlatforms = (): Map<string, Platform> => platforms;
 
 let _platform: Platform | undefined;
 

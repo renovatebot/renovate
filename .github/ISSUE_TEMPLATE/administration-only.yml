@@ -1,5 +1,5 @@
-name: Administration only
-description: For administrators only
+name: Direct Issue creation is not allowed
+description: As a user of Renovate, please create a Discussion! Do not use this template to create an Issue! The Renovate maintainers will triage your Discussion, and convert it to an Issue when we are ready to start work.
 labels: ['priority-3-medium', 'needs-discussion']
 body:
   - type: markdown
@@ -12,6 +12,7 @@ body:
         **Stop!** This form is for the Renovate administrators only.
         If you're a user of Renovate, please create a GitHub Discussion.
         Please go back a step and select _Start a discussion_ instead of Issue.
+        If you ignore these directions, you will be blocked from this repo.
 
   - type: textarea
     id: describe-proposed-changes

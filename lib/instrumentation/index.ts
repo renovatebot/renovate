@@ -25,7 +25,6 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-import { ATTR_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions/incubating';
 import { pkg } from '../expose.cjs';
 import {
   isTraceDebuggingEnabled,
@@ -47,7 +46,9 @@ export function init(): void {
     resource: new Resource({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
       [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'renovate',
-      [ATTR_SERVICE_NAMESPACE]:
+      // https://github.com/open-telemetry/opentelemetry-js/tree/main/semantic-conventions#unstable-semconv
+      // https://github.com/open-telemetry/opentelemetry-js/blob/e9d3c71918635d490b6a9ac9f8259265b38394d0/semantic-conventions/src/experimental_attributes.ts#L7688
+      ['service.namespace']:
         process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
       [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
