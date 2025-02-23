@@ -1971,16 +1971,18 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry-1.docker.io/library/node',
       });
-      expect(res?.releases).toMatchObject([
-        {
-          version: '0.9.0',
-          releaseTimestamp: '2020-01-01T00:00:00.000Z',
-        },
-        {
-          version: '1.0.0',
-          releaseTimestamp: '2021-01-01T00:00:00.000Z',
-        },
-      ]);
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.9.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
