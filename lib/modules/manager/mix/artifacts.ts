@@ -5,7 +5,10 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
+  deleteLocalFile,
   findLocalSiblingOrParent,
+  getSiblingFileName,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -26,15 +29,51 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`mix.getArtifacts(${packageFileName})`);
-  if (updatedDeps.length < 1) {
-    logger.debug('No updated mix deps - returning null');
+  const { isLockFileMaintenance } = config;
+
+  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
+    logger.debug('No updated mix deps');
     return null;
   }
 
-  const lockFileName =
-    (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
+  let lockFileName = getSiblingFileName(packageFileName, 'mix.lock');
+  let isUmbrella = false;
+
+  let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  if (!existingLockFileContent) {
+    const lockFileError = await lockFileReadError(lockFileName);
+    if (lockFileError) {
+      return lockFileError;
+    }
+
+    const parentLockFileName =
+      (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ??
+      'mix.lock';
+    existingLockFileContent = await readLocalFile(parentLockFileName, 'utf8');
+
+    if (existingLockFileContent) {
+      lockFileName = parentLockFileName;
+      isUmbrella = true;
+    } else {
+      const lockFileError = await lockFileReadError(parentLockFileName);
+      if (lockFileError) {
+        return lockFileError;
+      }
+    }
+  }
+
+  if (isLockFileMaintenance && isUmbrella) {
+    logger.debug(
+      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+    );
+    return null;
+  }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+    if (isLockFileMaintenance) {
+      await deleteLocalFile(lockFileName);
+    }
   } catch (err) {
     logger.warn({ err }, 'mix.exs could not be written');
     return [
@@ -47,7 +86,6 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No mix.lock found');
     return null;
@@ -113,14 +151,20 @@ export async function updateArtifacts({
     ],
     preCommands,
   };
-  const command = [
-    'mix',
-    'deps.update',
-    ...updatedDeps
-      .map((dep) => dep.depName)
-      .filter(is.string)
-      .map((dep) => quote(dep)),
-  ].join(' ');
+
+  let command: string;
+  if (isLockFileMaintenance) {
+    command = 'mix deps.get';
+  } else {
+    command = [
+      'mix',
+      'deps.update',
+      ...updatedDeps
+        .map((dep) => dep.depName)
+        .filter(is.string)
+        .map((dep) => quote(dep)),
+    ].join(' ');
+  }
 
   try {
     await exec(command, execOptions);
@@ -160,4 +204,20 @@ export async function updateArtifacts({
       },
     },
   ];
+}
+
+async function lockFileReadError(
+  lockFileName: string,
+): Promise<UpdateArtifactsResult[] | null> {
+  if (await localPathExists(lockFileName)) {
+    return [
+      {
+        artifactError: {
+          lockFile: lockFileName,
+          stderr: `Error reading ${lockFileName}`,
+        },
+      },
+    ];
+  }
+  return null;
 }
