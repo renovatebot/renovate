@@ -85,7 +85,7 @@ describe('modules/manager/pixi/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pixi lock --no-progress --color=never',
+          cmd: 'pixi lock --no-progress --color=never --quiet',
           options: {
             cwd: '/tmp/github/some/repo',
             env: { PIXI_CACHE_DIR: '/tmp/renovate/cache/others/pixi' },
@@ -144,7 +144,7 @@ describe('modules/manager/pixi/artifacts', () => {
             'bash -l -c "' +
             'install-tool pixi 0.41.4 ' +
             '&& ' +
-            'pixi lock --no-progress --color=never' +
+            'pixi lock --no-progress --color=never --quiet' +
             '"',
         },
       ]);
@@ -187,7 +187,7 @@ describe('modules/manager/pixi/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool pixi 0.41.4' },
-        { cmd: 'pixi lock --no-progress --color=never' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
 
@@ -237,7 +237,7 @@ describe('modules/manager/pixi/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'pixi lock --no-progress --color=never' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
   });

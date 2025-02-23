@@ -40,7 +40,7 @@ export async function updateArtifacts({
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
-    cmd.push('pixi lock --no-progress --color=never');
+    cmd.push('pixi lock --no-progress --color=never --quiet');
 
     const extraEnv = {
       ...getGitEnvironmentVariables(['pypi']),
