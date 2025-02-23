@@ -369,9 +369,6 @@
       "better-sqlite3",
       "re2"
     ],
-    "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.4.2"
-    },
     "patchedDependencies": {
       "re2": "patches/re2.patch"
     }

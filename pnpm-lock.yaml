@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@semantic-release/github>@octokit/plugin-paginate-rest': 11.4.2
-
 patchedDependencies:
   re2:
     hash: 018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1
