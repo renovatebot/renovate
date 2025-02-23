@@ -10,7 +10,7 @@ FROM ghcr.io/renovatebot/base-image:9.43.0@sha256:88b851cb6cd422d850ccb8aef70e4e
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.43.0@sha256:88b851cb6cd422d850ccb8aef70e4ed263490598babf43d4cd07fd82a95857b7 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.43.0-full@sha256:9bf38b0a33cd1a459d8b01b1ded61f66d82c6d93a6154e12149ccd190a9780e7 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
@@ -61,6 +61,8 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
+COPY --link .npmrc ./
+COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
@@ -70,13 +72,10 @@ RUN set -ex; \
 
 COPY --link . ./
 
-# disable prepare script
-RUN sed -i -e "s/run-s 'prepare:\*'/true/" package.json
-
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline; \
-  pnpm rebuild; \
+  pnpm install --prod --offline --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3; \
   true
 
 # --------------------------------------
