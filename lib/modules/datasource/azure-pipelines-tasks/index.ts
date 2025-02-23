@@ -33,7 +33,6 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
-
     const { token } = hostRules.find({
       hostType: AzurePipelinesTasksDatasource.id,
       url: endpoint,
@@ -104,7 +103,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     key: (url: string) => url,
     ttlMinutes: 24 * 60,
   })
-  
+
   async getTasks<Schema extends ZodType>(
     url: string,
     opts: HttpOptions,
