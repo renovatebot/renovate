@@ -27,8 +27,8 @@ export async function updateArtifacts({
     return null;
   }
 
-  let lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
-  let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug(`No lock file found`);
     return null;

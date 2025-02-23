@@ -9,10 +9,14 @@ const pyprojectWithoutPixi = Fixtures.get('pyproject_no_pixi.toml');
 
 describe('modules/manager/pixi/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for empty', async () => {
+    it('returns null for empty pyproject.toml', async () => {
       expect(
         await extractPackageFile('nothing here', 'pyproject.toml'),
       ).toBeNull();
+    });
+
+    it('returns null for empty pixi.toml', async () => {
+      expect(await extractPackageFile('nothing here', 'pixi.toml')).toBeNull();
     });
 
     it('returns null for parsed file without pixi section', async () => {

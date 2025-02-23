@@ -30,11 +30,3 @@ export const supportedDatasources = [
   GitRefsDatasource.id,
   GitTagsDatasource.id,
 ];
-
-import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-
-export function updateLockedDependency(
-  config: UpdateLockedConfig,
-): UpdateLockedResult {
-  return { status: 'unsupported' };
-}

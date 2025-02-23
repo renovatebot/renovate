@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import type { PackageFileContent } from '../types';
-import { PyprojectToml, PixiToml, type PixiConfigSchema } from './schema';
+import { type PixiConfigSchema, PixiToml, PyprojectToml } from './schema';
 
 function getUserPixiConfig(
   content: string,
@@ -29,6 +29,7 @@ function getUserPixiConfig(
     return val;
   }
 
+  // istanbul ignore next
   return null;
 }
 
