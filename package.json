@@ -369,7 +369,7 @@
       "better-sqlite3",
       "re2"
     ],
-      "patchedDependencies": {
+     "patchedDependencies": {
       "re2": "patches/re2.patch"
     }
   }
