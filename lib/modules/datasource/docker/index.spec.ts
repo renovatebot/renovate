@@ -1935,6 +1935,56 @@ describe('modules/datasource/docker/index', () => {
       ]);
     });
 
+    it('Uses custom page limit for Docker hub repository tags', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=3&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 4,
+              last_updated: '2020-01-01T00:00:00.000Z',
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.9.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+    });
+
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
       const tags = ['1.0.0'];
       httpMock
