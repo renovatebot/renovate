@@ -2766,7 +2766,7 @@ const options: RenovateOptions[] = [
     description:
       'It specifies the syntax of the package file being managed by the custom JSONata manager.',
     type: 'string',
-    allowedValues: ['json', 'yaml'],
+    allowedValues: ['json', 'toml', 'yaml'],
     parents: ['customManagers'],
     cli: false,
     env: false,
