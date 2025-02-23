@@ -86,6 +86,15 @@ let config: {
   squash: boolean;
 } = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  draftPrefix = DRAFT_PREFIX;
+  defaults.hostType = 'gitlab';
+  defaults.endpoint = 'https://gitlab.com/api/v4/';
+  defaults.version = '0.0.0';
+  setBaseUrl(defaults.endpoint);
+}
+
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
