@@ -14,6 +14,7 @@ import type { PackageDependency } from '../modules/manager/types';
 import { parse as parseToml } from './toml';
 import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
+import { stripTemplates } from './string';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -319,3 +320,5 @@ export function withTraceMessage<Input, Output>(
     return value;
   };
 }
+
+export const StripTemplates = z.string().transform(stripTemplates);
