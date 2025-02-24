@@ -6,7 +6,7 @@
       "@semantic-release/github",
       {
         "releasedLabels": false,
-        "successCommentCondition": "<% return issue.user.type !== 'Bot'; %>",
+        "successCommentCondition": "<% return branch.channel !== 'next' && issue.user.type !== 'Bot'; %>",
         "assets": [
           {
             "path": "tmp/docs.tgz",
