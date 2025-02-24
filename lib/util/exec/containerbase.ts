@@ -174,7 +174,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   pixi: {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
-    versioning: semverVersioningId,
+    versioning: pep440VersioningId,
   },
   poetry: {
     datasource: 'pypi',

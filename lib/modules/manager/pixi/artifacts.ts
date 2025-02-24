@@ -16,6 +16,12 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { pickPixiBasedOnLockVersion } from './lockfile';
 import { LockfileYaml } from './schema';
 
+const globalLockCommand = 'pixi lock --no-progress --color=never --quiet';
+/**
+ * old version of pixi doesn't have `pixi lock` command so we need to do a full install to generate a lock file
+ */
+const oldVersionLockCommand = 'pixi install';
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -30,6 +36,8 @@ export async function updateArtifacts({
     return null;
   }
 
+  const cmd: string[] = [];
+
   const lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
@@ -42,28 +50,25 @@ export async function updateArtifacts({
     existingLockFileContent,
     LockfileYaml,
   ).unwrap();
+
   if (!err) {
-    // istanbul ignore if
     if (val.version <= 5) {
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: 'lock file version < 6 is not support.',
-          },
-        },
-      ];
+      cmd.push(oldVersionLockCommand);
+    } else {
+      cmd.push(globalLockCommand);
     }
+
     pixiConstraint = pickPixiBasedOnLockVersion(val.version);
+  } else {
+    // we can't know which lock file version it is, latest version
+    cmd.push(globalLockCommand);
   }
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    const cmd: string[] = [];
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
-    cmd.push('pixi lock --no-progress --color=never --quiet');
 
     const extraEnv = {
       ...getGitEnvironmentVariables(['pypi']),

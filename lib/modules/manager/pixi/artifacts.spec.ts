@@ -189,6 +189,44 @@ describe('modules/manager/pixi/artifacts', () => {
       ]);
     });
 
+    it('returns updated pixi.lock using install mode for old version lock file', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      // pixi.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('version: 5');
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      // pixi
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.38.0' }, { version: '0.41.4' }],
+      });
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [],
+          newPackageFileContent: pyprojectToml,
+          config: {
+            ...config,
+            constraints: {},
+            isLockFileMaintenance: true,
+          },
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pixi.lock',
+            contents: 'New pixi.lock',
+          },
+        },
+      ]);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool pixi 0.38.0' },
+        { cmd: 'pixi install' },
+      ]);
+    });
+
     it('catches errors', async () => {
       const execSnapshots = mockExecAll();
       // pixi.lock
