@@ -223,7 +223,7 @@ describe('modules/manager/pixi/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool pixi 0.38.0' },
-        { cmd: 'pixi install' },
+        { cmd: 'pixi list' },
       ]);
     });
 

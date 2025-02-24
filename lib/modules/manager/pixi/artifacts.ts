@@ -13,14 +13,8 @@ import {
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { pickPixiBasedOnLockVersion } from './lockfile';
+import { commandLock, pickConfig } from './lockfile';
 import { LockfileYaml } from './schema';
-
-const globalLockCommand = 'pixi lock --no-progress --color=never --quiet';
-/**
- * old version of pixi doesn't have `pixi lock` command so we need to do a full install to generate a lock file
- */
-const oldVersionLockCommand = 'pixi install';
 
 export async function updateArtifacts({
   packageFileName,
@@ -45,23 +39,23 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug(`Updating ${lockFileName}`);
-  let pixiConstraint: string | undefined = undefined;
+  let constraint: string | undefined = undefined;
   const { val, err } = Result.parse(
     existingLockFileContent,
     LockfileYaml,
   ).unwrap();
 
-  if (!err) {
-    if (val.version <= 5) {
-      cmd.push(oldVersionLockCommand);
-    } else {
-      cmd.push(globalLockCommand);
-    }
-
-    pixiConstraint = pickPixiBasedOnLockVersion(val.version);
+  if (err) {
+    // use latest tool version
+    cmd.push(commandLock);
   } else {
-    // we can't know which lock file version it is, latest version
-    cmd.push(globalLockCommand);
+    const cfg = pickConfig(val.version);
+    constraint = cfg?.range;
+    if (cfg) {
+      cmd.push(cfg.cmd);
+    } else {
+      cmd.push(commandLock);
+    }
   }
 
   try {
@@ -81,7 +75,7 @@ export async function updateArtifacts({
       extraEnv,
       docker: {},
       userConfiguredEnv: config.env,
-      toolConstraints: [{ toolName: 'pixi', constraint: pixiConstraint }],
+      toolConstraints: [{ toolName: 'pixi', constraint }],
     };
     await exec(cmd, execOptions);
     const newPixiLockContent = await readLocalFile(lockFileName, 'utf8');
