@@ -11,10 +11,10 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { LockfileYaml } from './schema';
 import { Result } from '../../../util/result';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { pickPixiBasedOnLockVersion } from './lockfile';
+import { LockfileYaml } from './schema';
 
 export async function updateArtifacts({
   packageFileName,

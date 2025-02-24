@@ -4,10 +4,10 @@
  *
  * This list should be sorted by the pixi version.
  */
-export const pixiGenerateLockFileVersion: Array<{
+export const pixiGenerateLockFileVersion: {
   pixiVersion: string;
   lockVersion: number;
-}> = [
+}[] = [
   {
     pixiVersion: 'v0.0.4',
     lockVersion: 1,
