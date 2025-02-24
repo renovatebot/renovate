@@ -43,6 +43,7 @@ export async function updateArtifacts({
     LockfileYaml,
   ).unwrap();
   if (!err) {
+    // istanbul ignore if
     if (val.version <= 5) {
       return [
         {
