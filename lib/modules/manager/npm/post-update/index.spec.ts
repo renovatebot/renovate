@@ -587,7 +587,7 @@ describe('modules/manager/npm/post-update/index', () => {
             ...baseConfig,
             upgrades: [{ isLockfileUpdate: false }],
             reuseExistingBranch: true,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
             updateLockFiles: true,
           },
           additionalFiles,
@@ -719,14 +719,16 @@ describe('modules/manager/npm/post-update/index', () => {
 
         spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
 
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        ).catch(() => {});
+        await expect(
+          getAdditionalFiles(
+            {
+              ...updateConfig,
+              updateLockFiles: true,
+              reuseExistingBranch: true,
+            },
+            additionalFiles,
+          ),
+        ).rejects.toThrow();
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),

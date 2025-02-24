@@ -59,9 +59,7 @@ const pipenvCacheDir = join('/tmp/renovate/cache/others/pipenv');
 const pipCacheDir = join('/tmp/renovate/cache/others/pip');
 const virtualenvsCacheDir = join('/tmp/renovate/cache/others/virtualenvs');
 
-interface MockFiles {
-  [key: string]: string | string[];
-}
+type MockFiles = Record<string, string | string[]>;
 
 function mockFiles(mockFiles: MockFiles): void {
   fsExtra.readFile.mockImplementation(((name: string) => {

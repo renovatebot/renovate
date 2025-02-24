@@ -89,7 +89,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
 
   if (entries.length > 3) {
-    output['___'] = `... ${entries.length - 3} more`;
+    output.___ = `... ${entries.length - 3} more`;
   }
 
   return output;
@@ -99,7 +99,9 @@ export function prepareZodError(err: ZodError): Record<string, unknown> {
   // istanbul ignore next
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    set: () => {},
+    set: () => {
+      // intentionally empty
+    },
   });
 
   return {

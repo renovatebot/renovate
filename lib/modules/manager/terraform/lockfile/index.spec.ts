@@ -659,7 +659,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -769,7 +769,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -874,7 +874,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
     const result = await updateArtifacts({
@@ -944,7 +944,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     mockHash.mockResolvedValue(null);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -980,7 +980,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('return null if experimental flag is not set', async () => {
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
     const result = await updateArtifacts({

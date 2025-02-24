@@ -389,8 +389,7 @@ describe('util/http/github', () => {
 
       it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
         const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
-        for (let idx = 0; idx < codes.length; idx += 1) {
-          const code = codes[idx];
+        for (const code of codes) {
           await expect(failWithError({ code })).rejects.toThrow(
             EXTERNAL_HOST_ERROR,
           );
@@ -706,10 +705,9 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(25);
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem?.pageSize).toBe(25);
     });
 
     it('expands items count on timeout', async () => {
@@ -735,10 +733,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(84);
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem?.pageSize).toBe(84);
     });
 
     it('continues to iterate with a lower page size on error 502', async () => {
@@ -780,10 +777,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']).toBeUndefined();
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem).toBeUndefined();
     });
 
     it('throws on 50x if count < 10', async () => {

@@ -19,7 +19,7 @@ export async function extractPackageFile(
     apiVersion: string;
     name: string;
     version: string;
-    dependencies: Array<{ name: string; version: string; repository: string }>;
+    dependencies: { name: string; version: string; repository: string }[];
   };
   try {
     // TODO: use schema (#9610)

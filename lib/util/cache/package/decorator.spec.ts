@@ -132,10 +132,10 @@ describe('util/cache/package/decorator', () => {
   });
 
   it('computes cache namespace and key from arguments', async () => {
-    type Arg = {
+    interface Arg {
       foo: 'namespace';
       bar: 'key';
-    };
+    }
 
     class Class {
       @cache({

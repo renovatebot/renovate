@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.7.2',
+    default: 'ghcr.io/containerbase/sidecar:13.7.19',
     globalOnly: true,
   },
   {
@@ -1877,6 +1877,17 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
     default: 'strict',
+  },
+  {
+    name: 'processEnv',
+    description: 'Environment variables to be used in global config only.',
+    type: 'object',
+    default: {},
+    globalOnly: true,
+    stage: 'global',
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'prCreation',

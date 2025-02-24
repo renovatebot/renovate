@@ -1,7 +1,7 @@
 import type { Package, PackageRepository } from './schema';
 
-export type GlasskubeResources = {
+export interface GlasskubeResources {
   packageFile: string;
   packages: Package[];
   repositories: PackageRepository[];
-};
+}

@@ -57,6 +57,11 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: Config = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  renovateUserUuid = null;
+}
+
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
@@ -517,7 +522,11 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; title: string; content?: { raw: string } };
+interface BbIssue {
+  id: number;
+  title: string;
+  content?: { raw: string };
+}
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {

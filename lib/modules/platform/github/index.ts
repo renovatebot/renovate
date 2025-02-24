@@ -1126,9 +1126,7 @@ async function getStatusCheck(
   ).body;
 }
 
-interface GithubToRenovateStatusMapping {
-  [index: string]: BranchStatus;
-}
+type GithubToRenovateStatusMapping = Record<string, BranchStatus>;
 const githubToRenovateStatusMapping: GithubToRenovateStatusMapping = {
   success: 'green',
   error: 'red',
