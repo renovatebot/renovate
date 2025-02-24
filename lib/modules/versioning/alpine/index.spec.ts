@@ -1,7 +1,7 @@
 import alpine from '.';
 
 describe('modules/versioning/alpine/index', () => {
-  // https://gitlab.alpinelinux.org/alpine/apk-tools/-/blob/master/test/version.data
+  // https://gitlab.alpinelinux.org/alpine/apk-tools/-/blob/master/test/unit/version.data
   // The following rows were removed as they are failing tests right now:
   // 1.1 > 1.1_alpha1
   // 4.5.14 > 4.09-r1
