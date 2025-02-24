@@ -57,6 +57,11 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: Config = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  renovateUserUuid = null;
+}
+
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';

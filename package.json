@@ -141,7 +141,7 @@
   },
   "volta": {
     "node": "22.14.0",
-    "pnpm": "10.4.0"
+    "pnpm": "10.4.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.738.0",
@@ -348,12 +348,12 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
-    "type-fest": "4.34.1",
+    "type-fest": "4.35.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.24.1",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@10.4.0",
+  "packageManager": "pnpm@10.4.1",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -369,9 +369,6 @@
       "better-sqlite3",
       "re2"
     ],
-    "overrides": {
-      "@semantic-release/github>@octokit/plugin-paginate-rest": "11.4.2"
-    },
     "patchedDependencies": {
       "re2": "patches/re2.patch"
     }
