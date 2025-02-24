@@ -11,7 +11,6 @@ import {
 } from 'zod';
 import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
-import { stripTemplates } from './string';
 import { parse as parseToml } from './toml';
 import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
@@ -320,5 +319,3 @@ export function withTraceMessage<Input, Output>(
     return value;
   };
 }
-
-export const StripTemplates = z.string().transform(stripTemplates);
