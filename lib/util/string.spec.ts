@@ -45,7 +45,9 @@ describe('util/string', () => {
     test.each`
       input                                                        | expected
       ${'This is {% template %} text.'}                            | ${'This is  text.'}
+      ${'This is {%` template `%} text.'}                          | ${'This is  text.'}
       ${'Calculate {{ sum }} of numbers.'}                         | ${'Calculate  of numbers.'}
+      ${'Calculate {{` sum `}} of numbers.'}                       | ${'Calculate  of numbers.'}
       ${'Text with {# comment #} embedded comment.'}               | ${'Text with  embedded comment.'}
       ${'Start {{ value }} middle {% code %} end {# note #}.'}     | ${'Start  middle  end .'}
       ${'Nested {{ {% pattern %} }} test.'}                        | ${'Nested  test.'}
@@ -58,7 +60,7 @@ describe('util/string', () => {
       ${'Empty patterns {% %}{{ }}{# #}.'}                         | ${'Empty patterns .'}
       ${'{% start %} Middle text {# end #}'}                       | ${' Middle text '}
       ${'{% a %}{{ b }}{# c #}'}                                   | ${''}
-      ${'{% only %}{{ patterns }}{# here #}'}                      | ${''}
+      ${'{%` only `%}{{` patterns `}}{# here #}'}                  | ${''}
       ${'Escaped \\{% not a pattern %\\} text.'}                   | ${'Escaped \\{% not a pattern %\\} text.'}
       ${'Content with escaped \\{\\{ braces \\}\\}.'}              | ${'Content with escaped \\{\\{ braces \\}\\}.'}
       ${'Unicode {{ 🚀🌟 }} characters.'}                          | ${'Unicode  characters.'}

@@ -92,14 +92,16 @@ export function coerceString(
 }
 
 /**
- * Remove jinja templates.
+ * Remove templates from string.
  *
- * More performant version of this code:
+ * This is more performant version of this code:
  *
  * ```
  *   content
- *     .replaceAll(regEx(/{%.+?%}/gs), '')
+ *     .replaceAll(regEx(/{{`.+?`}}/gs), '')
  *     .replaceAll(regEx(/{{.+?}}/gs), '')
+ *     .replaceAll(regEx(/{%`.+?`%}/gs), '')
+ *     .replaceAll(regEx(/{%.+?%}/gs), '')
  *     .replaceAll(regEx(/{#.+?#}/gs), '')
  * ```
  */
@@ -115,13 +117,25 @@ export function stripTemplates(content: string): string {
       let skipLength = 0;
 
       if (content[idx + 1] === '%') {
-        // Handle `{% ... %}`
-        closing = '%}';
-        skipLength = 2;
+        if (idx + 2 < len && content[idx + 2] === '`') {
+          // Handle `{%` ... `%}`
+          closing = '`%}';
+          skipLength = 3;
+        } else {
+          // Handle `{% ... %}`
+          closing = '%}';
+          skipLength = 2;
+        }
       } else if (content[idx + 1] === '{') {
-        // Handle `{{ ... }}`
-        closing = '}}';
-        skipLength = 2;
+        if (idx + 2 < len && content[idx + 2] === '`') {
+          // Handle `{{` ... `}}`
+          closing = '`}}';
+          skipLength = 3;
+        } else {
+          // Handle `{{ ... }}`
+          closing = '}}';
+          skipLength = 2;
+        }
       } else if (content[idx + 1] === '#') {
         // Handle `{# ... #}`
         closing = '#}';
