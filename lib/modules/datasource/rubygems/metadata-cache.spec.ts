@@ -8,7 +8,7 @@ jest.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
-  const packageCacheMock: Map<string, unknown> = new Map();
+  const packageCacheMock = new Map<string, unknown>();
 
   beforeEach(() => {
     packageCacheMock.clear();

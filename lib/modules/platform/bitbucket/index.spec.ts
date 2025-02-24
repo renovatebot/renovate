@@ -1,9 +1,10 @@
 import * as httpMock from '../../../../test/http-mock';
-import type { logger as _logger } from '../../../logger';
-import type * as _git from '../../../util/git';
+import { git, hostRules, logger } from '../../../../test/util';
+import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { Platform, PlatformResult, RepoParams } from '../types';
+import type { PlatformResult, RepoParams } from '../types';
 import type { PrTask } from './schema';
+import * as bitbucket from '.';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
@@ -21,28 +22,16 @@ const pr = {
 };
 
 describe('modules/platform/bitbucket/index', () => {
-  let bitbucket: Platform;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
-  let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
-  let memCache: typeof import('../../../util/cache/memory');
-
-  beforeEach(async () => {
-    // reset module
-    jest.resetModules();
-    memCache = await import('../../../util/cache/memory');
-    hostRules = jest.requireMock('../../../util/host-rules');
-    bitbucket = await import('.');
-    logger = (await import('../../../logger')).logger as any;
-    git = jest.requireMock('../../../util/git');
+  beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({
       username: 'abc',
       password: '123',
     });
+
+    bitbucket.resetPlatform();
 
     setBaseUrl(baseUrl);
     memCache.init();
@@ -84,7 +73,7 @@ describe('modules/platform/bitbucket/index', () => {
         username: 'abc',
         password: '123',
       });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
@@ -122,7 +111,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user')
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         `Bitbucket: missing 'account' scope for password`,
       );
     });
@@ -483,7 +472,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('getBranchStatusCheck 1', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', null)).toBeNull();
+      expect(await bitbucket.getBranchStatusCheck('master', '')).toBeNull();
     });
 
     it('getBranchStatusCheck 2', async () => {

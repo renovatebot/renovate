@@ -891,7 +891,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const repo = repos.find((c) => c.id === config.repoId)!;
   const requiredReviewerPrefix = 'required:';
   const validReviewers = new Set<string>();
 

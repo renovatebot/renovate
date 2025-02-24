@@ -47,7 +47,7 @@ export class NugetV2Api {
             'IsLatestVersion',
           );
           if (pkgIsLatestVersion === 'true') {
-            dep['tags'] = { latest: removeBuildMeta(`${version}`) };
+            dep.tags = { latest: removeBuildMeta(`${version}`) };
             const projectUrl = this.getPkgProp(pkgInfo, 'ProjectUrl');
             if (projectUrl) {
               dep.sourceUrl = massageUrl(projectUrl);

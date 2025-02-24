@@ -190,8 +190,7 @@ export class PodDatasource extends Datasource {
     const resp = await this.requestCDN(url, packageName);
     if (resp) {
       const lines = resp.split(newlineRegex);
-      for (let idx = 0; idx < lines.length; idx += 1) {
-        const line = lines[idx];
+      for (const line of lines) {
         const [name, ...versions] = line.split('/');
         if (name === packageName.replace(regEx(/\/.*$/), '')) {
           const releases = versions.map((version) => ({ version }));

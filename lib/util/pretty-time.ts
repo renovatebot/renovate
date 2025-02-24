@@ -13,9 +13,12 @@ function split(time: string): string[] {
     .filter(is.nonEmptyString);
 }
 
-function applyCustomFormat(spec: string): string {
+function applyCustomFormat(spec: string): ms.StringValue {
   const monthRegex = regEx(/^(\d+)\s*(?:months?|M)$/);
-  return spec.replace(monthRegex, (_, months) => `${months * 30} days`);
+  return spec.replace(
+    monthRegex,
+    (_, months) => `${months * 30} days`,
+  ) as ms.StringValue;
 }
 
 export function toMs(time: string): number | null {

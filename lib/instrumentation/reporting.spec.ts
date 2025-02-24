@@ -8,16 +8,23 @@ import type { BranchCache } from '../util/cache/repository/types';
 import {
   addBranchStats,
   addExtractionStats,
+  addLibYears,
   exportStats,
   finalizeReport,
   getReport,
+  resetReport,
 } from './reporting';
+import type { Report } from './types';
 
 jest.mock('../util/fs', () => mockDeep());
 jest.mock('../util/s3', () => mockDeep());
 jest.mock('../logger', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
+  beforeEach(() => {
+    resetReport();
+  });
+
   const branchInformation: Partial<BranchCache>[] = [
     {
       branchName: 'a-branch-name',
@@ -53,7 +60,7 @@ describe('instrumentation/reporting', () => {
     ],
   };
 
-  const expectedReport = {
+  const expectedReport: Report = {
     problems: [],
     repositories: {
       'myOrg/myRepo': {
@@ -72,6 +79,7 @@ describe('instrumentation/reporting', () => {
       branches: [],
       packageFiles: {},
     });
+    addLibYears(config, {}, 0, 0, 0);
 
     expect(getReport()).toEqual({
       problems: [],
@@ -223,5 +231,33 @@ describe('instrumentation/reporting', () => {
     finalizeReport();
 
     expect(getReport()).toEqual(expectedReport);
+  });
+
+  it('should handle libyears addition', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+    addLibYears(config, { npm: 1 }, 1, 1, 1);
+
+    expect(getReport()).toEqual({
+      problems: [],
+      repositories: {
+        'myOrg/myRepo': {
+          problems: [],
+          branches: branchInformation,
+          packageFiles,
+          libYears: {
+            managerLibYears: { npm: 1 },
+            totalLibYears: 1,
+            totalDepsCount: 1,
+            outdatedDepsCount: 1,
+          },
+        },
+      },
+    });
   });
 });

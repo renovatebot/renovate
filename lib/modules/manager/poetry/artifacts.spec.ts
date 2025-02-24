@@ -676,7 +676,7 @@ describe('modules/manager/poetry/artifacts', () => {
           newPackageFileContent: '{}',
           config: {
             ...config,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
         }),
       ).toEqual([
