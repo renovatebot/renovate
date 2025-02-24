@@ -1,7 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -11,7 +10,34 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-const pyprojectToml = Fixtures.get('pyproject.toml');
+const pixiToml = `
+[project]
+authors = []
+channels = ["conda-forge"]
+name = "data"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "3.12.*"
+geographiclib = ">=2.0,<3"
+geopy = ">=2.4.1,<3"
+cartopy = ">=0.24.0,<0.25"
+pydantic = "2.*"
+matplotlib = ">=3.10.0,<4"
+pyqt = ">=5.15.9,<6"
+pandas = ">=2.2.3,<3"
+python-dateutil = ">=2.9.0.post0,<3"
+rich = ">=13.9.4,<14"
+scipy = ">=1.15.2,<2"
+tqdm = ">=4.67.1,<5"
+tzdata = ">=2025a"
+numpy = "2.*"
+adjusttext = ">=1.3.0,<2"
+iris = ">=3.11.1,<4"
+`;
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
@@ -19,8 +45,6 @@ jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
-
-// process.env.PIXI_CACHE_DIR = '/tmp/cache/others/pixi';
 
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
@@ -115,9 +139,9 @@ describe('modules/manager/pixi/artifacts', () => {
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
-          packageFileName: 'pyproject.toml',
+          packageFileName: 'pixi.toml',
           updatedDeps,
-          newPackageFileContent: pyprojectToml,
+          newPackageFileContent: pixiToml,
           config: { ...config, isLockFileMaintenance: true },
         }),
       ).toEqual([
@@ -166,7 +190,7 @@ describe('modules/manager/pixi/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps,
-          newPackageFileContent: pyprojectToml,
+          newPackageFileContent: pixiToml,
           config: {
             ...config,
             constraints: {},
@@ -202,9 +226,9 @@ describe('modules/manager/pixi/artifacts', () => {
       });
       expect(
         await updateArtifacts({
-          packageFileName: 'pyproject.toml',
+          packageFileName: 'pixi.toml',
           updatedDeps: [],
-          newPackageFileContent: pyprojectToml,
+          newPackageFileContent: pixiToml,
           config: {
             ...config,
             constraints: {},
@@ -222,8 +246,8 @@ describe('modules/manager/pixi/artifacts', () => {
       ]);
 
       expect(execSnapshots).toMatchObject([
-        { cmd: 'install-tool pixi 0.38.0' },
-        { cmd: 'pixi list' },
+        { cmd: 'install-tool pixi 0.41.4' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
 
@@ -238,7 +262,7 @@ describe('modules/manager/pixi/artifacts', () => {
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
-          packageFileName: 'pyproject.toml',
+          packageFileName: 'pixi.toml',
           updatedDeps,
           newPackageFileContent: '{}',
           config,
