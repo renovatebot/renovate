@@ -12,6 +12,9 @@ import {
 } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { LockfileYaml } from './schema';
+import { Result } from '../../../util/result';
+import { pickPixiBasedOnLockVersion } from './lockfile';
 
 export async function updateArtifacts({
   packageFileName,
@@ -34,6 +37,25 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug(`Updating ${lockFileName}`);
+  let pixiConstraint: string | undefined = undefined;
+  const { val, err } = Result.parse(
+    existingLockFileContent,
+    LockfileYaml,
+  ).unwrap();
+  if (!err) {
+    if (val.version <= 5) {
+      return [
+        {
+          artifactError: {
+            lockFile: lockFileName,
+            stderr: 'lock file version < 6 is not support.',
+          },
+        },
+      ];
+    }
+    pixiConstraint = pickPixiBasedOnLockVersion(val.version);
+  }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
@@ -53,7 +75,7 @@ export async function updateArtifacts({
       extraEnv,
       docker: {},
       userConfiguredEnv: config.env,
-      toolConstraints: [{ toolName: 'pixi' }],
+      toolConstraints: [{ toolName: 'pixi', constraint: pixiConstraint }],
     };
     await exec(cmd, execOptions);
     const newPixiLockContent = await readLocalFile(lockFileName, 'utf8');

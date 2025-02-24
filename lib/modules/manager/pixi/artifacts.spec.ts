@@ -106,7 +106,7 @@ describe('modules/manager/pixi/artifacts', () => {
       );
       // pixi.lock
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      fs.readLocalFile.mockResolvedValueOnce('version: 7');
       fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
       // pixi
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -155,9 +155,7 @@ describe('modules/manager/pixi/artifacts', () => {
       const execSnapshots = mockExecAll();
       // pixi.lock
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce(
-        '[metadata]\npython-versions = "~2.7 || ^3.4"',
-      );
+      fs.readLocalFile.mockResolvedValueOnce('version: 6');
       fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
       // pixi
       datasource.getPkgReleases.mockResolvedValueOnce({
