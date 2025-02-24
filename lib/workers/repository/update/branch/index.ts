@@ -501,17 +501,18 @@ export async function processBranch(
       config.artifactErrors = (config.artifactErrors ?? []).concat(
         additionalFiles.artifactErrors,
       );
-      config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
-        additionalFiles.updatedArtifacts,
-      );
-      if (config.updatedArtifacts?.length) {
+      config.updatedArtifacts = {
+        ...config.updatedArtifacts,
+        ...additionalFiles.updatedArtifacts,
+      };
+      if (Object.keys(config.updatedArtifacts).length) {
         logger.debug(
           {
-            updatedArtifacts: config.updatedArtifacts.map((f) =>
+            updatedArtifacts: Object.values(config.updatedArtifacts).map((f) =>
               f.type === 'deletion' ? `${f.path} (delete)` : f.path,
             ),
           },
-          `Updated ${config.updatedArtifacts.length} lock files`,
+          `Updated ${Object.entries(config.updatedArtifacts).length} lock files`,
         );
       } else {
         logger.debug('No updated lock files in branch');
@@ -552,7 +553,7 @@ export async function processBranch(
         } else {
           logger.debug('PR has no releaseTimestamp');
         }
-      } else if (config.updatedArtifacts?.length && branchPr) {
+      } else if (Object.keys(config.updatedArtifacts).length && branchPr) {
         // If there are artifacts, no errors, and an existing PR then ensure any artifacts error comment is removed
         // istanbul ignore if
         if (GlobalConfig.get('dryRun')) {
