@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.43.0@sha256:88b851cb6cd422d850ccb8aef70e4ed263490598babf43d4cd07fd82a95857b7 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.43.2@sha256:2d88a87abf47a7204dceb80d614393ac243114bf719883ddecd84de351b804e6 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.43.0@sha256:88b851cb6cd422d850ccb8aef70e4ed263490598babf43d4cd07fd82a95857b7 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.43.2-full@sha256:f032c4b6fa0f2a671962a4d8d20a55c34b1bd56e84cbcc029e88494b5788806b AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.43.0@sha256:88b851cb6cd422d850ccb8aef70e4ed263490598babf43d4cd07fd82a95857b7 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.43.2@sha256:2d88a87abf47a7204dceb80d614393ac243114bf719883ddecd84de351b804e6 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -25,7 +25,7 @@ RUN install-tool node 22.14.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.4.0
+RUN install-tool pnpm 10.4.1
 
 WORKDIR /usr/local/renovate
 
@@ -61,6 +61,8 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
+COPY --link .npmrc ./
+COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
@@ -70,13 +72,10 @@ RUN set -ex; \
 
 COPY --link . ./
 
-# disable prepare script
-RUN sed -i -e "s/run-s 'prepare:\*'/true/" package.json
-
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline; \
-  pnpm rebuild; \
+  pnpm install --prod --offline --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3; \
   true
 
 # --------------------------------------
