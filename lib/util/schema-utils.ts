@@ -11,10 +11,10 @@ import {
 } from 'zod';
 import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
+import { stripTemplates } from './string';
 import { parse as parseToml } from './toml';
 import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
-import { stripTemplates } from './string';
 
 interface ErrorContext<T> {
   error: z.ZodError;
