@@ -3,7 +3,7 @@ import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
-import { ensureTrailingSlash, parseUrl } from '../util/url';
+import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
 import { tryDecryptKbPgp } from './decrypt/kbpgp';
 import {
   tryDecryptPublicKeyDefault,
@@ -243,10 +243,7 @@ export function getAzureCollection(): string | undefined {
     return undefined;
   }
 
-  const azureCollection = endpointUrl.pathname
-    ?.split('/')
-    .filter(is.nonEmptyString)
-    .join('/');
+  const azureCollection = trimSlashes(endpointUrl.pathname);
   if (!is.nonEmptyString(azureCollection)) {
     logger.debug({ endpoint }, 'Unable to find azure collection name from URL');
     return undefined;
