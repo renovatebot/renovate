@@ -21,6 +21,28 @@ describe('modules/versioning/conda/index', () => {
     input                                            | expected
     ${'0.750'}                                       | ${true}
     ${'1.2.3'}                                       | ${true}
+    ${'1.0.1a'}                                      | ${true}
+    ${'1.9'}                                         | ${true}
+    ${'17.04.0'}                                     | ${true}
+    ${''}                                            | ${false}
+    ${'==1.2.3'}                                     | ${false}
+    ${'==1.2.3.0'}                                   | ${false}
+    ${'==1.2.3rc0'}                                  | ${false}
+    ${'~=1.2.3'}                                     | ${false}
+    ${'1.2.*'}                                       | ${false}
+    ${'>1.2.3'}                                      | ${false}
+    ${'renovatebot/renovate'}                        | ${false}
+    ${'renovatebot/renovate#master'}                 | ${false}
+    ${'https://github.com/renovatebot/renovate.git'} | ${false}
+  `('isVersion("$input") === $expected', ({ input, expected }) => {
+    const res = !!api.isVersion(input);
+    expect(res).toBe(expected);
+  });
+
+  it.each`
+    input                                            | expected
+    ${'0.750'}                                       | ${true}
+    ${'1.2.3'}                                       | ${true}
     ${'1.9'}                                         | ${true}
     ${'17.04.0'}                                     | ${true}
     ${'==1.2.3'}                                     | ${true}
@@ -29,6 +51,7 @@ describe('modules/versioning/conda/index', () => {
     ${'~=1.2.3'}                                     | ${true}
     ${'1.2.*'}                                       | ${true}
     ${'>1.2.3'}                                      | ${true}
+    ${''}                                            | ${false}
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#master'}                 | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
@@ -55,13 +78,47 @@ describe('modules/versioning/conda/index', () => {
   });
 
   it.each`
-    a          | b             | expected
-    ${'1.0'}   | ${'>=1.0.0'}  | ${true}
-    ${'3.0.0'} | ${'==3.0.0'}  | ${true}
-    ${'1.6.2'} | ${'<2.2.1.0'} | ${true}
-    ${'3.8'}   | ${'>=3.9'}    | ${false}
+    a                       | b             | expected
+    ${'1.0'}                | ${'>=1.0.0'}  | ${true}
+    ${'3.0.0'}              | ${'==3.0.0'}  | ${true}
+    ${'1.6.2'}              | ${'<2.2.1.0'} | ${true}
+    ${'3.8'}                | ${'>=3.9'}    | ${false}
+    ${'not-pep440-version'} | ${''}         | ${true}
   `('matches($a, $b) === $expected', ({ a, b, expected }) => {
     expect(api.matches(a, b)).toBe(expected);
+  });
+
+  it.each`
+    a                       | expected
+    ${'1.0'}                | ${1}
+    ${'3.0.0'}              | ${3}
+    ${'1.6.2'}              | ${1}
+    ${'3.8'}                | ${3}
+    ${'not-pep440-version'} | ${null}
+  `('getMajor($a) === $expected', ({ a, expected }) => {
+    expect(api.getMajor(a)).toBe(expected);
+  });
+
+  it.each`
+    a                       | expected
+    ${'1.0'}                | ${0}
+    ${'3.0.0'}              | ${0}
+    ${'1.6.2'}              | ${2}
+    ${'3.8'}                | ${0}
+    ${'not-pep440-version'} | ${null}
+  `('getPatch($a) === $expected', ({ a, expected }) => {
+    expect(api.getPatch(a)).toBe(expected);
+  });
+
+  it.each`
+    a          | expected
+    ${'1.0'}   | ${0}
+    ${'3.0.0'} | ${0}
+    ${'1.6.2'} | ${6}
+    ${'3.8'}   | ${8}
+    ${'1!3.8'} | ${8}
+  `('getMinor($a) === $expected', ({ a, expected }) => {
+    expect(api.getMinor(a)).toBe(expected);
   });
 
   it.each`
@@ -88,6 +145,10 @@ describe('modules/versioning/conda/index', () => {
     '2.0.3',
   ];
 
+  it('always compatible', () => {
+    expect(api.isCompatible('a', 'b')).toBeTrue();
+  });
+
   it.each`
     range        | expected
     ${'~=1.2.1'} | ${'1.2.3'}
@@ -109,6 +170,14 @@ describe('modules/versioning/conda/index', () => {
       expect(api.minSatisfyingVersion(versions, range)).toBe(expected);
     },
   );
+
+  it.each`
+    a            | b          | result
+    ${'1.2.1'}   | ${'1.2.0'} | ${true}
+    ${'1!1.0.0'} | ${'3.1.2'} | ${true}
+  `('isGreaterThan("$a", "$b") === $result', ({ a, b, result }) => {
+    expect(api.isGreaterThan(a, b)).toBe(result);
+  });
 
   it.each`
     currentValue          | rangeStrategy | currentVersion | newVersion | expected

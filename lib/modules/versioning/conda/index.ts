@@ -50,11 +50,7 @@ function isValid(input: string): boolean {
 }
 
 function isVersion(input: string | undefined | null): boolean {
-  if (!input) {
-    return false;
-  }
-
-  return isValidVersion(input);
+  return isValidVersion(input ?? '');
 }
 
 function matches(version: string, range: string): boolean {
@@ -96,12 +92,17 @@ function getNewValue({
     return null;
   }
 
+  // istanbul ignore next
   throw new Error(
     'conda versioning for non-pin strategy is not implemented yet.',
   );
 }
 
-export const api: VersioningApi = {
+function sortVersions(version: string, other: string): number {
+  return new Version(version).compare(new Version(other));
+}
+
+export const api = {
   isValid,
   isVersion,
   isSingleVersion,
@@ -120,6 +121,7 @@ export const api: VersioningApi = {
     return true;
   },
 
+  // conda version are always compatible with each other.
   isCompatible(version: string, current?: string): boolean {
     return true;
   },
@@ -133,13 +135,17 @@ export const api: VersioningApi = {
   // sadly conda version doesn't have a concept of patch version
   // so we try to use pep440 get a patch version.
   getPatch(version: string | SemVer): null | number {
-    return pep440.getPatch(version);
+    try {
+      return pep440.getPatch(version);
+    } catch {
+      return null;
+    }
   },
   equals(version: string, other: string): boolean {
     return parse(version)?.equals(new Version(other)) ?? false;
   },
   isGreaterThan(version: string, other: string): boolean {
-    return new Version(version).compare(new Version(other)) > 0;
+    return sortVersions(version, other) > 0;
   },
   getSatisfyingVersion(versions: string[], range: string): string | null {
     const spec = new VersionSpec(range);
@@ -176,10 +182,9 @@ export const api: VersioningApi = {
     return versions[satisfiedVersions.pop()![1]] ?? null;
   },
   getNewValue,
-  sortVersions(version: string, other: string): number {
-    return new Version(version).compare(new Version(other));
-  },
+
   matches,
-};
+  sortVersions,
+} satisfies VersioningApi;
 
 export default api;
