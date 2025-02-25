@@ -6,9 +6,8 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
-import { stripTemplates } from '../../../util/string';
+import { massage as massageToml } from '../../../util/toml';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageFileContent } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
@@ -19,7 +18,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
-    stripTemplates(content.replace(regEx(/^\s*{{.+?}}\s*=.*$/gm), '')),
+    massageToml(content),
     PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {
