@@ -1,11 +1,15 @@
 import { codeBlock } from 'common-tags';
 import { mockExecAll } from '../../../../test/exec-util';
-import { fs, git, partial } from '../../../../test/util';
+import { fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
+
+jest.mock('../../datasource');
+const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -290,6 +294,13 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
       fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.14.0' },
+          { version: '0.13.7' },
+          { version: '0.13.6' },
+        ],
+      });
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',
@@ -298,7 +309,7 @@ describe('modules/manager/devbox/artifacts', () => {
           config: {
             isLockFileMaintenance: true,
             constraints: {
-              devbox: '0.13.0',
+              devbox: '< 0.14.0',
             },
           },
         }),
