@@ -19,12 +19,6 @@ export class AwsEKSAddonDataSource extends Datasource {
   override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
-  override readonly defaultConfig: Record<string, unknown> | undefined = {
-    commitMessageTopic: '{{datasource}}',
-    commitMessageExtra: '{{currentVersion}} to {{{newVersion}}}',
-    additionalBranchPrefix: '{{datasource}}-{{{newVersion}}}-',
-  };
-
   constructor() {
     super(AwsEKSAddonDataSource.id);
   }
