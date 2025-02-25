@@ -648,6 +648,7 @@
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",
     "testing-library": "/^@testing-library//",
+    "twig": "/^twig//",
     "wordpress": "/^@wordpress/"
   }
 }
