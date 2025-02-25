@@ -16,6 +16,7 @@ import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
+import { stripTemplates } from '../../../util/string';
 import { parse as parseToml } from '../../../util/toml';
 import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -97,7 +98,7 @@ export function getPoetryRequirement(
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
-    pyprojectFile = parseToml(content) as PoetryFile;
+    pyprojectFile = parseToml(stripTemplates(content)) as PoetryFile;
   } catch (err) {
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return [];

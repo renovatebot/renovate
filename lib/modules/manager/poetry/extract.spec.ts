@@ -496,5 +496,22 @@ describe('modules/manager/poetry/extract', () => {
         ]);
       });
     });
+
+    it('parses package file with template', async () => {
+      const content = codeBlock`
+            [tool.poetry]
+            name = "{{ name }}"
+            {# comment #}
+            [tool.poetry.dependencies]
+            python = "^3.9"
+            {% if foo %}
+            dep1 = "^1.0.0"
+            {% endif %}
+          `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps[0].depName).toBe('python');
+      expect(res?.deps[1].depName).toBe('dep1');
+    });
   });
 });
