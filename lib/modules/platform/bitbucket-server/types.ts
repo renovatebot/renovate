@@ -49,8 +49,9 @@ export interface BbsRestPr {
 
 export interface BbsRestRepo {
   id: number;
+  slug: string;
   project: { key: string };
-  origin: { name: string; slug: string };
+  origin?: { name: string; slug: string }; // only present in forks
   links: {
     clone?: { href: string; name: string }[];
   };
@@ -70,3 +71,18 @@ export interface BitbucketErrorResponse {
 export interface BitbucketError extends HTTPError {
   readonly response: Response<BitbucketErrorResponse>;
 }
+
+export interface Comment {
+  text: string;
+  id: number;
+}
+
+export interface PullRequestCommentActivity {
+  action: 'COMMENTED';
+  commentAction: string;
+  comment: Comment;
+}
+
+export type PullRequestActivity =
+  | { action: string }
+  | PullRequestCommentActivity;
