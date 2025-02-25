@@ -25,7 +25,7 @@ import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import {
   ensureTrailingSlash,
@@ -39,6 +39,7 @@ import type {
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
+  FileOwnerRule,
   FindPRConfig,
   GitUrlOption,
   Issue,
@@ -54,6 +55,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { CodeOwnersParser } from './code-owners';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -1506,4 +1508,24 @@ export async function expandGroupMembers(
     }
   }
   return expandedReviewersOrAssignees;
+}
+
+export function extractRulesFromCodeOwnersFile(
+  codeOwnersFile: string,
+): FileOwnerRule[] {
+  const parser = new CodeOwnersParser();
+
+  const cleanedLines = codeOwnersFile
+    .split(newlineRegex)
+    // Remove comments
+    .map((line) => line.split('#')[0])
+    // Remove empty lines
+    .map((line) => line.trim())
+    .filter(is.nonEmptyString);
+
+  for (const line of cleanedLines) {
+    parser.parseLine(line);
+  }
+
+  return parser.rules;
 }
