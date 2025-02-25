@@ -460,6 +460,7 @@ export async function validateConfig(
                     'separateMinorPatch',
                     'separateMultipleMajor',
                     'separateMultipleMinor',
+                    'separateMultiplePatch',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {

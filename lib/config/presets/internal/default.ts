@@ -605,6 +605,11 @@ export const presets: Record<string, Preset> = {
       'Separate each `minor` version of dependencies into individual branches/PRs.',
     separateMultipleMinor: true,
   },
+  separateMultiplePatchReleases: {
+    description:
+      'Separate each `patch` version of dependencies into individual branches/PRs.',
+    separateMultiplePatch: true,
+  },
   separatePatchReleases: {
     description:
       'Separate `patch` and `minor` releases of dependencies into separate PRs.',

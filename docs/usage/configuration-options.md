@@ -4052,6 +4052,10 @@ By default, Renovate skips versions in between, like `python@v3.10.x`.
 
 But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
 
+## separateMultiplePatch
+
+Configure this to `true` if you wish to get one PR for every separate patch version upgrade of a dependency.
+
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.

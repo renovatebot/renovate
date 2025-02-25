@@ -42,6 +42,7 @@ export interface LookupUpdateConfig
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   separateMultipleMinor?: boolean;
+  separateMultiplePatch?: boolean;
   datasource: string;
   packageName: string;
   minimumConfidence?: MergeConfidence | undefined;

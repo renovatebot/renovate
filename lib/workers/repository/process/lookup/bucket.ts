@@ -4,6 +4,7 @@ export interface BucketConfig {
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   separateMultipleMinor?: boolean;
+  separateMultiplePatch?: boolean;
   separateMinorPatch?: boolean;
 }
 
@@ -17,6 +18,7 @@ export function getBucket(
     separateMajorMinor,
     separateMultipleMajor,
     separateMultipleMinor,
+    separateMultiplePatch,
     separateMinorPatch,
   } = config;
   if (!separateMajorMinor) {
@@ -64,14 +66,12 @@ export function getBucket(
 
   // If we reach here then we know it's a patch release
 
-  /* future option
   if (separateMultiplePatch) {
     const toPatch = versioningApi.getPatch(newVersion);
     if (toPatch !== null && separateMultiplePatch) {
       return `v${toMajor}.${toMinor}.${toPatch}`;
     }
   }
-  */
 
   if (separateMinorPatch) {
     return 'patch';

@@ -5,6 +5,7 @@ export interface UpdateTypeConfig {
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   separateMultipleMinor?: boolean;
+  separateMultiplePatch?: boolean;
   separateMinorPatch?: boolean;
 }
 
