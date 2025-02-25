@@ -70,10 +70,12 @@ describe('modules/versioning/conda/index', () => {
   });
 
   it.each`
-    a          | b            | expected
-    ${'1.0'}   | ${'1.0.0'}   | ${true}
-    ${'1.0.0'} | ${'1.0.foo'} | ${false}
-  `('equals($a, $b) === $expected', ({ a, b, expected }) => {
+    a                     | b                     | expected
+    ${'1.0'}              | ${'1.0.0'}            | ${true}
+    ${'1.0.0'}            | ${'1.0.foo'}          | ${false}
+    ${'non-pep440-1'}     | ${'non-pep440-2'}     | ${false}
+    ${'broken/version/1'} | ${'broken/version/2'} | ${false}
+  `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.equals(a, b)).toBe(expected);
   });
 
@@ -83,8 +85,8 @@ describe('modules/versioning/conda/index', () => {
     ${'3.0.0'}              | ${'==3.0.0'}  | ${true}
     ${'1.6.2'}              | ${'<2.2.1.0'} | ${true}
     ${'3.8'}                | ${'>=3.9'}    | ${false}
-    ${'not-pep440-version'} | ${''}         | ${true}
-  `('matches($a, $b) === $expected', ({ a, b, expected }) => {
+    ${'not-pep440-version'} | ${'*'}        | ${true}
+  `('matches("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.matches(a, b)).toBe(expected);
   });
 
@@ -95,8 +97,20 @@ describe('modules/versioning/conda/index', () => {
     ${'1.6.2'}              | ${1}
     ${'3.8'}                | ${3}
     ${'not-pep440-version'} | ${null}
-  `('getMajor($a) === $expected', ({ a, expected }) => {
+  `('getMajor("$a") === $expected', ({ a, expected }) => {
     expect(api.getMajor(a)).toBe(expected);
+  });
+
+  it.each`
+    a                      | expected
+    ${'1.0'}               | ${0}
+    ${'3.0.0'}             | ${0}
+    ${'1.6.2'}             | ${6}
+    ${'3.8'}               | ${8}
+    ${'1!3.8'}             | ${8}
+    ${'non-pep440-string'} | ${null}
+  `('getMinor($a) === $expected', ({ a, expected }) => {
+    expect(api.getMinor(a)).toBe(expected);
   });
 
   it.each`
@@ -106,19 +120,8 @@ describe('modules/versioning/conda/index', () => {
     ${'1.6.2'}              | ${2}
     ${'3.8'}                | ${0}
     ${'not-pep440-version'} | ${null}
-  `('getPatch($a) === $expected', ({ a, expected }) => {
+  `('getPatch("$a") === $expected', ({ a, expected }) => {
     expect(api.getPatch(a)).toBe(expected);
-  });
-
-  it.each`
-    a          | expected
-    ${'1.0'}   | ${0}
-    ${'3.0.0'} | ${0}
-    ${'1.6.2'} | ${6}
-    ${'3.8'}   | ${8}
-    ${'1!3.8'} | ${8}
-  `('getMinor($a) === $expected', ({ a, expected }) => {
-    expect(api.getMinor(a)).toBe(expected);
   });
 
   it.each`

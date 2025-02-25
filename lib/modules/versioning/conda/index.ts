@@ -49,10 +49,6 @@ function isValid(input: string): boolean {
   return isValidVersion(input) || isValidVersionSpec(input);
 }
 
-function isVersion(input: string | undefined | null): boolean {
-  return isValidVersion(input ?? '');
-}
-
 function matches(version: string, range: string): boolean {
   try {
     return new VersionSpec(range).matches(new Version(version));
@@ -104,7 +100,7 @@ function sortVersions(version: string, other: string): number {
 
 export const api = {
   isValid,
-  isVersion,
+  isVersion: isValidVersion,
   isSingleVersion,
 
   isStable(version: string): boolean {
@@ -142,7 +138,12 @@ export const api = {
     }
   },
   equals(version: string, other: string): boolean {
-    return parse(version)?.equals(new Version(other)) ?? false;
+    const v2 = parse(other);
+    if (!v2) {
+      return false;
+    }
+
+    return parse(version)?.equals(v2) ?? false;
   },
   isGreaterThan(version: string, other: string): boolean {
     return sortVersions(version, other) > 0;
