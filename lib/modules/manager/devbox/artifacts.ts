@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { SemVer } from 'semver';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
@@ -17,6 +18,11 @@ export async function updateArtifacts(
     logger.debug('No devbox.lock found');
     return null;
   }
+
+  const supportsNoInstall = updateConfig.config.constraints?.devbox
+    ? new SemVer(updateConfig.config.constraints.devbox).compare('0.14.0') >= 0
+    : true;
+
   const execOptions: ExecOptions = {
     cwdFile: updateConfig.packageFileName,
     toolConstraints: [
@@ -34,16 +40,22 @@ export async function updateArtifacts(
     updateConfig.config.isLockFileMaintenance ||
     updateConfig.config.updateType === 'lockFileMaintenance'
   ) {
-    cmd += 'devbox update --no-install';
+    cmd += supportsNoInstall ? 'devbox update --no-install' : 'devbox update';
   } else if (is.nonEmptyArray(updateConfig.updatedDeps)) {
-    const updateCommands = updateConfig.updatedDeps
-      .map((dep) => dep.depName && `devbox update ${dep.depName} --no-install`)
-      .filter((dep) => dep);
-    if (updateCommands.length) {
-      cmd += updateCommands.join('; ');
+    if (supportsNoInstall) {
+      const updateCommands = updateConfig.updatedDeps
+        .map(
+          (dep) => dep.depName && `devbox update ${dep.depName} --no-install`,
+        )
+        .filter((dep) => dep);
+      if (updateCommands.length) {
+        cmd += updateCommands.join('; ');
+      } else {
+        logger.trace('No updated devbox packages - returning null');
+        return null;
+      }
     } else {
-      logger.trace('No updated devbox packages - returning null');
-      return null;
+      cmd += 'devbox install';
     }
   } else {
     logger.trace('No updated devbox packages - returning null');
