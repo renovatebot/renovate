@@ -195,6 +195,64 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('renovate/lodash-4.x');
     });
 
+    it('separates patch groups with patch version when separateMultiplePatch=true', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'patch',
+        separateMajorMinor: true,
+        separateMultiplePatch: true,
+        newMajor: 2,
+        newMinor: 1,
+        newPatch: 5,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('patch-2.1.5-some-group-slug-grouptopic');
+    });
+
+    it('falls back to patch version "0" when newPatch is not provided and separateMultiplePatch=true', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'patch',
+        separateMajorMinor: true,
+        separateMultiplePatch: true,
+        newMajor: 2,
+        newMinor: 1,
+        // newPatch is not provided
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('patch-2.1.0-some-group-slug-grouptopic');
+    });
+
+    it('prioritizes separateMultiplePatch over separateMinorPatch when both are true', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'patch',
+        separateMajorMinor: true,
+        separateMultiplePatch: true,
+        separateMinorPatch: true,
+        newMajor: 2,
+        newMinor: 1,
+        newPatch: 7,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('patch-2.1.7-some-group-slug-grouptopic');
+    });
+
     it('realistic defaults', () => {
       const upgrade: RenovateConfig = {
         branchName:
