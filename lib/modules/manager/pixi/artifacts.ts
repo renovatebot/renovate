@@ -39,24 +39,11 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug(`Updating ${lockFileName}`);
-  let constraint: string | undefined = undefined;
-  const { val, err } = Result.parse(
-    existingLockFileContent,
-    LockfileYaml,
-  ).unwrap();
 
-  if (err) {
-    // use latest tool version
-    cmd.push(commandLock);
-  } else {
-    const cfg = pickConfig(val.version);
-    constraint = cfg?.range;
-    if (cfg) {
-      cmd.push(cfg.cmd);
-    } else {
-      cmd.push(commandLock);
-    }
-  }
+  const { val } = Result.parse(existingLockFileContent, LockfileYaml).unwrap();
+  const cfg = pickConfig(val?.version);
+  const constraint = cfg?.range;
+  cmd.push(cfg?.cmd ?? commandLock);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);

@@ -17,7 +17,11 @@ interface Config {
   cmd: string;
 }
 
-export function pickConfig(lockVersion: number): Config | undefined {
+export function pickConfig(lockVersion?: number): Config | undefined {
+  if (!lockVersion) {
+    return;
+  }
+
   for (const pixi of pixiGenerateLockFileVersion) {
     if (lockVersion === pixi.lockVersion) {
       return pixi;
