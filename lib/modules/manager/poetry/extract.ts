@@ -6,6 +6,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
 import { stripTemplates } from '../../../util/string';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -18,7 +19,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
-    stripTemplates(content),
+    stripTemplates(content.replace(regEx(/^\s*{{.+?}}\s*=.*$/gm), '')),
     PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {

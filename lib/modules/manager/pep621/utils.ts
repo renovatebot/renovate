@@ -137,7 +137,9 @@ export function parsePyProject(
   content: string,
 ): PyProject | null {
   try {
-    const jsonMap = parseToml(stripTemplates(content));
+    const jsonMap = parseToml(
+      stripTemplates(content).replace(regEx(/^\s*{{.+?}}\s*=.*$/gm), ''),
+    );
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(

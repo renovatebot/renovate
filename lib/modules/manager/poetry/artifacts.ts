@@ -98,7 +98,9 @@ export function getPoetryRequirement(
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
-    pyprojectFile = parseToml(stripTemplates(content)) as PoetryFile;
+    pyprojectFile = parseToml(
+      stripTemplates(content).replace(regEx(/^\s*{{.+?}}\s*=.*$/gm), ''),
+    ) as PoetryFile;
   } catch (err) {
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return [];
