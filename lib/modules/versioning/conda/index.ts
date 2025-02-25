@@ -165,6 +165,7 @@ export const api = {
 
     return versions[satisfiedVersions.pop()![1]] ?? null;
   },
+
   minSatisfyingVersion(versions: string[], range: string): string | null {
     const spec = new VersionSpec(range);
     const satisfiedVersions = versions

@@ -70,11 +70,13 @@ describe('modules/versioning/conda/index', () => {
   });
 
   it.each`
-    a                     | b                     | expected
-    ${'1.0'}              | ${'1.0.0'}            | ${true}
-    ${'1.0.0'}            | ${'1.0.foo'}          | ${false}
-    ${'non-pep440-1'}     | ${'non-pep440-2'}     | ${false}
-    ${'broken/version/1'} | ${'broken/version/2'} | ${false}
+    a                   | b                   | expected
+    ${'1.0'}            | ${'1.0.0'}          | ${true}
+    ${'1.0.0'}          | ${'1.0.foo'}        | ${false}
+    ${'non-pep440-1'}   | ${'non-pep440-2'}   | ${false}
+    ${'broken/version'} | ${'broken/version'} | ${false}
+    ${'1.0.0'}          | ${'broken/version'} | ${false}
+    ${'broken/version'} | ${'1.0.0'}          | ${false}
   `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.equals(a, b)).toBe(expected);
   });
