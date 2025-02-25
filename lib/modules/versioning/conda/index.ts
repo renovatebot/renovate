@@ -150,38 +150,40 @@ export const api = {
   },
   getSatisfyingVersion(versions: string[], range: string): string | null {
     const spec = new VersionSpec(range);
+
     const satisfiedVersions = versions
-      .map((v, index) => {
-        return [new Version(v), index] as [Version, number];
+      .map((v) => {
+        return [new Version(v), v] as const;
       })
-      .filter(([v]) => {
-        return spec.matches(v);
+      .filter(([v, raw]) => spec.matches(v))
+      .sort((a, b) => {
+        return a[0].compare(b[0]);
       });
 
-    satisfiedVersions.sort(([a], [b]) => a.compare(b));
     if (satisfiedVersions.length === 0) {
       return null;
     }
 
-    return versions[satisfiedVersions.pop()![1]] ?? null;
+    return satisfiedVersions[satisfiedVersions.length - 1][1];
   },
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
     const spec = new VersionSpec(range);
+
     const satisfiedVersions = versions
-      .map((v, index) => {
-        return [new Version(v), index] as [Version, number];
+      .map((v) => {
+        return [new Version(v), v] as const;
       })
-      .filter(([v, index]) => {
-        return spec.matches(v);
+      .filter(([v, raw]) => spec.matches(v))
+      .sort((a, b) => {
+        return a[0].compare(b[0]);
       });
 
-    satisfiedVersions.sort(([a, index1], [b, index2]) => -a.compare(b));
     if (satisfiedVersions.length === 0) {
       return null;
     }
 
-    return versions[satisfiedVersions.pop()![1]] ?? null;
+    return satisfiedVersions[0][1];
   },
   getNewValue,
 

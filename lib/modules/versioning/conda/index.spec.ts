@@ -139,6 +139,10 @@ describe('modules/versioning/conda/index', () => {
     expect(res).toBe(isSingle);
   });
 
+  it('always compatible', () => {
+    expect(api.isCompatible('a', 'b')).toBeTrue();
+  });
+
   const versions = [
     '0.9.4',
     '1.0.0',
@@ -149,10 +153,6 @@ describe('modules/versioning/conda/index', () => {
     '1.3.4',
     '2.0.3',
   ];
-
-  it('always compatible', () => {
-    expect(api.isCompatible('a', 'b')).toBeTrue();
-  });
 
   it.each`
     range        | expected
