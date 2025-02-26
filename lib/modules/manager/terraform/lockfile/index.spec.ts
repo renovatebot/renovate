@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import type { MockedFunction } from 'vitest';
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
@@ -27,9 +26,7 @@ const adminConfig = {
 };
 
 const mockHash = vi.mocked(TerraformProviderHash).createHashes;
-const mockGetPkgReleases = getPkgReleases as MockedFunction<
-  typeof getPkgReleases
->;
+const mockGetPkgReleases = vi.mocked(getPkgReleases);
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
