@@ -6,7 +6,7 @@ import { findCommitOfTag } from './tags';
 describe('util/github/tags', () => {
   describe('findCommitOfTag', () => {
     const http = new GithubHttp();
-    const queryTagsSpy = jest.spyOn(githubGraphql, 'queryTags');
+    const queryTagsSpy = vi.spyOn(githubGraphql, 'queryTags');
 
     it('should be able to find the hash of a Git tag', async () => {
       queryTagsSpy.mockResolvedValueOnce([

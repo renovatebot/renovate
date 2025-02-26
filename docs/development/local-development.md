@@ -158,7 +158,7 @@ e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// v8 ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 

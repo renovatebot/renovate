@@ -14,15 +14,12 @@ vi.mock('../../../util/host-rules', () => mockDeep());
 const datasource = new GoProxyDatasource();
 
 describe('modules/datasource/go/releases-goproxy', () => {
-  const githubGetReleases = jest.spyOn(
+  const githubGetReleases = vi.spyOn(
     GithubReleasesDatasource.prototype,
     'getReleases',
   );
 
-  const githubGetTags = jest.spyOn(
-    GithubTagsDatasource.prototype,
-    'getReleases',
-  );
+  const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});

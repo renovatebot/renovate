@@ -39,7 +39,7 @@ const validDepUpdate = {
 } satisfies Upgrade<Record<string, unknown>>;
 
 describe('modules/manager/npm/artifacts', () => {
-  const spyProcessHostRules = jest.spyOn(rules, 'processHostRules');
+  const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
 
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({

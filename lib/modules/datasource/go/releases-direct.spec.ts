@@ -11,15 +11,12 @@ vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('./base');
 
 const datasource = new GoDirectDatasource();
-const getDatasourceSpy = jest.spyOn(BaseGoDatasource, 'getDatasource');
+const getDatasourceSpy = vi.spyOn(BaseGoDatasource, 'getDatasource');
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
-  const gitGetTags = jest.spyOn(GitTagsDatasource.prototype, 'getReleases');
-  const githubGetTags = jest.spyOn(
-    GithubTagsDatasource.prototype,
-    'getReleases',
-  );
+  const gitGetTags = vi.spyOn(GitTagsDatasource.prototype, 'getReleases');
+  const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});

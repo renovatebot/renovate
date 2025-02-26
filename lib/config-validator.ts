@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// istanbul ignore file
 import 'source-map-support/register';
 import './punycode.cjs';
 import { dequal } from 'dequal';

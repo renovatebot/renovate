@@ -62,9 +62,9 @@ describe('util/json-writer/editor-config', () => {
       '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
     const editorconf = await import('editorconfig');
-    jest
-      .spyOn(editorconf, 'parse')
-      .mockImplementationOnce(new Error('something') as never);
+    vi.spyOn(editorconf, 'parse').mockImplementationOnce(
+      new Error('something') as never,
+    );
 
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 

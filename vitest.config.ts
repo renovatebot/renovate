@@ -6,7 +6,6 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import GitHubActionsReporter from 'vitest-github-actions-reporter';
 import { testShards } from './tools/test/shards';
 import {
   getCoverageIgnorePatterns,
@@ -82,14 +81,14 @@ export default defineConfig(() =>
           'jest-extended/all',
           'expect-more-jest',
           './test/setup.ts',
-          './test/jest-legacy.ts',
           'test/to-migrate.ts',
         ],
-        reporters: ci ? ['default', new GitHubActionsReporter()] : ['default'],
+        reporters: ci ? ['default', 'github-actions'] : ['default'],
         mockReset: true,
         coverage: {
           provider: 'v8',
           ignoreEmptyLines: true,
+          skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
             : ['text-summary', 'html', 'json'],
@@ -106,6 +105,7 @@ export default defineConfig(() =>
             '__mocks__/**',
             // fully ignored files
             'lib/config-validator.ts',
+            'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
             'lib/util/cache/package/redis.ts',
