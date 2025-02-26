@@ -17,6 +17,7 @@ import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { memCacheProvider } from './cache/memory-http-cache-provider';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
@@ -180,13 +181,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
-    const { cacheProvider } = options;
-    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
+    let { cacheProvider } = options;
 
     const memCacheKey =
+      options.cacheProvider !== memCacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
@@ -198,11 +196,25 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           )
         : null;
 
+    if (memCacheKey) {
+      cacheProvider = undefined;
+    }
+
+    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     let resPromise: Promise<HttpResponse<T>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
+
+      // istanbul ignore next
+      if (resPromise && options.cacheProvider !== memCacheProvider) {
+        logger.debug({ url }, 'Cache hit on the obsolete memCache option');
+      }
     }
 
     // istanbul ignore else: no cache tests
