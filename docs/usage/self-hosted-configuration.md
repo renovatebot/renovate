@@ -503,7 +503,7 @@ The format of the environment variables must follow:
 
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
-- `matchHost`
+- `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
 - Underscore (`_`)
 - Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
