@@ -24,10 +24,10 @@ import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -79,8 +79,7 @@ describe('modules/manager/gradle/artifacts', () => {
       }),
     );
 
-    // TODO: fix types, jest is using wrong overload (#22198)
-    fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
       let content = '';
       if (fileName === 'gradle.lockfile') {
         content = 'New gradle.lockfile';

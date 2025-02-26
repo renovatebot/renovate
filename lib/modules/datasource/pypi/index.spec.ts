@@ -7,7 +7,7 @@ import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
 
 const googleAuth = mocked(_googleAuth);
-jest.mock('google-auth-library');
+vi.mock('google-auth-library');
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const htmlResponse = Fixtures.get('versions-html.html');

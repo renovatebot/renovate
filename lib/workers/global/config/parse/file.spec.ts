@@ -72,7 +72,7 @@ describe('workers/global/config/parse/file', () => {
 
     it.each([
       [
-        'config.js',
+        'config.invalid.js',
         `module.exports = {
         "platform": "github",
         "token":"abcdef",
@@ -84,8 +84,8 @@ describe('workers/global/config/parse/file', () => {
         "repositories": [ "test/test" ],
       };`,
       ],
-      ['config.json5', `"invalid":`],
-      ['config.yaml', `invalid: -`],
+      ['config.invalid.json5', `"invalid":`],
+      ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
     ])(
       'fatal error and exit if error in parsing %s',
       async (fileName, fileContent) => {

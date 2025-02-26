@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenance 1`] = `
+exports[`modules/manager/jsonnet-bundler/artifacts > performs lock file maintenance 1`] = `
 [
   {
     "cmd": "jb update",
@@ -23,7 +23,7 @@ exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenanc
 ]
 `;
 
-exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update fails 1`] = `
+exports[`modules/manager/jsonnet-bundler/artifacts > returns error when jb update fails 1`] = `
 [
   {
     "cmd": "jb update",
@@ -46,9 +46,9 @@ exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update 
 ]
 `;
 
-exports[`modules/manager/jsonnet-bundler/artifacts returns null if there are no changes 1`] = `[]`;
+exports[`modules/manager/jsonnet-bundler/artifacts > returns null if there are no changes 1`] = `[]`;
 
-exports[`modules/manager/jsonnet-bundler/artifacts updates the vendor dir when dependencies change 1`] = `
+exports[`modules/manager/jsonnet-bundler/artifacts > updates the vendor dir when dependencies change 1`] = `
 [
   {
     "cmd": "jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar",

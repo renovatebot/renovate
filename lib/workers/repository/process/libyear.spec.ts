@@ -5,7 +5,7 @@ import type { PackageFile } from '../../../modules/manager/types';
 import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
 
-jest.mock('../../../instrumentation/reporting');
+vi.mock('../../../instrumentation/reporting');
 
 describe('workers/repository/process/libyear', () => {
   const config: RenovateConfig = {};

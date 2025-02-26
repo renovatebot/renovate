@@ -617,11 +617,11 @@ describe('util/http/index', () => {
 
   describe('Throttling', () => {
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('works without throttling', async () => {
-      jest.useFakeTimers({ advanceTimers: 1 });
+      vi.useFakeTimers({ shouldAdvanceTime: true, advanceTimeDelta: 1 });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
 
       const t1 = Date.now();
@@ -633,13 +633,13 @@ describe('util/http/index', () => {
     });
 
     it('limits request rate by host', async () => {
-      jest.useFakeTimers({ advanceTimers: true });
+      vi.useFakeTimers({ shouldAdvanceTime: true });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
       hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
 
       const t1 = Date.now();
       await http.get('http://renovate.com/foo');
-      jest.advanceTimersByTime(4000);
+      vi.advanceTimersByTime(4000);
       await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 

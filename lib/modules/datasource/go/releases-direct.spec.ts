@@ -7,8 +7,8 @@ import { GithubTagsDatasource } from '../github-tags';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('./base');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./base');
 
 const datasource = new GoDirectDatasource();
 const getDatasourceSpy = jest.spyOn(BaseGoDatasource, 'getDatasource');

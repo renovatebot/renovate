@@ -4,8 +4,8 @@ import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { setBranchNewCommit } from './set-branch-commit';
 import type { LongCommitSha } from './types';
 
-jest.mock('../cache/repository');
-jest.mock('.');
+vi.mock('../cache/repository');
+vi.mock('.');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/set-branch-commit', () => {

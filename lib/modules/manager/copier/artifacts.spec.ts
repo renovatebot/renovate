@@ -12,9 +12,9 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/git');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

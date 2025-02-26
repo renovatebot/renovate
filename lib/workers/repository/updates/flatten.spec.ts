@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { flattenUpdates, sanitizeDepName } from './flatten';
 
-jest.mock('../../../util/git/semantic');
+vi.mock('../../../util/git/semantic');
 
 let config: RenovateConfig;
 

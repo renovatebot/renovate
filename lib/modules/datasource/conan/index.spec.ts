@@ -244,7 +244,7 @@ describe('modules/datasource/conan/index', () => {
       ).toBeNull();
     });
 
-    it('it handles mismatched userAndChannel versioned data', async () => {
+    it('handles mismatched userAndChannel versioned data', async () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')

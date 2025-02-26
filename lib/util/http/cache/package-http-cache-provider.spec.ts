@@ -7,7 +7,7 @@ import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
 
-jest.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 const packageCache = mocked(_packageCache);
 
 const http = new Http('test');

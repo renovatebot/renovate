@@ -119,7 +119,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       ).toBeNull();
     });
 
-    it('returns null for null packageName ', async () => {
+    it('returns null for null packageName', async () => {
       expect(
         await getPkgReleases({
           datasource,

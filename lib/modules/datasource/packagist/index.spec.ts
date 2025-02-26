@@ -8,7 +8,7 @@ import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
 import { PackagistDatasource } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = _hostRules;
 
@@ -144,7 +144,7 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports includes packages', async () => {
-      hostRules.find = jest.fn(() => ({
+      hostRules.find = vi.fn(() => ({
         username: 'some-username',
         password: 'some-password',
       }));
@@ -177,7 +177,7 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports older sha1 hashes', async () => {
-      hostRules.find = jest.fn(() => ({
+      hostRules.find = vi.fn(() => ({
         username: 'some-username',
         password: 'some-password',
       }));

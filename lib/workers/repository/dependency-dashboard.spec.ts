@@ -20,7 +20,7 @@ import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
 const createVulnerabilitiesMock = jest.fn();
-jest.mock('./process/vulnerabilities', () => {
+vi.mock('./process/vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
