@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';

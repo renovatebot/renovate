@@ -29,7 +29,7 @@ function getUserPixiConfig(
     return val;
   }
 
-  // v8 ignore next 2
+  /* v8 ignore next 2 */
   return null;
 }
 

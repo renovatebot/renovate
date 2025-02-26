@@ -81,10 +81,12 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
-    // v8 ignore next 3
+    /* v8 ignore start */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
+    /* v8 ignore end */
+
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
     return [
       {

@@ -1,6 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { vi } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
