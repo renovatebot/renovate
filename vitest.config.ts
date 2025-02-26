@@ -1,9 +1,16 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
 import type { ViteUserConfig } from 'vitest/config';
-import { defineConfig, mergeConfig } from 'vitest/config';
+import {
+  coverageConfigDefaults,
+  defineConfig,
+  mergeConfig,
+} from 'vitest/config';
 import GitHubActionsReporter from 'vitest-github-actions-reporter';
 import { testShards } from './tools/test/shards';
-import { normalizePattern } from './tools/test/utils';
+import {
+  getCoverageIgnorePatterns,
+  normalizePattern,
+} from './tools/test/utils';
 
 const ci = !!process.env.CI;
 
@@ -86,14 +93,27 @@ export default defineConfig(() =>
             ? ['text-summary', 'lcovonly', 'json']
             : ['text-summary', 'html', 'json'],
           enabled: true,
-          include: [
-            'lib/**/*.{js,ts}',
-            '!lib/**/*.{d,spec}.ts',
-            '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
-            '!lib/**/types.ts',
+          exclude: [
+            ...coverageConfigDefaults.exclude,
+            ...getCoverageIgnorePatterns(),
+            'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
+            'lib/**/types.ts',
+            'lib/types/**',
+            'tools/**',
+            '+(config.js)',
+            '__mocks__/**',
+            // fully ignored files
+            'lib/config-validator.ts',
+            'lib/config/decrypt/legacy.ts',
+            'lib/modules/datasource/hex/v2/package.ts',
+            'lib/modules/datasource/hex/v2/signed.ts',
+            'lib/util/cache/package/redis.ts',
+            'lib/util/http/legacy.ts',
+            'lib/workers/repository/cache.ts',
           ],
         },
         alias: {
+          // TODO: remove when migration is done
           'jest-mock-extended': 'vitest-mock-extended',
         },
       },
