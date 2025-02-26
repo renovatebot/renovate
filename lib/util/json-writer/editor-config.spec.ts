@@ -1,13 +1,16 @@
-import { fs as memfs } from 'memfs';
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 
+// mock `require` calls to `fs` and `memfs`
+// https://github.com/vitest-dev/vitest/discussions/3134
 // use real fs to read wasm files for `@one-ini/wasm`
-jest.mock('fs', () => {
-  const realFs = jest.requireActual<typeof import('fs')>('fs');
-  return {
+// @ts-expect-error no toplevel await on commonjs
+await vi.hoisted(async () => {
+  const { fs: memfs } = await vi.importActual<typeof import('memfs')>('memfs');
+  const realFs = await vi.importActual<typeof import('fs')>('fs');
+  const fs = {
     ...memfs,
     readFileSync: (file: string, ...args: any[]) => {
       if (file.endsWith('.wasm')) {
@@ -16,6 +19,8 @@ jest.mock('fs', () => {
       return memfs.readFileSync(file, ...args);
     },
   };
+
+  require.cache.fs = { exports: fs } as never;
 });
 
 const defaultConfigFile = configFileNames[0];
@@ -28,7 +33,6 @@ describe('util/json-writer/editor-config', () => {
   });
 
   beforeEach(() => {
-    jest.restoreAllMocks();
     Fixtures.reset();
   });
 

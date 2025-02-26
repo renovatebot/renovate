@@ -1,7 +1,7 @@
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {

@@ -23,24 +23,23 @@ import {
   writeUpdates,
 } from './write';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/git');
+vi.mock('../../../util/cache/repository');
+vi.mock('./limits');
+vi.mock('../update/branch');
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);
 const repoCache = mocked(_repoCache);
-
-branchWorker.processBranch = jest.fn();
-
-limits.getConcurrentPrsCount = jest.fn().mockResolvedValue(0);
-limits.getConcurrentBranchesCount = jest.fn().mockResolvedValue(0);
-limits.getPrHourlyCount = jest.fn().mockResolvedValue(0);
 
 let config: RenovateConfig;
 
 beforeEach(() => {
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
+  limits.getConcurrentPrsCount.mockResolvedValue(0);
+  limits.getConcurrentBranchesCount.mockResolvedValue(0);
+  limits.getPrHourlyCount.mockResolvedValue(0);
 });
 
 describe('workers/repository/process/write', () => {

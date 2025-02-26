@@ -1,5 +1,3 @@
-import type { JestConfigWithTsJest } from 'ts-jest';
-
 /**
  * Configuration for single test shard.
  */
@@ -68,16 +66,3 @@ export interface ShardGroup {
    */
   'upload-artifact-name': string;
 }
-
-export type JestConfig = JestConfigWithTsJest & {
-  // https://github.com/renovatebot/renovate/issues/17034
-  workerIdleMemoryLimit?: string;
-};
-
-/**
- * Subset of Jest config that is relevant for sharded test run.
- */
-export type JestShardedSubconfig = Pick<
-  JestConfig,
-  'testMatch' | 'coverageDirectory'
->;

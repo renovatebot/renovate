@@ -6,7 +6,7 @@ import {
   extractAllPackageFiles,
 } from './extract';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 

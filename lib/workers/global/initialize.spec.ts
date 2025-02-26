@@ -4,7 +4,7 @@ import { initPlatform as _initPlatform } from '../../modules/platform';
 import * as hostRules from '../../util/host-rules';
 import { globalInitialize } from './initialize';
 
-jest.mock('../../util/git');
+vi.mock('../../util/git');
 const initPlatform = mockedFunction(_initPlatform);
 
 describe('workers/global/initialize', () => {
