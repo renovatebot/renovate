@@ -5,6 +5,13 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('../../../../test/fixtures')>(
+      '../../../../test/fixtures',
+    )
+  ).fsExtra(),
+);
 vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
