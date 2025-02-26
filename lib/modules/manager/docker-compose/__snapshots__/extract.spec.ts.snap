@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
+exports[`modules/manager/docker-compose/extract > extractPackageFile() > extracts multiple image lines for version 1 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -74,7 +74,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
 ]
 `;
 
-exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
+exports[`modules/manager/docker-compose/extract > extractPackageFile() > extracts multiple image lines for version 3 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -148,7 +148,7 @@ exports[`modules/manager/docker-compose/extract extractPackageFile() extracts mu
 ]
 `;
 
-exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
+exports[`modules/manager/docker-compose/extract > extractPackageFile() > extracts multiple image lines for version 3 without set version key 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

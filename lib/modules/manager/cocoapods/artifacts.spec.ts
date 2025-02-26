@@ -10,10 +10,10 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
 
 const datasource = mocked(_datasource);
 

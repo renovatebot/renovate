@@ -18,7 +18,7 @@ import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 
-jest.mock('../../../fs');
+vi.mock('../../../fs');
 
 function createGetObjectCommandInput(
   repository: string,

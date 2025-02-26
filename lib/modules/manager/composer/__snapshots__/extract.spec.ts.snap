@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
+exports[`modules/manager/composer/extract > extractPackageFile() > extracts dependencies with lock file 1`] = `
 {
   "deps": [
     {
@@ -213,7 +213,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
 }
 `;
 
-exports[`modules/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
+exports[`modules/manager/composer/extract > extractPackageFile() > extracts dependencies with no lock file 1`] = `
 {
   "deps": [
     {

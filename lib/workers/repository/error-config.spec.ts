@@ -10,8 +10,6 @@ import {
   raiseCredentialsWarningIssue,
 } from './error-config';
 
-jest.mock('../../modules/platform');
-
 let config: RenovateConfig;
 
 beforeEach(() => {

@@ -3,7 +3,7 @@ import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '../update/pr/changelog';
 import { embedChangelogs } from '.';
 
-jest.mock('../update/pr/changelog');
+vi.mock('../update/pr/changelog');
 
 mockedFunction(getChangeLogJSON).mockResolvedValue({
   hasReleaseNotes: true,

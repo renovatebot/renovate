@@ -9,7 +9,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
 
 const hostRules = mocked(_hostRules);
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const datasource = new GoProxyDatasource();
 
@@ -205,13 +205,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it.each<{ abortOnError: boolean }>`
+    it.each`
       abortOnError
       ${true}
       ${false}
     `(
       'handles pipe fallback when abortOnError is $abortOnError',
-      async ({ abortOnError }) => {
+      async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = `https://example.com|${baseUrl}`;
         hostRules.find.mockReturnValue({ abortOnError });
 
@@ -424,13 +424,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it.each<{ abortOnError: boolean }>`
+    it.each`
       abortOnError
       ${true}
       ${false}
     `(
       'handles major releases with abortOnError is $abortOnError',
-      async ({ abortOnError }) => {
+      async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = baseUrl;
         hostRules.find.mockReturnValue({ abortOnError });
 

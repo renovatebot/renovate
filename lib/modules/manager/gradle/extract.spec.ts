@@ -6,18 +6,19 @@ import { matchesContentDescriptor } from './extract';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  // TODO: fix types, jest is using wrong overload (#22198)
-  fs.getLocalFiles.mockImplementation((fileNames: string[]): Promise<any> => {
-    const fileContentMap: Record<string, string | null> = {};
-    for (const fileName of fileNames) {
-      fileContentMap[fileName] = files?.[fileName];
-    }
+  fs.getLocalFiles.mockImplementation(
+    (fileNames: string[]): Promise<Record<string, string | null>> => {
+      const fileContentMap: Record<string, string | null> = {};
+      for (const fileName of fileNames) {
+        fileContentMap[fileName] = files?.[fileName];
+      }
 
-    return Promise.resolve(fileContentMap);
-  });
+      return Promise.resolve(fileContentMap);
+    },
+  );
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {

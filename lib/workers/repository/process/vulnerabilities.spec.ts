@@ -11,7 +11,7 @@ const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
 const createMock = jest.fn();
 
-jest.mock('@renovatebot/osv-offline', () => {
+vi.mock('@renovatebot/osv-offline', () => {
   return {
     __esModule: true,
     OsvOffline: class {
