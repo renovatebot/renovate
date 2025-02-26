@@ -88,7 +88,7 @@ export default defineConfig(() =>
         coverage: {
           provider: 'v8',
           ignoreEmptyLines: true,
-          skipFull: true,
+          skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
             : ['text-summary', 'html', 'json'],

@@ -1,9 +1,8 @@
-import type { Mock } from 'vitest';
 import type { Decorator } from '.';
 import { decorate } from '.';
 
 interface WrapParameters {
-  mock: Mock;
+  mock: (_: string) => string;
 }
 
 function wrap<T>({ mock }: WrapParameters): Decorator<T> {

@@ -3195,10 +3195,10 @@ describe('modules/platform/github/index', () => {
           {
             number: 2500,
             head: {
-              ref: 'renovate/vi-monorepo',
+              ref: 'renovate/jest-monorepo',
               repo: { full_name: 'some/repo' },
             },
-            title: 'chore(deps): update dependency vi to v23.6.0',
+            title: 'chore(deps): update dependency jest to v23.6.0',
             state: 'closed',
           },
         ]);
@@ -3220,10 +3220,10 @@ describe('modules/platform/github/index', () => {
           {
             number: 2500,
             head: {
-              ref: 'renovate/vi-monorepo',
+              ref: 'renovate/jest-monorepo',
               repo: { full_name: 'some/repo' },
             },
-            title: 'chore(deps): update dependency vi to v23.6.0',
+            title: 'chore(deps): update dependency jest to v23.6.0',
             state: 'closed',
             merged_at: DateTime.now().toISO(),
           },
