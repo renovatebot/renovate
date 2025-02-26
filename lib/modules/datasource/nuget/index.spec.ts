@@ -16,9 +16,9 @@ const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
-jest.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 const packageCache = mocked(_packageCache);
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');

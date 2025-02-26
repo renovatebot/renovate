@@ -4,7 +4,7 @@ import { logger } from '../../../logger';
 import * as _fs from '../../../util/fs';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const fs = mocked(_fs);
 

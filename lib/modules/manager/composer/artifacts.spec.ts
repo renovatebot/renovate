@@ -13,10 +13,10 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 process.env.CONTAINERBASE = 'true';
 

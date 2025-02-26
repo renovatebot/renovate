@@ -10,7 +10,7 @@ import {
 } from './common';
 import { inferCommandExecDir } from './utils';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#

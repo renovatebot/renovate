@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/artifactory/index getReleases parses real data (files): without slash at the end 1`] = `
+exports[`modules/datasource/artifactory/index > getReleases > parses real data (files): without slash at the end 1`] = `
 {
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": [
@@ -24,7 +24,7 @@ exports[`modules/datasource/artifactory/index getReleases parses real data (file
 }
 `;
 
-exports[`modules/datasource/artifactory/index getReleases parses real data (folders): with slash at the end 1`] = `
+exports[`modules/datasource/artifactory/index > getReleases > parses real data (folders): with slash at the end 1`] = `
 {
   "registryUrl": "https://jfrog.company.com/artifactory",
   "releases": [
@@ -48,7 +48,7 @@ exports[`modules/datasource/artifactory/index getReleases parses real data (fold
 }
 `;
 
-exports[`modules/datasource/artifactory/index getReleases parses real data (merge strategy with 2 registries) 1`] = `
+exports[`modules/datasource/artifactory/index > getReleases > parses real data (merge strategy with 2 registries) 1`] = `
 {
   "releases": [
     {

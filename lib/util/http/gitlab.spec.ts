@@ -114,7 +114,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Response code 403 (Forbidden)"`,
+        `[HTTPError: Response code 403 (Forbidden)]`,
       );
     });
 
@@ -123,7 +123,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Response code 404 (Not Found)"`,
+        `[HTTPError: Response code 404 (Not Found)]`,
       );
     });
 

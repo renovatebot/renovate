@@ -1,5 +1,5 @@
 name: Direct Issue creation is not allowed
-description: As a user of Renovate, please create a Discussion! Do not use this template to create an Issue! The Renovate maintainers will triage your Discussion, and convert it to an Issue when we are ready to start work.
+description: As a user of Renovate, please create a Discussion first - do not use this template to create an Issue!
 labels: ['priority-3-medium', 'needs-discussion']
 body:
   - type: markdown

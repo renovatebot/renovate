@@ -596,7 +596,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       const res = await lookup.lookupUpdates(config);
 
-      expect(() => res.unwrapOrThrow()).toThrow(Error(CONFIG_VALIDATION));
+      expect(() => res.unwrapOrThrow()).toThrow(CONFIG_VALIDATION);
     });
 
     it('returns patch update even if separate patches not configured', async () => {

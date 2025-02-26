@@ -7,7 +7,7 @@ import type { Timestamp } from '../../../util/timestamp';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 const githubApiHost = 'https://api.github.com';

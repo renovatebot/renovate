@@ -18,11 +18,11 @@ import {
   writeUpdatedPackageFiles,
 } from './';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./npm');
+vi.mock('./yarn');
+vi.mock('./pnpm');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -403,8 +403,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      // TODO: fix types, jest is using wrong overload (#22198)
-      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
         if (f === '.npmrc') {
           return Promise.resolve('# dummy');
         }
@@ -666,7 +665,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
 
       it('should fuzzy merge the yarnrc Files', async () => {
-        (yarn.fuzzyMatchAdditionalYarnrcYml as jest.Mock).mockReturnValue({
+        vi.mocked(yarn.fuzzyMatchAdditionalYarnrcYml).mockReturnValue({
           npmRegistries: {
             'https://my-private-registry': { npmAuthToken: 'xxxxxx' },
           },

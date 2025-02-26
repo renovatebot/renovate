@@ -9,7 +9,7 @@ import {
 } from './extract';
 import { updateDependency } from './update';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const parentPomContent = Fixtures.get('parent.pom.xml');
