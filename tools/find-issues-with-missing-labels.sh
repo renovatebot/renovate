@@ -64,20 +64,10 @@ if [[ "$HAS_ISSUES_MISSING_LABELS" == "false" && "$HAS_ISSUES_MISSING_ISSUE_TYPE
     ISSUE_BODY="$ISSUE_BODY All checked issues are correctly labeled and have issue type.\n"
 fi
 
-LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --repo $REPO --json "number,author,title" | jq --arg title "$ISSUE_TITLE" 'map(select(.title == $title and .author.type == "Bot"))') || { echo "Failed to fetch existing label check issue"; exit 1; }
-ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
+ISSUE_NUMBER=33236
 
-if [ -z "$ISSUE_NUMBER" ]; then
-    
-    # Create a new issue (with the list of issues in it).
-    gh issue create --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue."; exit 1; }
-else
-    # Edit the open issue, and update the list of issues.
-    gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue."; exit 1; }
-    
-    # Re-open the issue.
-    gh issue reopen "$ISSUE_NUMBER" --repo $REPO || { echo "Failed to reopen issue"; exit 1; }
-fi
+# Edit the open issue, and update the list of issues.
+gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue."; exit 1; }
 
 if [[ "$HAS_ISSUES_MISSING_LABELS" == "false" && "$HAS_ISSUES_MISSING_ISSUE_TYPE" == "false" ]]; then
     exit 0

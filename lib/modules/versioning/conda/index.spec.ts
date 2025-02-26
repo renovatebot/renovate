@@ -1,20 +1,4 @@
-import { fs as memfs } from 'memfs';
-
 import { api } from '.';
-
-// use real fs to read wasm files for `@trim21/rattler`
-jest.mock('fs', () => {
-  const realFs = jest.requireActual<typeof import('fs')>('fs');
-  return {
-    ...memfs,
-    readFileSync: (file: string, ...args: any[]) => {
-      if (file.endsWith('.wasm')) {
-        return realFs.readFileSync(file, ...args);
-      }
-      return memfs.readFileSync(file, ...args);
-    },
-  };
-});
 
 describe('modules/versioning/conda/index', () => {
   it.each`

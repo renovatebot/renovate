@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/repology/index getReleases returns correct version for api package 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns correct version for api package 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [
@@ -11,7 +11,7 @@ exports[`modules/datasource/repology/index getReleases returns correct version f
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for binary package 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns correct version for binary package 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [
@@ -22,7 +22,7 @@ exports[`modules/datasource/repology/index getReleases returns correct version f
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with different name 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns correct version for multi-package project with different name 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [
@@ -33,7 +33,7 @@ exports[`modules/datasource/repology/index getReleases returns correct version f
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for multi-package project with same name 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns correct version for multi-package project with same name 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [
@@ -44,7 +44,7 @@ exports[`modules/datasource/repology/index getReleases returns correct version f
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns correct version for source package 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns correct version for source package 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [
@@ -55,7 +55,7 @@ exports[`modules/datasource/repology/index getReleases returns correct version f
 }
 `;
 
-exports[`modules/datasource/repology/index getReleases returns multiple versions if they are present in repository 1`] = `
+exports[`modules/datasource/repology/index > getReleases > returns multiple versions if they are present in repository 1`] = `
 {
   "registryUrl": "https://repology.org",
   "releases": [

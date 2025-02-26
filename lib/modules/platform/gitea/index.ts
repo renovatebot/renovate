@@ -88,6 +88,17 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  botUserID = undefined as never;
+  botUserName = undefined as never;
+  defaults.hostType = 'gitea';
+  defaults.endpoint = 'https://gitea.com/';
+  defaults.version = '0.0.0';
+  defaults.isForgejo = false;
+  setBaseUrl(defaults.endpoint);
+}
+
 function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,

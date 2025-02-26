@@ -1,15 +1,15 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/github/index getBranchForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
+exports[`modules/platform/github/index > getBranchForceRebase > should throw 401 1`] = `[HTTPError: Response code 401 (Unauthorized)]`;
 
-exports[`modules/platform/github/index getRepos should return an array of repos 1`] = `
+exports[`modules/platform/github/index > getRepos > should return an array of repos 1`] = `
 [
   "a/b",
   "c/d",
 ]
 `;
 
-exports[`modules/platform/github/index initPlatform() should support custom endpoint 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support custom endpoint 1`] = `
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
@@ -18,7 +18,7 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 }
 `;
 
-exports[`modules/platform/github/index initPlatform() should support custom endpoint without version 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support custom endpoint without version 1`] = `
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
@@ -27,7 +27,7 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 }
 `;
 
-exports[`modules/platform/github/index initPlatform() should support default endpoint no email access 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support default endpoint no email access 1`] = `
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
@@ -36,7 +36,7 @@ exports[`modules/platform/github/index initPlatform() should support default end
 }
 `;
 
-exports[`modules/platform/github/index initPlatform() should support default endpoint no email result 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support default endpoint no email result 1`] = `
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
@@ -45,7 +45,7 @@ exports[`modules/platform/github/index initPlatform() should support default end
 }
 `;
 
-exports[`modules/platform/github/index initPlatform() should support default endpoint with email 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support default endpoint with email 1`] = `
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
@@ -54,7 +54,7 @@ exports[`modules/platform/github/index initPlatform() should support default end
 }
 `;
 
-exports[`modules/platform/github/index initPlatform() should support gitAuthor and username 1`] = `
+exports[`modules/platform/github/index > initPlatform() > should support gitAuthor and username 1`] = `
 {
   "endpoint": "https://api.github.com/",
   "gitAuthor": "renovate@whitesourcesoftware.com",
@@ -63,7 +63,7 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
 }
 `;
 
-exports[`modules/platform/github/index initRepo detects fork default branch mismatch 1`] = `
+exports[`modules/platform/github/index > initRepo > detects fork default branch mismatch 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -71,7 +71,7 @@ exports[`modules/platform/github/index initRepo detects fork default branch mism
 }
 `;
 
-exports[`modules/platform/github/index initRepo should fork when using forkToken 1`] = `
+exports[`modules/platform/github/index > initRepo > should fork when using forkToken 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -79,7 +79,7 @@ exports[`modules/platform/github/index initRepo should fork when using forkToken
 }
 `;
 
-exports[`modules/platform/github/index initRepo should merge 1`] = `
+exports[`modules/platform/github/index > initRepo > should merge 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -87,7 +87,7 @@ exports[`modules/platform/github/index initRepo should merge 1`] = `
 }
 `;
 
-exports[`modules/platform/github/index initRepo should not guess at merge 1`] = `
+exports[`modules/platform/github/index > initRepo > should not guess at merge 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -95,7 +95,7 @@ exports[`modules/platform/github/index initRepo should not guess at merge 1`] = 
 }
 `;
 
-exports[`modules/platform/github/index initRepo should rebase 1`] = `
+exports[`modules/platform/github/index > initRepo > should rebase 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -103,7 +103,7 @@ exports[`modules/platform/github/index initRepo should rebase 1`] = `
 }
 `;
 
-exports[`modules/platform/github/index initRepo should squash 1`] = `
+exports[`modules/platform/github/index > initRepo > should squash 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -111,7 +111,7 @@ exports[`modules/platform/github/index initRepo should squash 1`] = `
 }
 `;
 
-exports[`modules/platform/github/index initRepo should update fork when using forkToken and forkOrg 1`] = `
+exports[`modules/platform/github/index > initRepo > should update fork when using forkToken and forkOrg 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -119,4 +119,4 @@ exports[`modules/platform/github/index initRepo should update fork when using fo
 }
 `;
 
-exports[`modules/platform/github/index massageMarkdown(input) returns updated pr body 1`] = `"[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)"`;
+exports[`modules/platform/github/index > massageMarkdown(input) > returns updated pr body 1`] = `"[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)"`;

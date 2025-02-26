@@ -9,7 +9,7 @@ import { HexDatasource } from '.';
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;

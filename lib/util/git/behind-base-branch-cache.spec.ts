@@ -7,7 +7,7 @@ import {
 } from './behind-base-branch-cache';
 import type { LongCommitSha } from './types';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 describe('util/git/behind-base-branch-cache', () => {

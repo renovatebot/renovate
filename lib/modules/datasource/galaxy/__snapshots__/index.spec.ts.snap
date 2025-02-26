@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/galaxy/index getReleases processes real data 1`] = `
+exports[`modules/datasource/galaxy/index > getReleases > processes real data 1`] = `
 {
   "dependencyUrl": "https://galaxy.ansible.com/yatesr/timezone",
   "registryUrl": "https://galaxy.ansible.com/",

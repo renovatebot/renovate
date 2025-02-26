@@ -5,10 +5,12 @@ import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import type { RenovateLogger } from './renovate-logger';
+import { ProblemStream } from './utils';
 import {
   addMeta,
   addStream,
   clearProblems,
+  createDefaultStreams,
   getContext,
   getProblems,
   levels,
@@ -22,8 +24,8 @@ import {
 
 const initialContext = 'initial_context';
 
-jest.unmock('.');
-jest.mock('nanoid', () => ({
+vi.unmock('.');
+vi.mock('nanoid', () => ({
   nanoid: () => 'initial_context',
 }));
 
@@ -158,6 +160,18 @@ describe('logger/index', () => {
         { logContext: initialContext, ...logMeta },
         '',
       );
+    });
+  });
+
+  describe('createDefaultStreams', () => {
+    it('creates log file stream', () => {
+      expect(
+        createDefaultStreams('info', new ProblemStream(), 'file.log'),
+      ).toMatchObject([
+        { name: 'stdout', type: 'raw' },
+        { name: 'problems', type: 'raw' },
+        { name: 'logfile' },
+      ]);
     });
   });
 
