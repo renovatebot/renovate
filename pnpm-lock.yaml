@@ -491,6 +491,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: 3.0.6
         version: 3.0.6(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0))
+      '@vitest/coverage-v8':
+        specifier: 3.0.6
+        version: 3.0.6(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0))
       '@vitest/eslint-plugin':
         specifier: 1.1.31
         version: 1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1)(typescript@5.7.3))(eslint@9.20.1)(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0))
@@ -992,6 +995,10 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@bcoe/v8-coverage@1.0.2':
+    resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
+    engines: {node: '>=18'}
 
   '@breejs/later@4.2.0':
     resolution: {integrity: sha512-EVMD0SgJtOuFeg0lAVbCwa+qeTKILb87jqvLyUtQswGD9+ce2nB52Y5zbTF1Hc0MDFfbydcMcxb47jSdhikVHA==}
@@ -2435,6 +2442,15 @@ packages:
     resolution: {integrity: sha512-e+8HkmVlPpqOZXIWGE8opxex3trTMCeCMHax7yG0JbWOtGRVKBjuNS/GGA/eta89LuXUrCIcQrRfJHLUrWl7Wg==}
     peerDependencies:
       vitest: 3.0.6
+
+  '@vitest/coverage-v8@3.0.6':
+    resolution: {integrity: sha512-JRTlR8Bw+4BcmVTICa7tJsxqphAktakiLsAmibVLAWbu1lauFddY/tXeM6sAyl1cgkPuXtpnUgaCPhTdz1Qapg==}
+    peerDependencies:
+      '@vitest/browser': 3.0.6
+      vitest: 3.0.6
+    peerDependenciesMeta:
+      '@vitest/browser':
+        optional: true
 
   '@vitest/eslint-plugin@1.1.31':
     resolution: {integrity: sha512-xlsLr+e+AXZ/00eVZCtNmMeCJoJaRCoLDiAgLcxgQjSS1EertieB2MUHf8xIqPKs9lECc/UpL+y1xDcpvi02hw==}
@@ -7825,6 +7841,8 @@ snapshots:
   '@bcoe/v8-coverage@0.2.3':
     optional: true
 
+  '@bcoe/v8-coverage@1.0.2': {}
+
   '@breejs/later@4.2.0': {}
 
   '@cdktf/hcl2json@0.20.11':
@@ -9509,6 +9527,24 @@ snapshots:
       istanbul-lib-source-maps: 5.0.6
       istanbul-reports: 3.1.7
       magicast: 0.3.5
+      test-exclude: 7.0.1
+      tinyrainbow: 2.0.0
+      vitest: 3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@3.0.6(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 1.0.2
+      debug: 4.4.0
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.17
+      magicast: 0.3.5
+      std-env: 3.8.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
       vitest: 3.0.6(@types/debug@4.1.12)(@types/node@22.13.4)(yaml@2.7.0)

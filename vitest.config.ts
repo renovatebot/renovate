@@ -80,7 +80,8 @@ export default defineConfig(() =>
         reporters: ci ? ['default', new GitHubActionsReporter()] : ['default'],
         mockReset: true,
         coverage: {
-          provider: 'istanbul',
+          provider: 'v8',
+          ignoreEmptyLines: true,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
             : ['text-summary', 'html', 'json'],
