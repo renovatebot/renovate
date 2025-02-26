@@ -40,7 +40,12 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { UserSchema } from './schema';
+import {
+  Comment,
+  PullRequestActivity,
+  PullRequestCommentActivity,
+  UserSchema,
+} from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -48,9 +53,6 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
-  Comment,
-  PullRequestActivity,
-  PullRequestCommentActivity,
 } from './types';
 import * as utils from './utils';
 import { getExtraCloneOpts } from './utils';

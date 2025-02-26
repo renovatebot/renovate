@@ -71,18 +71,3 @@ export interface BitbucketErrorResponse {
 export interface BitbucketError extends HTTPError {
   readonly response: Response<BitbucketErrorResponse>;
 }
-
-export interface Comment {
-  text: string;
-  id: number;
-}
-
-export interface PullRequestCommentActivity {
-  action: 'COMMENTED';
-  commentAction: string;
-  comment: Comment;
-}
-
-export type PullRequestActivity =
-  | { action: string }
-  | PullRequestCommentActivity;
