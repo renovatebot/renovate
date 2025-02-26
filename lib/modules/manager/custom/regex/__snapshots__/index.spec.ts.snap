@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/custom/regex/index extracts and applies a registryUrlTemplate 1`] = `
+exports[`modules/manager/custom/regex/index > extracts and applies a registryUrlTemplate 1`] = `
 {
   "deps": [
     {
@@ -22,7 +22,7 @@ exports[`modules/manager/custom/regex/index extracts and applies a registryUrlTe
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts and does not apply a registryUrlTemplate if the result is an invalid url 1`] = `
+exports[`modules/manager/custom/regex/index > extracts and does not apply a registryUrlTemplate if the result is an invalid url 1`] = `
 {
   "deps": [
     {
@@ -41,7 +41,7 @@ exports[`modules/manager/custom/regex/index extracts and does not apply a regist
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts dependency with autoReplaceStringTemplate 1`] = `
+exports[`modules/manager/custom/regex/index > extracts dependency with autoReplaceStringTemplate 1`] = `
 {
   "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
   "datasourceTemplate": "docker",
@@ -60,7 +60,7 @@ exports[`modules/manager/custom/regex/index extracts dependency with autoReplace
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts extractVersion 1`] = `
+exports[`modules/manager/custom/regex/index > extracts extractVersion 1`] = `
 {
   "deps": [
     {
@@ -79,7 +79,7 @@ exports[`modules/manager/custom/regex/index extracts extractVersion 1`] = `
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts multiple dependencies 1`] = `
+exports[`modules/manager/custom/regex/index > extracts multiple dependencies 1`] = `
 {
   "depTypeTemplate": "final",
   "deps": [
@@ -163,7 +163,7 @@ exports[`modules/manager/custom/regex/index extracts multiple dependencies 1`] =
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts multiple dependencies with multiple matchStrings 1`] = `
+exports[`modules/manager/custom/regex/index > extracts multiple dependencies with multiple matchStrings 1`] = `
 {
   "deps": [
     {
@@ -191,7 +191,7 @@ exports[`modules/manager/custom/regex/index extracts multiple dependencies with 
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts registryUrl 1`] = `
+exports[`modules/manager/custom/regex/index > extracts registryUrl 1`] = `
 {
   "datasourceTemplate": "helm",
   "deps": [
@@ -219,7 +219,7 @@ exports[`modules/manager/custom/regex/index extracts registryUrl 1`] = `
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with combination strategy 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with combination strategy 1`] = `
 {
   "datasourceTemplate": "docker",
   "deps": [
@@ -238,7 +238,7 @@ exports[`modules/manager/custom/regex/index extracts with combination strategy 1
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with combination strategy and multiple matches 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with combination strategy and multiple matches 1`] = `
 {
   "datasourceTemplate": "docker",
   "deps": [
@@ -257,7 +257,7 @@ exports[`modules/manager/custom/regex/index extracts with combination strategy a
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with combination strategy and non standard capture groups 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with combination strategy and non standard capture groups 1`] = `
 {
   "datasourceTemplate": "docker",
   "depNameTemplate": "{{{ registry }}}/{{{ repository }}}",
@@ -279,7 +279,7 @@ exports[`modules/manager/custom/regex/index extracts with combination strategy a
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with combination strategy and registry url 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with combination strategy and registry url 1`] = `
 {
   "datasourceTemplate": "helm",
   "deps": [
@@ -304,7 +304,7 @@ exports[`modules/manager/custom/regex/index extracts with combination strategy a
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with combination strategy and templates 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with combination strategy and templates 1`] = `
 {
   "datasourceTemplate": "helm",
   "depNameTemplate": "helm_repo/{{{ depName }}}",
@@ -329,7 +329,7 @@ exports[`modules/manager/custom/regex/index extracts with combination strategy a
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with recursive strategy and merged groups 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with recursive strategy and merged groups 1`] = `
 {
   "depNameTemplate": "{{{ first }}}/{{{ second }}}/{{{ depName }}}",
   "deps": [
@@ -375,7 +375,7 @@ exports[`modules/manager/custom/regex/index extracts with recursive strategy and
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with recursive strategy and multiple layers  1`] = `
+exports[`modules/manager/custom/regex/index > extracts with recursive strategy and multiple layers 1`] = `
 {
   "deps": [
     {
@@ -396,7 +396,7 @@ exports[`modules/manager/custom/regex/index extracts with recursive strategy and
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with recursive strategy and multiple matches 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with recursive strategy and multiple matches 1`] = `
 {
   "deps": [
     {
@@ -424,7 +424,7 @@ exports[`modules/manager/custom/regex/index extracts with recursive strategy and
 }
 `;
 
-exports[`modules/manager/custom/regex/index extracts with recursive strategy and single match 1`] = `
+exports[`modules/manager/custom/regex/index > extracts with recursive strategy and single match 1`] = `
 {
   "deps": [
     {

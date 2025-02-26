@@ -8,8 +8,8 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
-jest.mock('../../../util/exec');
-jest.mock('fs-extra');
+vi.mock('../../../util/exec');
+vi.mock('fs-extra');
 
 const exec = mocked(_exec);
 const fs = mocked(_fs);

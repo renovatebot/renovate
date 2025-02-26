@@ -15,20 +15,18 @@ import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 
-jest.mock('./conflicts-cache');
-jest.mock('./behind-base-branch-cache');
-jest.mock('./modified-cache');
-jest.mock('timers/promises');
-jest.mock('../cache/repository');
+vi.mock('./conflicts-cache');
+vi.mock('./behind-base-branch-cache');
+vi.mock('./modified-cache');
+vi.mock('timers/promises');
+vi.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
-describe('util/git/index', () => {
-  jest.setTimeout(60000);
-
+describe('util/git/index', { timeout: 10000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;

@@ -4,7 +4,7 @@ import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
 
 const googleAuth = mocked(_googleAuth);
-jest.mock('google-auth-library');
+vi.mock('google-auth-library');
 
 describe('modules/datasource/utils', () => {
   it('is artifactory server invalid', () => {

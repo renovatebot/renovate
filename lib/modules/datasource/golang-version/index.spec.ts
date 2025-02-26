@@ -119,7 +119,7 @@ describe('modules/datasource/golang-version/index', () => {
       ).toBeNull();
     });
 
-    it('throws ExternalHostError for invalid release format beginning ', async () => {
+    it('throws ExternalHostError for invalid release format beginning', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/HEAD/internal/history/release.go')

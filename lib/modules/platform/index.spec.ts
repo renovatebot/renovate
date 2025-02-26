@@ -6,16 +6,15 @@ import api from './api';
 import type { Platform } from './types';
 import * as platform from '.';
 
-jest.unmock('.');
-jest.unmock('./scm');
+vi.unmock('.');
+vi.unmock('./scm');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
-    jest.resetModules();
     process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
   });
 
-  it('validates', () => {
+  it('validates', async () => {
     function validate(module: Platform | undefined, name: string): boolean {
       // TODO: test required api (#9650)
       if (!module?.initPlatform) {
@@ -25,7 +24,7 @@ describe('modules/platform/index', () => {
     }
     const platforms = api;
 
-    const loadedMgr = loadModules(
+    const loadedMgr = await loadModules(
       __dirname,
       undefined,
       (m) => !['utils', 'git'].includes(m),

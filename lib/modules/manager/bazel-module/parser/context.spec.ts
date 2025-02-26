@@ -52,7 +52,7 @@ describe('modules/manager/bazel-module/parser/context', () => {
       const ctx = new Ctx('').startAttribute('name');
       expect(() => ctx.addString('chicken')).toThrow(
         new CtxProcessingError(
-          fragments.attribute('name', fragments.string('chicken')),
+          fragments.attribute('name', fragments.string('chicken'), true),
         ),
       );
     });

@@ -239,7 +239,7 @@ describe('modules/versioning/composer/index', () => {
     ${['1.2.3-p1', '1.2.3-p2', '1.2.3']}                                          | ${['1.2.3', '1.2.3-p1', '1.2.3-p2']}
     ${['1.2.3-p1', '1.2.2']}                                                      | ${['1.2.2', '1.2.3-p1']}
     ${['1.0-p1', '1']}                                                            | ${['1', '1.0-p1']}
-  `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
+  `('$versions -> sortVersions -> $expected', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });
 

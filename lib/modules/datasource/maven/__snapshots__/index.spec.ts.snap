@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/maven/index falls back to next registry url 1`] = `
+exports[`modules/datasource/maven/index > falls back to next registry url 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -37,7 +37,7 @@ exports[`modules/datasource/maven/index falls back to next registry url 1`] = `
 }
 `;
 
-exports[`modules/datasource/maven/index ignores unsupported protocols 1`] = `
+exports[`modules/datasource/maven/index > ignores unsupported protocols 1`] = `
 [
   {
     "version": "0.0.1",
@@ -66,7 +66,7 @@ exports[`modules/datasource/maven/index ignores unsupported protocols 1`] = `
 ]
 `;
 
-exports[`modules/datasource/maven/index removes authentication header after redirect 1`] = `
+exports[`modules/datasource/maven/index > removes authentication header after redirect 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -104,7 +104,7 @@ exports[`modules/datasource/maven/index removes authentication header after redi
 }
 `;
 
-exports[`modules/datasource/maven/index returns releases 1`] = `
+exports[`modules/datasource/maven/index > returns releases 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -141,7 +141,7 @@ exports[`modules/datasource/maven/index returns releases 1`] = `
 }
 `;
 
-exports[`modules/datasource/maven/index returns releases from custom repository 1`] = `
+exports[`modules/datasource/maven/index > returns releases from custom repository 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -179,7 +179,7 @@ exports[`modules/datasource/maven/index returns releases from custom repository 
 }
 `;
 
-exports[`modules/datasource/maven/index skips registry with invalid XML 1`] = `
+exports[`modules/datasource/maven/index > skips registry with invalid XML 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -216,7 +216,7 @@ exports[`modules/datasource/maven/index skips registry with invalid XML 1`] = `
 }
 `;
 
-exports[`modules/datasource/maven/index skips registry with invalid metadata structure 1`] = `
+exports[`modules/datasource/maven/index > skips registry with invalid metadata structure 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",

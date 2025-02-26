@@ -16,7 +16,7 @@ import { MAVEN_REPO } from './common';
 import { MavenDatasource } from '.';
 
 const googleAuth = mocked(_googleAuth);
-jest.mock('google-auth-library');
+vi.mock('google-auth-library');
 
 const datasource = MavenDatasource.id;
 

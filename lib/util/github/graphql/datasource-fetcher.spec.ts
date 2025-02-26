@@ -16,7 +16,7 @@ import type {
   GithubGraphqlRepoResponse,
 } from './types';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 interface TestAdapterInput {
