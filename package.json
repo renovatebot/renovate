@@ -346,7 +346,6 @@
     "vite": "6.1.1",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.0.6",
-    "vitest-github-actions-reporter": "0.11.1",
     "vitest-mock-extended": "3.0.1"
   },
   "packageManager": "pnpm@10.4.1",
