@@ -5,7 +5,7 @@ import { GlobalConfig } from '../../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const localDir = '/tmp/github/some/repo';
 

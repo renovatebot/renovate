@@ -9,10 +9,10 @@ import { renovateRepository } from '.';
 
 const process = mocked(_process);
 
-jest.mock('./init');
-jest.mock('./process');
-jest.mock('./result');
-jest.mock('./error');
+vi.mock('./init');
+vi.mock('./process');
+vi.mock('./result');
+vi.mock('./error');
 
 describe('workers/repository/index', () => {
   describe('renovateRepository()', () => {

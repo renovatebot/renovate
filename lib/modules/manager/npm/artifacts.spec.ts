@@ -12,8 +12,8 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

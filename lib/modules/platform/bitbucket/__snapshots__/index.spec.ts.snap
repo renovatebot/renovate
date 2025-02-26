@@ -1,19 +1,19 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/bitbucket/index addAssignees() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket/index > addAssignees() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket/index ensureComment() does not throw 1`] = `false`;
+exports[`modules/platform/bitbucket/index > ensureComment() > does not throw 1`] = `false`;
 
-exports[`modules/platform/bitbucket/index ensureCommentRemoval() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket/index > ensureCommentRemoval() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket/index findIssue() does not throw 1`] = `
+exports[`modules/platform/bitbucket/index > findIssue() > does not throw 1`] = `
 {
   "body": "content",
   "number": 25,
 }
 `;
 
-exports[`modules/platform/bitbucket/index findPr() finds pr 1`] = `
+exports[`modules/platform/bitbucket/index > findPr() > finds pr 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -27,7 +27,7 @@ exports[`modules/platform/bitbucket/index findPr() finds pr 1`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for branch 1`] = `
+exports[`modules/platform/bitbucket/index > getBranchPr() > bitbucket finds PR for branch 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -41,7 +41,7 @@ exports[`modules/platform/bitbucket/index getBranchPr() bitbucket finds PR for b
 }
 `;
 
-exports[`modules/platform/bitbucket/index getIssueList() get issues 1`] = `
+exports[`modules/platform/bitbucket/index > getIssueList() > get issues 1`] = `
 [
   {
     "content": {
@@ -60,7 +60,7 @@ exports[`modules/platform/bitbucket/index getIssueList() get issues 1`] = `
 ]
 `;
 
-exports[`modules/platform/bitbucket/index getPr() canRebase 1`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -74,7 +74,7 @@ exports[`modules/platform/bitbucket/index getPr() canRebase 1`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index getPr() canRebase 2`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase 2`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -88,7 +88,7 @@ exports[`modules/platform/bitbucket/index getPr() canRebase 2`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index getPr() canRebase 3`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase 3`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -102,7 +102,7 @@ exports[`modules/platform/bitbucket/index getPr() canRebase 3`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index getPr() exists 1`] = `
+exports[`modules/platform/bitbucket/index > getPr() > exists 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -116,7 +116,7 @@ exports[`modules/platform/bitbucket/index getPr() exists 1`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 1`] = `
+exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by author 1`] = `
 [
   {
     "bodyStruct": {
@@ -132,7 +132,7 @@ exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 
 ]
 `;
 
-exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `
+exports[`modules/platform/bitbucket/index > massageMarkdown() > returns diff files 1`] = `
 "**foo**
 
 
@@ -144,6 +144,6 @@ exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1
 "
 `;
 
-exports[`modules/platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
+exports[`modules/platform/bitbucket/index > updatePr() > rethrows exception when PR update error due to unknown reviewers error 1`] = `[HTTPError: Response code 400 (Bad Request)]`;
 
-exports[`modules/platform/bitbucket/index updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
+exports[`modules/platform/bitbucket/index > updatePr() > throws an error on failure to get current list of reviewers 1`] = `[HTTPError: Response code 500 (Internal Server Error)]`;

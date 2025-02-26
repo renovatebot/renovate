@@ -10,9 +10,9 @@ import { TerraformProviderHash } from './hash';
 import { getNewConstraint } from './index';
 
 // auto-mock fs
-jest.mock('../../../../util/fs');
-jest.mock('./hash');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs');
+vi.mock('./hash');
+vi.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},

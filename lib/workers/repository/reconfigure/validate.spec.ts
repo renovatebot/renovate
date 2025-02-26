@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../../../../test/util';
 import { fs, git, mocked, partial, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -9,10 +9,10 @@ import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
 import { validateReconfigureBranch } from './validate';
 
-jest.mock('../../../util/cache/repository');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../init/merge');
+vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../init/merge');
 
 const cache = mocked(_cache);
 const merge = mocked(_merge);

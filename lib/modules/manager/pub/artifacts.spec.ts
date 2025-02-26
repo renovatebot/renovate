@@ -10,11 +10,11 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/http');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/http');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

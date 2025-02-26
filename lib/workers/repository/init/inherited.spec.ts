@@ -10,7 +10,7 @@ import {
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
 
-jest.mock('../../../config/presets');
+vi.mock('../../../config/presets');
 
 const presets = mocked(presets_);
 
