@@ -121,7 +121,7 @@ export default defineConfig(() =>
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
       test: {
-        exclude: ['tools/docs/test/**/*.spec.ts'],
+        exclude: [...defaultExclude, 'tools/docs/test/**/*.spec.ts'],
       },
     }),
   ),
