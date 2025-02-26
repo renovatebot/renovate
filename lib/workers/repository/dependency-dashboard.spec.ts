@@ -1,8 +1,8 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import type { RenovateConfig } from '../../../test/util';
 import { logger, mockedFunction, platform } from '../../../test/util';

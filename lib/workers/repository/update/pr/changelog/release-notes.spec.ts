@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
 import { mocked, partial } from '../../../../../../test/util';

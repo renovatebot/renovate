@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, git, hostRules, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
