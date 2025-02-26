@@ -31,7 +31,7 @@ function mockFs(files: Record<string, string>): void {
 
 describe('modules/manager/gradle/extract', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns null', async () => {
@@ -57,7 +57,7 @@ describe('modules/manager/gradle/extract', () => {
     };
     mockFs(fsMock);
 
-    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
+    vi.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
       throw err;
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);

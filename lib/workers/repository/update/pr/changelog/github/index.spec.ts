@@ -313,7 +313,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      const githubTagsMock = vi.spyOn(githubGraphql, 'queryTags');
       githubTagsMock.mockResolvedValue(
         partial<GithubTagItem>([
           { version: 'v1.0.1' },

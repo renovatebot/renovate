@@ -14,7 +14,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
   beforeEach(async () => {
     // reset module
-    jest.resetModules();
+    vi.resetModules();
     azureHelper = await import('./azure-helper');
     azureApi = await vi.importMock('./azure-got-wrapper');
   });
@@ -24,7 +24,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getRefs: jest.fn(() => [{ objectId: 132 }]),
+            getRefs: vi.fn(() => [{ objectId: 132 }]),
           }) as any,
       );
       const res = await azureHelper.getRefs('123', 'branch');
@@ -35,7 +35,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getRefs: jest.fn(() => []),
+            getRefs: vi.fn(() => []),
           }) as any,
       );
       const res = await azureHelper.getRefs('123');
@@ -46,7 +46,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getRefs: jest.fn(() => [{ objectId: '132' }]),
+            getRefs: vi.fn(() => [{ objectId: '132' }]),
           }) as any,
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
@@ -59,7 +59,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getRefs: jest.fn(() => [{ objectId: '132' }]),
+            getRefs: vi.fn(() => [{ objectId: '132' }]),
           }) as any,
       );
       const res = await azureHelper.getAzureBranchObj(
@@ -74,7 +74,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getRefs: jest.fn(() => []),
+            getRefs: vi.fn(() => []),
           }) as any,
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
@@ -100,7 +100,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemText: jest.fn(() => mockEventStream),
+            getItemText: vi.fn(() => mockEventStream),
           }) as any,
       );
 
@@ -129,7 +129,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemText: jest.fn(() => mockEventStream),
+            getItemText: vi.fn(() => mockEventStream),
           }) as any,
       );
 
@@ -158,7 +158,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemText: jest.fn(() => mockEventStream),
+            getItemText: vi.fn(() => mockEventStream),
           }) as any,
       );
 
@@ -174,7 +174,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getItemText: jest.fn(() => ({
+            getItemText: vi.fn(() => ({
               readable: false,
             })),
           }) as any,
@@ -194,7 +194,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getCommit: jest.fn(() => ({
+            getCommit: vi.fn(() => ({
               parents: ['123456'],
             })),
           }) as any,
@@ -209,7 +209,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => []),
+            getPolicyConfigurations: vi.fn(() => []),
           }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
@@ -221,7 +221,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
+            getPolicyConfigurations: vi.fn(() => [
               {
                 settings: {
                   allowSquash: true,
@@ -248,7 +248,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
       azureApi.policyApi.mockResolvedValueOnce(
         partial<IPolicyApi>({
-          getPolicyConfigurations: jest.fn(() =>
+          getPolicyConfigurations: vi.fn(() =>
             Promise.resolve([
               partial<PolicyConfiguration>({
                 settings: {
@@ -276,7 +276,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
+            getPolicyConfigurations: vi.fn(() => [
               {
                 settings: {
                   allowSquash: true,
@@ -317,7 +317,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
+            getPolicyConfigurations: vi.fn(() => [
               {
                 settings: {
                   allowSquash: true,
@@ -386,7 +386,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
           ({
-            getPolicyConfigurations: jest.fn(() => [
+            getPolicyConfigurations: vi.fn(() => [
               {
                 settings: {
                   allowSquash: true,
@@ -449,7 +449,7 @@ describe('modules/platform/azure/azure-helper', () => {
       azureApi.coreApi.mockImplementationOnce(
         () =>
           ({
-            getTeams: jest
+            getTeams: vi
               .fn()
               .mockResolvedValueOnce(team1)
               .mockResolvedValueOnce(team2),

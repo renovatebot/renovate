@@ -235,8 +235,8 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       hostRules.find.mockReturnValue({});
@@ -281,8 +281,8 @@ describe('modules/manager/poetry/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const updatedDeps = [{ depName: 'dep1' }];

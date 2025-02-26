@@ -113,7 +113,7 @@ const gitlabProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
-  const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
+  const githubReleasesMock = vi.spyOn(githubGraphql, 'queryReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});

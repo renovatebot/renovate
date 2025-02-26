@@ -1,4 +1,3 @@
-// istanbul ignore file
 import { RequestError as HttpError } from 'got';
 import { parseUrl } from '../url';
 

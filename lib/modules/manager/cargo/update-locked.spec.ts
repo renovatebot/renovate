@@ -62,9 +62,10 @@ describe('modules/manager/cargo/update-locked', () => {
       newVersion: '1.0.3',
       currentVersion: '1.0.0',
     };
-    jest
-      .spyOn(lockedVersion, 'extractLockFileContentVersions')
-      .mockReturnValueOnce(new Error() as never);
+    vi.spyOn(
+      lockedVersion,
+      'extractLockFileContentVersions',
+    ).mockReturnValueOnce(new Error() as never);
     expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });

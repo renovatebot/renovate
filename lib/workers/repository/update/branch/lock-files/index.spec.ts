@@ -79,16 +79,16 @@ describe('workers/repository/update/branch/lock-files/index', () => {
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');
-      jest.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(lockFiles, 'determineLockFileDirs');
+      vi.spyOn(lockFiles, 'determineLockFileDirs');
     });
 
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {

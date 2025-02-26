@@ -445,8 +445,8 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      vi.fn().mockImplementation(() => ({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
       })),
     );
 
@@ -490,8 +490,8 @@ describe('modules/datasource/maven/index', () => {
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
-      jest.fn().mockImplementation(() => ({
-        getAccessToken: jest.fn().mockResolvedValue(undefined),
+      vi.fn().mockImplementation(() => ({
+        getAccessToken: vi.fn().mockResolvedValue(undefined),
       })),
     );
 

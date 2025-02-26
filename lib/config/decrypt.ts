@@ -38,13 +38,14 @@ export async function tryDecrypt(
       );
     } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
-      // istanbul ignore if
+      /* v8 ignore start: not testable */
       if (is.string(decryptedStr)) {
         logger.warn(
           { keyName },
           'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
         );
       }
+      /* v8 ignore stop */
     }
   }
   return decryptedStr;
@@ -56,7 +57,6 @@ function validateDecryptedValue(
 ): string | null {
   try {
     const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
-    // istanbul ignore if
     if (!decryptedObj.success) {
       const error = new Error('config-validation');
       error.validationError = `Could not parse decrypted config.`;

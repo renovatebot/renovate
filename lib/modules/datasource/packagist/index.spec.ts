@@ -25,8 +25,8 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
 
     beforeEach(() => {
-      hostRules.find = jest.fn((input: HostRule) => input);
-      hostRules.hosts = jest.fn(() => []);
+      hostRules.find = vi.fn((input: HostRule) => input);
+      hostRules.hosts = vi.fn(() => []);
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
