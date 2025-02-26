@@ -8,12 +8,10 @@ import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
-jest.mock('fs-extra', () =>
-  jest
-    .requireActual<
-      typeof import('../../../test/fixtures')
-    >('../../../test/fixtures')
-    .fsExtra(),
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+  ).fsExtra(),
 );
 
 const supportedSchemes = getOptions().find(
