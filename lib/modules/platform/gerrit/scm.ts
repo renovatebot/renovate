@@ -53,7 +53,7 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions[change.current_revision];
-      return currentGerritPatchset.actions?.['rebase'].enabled === true;
+      return currentGerritPatchset.actions?.rebase.enabled === true;
     }
     return true;
   }

@@ -5,7 +5,7 @@ import * as terraformLockfile from '../terraform/lockfile';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
-jest.mock('../terraform/lockfile');
+vi.mock('../terraform/lockfile');
 
 const config = {
   constraints: {},
@@ -38,7 +38,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
 
   it('calls terraform updateArtifacts if the update type is lockfileMaintenance', async () => {
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 

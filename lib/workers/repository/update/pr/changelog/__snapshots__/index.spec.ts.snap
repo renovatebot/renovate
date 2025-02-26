@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON filters unnecessary warns 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > filters unnecessary warns 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -59,7 +59,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON filters u
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github enterprise and github enterprise changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -118,7 +118,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github enterprise and github.com changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -177,7 +177,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports github.com and github enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports github.com and github enterprise changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -236,7 +236,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports node engines 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > supports node engines 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -295,7 +295,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON supports 
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON uses GitHub tags 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > uses GitHub tags 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
@@ -359,7 +359,7 @@ exports[`workers/repository/update/pr/changelog/index getChangeLogJSON uses GitH
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/index getChangeLogJSON works without Github 1`] = `
+exports[`workers/repository/update/pr/changelog/index > getChangeLogJSON > works without Github 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {

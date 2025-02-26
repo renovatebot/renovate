@@ -76,7 +76,7 @@ export async function getConfiguredRegistries(
     const sourceMappedPackagePatterns = packageSourceMapping
       ?.childWithAttribute('key', registry.name)
       ?.childrenNamed('package')
-      .map((packagePattern) => packagePattern.attr['pattern']);
+      .map((packagePattern) => packagePattern.attr.pattern);
 
     registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
   }
@@ -96,7 +96,7 @@ export async function getConfiguredRegistries(
           const sourceMappedPackagePatterns = packageSourceMapping
             ?.childWithAttribute('key', child.attr.key)
             ?.childrenNamed('package')
-            .map((packagePattern) => packagePattern.attr['pattern']);
+            .map((packagePattern) => packagePattern.attr.pattern);
 
           logger.debug(
             {

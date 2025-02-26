@@ -63,6 +63,7 @@ import {
 } from './utils';
 
 interface GiteaRepoConfig {
+  ignorePrAuthor: boolean;
   repository: string;
   mergeMethod: PRMergeMethod;
 
@@ -86,6 +87,17 @@ const defaults = {
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
+
+export function resetPlatform(): void {
+  config = {} as any;
+  botUserID = undefined as never;
+  botUserName = undefined as never;
+  defaults.hostType = 'gitea';
+  defaults.endpoint = 'https://gitea.com/';
+  defaults.version = '0.0.0';
+  defaults.isForgejo = false;
+  setBaseUrl(defaults.endpoint);
+}
 
 function toRenovateIssue(data: Issue): Issue {
   return {
@@ -263,6 +275,7 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
+    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -270,6 +283,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
+    config.ignorePrAuthor = !!ignorePrAuthor;
 
     // Try to fetch information about repository
     try {
@@ -475,7 +489,12 @@ const platform: Platform = {
   },
 
   getPrList(): Promise<Pr[]> {
-    return GiteaPrCache.getPrs(giteaHttp, config.repository, botUserName);
+    return GiteaPrCache.getPrs(
+      giteaHttp,
+      config.repository,
+      config.ignorePrAuthor,
+      botUserName,
+    );
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -491,7 +510,13 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (pr) {
-        await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+        await GiteaPrCache.setPr(
+          giteaHttp,
+          config.repository,
+          config.ignorePrAuthor,
+          botUserName,
+          pr,
+        );
       }
     }
 
@@ -593,7 +618,13 @@ const platform: Platform = {
         throw new Error('Can not parse newly created Pull Request');
       }
 
-      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(
+        giteaHttp,
+        config.repository,
+        config.ignorePrAuthor,
+        botUserName,
+        pr,
+      );
       return pr;
     } catch (err) {
       // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -687,7 +718,13 @@ const platform: Platform = {
     );
     const pr = toRenovatePR(gpr, botUserName);
     if (pr) {
-      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(
+        giteaHttp,
+        config.repository,
+        config.ignorePrAuthor,
+        botUserName,
+        pr,
+      );
     }
   },
 

@@ -15,7 +15,7 @@ import type {
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://gerrit.example.com';
 const hostRules = mocked(_hostRules);

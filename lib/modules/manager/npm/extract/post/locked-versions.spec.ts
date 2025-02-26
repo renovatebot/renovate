@@ -10,12 +10,12 @@ const npm = mocked(_npm);
 const pnpm = mocked(_pnpm);
 const yarn = mocked(_yarn);
 
-jest.mock('../npm');
-jest.mock('../yarn', () => ({
-  ...jest.requireActual<typeof import('../yarn')>('../yarn'),
-  getYarnLock: jest.fn(),
+vi.mock('../npm');
+vi.mock('../yarn', async () => ({
+  ...(await vi.importActual<typeof import('../yarn')>('../yarn')),
+  getYarnLock: vi.fn(),
 }));
-jest.mock('../pnpm');
+vi.mock('../pnpm');
 
 describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {

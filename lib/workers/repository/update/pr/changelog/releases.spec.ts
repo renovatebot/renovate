@@ -8,7 +8,7 @@ import * as releases from './releases';
 describe('workers/repository/update/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
-      jest.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({
+      vi.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({
         releases: [
           {
             version: '1.0.0',

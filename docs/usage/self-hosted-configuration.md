@@ -503,7 +503,7 @@ The format of the environment variables must follow:
 
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
-- `matchHost`
+- `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
 - Underscore (`_`)
 - Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
@@ -606,8 +606,6 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerMaxPages
-
-By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
 
 If set to an positive integer, Renovate will use this value as the maximum page number.
 Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
@@ -1150,6 +1148,28 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 ## privateKeyPathOld
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
+
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Only supported in file configuration (not via CLI or environment).
 
 ## productLinks
 
