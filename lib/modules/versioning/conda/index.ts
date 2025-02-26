@@ -20,9 +20,8 @@ export const urls = [
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
-  // 'bump',
+  // TODO we should support more strategy but currently only pin
   'pin',
-  // 'replace',
 ];
 
 function isValidVersion(s: string): boolean {
