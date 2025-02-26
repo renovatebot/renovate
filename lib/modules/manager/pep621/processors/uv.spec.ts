@@ -19,9 +19,9 @@ import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
 
-jest.mock('google-auth-library');
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('google-auth-library');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
 const googleAuth = mocked(_googleAuth);
 const getPkgReleases = mockedFunction(_getPkgReleases);

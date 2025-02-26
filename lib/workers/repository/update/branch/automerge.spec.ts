@@ -5,7 +5,7 @@ import type { Pr } from '../../../../modules/platform/types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {

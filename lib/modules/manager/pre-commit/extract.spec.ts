@@ -5,7 +5,7 @@ import * as _hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 const filename = '.pre-commit.yaml';
 
