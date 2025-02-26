@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';

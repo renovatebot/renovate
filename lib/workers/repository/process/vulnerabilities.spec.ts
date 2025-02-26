@@ -1,6 +1,6 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
-import { mockFn } from 'jest-mock-extended';
+import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../../../../test/util';
 import { logger } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';

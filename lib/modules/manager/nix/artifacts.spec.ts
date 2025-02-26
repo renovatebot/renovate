@@ -1,6 +1,6 @@
-import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   envMock,
   mockExecAll,
