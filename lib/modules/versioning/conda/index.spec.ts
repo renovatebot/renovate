@@ -192,6 +192,11 @@ describe('modules/versioning/conda/index', () => {
     ${'invalid'}          | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${null}
     ${'==1.0.3'}          | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
     ${'!=1.2.3'}          | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${null}
+    ${'!=1.2.3'}          | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${null}
+    ${'==1.2.3'}          | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${'==1.2.4'}
+    ${'>=1.2.3'}          | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${'>=1.2.4'}
+    ${'>1.2.3'}           | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${'>1.2.4'}
+    ${'<2.0.0'}           | ${'replace'}  | ${'1.2.3'}     | ${'1.2.4'} | ${null}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

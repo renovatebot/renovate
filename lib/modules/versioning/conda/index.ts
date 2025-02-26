@@ -22,6 +22,7 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   // TODO we should support more strategy but currently only pin
   'pin',
+  'replace',
 ];
 
 function isValidVersion(s: string): boolean {
@@ -85,10 +86,26 @@ function getNewValue({
     return null;
   }
 
-  // istanbul ignore next
-  throw new Error(
-    'conda versioning for non-pin strategy is not implemented yet.',
-  );
+  if (rangeStrategy === 'replace') {
+    if (currentValue.includes('|')) {
+      //  conda or, can't replace
+      return null;
+    }
+
+    if (currentVersion) {
+      if (
+        ['==', '>'].some((item) => currentValue.startsWith(item)) &&
+        currentValue.includes(currentVersion)
+      ) {
+        return currentValue.replace(currentVersion, newVersion);
+      }
+    }
+
+    return null;
+  }
+
+  // TODO: not implement yet.
+  return null;
 }
 
 function sortVersions(version: string, other: string): number {
