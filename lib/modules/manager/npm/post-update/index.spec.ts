@@ -374,10 +374,10 @@ describe('modules/manager/npm/post-update/index', () => {
   });
 
   describe('getAdditionalFiles()', () => {
-    const spyNpm = jest.spyOn(npm, 'generateLockFile');
-    const spyYarn = jest.spyOn(yarn, 'generateLockFile');
-    const spyPnpm = jest.spyOn(pnpm, 'generateLockFile');
-    const spyProcessHostRules = jest.spyOn(rules, 'processHostRules');
+    const spyNpm = vi.spyOn(npm, 'generateLockFile');
+    const spyYarn = vi.spyOn(yarn, 'generateLockFile');
+    const spyPnpm = vi.spyOn(pnpm, 'generateLockFile');
+    const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
 
     beforeEach(() => {
       spyNpm.mockResolvedValue({});

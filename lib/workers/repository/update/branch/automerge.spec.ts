@@ -9,7 +9,7 @@ vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
-    const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
+    const isScheduledSpy = vi.spyOn(schedule, 'isScheduledNow');
     let config: RenovateConfig;
 
     beforeEach(() => {

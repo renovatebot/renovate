@@ -1,7 +1,7 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
-import { fs, git, hostRules, mocked, partial } from '../../../../test/util';
+import { fs, git, hostRules, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -10,7 +10,7 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { updateArtifacts } from '.';
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/git');
 vi.mock('../../../util/fs');

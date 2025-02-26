@@ -52,7 +52,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
       } satisfies BranchConfig;
-      npm.updateDependency = jest.fn();
+      npm.updateDependency = vi.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 

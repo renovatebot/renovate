@@ -39,7 +39,7 @@ const adminConfig: RepoGlobalConfig = {
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
