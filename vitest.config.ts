@@ -106,6 +106,7 @@ export default defineConfig(() =>
             '__mocks__/**',
             // fully ignored files
             'lib/config-validator.ts',
+            'lib/constants/category.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
             'lib/util/cache/package/redis.ts',
