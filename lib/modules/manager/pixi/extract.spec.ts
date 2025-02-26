@@ -1,7 +1,9 @@
+import { vi } from 'vitest';
+
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pyprojectToml = `
 [project]

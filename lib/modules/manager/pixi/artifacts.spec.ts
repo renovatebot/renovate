@@ -1,7 +1,8 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { vi } from 'vitest';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, mocked } from '../../../../test/util';
+import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -39,15 +40,15 @@ adjusttext = ">=1.3.0,<2"
 iris = ">=3.11.1,<4"
 `;
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = mocked(_datasource);
-const hostRules = mocked(_hostRules);
+const datasource = vi.mocked(_datasource);
+const hostRules = vi.mocked(_hostRules);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
