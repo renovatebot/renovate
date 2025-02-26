@@ -6,7 +6,6 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import GitHubActionsReporter from 'vitest-github-actions-reporter';
 import { testShards } from './tools/test/shards';
 import {
   getCoverageIgnorePatterns,
@@ -85,7 +84,7 @@ export default defineConfig(() =>
           './test/jest-legacy.ts',
           'test/to-migrate.ts',
         ],
-        reporters: ci ? ['default', new GitHubActionsReporter()] : ['default'],
+        reporters: ci ? ['default', 'github-actions'] : ['default'],
         mockReset: true,
         coverage: {
           provider: 'v8',
