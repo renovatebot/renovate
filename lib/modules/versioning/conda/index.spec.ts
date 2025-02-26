@@ -47,8 +47,9 @@ describe('modules/versioning/conda/index', () => {
   it.each`
     input                | expected
     ${'1.2.3'}           | ${true}
-    ${'1.2.3rc0'}        | ${false}
-    ${'not..version..1'} | ${false}
+    ${'1.2.3rc0'}        | ${true}
+    ${'1.2.3a'}          | ${true}
+    ${'not./version..1'} | ${false}
   `('isStable("$input") === $expected', ({ input, expected }) => {
     expect(api.isStable(input)).toBe(expected);
   });
