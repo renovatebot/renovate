@@ -676,9 +676,9 @@ describe('workers/repository/update/pr/index', () => {
       it('comments on automerge failure', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
-        jest
-          .spyOn(platform, 'massageMarkdown')
-          .mockImplementation((prBody) => 'markdown content');
+        vi.spyOn(platform, 'massageMarkdown').mockImplementation(
+          (prBody) => 'markdown content',
+        );
         await ensurePr({
           ...config,
           automerge: true,

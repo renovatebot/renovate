@@ -6,7 +6,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
   beforeEach(async () => {
     // reset module
-    jest.resetModules();
+    vi.resetModules();
     hostRules = await import('../../../util/host-rules');
     azure = await import('./azure-got-wrapper');
   });

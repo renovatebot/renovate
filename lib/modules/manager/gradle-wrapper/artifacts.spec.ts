@@ -42,7 +42,7 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {

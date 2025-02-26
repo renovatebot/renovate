@@ -18,7 +18,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {

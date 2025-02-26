@@ -205,8 +205,8 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       const res = await getPkgReleases({
@@ -229,8 +229,8 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getPkgReleases({
@@ -779,8 +779,8 @@ describe('modules/datasource/pypi/index', () => {
       ],
     };
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
       })),
     );
     expect(

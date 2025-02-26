@@ -113,7 +113,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           number: 1,
         }),
       );
-      platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
@@ -164,7 +164,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('updates migration branch & refresh PR when migration enabled and open pr exists', async () => {
       platform.getBranchPr.mockResolvedValue(mock<Pr>());
-      platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {

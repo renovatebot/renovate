@@ -16,10 +16,7 @@ const formattedMigratedData = Fixtures.getJson(
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting',
-  );
+  const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
   beforeEach(() => {
     GlobalConfig.set({
