@@ -6,7 +6,7 @@ import type { RawExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
 import { mockedFunction } from './util';
 
-jest.mock('../lib/util/exec/common');
+vi.mock('../lib/util/exec/common');
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 

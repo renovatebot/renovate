@@ -22,8 +22,8 @@ import {
 
 const initialContext = 'initial_context';
 
-jest.unmock('.');
-jest.mock('nanoid', () => ({
+vi.unmock('.');
+vi.mock('nanoid', () => ({
   nanoid: () => 'initial_context',
 }));
 

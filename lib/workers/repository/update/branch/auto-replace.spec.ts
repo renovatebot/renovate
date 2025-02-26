@@ -12,7 +12,7 @@ const sampleHtml = Fixtures.get(
   `../../../../modules/manager/html`,
 );
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {

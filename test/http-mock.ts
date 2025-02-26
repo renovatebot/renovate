@@ -1,5 +1,5 @@
+import fs from 'node:fs';
 import type { Url } from 'node:url';
-import { afterAll, afterEach, beforeAll } from '@jest/globals';
 import { codeBlock } from 'common-tags';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
@@ -123,7 +123,6 @@ function massageHttpMockStacktrace(err: Error): void {
     return;
   }
 
-  const fs: typeof import('fs-extra') = jest.requireActual('fs-extra');
   const content = fs.readFileSync(state.testPath, { encoding: 'utf8' });
 
   // Shrink the `testName` until we could locate it in the source file

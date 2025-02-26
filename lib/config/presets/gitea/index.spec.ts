@@ -7,7 +7,7 @@ import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as gitea from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 

@@ -15,21 +15,19 @@ import * as gomod from '.';
 
 type FS = typeof import('../../../util/fs');
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs', () => {
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs', async () => {
   // restore
-  return {
-    __esModules: true,
-    ...jest.createMockFromModule<FS>('../../../util/fs'),
-    isValidLocalPath:
-      jest.requireActual<FS>('../../../util/fs').isValidLocalPath,
-  };
+  return mockDeep({
+    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
+      .isValidLocalPath,
+  });
 });
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('./artifacts-extra', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('./artifacts-extra', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

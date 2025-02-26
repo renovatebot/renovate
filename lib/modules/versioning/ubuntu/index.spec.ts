@@ -396,7 +396,7 @@ describe('modules/versioning/ubuntu/index', () => {
     versions                                                  | expected
     ${['17.03', '18.04', '18.04', '6.10', '19.10']}           | ${['6.10', '17.03', '18.04', '18.04', '19.10']}
     ${['17.03', 'zesty', 'bionic', 'bionic', 'edgy', 'eoan']} | ${['edgy', '17.03', 'zesty', 'bionic', 'bionic', 'eoan']}
-  `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
+  `('$versions -> sortVersions -> $expected', ({ versions, expected }) => {
     expect(versions.sort(ubuntu.sortVersions)).toEqual(expected);
   });
 

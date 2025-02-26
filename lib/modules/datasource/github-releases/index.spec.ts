@@ -6,7 +6,7 @@ import * as _hostRules from '../../../util/host-rules';
 import type { Timestamp } from '../../../util/timestamp';
 import { GithubReleasesDatasource } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {

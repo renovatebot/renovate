@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/node-version/index getReleases processes real data 1`] = `
+exports[`modules/datasource/node-version/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://nodejs.org",
   "registryUrl": "https://nodejs.org/dist",

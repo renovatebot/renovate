@@ -14,7 +14,7 @@ import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
 
 describe('workers/repository/config-migration/pr/index', () => {
-  const spy = jest.spyOn(platform, 'massageMarkdown');
+  const spy = platform.massageMarkdown;
   const { configFileName, migratedContent } = Fixtures.getJson(
     './migrated-data.json',
   );

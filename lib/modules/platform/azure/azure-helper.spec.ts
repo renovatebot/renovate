@@ -2,19 +2,21 @@ import { Readable } from 'node:stream';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import type { MockedObject } from 'vitest';
+import { mockDeep } from 'vitest-mock-extended';
 import { partial } from '../../../../test/util';
 
-jest.mock('./azure-got-wrapper');
+vi.mock('./azure-got-wrapper', () => mockDeep());
 
 describe('modules/platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');
-  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
+  let azureApi: MockedObject<typeof import('./azure-got-wrapper')>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     azureHelper = await import('./azure-helper');
-    azureApi = jest.requireMock('./azure-got-wrapper');
+    azureApi = await vi.importMock('./azure-got-wrapper');
   });
 
   describe('getRef', () => {
@@ -436,7 +438,7 @@ describe('modules/platform/azure/azure-helper', () => {
   });
 
   describe('getAllProjectTeams', () => {
-    it('should get all teams ', async () => {
+    it('should get all teams', async () => {
       const team1 = Array.from({ length: 100 }, (_, index) => ({
         description: `team1 ${index + 1}`,
       }));

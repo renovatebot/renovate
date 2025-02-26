@@ -30,9 +30,9 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-jest.mock('../../../util/host-rules');
-jest.mock('../../../util/git');
-jest.mock('./client');
+vi.mock('../../../util/host-rules');
+vi.mock('../../../util/git');
+vi.mock('./client');
 const clientMock = mocked(_client);
 const hostRules = mocked(_hostRules);
 
@@ -263,7 +263,7 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
-  describe('createPr() - error ', () => {
+  describe('createPr() - error', () => {
     it('createPr() - no existing found => rejects', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
@@ -485,7 +485,7 @@ describe('modules/platform/gerrit/index', () => {
         'unknownCtx',
         'renovate/stability-days',
         'renovate/merge-confidence',
-      ])('getBranchStatusCheck() - %s ', async (ctx) => {
+      ])('getBranchStatusCheck() - %s', async (ctx) => {
         await expect(
           gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx),
         ).resolves.toBe('yellow');
