@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';

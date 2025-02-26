@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';

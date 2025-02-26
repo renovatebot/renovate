@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '../../../../../test/exec-util';
 import {
   envMock,

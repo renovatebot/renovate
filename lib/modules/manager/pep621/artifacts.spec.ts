@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';

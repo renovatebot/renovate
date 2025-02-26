@@ -118,7 +118,7 @@ export default tseslint.config(
       'import/no-unresolved': [
         'error',
         {
-          ignore: ['^mdast$', `^jest-mock-extended$`],
+          ignore: ['^mdast$'],
         },
       ],
 
