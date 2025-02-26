@@ -830,9 +830,9 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   // describe('mergePr()', () => {
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('checks that rebase is not supported', async () => {
   //     expect(
   //       await codeCommit.mergePr({
@@ -843,7 +843,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeFalse();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with auto', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -877,7 +877,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeTrue();
   //   });
   //
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with squash', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -910,7 +910,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeTrue();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with fast-forward', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -940,10 +940,10 @@ describe('modules/platform/codecommit/index', () => {
   //         id: 1,
   //         strategy: 'fast-forward',
   //       })
-  //     ).toBe(true);
+  //     ).toBeTrue();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('checks that merge-commit is not supported', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -1118,7 +1118,7 @@ describe('modules/platform/codecommit/index', () => {
       );
     });
 
-    it('throws an exception in case of api failed connection ', async () => {
+    it('throws an exception in case of api failed connection', async () => {
       const err = new Error('some error');
       codeCommitClient.on(GetCommentsForPullRequestCommand).rejectsOnce(err);
       const res = await codeCommit.ensureComment({

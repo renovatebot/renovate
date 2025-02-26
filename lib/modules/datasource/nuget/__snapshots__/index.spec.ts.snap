@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/nuget/index getReleases handles paginated results (v2) 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > handles paginated results (v2) 1`] = `
 {
   "registryUrl": "https://www.nuget.org/api/v2",
   "releases": [
@@ -17,7 +17,7 @@ exports[`modules/datasource/nuget/index getReleases handles paginated results (v
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v2) 1`] = `
 {
   "registryUrl": "https://www.nuget.org/api/v2",
   "releases": [
@@ -208,7 +208,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`]
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is a nuget.org 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v3) feed is a nuget.org 1`] = `
 {
   "homepage": "https://nunit.org/",
   "registryUrl": "https://api.nuget.org/v3/index.json",
@@ -398,7 +398,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) feed is not a nuget.org 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v3) feed is not a nuget.org 1`] = `
 {
   "registryUrl": "https://myprivatefeed/index.json",
   "releases": [
@@ -586,7 +586,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) fee
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) for several catalog pages 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v3) for several catalog pages 1`] = `
 {
   "homepage": "https://nlog-project.org/",
   "registryUrl": "https://api.nuget.org/v3/index.json",
@@ -1220,7 +1220,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) for
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch 404 error 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v3) nuspec fetch 404 error 1`] = `
 {
   "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": [
@@ -1409,7 +1409,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data (v3) nuspec fetch error 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data (v3) nuspec fetch error 1`] = `
 {
   "registryUrl": "https://api.nuget.org/v3/index.json",
   "releases": [
@@ -1598,7 +1598,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v3) nus
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data with no github project url (v2) 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data with no github project url (v2) 1`] = `
 {
   "registryUrl": "https://www.nuget.org/api/v2",
   "releases": [
@@ -1613,7 +1613,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data with no 
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases processes real data without project url (v2) 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > processes real data without project url (v2) 1`] = `
 {
   "registryUrl": "https://www.nuget.org/api/v2",
   "releases": [
@@ -1753,7 +1753,7 @@ exports[`modules/datasource/nuget/index getReleases processes real data without 
 }
 `;
 
-exports[`modules/datasource/nuget/index getReleases returns deduplicated results 1`] = `
+exports[`modules/datasource/nuget/index > getReleases > returns deduplicated results 1`] = `
 {
   "homepage": "https://nunit.org/",
   "releases": [

@@ -5,7 +5,7 @@ import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { DataListener, RawExecOptions } from './types';
 
-jest.mock('node:child_process');
+vi.mock('node:child_process');
 const spawn = mockedFunction(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;

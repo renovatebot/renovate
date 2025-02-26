@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/go/releases-direct getReleases support bitbucket tags 1`] = `
+exports[`modules/datasource/go/releases-direct > getReleases > support bitbucket tags 1`] = `
 {
   "registryUrl": "https://bitbucket.org",
   "releases": [
@@ -19,7 +19,7 @@ exports[`modules/datasource/go/releases-direct getReleases support bitbucket tag
 }
 `;
 
-exports[`modules/datasource/go/releases-direct getReleases support git 1`] = `
+exports[`modules/datasource/go/releases-direct > getReleases > support git 1`] = `
 {
   "releases": [
     {
@@ -35,7 +35,7 @@ exports[`modules/datasource/go/releases-direct getReleases support git 1`] = `
 }
 `;
 
-exports[`modules/datasource/go/releases-direct getReleases support gitlab 1`] = `
+exports[`modules/datasource/go/releases-direct > getReleases > support gitlab 1`] = `
 {
   "releases": [
     {
@@ -53,7 +53,7 @@ exports[`modules/datasource/go/releases-direct getReleases support gitlab 1`] = 
 }
 `;
 
-exports[`modules/datasource/go/releases-direct getReleases support gitlab subgroups 1`] = `
+exports[`modules/datasource/go/releases-direct > getReleases > support gitlab subgroups 1`] = `
 {
   "releases": [
     {
@@ -71,7 +71,7 @@ exports[`modules/datasource/go/releases-direct getReleases support gitlab subgro
 }
 `;
 
-exports[`modules/datasource/go/releases-direct getReleases support self hosted gitlab private repositories 1`] = `
+exports[`modules/datasource/go/releases-direct > getReleases > support self hosted gitlab private repositories 1`] = `
 {
   "releases": [
     {

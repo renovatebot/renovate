@@ -1,4 +1,3 @@
-import { mockDeep } from 'jest-mock-extended';
 import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -16,7 +15,7 @@ import {
   sideCarImage,
 } from '.';
 
-jest.mock('../../../modules/datasource', () => mockDeep());
+vi.mock('../../../modules/datasource', () => ({ getPkgReleases: vi.fn() }));
 
 describe('util/exec/docker/index', () => {
   describe('prefetchDockerImage', () => {
@@ -181,7 +180,7 @@ describe('util/exec/docker/index', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('handles empty container list ', async () => {
+    it('handles empty container list', async () => {
       const execSnapshots = mockExecAll({ stdout: '\n\n\n', stderr: '' });
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([

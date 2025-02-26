@@ -8,6 +8,7 @@ Object.defineProperty(HttpError.prototype, 'statusCode', {
   get: function statusCode(this: HttpError) {
     return this.response?.statusCode;
   },
+  configurable: true, // required by azure tests
 });
 
 Object.defineProperty(HttpError.prototype, 'body', {
@@ -19,6 +20,7 @@ Object.defineProperty(HttpError.prototype, 'body', {
       this.response.body = value;
     }
   },
+  configurable: true,
 });
 
 Object.defineProperty(HttpError.prototype, 'headers', {
@@ -31,6 +33,7 @@ Object.defineProperty(HttpError.prototype, 'url', {
   get: function url(this: HttpError) {
     return this.response?.url;
   },
+  configurable: true,
 });
 
 Object.defineProperty(HttpError.prototype, 'host', {
@@ -39,6 +42,7 @@ Object.defineProperty(HttpError.prototype, 'host', {
     const url = urlStr ? parseUrl(urlStr) : null;
     return url?.host;
   },
+  configurable: true,
 });
 
 export type GotLegacyError<E = unknown, T = unknown> = HttpError & {

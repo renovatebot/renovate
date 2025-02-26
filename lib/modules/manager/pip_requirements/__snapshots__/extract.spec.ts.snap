@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > extracts dependencies 1`] = `
 {
   "deps": [
     {
@@ -37,7 +37,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts 
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > extracts multiple dependencies 1`] = `
 [
   {
     "currentValue": "==1",
@@ -77,7 +77,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts 
 ]
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles comments and commands 1`] = `
 [
   {
     "currentValue": "==1.11.23",
@@ -118,7 +118,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles c
 ]
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -173,7 +173,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url and defaults without index to config 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -225,7 +225,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url and defaults without index to pypi 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -277,7 +277,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra spaces around pinned dependency equal signs 1`] = `
 {
   "deps": [
     {
@@ -308,7 +308,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extras and complex index url 1`] = `
 {
   "deps": [
     {
@@ -339,7 +339,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() should handle hashes 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > should handle hashes 1`] = `
 {
   "deps": [
     {
