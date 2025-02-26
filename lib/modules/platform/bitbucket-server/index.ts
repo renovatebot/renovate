@@ -40,12 +40,12 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import {
+import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-  UserSchema,
 } from './schema';
+import { UserSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
