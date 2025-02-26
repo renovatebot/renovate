@@ -9,11 +9,11 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/git');
-jest.mock('./util');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/git');
+vi.mock('./util');
 
 const { getDefaultRegistries, findGlobalJson } = mocked(util);
 
@@ -29,9 +29,11 @@ const adminConfig: RepoGlobalConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/nuget/artifacts', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     const realFs =
-      jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+      await vi.importActual<typeof import('../../../util/fs')>(
+        '../../../util/fs',
+      );
     getDefaultRegistries.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);

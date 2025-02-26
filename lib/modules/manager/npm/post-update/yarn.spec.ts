@@ -16,16 +16,16 @@ import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs-extra', () =>
-  jest
-    .requireActual<
-      typeof import('../../../../../test/fixtures')
-    >('../../../../../test/fixtures')
-    .fsExtra(),
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('../../../../../test/fixtures')>(
+      '../../../../../test/fixtures',
+    )
+  ).fsExtra(),
 );
-jest.mock('../../../../util/exec/env');
-jest.mock('./node-version');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/exec/env');
+vi.mock('./node-version');
+vi.mock('../../../datasource', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 

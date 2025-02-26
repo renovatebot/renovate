@@ -6,8 +6,8 @@ import type { PackageFile } from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 
-jest.mock('./manager-files');
-jest.mock('../../../util/git');
+vi.mock('./manager-files');
+vi.mock('../../../util/git');
 
 const managerFiles = mocked(_managerFiles);
 

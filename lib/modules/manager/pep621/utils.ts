@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { stripTemplates } from '../../../util/string';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
@@ -136,7 +137,7 @@ export function parsePyProject(
   content: string,
 ): PyProject | null {
   try {
-    const jsonMap = parseToml(content);
+    const jsonMap = parseToml(stripTemplates(content));
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(

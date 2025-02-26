@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() contains the onboardingConfigFileName if set 1`] = `
+exports[`workers/repository/onboarding/pr/config-description > getConfigDesc() > contains the onboardingConfigFileName if set 1`] = `
 "
 ### Configuration Summary
 
@@ -15,7 +15,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not set 1`] = `
+exports[`workers/repository/onboarding/pr/config-description > getConfigDesc() > falls back to "renovate.json" if onboardingConfigFileName is not set 1`] = `
 "
 ### Configuration Summary
 
@@ -30,7 +30,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() falls back to "renovate.json" if onboardingConfigFileName is not valid 1`] = `
+exports[`workers/repository/onboarding/pr/config-description > getConfigDesc() > falls back to "renovate.json" if onboardingConfigFileName is not valid 1`] = `
 "
 ### Configuration Summary
 
@@ -45,7 +45,22 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() returns a full list 1`] = `
+exports[`workers/repository/onboarding/pr/config-description > getConfigDesc() > include retry/refresh checkbox message only if onboardingRebaseCheckbox is true 1`] = `
+"
+### Configuration Summary
+
+Based on the default config's presets, Renovate will:
+
+  - Start dependency updates only once this onboarding PR is merged
+  - Run Renovate on following schedule: before 5am
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`.github/renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
+
+---
+"
+`;
+
+exports[`workers/repository/onboarding/pr/config-description > getConfigDesc() > returns a full list 1`] = `
 "
 ### Configuration Summary
 
@@ -58,21 +73,6 @@ Based on the default config's presets, Renovate will:
   - this is Docker-only
 
 🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
-
----
-"
-`;
-
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() include retry/refresh checkbox message only if onboardingRebaseCheckbox is true 1`] = `
-"
-### Configuration Summary
-
-Based on the default config's presets, Renovate will:
-
-  - Start dependency updates only once this onboarding PR is merged
-  - Run Renovate on following schedule: before 5am
-
-🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`.github/renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 ---
 "

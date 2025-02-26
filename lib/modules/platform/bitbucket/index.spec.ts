@@ -6,8 +6,8 @@ import type { PlatformResult, RepoParams } from '../types';
 import type { PrTask } from './schema';
 import * as bitbucket from '.';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -1291,7 +1291,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+      ).rejects.toThrow('Response code 401 (Unauthorized)');
     });
 
     it('removes reviewer if they are also the author of the pr', async () => {
@@ -1385,7 +1385,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
@@ -1424,7 +1424,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('lists PR tasks and resolves the unresolved tasks', async () => {
@@ -1819,7 +1819,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+      ).rejects.toThrow('Response code 401 (Unauthorized)');
     });
 
     it('rethrows exception when PR update error due to unknown reviewers error', async () => {
@@ -1869,7 +1869,7 @@ describe('modules/platform/bitbucket/index', () => {
         });
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('throws an error on failure to get current list of reviewers', async () => {
