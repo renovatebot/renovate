@@ -6,7 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

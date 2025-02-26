@@ -13,10 +13,10 @@ import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
-const googleAuth = mocked(_googleAuth);
+const googleAuth = vi.mocked(_googleAuth, true);
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 

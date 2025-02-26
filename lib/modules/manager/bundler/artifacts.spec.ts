@@ -23,12 +23,12 @@ import { updateArtifacts } from '.';
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('./host-rules');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
 

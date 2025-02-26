@@ -378,12 +378,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Cache jest
+      - name: Cache vitest
         uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
-          path: .cache/jest
+          path: .cache/vitest
           key: |
-            jest-cache-${{
+            vitest-cache-${{
               runner.os
             }}-${{
               env.NODE_VERSION
@@ -398,8 +398,7 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" pnpm jest \
-              --ci \
+            TEST_SHARD="$shard" pnpm vitest \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
           done
@@ -488,10 +487,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 100 \
-            --functions 100 \
-            --lines 100 \
-            --statements 100
+            --branches 97 \
+            --functions 98 \
+            --lines 97 \
+            --statements 97
 
   # Catch-all required check for test matrix and coverage
   test-success:

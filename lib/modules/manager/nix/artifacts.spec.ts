@@ -14,10 +14,10 @@ import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

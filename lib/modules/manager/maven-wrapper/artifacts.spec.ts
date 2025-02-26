@@ -10,10 +10,10 @@ import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 

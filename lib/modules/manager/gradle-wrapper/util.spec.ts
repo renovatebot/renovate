@@ -12,7 +12,7 @@ import {
 } from './utils';
 
 const platform = jest.spyOn(os, 'platform');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {

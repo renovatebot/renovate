@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts dependency 1`] = `
+exports[`modules/manager/jsonnet-bundler/extract > extractPackageFile() > extracts dependency 1`] = `
 {
   "deps": [
     {
@@ -23,7 +23,7 @@ exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts d
 }
 `;
 
-exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts dependency with custom name 1`] = `
+exports[`modules/manager/jsonnet-bundler/extract > extractPackageFile() > extracts dependency with custom name 1`] = `
 {
   "deps": [
     {

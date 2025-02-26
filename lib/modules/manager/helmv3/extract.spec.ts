@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../datasource/docker';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 const config = partial<ExtractConfig>({
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',

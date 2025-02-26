@@ -9,8 +9,8 @@ import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 

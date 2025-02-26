@@ -400,7 +400,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
     });
 
-    it('it migrates preset strings to array', () => {
+    it('migrates preset strings to array', () => {
       let config: TestRenovateConfig;
       let res: MigratedConfig;
 
@@ -422,7 +422,7 @@ describe('config/migration', () => {
       });
     });
 
-    it('it migrates unpublishSafe', () => {
+    it('migrates unpublishSafe', () => {
       let config: TestRenovateConfig;
       let res: MigratedConfig;
 
@@ -505,7 +505,7 @@ describe('config/migration', () => {
       });
     });
 
-    it('it migrates packageRules', () => {
+    it('migrates packageRules', () => {
       const config: TestRenovateConfig = {
         packageRules: [
           {
@@ -575,7 +575,7 @@ describe('config/migration', () => {
     });
   });
 
-  it('it migrates nested packageRules', () => {
+  it('migrates nested packageRules', () => {
     const config: TestRenovateConfig = {
       packageRules: [
         {
@@ -605,7 +605,7 @@ describe('config/migration', () => {
     expect(migratedConfig.packageRules).toHaveLength(3);
   });
 
-  it('it migrates presets', () => {
+  it('migrates presets', () => {
     GlobalConfig.set({
       migratePresets: {
         '@org': 'local>org/renovate-config',
@@ -621,7 +621,7 @@ describe('config/migration', () => {
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
 
-  it('it migrates customManagers', () => {
+  it('migrates customManagers', () => {
     const config: RenovateConfig = {
       customManagers: [
         {
@@ -646,7 +646,7 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
   });
 
-  it('it migrates pip-compile', () => {
+  it('migrates pip-compile', () => {
     const config: RenovateConfig = {
       'pip-compile': {
         enabled: true,
@@ -678,7 +678,7 @@ describe('config/migration', () => {
     });
   });
 
-  it('it migrates gradle-lite', () => {
+  it('migrates gradle-lite', () => {
     const config: RenovateConfig = {
       'gradle-lite': {
         enabled: true,
@@ -757,7 +757,7 @@ describe('config/migration', () => {
     });
   });
 
-  it('it migrates dryRun', () => {
+  it('migrates dryRun', () => {
     let config: TestRenovateConfig;
     let res: MigratedConfig;
 

@@ -25,11 +25,11 @@ requires = ["poetry_core>=1.0", "wheel"]
 build-backend = "poetry.masonry.api"
 `;
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
 

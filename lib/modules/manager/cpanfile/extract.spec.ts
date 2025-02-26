@@ -205,7 +205,7 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('test phase', () => {
+      test('phase', () => {
         expect(
           extractPackageFile(
             codeBlock`

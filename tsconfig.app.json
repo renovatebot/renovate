@@ -5,7 +5,9 @@
     "sourceMap": true,
     "inlineSources": true,
     "importHelpers": true,
-    "types": ["node"]
+    "moduleResolution": "node10",
+    "types": ["node"],
+    "paths": {} // no paths for production
   },
   "files": ["lib/renovate.ts", "lib/config-validator.ts"],
   "include": ["lib/**/*.d.ts"]

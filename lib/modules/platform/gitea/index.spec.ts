@@ -28,7 +28,7 @@ import type {
 } from './types';
 import * as gitea from '.';
 
-jest.mock('../../../util/git');
+vi.mock('../../../util/git');
 
 /**
  * latest tested gitea version.
