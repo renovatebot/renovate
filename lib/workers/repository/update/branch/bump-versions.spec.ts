@@ -4,17 +4,16 @@ import * as templates from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { bumpVersions } from './bump-versions';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../modules/platform/scm');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      vi.resetAllMocks();
     });
 
     afterEach(() => {
-      jest.spyOn(templates, 'compile').mockRestore();
+      vi.spyOn(templates, 'compile').mockRestore();
     });
 
     it('should be noop if bumpVersions is undefined', async () => {
@@ -56,7 +55,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should catch template error in fileMatch', async () => {
-      jest.spyOn(templates, 'compile').mockImplementationOnce(() => {
+      vi.spyOn(templates, 'compile').mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
       });
       const config = {
@@ -90,7 +89,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should catch template error in matchString', async () => {
-      const compile = jest.spyOn(templates, 'compile');
+      const compile = vi.spyOn(templates, 'compile');
       compile.mockReturnValueOnce('foo');
       compile.mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
@@ -126,7 +125,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should catch template error in bumpType', async () => {
-      const compile = jest.spyOn(templates, 'compile');
+      const compile = vi.spyOn(templates, 'compile');
       compile.mockReturnValueOnce('foo');
       compile.mockReturnValueOnce('^(?<version>.+)$');
       compile.mockImplementationOnce(() => {
