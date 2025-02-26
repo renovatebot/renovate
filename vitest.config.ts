@@ -97,7 +97,7 @@ export default defineConfig(() =>
           exclude: [
             ...coverageConfigDefaults.exclude,
             ...getCoverageIgnorePatterns(),
-            '**/*.spec.ts', // should work from defauls
+            '**/*.spec.ts', // should work from defaults
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',
             'lib/types/**',
