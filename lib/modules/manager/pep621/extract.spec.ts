@@ -5,7 +5,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs';
 import { depTypes } from './utils';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');

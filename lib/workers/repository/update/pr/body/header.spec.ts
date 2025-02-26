@@ -2,7 +2,7 @@ import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getPrHeader } from './header';
 
-jest.mock('../../../../../util/template');
+vi.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/header', () => {

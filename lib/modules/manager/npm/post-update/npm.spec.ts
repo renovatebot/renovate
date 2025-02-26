@@ -6,9 +6,9 @@ import { GlobalConfig } from '../../../../config/global';
 import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 process.env.CONTAINERBASE = 'true';
 

@@ -13,23 +13,25 @@ import * as configParser from './config/parse';
 import * as limits from './limits';
 import * as globalWorker from '.';
 
-jest.mock('../repository');
-jest.mock('../../util/fs');
-jest.mock('../../config/presets');
+vi.mock('../repository');
+vi.mock('../../util/fs');
+vi.mock('../../config/presets');
 
-jest.mock('fs-extra', () => {
-  const realFs = jest.requireActual<typeof fs>('fs-extra');
+vi.mock('fs-extra', async () => {
+  const realFs = await vi.importActual<typeof fs>('fs-extra');
   return {
-    ensureDir: jest.fn(),
-    remove: jest.fn(),
-    readFile: jest.fn((file: string, options: any) => {
-      if (file.endsWith('.wasm.gz')) {
-        return realFs.readFile(file, options);
-      }
-      return undefined;
-    }),
-    writeFile: jest.fn(),
-    outputFile: jest.fn(),
+    default: {
+      ensureDir: vi.fn(),
+      remove: vi.fn(),
+      readFile: vi.fn((file: string, options: any) => {
+        if (file.endsWith('.wasm.gz')) {
+          return realFs.readFile(file, options);
+        }
+        return undefined;
+      }),
+      writeFile: vi.fn(),
+      outputFile: vi.fn(),
+    },
   };
 });
 

@@ -13,7 +13,7 @@ Some good branch names:
 
 - `feat/13732-cacache-cleanup`
 - `fix/15431-gitea-automerge-strategy`
-- `refactor/jest-reset-mocks`
+- `refactor/vitest-reset-mocks`
 - `docs/rewrite-packageRules-section`
 
 Avoid branch names like `patch-1`.
@@ -280,12 +280,12 @@ if (end) {
 
 - Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
 - Use `it.each` rather than `test.each`
-- Prefer [Tagged Template Literal](https://jestjs.io/docs/api#2-testeachtablename-fn-timeout) style for `it.each`, Prettier will help with formatting
+- Prefer [Tagged Template Literal](https://vitest.dev/api/#test-each) style for `it.each`, Prettier will help with formatting
   - See [Example](https://github.com/renovatebot/renovate/blob/768e178419437a98f5ce4996bafd23f169e530b4/lib/modules/platform/util.spec.ts#L8-L18)
 - Mock Date/Time when testing a Date/Time dependent module
   - For `Luxon` mocking see [Example](https://github.com/renovatebot/renovate/blob/5043379847818ac1fa71ff69c098451975e95710/lib/modules/versioning/distro.spec.ts#L7-L10)
-- Prefer `jest.spyOn` for mocking single functions, or mock entire modules
-  - Avoid overwriting functions, for example: (`func = jest.fn();`)
+- Prefer `vi.spyOn` for mocking single functions, or mock entire modules
+  - Avoid overwriting functions, for example: (`func = vi.fn();`)
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
 - Avoid `toMatchSnapshot`, only use it for:

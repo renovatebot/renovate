@@ -14,7 +14,7 @@ import {
   REGISTRY_URLS,
 } from './parser/common';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   fs.getSiblingFileName.mockImplementation(

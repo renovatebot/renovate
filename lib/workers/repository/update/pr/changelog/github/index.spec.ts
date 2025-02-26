@@ -9,7 +9,7 @@ import * as hostRules from '../../../../../../util/host-rules';
 import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../../modules/datasource/npm');
+vi.mock('../../../../../../modules/datasource/npm');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

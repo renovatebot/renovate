@@ -8,8 +8,8 @@ import * as _fs from '../../../util/fs';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec');
+vi.mock('../../../util/fs');
 
 const exec = mocked(_exec);
 const fs = mocked(_fs);

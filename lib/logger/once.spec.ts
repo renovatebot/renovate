@@ -1,7 +1,7 @@
 import { once, reset } from './once';
 import { logger } from '.';
 
-jest.unmock('.');
+vi.unmock('.');
 
 describe('logger/once', () => {
   afterEach(() => {
