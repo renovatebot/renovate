@@ -7,6 +7,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
+import { stripTemplates } from '../../../util/string';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageFileContent } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
@@ -17,7 +18,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
-    content,
+    stripTemplates(content),
     PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {

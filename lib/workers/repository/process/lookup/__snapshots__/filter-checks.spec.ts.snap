@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumConfidence settings from updateType 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > picks up minimumConfidence settings from updateType 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [
@@ -24,7 +24,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumReleaseAge settings from hostRules 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > picks up minimumReleaseAge settings from hostRules 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [],
@@ -35,7 +35,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumReleaseAge settings from updateType 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > picks up minimumReleaseAge settings from updateType 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [
@@ -51,7 +51,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns latest release if internalChecksFilter=none 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > returns latest release if internalChecksFilter=none 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [],
@@ -62,7 +62,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=flexible and some pass checks 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > returns non-latest release if internalChecksFilter=flexible and some pass checks 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [
@@ -82,7 +82,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-latest release if internalChecksFilter=strict and some pass checks 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > returns non-latest release if internalChecksFilter=strict and some pass checks 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [
@@ -102,7 +102,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns non-pending latest release if internalChecksFilter=flexible and none pass checks 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > returns non-pending latest release if internalChecksFilter=flexible and none pass checks 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [],
@@ -113,7 +113,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() returns pending latest release if internalChecksFilter=strict and none pass checks 1`] = `
+exports[`workers/repository/process/lookup/filter-checks > .filterInternalChecks() > returns pending latest release if internalChecksFilter=strict and none pass checks 1`] = `
 {
   "pendingChecks": true,
   "pendingReleases": [],

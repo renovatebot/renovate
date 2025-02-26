@@ -14,12 +14,12 @@ import {
   update,
 } from './extract-update';
 
-const createVulnerabilitiesMock = jest.fn();
+const createVulnerabilitiesMock = vi.fn();
 
-jest.mock('./write');
-jest.mock('./sort');
-jest.mock('./fetch');
-jest.mock('./vulnerabilities', () => {
+vi.mock('./write');
+vi.mock('./sort');
+vi.mock('./fetch');
+vi.mock('./vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -29,10 +29,10 @@ jest.mock('./vulnerabilities', () => {
     },
   };
 });
-jest.mock('../updates/branchify');
-jest.mock('../extract');
-jest.mock('../../../util/cache/repository');
-jest.mock('../../../util/git');
+vi.mock('../updates/branchify');
+vi.mock('../extract');
+vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/git');
 
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
@@ -122,7 +122,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       };
-      const appendVulnerabilityPackageRulesMock = jest.fn();
+      const appendVulnerabilityPackageRulesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });

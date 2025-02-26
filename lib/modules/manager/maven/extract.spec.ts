@@ -1,7 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
-import { logger } from '../../../logger';
+import { fs, logger } from '../../../../test/util';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -10,7 +9,7 @@ import {
   resolveParents,
 } from './extract';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
@@ -236,12 +235,11 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('extract dependencies with windows line endings', () => {
-      const logSpy = jest.spyOn(logger, 'warn');
       extractPackage(
         '<?xml version="1.0" encoding="UTF-8"?> \r\n',
         'some-file',
       );
-      expect(logSpy).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );
     });

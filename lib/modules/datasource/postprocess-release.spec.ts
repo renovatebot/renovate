@@ -11,7 +11,7 @@ import type {
   ReleaseResult,
 } from './types';
 
-jest.mock('./common');
+vi.mock('./common');
 const { getDatasourceFor } = mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {

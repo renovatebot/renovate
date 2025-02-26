@@ -13,7 +13,7 @@ import {
   getPnpmLock,
 } from './pnpm';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
@@ -21,7 +21,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -43,7 +43,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
+      vi.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
         throw new Error();
       });
 
@@ -90,8 +90,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   describe('.detectPnpmWorkspaces()', () => {
-    beforeEach(() => {
-      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
+    beforeEach(async () => {
+      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.

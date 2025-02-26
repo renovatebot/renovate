@@ -144,21 +144,21 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
-### Jest
+### Vitest
 
-Run the Jest unit tests with the `pnpm jest` command.
-You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
+Run the Vitest unit tests with the `pnpm vitest` command.
+You can also run a subset of the Vitest tests using file matching, e.g. `pnpm vitest composer` or `pnpm vitest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
+e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -181,6 +181,9 @@ To install the required dependency, use `pdm install`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
+
+Also, make sure to set the `GITHUB_TOKEN` in your environment as we use [gh cli](https://cli.github.com/manual/gh_issue_list) to fetch the issues.
+If you wish to skip fetching the issues, then set `SKIP_GITHUB_ISSUES` to `true` before building the docs.
 
 ## Keeping your Renovate fork up to date
 

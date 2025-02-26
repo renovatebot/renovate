@@ -9,7 +9,7 @@ import { rebaseOnboardingBranch } from './rebase';
 
 const configModule = mocked(_config);
 
-jest.mock('./config');
+vi.mock('./config');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {

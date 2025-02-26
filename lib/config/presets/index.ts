@@ -159,7 +159,6 @@ export async function getPreset(
   }
   logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
   const presetKeys = Object.keys(presetConfig);
-  // istanbul ignore if
   if (
     presetKeys.length === 2 &&
     presetKeys.includes('description') &&
@@ -212,7 +211,6 @@ export async function resolveConfigPresets(
           ignorePresets,
           existingPresets.concat([preset]),
         );
-        // istanbul ignore if
         if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
@@ -271,11 +269,9 @@ async function fetchPreset(
     return await getPreset(preset, baseConfig ?? inputConfig);
   } catch (err) {
     logger.debug({ preset, err }, 'Preset fetch error');
-    // istanbul ignore if
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    // istanbul ignore if
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;
     }
@@ -295,7 +291,6 @@ async function fetchPreset(
     } else {
       error.validationError = `Preset caused unexpected error (${preset})`;
     }
-    // istanbul ignore if
     if (existingPresets.length) {
       error.validationError +=
         '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
@@ -313,7 +308,6 @@ function shouldResolvePreset(
   existingPresets: string[],
   ignorePresets: string[],
 ): boolean {
-  // istanbul ignore if
   if (existingPresets.includes(preset)) {
     logger.debug(
       `Already seen preset ${preset} in [${existingPresets.join(', ')}]`,
@@ -321,7 +315,6 @@ function shouldResolvePreset(
     return false;
   }
   if (ignorePresets.includes(preset)) {
-    // istanbul ignore next
     logger.debug(
       `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`,
     );
