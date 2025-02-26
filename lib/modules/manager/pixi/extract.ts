@@ -29,7 +29,7 @@ function getUserPixiConfig(
     return val;
   }
 
-  // istanbul ignore next
+  // v8 ignore next
   return null;
 }
 
