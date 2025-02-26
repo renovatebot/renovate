@@ -13,7 +13,7 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Grouped updates                           | Yes, use community-provided groups, or create your own                                                                         | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     |
 | Upgrades common monorepo packages at once | Yes                                                                                                                            | No                                                                                                                                                                           |
 | Officially supported platforms            | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](./index.md#supported-platforms)                                       | GitHub only                                                                                                                                                                  |
-| Supported languages                       | [List for Renovate](./modules/manager/index.md)                                                                                | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) |
+| Supported languages                       | [List for Renovate](./modules/manager/index.md)                                                                                | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories#supported-ecosystems-and-repositories) |
 | Show changelogs                           | Yes                                                                                                                            | Yes                                                                                                                                                                          |
 | Compatibility score badges                | Four badges showing: Age, Adoption, Passing, Confidence                                                                        | One badge with overall compatibility score                                                                                                                                   |
 | Built-in to GitHub                        | No, requires app or self-hosting                                                                                               | Yes                                                                                                                                                                          |
@@ -105,10 +105,10 @@ Read [Renovate scheduling](./key-concepts/scheduling.md) to learn more.
 
 Dependabot has four options that apply at a language level:
 
-- [`schedule.interval`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduleinterval)
-- [`schedule.day`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduleday)
-- [`schedule.time`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletime)
-- [`schedule.timezone`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#scheduletimezone)
+- [`schedule.interval`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#interval)
+- [`schedule.day`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#day)
+- [`schedule.time`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#time)
+- [`schedule.timezone`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference#timezone)
 
 ### License
 
@@ -153,7 +153,7 @@ You can self-host Dependabot on other platforms than GitHub but none are officia
 You can run Dependabot as a GitHub Actions workflow on hosted and self-hosted runners.
 Learn more by reading the:
 
-- [GitHub Blog, Dependabot on GitHub Actions and self-hosted runners is now generally available](https://github.blog/2024-05-02-dependabot-on-github-actions-and-self-hosted-runners-is-now-generally-available/)
+- [GitHub Blog, Dependabot on GitHub Actions and self-hosted runners is now generally available](https://github.blog/news-insights/product-news/dependabot-on-github-actions-and-self-hosted-runners-is-now-generally-available/)
 - [GitHub Docs, About Dependabot on GitHub Actions runners](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/about-dependabot-on-github-actions-runners)
 
 #### `dependabot-core`
