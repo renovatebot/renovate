@@ -55,4 +55,8 @@ describe('config/presets/internal/index', () => {
       .flat()
       .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
   });
+
+  it('returns undefined for unknown preset', () => {
+    expect(internal.getPreset({ repo: 'some/repo' })).toBeUndefined();
+  });
 });
