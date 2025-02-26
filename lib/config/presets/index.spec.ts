@@ -1,6 +1,7 @@
 import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
-import { mocked } from '../../../test/util';
+import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as _packageCache from '../../util/cache/package';
 import { GlobalConfig } from '../global';
@@ -15,6 +16,7 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
+import { logger, mocked } from '~test/util';
 
 vi.mock('./npm');
 vi.mock('./github');
@@ -83,9 +85,25 @@ describe('config/presets/index', () => {
       expect(res).toEqual({ foo: 1 });
     });
 
+    it('skips duplicate resolves', async () => {
+      config.extends = ['local>some/repo:a', 'local>some/repo:b'];
+      local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
+      local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
+      local.getPreset.mockResolvedValueOnce({ foo: 1 });
+      expect(await presets.resolveConfigPresets(config)).toEqual({
+        foo: 1,
+      });
+      expect(local.getPreset).toHaveBeenCalledTimes(3);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Already seen preset local>some/repo:c in [local>some/repo:a, local>some/repo:c]',
+      );
+    });
+
     it('throws if invalid preset file', async () => {
       config.foo = 1;
-      config.extends = ['notfound'];
+      config.extends = ['local>some/repo'];
+
+      local.getPreset.mockResolvedValueOnce({ extends: ['notfound'] });
       let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
@@ -95,7 +113,8 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        "Cannot find preset's package (notfound)",
+        "Cannot find preset's package (notfound)." +
+          ' Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -463,6 +482,24 @@ describe('config/presets/index', () => {
       });
 
       expect(packageCache.set.mock.calls[0][3]).toBe(60);
+    });
+
+    it('throws', async () => {
+      config.extends = ['local>username/preset-repo'];
+
+      local.getPreset.mockRejectedValueOnce(
+        new ExternalHostError(new Error('whoops')),
+      );
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        ExternalHostError,
+      );
+
+      local.getPreset.mockRejectedValueOnce(
+        new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+      );
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+      );
     });
   });
 

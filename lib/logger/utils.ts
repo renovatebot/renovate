@@ -57,14 +57,12 @@ type ZodShortenedIssue =
     };
 
 export function prepareZodIssues(input: unknown): ZodShortenedIssue {
-  // istanbul ignore if
   if (!is.plainObject(input)) {
     return null;
   }
 
   let err: null | string | string[] = null;
   if (is.array(input._errors, is.string)) {
-    // istanbul ignore else
     if (input._errors.length === 1) {
       err = input._errors[0];
     } else if (input._errors.length > 1) {
@@ -96,11 +94,11 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 }
 
 export function prepareZodError(err: ZodError): Record<string, unknown> {
-  // istanbul ignore next
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
+    /* v8 ignore next 3: TODO: drop set? */
     set: () => {
-      // intentionally empty
+      /* intentionally empty */
     },
   });
 
@@ -144,13 +142,11 @@ export default function prepareError(err: Error): Record<string, unknown> {
     options.method = err.options.method;
     options.http2 = err.options.http2;
 
-    // istanbul ignore else
     if (err.response) {
       response.response = {
-        statusCode: err.response?.statusCode,
-        statusMessage: err.response?.statusMessage,
+        statusCode: err.response.statusCode,
+        statusMessage: err.response.statusMessage,
         body:
-          // istanbul ignore next: not easily testable
           err.name === 'TimeoutError'
             ? undefined
             : structuredClone(err.response.body),
