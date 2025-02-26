@@ -8,7 +8,8 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { mockDeep } from 'jest-mock-extended';
-import { Mocked, MockedObject, vi } from 'vitest';
+import type { Mocked, MockedObject } from 'vitest';
+import { vi } from 'vitest';
 import { partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
