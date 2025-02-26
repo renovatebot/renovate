@@ -2,6 +2,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import type { ViteUserConfig } from 'vitest/config';
 import {
   coverageConfigDefaults,
+  defaultExclude,
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
@@ -38,6 +39,7 @@ function configureShardingOrFallbackTo(
   }
 
   const include: string[] = [];
+  const exclude: string[] = [...defaultExclude];
 
   for (const [key, { matchPaths: patterns }] of Object.entries(testShards)) {
     if (key === shardKey) {
@@ -51,17 +53,16 @@ function configureShardingOrFallbackTo(
 
     const testMatchPatterns = patterns.map((pattern) => {
       const filePattern = normalizePattern(pattern, '.spec.ts');
-      return `!**/${filePattern}`;
+      return `**/${filePattern}`;
     });
-    include.push(...testMatchPatterns);
+    exclude.push(...testMatchPatterns);
   }
-
-  include.reverse();
 
   const reportsDirectory = `./coverage/shard/${shardKey}`;
   return {
     test: {
       include,
+      exclude,
       coverage: {
         reportsDirectory,
       },
@@ -96,6 +97,7 @@ export default defineConfig(() =>
           exclude: [
             ...coverageConfigDefaults.exclude,
             ...getCoverageIgnorePatterns(),
+            '**/*.spec.ts', // should work from defauls
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',
             'lib/types/**',
@@ -104,7 +106,6 @@ export default defineConfig(() =>
             '__mocks__/**',
             // fully ignored files
             'lib/config-validator.ts',
-            'lib/config/decrypt/legacy.ts',
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
             'lib/util/cache/package/redis.ts',
@@ -120,7 +121,7 @@ export default defineConfig(() =>
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
       test: {
-        include: ['lib/**/*.spec.ts', 'test/**/*.spec.ts'],
+        exclude: ['tools/docs/test/**/*.spec.ts'],
       },
     }),
   ),

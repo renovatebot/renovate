@@ -4,7 +4,7 @@ export function getCoverageIgnorePatterns(): string[] {
   const patterns = [];
 
   if (env.TEST_LEGACY_DECRYPTION !== 'true') {
-    patterns.push('<rootDir>/lib/config/decrypt/legacy.ts');
+    patterns.push('lib/config/decrypt/legacy.ts');
   }
 
   return patterns;
