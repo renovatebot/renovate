@@ -125,7 +125,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   afterEach(async () => {
     await tmpDir?.cleanup();
     await origin?.cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -135,7 +135,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('gitRetry', () => {
     it('returns result if git returns successfully', async () => {
-      const gitFunc = jest.fn().mockImplementation((args) => {
+      const gitFunc = vi.fn().mockImplementation((args) => {
         if (args === undefined) {
           return 'some result';
         } else {
@@ -149,7 +149,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('retries the func call if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest
+      const gitFunc = vi
         .fn()
         .mockImplementationOnce(() => {
           throw new Error('The remote end hung up unexpectedly');
@@ -164,7 +164,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest.fn().mockImplementation(() => {
+      const gitFunc = vi.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
@@ -174,7 +174,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
-      const gitFunc = jest.fn().mockImplementationOnce(() => {
+      const gitFunc = vi.fn().mockImplementationOnce(() => {
         throw new Error('some error');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
@@ -449,7 +449,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
       expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
@@ -470,7 +470,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
         'push',
@@ -481,7 +481,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should not add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       setNoVerify(['push']);
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
@@ -674,8 +674,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('does not pass --no-verify', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -704,8 +704,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('passes --no-verify to commit', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -735,8 +735,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('passes --no-verify to push', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -1113,7 +1113,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await git.pushCommitToRenovateRef(commit, 'bbb');
       await git.pushCommitToRenovateRef(commit, 'ccc');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
@@ -1136,7 +1136,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
       pushSpy.mockImplementationOnce(() => {
         throw new Error(
           'remote: Repository policies do not allow pushes that update more than 2 branches or tags.',

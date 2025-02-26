@@ -8,7 +8,7 @@ import prepareError, {
 
 describe('logger/utils', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('checks for valid log levels', () => {
@@ -29,7 +29,7 @@ describe('logger/utils', () => {
     ${' '}
   `('checks for invalid log level: $input', (input) => {
     // Mock when the function exits
-    const mockExit = jest.spyOn(process, 'exit');
+    const mockExit = vi.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#22198)
       throw new Error(`process.exit: ${number}`);

@@ -17,7 +17,7 @@ vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(

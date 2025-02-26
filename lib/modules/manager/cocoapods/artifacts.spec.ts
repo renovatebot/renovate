@@ -32,7 +32,7 @@ const adminConfig: RepoGlobalConfig = {
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
+    vi.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
     // can't be mocked
     docker.resetPrefetchedImages();
 

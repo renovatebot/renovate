@@ -1,7 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { fs, mocked } from '../../../../../test/util';
+import type { MockedFunction } from 'vitest';
+import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
@@ -25,8 +26,8 @@ const adminConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const mockHash = mocked(TerraformProviderHash).createHashes;
-const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
+const mockHash = vi.mocked(TerraformProviderHash).createHashes;
+const mockGetPkgReleases = getPkgReleases as MockedFunction<
   typeof getPkgReleases
 >;
 

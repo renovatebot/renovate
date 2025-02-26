@@ -114,9 +114,9 @@ describe('workers/repository/update/branch/index', () => {
         // eslint-disable-next-line require-await, @typescript-eslint/require-await
         async (config) => config,
       );
-      prWorker.ensurePr = jest.fn();
-      prWorker.getPlatformPrOptions = jest.fn();
-      prAutomerge.checkAutoMerge = jest.fn();
+      prWorker.ensurePr = vi.fn();
+      prWorker.getPlatformPrOptions = vi.fn();
+      prAutomerge.checkAutoMerge = vi.fn();
       // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
@@ -2321,7 +2321,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard All Pending approval', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2358,7 +2358,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard open all rate-limited', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2395,7 +2395,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2434,7 +2434,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
         }),
       );
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
         }),

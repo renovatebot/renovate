@@ -29,7 +29,7 @@ vi.mock('nanoid', () => ({
   nanoid: () => 'initial_context',
 }));
 
-const bunyanDebugSpy = jest.spyOn(bunyan.prototype, 'debug');
+const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
   it('inits', () => {
@@ -183,8 +183,8 @@ describe('logger/index', () => {
 
   it('should create a child logger', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
-    const loggerSpy = jest.spyOn(logger, 'debug');
-    const childLoggerSpy = jest.spyOn(childLogger, 'debug');
+    const loggerSpy = vi.spyOn(logger, 'debug');
+    const childLoggerSpy = vi.spyOn(childLogger, 'debug');
 
     childLogger.debug('test');
 
@@ -236,7 +236,7 @@ describe('logger/index', () => {
 
   it('supports file-based logging', () => {
     let chunk = '';
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -259,7 +259,7 @@ describe('logger/index', () => {
 
   it('handles cycles', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -287,7 +287,7 @@ describe('logger/index', () => {
 
   it('sanitizes secrets', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
