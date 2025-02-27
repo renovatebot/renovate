@@ -12,7 +12,7 @@ function getUserPixiConfig(
   if (packageFile.endsWith('pyproject.toml')) {
     const { val, err } = Result.parse(content, PyprojectToml).unwrap();
     if (err) {
-      logger.debug({ packageFile, err }, `pixi: error parsing pyproject.toml`);
+      logger.debug({ packageFile, err }, `error parsing pyproject.toml`);
       return null;
     }
 
