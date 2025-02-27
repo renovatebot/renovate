@@ -52,7 +52,6 @@ export async function extractPackageFile(
 
   return {
     lockFiles,
-    deps: [], // TODO
-    fileFormat: 'toml',
+    deps: [],
   };
 }
