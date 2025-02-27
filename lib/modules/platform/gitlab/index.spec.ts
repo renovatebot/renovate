@@ -1,6 +1,6 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { git, hostRules, logger, mocked } from '../../../../test/util';
