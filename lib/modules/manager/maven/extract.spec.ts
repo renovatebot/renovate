@@ -814,6 +814,48 @@ describe('modules/manager/maven/extract', () => {
         ]);
       });
 
+      it('should skip root pom.xml when it has an external parent', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+            <parent>
+              <groupId>org.acme</groupId>
+              <artifactId>external-parent</artifactId>
+              <version>1.0.0</version>
+            </parent>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const res = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(res).toMatchObject([
+          {
+            packageFile: 'pom.xml',
+            deps: [{ depName: 'org.acme:external-parent', depType: 'parent' }],
+          },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
       it('handles cross-referencing', async () => {
         fs.readLocalFile.mockResolvedValueOnce(codeBlock`
           <project>
