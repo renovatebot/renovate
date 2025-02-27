@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 
 import { fs } from '../../../../test/util';
@@ -6,16 +7,6 @@ import { extractPackageFile } from '.';
 vi.mock('../../../util/fs');
 
 const pyprojectToml = `
-[project]
-dependencies = []
-name = "pixi-py"
-requires-python = ">= 3.11"
-version = "0.1.0"
-
-[build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]
-
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["osx-arm64"]
@@ -120,6 +111,44 @@ describe('modules/manager/pixi/extract', () => {
       ).toMatchObject({
         deps: [],
         lockFiles: ['pixi.lock'],
+      });
+    });
+
+    it('returns parse non-known config file as pyproject.toml', async () => {
+      expect(
+        await extractPackageFile(
+          codeBlock`
+          [tool.project]
+          channels = ['conda-forge']
+          platforms = ["osx-arm64"]
+
+          [tool.project.dependencies]
+          requests = '*'
+          `,
+          'not-sure-what-file-this-is.toml',
+        ),
+      ).toMatchObject({
+        deps: [],
+        lockFiles: [],
+      });
+    });
+
+    it('returns parse non-known config file as pixi.toml', async () => {
+      expect(
+        await extractPackageFile(
+          codeBlock`
+        [project]
+        channels = ['conda-forge']
+        platforms = ["osx-arm64"]
+
+        [dependencies]
+        requests = '*'
+        `,
+          'not-sure-what-file-this-is.toml',
+        ),
+      ).toMatchObject({
+        deps: [],
+        lockFiles: [],
       });
     });
   });
