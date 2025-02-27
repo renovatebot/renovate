@@ -45,7 +45,7 @@ export async function extractPackageFile(
   }
 
   const lockfileName = getSiblingFileName(packageFile, 'pixi.lock');
-  const lockFiles = [];
+  const lockFiles: string[] = [];
   if (await localPathExists(lockfileName)) {
     lockFiles.push(lockfileName);
   }
