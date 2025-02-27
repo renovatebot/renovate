@@ -87,8 +87,8 @@ function getNewValue({
   }
 
   if (rangeStrategy === 'replace') {
-    if (currentValue.includes('|')) {
-      //  conda or, can't replace
+    if (currentValue.includes('|') || currentValue.includes(',')) {
+      //  conda and/or, can't replace
       return null;
     }
 
