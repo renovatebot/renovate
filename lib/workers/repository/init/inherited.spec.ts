@@ -159,8 +159,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -198,8 +197,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -237,7 +235,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest.spyOn(validation, 'validateConfig').mockResolvedValue({
+    vi.spyOn(validation, 'validateConfig').mockResolvedValue({
       warnings: [],
       errors: [],
     });

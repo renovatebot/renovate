@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '../../../../../test/exec-util';
 import {
   envMock,
@@ -42,7 +42,7 @@ const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
-  const removeDockerContainer = jest.spyOn(docker, 'removeDockerContainer');
+  const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
     delete process.env.BUILDPACK;

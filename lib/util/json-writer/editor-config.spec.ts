@@ -1,45 +1,35 @@
+import fs from 'node:fs/promises';
+import editorconfig from 'editorconfig';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
 
-// mock `require` calls to `fs` and `memfs`
-// https://github.com/vitest-dev/vitest/discussions/3134
-// use real fs to read wasm files for `@one-ini/wasm`
-// @ts-expect-error no toplevel await on commonjs
-await vi.hoisted(async () => {
-  const { fs: memfs } = await vi.importActual<typeof import('memfs')>('memfs');
-  const realFs = await vi.importActual<typeof import('fs')>('fs');
-  const fs = {
-    ...memfs,
-    readFileSync: (file: string, ...args: any[]) => {
-      if (file.endsWith('.wasm')) {
-        return realFs.readFileSync(file, ...args);
-      }
-      return memfs.readFileSync(file, ...args);
-    },
-  };
-
-  require.cache.fs = { exports: fs } as never;
-});
+// We can't use memfs, because `node:*` modules are not easily mockable
+vi.mock('editorconfig', { spy: true });
 
 const defaultConfigFile = configFileNames[0];
 
 describe('util/json-writer/editor-config', () => {
-  beforeAll(() => {
+  let tmpDir: DirectoryResult | null;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+
     GlobalConfig.set({
-      localDir: '',
+      localDir: tmpDir.path,
     });
   });
 
-  beforeEach(() => {
-    Fixtures.reset();
+  afterEach(async () => {
+    await tmpDir?.cleanup();
+    tmpDir = null;
   });
 
   it('should handle empty .editorconfig file', async () => {
-    Fixtures.mock({
-      '.editorconfig': '',
-    });
+    await fs.writeFile(`${tmpDir!.path}/.editorconfig`, '');
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
@@ -48,9 +38,10 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle global config from .editorconfig', async () => {
-    Fixtures.mock({
-      '.editorconfig': Fixtures.get('.global_editorconfig'),
-    });
+    await fs.writeFile(
+      `${tmpDir!.path}/.editorconfig`,
+      Fixtures.get('.global_editorconfig'),
+    );
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
     expect(format.indentationSize).toBe(6);
     expect(format.indentationType).toBe('space');
@@ -58,14 +49,7 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should return undefined in case of exception', async () => {
-    Fixtures.mock({
-      '.editorconfig': Fixtures.get('.global_editorconfig'),
-    });
-    const editorconf = await import('editorconfig');
-    jest
-      .spyOn(editorconf, 'parse')
-      .mockImplementationOnce(new Error('something') as never);
-
+    vi.mocked(editorconfig).parse.mockRejectedValueOnce(new Error('something'));
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
@@ -73,9 +57,10 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should not handle non json config from .editorconfig', async () => {
-    Fixtures.mock({
-      '.editorconfig': Fixtures.get('.non_json_editorconfig'),
-    });
+    await fs.writeFile(
+      `${tmpDir!.path}/.editorconfig`,
+      Fixtures.get('.non_json_editorconfig'),
+    );
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
@@ -83,9 +68,10 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle json config from .editorconfig', async () => {
-    Fixtures.mock({
-      '.editorconfig': Fixtures.get('.json_editorconfig'),
-    });
+    await fs.writeFile(
+      `${tmpDir!.path}/.editorconfig`,
+      Fixtures.get('.json_editorconfig'),
+    );
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationType).toBe('tab');

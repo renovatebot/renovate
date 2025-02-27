@@ -74,11 +74,8 @@ export function init(): void {
 
   instrumentations = [
     new HttpInstrumentation({
-      applyCustomAttributesOnSpan: /* istanbul ignore next */ (
-        span,
-        request,
-        response,
-      ) => {
+      /* v8 ignore start: not easily testable */
+      applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
         if (
           request instanceof ClientRequest &&
@@ -89,6 +86,7 @@ export function init(): void {
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
+      /* v8 ignore stop */
     }),
     new BunyanInstrumentation(),
   ];
@@ -97,8 +95,7 @@ export function init(): void {
   });
 }
 
-/* istanbul ignore next */
-
+/* v8 ignore start: not easily testable */
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
@@ -111,8 +108,8 @@ export async function shutdown(): Promise<void> {
     }
   }
 }
+/* v8 ignore stop */
 
-/* istanbul ignore next */
 export function disableInstrumentations(): void {
   for (const instrumentation of instrumentations) {
     instrumentation.disable();

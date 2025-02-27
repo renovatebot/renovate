@@ -38,9 +38,9 @@ vi.mock('fs-extra', async () => {
 // imports are readonly
 const presets = mocked(_presets);
 
-const addSecretForSanitizing = jest.spyOn(secrets, 'addSecretForSanitizing');
-const parseConfigs = jest.spyOn(configParser, 'parseConfigs');
-const initPlatform = jest.spyOn(platform, 'initPlatform');
+const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
+const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
+const initPlatform = vi.spyOn(platform, 'initPlatform');
 
 describe('workers/global/index', () => {
   beforeEach(() => {
@@ -155,7 +155,7 @@ describe('workers/global/index', () => {
   });
 
   it('processes repositories break', async () => {
-    const isLimitReached = jest.spyOn(limits, 'isLimitReached');
+    const isLimitReached = vi.spyOn(limits, 'isLimitReached');
     isLimitReached.mockReturnValue(true);
     parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',

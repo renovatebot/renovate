@@ -480,8 +480,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -611,8 +611,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -710,8 +710,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');

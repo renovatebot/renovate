@@ -59,7 +59,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
 
     it('updates cache', () => {
       cache.getCache.mockReturnValue(dummyCache);
-      jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+      vi.useFakeTimers().setSystemTime(new Date('2020-01-01'));
       setPrCache('branch_name', 'fingerprint_hash', true);
       expect(dummyCache).toStrictEqual({
         branches: [
@@ -87,7 +87,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
         ],
       };
       cache.getCache.mockReturnValue(dummyCache);
-      jest.useFakeTimers().setSystemTime(new Date('2020-01-02'));
+      vi.useFakeTimers().setSystemTime(new Date('2020-01-02'));
       setPrCache('branch_name', 'fingerprint_hash', false);
       expect(dummyCache2).toStrictEqual({
         branches: [

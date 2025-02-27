@@ -1,6 +1,6 @@
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   envMock,
   mockExecAll,
@@ -39,7 +39,7 @@ const adminConfig: RepoGlobalConfig = {
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
