@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { join } from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
