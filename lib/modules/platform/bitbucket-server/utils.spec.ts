@@ -62,6 +62,7 @@ function infoMock(
     }
     return {
       id: 123,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
@@ -71,6 +72,7 @@ function infoMock(
     // if ssh and https are both turned off
     return {
       id: 1,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },
