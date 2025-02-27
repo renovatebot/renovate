@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
-import { SemVer } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import { resolveConstraint } from '../../../util/exec/containerbase';
 import type { ExecOptions } from '../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -19,14 +18,9 @@ export async function updateArtifacts({
     return null;
   }
 
-  let supportsNoInstall = true;
-  if (constraints?.devbox) {
-    const constraintVersion = await resolveConstraint({
-      toolName: 'devbox',
-      constraint: constraints?.devbox,
-    });
-    supportsNoInstall = new SemVer(constraintVersion).compare('0.14.0') >= 0;
-  }
+  const supportsNoInstall = constraints?.devbox
+    ? semver.satisfies(constraints.devbox, '>=0.14.0')
+    : true;
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
