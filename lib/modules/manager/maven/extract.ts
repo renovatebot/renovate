@@ -473,7 +473,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       const dep = applyProps(rawDep, name, extractedProps[name]);
       if (dep.depType === 'parent') {
         const parentPkg = extractedPackages[pkg.parent!];
-        if (parentPkg && !parentPkg.parent) {
+        const hasParentWithNoParent = parentPkg && !parentPkg.parent;
+        const hasParentWithExternalParent =
+          parentPkg && !packageFileNames.includes(parentPkg.parent!);
+        if (hasParentWithNoParent || hasParentWithExternalParent) {
           rootDeps.add(dep.depName!);
         }
       }
