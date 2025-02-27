@@ -4,7 +4,9 @@ import { Toml, Yaml } from '../../../util/schema-utils';
 /**
  * config of `pixi.toml` of `tool.pixi` of `pyproject.toml`
  */
-export const PixiConfigSchema = z.union([z.object({}), z.undefined()]);
+export const PixiConfigSchema = z.object({}).nullish();
+
+export type PixiConfig = z.infer<typeof PixiConfigSchema>;
 
 export const PyprojectSchema = z
   .object({

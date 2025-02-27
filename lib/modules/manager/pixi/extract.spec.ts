@@ -105,24 +105,28 @@ describe('modules/manager/pixi/extract', () => {
     });
 
     it('returns parse pixi.toml', async () => {
-      expect(await extractPackageFile(pixiToml, 'pixi.toml')).toMatchObject({
-        deps: [],
-        fileFormat: 'toml',
-        lockFiles: [],
-      });
+      expect(await extractPackageFile(pixiToml, 'pixi.toml'))
+        .toMatchInlineSnapshot(`
+        {
+          "deps": [],
+          "lockFiles": [],
+        }
+      `);
     });
 
     it('returns parse pixi section from pyproject.toml', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockReturnValueOnce(Promise.resolve(true));
 
-      expect(
-        await extractPackageFile(pyprojectToml, 'pyproject.toml'),
-      ).toMatchObject({
-        deps: [],
-        fileFormat: 'toml',
-        lockFiles: ['pixi.lock'],
-      });
+      expect(await extractPackageFile(pyprojectToml, 'pyproject.toml'))
+        .toMatchInlineSnapshot(`
+        {
+          "deps": [],
+          "lockFiles": [
+            "pixi.lock",
+          ],
+        }
+      `);
     });
   });
 });

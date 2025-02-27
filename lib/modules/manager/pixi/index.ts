@@ -22,11 +22,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [
-  PypiDatasource.id,
-  GithubTagsDatasource.id,
-  GithubReleasesDatasource.id,
-  GitlabTagsDatasource.id,
-  GitRefsDatasource.id,
-  GitTagsDatasource.id,
-];
+export const supportedDatasources = [];

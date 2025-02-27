@@ -1,18 +1,17 @@
-import type { z } from 'zod';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import type { PackageFileContent } from '../types';
-import { type PixiConfigSchema, PixiToml, PyprojectToml } from './schema';
+import { type PixiConfig, PixiToml, PyprojectToml } from './schema';
 
 function getUserPixiConfig(
   content: string,
   packageFile: string,
-): null | z.infer<typeof PixiConfigSchema> {
+): null | PixiConfig {
   if (packageFile.endsWith('pyproject.toml')) {
     const { val, err } = Result.parse(content, PyprojectToml).unwrap();
     if (err) {
-      logger.debug({ packageFile, err }, `error parsing pyproject.toml`);
+      logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
     }
 
@@ -22,7 +21,7 @@ function getUserPixiConfig(
   if (packageFile.endsWith('pixi.toml')) {
     const { val, err } = Result.parse(content, PixiToml).unwrap();
     if (err) {
-      logger.debug({ packageFile, err }, `error parsing pixi.toml`);
+      logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
     }
 

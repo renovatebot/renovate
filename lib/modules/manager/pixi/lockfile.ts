@@ -17,9 +17,9 @@ interface Config {
   cmd: string;
 }
 
-export function pickConfig(lockVersion?: number): Config | undefined {
+export function pickConfig(lockVersion?: number): Config | null {
   if (!lockVersion) {
-    return;
+    return null;
   }
 
   for (const pixi of pixiGenerateLockFileVersion) {
@@ -28,5 +28,5 @@ export function pickConfig(lockVersion?: number): Config | undefined {
     }
   }
 
-  return undefined;
+  return null;
 }
