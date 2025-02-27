@@ -10,7 +10,7 @@ import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import { getBranchList } from '../../../util/git';
+import * as gitUtil from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
@@ -92,7 +92,7 @@ function unfoldBaseBranches(
 ): string[] {
   const unfoldedList: string[] = [];
 
-  const allBranches = getBranchList();
+  const allBranches = gitUtil.getBranchList();
   for (const baseBranch of baseBranches) {
     const isAllowedPred = getRegexPredicate(baseBranch);
     if (isAllowedPred) {
@@ -130,6 +130,16 @@ export async function extractDependencies(
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
+
+      // TODO: initialize these two variables
+      const isForkMode = true;
+      const isGitHub = true;
+
+      if (isForkMode && isGitHub) {
+        await scm.syncForkBranch(baseBranch);
+        logger.info(`Synced base branch ${baseBranch} of fork with upstream`);
+      }
+
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
