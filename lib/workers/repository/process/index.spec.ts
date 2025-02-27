@@ -64,7 +64,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = jest
+      platform.getJsonFile = vi
         .fn()
         .mockResolvedValue({ extends: [':approveMajorUpdates'] });
       config.baseBranches = ['master', 'dev'];
@@ -87,7 +87,7 @@ describe('workers/repository/process/index', () => {
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = jest
+      platform.getJsonFile = vi
         .fn()
         .mockImplementation((fileName, repoName, branchName) => {
           if (branchName === 'dev') {

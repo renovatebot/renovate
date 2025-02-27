@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, partial } from '../../../../test/util';

@@ -8,7 +8,7 @@ import * as internal from '.';
 vi.mock('../npm');
 vi.mock('../../../modules/datasource/npm');
 
-jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
+vi.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 

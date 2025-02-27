@@ -16,10 +16,7 @@ describe('workers/repository/config-migration/branch/create', () => {
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting',
-  );
+  const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;

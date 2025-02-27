@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { fs, git } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import { codeOwnersForPr } from './code-owners';

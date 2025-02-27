@@ -81,7 +81,6 @@ export default defineConfig(() =>
           'jest-extended/all',
           'expect-more-jest',
           './test/setup.ts',
-          './test/jest-legacy.ts',
           'test/to-migrate.ts',
         ],
         reporters: ci ? ['default', 'github-actions'] : ['default'],
@@ -89,6 +88,7 @@ export default defineConfig(() =>
         coverage: {
           provider: 'v8',
           ignoreEmptyLines: true,
+          skipFull: !ci,
           reporter: ci
             ? ['text-summary', 'lcovonly', 'json']
             : ['text-summary', 'html', 'json'],
@@ -112,10 +112,6 @@ export default defineConfig(() =>
             'lib/util/http/legacy.ts',
             'lib/workers/repository/cache.ts',
           ],
-        },
-        alias: {
-          // TODO: remove when migration is done
-          'jest-mock-extended': 'vitest-mock-extended',
         },
       },
     } satisfies ViteUserConfig,
