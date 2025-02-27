@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, partial } from '../../../../test/util';
@@ -13,11 +13,11 @@ import * as vendir from '.';
 
 process.env.CONTAINERBASE = 'true';
 
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env', () => mockDeep());
-jest.mock('../../../util/http', () => mockDeep());
-jest.mock('../../../util/fs', () => mockDeep());
-jest.mock('../../../util/git', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env', () => mockDeep());
+vi.mock('../../../util/http', () => mockDeep());
+vi.mock('../../../util/fs', () => mockDeep());
+vi.mock('../../../util/git', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI

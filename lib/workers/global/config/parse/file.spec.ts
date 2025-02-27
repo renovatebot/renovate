@@ -8,9 +8,9 @@ import customConfig from './__fixtures__/config';
 import * as file from './file';
 
 describe('workers/global/config/parse/file', () => {
-  const processExitSpy = jest.spyOn(process, 'exit');
-  const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
-  const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
+  const processExitSpy = vi.spyOn(process, 'exit');
+  const fsPathExistsSpy = vi.spyOn(fsExtra, 'pathExists');
+  const fsRemoveSpy = vi.spyOn(fsExtra, 'remove');
 
   let tmp: DirectoryResult;
 
@@ -72,7 +72,7 @@ describe('workers/global/config/parse/file', () => {
 
     it.each([
       [
-        'config.js',
+        'config.invalid.js',
         `module.exports = {
         "platform": "github",
         "token":"abcdef",
@@ -84,8 +84,8 @@ describe('workers/global/config/parse/file', () => {
         "repositories": [ "test/test" ],
       };`,
       ],
-      ['config.json5', `"invalid":`],
-      ['config.yaml', `invalid: -`],
+      ['config.invalid.json5', `"invalid":`],
+      ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
     ])(
       'fatal error and exit if error in parsing %s',
       async (fileName, fileContent) => {

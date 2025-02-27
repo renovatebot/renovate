@@ -32,7 +32,7 @@ spec:
   url: https://packages.dl.glasskube.dev/packages
 `;
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/glasskube/extract', () => {
   beforeEach(() => {

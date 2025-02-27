@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines 1`] = `
+exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts multiple image lines 1`] = `
 [
   {
     "deps": [
@@ -90,7 +90,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
 ]
 `;
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines with comments 1`] = `
+exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts multiple image lines with comments 1`] = `
 [
   {
     "deps": [
@@ -130,7 +130,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
 ]
 `;
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple included image lines 1`] = `
+exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts multiple included image lines 1`] = `
 [
   {
     "deps": [
@@ -200,7 +200,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
 ]
 `;
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple named services 1`] = `
+exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts multiple named services 1`] = `
 [
   {
     "deps": [
@@ -310,7 +310,7 @@ exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts mult
 ]
 `;
 
-exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts named services 1`] = `
+exports[`modules/manager/gitlabci/extract > extractAllPackageFiles() > extracts named services 1`] = `
 [
   {
     "deps": [

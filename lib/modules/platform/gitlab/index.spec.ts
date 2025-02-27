@@ -1,6 +1,6 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { git, hostRules, logger, mocked } from '../../../../test/util';
@@ -19,9 +19,10 @@ import { getPrBodyStruct } from '../pr-body';
 import * as prBodyModule from '../utils/pr-body';
 import * as gitlab from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/git');
-jest.mock('timers/promises');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/git', () => mockDeep());
+vi.mock('timers/promises');
+vi.mock('../utils/pr-body', { spy: true });
 
 const timers = mocked(_timers);
 
@@ -3425,30 +3426,29 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('returns updated pr body', async () => {
-      jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
-
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
-      expect(smartTruncate).not.toHaveBeenCalled();
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledOnce();
     });
 
     it('truncates description if too low API version', async () => {
-      const smartTruncate = jest.spyOn(prBodyModule, 'smartTruncate');
-
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
-      expect(smartTruncate).toHaveBeenCalledTimes(1);
-      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+        expect.any(String),
+        25000,
+      );
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      const smartTruncate = jest.spyOn(prBodyModule, 'smartTruncate');
-
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);
-      expect(smartTruncate).toHaveBeenCalledTimes(1);
-      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+        expect.any(String),
+        1000000,
+      );
     });
   });
 

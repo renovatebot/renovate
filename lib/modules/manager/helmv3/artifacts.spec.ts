@@ -1,8 +1,8 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -16,11 +16,11 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
 
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 const datasource = mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {

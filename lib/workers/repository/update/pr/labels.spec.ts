@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitlab', () => {
-        jest.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
+        vi.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
           return 255;
         });
         // platform.labelCharLimit.mockReturnValueOnce(255);
