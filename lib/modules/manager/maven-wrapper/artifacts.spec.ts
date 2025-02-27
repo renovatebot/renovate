@@ -1,8 +1,8 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';

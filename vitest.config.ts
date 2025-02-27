@@ -113,10 +113,6 @@ export default defineConfig(() =>
             'lib/workers/repository/cache.ts',
           ],
         },
-        alias: {
-          // TODO: remove when migration is done
-          'jest-mock-extended': 'vitest-mock-extended',
-        },
       },
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
