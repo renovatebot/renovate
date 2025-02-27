@@ -158,4 +158,8 @@ version = '1'
       rawToml,
     );
   });
+
+  it('should not replace table', () => {
+    expect(replaceString(rawToml, ['project'], () => 'hello')).toBe(rawToml);
+  });
 });
