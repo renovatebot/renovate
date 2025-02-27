@@ -1,21 +1,22 @@
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
+import { PyProjectSchema } from '../pep621/schema';
 import type { PackageFileContent } from '../types';
-import { type PixiConfig, PixiToml, PyprojectToml } from './schema';
+import { type PixiConfig, PixiToml } from './schema';
 
 function getUserPixiConfig(
   content: string,
   packageFile: string,
 ): null | PixiConfig {
   if (packageFile.endsWith('pyproject.toml')) {
-    const { val, err } = Result.parse(content, PyprojectToml).unwrap();
+    const { val, err } = Result.parse(content, PyProjectSchema).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
       return null;
     }
 
-    return val.tool?.pixi;
+    return val.tool?.pixi ?? null;
   }
 
   if (packageFile.endsWith('pixi.toml')) {
@@ -28,7 +29,6 @@ function getUserPixiConfig(
     return val;
   }
 
-  /* v8 ignore next 2 */
   return null;
 }
 
