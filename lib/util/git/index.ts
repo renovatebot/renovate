@@ -614,7 +614,7 @@ export async function checkoutBranchFromRemote(
   }
 }
 
-export async function resetHardToRemote(
+export async function resetHardFromRemote(
   remoteAndBranch: string,
 ): Promise<void> {
   try {
@@ -1476,7 +1476,7 @@ export async function syncForkBranch(
     } else {
       await checkoutBranchFromRemote(branchName, `upstream`);
     }
-    await resetHardToRemote(`upstream/${branchName}`);
+    await resetHardFromRemote(`upstream/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
     // Get long git sha
     return (await git.revparse([branchName])) as LongCommitSha;

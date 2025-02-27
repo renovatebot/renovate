@@ -10,7 +10,7 @@ import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import * as gitUtil from '../../../util/git';
+import { getBranchList } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
@@ -92,7 +92,7 @@ function unfoldBaseBranches(
 ): string[] {
   const unfoldedList: string[] = [];
 
-  const allBranches = gitUtil.getBranchList();
+  const allBranches = getBranchList();
   for (const baseBranch of baseBranches) {
     const isAllowedPred = getRegexPredicate(baseBranch);
     if (isAllowedPred) {
