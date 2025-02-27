@@ -1844,9 +1844,29 @@ export async function reattemptPlatformAutomerge({
   }
 }
 
+function mapMergeStartegy(
+  strategy: MergePRConfig['strategy'],
+): string | undefined {
+  switch (strategy) {
+    case 'auto':
+      return undefined;
+    case 'fast-forward': {
+      logger.warn(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+      return undefined;
+    }
+    case 'merge-commit':
+      return 'merge';
+    default:
+      return strategy;
+  }
+}
+
 export async function mergePr({
   branchName,
   id: prNo,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   const url = `repos/${
@@ -1861,9 +1881,11 @@ export async function mergePr({
   }
   let automerged = false;
   let automergeResult: HttpResponse<unknown>;
-  if (config.mergeMethod) {
+  const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
+
+  if (mergeStrategy) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
-    options.body.merge_method = config.mergeMethod;
+    options.body.merge_method = mergeStrategy;
     try {
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
@@ -1906,6 +1928,7 @@ export async function mergePr({
     }
   }
   if (!automerged) {
+    logger.debug('No merge strategy set for the repository');
     // We need to guess the merge method and try squash -> merge -> rebase
     options.body.merge_method = 'squash';
     try {

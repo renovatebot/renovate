@@ -3662,6 +3662,78 @@ describe('modules/platform/github/index', () => {
         }),
       ).toBeFalse();
     });
+
+    // should warn if mergeStragey is fast-forward
+    it('should warn if automergeStrategy is invalid', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        // .get(
+        //   '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        // )
+        // .reply(200, [
+        //   {
+        //     number: 1234,
+        //     base: { sha: '1234' },
+        //     head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+        //     state: 'open',
+        //     title: 'Some PR',
+        //   },
+        // ])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'fast-forward',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+    });
+
+    // should use configured automergeStrategy
+    it('should use configured automergeStrategy', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        // .get(
+        //   '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        // )
+        // .reply(200, [
+        //   {
+        //     number: 1234,
+        //     base: { sha: '1234' },
+        //     head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+        //     state: 'open',
+        //     title: 'Some PR',
+        //   },
+        // ])
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'rebase',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          options: {
+            body: { merge_method: 'rebase' },
+          },
+          url: 'repos/some/repo/pulls/1234/merge',
+        },
+        'mergePr',
+      );
+    });
   });
 
   describe('massageMarkdown(input)', () => {
