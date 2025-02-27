@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { PypiDatasource } from '../../datasource/pypi';
 
 export { bumpPackageVersion } from '../pep621/update';
 export { extractPackageFile } from './extract';
@@ -16,4 +17,4 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [];
+export const supportedDatasources = [PypiDatasource.id];
