@@ -15,7 +15,7 @@ function getUserPixiConfig(
       return null;
     }
 
-    return val;
+    return val.tool?.pixi;
   }
 
   if (packageFile.endsWith('pixi.toml')) {

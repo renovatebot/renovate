@@ -8,13 +8,9 @@ export const PixiConfigSchema = z.object({}).nullish();
 
 export type PixiConfig = z.infer<typeof PixiConfigSchema>;
 
-export const PyprojectSchema = z
-  .object({
-    tool: z.object({ pixi: PixiConfigSchema }),
-  })
-  .transform(({ tool: { pixi } }) => {
-    return pixi ?? null;
-  });
+export const PyprojectSchema = z.object({
+  tool: z.object({ pixi: PixiConfigSchema.nullish() }).optional(),
+});
 
 export const PyprojectToml = Toml.pipe(PyprojectSchema);
 export const PixiToml = Toml.pipe(PixiConfigSchema);
