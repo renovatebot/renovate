@@ -13,14 +13,15 @@ import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
-import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
+import { joinUrlParts, parseLinkHeader } from '../url';
 import { findMatchingRule } from './host-rules';
+import type { InternalHttpOptions, InternalJsonUnsafeOptions } from './http';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
+  HttpMethod,
   HttpOptions,
   HttpResponse,
-  InternalHttpOptions,
 } from './types';
 import { Http } from '.';
 
@@ -73,10 +74,6 @@ function handleGotError(
     err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    return new ExternalHostError(err, 'github');
-  }
-  if (err.name === 'ParseError') {
-    logger.debug({ err }, '');
     return new ExternalHostError(err, 'github');
   }
   if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
@@ -267,23 +264,20 @@ function replaceUrlBase(url: URL, baseUrl: string): URL {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions> {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
+
   constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
   }
 
-  protected override async request<T>(
-    url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions,
-    okToRetry = true,
-  ): Promise<HttpResponse<T>> {
-    const opts: InternalHttpOptions & GithubHttpOptions = {
-      baseUrl,
-      ...options,
-      throwHttpErrors: true,
-    };
-
+  protected override processOptions(
+    url: URL,
+    opts: InternalHttpOptions & GithubHttpOptions,
+  ): void {
     if (!opts.token) {
-      const authUrl = new URL(resolveBaseUrl(opts.baseUrl!, url));
+      const authUrl = new URL(url);
 
       if (opts.repository) {
         // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
@@ -317,68 +311,87 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       ...opts.headers,
       accept,
     };
+  }
 
-    try {
-      const result = await super.request<T>(url, opts);
-      if (opts.paginate) {
-        // Check if result is paginated
-        const pageLimit = opts.pageLimit ?? 10;
-        const linkHeader = parseLinkHeader(result?.headers?.link);
-        const next = linkHeader?.next;
-        if (next?.url && linkHeader?.last?.page) {
-          let lastPage = parseInt(linkHeader.last.page, 10);
-          // istanbul ignore else: needs a test
-          if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
-            lastPage = Math.min(pageLimit, lastPage);
-          }
-          const baseUrl = opts.baseUrl;
-          const parsedUrl = new URL(next.url, baseUrl);
-          const rebasePagination =
-            !!baseUrl &&
-            !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
-            // Preserve github.com URLs for use cases like release notes
-            parsedUrl.origin !== 'https://api.github.com';
-          const firstPageUrl = rebasePagination
-            ? replaceUrlBase(parsedUrl, baseUrl)
-            : parsedUrl;
-          const queue = [...range(2, lastPage)].map(
-            (pageNumber) => (): Promise<HttpResponse<T>> => {
-              // copy before modifying searchParams
-              const nextUrl = new URL(firstPageUrl);
-              nextUrl.searchParams.set('page', String(pageNumber));
-              return this.request<T>(
-                nextUrl,
-                { ...opts, paginate: false, cacheProvider: undefined },
-                okToRetry,
-              );
-            },
-          );
-          const pages = await p.all(queue);
-          if (opts.paginationField && is.plainObject(result.body)) {
-            const paginatedResult = result.body[opts.paginationField];
-            if (is.array<T>(paginatedResult)) {
-              for (const nextPage of pages) {
-                if (is.plainObject(nextPage.body)) {
-                  const nextPageResults = nextPage.body[opts.paginationField];
-                  if (is.array<T>(nextPageResults)) {
-                    paginatedResult.push(...nextPageResults);
-                  }
+  protected override handleError(
+    url: string | URL,
+    opts: HttpOptions,
+    err: GotLegacyError,
+  ): never {
+    throw handleGotError(err, url, opts);
+  }
+
+  protected override async requestJsonUnsafe<T>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<GithubHttpOptions>,
+  ): Promise<HttpResponse<T>> {
+    const httpOptions = options.httpOptions ?? {};
+    const resolvedUrl = this.resolveUrl(options.url, httpOptions);
+    const opts = {
+      ...options,
+      url: resolvedUrl,
+    };
+
+    const result = await super.requestJsonUnsafe<T>(method, opts);
+    if (httpOptions.paginate) {
+      delete httpOptions.cacheProvider;
+      // Check if result is paginated
+      const pageLimit = httpOptions.pageLimit ?? 10;
+      const linkHeader = parseLinkHeader(result?.headers?.link);
+      const next = linkHeader?.next;
+      if (next?.url && linkHeader?.last?.page) {
+        let lastPage = parseInt(linkHeader.last.page, 10);
+        if (
+          !process.env.RENOVATE_PAGINATE_ALL &&
+          httpOptions.paginate !== 'all'
+        ) {
+          lastPage = Math.min(pageLimit, lastPage);
+        }
+        const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
+        const parsedUrl = new URL(next.url, baseUrl);
+        const rebasePagination =
+          !!baseUrl &&
+          !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+          // Preserve github.com URLs for use cases like release notes
+          parsedUrl.origin !== 'https://api.github.com';
+        const firstPageUrl = rebasePagination
+          ? replaceUrlBase(parsedUrl, baseUrl)
+          : parsedUrl;
+        const queue = [...range(2, lastPage)].map(
+          (pageNumber) => (): Promise<HttpResponse<T>> => {
+            // copy before modifying searchParams
+            const nextUrl = new URL(firstPageUrl);
+            nextUrl.searchParams.set('page', String(pageNumber));
+            return super.requestJsonUnsafe<T>(method, {
+              ...opts,
+              url: nextUrl,
+            });
+          },
+        );
+        const pages = await p.all(queue);
+        if (httpOptions.paginationField && is.plainObject(result.body)) {
+          const paginatedResult = result.body[httpOptions.paginationField];
+          if (is.array<T>(paginatedResult)) {
+            for (const nextPage of pages) {
+              if (is.plainObject(nextPage.body)) {
+                const nextPageResults =
+                  nextPage.body[httpOptions.paginationField];
+                if (is.array<T>(nextPageResults)) {
+                  paginatedResult.push(...nextPageResults);
                 }
               }
             }
-          } else if (is.array<T>(result.body)) {
-            for (const nextPage of pages) {
-              if (is.array<T>(nextPage.body)) {
-                result.body.push(...nextPage.body);
-              }
+          }
+        } else if (is.array<T>(result.body)) {
+          for (const nextPage of pages) {
+            if (is.array<T>(nextPage.body)) {
+              result.body.push(...nextPage.body);
             }
           }
         }
       }
-      return result;
-    } catch (err) {
-      throw handleGotError(err, url, opts);
     }
+    return result;
   }
 
   public async requestGraphql<T = unknown>(
@@ -528,6 +541,6 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         `Expected raw text file but received ${typeof result.body}`,
       );
     }
-    return result;
+    return result as HttpResponse<string>;
   }
 }

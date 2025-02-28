@@ -28,7 +28,7 @@ describe('util/http/index', () => {
 
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    expect(await http.get('http://renovate.com/test')).toEqual({
+    expect(await http.getText('http://renovate.com/test')).toEqual({
       authorization: false,
       body: '',
       headers: {},

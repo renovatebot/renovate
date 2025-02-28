@@ -187,7 +187,7 @@ export class DebDatasource extends Datasource {
    */
   private async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
     const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
-    const response = await this.http.get(inReleaseUrl);
+    const response = await this.http.getText(inReleaseUrl);
     return response.body;
   }
 

@@ -109,6 +109,7 @@ export default defineConfig(() =>
             'lib/modules/datasource/hex/v2/package.ts',
             'lib/modules/datasource/hex/v2/signed.ts',
             'lib/util/cache/package/redis.ts',
+            'lib/util/http/http.ts', // TODO: remove when code is moved from index
             'lib/util/http/legacy.ts',
             'lib/workers/repository/cache.ts',
           ],

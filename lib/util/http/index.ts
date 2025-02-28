@@ -1,3 +1,6 @@
+// TODO: refactor code to remove this (#9651)
+import './legacy';
+
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, RetryObject } from 'got';
@@ -14,40 +17,34 @@ import * as memCache from '../cache/memory';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
-import { resolveBaseUrl } from '../url';
+import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
+import type {
+  InternalGotOptions,
+  InternalHttpOptions,
+  InternalJsonOptions,
+  InternalJsonUnsafeOptions,
+} from './http';
 import { getQueue } from './queue';
 import { getRetryAfter, wrapWithRetry } from './retry-after';
 import { getThrottle } from './throttle';
 import type {
-  GotJSONOptions,
+  GotBufferOptions,
   GotOptions,
   GotTask,
+  HttpMethod,
   HttpOptions,
   HttpResponse,
-  InternalHttpOptions,
 } from './types';
-// TODO: refactor code to remove this (#9651)
-import './legacy';
 import { copyResponse } from './util';
 
 export { RequestError as HttpError };
 
 export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
-
-interface HttpFnArgs<
-  Opts extends HttpOptions,
-  ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>,
-> {
-  url: string;
-  httpOptions?: Opts;
-  schema?: Schema;
-}
 
 function applyDefaultHeaders(options: Options): void {
   const renovateVersion = pkg.version;
@@ -61,42 +58,32 @@ function applyDefaultHeaders(options: Options): void {
 
 type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
 
-// Note on types:
-// options.requestType can be either 'json' or 'buffer', but `T` should be
-// `Buffer` in the latter case.
-// We don't declare overload signatures because it's immediately wrapped by
-// `request`.
-async function gotTask<T>(
+async function gotTask(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
   queueStats: QueueStatsData,
-): Promise<HttpResponse<T>> {
+): Promise<HttpResponse<Buffer | string>> {
   logger.trace({ url, options }, 'got request');
 
   let duration = 0;
   let statusCode = 0;
-
   try {
     // Cheat the TS compiler using `as` to pick a specific overload.
     // Otherwise it doesn't typecheck.
-    const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
+    const resp = await got(url, { ...options, hooks } as GotBufferOptions);
     statusCode = resp.statusCode;
     duration =
-      resp.timings.phases.total ??
-      /* istanbul ignore next: can't be tested */ 0;
+      resp.timings.phases.total ?? /* v8 ignore next: can't be tested */ 0;
     return resp;
   } catch (error) {
     if (error instanceof RequestError) {
       statusCode =
-        error.response?.statusCode ??
-        /* istanbul ignore next: can't be tested */ -1;
+        error.response?.statusCode ?? /* v8 ignore next: can't be tested */ -1;
       duration =
-        error.timings?.phases.total ??
-        /* istanbul ignore next: can't be tested */ -1;
+        error.timings?.phases.total ?? /* v8 ignore next: can't be tested */ -1;
       const method = options.method.toUpperCase();
-      const code = error.code ?? /* istanbul ignore next */ 'UNKNOWN';
-      const retryCount =
-        error.request?.retryCount ?? /* istanbul ignore next */ -1;
+      const code = error.code ?? /* v8 ignore next */ 'UNKNOWN';
+      const retryCount = error.request?.retryCount ?? /* v8 ignore next */ -1;
       logger.debug(
         `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`,
       );
@@ -115,16 +102,21 @@ async function gotTask<T>(
 }
 
 export class Http<Opts extends HttpOptions = HttpOptions> {
-  private options?: GotOptions;
+  private readonly options: InternalGotOptions;
+
+  protected get baseUrl(): string | undefined {
+    return undefined;
+  }
 
   constructor(
     protected hostType: string,
     options: HttpOptions = {},
   ) {
     const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
-    this.options = merge<GotOptions>(
+    this.options = merge<InternalGotOptions>(
       options,
       {
+        method: 'get',
         context: { hostType },
         retry: {
           calculateDelay: (retryObject) =>
@@ -137,18 +129,29 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
   }
 
-  protected async request<T>(
+  private async request(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<T>> {
-    let url = requestUrl.toString();
-    if (httpOptions?.baseUrl) {
-      url = resolveBaseUrl(httpOptions.baseUrl, url);
-    }
+    httpOptions: InternalHttpOptions & { responseType: 'text' },
+  ): Promise<HttpResponse<string>>;
+  private async request(
+    requestUrl: string | URL,
+    httpOptions: InternalHttpOptions & { responseType: 'buffer' },
+  ): Promise<HttpResponse<Buffer>>;
+  private async request(
+    requestUrl: string | URL,
+    httpOptions: InternalHttpOptions & { responseType?: 'text' | 'buffer' },
+  ): Promise<HttpResponse<string | Buffer>>;
+  private async request(
+    requestUrl: string | URL,
+    httpOptions: InternalHttpOptions & { responseType?: 'text' | 'buffer' },
+  ): Promise<HttpResponse<string | Buffer>> {
+    const resolvedUrl = this.resolveUrl(requestUrl, httpOptions);
+    const url = resolvedUrl.toString();
 
-    let options = merge<SetRequired<GotOptions, 'method'>, InternalHttpOptions>(
+    this.processOptions(resolvedUrl, httpOptions);
+
+    let options = merge<InternalGotOptions, InternalHttpOptions>(
       {
-        method: 'get',
         ...this.options,
         hostType: this.hostType,
       },
@@ -181,7 +184,9 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options.timeout ??= 60000;
 
     const { cacheProvider } = options;
-    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
+    const cachedResponse = await cacheProvider?.bypassServer<string | Buffer>(
+      url,
+    );
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -198,34 +203,29 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           )
         : null;
 
-    let resPromise: Promise<HttpResponse<T>> | null = null;
+    let resPromise: Promise<HttpResponse<Buffer | string>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
     }
 
-    // istanbul ignore else: no cache tests
     if (!resPromise) {
       if (cacheProvider) {
         await cacheProvider.setCacheHeaders(url, options);
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask<T> = () => {
+      const httpTask: GotTask = () => {
         const queueMs = Date.now() - startTime;
         return gotTask(url, options, { queueMs });
       };
 
       const throttle = getThrottle(url);
-      const throttledTask: GotTask<T> = throttle
-        ? () => throttle.add<HttpResponse<T>>(httpTask)
-        : httpTask;
+      const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask: GotTask<T> = queue
-        ? () => queue.add<HttpResponse<T>>(throttledTask)
-        : throttledTask;
+      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
@@ -252,7 +252,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<T>(url, true);
+      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
+        url,
+        true,
+      );
       if (staleResponse) {
         logger.debug(
           { err },
@@ -261,57 +264,136 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         return staleResponse;
       }
 
-      throw err;
+      if (
+        err instanceof RequestError &&
+        err.response?.headers['content-type'] === 'application/json'
+      ) {
+        err.response.body = JSON.parse(err.response.body as string);
+      }
+
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+
+      this.handleError(requestUrl, httpOptions, err);
     }
+  }
+
+  protected processOptions(_url: URL, _httpOptions: HttpOptions): void {
+    // noop
+  }
+
+  protected handleError(
+    _url: string | URL,
+    _httpOptions: HttpOptions,
+    err: Error,
+  ): never {
+    throw err;
+  }
+
+  protected resolveUrl(
+    requestUrl: string | URL,
+    options: HttpOptions | undefined,
+  ): URL {
+    let url = requestUrl;
+
+    if (url instanceof URL) {
+      // already a aboslute URL
+      return url;
+    }
+
+    const baseUrl = options?.baseUrl ?? this.baseUrl;
+    if (baseUrl) {
+      url = resolveBaseUrl(baseUrl, url);
+    }
+
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl || !isHttpUrl(parsedUrl)) {
+      logger.error({ url: requestUrl }, 'Request Error: cannot parse url');
+      throw new Error('Invalid URL');
+    }
+    return parsedUrl;
   }
 
   protected calculateRetryDelay({ computedValue }: RetryObject): number {
     return computedValue;
   }
 
-  get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return this.request<string>(url, options);
+  protected prepareJsonBody(body: string): string {
+    return body;
   }
 
-  head(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return this.request<string>(url, { ...options, method: 'head' });
+  get(
+    url: string,
+    options: HttpOptions = {},
+  ): Promise<HttpResponse<string | Buffer>> {
+    return this.request(url, options);
+  }
+
+  head(url: string, options: HttpOptions = {}): Promise<HttpResponse<never>> {
+    // to complex to validate
+    return this.request(url, {
+      ...options,
+      responseType: 'text',
+      method: 'head',
+    }) as Promise<HttpResponse<never>>;
+  }
+
+  getText(
+    url: string | URL,
+    options: HttpOptions = {},
+  ): Promise<HttpResponse<string>> {
+    return this.request(url, { ...options, responseType: 'text' });
   }
 
   getBuffer(
-    url: string,
+    url: string | URL,
     options: HttpOptions = {},
   ): Promise<HttpResponse<Buffer>> {
-    return this.request<Buffer>(url, {
-      ...options,
-      responseType: 'buffer',
-    });
+    return this.request(url, { ...options, responseType: 'buffer' });
   }
 
-  private async requestJson<ResT = unknown>(
-    method: InternalHttpOptions['method'],
-    { url, httpOptions: requestOptions, schema }: HttpFnArgs<Opts, ResT>,
+  protected async requestJsonUnsafe<ResT>(
+    method: HttpMethod,
+    { url, httpOptions: requestOptions }: InternalJsonUnsafeOptions<Opts>,
   ): Promise<HttpResponse<ResT>> {
-    const { body, ...httpOptions } = { ...requestOptions };
+    const { body: json, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
       ...httpOptions,
       method,
-      responseType: 'json',
     };
     // signal that we expect a json response
     opts.headers = {
       accept: 'application/json',
       ...opts.headers,
     };
-    if (body) {
-      opts.json = body;
+    if (json) {
+      opts.json = json;
     }
-    const res = await this.request<ResT>(url, opts);
+    const res = await this.getText(url, opts);
 
-    if (!schema) {
-      return res;
+    if (!res.body) {
+      return res as HttpResponse<ResT>;
     }
 
-    res.body = await schema.parseAsync(res.body);
+    try {
+      const body = JSON.parse(this.prepareJsonBody(res.body)) as ResT;
+      return Object.assign(res, { body });
+    } catch (e) {
+      throw new ExternalHostError(e);
+    }
+  }
+
+  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+    method: HttpMethod,
+    options: InternalJsonOptions<Opts, ResT, Schema>,
+  ): Promise<HttpResponse<ResT>> {
+    const res = await this.requestJsonUnsafe<ResT>(method, options);
+
+    if (options.schema) {
+      res.body = await options.schema.parseAsync(res.body);
+    }
+
     return res;
   }
 
@@ -319,8 +401,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     arg1: string,
     arg2: Opts | ZodType<ResT> | undefined,
     arg3: ZodType<ResT> | undefined,
-  ): HttpFnArgs<Opts, ResT> {
-    const res: HttpFnArgs<Opts, ResT> = { url: arg1 };
+  ): InternalJsonOptions<Opts, ResT> {
+    const res: InternalJsonOptions<Opts, ResT> = { url: arg1 };
 
     if (arg2 instanceof ZodType) {
       res.schema = arg2;
@@ -337,7 +419,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
     const opt = options ?? {};
-    return await this.get(url, {
+    return await this.getText(url, {
       headers: {
         Accept: 'text/plain',
       },
@@ -352,7 +434,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     url: string,
     options?: Opts,
   ): Promise<HttpResponse<ResT>> {
-    const res = await this.get(url, options);
+    const res = await this.getText(url, options);
     const body = parseSingleYaml<ResT>(res.body);
     return { ...res, body };
   }
@@ -386,7 +468,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       method: 'get',
     };
 
-    const res = await this.get(url, opts);
+    const res = await this.getText(url, opts);
     const body = await schema.parseAsync(parseSingleYaml(res.body));
     return { ...res, body };
   }
@@ -583,17 +665,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
     // TODO: fix types (#22198)
     let combinedOptions: any = {
-      method: 'get',
       ...this.options,
       hostType: this.hostType,
       ...options,
     };
 
-    let resolvedUrl = url;
-    // istanbul ignore else: needs test
-    if (options?.baseUrl) {
-      resolvedUrl = resolveBaseUrl(options.baseUrl, url);
-    }
+    const resolvedUrl = this.resolveUrl(url, options).toString();
 
     applyDefaultHeaders(combinedOptions);
 

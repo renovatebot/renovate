@@ -1,8 +1,6 @@
-import { parseJson } from '../common';
 import { regEx } from '../regex';
-import { isHttpUrl } from '../url';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from './index';
+import type { HttpOptions } from './types';
+import { Http } from '.';
 
 let baseUrl: string;
 export function setBaseUrl(url: string): void {
@@ -16,23 +14,15 @@ export function setBaseUrl(url: string): void {
 export class GerritHttp extends Http {
   private static magicPrefix = regEx(/^\)]}'\n/g);
 
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
+
   constructor(options?: HttpOptions) {
     super('gerrit', options);
   }
 
-  protected override async request<T>(
-    path: string,
-    options?: InternalHttpOptions,
-  ): Promise<HttpResponse<T>> {
-    const url = isHttpUrl(path) ? path : baseUrl + path;
-    const opts: InternalHttpOptions = {
-      parseJson: (text: string) =>
-        parseJson(text.replace(GerritHttp.magicPrefix, ''), path),
-      ...options,
-    };
-    opts.headers = {
-      ...opts.headers,
-    };
-    return await super.request<T>(url, opts);
+  protected override prepareJsonBody(body: string): string {
+    return body.replace(GerritHttp.magicPrefix, '');
   }
 }

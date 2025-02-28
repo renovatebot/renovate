@@ -4,6 +4,7 @@ import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
+import { logger } from '~test/util';
 
 hostRules.add({
   hostType: 'gitlab',
@@ -36,18 +37,26 @@ describe('util/http/gitlab', () => {
       .scope(gitlabApiHost)
       .get('/api/v4/some-url')
       .reply(200, ['a'], {
-        link: '<https://gitlab.com/api/v4/some-url&page=2>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://gitlab.com/api/v4/some-url&page=2>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
       })
       .get('/api/v4/some-url&page=2')
       .reply(200, ['b', 'c'], {
-        link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
       })
       .get('/api/v4/some-url&page=3')
-      .reply(200, ['d']);
+      .reply(200, ['d'], {
+        link: '<https://gitlab.com/api/v4/some-url&page=4>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=4')
+      .reply(500);
     const res = await gitlabApi.getJsonUnchecked('some-url', {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Pagination error',
+    );
   });
 
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {

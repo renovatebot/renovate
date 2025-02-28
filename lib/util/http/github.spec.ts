@@ -563,7 +563,7 @@ describe('util/http/github', () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.requestGraphql(graphqlQuery);
+      await githubApi.requestGraphql(graphqlQuery, { token: 'abc' });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
@@ -948,6 +948,7 @@ describe('util/http/github', () => {
         .reply(200, Buffer.from('foo', 'binary'));
       await expect(
         githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.bin`, {
+          // @ts-expect-error not allowed
           responseType: 'buffer',
         }),
       ).rejects.toThrow();

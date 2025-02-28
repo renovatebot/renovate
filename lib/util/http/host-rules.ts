@@ -12,8 +12,9 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
+import type { InternalHttpOptions } from './http';
 import { keepAliveAgents } from './keep-alive';
-import type { GotOptions, InternalHttpOptions } from './types';
+import type { GotOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,

@@ -1,8 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
-  OptionsOfJSONResponseBody,
-  ParseJsonFunction,
+  OptionsOfTextResponseBody,
 } from 'got';
 import type { HttpCacheProvider } from './cache/types';
 
@@ -11,9 +10,9 @@ export type GotContextOptions = {
 } & Record<string, unknown>;
 
 // TODO: Move options to context
-export type GotOptions = GotBufferOptions | GotJSONOptions;
+export type GotOptions = GotBufferOptions | GotTextOptions;
 export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
-export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
+export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
 
 export interface GotExtraOptions {
   abortOnError?: boolean;
@@ -69,16 +68,11 @@ export interface HttpOptions {
   readOnly?: boolean;
 }
 
-export interface InternalHttpOptions extends HttpOptions {
-  json?: HttpOptions['body'];
-  responseType?: 'json' | 'buffer';
-  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
-  parseJson?: ParseJsonFunction;
-}
-
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
 }
+
+export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 
 export interface HttpResponse<T = string> {
   statusCode: number;
@@ -88,7 +82,7 @@ export interface HttpResponse<T = string> {
 }
 
 export type Task<T> = () => Promise<T>;
-export type GotTask<T> = Task<HttpResponse<T>>;
+export type GotTask<T = Buffer | string> = Task<HttpResponse<T>>;
 
 export interface ThrottleLimitRule {
   matchHost: string;
