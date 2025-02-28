@@ -91,11 +91,15 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
       'ETIMEDOUT',
       'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
     ];
+    // TODO: fix test, should be `RequestError`
     if (
       'code' in err &&
       is.string(err.code) &&
       platformFailureCodes.includes(err.code)
     ) {
+      throw new ExternalHostError(err, 'gitlab');
+    }
+    if (err.name === 'ParseError') {
       throw new ExternalHostError(err, 'gitlab');
     }
     throw err;

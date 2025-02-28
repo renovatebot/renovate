@@ -1,3 +1,4 @@
+import type { Options } from 'got';
 import type { SetRequired } from 'type-fest';
 import type { ZodType } from 'zod';
 import type { GotOptions, HttpMethod, HttpOptions } from './types';
@@ -23,4 +24,6 @@ export interface InternalHttpOptions extends HttpOptions {
   json?: HttpOptions['body'];
 
   method?: HttpMethod;
+
+  parseJson?: Options['parseJson'];
 }

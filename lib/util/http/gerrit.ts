@@ -1,4 +1,7 @@
+import { parseJson } from '../common';
 import { regEx } from '../regex';
+import { isHttpUrl } from '../url';
+import type { InternalHttpOptions } from './http';
 import type { HttpOptions } from './types';
 import { Http } from '.';
 
@@ -22,7 +25,22 @@ export class GerritHttp extends Http {
     super('gerrit', options);
   }
 
-  protected override prepareJsonBody(body: string): string {
-    return body.replace(GerritHttp.magicPrefix, '');
+  protected override resolveUrl(
+    requestUrl: string | URL,
+    options: HttpOptions | undefined,
+  ): URL {
+    // ensure trailing slash for gerrit
+    return super.resolveUrl(
+      isHttpUrl(requestUrl) ? requestUrl : `${baseUrl}${requestUrl}`,
+      options,
+    );
+  }
+
+  protected override processOptions(
+    url: URL,
+    options: InternalHttpOptions,
+  ): void {
+    options.parseJson = (text: string) =>
+      parseJson(text.replace(GerritHttp.magicPrefix, ''), url.pathname);
   }
 }

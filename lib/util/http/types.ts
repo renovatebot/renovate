@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
+  OptionsOfJSONResponseBody,
   OptionsOfTextResponseBody,
 } from 'got';
 import type { HttpCacheProvider } from './cache/types';
@@ -10,9 +11,10 @@ export type GotContextOptions = {
 } & Record<string, unknown>;
 
 // TODO: Move options to context
-export type GotOptions = GotBufferOptions | GotTextOptions;
+export type GotOptions = GotBufferOptions | GotTextOptions | GotJSONOptions;
 export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
+export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 
 export interface GotExtraOptions {
   abortOnError?: boolean;
@@ -82,7 +84,7 @@ export interface HttpResponse<T = string> {
 }
 
 export type Task<T> = () => Promise<T>;
-export type GotTask<T = Buffer | string> = Task<HttpResponse<T>>;
+export type GotTask<T = unknown> = Task<HttpResponse<T>>;
 
 export interface ThrottleLimitRule {
   matchHost: string;

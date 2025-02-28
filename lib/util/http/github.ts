@@ -76,6 +76,10 @@ function handleGotError(
     logger.debug({ err }, 'GitHub failure: RequestError');
     return new ExternalHostError(err, 'github');
   }
+  if (err.name === 'ParseError') {
+    logger.debug({ err }, '');
+    return new ExternalHostError(err, 'github');
+  }
   if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     return new ExternalHostError(err, 'github');
@@ -535,12 +539,6 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       newURL = joinUrlParts(options.repository, 'contents', url);
     }
 
-    const result = await this.get(newURL, newOptions);
-    if (!is.string(result.body)) {
-      throw new Error(
-        `Expected raw text file but received ${typeof result.body}`,
-      );
-    }
-    return result as HttpResponse<string>;
+    return await this.getText(newURL, newOptions);
   }
 }

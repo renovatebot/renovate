@@ -62,7 +62,7 @@ async function gotTask(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
   queueStats: QueueStatsData,
-): Promise<HttpResponse<Buffer | string>> {
+): Promise<HttpResponse<unknown>> {
   logger.trace({ url, options }, 'got request');
 
   let duration = 0;
@@ -77,8 +77,7 @@ async function gotTask(
     return resp;
   } catch (error) {
     if (error instanceof RequestError) {
-      statusCode =
-        error.response?.statusCode ?? /* v8 ignore next: can't be tested */ -1;
+      statusCode = error.response?.statusCode ?? -1;
       duration =
         error.timings?.phases.total ?? /* v8 ignore next: can't be tested */ -1;
       const method = options.method.toUpperCase();
@@ -90,6 +89,7 @@ async function gotTask(
     }
 
     throw error;
+    /* v8 ignore next: 🐛 https://github.com/bcoe/c8/issues/229 */
   } finally {
     HttpStats.write({
       method: options.method,
@@ -128,7 +128,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       { isMergeableObject: is.plainObject },
     );
   }
-
+  private async request(
+    requestUrl: string | URL,
+    httpOptions: InternalHttpOptions,
+  ): Promise<HttpResponse<string>>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
@@ -137,14 +140,15 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
   ): Promise<HttpResponse<Buffer>>;
+  private async request<T = unknown>(
+    requestUrl: string | URL,
+    httpOptions: InternalHttpOptions & { responseType: 'json' },
+  ): Promise<HttpResponse<T>>;
+
   private async request(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & { responseType?: 'text' | 'buffer' },
-  ): Promise<HttpResponse<string | Buffer>>;
-  private async request(
-    requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & { responseType?: 'text' | 'buffer' },
-  ): Promise<HttpResponse<string | Buffer>> {
+    httpOptions: InternalHttpOptions,
+  ): Promise<HttpResponse<unknown>> {
     const resolvedUrl = this.resolveUrl(requestUrl, httpOptions);
     const url = resolvedUrl.toString();
 
@@ -203,7 +207,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           )
         : null;
 
-    let resPromise: Promise<HttpResponse<Buffer | string>> | null = null;
+    let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
@@ -264,22 +268,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         return staleResponse;
       }
 
-      if (
-        err instanceof RequestError &&
-        err.response?.headers['content-type'] === 'application/json'
-      ) {
-        err.response.body = JSON.parse(err.response.body as string);
-      }
-
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-
       this.handleError(requestUrl, httpOptions, err);
     }
   }
 
-  protected processOptions(_url: URL, _httpOptions: HttpOptions): void {
+  protected processOptions(_url: URL, _options: InternalHttpOptions): void {
     // noop
   }
 
@@ -319,10 +312,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return computedValue;
   }
 
-  protected prepareJsonBody(body: string): string {
-    return body;
-  }
-
   get(
     url: string,
     options: HttpOptions = {},
@@ -353,7 +342,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return this.request(url, { ...options, responseType: 'buffer' });
   }
 
-  protected async requestJsonUnsafe<ResT>(
+  protected requestJsonUnsafe<ResT>(
     method: HttpMethod,
     { url, httpOptions: requestOptions }: InternalJsonUnsafeOptions<Opts>,
   ): Promise<HttpResponse<ResT>> {
@@ -370,18 +359,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     if (json) {
       opts.json = json;
     }
-    const res = await this.getText(url, opts);
-
-    if (!res.body) {
-      return res as HttpResponse<ResT>;
-    }
-
-    try {
-      const body = JSON.parse(this.prepareJsonBody(res.body)) as ResT;
-      return Object.assign(res, { body });
-    } catch (e) {
-      throw new ExternalHostError(e);
-    }
+    return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
   private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(

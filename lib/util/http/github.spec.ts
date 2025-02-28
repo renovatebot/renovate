@@ -1,4 +1,3 @@
-import { Buffer } from 'node:buffer';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
@@ -935,23 +934,6 @@ describe('util/http/github', () => {
       ).resolves.toMatchObject({
         body: 'test',
       });
-    });
-
-    it('throw error if a', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/foo/bar/contents/lore/ipsum.bin')
-        .matchHeader(
-          'accept',
-          'application/vnd.github.raw+json, application/vnd.github.v3+json',
-        )
-        .reply(200, Buffer.from('foo', 'binary'));
-      await expect(
-        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.bin`, {
-          // @ts-expect-error not allowed
-          responseType: 'buffer',
-        }),
-      ).rejects.toThrow();
     });
   });
 });
