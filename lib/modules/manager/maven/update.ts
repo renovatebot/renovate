@@ -67,7 +67,11 @@ export function updateAtPosition(
   }
   if (version === currentValue || upgrade.sharedVariableName) {
     // TODO: validate newValue (#22198)
-    const replacedPart = versionPart.replace(version, newValue!);
+    const versionElement = leftPart.slice(leftPart.lastIndexOf('<'));
+    const replacedPart = versionPart.replace(
+      versionElement === '<version>' ? currentValue! : version,
+      newValue!,
+    );
     return leftPart + replacedPart + restPart;
   }
   logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');
