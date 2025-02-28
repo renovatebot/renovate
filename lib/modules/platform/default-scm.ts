@@ -48,4 +48,8 @@ export class DefaultGitScm implements PlatformScm {
   mergeToLocal(branchName: string): Promise<void> {
     return git.mergeToLocal(branchName);
   }
+
+  async syncForkBranch(branchName: string): Promise<LongCommitSha> {
+    return await git.syncForkBranch(branchName);
+  }
 }

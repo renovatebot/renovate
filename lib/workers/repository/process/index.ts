@@ -130,6 +130,16 @@ export async function extractDependencies(
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
+
+      // TODO: initialize these two variables
+      const isForkMode = true;
+      const isGitHub = true;
+
+      if (isForkMode && isGitHub) {
+        await scm.syncForkBranch(baseBranch);
+        logger.info(`Synced base branch ${baseBranch} of fork with upstream`);
+      }
+
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
