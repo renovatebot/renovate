@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
-import type { PackageDependency } from '../../types';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
+import type { PackageDependency } from '../../types';
 
 const githubUrlRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,
