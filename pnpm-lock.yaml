@@ -94,6 +94,9 @@ importers:
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
+      '@trim21/rattler':
+        specifier: 0.1.8
+        version: 0.1.8
       '@yarnpkg/core':
         specifier: 4.2.0
         version: 4.2.0(typanion@3.14.0)
@@ -2142,6 +2145,9 @@ packages:
 
   '@thi.ng/zipper@1.0.3':
     resolution: {integrity: sha512-dWfuk5nzf5wGEmcF90AXNEuWr3NVwRF+cf/9ZSE6xImA7Vy5XpHNMwLHFszZaC+kqiDXr+EZ0lXWDF46a8lSPA==}
+
+  '@trim21/rattler@0.1.8':
+    resolution: {integrity: sha512-LIeZUNWt2pfBLOr/9JCu38SK1qyTgACxtfU4135odMhVsE03WwYitA8n1ZV+gvRO10YF0W2dqKZF6cMYaRx7QQ==}
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -9179,6 +9185,8 @@ snapshots:
       '@thi.ng/api': 7.2.0
       '@thi.ng/arrays': 1.0.3
       '@thi.ng/checks': 2.9.11
+
+  '@trim21/rattler@0.1.8': {}
 
   '@tsconfig/node10@1.0.11': {}
 
