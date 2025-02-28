@@ -11,8 +11,8 @@ import {
   prepareGradleCommand,
 } from './utils';
 
-const platform = jest.spyOn(os, 'platform');
-jest.mock('../../../util/fs');
+const platform = vi.spyOn(os, 'platform');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {

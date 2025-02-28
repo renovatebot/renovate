@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
+exports[`modules/manager/bazel/extract > extractPackageFile() > extracts multiple types of dependencies 1`] = `
 [
   {
     "currentValue": "v1.0.5",
@@ -95,7 +95,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
   },
   {
     "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "com_github_bazelbuild_buildtools",
     "depType": "git_repository",
     "managerData": {
@@ -199,7 +199,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
 ]
 `;
 
-exports[`modules/manager/bazel/extract extractPackageFile() sequential http_archive 1`] = `
+exports[`modules/manager/bazel/extract > extractPackageFile() > sequential http_archive 1`] = `
 [
   {
     "currentValue": "v1.1.2",

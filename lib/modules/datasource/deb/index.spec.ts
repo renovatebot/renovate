@@ -31,7 +31,7 @@ describe('modules/datasource/deb/index', () => {
   let extractedPackageFile: string;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     debDatasource = new DebDatasource();
     cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
@@ -393,7 +393,7 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should throw error for when extracting fails', async () => {
-      jest.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
+      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
 
       httpMock
         .scope(debBaseUrl)

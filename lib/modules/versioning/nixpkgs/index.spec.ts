@@ -61,7 +61,7 @@ describe('modules/versioning/nixpkgs/index', () => {
     versions                                                                                         | expected
     ${['nixos-21.11', 'nixos-22.05', 'nixos-22.05-small', 'nixos-unstable', 'nixos-unstable-small']} | ${['nixos-21.11', 'nixos-22.05', 'nixos-22.05-small', 'nixos-unstable', 'nixos-unstable-small']}
   `(
-    '$versions -> sortVersions -> $expected ',
+    '$versions -> sortVersions -> $expected',
     ({ versions, expected }: { versions: string[]; expected: string[] }) => {
       expect(versions.sort((a, b) => versioning.sortVersions(a, b))).toEqual(
         expected,

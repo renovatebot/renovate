@@ -1,7 +1,7 @@
 import { fs } from '../../../../test/util';
 import { detectGlobalConfig } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/npm/detect', () => {
   describe('.detectGlobalConfig()', () => {

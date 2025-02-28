@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime, Settings } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import { Http } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -7,7 +7,7 @@ import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
 
-jest.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 const packageCache = mocked(_packageCache);
 
 const http = new Http('test');
@@ -18,7 +18,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {

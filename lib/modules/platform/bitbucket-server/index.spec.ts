@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { git, hostRules, logger } from '../../../../test/util';
 import {
@@ -11,9 +11,9 @@ import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as bitbucket from '.';
 
-jest.mock('timers/promises');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('timers/promises');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -179,6 +179,7 @@ describe('modules/platform/bitbucket-server/index', () => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
 
+    // eslint-disable-next-line vitest/valid-title
     describe(scenarioName, () => {
       const username = 'abc';
       const password = '123';

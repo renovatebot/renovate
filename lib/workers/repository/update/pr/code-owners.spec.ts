@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { fs, git } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import { codeOwnersForPr } from './code-owners';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
@@ -258,7 +258,6 @@ describe('workers/repository/update/pr/code-owners', () => {
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
       it(`detects code owner file at '${codeOwnerFilePath}'`, async () => {
-        // TODO: fix types, jest is using wrong overload (#22198)
         fs.readLocalFile.mockImplementation((path): Promise<any> => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));

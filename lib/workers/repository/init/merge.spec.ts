@@ -26,9 +26,9 @@ import {
   setNpmTokenInNpmrc,
 } from './merge';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../onboarding/branch/onboarding-branch-cache');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../onboarding/branch/onboarding-branch-cache');
 
 const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
@@ -43,12 +43,12 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-jest.mock('../../../config/migration');
-jest.mock('../../../config/migrate-validate');
+vi.mock('../../../config/migration');
+vi.mock('../../../config/migrate-validate');
 
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('detectRepoFileConfig()', () => {
@@ -63,11 +63,9 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('returns config if not found - uses cache', async () => {
-      jest
-        .spyOn(repoCache, 'getCache')
-        .mockReturnValueOnce(
-          partial<RepoCacheData>({ configFileName: 'renovate.json' }),
-        );
+      vi.spyOn(repoCache, 'getCache').mockReturnValueOnce(
+        partial<RepoCacheData>({ configFileName: 'renovate.json' }),
+      );
       platform.getRawFile.mockRejectedValueOnce(new Error());
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
@@ -434,7 +432,7 @@ describe('workers/repository/init/merge', () => {
         isMigrated: true,
         migratedConfig: c,
       }));
-      jest.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+      vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
         ...config,
         npmrc: 'something_authToken=${NPM_TOKEN}',
         npmToken: 'token',
