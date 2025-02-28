@@ -504,6 +504,7 @@ describe('modules/manager/poetry/extract', () => {
             {# comment #}
             [tool.poetry.dependencies]
             python = "^3.9"
+            {{ foo }} = "{{ bar }}"
             {% if foo %}
             dep1 = "^1.0.0"
             {% endif %}
