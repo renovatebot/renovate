@@ -160,9 +160,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(prConfig.number);
-  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -195,9 +192,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(pr._number);
-  }
   return getPr(pr._number);
 }
 
@@ -441,4 +435,15 @@ export function findIssue(title: string): Promise<Issue | null> {
 
 export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
+}
+
+/**
+ * The Code-Review +2 vote of when the change was created or updated in Gerrit
+ * may have been downgraded by a CI check utilizing the same account as
+ * Renovate (e.g. SonarQube which posts Code-Review +1). This function will
+ * vote with +2 again on the change, if needed, before Renovate attempt to
+ * automerge it.
+ */
+export async function approvePrForAutomerge(number: number): Promise<void> {
+  await client.approveChange(number);
 }
