@@ -80,7 +80,7 @@ export function getGitAuthenticatedEnvironmentVariables(
       rule.insteadOf;
     gitConfigCount++;
   }
-  newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
+  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
 }

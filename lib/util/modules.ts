@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import upath from 'upath';
 
+// TODO: move to `test/util.ts` or `test/modules.ts`
+
 function relatePath(here: string, there: string): string {
   const thereParts = upath.normalizeTrim(there).split('/');
   const hereParts = upath.normalizeTrim(here).split('/');
@@ -24,11 +26,11 @@ function relatePath(here: string, there: string): string {
   return result.join('/');
 }
 
-export function loadModules<T>(
+export async function loadModules<T>(
   dirname: string,
   validate?: (module: T, moduleName: string) => boolean,
   filter: (moduleName: string) => boolean = () => true,
-): Record<string, T> {
+): Promise<Record<string, T>> {
   const result: Record<string, T> = {};
 
   const moduleNames: string[] = fs
@@ -41,7 +43,7 @@ export function loadModules<T>(
 
   for (const moduleName of moduleNames) {
     const modulePath = upath.join(relatePath(__dirname, dirname), moduleName);
-    const module = require(modulePath); // eslint-disable-line
+    const module = await import(modulePath);
     // istanbul ignore if
     if (!module || (validate && !validate(module, moduleName))) {
       throw new Error(`Invalid module: ${modulePath}`);

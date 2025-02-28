@@ -14,7 +14,7 @@ export function cleanupHttpCache(cacheData: RepoCacheData): void {
   const ttlDays = GlobalConfig.get('httpCacheTtlDays', 90);
   if (ttlDays === 0) {
     logger.trace('cleanupHttpCache: zero value received, removing the cache');
-    delete cacheData['httpCache'];
+    delete cacheData.httpCache;
     return;
   }
 

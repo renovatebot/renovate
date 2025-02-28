@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/bundler/extract extractPackageFile() parse Ruby CI Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI Gemfile 1`] = `
 {
   "deps": [
     {
@@ -149,7 +149,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse Ruby CI Gemf
 }
 `;
 
-exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon Gemfile 1`] = `
 {
   "deps": [
     {
@@ -1400,7 +1400,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse mastodon Gem
 }
 `;
 
-exports[`modules/manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > extractPackageFile() > parse webpacker Gemfile 1`] = `
 {
   "deps": [
     {
@@ -1461,7 +1461,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parse webpacker Ge
 }
 `;
 
-exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails Gemfile 1`] = `
 {
   "deps": [
     {
@@ -2179,7 +2179,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses rails Gemfi
 }
 `;
 
-exports[`modules/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
+exports[`modules/manager/bundler/extract > extractPackageFile() > parses sourceGroups 1`] = `
 {
   "deps": [
     {
@@ -2252,7 +2252,7 @@ exports[`modules/manager/bundler/extract extractPackageFile() parses sourceGroup
 }
 `;
 
-exports[`modules/manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
 {
   "deps": [
     {
@@ -4728,7 +4728,7 @@ exports[`modules/manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
 }
 `;
 
-exports[`modules/manager/bundler/extract parse source blocks in Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > parse source blocks in Gemfile 1`] = `
 {
   "deps": [
     {
@@ -4761,7 +4761,7 @@ exports[`modules/manager/bundler/extract parse source blocks in Gemfile 1`] = `
 }
 `;
 
-exports[`modules/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
+exports[`modules/manager/bundler/extract > parse source blocks with spaces in Gemfile 1`] = `
 {
   "deps": [
     {

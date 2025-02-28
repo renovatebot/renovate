@@ -86,6 +86,15 @@ let config: {
   squash: boolean;
 } = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  draftPrefix = DRAFT_PREFIX;
+  defaults.hostType = 'gitlab';
+  defaults.endpoint = 'https://gitlab.com/api/v4/';
+  defaults.version = '0.0.0';
+  setBaseUrl(defaults.endpoint);
+}
+
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
@@ -169,13 +178,13 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     archived: false,
   };
   if (config?.topics?.length) {
-    queryParams['topic'] = config.topics.join(',');
+    queryParams.topic = config.topics.join(',');
   }
 
   const urls = [];
   if (config?.namespaces?.length) {
-    queryParams['with_shared'] = false;
-    queryParams['include_subgroups'] = true;
+    queryParams.with_shared = false;
+    queryParams.include_subgroups = true;
     urls.push(
       ...config.namespaces.map(
         (namespace) =>

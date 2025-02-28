@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/utils/pr-body .smartTruncate truncates to 300 not smart 1`] = `
+exports[`modules/platform/utils/pr-body > .smartTruncate > truncates to 300 not smart 1`] = `
 "This PR contains the following updates:
 
 | Package | Type | Update | Change |
@@ -17,7 +17,7 @@ exports[`modules/platform/utils/pr-body .smartTruncate truncates to 300 not smar
 ### [\`v19."
 `;
 
-exports[`modules/platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
+exports[`modules/platform/utils/pr-body > .smartTruncate > truncates to 1000 1`] = `
 "This PR contains the following updates:
 
 | Package | Type | Update | Change |

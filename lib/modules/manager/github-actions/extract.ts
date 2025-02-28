@@ -83,10 +83,10 @@ function extractWithRegex(
         commentWhiteSpaces = ' ',
       } = tagMatch.groups;
       let quotes = '';
-      if (replaceString.indexOf("'") >= 0) {
+      if (replaceString.includes("'")) {
         quotes = "'";
       }
-      if (replaceString.indexOf('"') >= 0) {
+      if (replaceString.includes('"')) {
         quotes = '"';
       }
       const dep: PackageDependency = {
