@@ -73,7 +73,7 @@ export function clear(check = true): void {
   }
 
   if (missing.length) {
-    const err = new Error(missingHttpMockMessage(done, missing));
+    const err = new Error(missingHttpMockMessage(done, missing, pending));
     massageHttpMockStacktrace(err);
     throw err;
   }
@@ -158,6 +158,7 @@ function massageHttpMockStacktrace(err: Error): void {
 function missingHttpMockMessage(
   done: RequestLog[],
   missing: MissingRequestLog[],
+  pending: string[],
 ): string {
   const blocks: string[] = [];
 
@@ -205,6 +206,14 @@ function missingHttpMockMessage(
       Requests done:
 
       ${done.map(({ method, url, status }) => `- ${method} ${url} [${status}]`).join('\n')}
+    `);
+  }
+
+  if (pending.length) {
+    blocks.push(codeBlock`
+      Pending mocks:
+
+      ${pending.join('\n')}
     `);
   }
 

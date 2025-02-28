@@ -193,7 +193,7 @@ export class CrateDatasource extends Datasource {
       );
       const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
-        return (await this.http.get(crateUrl)).body;
+        return (await this.http.getText(crateUrl)).body;
       } catch (err) {
         this.handleGenericErrors(err);
       }
