@@ -52,7 +52,17 @@ export class AzurePipelinesTasksDatasource extends Datasource {
       const result: ReleaseResult = { releases: [] };
 
       results.value
-        .filter((task) => task.name === packageName)
+        .filter((task) => {
+          const matchers = [
+            task.id === packageName,
+            task.name === packageName,
+            task.contributionIdentifier !== null &&
+              `${task.contributionIdentifier}.${task.id}` === packageName,
+            task.contributionIdentifier !== null &&
+              `${task.contributionIdentifier}.${task.name}` === packageName,
+          ];
+          return matchers.some((match) => match);
+        })
         .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
         .forEach((task) => {
           result.releases.push({
