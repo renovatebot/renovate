@@ -333,7 +333,10 @@ describe('util/http/github', () => {
 
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
-        httpMock.scope(githubApiHost).get(url).replyWithError(error);
+        httpMock
+          .scope(githubApiHost)
+          .get(url)
+          .replyWithError(httpMock.error(error));
         await githubApi.getJsonUnchecked(url);
       }
 

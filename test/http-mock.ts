@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import type { Url } from 'node:url';
+import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
@@ -264,3 +265,10 @@ afterAll(() => {
 afterEach(() => {
   clear();
 });
+
+export function error(props: string | Record<string, unknown> = {}): Error {
+  if (is.string(props)) {
+    return new Error(props);
+  }
+  return Object.assign(new Error(), props);
+}
