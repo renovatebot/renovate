@@ -89,7 +89,7 @@ const addonInfo: AddonInfo = {
 
 describe('modules/datasource/aws-eks-addon/index', () => {
   describe('getPkgReleases()', () => {
-    it.each<{ des: string; req: DescribeAddonVersionsResponse }>`
+    it.each`
       des               | req
       ${'null'}         | ${{}}
       ${'empty'}        | ${{ addons: [] }}
