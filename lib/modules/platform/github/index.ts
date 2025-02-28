@@ -1884,7 +1884,8 @@ export async function mergePr({
   const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
 
   if (mergeStrategy) {
-    // This path is taken if we have auto-detected the allowed merge types from the repo
+    // This path is taken if we have auto-detected the allowed merge types from the repo or
+    // automergeStrategy is configured by user
     options.body.merge_method = mergeStrategy;
     try {
       logger.debug({ options, url }, `mergePr`);
