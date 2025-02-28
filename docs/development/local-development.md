@@ -11,8 +11,8 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^20.15.1`
-- pnpm `^9.0.0`
+- Node.js `^22.13.0`
+- pnpm `^10.0.0`
 - C++ compiler
 
 We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
@@ -23,15 +23,15 @@ Volta will apply automatically the correct version of Node.js and pnpm when you 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
-npm install -g pnpm@latest-10
+npm install -g pnpm
 ```
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install -global pnpm@latest-10`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install --global pnpm`.
 
 #### Windows
 
@@ -40,8 +40,8 @@ If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Install pnpm with: `npm install -global pnpm@latest-10`
+- In an Administrator PowerShell prompt, run `npm install --global npm` and then `npm --debug install --global windows-build-tools`
+- Install pnpm with: `npm install --global pnpm`
 
   You can see what versions you're using like this:
 
@@ -144,21 +144,21 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
-### Jest
+### Vitest
 
-Run the Jest unit tests with the `pnpm jest` command.
-You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
+Run the Vitest unit tests with the `pnpm vitest` command.
+You can also run a subset of the Vitest tests using file matching, e.g. `pnpm vitest composer` or `pnpm vitest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
+e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -181,6 +181,9 @@ To install the required dependency, use `pdm install`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
+
+Also, make sure to set the `GITHUB_TOKEN` in your environment as we use [gh cli](https://cli.github.com/manual/gh_issue_list) to fetch the issues.
+If you wish to skip fetching the issues, then set `SKIP_GITHUB_ISSUES` to `true` before building the docs.
 
 ## Keeping your Renovate fork up to date
 

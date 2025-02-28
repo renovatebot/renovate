@@ -6,7 +6,8 @@
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2022",
-    "module": "commonjs",
+    "moduleResolution": "node",
+    "module": "CommonJS",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -17,10 +18,14 @@
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for esbuild */,
     "lib": ["es2023"],
-    "types": ["node", "jest-extended", "expect-more-jest"],
+    "types": ["node", "vitest/globals"],
     "allowJs": true,
     "checkJs": true,
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
+    "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
+    "paths": {
+      "~test/*": ["./test/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
@@ -31,11 +36,12 @@
     "coverage",
     "config.js",
     "tmp",
-    "tools/mkdocs/site"
+    "tools/mkdocs/site",
+    /* TODO: fix me */
+    "eslint.config.mjs"
   ],
   "ts-node": {
     "transpileOnly": true,
-    "esm": false,
-    "swc": false
+    "esm": false
   }
 }

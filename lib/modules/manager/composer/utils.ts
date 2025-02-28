@@ -110,10 +110,10 @@ export function extractConstraints(
     res.composer = requireDev['composer/composer'];
   }
   // composer platform package
-  else if (require['composer']) {
-    res.composer = require['composer'];
-  } else if (requireDev['composer']) {
-    res.composer = requireDev['composer'];
+  else if (require.composer) {
+    res.composer = require.composer;
+  } else if (requireDev.composer) {
+    res.composer = requireDev.composer;
   }
   // check last used composer version
   else if (pluginApiVersion) {

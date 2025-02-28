@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness handles gitlab sourceDirectory 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > handles gitlab sourceDirectory 1`] = `
 {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -15,7 +15,7 @@ See merge request itentialopensource/adapter-utils!177
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > parses adapter-utils 4.33.0 1`] = `
 {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -30,7 +30,7 @@ See merge request itentialopensource/adapter-utils!177
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > parses yargs 15.2.0 1`] = `
 {
   "body": "##### ⚠ BREAKING CHANGES
 
@@ -61,7 +61,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > parses yargs 15.3.0 1`] = `
 {
   "body": "##### Features
 
@@ -77,7 +77,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() handles github sourceDirectory 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > handles github sourceDirectory 1`] = `
 {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
@@ -87,7 +87,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses angular.js 1`] = `
 {
   "body": "#### Bug Fixes
 
@@ -118,7 +118,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
 {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
@@ -135,7 +135,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses jest 1`] = `
 {
   "body": "##### Fixes
 
@@ -328,7 +328,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses js-yaml 1`] = `
 {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
@@ -338,7 +338,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd() parses self hosted gitlab 1`] = `
+exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses self hosted gitlab 1`] = `
 {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>

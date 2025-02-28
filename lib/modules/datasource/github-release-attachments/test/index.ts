@@ -14,7 +14,7 @@ export class GitHubReleaseAttachmentMocker {
 
   withAssets(
     version: string,
-    assets: { [key: string]: string },
+    assets: Record<string, string>,
   ): GithubRestRelease {
     const releaseData = partial<GithubRestRelease>({
       tag_name: version,

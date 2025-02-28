@@ -1,12 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/cocoapods/artifacts returns null for invalid local directory 1`] = `[]`;
+exports[`modules/manager/cocoapods/artifacts > returns null for invalid local directory 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns null if no Podfile.lock found 1`] = `[]`;
+exports[`modules/manager/cocoapods/artifacts > returns null if no Podfile.lock found 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns null if no updatedDeps were provided 1`] = `[]`;
+exports[`modules/manager/cocoapods/artifacts > returns null if no updatedDeps were provided 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns null if unchanged 1`] = `
+exports[`modules/manager/cocoapods/artifacts > returns null if unchanged 1`] = `
 [
   {
     "cmd": "pod install",
@@ -29,9 +29,9 @@ exports[`modules/manager/cocoapods/artifacts returns null if unchanged 1`] = `
 ]
 `;
 
-exports[`modules/manager/cocoapods/artifacts returns null if updatedDeps is empty 1`] = `[]`;
+exports[`modules/manager/cocoapods/artifacts > returns null if updatedDeps is empty 1`] = `[]`;
 
-exports[`modules/manager/cocoapods/artifacts returns pod exec error 1`] = `
+exports[`modules/manager/cocoapods/artifacts > returns pod exec error 1`] = `
 [
   {
     "cmd": "pod install",
@@ -54,7 +54,7 @@ exports[`modules/manager/cocoapods/artifacts returns pod exec error 1`] = `
 ]
 `;
 
-exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
+exports[`modules/manager/cocoapods/artifacts > returns updated Podfile 1`] = `
 [
   {
     "cmd": "docker pull ghcr.io/containerbase/sidecar",
@@ -84,7 +84,7 @@ exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
 ]
 `;
 
-exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 1`] = `
+exports[`modules/manager/cocoapods/artifacts > returns updated Podfile and Pods files 1`] = `
 [
   {
     "cmd": "docker pull ghcr.io/containerbase/sidecar",

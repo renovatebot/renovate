@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/sbt-plugin/index parses Maven index directory 1`] = `
+exports[`modules/datasource/sbt-plugin/index > parses Maven index directory 1`] = `
 [
   "autofix-3.0.6_2.11",
   "autofix-3.0.6_2.12",
@@ -188,7 +188,7 @@ exports[`modules/datasource/sbt-plugin/index parses Maven index directory 1`] = 
 ]
 `;
 
-exports[`modules/datasource/sbt-plugin/index parses sbt index directory 1`] = `
+exports[`modules/datasource/sbt-plugin/index > parses sbt index directory 1`] = `
 [
   "au.com.onegeek",
   "bavadim",
