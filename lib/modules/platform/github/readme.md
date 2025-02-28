@@ -140,7 +140,3 @@ When Renovate runs against repositories on `github.com`, and the environment var
 <!-- prettier-ignore -->
 !!! warning
     We reverted the Package Registry Credentials feature to experimental mode, because users reported it's not working correctly with app tokens.
-
-## Features awaiting implementation
-
-- none

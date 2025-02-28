@@ -67,7 +67,7 @@ import { repoFingerprint } from '../util';
 import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
-import { coerceRestPr, githubApi } from './common';
+import { coerceRestPr, githubApi, mapMergeStartegy } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -1841,25 +1841,6 @@ export async function reattemptPlatformAutomerge({
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
-  }
-}
-
-function mapMergeStartegy(
-  strategy: MergePRConfig['strategy'],
-): string | undefined {
-  switch (strategy) {
-    case 'auto':
-      return undefined;
-    case 'fast-forward': {
-      logger.warn(
-        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
-      );
-      return undefined;
-    }
-    case 'merge-commit':
-      return 'merge';
-    default:
-      return strategy;
   }
 }
 
