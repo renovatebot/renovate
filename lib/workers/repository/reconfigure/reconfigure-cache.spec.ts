@@ -6,7 +6,7 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/cache/repository');
 
 const cache = mocked(_cache);
 

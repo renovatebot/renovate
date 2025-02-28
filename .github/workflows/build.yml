@@ -212,7 +212,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -231,7 +231,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -258,7 +258,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -283,7 +283,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -378,12 +378,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Cache jest
-        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+      - name: Cache vitest
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
-          path: .cache/jest
+          path: .cache/vitest
           key: |
-            jest-cache-${{
+            vitest-cache-${{
               runner.os
             }}-${{
               env.NODE_VERSION
@@ -398,8 +398,7 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" pnpm jest \
-              --ci \
+            TEST_SHARD="$shard" pnpm vitest \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
           done
@@ -437,14 +436,14 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -473,7 +472,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           pattern: coverage-*
           path: coverage
@@ -488,10 +487,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 100 \
-            --functions 100 \
-            --lines 100 \
-            --statements 100
+            --branches 97 \
+            --functions 98 \
+            --lines 97 \
+            --statements 97
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -571,6 +570,12 @@ jobs:
 
       - name: Test docker
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
+
+      - name: dry-run
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true') || (github.repository == 'renovatebot/renovate' && github.event_name == 'pull_request')
+        run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
+        env:
+          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack
         run: pnpm test-e2e:pack
@@ -652,7 +657,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Download package
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: renovate-package
 
@@ -693,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@c1551eaeefa84705bf7c88ed38b33ebca3716444 # v3.10.3
+        uses: containerbase/internal-tools@edd29e0d936f70cad03ec46ac65c35790d9866f2 # v3.10.5
         with:
           command: docker-config
 

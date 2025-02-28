@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
@@ -7,7 +7,7 @@ import type { Timestamp } from '../../../util/timestamp';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 const githubApiHost = 'https://api.github.com';
@@ -22,7 +22,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
 
   describe('getReleases', () => {
     it('returns releases', async () => {
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           url: 'https://example.com',

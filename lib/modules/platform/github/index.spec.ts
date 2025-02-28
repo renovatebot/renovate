@@ -1,7 +1,8 @@
-import { mockDeep } from 'jest-mock-extended';
+import { RequestError } from 'got';
 import { DateTime } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
+import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -12,6 +13,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
@@ -30,14 +32,14 @@ import * as github from '.';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('timers/promises');
+vi.mock('timers/promises');
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http/queue');
-const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http/queue');
+const hostRules = vi.mocked(_hostRules);
 
-jest.mock('../../../util/git');
-const git: jest.Mocked<typeof _git> = mocked(_git);
+vi.mock('../../../util/git');
+const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
@@ -65,7 +67,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE <3.10 ', async () => {
+    it('should throw if using fine-grained token with GHE <3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -80,7 +82,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE unknown version ', async () => {
+    it('should throw if using fine-grained token with GHE unknown version', async () => {
       httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
       await expect(
         github.initPlatform({
@@ -1154,7 +1156,7 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const pr = await github.tryReuseAutoclosedPr({
         number: 91,
@@ -1178,7 +1180,7 @@ describe('modules/platform/github/index', () => {
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
 
@@ -3561,7 +3563,7 @@ describe('modules/platform/github/index', () => {
       await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err: new Error('external-host-error') },
+        { err: new ExternalHostError(expect.any(RequestError), 'github') },
         'Error re-attempting PR platform automerge',
       );
     });
@@ -4172,7 +4174,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4201,7 +4203,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4232,7 +4234,7 @@ describe('modules/platform/github/index', () => {
         .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4261,7 +4263,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',

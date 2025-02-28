@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/pypi/index getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > parses data-requires-python and respects constraints from simple endpoint 1`] = `
 {
   "registryUrl": "https://some.registry.org/simple",
   "releases": [
@@ -26,7 +26,7 @@ exports[`modules/datasource/pypi/index getReleases parses data-requires-python a
 }
 `;
 
-exports[`modules/datasource/pypi/index getReleases process data from +simple endpoint 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > process data from +simple endpoint 1`] = `
 {
   "registryUrl": "https://some.registry.org/+simple",
   "releases": [
@@ -68,7 +68,7 @@ exports[`modules/datasource/pypi/index getReleases process data from +simple end
 }
 `;
 
-exports[`modules/datasource/pypi/index getReleases process data from simple endpoint 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > process data from simple endpoint 1`] = `
 {
   "registryUrl": "https://some.registry.org/simple",
   "releases": [
@@ -110,7 +110,7 @@ exports[`modules/datasource/pypi/index getReleases process data from simple endp
 }
 `;
 
-exports[`modules/datasource/pypi/index getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > process data from simple endpoint with hyphens replaced with underscores 1`] = `
 {
   "registryUrl": "https://some.registry.org/simple",
   "releases": [
@@ -121,7 +121,7 @@ exports[`modules/datasource/pypi/index getReleases process data from simple endp
 }
 `;
 
-exports[`modules/datasource/pypi/index getReleases processes real data 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > processes real data 1`] = `
 {
   "registryUrl": "https://pypi.org/pypi",
   "releases": [
@@ -219,7 +219,7 @@ exports[`modules/datasource/pypi/index getReleases processes real data 1`] = `
 }
 `;
 
-exports[`modules/datasource/pypi/index getReleases respects constraints 1`] = `
+exports[`modules/datasource/pypi/index > getReleases > respects constraints 1`] = `
 {
   "registryUrl": "https://pypi.org/pypi",
   "releases": [
@@ -236,7 +236,7 @@ exports[`modules/datasource/pypi/index getReleases respects constraints 1`] = `
 }
 `;
 
-exports[`modules/datasource/pypi/index uses https://pypi.org/pypi/ instead of https://pypi.org/simple/ 1`] = `
+exports[`modules/datasource/pypi/index > uses https://pypi.org/pypi/ instead of https://pypi.org/simple/ 1`] = `
 {
   "registryUrl": "https://pypi.org/simple",
   "releases": [

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -11,11 +11,11 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmfile from '.';
 
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
 

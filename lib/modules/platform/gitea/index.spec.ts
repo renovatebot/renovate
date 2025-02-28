@@ -28,7 +28,7 @@ import type {
 } from './types';
 import * as gitea from '.';
 
-jest.mock('../../../util/git');
+vi.mock('../../../util/git');
 
 /**
  * latest tested gitea version.
@@ -1474,7 +1474,7 @@ describe('modules/platform/gitea/index', () => {
 
   describe('createPr', () => {
     beforeEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
       memCache.set('gitea-pr-cache-synced', true);
     });
 
@@ -1662,7 +1662,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should use platform automerge', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1688,7 +1688,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not use platform automerge on forgejo v7', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1712,7 +1712,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not use platform automerge on forgejo v7 LTS', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')

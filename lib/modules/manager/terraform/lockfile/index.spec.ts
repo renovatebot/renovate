@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { fs, mocked } from '../../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
+import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
@@ -10,9 +10,9 @@ import { TerraformProviderHash } from './hash';
 import { getNewConstraint } from './index';
 
 // auto-mock fs
-jest.mock('../../../../util/fs');
-jest.mock('./hash');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs');
+vi.mock('./hash');
+vi.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},
@@ -25,10 +25,8 @@ const adminConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const mockHash = mocked(TerraformProviderHash).createHashes;
-const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
-  typeof getPkgReleases
->;
+const mockHash = vi.mocked(TerraformProviderHash).createHashes;
+const mockGetPkgReleases = vi.mocked(getPkgReleases);
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
