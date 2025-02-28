@@ -53,7 +53,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
       while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
           nextURL,
-          options as BitbucketHttpOptions,
+          options!,
         );
 
         resultBody.values.push(...nextResult.body.values);

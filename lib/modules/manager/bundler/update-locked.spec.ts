@@ -62,9 +62,9 @@ describe('modules/manager/bundler/update-locked', () => {
       newVersion: '5.2.0',
       currentVersion: '5.1.9',
     };
-    jest
-      .spyOn(lockedVersion, 'extractLockFileEntries')
-      .mockReturnValueOnce(new Error() as never);
+    vi.spyOn(lockedVersion, 'extractLockFileEntries').mockReturnValueOnce(
+      new Error() as never,
+    );
     expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });

@@ -6,8 +6,8 @@ import {
   removeGlobalConfig,
 } from './index';
 
-jest.mock('../modules/datasource/npm');
-jest.mock('../../config.js', () => ({}), { virtual: true });
+vi.mock('../modules/datasource/npm');
+vi.mock('../../config.js', () => ({ default: {} }));
 
 const defaultConfig = getConfig();
 
@@ -125,7 +125,7 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
-        ['fileMatch', ['(^|/)package\\.json$']],
+        ['fileMatch', ['(^|/)package\\.json$', '(^|/)pnpm-workspace\\.yaml$']],
       ]);
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
         ['fileMatch', ['\\.html?$']],

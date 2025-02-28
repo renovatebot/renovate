@@ -39,15 +39,15 @@ export { RequestError as HttpError };
 export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
-type HttpFnArgs<
+interface HttpFnArgs<
   Opts extends HttpOptions,
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
-> = {
+> {
   url: string;
   httpOptions?: Opts;
   schema?: Schema;
-};
+}
 
 function applyDefaultHeaders(options: Options): void {
   const renovateVersion = pkg.version;
@@ -180,6 +180,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
+    const { cacheProvider } = options;
+    const cachedResponse = await cacheProvider?.bypassServer<T>(url);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     const memCacheKey =
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
@@ -201,8 +207,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
-      if (options.cacheProvider) {
-        await options.cacheProvider.setCacheHeaders(url, options);
+      if (cacheProvider) {
+        await cacheProvider.setCacheHeaders(url, options);
       }
 
       const startTime = Date.now();
@@ -235,8 +241,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 
-      if (options.cacheProvider) {
-        return await options.cacheProvider.wrapResponse(url, resCopy);
+      if (cacheProvider) {
+        return await cacheProvider.wrapServerResponse(url, resCopy);
       }
 
       return resCopy;
@@ -245,6 +251,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
       }
+
+      const staleResponse = await cacheProvider?.bypassServer<T>(url, true);
+      if (staleResponse) {
+        logger.debug(
+          { err },
+          `Request error: returning stale cache instead for ${url}`,
+        );
+        return staleResponse;
+      }
+
       throw err;
     }
   }

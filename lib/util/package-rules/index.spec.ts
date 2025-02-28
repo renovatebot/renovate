@@ -731,7 +731,7 @@ describe('util/package-rules/index', () => {
         error = err;
       }
 
-      expect(error).toStrictEqual(new Error(MISSING_API_CREDENTIALS));
+      expect(error).toMatchObject(new Error(MISSING_API_CREDENTIALS));
       expect(error.validationError).toBe('Missing credentials');
       expect(error.validationMessage).toBe(
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.',

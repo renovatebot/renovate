@@ -39,12 +39,19 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     }
   }
 
-  async wrapResponse<T>(
+  bypassServer<T>(
+    _url: string,
+    _ignoreSoftTtl: boolean,
+  ): Promise<HttpResponse<T> | null> {
+    return Promise.resolve(null);
+  }
+
+  async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
     if (resp.statusCode === 200) {
-      const etag = resp.headers?.['etag'];
+      const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
       HttpCacheStats.incRemoteMisses(url);
@@ -58,15 +65,17 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         httpResponse,
         timestamp,
       });
-      if (newHttpCache) {
-        logger.debug(
-          `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
-        );
-        await this.persist(url, newHttpCache as HttpCache);
-      } else {
+
+      // istanbul ignore if: should never happen
+      if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
+        return resp;
       }
 
+      logger.debug(
+        `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
+      );
+      await this.persist(url, newHttpCache as HttpCache);
       return resp;
     }
 

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="false") 1`] = `
 "
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -32,7 +32,7 @@ If you need any further assistance then you can also [request help here](https:/
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with empty footer and header(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="true") 1`] = `
 "
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -69,7 +69,7 @@ If you need any further assistance then you can also [request help here](https:/
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="false") 1`] = `
 "This is a header for platform:github
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -101,7 +101,7 @@ And this is a footer for repository:test baseBranch:some-branch
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header using templating(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="true") 1`] = `
 "This is a header for platform:github
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
@@ -138,7 +138,7 @@ And this is a footer for repository:test baseBranch:some-branch
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="false") 1`] = `
 "
 
 This should not be the first line of the PR
@@ -175,7 +175,7 @@ There should be several empty lines at the end of the PR
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index ensureOnboardingPr() creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="true") 1`] = `
 "
 
 This should not be the first line of the PR

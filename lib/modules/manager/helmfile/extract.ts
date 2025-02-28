@@ -51,8 +51,8 @@ export async function extractPackageFile(
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
       registryData = {};
-      for (let i = 0; i < doc.repositories.length; i += 1) {
-        registryData[doc.repositories[i].name] = doc.repositories[i];
+      for (const repo of doc.repositories) {
+        registryData[repo.name] = repo;
       }
       logger.debug(
         { registryAliases: registryData, packageFile },

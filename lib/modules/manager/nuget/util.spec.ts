@@ -10,7 +10,7 @@ import {
   getConfiguredRegistries,
 } from './util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/nuget/util', () => {
   describe('findVersion', () => {

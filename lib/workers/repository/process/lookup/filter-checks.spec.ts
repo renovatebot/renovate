@@ -17,13 +17,13 @@ import type { Timestamp } from '../../../../util/timestamp';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
-jest.mock('../../../../util/date');
+vi.mock('../../../../util/date');
 const dateUtil = mocked(_dateUtil);
 
-jest.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/merge-confidence');
 const mergeConfidence = mocked(_mergeConfidence);
 
-jest.mock('../../../../modules/datasource/common');
+vi.mock('../../../../modules/datasource/common');
 const { getDatasourceFor } = mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {

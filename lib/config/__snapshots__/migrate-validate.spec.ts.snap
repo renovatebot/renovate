@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
+exports[`config/migrate-validate > migrateAndValidate() > handles invalid 1`] = `
 {
   "errors": [
     {
@@ -13,7 +13,7 @@ exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
 }
 `;
 
-exports[`config/migrate-validate migrateAndValidate() isOnboarded 1`] = `
+exports[`config/migrate-validate > migrateAndValidate() > isOnboarded 1`] = `
 {
   "errors": [],
 }

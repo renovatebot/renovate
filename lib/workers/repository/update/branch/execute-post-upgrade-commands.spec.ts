@@ -4,8 +4,8 @@ import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
@@ -47,7 +47,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
@@ -97,7 +97,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
@@ -146,7 +146,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
       GlobalConfig.set({
         localDir: __dirname,
-        allowedPostUpgradeCommands: ['some-command'],
+        allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
         .mockResolvedValueOnce(true)

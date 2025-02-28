@@ -2,7 +2,7 @@ import { getS3Client, parseS3Url } from './s3';
 
 describe('util/s3', () => {
   afterEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('parses S3 URLs', () => {
