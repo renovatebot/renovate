@@ -22,7 +22,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
-import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
@@ -190,9 +189,11 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(): Promise<void> {
+async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
-  const opts = ['ls-remote', '--heads', config.url];
+  const url =
+    preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
+  const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
@@ -480,11 +481,26 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  config.currentBranch =
-    config.currentBranch ??
-    config.defaultBranch ??
-    (await getDefaultBranch(git));
-  delete getCache()?.semanticCommits;
+  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  // istanbul ignore if
+  if (config.upstreamUrl) {
+    logger.debug(`Resetting ${config.currentBranch} to upstream`);
+    await git.addRemote('upstream', config.upstreamUrl);
+    await git.fetch(['upstream']);
+    await resetToBranch(config.currentBranch);
+    const resetLog = await git.reset([
+      '--hard',
+      `upstream/${config.currentBranch}`,
+    ]);
+    logger.debug({ resetLog }, 'git reset log');
+    const pushLog = await git.push(['origin', config.currentBranch, '--force']);
+    logger.debug({ pushLog }, 'git push log');
+    await fetchBranchCommits(false);
+  }
+  config.currentBranchSha = (
+    await git.raw(['rev-parse', 'HEAD'])
+  ).trim() as LongCommitSha;
+  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 // istanbul ignore next
@@ -549,7 +565,10 @@ export async function checkoutBranch(
     ).trim() as LongCommitSha;
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
-      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+      logger.debug(
+        { branchName, latestCommitDate, sha: config.currentBranchSha },
+        'latest commit',
+      );
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
