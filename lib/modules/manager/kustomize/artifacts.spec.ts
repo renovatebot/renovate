@@ -463,6 +463,40 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
   });
 
+  it('enables HELM_EXPERIMENTAL_OCI if helm version < 3.8', async () => {
+    config.constraints = { helm: '3.7.0' };
+
+    const execSnapshots = mockExecAll();
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: '2.0.0',
+        currentVersion: '1.0.0',
+        packageName: 'github.com/example/example/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    await kustomize.updateArtifacts({
+      packageFileName,
+      updatedDeps,
+      newPackageFileContent,
+      config,
+    })
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm pull --untar --untardir charts/example-2.0.0 --version 2.0.0 oci://github.com/example/example/example',
+        options: {
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+          }
+        }
+      },
+    ]);
+  });
+
   it('does not inflate current version if kustomizeInflateHelmCharts is not enabled', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -19,19 +20,25 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import { parseKustomize } from './extract';
 
-function generateHelmEnvs(): ExtraEnv {
+function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
+  const cacheDir = privateCacheDir();
+  const enableExperimentalOci =
+    config.constraints?.helm &&
+    semver.satisfies(config.constraints.helm, '<3.8.0');
+
   return {
-    HELM_EXPERIMENTAL_OCI: '1',
+    HELM_EXPERIMENTAL_OCI: enableExperimentalOci ? '1' : '0',
     // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-    HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
-    HELM_REPOSITORY_CONFIG: `${upath.join(
-      privateCacheDir(),
-      'repositories.yaml',
-    )}`,
-    HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
+    HELM_REGISTRY_CONFIG: upath.join(cacheDir, 'registry.json'),
+    HELM_REPOSITORY_CONFIG: upath.join(cacheDir, 'repositories.yaml'),
+    HELM_REPOSITORY_CACHE: upath.join(cacheDir, 'repositories'),
   };
 }
 
@@ -155,7 +162,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       docker: {},
       userConfiguredEnv: config.env,
-      extraEnv: generateHelmEnvs(),
+      extraEnv: generateHelmEnvs(config),
       toolConstraints: [helmToolConstraint],
     };
 
