@@ -104,7 +104,7 @@ async function updateArtifactsImpl(
     return null;
   }
 
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
     return [
@@ -135,7 +135,8 @@ async function updateArtifactsImpl(
         // If there is a dependency without a locked version then log a warning
         // and perform a regular workspace lockfile update.
         logger.warn(
-          `Missing locked version for dependency \`${missingDep.depName}\``,
+          { dependency: missingDep.depName },
+          'Missing locked version for dependency',
         );
         await cargoUpdate(
           packageFileName,

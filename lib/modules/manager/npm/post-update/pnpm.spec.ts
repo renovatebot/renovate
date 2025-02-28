@@ -6,9 +6,9 @@ import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
@@ -104,13 +104,13 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: true,
       },
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-other-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: false,

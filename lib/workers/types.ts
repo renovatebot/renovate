@@ -19,6 +19,7 @@ import type {
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { Timestamp } from '../util/timestamp';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
@@ -41,6 +42,8 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+
+  currentValueTemplate?: string;
   depIndex?: number;
   depTypes?: string[];
 
@@ -65,7 +68,7 @@ export interface BranchUpgradeConfig
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
-  releaseTimestamp?: string;
+  releaseTimestamp?: Timestamp;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
@@ -122,7 +125,7 @@ export interface BranchConfig
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
-  releaseTimestamp?: string;
+  releaseTimestamp?: Timestamp;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
   result?: BranchResult;

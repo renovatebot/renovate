@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -16,9 +16,9 @@ const datasource = NugetDatasource.id;
 
 const hostRules: any = _hostRules;
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
-jest.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 const packageCache = mocked(_packageCache);
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');

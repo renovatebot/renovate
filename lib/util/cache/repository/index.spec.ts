@@ -6,7 +6,7 @@ import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
 import { getCache, isCacheModified, resetCache, saveCache } from '.';
 
-jest.mock('../../fs');
+vi.mock('../../fs');
 
 const fs = mocked(_fs);
 

@@ -61,6 +61,12 @@ describe('modules/manager/kustomize/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('should return null for an http base without ref/version', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const res = extractResource(`${base}?timeout=10s`);
+      expect(res).toBeNull();
+    });
+
     it('should extract out the version of an http base', () => {
       const base = 'https://github.com/user/test-repo.git';
       const version = 'v1.0.0';
@@ -148,6 +154,47 @@ describe('modules/manager/kustomize/extract', () => {
       const pkg = extractResource(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
+
+    it('should extract out the version of an http base with additional params', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(
+        `${base}?timeout=120&ref=${version}&submodules=false&version=v1`,
+      );
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should extract out the version of an http base from first version param', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(`${base}?version=${version}&version=v0`);
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should extract out the version of an http base from first ref param', () => {
+      const base = 'https://github.com/user/test-repo.git';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: GithubTagsDatasource.id,
+        depName: 'user/test-repo',
+      };
+
+      const pkg = extractResource(`${base}?ref=${version}&ref=v0`);
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('extractHelmChart', () => {
@@ -220,6 +267,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'node',
+        packageName: 'node',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -237,6 +285,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'test/node',
+        packageName: 'test/node',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -254,6 +303,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'quay.io/repo/image',
+        packageName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -271,6 +321,7 @@ describe('modules/manager/kustomize/extract', () => {
         datasource: DockerDatasource.id,
         replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
+        packageName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -288,6 +339,7 @@ describe('modules/manager/kustomize/extract', () => {
         replaceString: 'v1.0.0',
         datasource: DockerDatasource.id,
         depName: 'localhost:5000/repo/image/service',
+        packageName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
         name: sample.depName,
@@ -304,7 +356,8 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
         datasource: DockerDatasource.id,
-        depName: 'docker.io/image/service',
+        depName: 'localhost:5000/repo/image/service',
+        packageName: 'docker.io/image/service',
       };
       const pkg = extractImage(
         {

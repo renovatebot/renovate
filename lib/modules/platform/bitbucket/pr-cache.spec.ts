@@ -74,7 +74,56 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
-      httpCache: {},
+      httpCache: expect.toBeNonEmptyObject(),
+      platform: {
+        bitbucket: {
+          pullRequestsCache: {
+            author: 'some-author',
+            items: {
+              '1': prInfo(pr1),
+            },
+            updated_on: '2020-01-01T00:00:00.000Z',
+          },
+        },
+      },
+    });
+  });
+
+  it('resets cache for not matching authors', async () => {
+    cache.platform = {
+      bitbucket: {
+        pullRequestsCache: {
+          items: {
+            '1': prInfo(pr1),
+          },
+          author: 'some-other-author',
+          updated_on: '2020-01-01T00:00:00.000Z',
+        },
+      },
+    };
+
+    httpMock
+      .scope('https://api.bitbucket.org')
+      .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
+      .query(true)
+      .reply(200, {
+        values: [pr1],
+      });
+
+    const res = await BitbucketPrCache.getPrs(
+      http,
+      'some-workspace/some-repo',
+      'some-author',
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
@@ -117,11 +166,11 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     );
 
     expect(res).toMatchObject([
-      { number: 1, title: 'title' },
       { number: 2, title: 'title' },
+      { number: 1, title: 'title' },
     ]);
     expect(cache).toEqual({
-      httpCache: {},
+      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {

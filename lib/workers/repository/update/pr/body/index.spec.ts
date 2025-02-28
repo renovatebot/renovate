@@ -11,28 +11,28 @@ import * as _notes from './notes';
 import * as _table from './updates-table';
 import { getPrBody } from '.';
 
-jest.mock('./changelogs');
+vi.mock('./changelogs');
 const changelogs = mocked(_changelogs);
 
-jest.mock('./config-description');
+vi.mock('./config-description');
 const configDescription = mocked(_configDescription);
 
-jest.mock('./controls');
+vi.mock('./controls');
 const controls = mocked(_controls);
 
-jest.mock('./footer');
+vi.mock('./footer');
 const footer = mocked(_footer);
 
-jest.mock('./header');
+vi.mock('./header');
 const header = mocked(_header);
 
-jest.mock('./notes');
+vi.mock('./notes');
 const notes = mocked(_notes);
 
-jest.mock('./updates-table');
+vi.mock('./updates-table');
 const table = mocked(_table);
 
-jest.mock('../../../../../util/template');
+vi.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/index', () => {
@@ -89,12 +89,21 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
+      const upgradeBitbucket = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://bitbucket.org/foo/bar',
+        sourceDirectory: '/baz',
+        changelogUrl: 'https://bitbucket.org/foo/bar/src/main/CHANGELOG.md',
+        homepage: 'https://example.com',
+      };
+
       getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [upgrade, upgrade1],
+          upgrades: [upgrade, upgrade1, upgradeBitbucket],
         },
         {
           debugData: {
@@ -127,6 +136,15 @@ describe('workers/repository/update/pr/body/index', () => {
           '[homepage](https://example.com), [source](https://github.com/foo/bar)',
         homepage: 'https://example.com',
         sourceUrl: 'https://github.com/foo/bar',
+      });
+      expect(upgradeBitbucket).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md))',
+        references:
+          '[homepage](https://example.com), [source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md)',
+        homepage: 'https://example.com',
+        sourceUrl: 'https://bitbucket.org/foo/bar',
       });
     });
 

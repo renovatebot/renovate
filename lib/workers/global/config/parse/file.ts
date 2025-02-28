@@ -59,7 +59,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     config = await getParsedContent(configFile);
   } catch (err) {
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal(`Could not parse config file \n ${err.stack!}`);
+      logger.fatal({ error: err.stack }, 'Could not parse config file');
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(
@@ -70,11 +70,30 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
+      logger.debug({ err }, 'Parse error');
       logger.fatal('Error parsing config file');
       process.exit(1);
     }
     // istanbul ignore next: we can ignore this
     logger.debug('No config file found on disk - skipping');
+  }
+
+  if (is.nonEmptyObject(config.processEnv)) {
+    const exportedKeys = [];
+    for (const [key, value] of Object.entries(config.processEnv)) {
+      if (!is.nonEmptyString(value)) {
+        logger.error({ key }, 'processEnv value is not a string.');
+        continue;
+      }
+
+      exportedKeys.push(key);
+      process.env[key] = value;
+    }
+    logger.debug(
+      { keys: exportedKeys },
+      'processEnv keys were exported to env',
+    );
+    delete config.processEnv;
   }
 
   return migrateAndValidateConfig(config, configFile);

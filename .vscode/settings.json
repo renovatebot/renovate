@@ -16,10 +16,7 @@
     ".releaserc": "json"
   },
   "omnisharp.autoStart": false,
-  "jest.runMode": "on-demand",
-  "jest.jestCommandLine": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-  "jest.nodeEnv": {
-    "NODE_ENV": "test",
+  "vitest.nodeEnv": {
     "LOG_LEVEL": "trace",
     "GIT_ALLOW_PROTOCOL": "file"
   },

@@ -7,7 +7,7 @@ import type { GotOptions } from './types';
 
 const url = 'https://github.com';
 
-jest.mock('global-agent');
+vi.mock('global-agent');
 
 describe('util/http/host-rules', () => {
   const options: GotOptions = {
@@ -540,6 +540,26 @@ describe('util/http/host-rules', () => {
     expect(applyHostRule(url, {}, hostRule)).toEqual({
       headers: {
         'X-Auth-Token': 'token',
+      },
+    });
+  });
+
+  it('should replace existing headers with host rule headers', () => {
+    GlobalConfig.set({ allowedHeaders: ['Accept'] });
+    const hostRule = {
+      matchHost: 'https://domain.com/all-versions',
+      headers: {
+        Accept: 'replacement',
+      },
+    };
+    const options = {
+      headers: {
+        Accept: 'default',
+      },
+    };
+    expect(applyHostRule(url, options, hostRule)).toEqual({
+      headers: {
+        Accept: 'replacement',
       },
     });
   });

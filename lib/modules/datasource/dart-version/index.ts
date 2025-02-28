@@ -5,6 +5,12 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { DartResponse } from './types';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
+/**
+ * The server returns old svn versions which would need mapping to a version.
+ * They are very old, so we skip them instead.
+ * https://github.com/dart-lang/site-www/blob/7d4409c87bb6570b2d8870b20283f81f2b7e08fc/tool/get-dart/dart_sdk_archive/lib/src/svn_versions.dart#L2
+ */
+export const svnVersionRegex = regEx(/^\d+$/);
 
 export class DartVersionDatasource extends Datasource {
   static readonly id = 'dart-version';
@@ -41,7 +47,7 @@ export class DartVersionDatasource extends Datasource {
     try {
       for (const channel of this.channels) {
         const resp = (
-          await this.http.getJson<DartResponse>(
+          await this.http.getJsonUnchecked<DartResponse>(
             `${registryUrl}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
           )
         ).body;
@@ -65,6 +71,8 @@ export class DartVersionDatasource extends Datasource {
       .filter((version) => {
         if (
           version === 'latest' ||
+          // skip old svn versions
+          svnVersionRegex.test(version) ||
           // The API response contains a stable version being released as a non-stable
           // release. So we filter out these releases here.
           (channel !== 'stable' && stableVersionRegex.test(version))

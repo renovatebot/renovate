@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   envMock,
   mockExecAll,
@@ -14,11 +14,11 @@ import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
 const hostRules = mocked(_hostRules);
@@ -412,7 +412,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

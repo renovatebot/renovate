@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -23,11 +23,11 @@ import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
 import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../gradle');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -42,7 +42,7 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {

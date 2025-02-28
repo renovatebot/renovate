@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts all dependencies 1`] = `
 [
   {
     "currentValue": "1.0.0",
@@ -13,6 +13,43 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "datasource": "nuget",
     "depName": "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
     "depType": "nuget",
+  },
+  {
+    "currentValue": "undefined",
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable2",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable1",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
   },
   {
     "currentValue": "1.2.3",
@@ -87,33 +124,65 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
-    "currentValue": "1.1.2",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
+    "skipReason": "invalid-version",
   },
   {
-    "currentValue": "4.1.0",
+    "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac.Extensions.DependencyInjection",
     "depType": "nuget",
+    "sharedVariableName": "AutofacVersion",
   },
   {
     "currentValue": "4.5.0",
     "datasource": "nuget",
     "depName": "Autofac",
     "depType": "nuget",
+    "sharedVariableName": "AutofacVersion",
   },
 ]
 `;
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies from global packages file 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts all dependencies from global packages file 1`] = `
 [
   {
     "currentValue": "1.0.0",
     "datasource": "nuget",
     "depName": "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
     "depType": "nuget",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable3",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable2",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
+  },
+  {
+    "datasource": "nuget",
+    "depName": "NotUpdatable1",
+    "depType": "nuget",
+    "skipReason": "invalid-version",
   },
   {
     "currentValue": "1.2.3",
@@ -214,7 +283,7 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
 ]
 `;
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts package version dependency 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts package version dependency 1`] = `
 [
   {
     "currentValue": "4.5.0",

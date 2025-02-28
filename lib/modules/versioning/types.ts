@@ -137,6 +137,4 @@ export interface VersioningApi {
   isSame?(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean;
 }
 
-export interface VersioningApiConstructor {
-  new (config?: string): VersioningApi;
-}
+export type VersioningApiConstructor = new (config?: string) => VersioningApi;

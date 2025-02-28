@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
 import * as memCache from '../util/cache/memory';
 import { maskToken } from '../util/mask';
@@ -39,13 +40,14 @@ export async function tryDecrypt(
       );
     } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
-      // istanbul ignore if
+      /* v8 ignore start: not testable */
       if (is.string(decryptedStr)) {
         logger.warn(
           { keyName },
           'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
         );
       }
+      /* v8 ignore stop */
     }
   }
   return decryptedStr;
@@ -57,7 +59,6 @@ function validateDecryptedValue(
 ): string | null {
   try {
     const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
-    // istanbul ignore if
     if (!decryptedObj.success) {
       const error = new Error('config-validation');
       error.validationError = `Could not parse decrypted config.`;
@@ -65,59 +66,55 @@ function validateDecryptedValue(
     }
 
     const { o: org, r: repo, v: value } = decryptedObj.data;
-    if (is.nonEmptyString(value)) {
-      if (is.nonEmptyString(org)) {
-        const orgPrefixes = org
-          .split(',')
-          .map((o) => o.trim())
-          .map((o) => o.toUpperCase())
-          .map((o) => ensureTrailingSlash(o));
-        if (is.nonEmptyString(repo)) {
-          const scopedRepos = orgPrefixes.map((orgPrefix) =>
-            `${orgPrefix}${repo}`.toUpperCase(),
-          );
-          if (scopedRepos.some((r) => r === repository.toUpperCase())) {
-            return value;
-          } else {
-            logger.debug(
-              { scopedRepos },
-              'Secret is scoped to a different repository',
-            );
-            const error = new Error('config-validation');
-            error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
-              ',',
-            )}".`;
-            throw error;
-          }
-        } else {
-          if (
-            orgPrefixes.some((orgPrefix) =>
-              repository.toUpperCase().startsWith(orgPrefix),
-            )
-          ) {
-            return value;
-          } else {
-            logger.debug(
-              { orgPrefixes },
-              'Secret is scoped to a different org',
-            );
-            const error = new Error('config-validation');
-            error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
-              ',',
-            )}".`;
-            throw error;
-          }
-        }
-      } else {
-        const error = new Error('config-validation');
-        error.validationError = `Encrypted value in config is missing a scope.`;
-        throw error;
-      }
-    } else {
+
+    if (!is.nonEmptyString(value)) {
       const error = new Error('config-validation');
       error.validationError = `Encrypted value in config is missing a value.`;
       throw error;
     }
+
+    if (!is.nonEmptyString(org)) {
+      const error = new Error('config-validation');
+      error.validationError = `Encrypted value in config is missing a scope.`;
+      throw error;
+    }
+
+    const orgPrefixes = org
+      .split(',')
+      .map((o) => o.trim())
+      .map((o) => o.toUpperCase())
+      .map((o) => ensureTrailingSlash(o));
+
+    if (is.nonEmptyString(repo)) {
+      const scopedRepos = orgPrefixes.map((orgPrefix) =>
+        `${orgPrefix}${repo}`.toUpperCase(),
+      );
+      if (scopedRepos.some((r) => r === repository.toUpperCase())) {
+        return value;
+      }
+      logger.debug(
+        { scopedRepos },
+        'Secret is scoped to a different repository',
+      );
+      const error = new Error('config-validation');
+      const scopeString = scopedRepos.join(',');
+      error.validationError = `Encrypted secret is scoped to a different repository: "${scopeString}".`;
+      throw error;
+    }
+
+    // no scoped repos, only org
+    if (
+      orgPrefixes.some((orgPrefix) =>
+        repository.toUpperCase().startsWith(orgPrefix),
+      )
+    ) {
+      return value;
+    }
+    logger.debug({ orgPrefixes }, 'Secret is scoped to a different org');
+    const error = new Error('config-validation');
+    const scopeString = orgPrefixes.join(',');
+    error.validationError = `Encrypted secret is scoped to a different org: "${scopeString}".`;
+    throw error;
   } catch (err) {
     logger.warn({ err }, 'Could not parse decrypted string');
   }
@@ -169,38 +166,29 @@ export async function decryptConfig(
           logger.debug(`Decrypted ${eKey} in ${path}`);
           if (eKey === 'npmToken') {
             const token = decryptedStr.replace(regEx(/\n$/), '');
+            decryptedConfig[eKey] = token;
             addSecretForSanitizing(token);
-            logger.debug(
-              { decryptedToken: maskToken(token) },
-              'Migrating npmToken to npmrc',
-            );
-            if (is.string(decryptedConfig.npmrc)) {
-              /* eslint-disable no-template-curly-in-string */
-              if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
-                logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\${NPM_TOKEN}/g),
-                  token,
-                );
-              } else {
-                logger.debug('Appending _authToken= to end of existing npmrc');
-                decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                  regEx(/\n?$/),
-                  `\n_authToken=${token}\n`,
-                );
-              }
-              /* eslint-enable no-template-curly-in-string */
-            } else {
-              logger.debug('Adding npmrc to config');
-              decryptedConfig.npmrc = `//registry.npmjs.org/:_authToken=${token}\n`;
-            }
           } else {
             decryptedConfig[eKey] = decryptedStr;
             addSecretForSanitizing(decryptedStr);
           }
         }
       } else {
-        logger.error('Found encrypted data but no privateKey');
+        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
+          const error = new Error(CONFIG_VALIDATION);
+          error.validationSource = 'config';
+          error.validationError = 'Encrypted config unsupported';
+          error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
+          if (process.env.MEND_HOSTED === 'true') {
+            error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
+Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
+
+Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`;
+          }
+          throw error;
+        } else {
+          logger.error('Found encrypted data but no privateKey');
+        }
       }
       delete decryptedConfig.encrypted;
     } else if (is.array(val)) {
