@@ -1021,6 +1021,7 @@ describe('modules/platform/azure/index', () => {
         ${'fast-forward'}
         ${'merge-commit'}
         ${'rebase'}
+        ${'rebase-merge'}
         ${'squash'}
       `(
         'should not call getMergeMethod when automergeStrategy is $automergeStrategy',
@@ -1074,6 +1075,7 @@ describe('modules/platform/azure/index', () => {
         ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
         ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
         ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+        ${'rebase-merge'} | ${GitPullRequestMergeStrategy.RebaseMerge}
         ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
       `(
         'should create PR with mergeStrategy $prMergeStrategy',
@@ -1726,6 +1728,7 @@ describe('modules/platform/azure/index', () => {
       ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
       ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
       ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+      ${'rebase-merge'} | ${GitPullRequestMergeStrategy.RebaseMerge}
       ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
     `(
       'should complete PR with mergeStrategy $prMergeStrategy',
