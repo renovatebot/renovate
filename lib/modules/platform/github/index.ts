@@ -1929,7 +1929,6 @@ export async function mergePr({
     }
   }
   if (!automerged) {
-    logger.debug('No merge strategy set for the repository');
     // We need to guess the merge method and try squash -> merge -> rebase
     options.body.merge_method = 'squash';
     try {
