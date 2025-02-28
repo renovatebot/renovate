@@ -6,8 +6,8 @@ import {
   removeGlobalConfig,
 } from './index';
 
-jest.mock('../modules/datasource/npm');
-jest.mock('../../config.js', () => ({}), { virtual: true });
+vi.mock('../modules/datasource/npm');
+vi.mock('../../config.js', () => ({ default: {} }));
 
 const defaultConfig = getConfig();
 

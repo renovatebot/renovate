@@ -15,7 +15,7 @@ describe('util/http/hooks', () => {
   `(
     `returns $expected for status code $statusCode and followRedirect $followRedirect`,
     ({ statusCode, followRedirect, expected }) => {
-      const destroy = jest.fn();
+      const destroy = vi.fn();
       const response = {
         statusCode,
         request: {

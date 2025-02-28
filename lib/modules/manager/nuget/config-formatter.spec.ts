@@ -34,27 +34,25 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry',
       );
       expect(myRegistry?.name).toBe('add');
-      expect(myRegistry?.attr['value']).toBe(
-        'https://my-registry.example.org/',
-      );
-      expect(myRegistry?.attr['protocolVersion']).toBe('2');
+      expect(myRegistry?.attr.value).toBe('https://my-registry.example.org/');
+      expect(myRegistry?.attr.protocolVersion).toBe('2');
 
       const myRegistry2 = packageSources?.childWithAttribute(
         'key',
         'myRegistry2',
       );
       expect(myRegistry2?.name).toBe('add');
-      expect(myRegistry2?.attr['value']).toBe(
+      expect(myRegistry2?.attr.value).toBe(
         'https://my-registry2.example.org/index.json',
       );
-      expect(myRegistry2?.attr['protocolVersion']).toBe('3');
+      expect(myRegistry2?.attr.protocolVersion).toBe('3');
 
       const myUnnamedRegistry = packageSources?.childWithAttribute(
         'value',
         'https://my-unnamed-registry.example.org/index.json',
       );
       expect(myUnnamedRegistry?.name).toBe('add');
-      expect(myUnnamedRegistry?.attr['key']).toBe('Package source 1');
+      expect(myUnnamedRegistry?.attr.key).toBe('Package source 1');
     });
 
     it('returns xml with authenticated registries', () => {
@@ -102,21 +100,20 @@ describe('modules/manager/nuget/config-formatter', () => {
         'packageSourceCredentials.myRegistry',
       );
       expect(
-        myRegistryCredentials?.childWithAttribute('key', 'Username')?.attr[
-          'value'
-        ],
+        myRegistryCredentials?.childWithAttribute('key', 'Username')?.attr
+          .value,
       ).toBe('some-username');
 
       expect(
         myRegistryCredentials?.childWithAttribute('key', 'ClearTextPassword')
-          ?.attr['value'],
+          ?.attr.value,
       ).toBe('some-password');
 
       expect(
         myRegistryCredentials?.childWithAttribute(
           'key',
           'ValidAuthenticationTypes',
-        )?.attr['value'],
+        )?.attr.value,
       ).toBe('basic');
 
       const myRegistry2Credentials = xmlDocument.descendantWithPath(
@@ -127,14 +124,14 @@ describe('modules/manager/nuget/config-formatter', () => {
       ).toBeUndefined();
       expect(
         myRegistry2Credentials?.childWithAttribute('key', 'ClearTextPassword')
-          ?.attr['value'],
+          ?.attr.value,
       ).toBe('some-password');
 
       expect(
         myRegistry2Credentials?.childWithAttribute(
           'key',
           'ValidAuthenticationTypes',
-        )?.attr['value'],
+        )?.attr.value,
       ).toBe('basic');
     });
 
@@ -170,14 +167,14 @@ describe('modules/manager/nuget/config-formatter', () => {
         registryCredentialsWithSpecialName?.childWithAttribute(
           'key',
           'Username',
-        )?.attr['value'],
+        )?.attr.value,
       ).toBe('some-username');
 
       expect(
         registryCredentialsWithSpecialName?.childWithAttribute(
           'key',
           'ClearTextPassword',
-        )?.attr['value'],
+        )?.attr.value,
       ).toBe('some-password');
     });
 
@@ -198,10 +195,8 @@ describe('modules/manager/nuget/config-formatter', () => {
         'key',
         'myRegistry',
       );
-      expect(myRegistry?.attr['value']).toBe(
-        'https://my-registry.example.org/',
-      );
-      expect(myRegistry?.attr['protocolVersion']).toBe('3');
+      expect(myRegistry?.attr.value).toBe('https://my-registry.example.org/');
+      expect(myRegistry?.attr.protocolVersion).toBe('3');
     });
 
     it('includes packageSourceMapping when defined', () => {
@@ -233,7 +228,7 @@ describe('modules/manager/nuget/config-formatter', () => {
         'myRegistry',
       );
       expect(myRegistryMaps?.name).toBe('packageSource');
-      expect(myRegistryMaps?.childNamed('package')?.attr['pattern']).toBe('*');
+      expect(myRegistryMaps?.childNamed('package')?.attr.pattern).toBe('*');
 
       const myRegistry2Maps = packageSourceMapping?.childWithAttribute(
         'key',
@@ -243,7 +238,7 @@ describe('modules/manager/nuget/config-formatter', () => {
       expect(
         myRegistry2Maps
           ?.childrenNamed('package')
-          .map((child) => child.attr['pattern']),
+          .map((child) => child.attr.pattern),
       ).toEqual(['LimitedPackages.*', 'MySpecialPackage']);
     });
 

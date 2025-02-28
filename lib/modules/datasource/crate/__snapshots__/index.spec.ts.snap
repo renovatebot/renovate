@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/crate/index getReleases clones cloudsmith private registry 1`] = `
+exports[`modules/datasource/crate/index > getReleases > clones cloudsmith private registry 1`] = `
 {
   "dependencyUrl": "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg",
   "registryUrl": "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git",
@@ -15,7 +15,7 @@ exports[`modules/datasource/crate/index getReleases clones cloudsmith private re
 }
 `;
 
-exports[`modules/datasource/crate/index getReleases clones other private registry 1`] = `
+exports[`modules/datasource/crate/index > getReleases > clones other private registry 1`] = `
 {
   "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
   "registryUrl": "https://github.com/mcorbin/testregistry",
@@ -30,7 +30,7 @@ exports[`modules/datasource/crate/index getReleases clones other private registr
 }
 `;
 
-exports[`modules/datasource/crate/index getReleases processes real data: amethyst 1`] = `
+exports[`modules/datasource/crate/index > getReleases > processes real data: amethyst 1`] = `
 {
   "dependencyUrl": "https://crates.io/crates/amethyst",
   "homepage": "https://amethyst.rs/",
@@ -99,7 +99,7 @@ exports[`modules/datasource/crate/index getReleases processes real data: amethys
 }
 `;
 
-exports[`modules/datasource/crate/index getReleases processes real data: libc 1`] = `
+exports[`modules/datasource/crate/index > getReleases > processes real data: libc 1`] = `
 {
   "dependencyUrl": "https://crates.io/crates/libc",
   "registryUrl": "https://crates.io",

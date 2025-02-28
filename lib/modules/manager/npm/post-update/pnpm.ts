@@ -224,8 +224,8 @@ const lockToPnpmVersionMapping: LockToPnpmVersionMapping[] = [
   },
 ];
 
-type LockToPnpmVersionMapping = {
+interface LockToPnpmVersionMapping {
   lockfileVersion: string | number;
   lowerConstraint: string;
   upperConstraint?: string;
-};
+}

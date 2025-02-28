@@ -15,8 +15,8 @@ import {
   runRenovateRepoStats,
 } from './repository-statistics';
 
-jest.mock('../../../modules/platform/github/pr');
-jest.mock('../../../util/http/github');
+vi.mock('../../../modules/platform/github/pr');
+vi.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
 const result = Object.keys(prJson).map((key) => {
@@ -54,8 +54,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
   });
 
   describe('runBranchSummary', () => {
-    const getCacheSpy = jest.spyOn(cache, 'getCache');
-    const isCacheModifiedSpy = jest.spyOn(cache, 'isCacheModified');
+    const getCacheSpy = vi.spyOn(cache, 'getCache');
+    const isCacheModifiedSpy = vi.spyOn(cache, 'isCacheModified');
     const config: RenovateConfig = {};
 
     it('processes cache with baseBranches only', () => {

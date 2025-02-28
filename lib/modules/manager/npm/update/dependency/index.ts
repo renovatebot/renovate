@@ -142,7 +142,7 @@ export function updateDependency({
       if (overrideDepParents) {
         // old version when there is an object as a value in overrides block
         const { depObjectReference, overrideDepName } = overrideDepPosition(
-          parsedContents['overrides']!,
+          parsedContents.overrides!,
           overrideDepParents,
           depName,
         );

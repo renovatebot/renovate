@@ -6,6 +6,7 @@
       "@semantic-release/github",
       {
         "releasedLabels": false,
+        "successCommentCondition": "<% return branch.channel !== 'next' && issue.user.type !== 'Bot'; %>",
         "assets": [
           {
             "path": "tmp/docs.tgz",
@@ -18,8 +19,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "pnpm release:prepare --version=${nextRelease.version} --sha=${nextRelease.gitHead} --tries=3 --platform=linux/amd64,linux/arm64 --exit-on-error=false",
-        "publishCmd": "pnpm release:publish --version=${nextRelease.version} --sha=${nextRelease.gitHead} --platform=linux/amd64,linux/arm64 --exit-on-error=false"
+        "prepareCmd": "pnpm release:prepare --version=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead} --tries=3 --platform=linux/amd64,linux/arm64 --exit-on-error=true",
+        "publishCmd": "pnpm release:publish --version=${nextRelease.version} --channel='${branch.channel ?? ''}' --sha=${nextRelease.gitHead} --platform=linux/amd64,linux/arm64 --exit-on-error=true"
       }
     ]
   ],
@@ -92,7 +93,15 @@
   "tagFormat": "${version}",
   "branches": [
     {
+      "name": "maint/+([0-9])?(.{+([0-9]),x}).x",
+      "range": "${name.replace(/^maint\\//g, '')}"
+    },
+    {
       "name": "main"
+    },
+    {
+      "name": "next",
+      "prerelease": true
     }
   ]
 }
