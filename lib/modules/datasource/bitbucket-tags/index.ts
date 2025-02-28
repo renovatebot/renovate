@@ -68,9 +68,7 @@ export class BitbucketTagsDatasource extends Datasource {
     const bitbucketTags = (
       await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketTag>>(
         url,
-        {
-          paginate: true,
-        },
+        { paginate: true },
       )
     ).body.values;
 

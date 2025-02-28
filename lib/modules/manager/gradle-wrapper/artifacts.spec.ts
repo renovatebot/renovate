@@ -38,9 +38,7 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-const config: UpdateArtifactsConfig = {
-  newValue: '5.6.4',
-};
+const config: UpdateArtifactsConfig = { newValue: '5.6.4' };
 
 const osPlatformSpy = vi.spyOn(os, 'platform');
 
@@ -58,10 +56,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
     fs.readLocalFile.mockResolvedValue('test');
     fs.statLocalFile.mockResolvedValue(
-      partial<Stats>({
-        isFile: () => true,
-        mode: 0o555,
-      }),
+      partial<Stats>({ isFile: () => true, mode: 0o555 }),
     );
 
     // java
@@ -103,11 +98,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           'gradlew',
           'gradlew.bat',
         ].map((fileProjectPath) => ({
-          file: {
-            type: 'addition',
-            path: fileProjectPath,
-            contents: 'test',
-          },
+          file: { type: 'addition', path: fileProjectPath, contents: 'test' },
         })),
       );
       expect(execSnapshots).toMatchObject([
@@ -128,10 +119,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     it('gradlew not found', async () => {
       const execSnapshots = mockExecAll();
       fs.statLocalFile.mockResolvedValue(
-        partial<Stats>({
-          isFile: () => false,
-          mode: 0o555,
-        }),
+        partial<Stats>({ isFile: () => false, mode: 0o555 }),
       );
 
       const result = await updateArtifacts({
@@ -148,9 +136,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     it('gradlew failed', async () => {
       const execSnapshots = mockExecAll(new Error('failed'));
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       const result = await updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -319,11 +305,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           'sub/gradlew',
           'sub/gradlew.bat',
         ].map((fileProjectPath) => ({
-          file: {
-            type: 'addition',
-            path: fileProjectPath,
-            contents: 'test',
-          },
+          file: { type: 'addition', path: fileProjectPath, contents: 'test' },
         })),
       );
       expect(execSnapshots).toMatchObject([
@@ -433,19 +415,13 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       const execSnapshots = mockExecAll();
       const updatedArtifacts: UpdateArtifactsResult[] = [
         {
-          file: {
-            type: 'addition',
-            path: 'gradle.lockfile',
-            contents: 'test',
-          },
+          file: { type: 'addition', path: 'gradle.lockfile', contents: 'test' },
         },
       ];
       mockedFunction(gradleUpdateArtifacts).mockResolvedValue(updatedArtifacts);
 
       git.getRepoStatus.mockResolvedValue(
-        partial<StatusResult>({
-          modified: ['gradle.lockfile'],
-        }),
+        partial<StatusResult>({ modified: ['gradle.lockfile'] }),
       );
 
       const res = await updateArtifacts({
@@ -457,9 +433,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
 
       expect(res).toStrictEqual(updatedArtifacts);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: './gradlew :wrapper --gradle-version 8.2',
-        },
+        { cmd: './gradlew :wrapper --gradle-version 8.2' },
       ]);
     });
   });

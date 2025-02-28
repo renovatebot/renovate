@@ -39,10 +39,6 @@ describe('util/github/graphql/query-adapters/tags-query-adapter', () => {
   });
 
   it('returns null for other types', () => {
-    expect(
-      adapter.transform({
-        target: { type: 'Blob' },
-      } as never),
-    ).toBeNull();
+    expect(adapter.transform({ target: { type: 'Blob' } } as never)).toBeNull();
   });
 });

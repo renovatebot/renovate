@@ -26,10 +26,7 @@ describe('modules/manager/homebrew/update', () => {
       .scope(baseUrl)
       .get('/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz')
       .reply(200, Readable.from(['foo']));
-    const newContent = await updateDependency({
-      fileContent: aide,
-      upgrade,
-    });
+    const newContent = await updateDependency({ fileContent: aide, upgrade });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
     expect(newContent).toMatchSnapshot();
@@ -54,10 +51,7 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
-    const newContent = await updateDependency({
-      fileContent: ibazel,
-      upgrade,
-    });
+    const newContent = await updateDependency({ fileContent: ibazel, upgrade });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
@@ -82,10 +76,7 @@ describe('modules/manager/homebrew/update', () => {
         '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
-    const newContent = await updateDependency({
-      fileContent: ibazel,
-      upgrade,
-    });
+    const newContent = await updateDependency({ fileContent: ibazel, upgrade });
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
@@ -112,10 +103,7 @@ describe('modules/manager/homebrew/update', () => {
       .replyWithError('')
       .get('/bazelbuild/bazel-watcher/archive/refs/tags/v0.9.3.tar.gz')
       .replyWithError('');
-    const newContent = await updateDependency({
-      fileContent: ibazel,
-      upgrade,
-    });
+    const newContent = await updateDependency({ fileContent: ibazel, upgrade });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
   });
@@ -361,10 +349,7 @@ describe('modules/manager/homebrew/update', () => {
       .replyWithError('')
       .get('/aide/aide/archive/refs/tags/v0.17.7.tar.gz')
       .replyWithError('');
-    const newContent = await updateDependency({
-      fileContent: aide,
-      upgrade,
-    });
+    const newContent = await updateDependency({ fileContent: aide, upgrade });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(aide);
     expect(newContent).toMatchSnapshot();

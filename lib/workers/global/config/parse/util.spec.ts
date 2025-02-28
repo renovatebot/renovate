@@ -5,11 +5,7 @@ describe('workers/global/config/parse/util', () => {
   it('massages config', async () => {
     const config = {
       packageRules: [
-        {
-          description: 'haha',
-          matchPackageNames: ['name'],
-          enabled: false,
-        },
+        { description: 'haha', matchPackageNames: ['name'], enabled: false },
       ],
     };
 

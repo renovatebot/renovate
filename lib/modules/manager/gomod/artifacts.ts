@@ -215,12 +215,7 @@ export async function updateArtifacts({
         ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
-      toolConstraints: [
-        {
-          toolName: 'golang',
-          constraint: goConstraints,
-        },
-      ],
+      toolConstraints: [{ toolName: 'golang', constraint: goConstraints }],
     };
 
     const execCommands: string[] = [];
@@ -387,12 +382,7 @@ export async function updateArtifacts({
         }
       }
       for (const f of coerceArray(status.deleted)) {
-        res.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
+        res.push({ file: { type: 'deletion', path: f } });
       }
     }
 
@@ -433,14 +423,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');
-    return [
-      {
-        artifactError: {
-          lockFile: sumFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: sumFileName, stderr: err.message } }];
   }
 }
 

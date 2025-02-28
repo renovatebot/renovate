@@ -22,9 +22,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
   };
 }
 
-const adminConfig: RepoGlobalConfig = {
-  localDir: '',
-};
+const adminConfig: RepoGlobalConfig = { localDir: '' };
 
 const config: ExtractConfig = {};
 

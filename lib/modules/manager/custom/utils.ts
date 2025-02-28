@@ -41,11 +41,7 @@ export function checkIsValidDependency(
 ): boolean {
   const isValid = isValidDependency(dep);
   if (!isValid) {
-    const meta = {
-      packageDependency: dep,
-      packageFile,
-      manager,
-    };
+    const meta = { packageDependency: dep, packageFile, manager };
     logger.trace(
       meta,
       'Discovered a package dependency, but it did not pass validation. Discarding',

@@ -134,10 +134,7 @@ replace-with = "private-crates"`,
           datasource: 'crate',
           depName: 'proprietary-crate',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          managerData: { nestedVersion: true, registryName: 'private-crates' },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
@@ -147,10 +144,7 @@ replace-with = "private-crates"`,
           datasource: 'crate',
           depName: 'mcorbin-test',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          managerData: { nestedVersion: true, registryName: 'mcorbin' },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
@@ -160,9 +154,7 @@ replace-with = "private-crates"`,
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
@@ -187,9 +179,7 @@ replace-with = "crates-io-replacement"`,
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           registryUrls: ['https://github.com/replacement/testregistry'],
         },
       ]);
@@ -212,29 +202,21 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'proprietary-crate',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          managerData: { nestedVersion: true, registryName: 'private-crates' },
         },
         {
           currentValue: '3.0.0',
           datasource: 'crate',
           depName: 'mcorbin-test',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          managerData: { nestedVersion: true, registryName: 'mcorbin' },
         },
         {
           currentValue: '0.2',
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
         },
       ]);
     });
@@ -250,9 +232,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'wasm-bindgen',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           target: 'cfg(target_arch = "wasm32")',
         },
         {
@@ -260,9 +240,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'js-sys',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           target: 'cfg(target_arch = "wasm32")',
         },
         {
@@ -270,9 +248,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'js_relative_import',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           skipReason: 'path-dependency',
           target: 'cfg(target_arch = "wasm32")',
         },
@@ -281,9 +257,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'web-sys',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          managerData: { nestedVersion: true },
           target: 'cfg(target_arch = "wasm32")',
         },
       ]);
@@ -304,10 +278,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'proprietary-crate',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          managerData: { nestedVersion: true, registryName: 'private-crates' },
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
@@ -317,10 +288,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'mcorbin-test',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          managerData: { nestedVersion: true, registryName: 'mcorbin' },
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
         {
@@ -328,9 +296,7 @@ replace-with = "mcorbin"`,
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
         },
       ]);
     });
@@ -373,9 +339,7 @@ tokio = { version = "1.21.1" }`;
           datasource: 'crate',
           depName: 'tokio',
           depType: 'workspace.dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          managerData: { nestedVersion: true },
         },
       ]);
     });
@@ -389,9 +353,7 @@ tokio = { version = "1.21.1" }`;
           datasource: 'crate',
           depName: 'foobar',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           skipReason: 'inherited-dependency',
         },
       ]);
@@ -441,10 +403,7 @@ replace-with = "mine"`,
           datasource: 'crate',
           depName: 'proprietary-crate',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          managerData: { nestedVersion: true, registryName: 'private-crates' },
           skipReason: 'unknown-registry',
         },
         {
@@ -452,10 +411,7 @@ replace-with = "mine"`,
           datasource: 'crate',
           depName: 'mcorbin-test',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          managerData: { nestedVersion: true, registryName: 'mcorbin' },
           skipReason: 'unknown-registry',
         },
         {
@@ -463,9 +419,7 @@ replace-with = "mine"`,
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           skipReason: 'unknown-registry',
         },
       ]);
@@ -499,10 +453,7 @@ replace-with = "mcorbin"
           datasource: 'crate',
           depName: 'proprietary-crate',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          managerData: { nestedVersion: true, registryName: 'private-crates' },
           skipReason: 'unknown-registry',
         },
         {
@@ -510,10 +461,7 @@ replace-with = "mcorbin"
           datasource: 'crate',
           depName: 'mcorbin-test',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          managerData: { nestedVersion: true, registryName: 'mcorbin' },
           skipReason: 'unknown-registry',
         },
         {
@@ -521,9 +469,7 @@ replace-with = "mcorbin"
           datasource: 'crate',
           depName: 'tokio',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          managerData: { nestedVersion: false },
           skipReason: 'unknown-registry',
         },
       ]);

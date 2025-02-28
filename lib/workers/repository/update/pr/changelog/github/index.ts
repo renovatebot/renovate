@@ -95,10 +95,7 @@ export async function getReleaseList(
     'releases',
   );
   const releases = await queryReleases(
-    {
-      registryUrl: apiBaseUrl,
-      packageName: repository,
-    },
+    { registryUrl: apiBaseUrl, packageName: repository },
     http,
   );
 

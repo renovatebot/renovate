@@ -33,10 +33,7 @@ export interface GitLabMergeRequest {
   reviewers?: GitLabUser[];
   labels: string[];
   sha: LongCommitSha;
-  head_pipeline?: {
-    status: string;
-    sha: string;
-  };
+  head_pipeline?: { status: string; sha: string };
 }
 
 export interface GitlabPr extends Pr {

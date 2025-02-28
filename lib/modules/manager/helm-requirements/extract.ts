@@ -36,10 +36,7 @@ export function extractPackageFile(
         currentValue = dep.version;
     }
 
-    const res: PackageDependency = {
-      depName: dep.name,
-      currentValue,
-    };
+    const res: PackageDependency = { depName: dep.name, currentValue };
 
     if (!res.depName) {
       res.skipReason = 'invalid-name';
@@ -84,9 +81,6 @@ export function extractPackageFile(
     }
     return res;
   });
-  const res = {
-    deps,
-    datasource: HelmDatasource.id,
-  };
+  const res = { deps, datasource: HelmDatasource.id };
   return res;
 }

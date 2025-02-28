@@ -52,10 +52,7 @@ export const presets: Record<string, Preset> = {
     description:
       'Schedule automerge once a year on the first day of January (not recommended).',
   },
-  daily: {
-    description: 'Schedule daily before 4 AM.',
-    schedule: daily,
-  },
+  daily: { description: 'Schedule daily before 4 AM.', schedule: daily },
   earlyMondays: {
     description: 'Weekly schedule on early Monday mornings (before 4 AM).',
     schedule: earlyMondays,
@@ -75,14 +72,8 @@ export const presets: Record<string, Preset> = {
       'Schedule on the first day of each quarter (i.e., January, April, July, October).',
     schedule: quarterly,
   },
-  weekdays: {
-    description: 'Schedule for weekdays.',
-    schedule: weekdays,
-  },
-  weekends: {
-    description: 'Schedule for weekends.',
-    schedule: weekends,
-  },
+  weekdays: { description: 'Schedule for weekdays.', schedule: weekdays },
+  weekends: { description: 'Schedule for weekends.', schedule: weekends },
   weekly: {
     description: 'Schedule weekly.',
     extends: ['schedule:earlyMondays'],

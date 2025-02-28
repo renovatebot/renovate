@@ -90,10 +90,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     }
 
     const releases = rawReleases.map((value) => {
-      return {
-        ...value,
-        isDeprecated: baseProject.deprecated,
-      };
+      return { ...value, isDeprecated: baseProject.deprecated };
     });
 
     // asynchronously get release details
@@ -112,10 +109,7 @@ export class GalaxyCollectionDatasource extends Datasource {
       (release) => baseProject.highest_version.version === release.version,
     )?.sourceUrl;
 
-    return {
-      releases: filteredReleases,
-      sourceUrl: sourceUrlOfHighestRelease,
-    };
+    return { releases: filteredReleases, sourceUrl: sourceUrlOfHighestRelease };
   }
 
   @cache({
@@ -145,9 +139,6 @@ export class GalaxyCollectionDatasource extends Datasource {
       this.handleGenericErrors(versionsErr);
     }
 
-    return {
-      ...rawDetailedVersion,
-      isDeprecated: basicRelease.isDeprecated,
-    };
+    return { ...rawDetailedVersion, isDeprecated: basicRelease.isDeprecated };
   }
 }

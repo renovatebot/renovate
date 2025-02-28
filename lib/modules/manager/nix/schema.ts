@@ -32,10 +32,7 @@ const NixInput = z.object({
 });
 
 export const NixFlakeLock = Json.pipe(
-  z.object({
-    nodes: z.record(z.string(), NixInput),
-    version: z.literal(7),
-  }),
+  z.object({ nodes: z.record(z.string(), NixInput), version: z.literal(7) }),
 );
 
 export type NixFlakeLock = z.infer<typeof NixFlakeLock>;

@@ -12,9 +12,7 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/github-releases/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValue({ token: 'some-token' });
   });
 
   describe('getReleases', () => {
@@ -116,11 +114,7 @@ describe('modules/datasource/github-releases/index', () => {
 
     it('should be independent of the current digest', async () => {
       const digest = await getDigest(
-        {
-          datasource: GithubReleasesDatasource.id,
-          packageName,
-          currentValue,
-        },
+        { datasource: GithubReleasesDatasource.id, packageName, currentValue },
         newValue,
       );
       expect(digest).toBe(newDigest);

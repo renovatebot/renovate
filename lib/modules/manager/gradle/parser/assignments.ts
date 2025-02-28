@@ -91,15 +91,18 @@ const qGroovyMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
-    q.sym(storeVarToken).op(':').tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      startsWith: '[',
-      endsWith: ']',
-      preHandler: increaseNestingDepth,
-      search,
-      postHandler: reduceNestingDepth,
-    }),
+    q
+      .sym(storeVarToken)
+      .op(':')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '[',
+        endsWith: ']',
+        preHandler: increaseNestingDepth,
+        search,
+        postHandler: reduceNestingDepth,
+      }),
     qGroovySingleMapOfVarAssignment,
   );
 
@@ -131,15 +134,18 @@ const qKotlinMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
-    qStringValue.sym('to').sym('mapOf').tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      startsWith: '(',
-      endsWith: ')',
-      preHandler: increaseNestingDepth,
-      search,
-      postHandler: reduceNestingDepth,
-    }),
+    qStringValue
+      .sym('to')
+      .sym('mapOf')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '(',
+        endsWith: ')',
+        preHandler: increaseNestingDepth,
+        search,
+        postHandler: reduceNestingDepth,
+      }),
     qKotlinSingleMapOfVarAssignment,
   );
 

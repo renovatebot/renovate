@@ -221,13 +221,7 @@ describe('util/git/behind-base-branch-cache', () => {
       repositoryCache.getCache.mockReturnValue(repoCache);
       setCachedBehindBaseResult('foo', false);
       expect(repoCache).toEqual({
-        branches: [
-          {
-            branchName: 'foo',
-            sha: '121',
-            isBehindBase: false,
-          },
-        ],
+        branches: [{ branchName: 'foo', sha: '121', isBehindBase: false }],
       });
     });
 
@@ -257,21 +251,9 @@ describe('util/git/behind-base-branch-cache', () => {
       setCachedBehindBaseResult('foo-3', false);
       expect(repoCache).toEqual({
         branches: [
-          {
-            branchName: 'foo-1',
-            sha: '111',
-            isBehindBase: false,
-          },
-          {
-            branchName: 'foo-2',
-            sha: 'aaa',
-            isBehindBase: true,
-          },
-          {
-            branchName: 'foo-3',
-            sha: '222',
-            isBehindBase: false,
-          },
+          { branchName: 'foo-1', sha: '111', isBehindBase: false },
+          { branchName: 'foo-2', sha: 'aaa', isBehindBase: true },
+          { branchName: 'foo-3', sha: '222', isBehindBase: false },
         ],
       });
     });

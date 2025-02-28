@@ -70,29 +70,16 @@ export async function updateArtifacts(
 
     for (const f of coerceArray(status.modified)) {
       res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
+        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
       });
     }
     for (const f of coerceArray(status.not_added)) {
       res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
+        file: { type: 'addition', path: f, contents: await readLocalFile(f) },
       });
     }
     for (const f of coerceArray(status.deleted)) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
+      res.push({ file: { type: 'deletion', path: f } });
     }
 
     return res;
@@ -100,13 +87,6 @@ export async function updateArtifacts(
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.stderr,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.stderr } }];
   }
 }

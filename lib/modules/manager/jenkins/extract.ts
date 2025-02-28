@@ -85,12 +85,8 @@ function extractText(content: string): PackageDependency[] {
       const { depName, currentValue, comment } = match.groups;
       const plugin: JenkinsPlugin = {
         artifactId: depName,
-        source: {
-          version: currentValue,
-        },
-        renovate: {
-          ignore: isSkipComment(comment),
-        },
+        source: { version: currentValue },
+        renovate: { ignore: isSkipComment(comment) },
       };
       const dep = getDependency(plugin);
       deps.push(dep);

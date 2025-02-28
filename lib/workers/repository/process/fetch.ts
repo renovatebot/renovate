@@ -95,10 +95,7 @@ async function lookup(
         return Result.ok({
           updates: [],
           warnings: [
-            {
-              topic: 'Lookup Error',
-              message: `${depName}: ${cause.message}`,
-            },
+            { topic: 'Lookup Error', message: `${depName}: ${cause.message}` },
           ],
         });
       })

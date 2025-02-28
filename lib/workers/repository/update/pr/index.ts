@@ -225,10 +225,7 @@ export async function ensurePr(
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation`,
           );
-          return {
-            type: 'without-pr',
-            prBlockedBy: 'AwaitingTests',
-          };
+          return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
         }
         const prNotPendingHours = String(config.prNotPendingHours);
         logger.debug(
@@ -407,11 +404,7 @@ export async function ensurePr(
 
       if (labelsNeedUpdate) {
         logger.debug(
-          {
-            branchName,
-            prCurrentLabels,
-            configuredLabels,
-          },
+          { branchName, prCurrentLabels, configuredLabels },
           'PR labels have changed',
         );
 
@@ -436,20 +429,11 @@ export async function ensurePr(
       }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(
-          {
-            branchName,
-            oldPrTitle: existingPr.title,
-            newPrTitle: prTitle,
-          },
+          { branchName, oldPrTitle: existingPr.title, newPrTitle: prTitle },
           'PR title changed',
         );
       } else if (!config.committedFiles && !config.rebaseRequested) {
-        logger.debug(
-          {
-            prTitle,
-          },
-          'PR body changed',
-        );
+        logger.debug({ prTitle }, 'PR body changed');
       }
 
       if (GlobalConfig.get('dryRun')) {
@@ -540,11 +524,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
-        await ensureComment({
-          number: pr.number,
-          topic,
-          content,
-        });
+        await ensureComment({ number: pr.number, topic, content });
       }
     }
     // Skip assign and review if automerging PR

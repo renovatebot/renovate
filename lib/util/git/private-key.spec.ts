@@ -38,10 +38,7 @@ describe('util/git/private-key', () => {
         .calledWith(
           `gpg --batch --no-tty --import ${upath.join(os.tmpdir() + '/git-private-gpg.key')}`,
         )
-        .mockRejectedValueOnce({
-          stderr: `something wrong`,
-          stdout: '',
-        });
+        .mockRejectedValueOnce({ stderr: `something wrong`, stdout: '' });
       await expect(writePrivateKey()).rejects.toThrow();
     });
 
@@ -109,10 +106,7 @@ some-private-key
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
         .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
-        .mockResolvedValue({
-          stderr: '',
-          stdout: publicKey,
-        });
+        .mockResolvedValue({ stderr: '', stdout: publicKey });
       setPrivateKey(privateKey);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();

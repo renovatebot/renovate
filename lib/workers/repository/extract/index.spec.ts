@@ -36,9 +36,7 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchObject({
-        packageFiles: { npm: [{}] },
-      });
+      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
     });
 
     it('warns if no packages found for a enabled manager', async () => {

@@ -20,9 +20,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
     upgrades: [],
     prCache: null,
   };
-  const dummyCache: RepoCacheData = {
-    branches: [branchCache],
-  };
+  const dummyCache: RepoCacheData = { branches: [branchCache] };
 
   describe('getPrCache()', () => {
     it('return null if cache is empty', () => {

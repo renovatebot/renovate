@@ -16,19 +16,23 @@ const qVersionCatalogVersion = q
   .op<Ctx>('.')
   .alt(
     // library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
-    q.sym<Ctx>('versionRef').tree({
-      maxDepth: 1,
-      startsWith: '(',
-      endsWith: ')',
-      search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
-    }),
+    q
+      .sym<Ctx>('versionRef')
+      .tree({
+        maxDepth: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
+      }),
     // library("android-gradle", "com.android.tools.build", "gradle").version("${agp}")
-    q.sym<Ctx>('version').tree({
-      maxDepth: 1,
-      startsWith: '(',
-      endsWith: ')',
-      search: q.begin<Ctx>().join(qValueMatcher).end(),
-    }),
+    q
+      .sym<Ctx>('version')
+      .tree({
+        maxDepth: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search: q.begin<Ctx>().join(qValueMatcher).end(),
+      }),
   )
   .handler((ctx) => storeInTokenMap(ctx, 'version'));
 

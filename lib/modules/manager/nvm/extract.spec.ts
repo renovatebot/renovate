@@ -5,22 +5,14 @@ describe('modules/manager/nvm/extract', () => {
     it('returns a result', () => {
       const res = extractPackageFile('8.4.0\n');
       expect(res.deps).toEqual([
-        {
-          currentValue: '8.4.0',
-          datasource: 'node-version',
-          depName: 'node',
-        },
+        { currentValue: '8.4.0', datasource: 'node-version', depName: 'node' },
       ]);
     });
 
     it('supports ranges', () => {
       const res = extractPackageFile('8.4\n');
       expect(res.deps).toEqual([
-        {
-          currentValue: '8.4',
-          datasource: 'node-version',
-          depName: 'node',
-        },
+        { currentValue: '8.4', datasource: 'node-version', depName: 'node' },
       ]);
     });
 

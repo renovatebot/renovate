@@ -123,12 +123,7 @@ describe('modules/versioning/nuget/parser', () => {
     it('parses exact range', () => {
       expect(parseExactRange('[1.2.3]')).toEqual({
         type: 'nuget-exact-range',
-        version: {
-          type: 'nuget-version',
-          major: 1,
-          minor: 2,
-          patch: 3,
-        },
+        version: { type: 'nuget-version', major: 1, minor: 2, patch: 3 },
       });
     });
   });

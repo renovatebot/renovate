@@ -45,29 +45,20 @@ export async function checkAutoMerge(
   // Return if PR not ready for automerge
   if (!isScheduledNow(config, 'automergeSchedule')) {
     logger.debug(`PR automerge is off schedule`);
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'off schedule',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'off schedule' };
   }
   const isConflicted =
     config.isConflicted ??
     (await scm.isBranchConflicted(baseBranch, branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'Conflicted',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'Conflicted' };
   }
   if (!ignoreTests && pr.cannotMergeReason) {
     logger.debug(
       `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`,
     );
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'PlatformNotReady',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'PlatformNotReady' };
   }
   const branchStatus = await resolveBranchStatus(
     branchName,
@@ -78,17 +69,11 @@ export async function checkAutoMerge(
     logger.debug(
       `PR is not ready for merge (branch status is ${branchStatus})`,
     );
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'BranchNotGreen',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'BranchNotGreen' };
   }
   if (await scm.isBranchModified(branchName, baseBranch)) {
     logger.debug('PR is ready for automerge but has been modified');
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'BranchModified',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'BranchModified' };
   }
   if (automergeType === 'pr-comment') {
     // TODO: types (#22198)
@@ -98,10 +83,7 @@ export async function checkAutoMerge(
       logger.info(
         `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`,
       );
-      return {
-        automerged: false,
-        prAutomergeBlockReason: 'DryRun',
-      };
+      return { automerged: false, prAutomergeBlockReason: 'DryRun' };
     }
     if (rebaseRequested) {
       await ensureCommentRemoval({
@@ -126,10 +108,7 @@ export async function checkAutoMerge(
         pr.number
       } with strategy "${automergeStrategy!}"`,
     );
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'DryRun',
-    };
+    return { automerged: false, prAutomergeBlockReason: 'DryRun' };
   }
   // TODO: types (#22198)
   logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
@@ -153,8 +132,5 @@ export async function checkAutoMerge(
     }
     return { automerged: true, branchRemoved };
   }
-  return {
-    automerged: false,
-    prAutomergeBlockReason: 'PlatformRejection',
-  };
+  return { automerged: false, prAutomergeBlockReason: 'PlatformRejection' };
 }

@@ -14,9 +14,7 @@ vi.mock('../../../util/fs');
 const exec = mocked(_exec);
 const fs = mocked(_fs);
 
-const globalConfig: RepoGlobalConfig = {
-  localDir: '',
-};
+const globalConfig: RepoGlobalConfig = { localDir: '' };
 
 describe('modules/manager/gleam/artifacts', () => {
   describe('updateArtifacts()', () => {
@@ -69,13 +67,7 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
-        {
-          file: {
-            path: 'manifest.toml',
-            type: 'addition',
-            contents: 'new',
-          },
-        },
+        { file: { path: 'manifest.toml', type: 'addition', contents: 'new' } },
       ]);
     });
 
@@ -86,13 +78,7 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
-        {
-          file: {
-            path: 'manifest.toml',
-            type: 'addition',
-            contents: 'new',
-          },
-        },
+        { file: { path: 'manifest.toml', type: 'addition', contents: 'new' } },
       ]);
     });
 

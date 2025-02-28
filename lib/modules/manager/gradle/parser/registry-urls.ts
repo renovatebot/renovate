@@ -73,22 +73,21 @@ const qContentDescriptor = (
 };
 
 // content { includeModule('foo'); excludeModule('bar') }
-const qRegistryContent = q.sym<Ctx>('content').tree({
-  type: 'wrapped-tree',
-  maxDepth: 1,
-  startsWith: '{',
-  endsWith: '}',
-  search: q.alt(qContentDescriptor('include'), qContentDescriptor('exclude')),
-});
+const qRegistryContent = q
+  .sym<Ctx>('content')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q.alt(qContentDescriptor('include'), qContentDescriptor('exclude')),
+  });
 
 // uri("https://foo.bar/baz")
 // "https://foo.bar/baz"
 const qUri = q
   .alt(
-    q.sym<Ctx>('uri').tree({
-      maxDepth: 1,
-      search: qValueMatcher,
-    }),
+    q.sym<Ctx>('uri').tree({ maxDepth: 1, search: qValueMatcher }),
     qValueMatcher,
   )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
@@ -131,12 +130,14 @@ const qMavenArtifactRegistry = q.tree({
       .join(qValueMatcher)
       .handler((ctx) => storeInTokenMap(ctx, 'name')),
     q.sym<Ctx>('url').opt(q.op('=')).join(qUri),
-    q.sym<Ctx>('setUrl').tree({
-      maxDepth: 1,
-      startsWith: '(',
-      endsWith: ')',
-      search: q.begin<Ctx>().join(qUri).end(),
-    }),
+    q
+      .sym<Ctx>('setUrl')
+      .tree({
+        maxDepth: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search: q.begin<Ctx>().join(qUri).end(),
+      }),
     qRegistryContent,
   ),
 });

@@ -56,10 +56,7 @@ export async function extractAllPackageFiles(
         }
       });
 
-      results.push({
-        packageFile,
-        deps: result.deps,
-      });
+      results.push({ packageFile, deps: result.deps });
     }
   }
 

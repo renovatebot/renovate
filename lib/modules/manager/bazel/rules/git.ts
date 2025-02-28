@@ -29,10 +29,7 @@ export const GitTarget = z
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
   .transform(({ rule, name, tag, commit, remote }): PackageDependency[] => {
-    const dep: PackageDependency = {
-      depType: rule,
-      depName: name,
-    };
+    const dep: PackageDependency = { depType: rule, depName: name };
 
     if (tag) {
       dep.currentValue = tag;

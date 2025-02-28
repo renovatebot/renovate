@@ -31,10 +31,7 @@ export class BitbucketServerHttp extends Http<BitbucketServerHttpOptions> {
     options?: InternalHttpOptions & BitbucketServerHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
-    opts.headers = {
-      ...opts.headers,
-      'X-Atlassian-Token': 'no-check',
-    };
+    opts.headers = { ...opts.headers, 'X-Atlassian-Token': 'no-check' };
 
     const resolvedUrl = parseUrl(resolveBaseUrl(baseUrl, path));
     if (!resolvedUrl) {

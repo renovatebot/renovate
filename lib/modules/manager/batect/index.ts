@@ -8,8 +8,6 @@ export { extractAllPackageFiles, extractPackageFile };
 export const url = 'https://batect.dev/docs';
 export const categories: Category[] = ['batect'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)batect(-bundle)?\\.ya?ml$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)batect(-bundle)?\\.ya?ml$'] };
 
 export const supportedDatasources = [DockerDatasource.id, GitTagsDatasource.id];

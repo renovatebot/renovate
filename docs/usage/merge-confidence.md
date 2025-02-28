@@ -46,9 +46,7 @@ If you use the Mend Renovate App then the badges are enabled automatically.
 If you're self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
 
 ```json
-{
-  "extends": ["mergeConfidence:all-badges"]
-}
+{ "extends": ["mergeConfidence:all-badges"] }
 ```
 
 <!-- prettier-ignore -->
@@ -58,9 +56,7 @@ If you're self-hosting Renovate, you can enable the badges by adding the `mergeC
 If you want to disable the badges in the Mend Renovate App, add the `mergeConfidence:all-badges` preset to the `ignorePresets` array in your config:
 
 ```json
-{
-  "ignorePresets": ["mergeConfidence:all-badges"]
-}
+{ "ignorePresets": ["mergeConfidence:all-badges"] }
 ```
 
 ## Confidence levels and their meaning

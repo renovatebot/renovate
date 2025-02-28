@@ -14,8 +14,5 @@ export function parseRange(input: string): Range | null {
       return null;
     }
   }
-  return {
-    lower: m.groups.lower,
-    upper: m.groups.upper,
-  };
+  return { lower: m.groups.lower, upper: m.groups.upper };
 }

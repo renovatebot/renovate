@@ -40,14 +40,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       runRenovateRepoStats(config, result);
 
       expect(logger.debug).toHaveBeenCalledWith(
-        {
-          stats: {
-            total: 4,
-            open: 1,
-            closed: 1,
-            merged: 1,
-          },
-        },
+        { stats: { total: 4, open: 1, closed: 1, merged: 1 } },
         `Renovate repository PR statistics`,
       );
     });
@@ -73,14 +66,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
         {
           cacheModified: true,
           baseBranches: [
-            {
-              branchName: 'main',
-              sha,
-            },
-            {
-              branchName: 'dev',
-              sha,
-            },
+            { branchName: 'main', sha },
+            { branchName: 'dev', sha },
           ],
           branches: [],
           inactiveBranches: [],
@@ -115,10 +102,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       };
       const branches: BranchCache[] = [
         { ...branchCache, branchName: 'b1' },
-        {
-          ...branchCache,
-          branchName: 'b2',
-        },
+        { ...branchCache, branchName: 'b2' },
         partial<BranchCache>({ branchName: 'b3' }),
       ];
       const cache = partial<RepoCacheData>({
@@ -133,14 +117,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         {
           baseBranches: [
-            {
-              branchName: 'main',
-              sha,
-            },
-            {
-              branchName: 'dev',
-              sha,
-            },
+            { branchName: 'main', sha },
+            { branchName: 'dev', sha },
           ],
           branches: [
             { ...expectedMeta, branchName: 'b1' },
@@ -174,9 +152,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
 
       const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
-      const cache = partial<RepoCacheData>({
-        branches,
-      });
+      const cache = partial<RepoCacheData>({ branches });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
 

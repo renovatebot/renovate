@@ -102,9 +102,7 @@ describe('modules/datasource/aws-rds/index', () => {
 
   describe('getPkgReleases()', () => {
     it('without returned versions', async () => {
-      mockDescribeVersionsCommand({
-        $metadata: {},
-      });
+      mockDescribeVersionsCommand({ $metadata: {} });
       const res = await getPkgReleases({
         datasource: AwsRdsDatasource.id,
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
@@ -122,12 +120,7 @@ describe('modules/datasource/aws-rds/index', () => {
         packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toEqual({
-        releases: [
-          {
-            isDeprecated: true,
-            version: version2.EngineVersion,
-          },
-        ],
+        releases: [{ isDeprecated: true, version: version2.EngineVersion }],
       });
     });
 
@@ -142,18 +135,9 @@ describe('modules/datasource/aws-rds/index', () => {
       });
       expect(res).toEqual({
         releases: [
-          {
-            isDeprecated: false,
-            version: version1.EngineVersion,
-          },
-          {
-            isDeprecated: true,
-            version: version2.EngineVersion,
-          },
-          {
-            isDeprecated: false,
-            version: version3.EngineVersion,
-          },
+          { isDeprecated: false, version: version1.EngineVersion },
+          { isDeprecated: true, version: version2.EngineVersion },
+          { isDeprecated: false, version: version3.EngineVersion },
         ],
       });
     });

@@ -36,17 +36,11 @@ export type RawQueryResponse<Payload> = [Payload, null] | [null, Error];
 
 export interface GithubGraphqlPayload<T> {
   nodes: T[];
-  pageInfo?: {
-    hasNextPage?: boolean;
-    endCursor?: string;
-  };
+  pageInfo?: { hasNextPage?: boolean; endCursor?: string };
 }
 
 export interface GithubGraphqlRepoResponse<T> {
-  repository: {
-    isRepoPrivate?: boolean;
-    payload: GithubGraphqlPayload<T>;
-  };
+  repository: { isRepoPrivate?: boolean; payload: GithubGraphqlPayload<T> };
 }
 
 export interface GithubPackageConfig {

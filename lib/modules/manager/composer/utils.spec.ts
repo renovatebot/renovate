@@ -123,9 +123,7 @@ describe('modules/manager/composer/utils', () => {
     it('returns from plugin-api-version', () => {
       const file = PackageFile.parse({});
       const lockfile = Lockfile.parse({ 'plugin-api-version': '1.1.0' });
-      expect(extractConstraints(file, lockfile)).toEqual({
-        composer: '^1.1',
-      });
+      expect(extractConstraints(file, lockfile)).toEqual({ composer: '^1.1' });
     });
 
     it('fallback to 1.*', () => {
@@ -151,9 +149,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables platform requirements', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: [],
-          },
+          { composerIgnorePlatformReqs: [] },
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -164,9 +160,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables all platform requirements with 2.1.0', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: [],
-          },
+          { composerIgnorePlatformReqs: [] },
           { toolName: 'composer', constraint: '2.1.0' },
         ),
       ).toBe(
@@ -177,9 +171,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with 2.2.0', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: [],
-          },
+          { composerIgnorePlatformReqs: [] },
           { toolName: 'composer', constraint: '2.2.0' },
         ),
       ).toBe(
@@ -190,9 +182,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with ^2.2', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: [],
-          },
+          { composerIgnorePlatformReqs: [] },
           { toolName: 'composer', constraint: '^2.2' },
         ),
       ).toBe(
@@ -203,9 +193,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables single platform requirement', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: ['ext-intl'],
-          },
+          { composerIgnorePlatformReqs: ['ext-intl'] },
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -216,9 +204,7 @@ describe('modules/manager/composer/utils', () => {
     it('disables multiple platform requirement', () => {
       expect(
         getComposerArguments(
-          {
-            composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'],
-          },
+          { composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'] },
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -227,23 +213,17 @@ describe('modules/manager/composer/utils', () => {
     });
 
     it('allows scripts when configured', () => {
-      GlobalConfig.set({
-        allowScripts: true,
-      });
+      GlobalConfig.set({ allowScripts: true });
       expect(
         getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),
       ).toBe(' --no-ansi --no-interaction --no-plugins');
     });
 
     it('disables scripts when configured locally', () => {
-      GlobalConfig.set({
-        allowScripts: true,
-      });
+      GlobalConfig.set({ allowScripts: true });
       expect(
         getComposerArguments(
-          {
-            ignoreScripts: true,
-          },
+          { ignoreScripts: true },
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -252,23 +232,17 @@ describe('modules/manager/composer/utils', () => {
     });
 
     it('allows plugins when configured', () => {
-      GlobalConfig.set({
-        allowPlugins: true,
-      });
+      GlobalConfig.set({ allowPlugins: true });
       expect(
         getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),
       ).toBe(' --no-ansi --no-interaction --no-scripts --no-autoloader');
     });
 
     it('disables plugins when configured locally', () => {
-      GlobalConfig.set({
-        allowPlugins: true,
-      });
+      GlobalConfig.set({ allowPlugins: true });
       expect(
         getComposerArguments(
-          {
-            ignorePlugins: true,
-          },
+          { ignorePlugins: true },
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(

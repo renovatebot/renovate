@@ -72,9 +72,7 @@ describe('modules/datasource/deb/index', () => {
       httpMock
         .scope(debBaseUrl, {
           // ensure the rest call sets the correct request headers
-          reqheaders: {
-            'if-modified-since': ts.toUTCString(),
-          },
+          reqheaders: { 'if-modified-since': ts.toUTCString() },
         })
         .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
         .reply(304);
@@ -84,11 +82,7 @@ describe('modules/datasource/deb/index', () => {
         homepage: 'http://marginalhacks.com/Hacks/album',
         registryUrl:
           'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
-        releases: [
-          {
-            version: '4.15-1',
-          },
-        ],
+        releases: [{ version: '4.15-1' }],
       });
     });
 
@@ -136,11 +130,7 @@ describe('modules/datasource/deb/index', () => {
           homepage: 'http://marginalhacks.com/Hacks/album',
           registryUrl:
             'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
-          releases: [
-            {
-              version: '4.15-1',
-            },
-          ],
+          releases: [{ version: '4.15-1' }],
         });
       });
 
@@ -153,11 +143,7 @@ describe('modules/datasource/deb/index', () => {
           homepage: 'http://marginalhacks.com/Hacks/album',
           registryUrl:
             'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=amd64',
-          releases: [
-            {
-              version: '4.15-1',
-            },
-          ],
+          releases: [{ version: '4.15-1' }],
         });
       });
 
@@ -197,14 +183,7 @@ describe('modules/datasource/deb/index', () => {
             homepage: 'http://marginalhacks.com/Hacks/album',
             registryUrl:
               'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
-            releases: [
-              {
-                version: '4.14-1',
-              },
-              {
-                version: '4.15-1',
-              },
-            ],
+            releases: [{ version: '4.14-1' }, { version: '4.15-1' }],
           });
         });
 
@@ -215,14 +194,7 @@ describe('modules/datasource/deb/index', () => {
             homepage: 'http://marginalhacks.com/Hacks/album',
             registryUrl:
               'http://deb.debian.org/debian?suite=stable&components=non-free,non-free-second&binaryArch=amd64',
-            releases: [
-              {
-                version: '4.14-1',
-              },
-              {
-                version: '4.15-1',
-              },
-            ],
+            releases: [{ version: '4.14-1' }, { version: '4.15-1' }],
           });
         });
       });
@@ -265,11 +237,7 @@ describe('modules/datasource/deb/index', () => {
         homepage: 'http://marginalhacks.com/Hacks/album',
         registryUrl:
           'http://deb.debian.org/debian?suite=stable&components=non-free&binaryArch=riscv',
-        releases: [
-          {
-            version: '4.15-1',
-          },
-        ],
+        releases: [{ version: '4.15-1' }],
       });
     });
 

@@ -190,10 +190,7 @@ function extractDependency({
   if (is.string(descriptor)) {
     const [group, name, currentValue] = descriptor.split(':');
     if (!currentValue) {
-      return {
-        depName,
-        skipReason: 'unspecified-version',
-      };
+      return { depName, skipReason: 'unspecified-version' };
     }
     return {
       depName: `${group}:${name}`,
@@ -216,10 +213,7 @@ function extractDependency({
   });
 
   if (skipReason) {
-    return {
-      depName,
-      skipReason,
-    };
+    return { depName, skipReason };
   }
 
   const dependency: PackageDependency<GradleManagerData> = {

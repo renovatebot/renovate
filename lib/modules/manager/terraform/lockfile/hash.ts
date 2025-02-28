@@ -86,9 +86,7 @@ export class TerraformProviderHash {
     zipFilePath: string,
     extractPath: string,
   ): Promise<string> {
-    await extract(zipFilePath, {
-      dir: extractPath,
-    });
+    await extract(zipFilePath, { dir: extractPath });
     const hash = await this.hashOfDir(extractPath);
     // delete extracted files
     await fs.rmCache(extractPath);

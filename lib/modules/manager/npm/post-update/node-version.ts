@@ -70,8 +70,5 @@ export async function getNodeToolConstraint(
     pkg,
   );
 
-  return {
-    toolName: 'node',
-    constraint,
-  };
+  return { toolName: 'node', constraint };
 }

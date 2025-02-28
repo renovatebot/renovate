@@ -183,9 +183,7 @@ export class PypiDatasource extends Datasource {
         const pythonConstraints = releases
           .map(({ requires_python }) => requires_python)
           .filter(is.string);
-        result.constraints = {
-          python: Array.from(new Set(pythonConstraints)),
-        };
+        result.constraints = { python: Array.from(new Set(pythonConstraints)) };
         return result;
       });
     }

@@ -233,9 +233,7 @@ describe('modules/manager/npm/artifacts', () => {
     });
 
     expect(res).toEqual([
-      {
-        artifactError: { fileName: 'package.json', stderr: 'exec error' },
-      },
+      { artifactError: { fileName: 'package.json', stderr: 'exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });

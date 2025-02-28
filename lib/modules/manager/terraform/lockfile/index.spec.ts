@@ -14,9 +14,7 @@ vi.mock('../../../../util/fs');
 vi.mock('./hash');
 vi.mock('../../../datasource', () => mockDeep());
 
-const config = {
-  constraints: {},
-};
+const config = { constraints: {} };
 
 const adminConfig = {
   // `join` fixes Windows CI
@@ -1173,11 +1171,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     it('correctly calculate new constraint on pinning', () => {
       expect(
         getNewConstraint(
-          {
-            currentValue: '>= 4.3',
-            newValue: '5.26.0',
-            newVersion: '5.26.0',
-          },
+          { currentValue: '>= 4.3', newValue: '5.26.0', newVersion: '5.26.0' },
           '>= 4.3.0',
         ),
       ).toBe('5.26.0');
@@ -1186,11 +1180,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     it('update constraint with multiple elements', () => {
       expect(
         getNewConstraint(
-          {
-            currentValue: '2.41.0',
-            newValue: '2.46.0',
-            newVersion: '2.46.0',
-          },
+          { currentValue: '2.41.0', newValue: '2.46.0', newVersion: '2.46.0' },
           '>= 2.36.0, 2.41.0',
         ),
       ).toBe('>= 2.36.0, 2.46.0');
@@ -1199,11 +1189,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     it('update constraint when current version is matched multiple times', () => {
       expect(
         getNewConstraint(
-          {
-            currentValue: '2.41.0',
-            newValue: '2.46.0',
-            newVersion: '2.46.0',
-          },
+          { currentValue: '2.41.0', newValue: '2.46.0', newVersion: '2.46.0' },
           '>= 2.41.0, 2.41.0',
         ),
       ).toBe('>= 2.41.0, 2.46.0');

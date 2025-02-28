@@ -14,10 +14,7 @@ const DevboxEntry = z
   .array(z.string())
   .min(1)
   .transform(([depName, currentValue]) => {
-    const dep: PackageDependency = {
-      datasource: DevboxDatasource.id,
-      depName,
-    };
+    const dep: PackageDependency = { datasource: DevboxDatasource.id, depName };
 
     if (!currentValue) {
       logger.trace(

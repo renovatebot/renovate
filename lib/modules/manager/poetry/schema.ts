@@ -22,19 +22,14 @@ import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 const PoetryOptionalDependencyMixin = z
-  .object({
-    optional: z.boolean().optional().catch(false),
-  })
+  .object({ optional: z.boolean().optional().catch(false) })
   .transform(
     ({ optional }): PackageDependency =>
       optional ? { depType: 'extras' } : {},
   );
 
 const PoetryPathDependency = z
-  .object({
-    path: z.string(),
-    version: z.string().optional().catch(undefined),
-  })
+  .object({ path: z.string(), version: z.string().optional().catch(undefined) })
   .transform(({ version }): PackageDependency => {
     const dep: PackageDependency = {
       datasource: PypiDatasource.id,
@@ -119,21 +114,25 @@ const PoetryPypiDependency = z.union([
       };
     })
     .and(PoetryOptionalDependencyMixin),
-  z.string().transform(
-    (version): PackageDependency => ({
-      datasource: PypiDatasource.id,
-      currentValue: version,
-      managerData: { nestedVersion: false },
-    }),
-  ),
+  z
+    .string()
+    .transform(
+      (version): PackageDependency => ({
+        datasource: PypiDatasource.id,
+        currentValue: version,
+        managerData: { nestedVersion: false },
+      }),
+    ),
 ]);
 
-const PoetryArrayDependency = z.array(z.unknown()).transform(
-  (): PackageDependency => ({
-    datasource: PypiDatasource.id,
-    skipReason: 'multiple-constraint-dep',
-  }),
-);
+const PoetryArrayDependency = z
+  .array(z.unknown())
+  .transform(
+    (): PackageDependency => ({
+      datasource: PypiDatasource.id,
+      skipReason: 'multiple-constraint-dep',
+    }),
+  );
 
 const PoetryDependency = z.union([
   PoetryPathDependency,
@@ -385,10 +384,7 @@ export const Lockfile = Toml.pipe(
   z.object({
     package: LooseArray(
       z
-        .object({
-          name: z.string(),
-          version: z.string(),
-        })
+        .object({ name: z.string(), version: z.string() })
         .transform(({ name, version }): [string, string] => [name, version]),
     )
       .transform((entries) => Object.fromEntries(entries))
@@ -406,15 +402,9 @@ export const Lockfile = Toml.pipe(
         ({
           'lock-version': poetryConstraint,
           'python-versions': pythonVersions,
-        }) => ({
-          poetryConstraint,
-          pythonVersions,
-        }),
+        }) => ({ poetryConstraint, pythonVersions }),
       )
-      .catch({
-        poetryConstraint: undefined,
-        pythonVersions: undefined,
-      }),
+      .catch({ poetryConstraint: undefined, pythonVersions: undefined }),
   }),
 ).transform(
   ({ package: lock, metadata: { poetryConstraint, pythonVersions } }) => ({

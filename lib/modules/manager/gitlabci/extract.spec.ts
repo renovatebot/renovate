@@ -249,9 +249,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - $BUILD_IMAGES/image2:1.0.0
       `,
         '',
-        {
-          registryAliases,
-        },
+        { registryAliases },
       );
       expect(res?.deps).toEqual([
         {
@@ -317,11 +315,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(extractFromImage('image:test')).toEqual(expectedRes);
 
       expectedRes = { ...expectedRes, depType: 'image-name' };
-      expect(
-        extractFromImage({
-          name: 'image:test',
-        }),
-      ).toEqual(expectedRes);
+      expect(extractFromImage({ name: 'image:test' })).toEqual(expectedRes);
 
       expect(extractFromImage(undefined)).toBeNull();
     });
@@ -399,9 +393,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
           - component: $COMPONENT_REGISTRY/a-project/a-component@1.0
       `;
-      const res = extractPackageFile(content, '', {
-        registryAliases,
-      });
+      const res = extractPackageFile(content, '', { registryAliases });
       expect(res?.deps).toMatchObject([
         {
           currentValue: '1.0',

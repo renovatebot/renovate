@@ -35,10 +35,7 @@ export function hashicorp2npm(input: string): string {
         );
         throw new Error('Unsupported hashicorp constraint');
       }
-      return {
-        operator: r[1],
-        version: r[2],
-      };
+      return { operator: r[1], version: r[2] };
     })
     .map(({ operator, version }) => {
       switch (operator) {
@@ -77,10 +74,7 @@ export function npm2hashicorp(input: string): string {
       if (!r) {
         throw new Error('invalid npm constraint');
       }
-      return {
-        operator: r[1],
-        version: r[2],
-      };
+      return { operator: r[1], version: r[2] };
     })
     .map(({ operator, version }) => {
       switch (operator) {

@@ -103,10 +103,7 @@ export class GithubTagsDatasource extends Datasource {
       logger.debug({ err }, `Error fetching additional info for GitHub tags`);
     }
 
-    const dependency: ReleaseResult = {
-      sourceUrl,
-      releases,
-    };
+    const dependency: ReleaseResult = { sourceUrl, releases };
     return dependency;
   }
 }

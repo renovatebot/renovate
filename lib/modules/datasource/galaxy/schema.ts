@@ -8,10 +8,7 @@ export const GalaxyV1 = z.object({
       summary_fields: z.object({
         versions: z.array(
           z
-            .object({
-              name: z.string(),
-              created: MaybeTimestamp,
-            })
+            .object({ name: z.string(), created: MaybeTimestamp })
             .transform(({ name, created }) => ({
               version: name,
               releaseTimestamp: created,

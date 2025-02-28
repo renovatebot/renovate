@@ -16,9 +16,7 @@ export async function fetchJSONFile(
 ): Promise<Preset> {
   let res: RepoContents;
   try {
-    res = await getRepoContents(repo, fileName, tag, {
-      baseUrl: endpoint,
-    });
+    res = await getRepoContents(repo, fileName, tag, { baseUrl: endpoint });
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;

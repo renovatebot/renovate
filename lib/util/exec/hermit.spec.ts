@@ -73,9 +73,7 @@ describe('util/exec/hermit', () => {
       const fullCwd = upath.join(localDir, relativeCwd);
 
       const resp = await getHermitEnvs(
-        partial<RawExecOptions>({
-          cwd: fullCwd,
-        }),
+        partial<RawExecOptions>({ cwd: fullCwd }),
       );
 
       expect(findUp.mock.calls[0][1]?.cwd).toEqual(fullCwd);

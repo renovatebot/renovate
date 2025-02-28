@@ -39,11 +39,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         baseBranch: 'base',
       };
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-          not_added: [],
-          deleted: [],
-        }),
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
       );
       GlobalConfig.set({
         localDir: __dirname,
@@ -89,11 +85,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         baseBranch: 'base',
       };
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-          not_added: [],
-          deleted: [],
-        }),
+        partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
       );
       GlobalConfig.set({
         localDir: __dirname,

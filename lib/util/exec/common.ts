@@ -88,10 +88,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
     });
 
     // handle streams
-    const [stdout, stderr] = initStreamListeners(cp, {
-      ...opts,
-      maxBuffer,
-    });
+    const [stdout, stderr] = initStreamListeners(cp, { ...opts, maxBuffer });
 
     // handle process events
     cp.on('error', (error) => {
@@ -123,10 +120,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
         );
         return;
       }
-      resolve({
-        stderr: stringify(stderr),
-        stdout: stringify(stdout),
-      });
+      resolve({ stderr: stringify(stderr), stdout: stringify(stdout) });
     });
 
     function rejectInfo(): ExecErrorData {

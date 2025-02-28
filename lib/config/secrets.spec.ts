@@ -52,17 +52,13 @@ describe('config/secrets', () => {
     it('throws if disallowed field is used', () => {
       const config = {
         prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
-        secrets: {
-          ARTIFACTORY_TOKEN: '123test==',
-        },
+        secrets: { ARTIFACTORY_TOKEN: '123test==' },
       };
       expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
     });
 
     it('throws if an unknown secret is used', () => {
-      const config = {
-        npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
-      };
+      const config = { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' };
       expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
     });
 
@@ -72,9 +68,7 @@ describe('config/secrets', () => {
         npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
       };
       const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        npmToken: '123test==',
-      });
+      expect(res).toStrictEqual({ npmToken: '123test==' });
       expect(Object.keys(res)).not.toContain('secrets');
     });
 
@@ -84,11 +78,7 @@ describe('config/secrets', () => {
         npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
       };
       const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        npm: {
-          npmToken: '123test==',
-        },
-      });
+      expect(res).toStrictEqual({ npm: { npmToken: '123test==' } });
       expect(Object.keys(res)).not.toContain('secrets');
     });
 
@@ -112,9 +102,7 @@ describe('config/secrets', () => {
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
       const res = applySecretsToConfig(config);
-      expect(res).toStrictEqual({
-        allowedManagers: ['npm'],
-      });
+      expect(res).toStrictEqual({ allowedManagers: ['npm'] });
       expect(Object.keys(res)).not.toContain('secrets');
     });
 

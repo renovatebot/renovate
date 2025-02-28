@@ -81,10 +81,7 @@ describe('instrumentation/reporting', () => {
     });
     addLibYears(config, {}, 0, 0, 0);
 
-    expect(getReport()).toEqual({
-      problems: [],
-      repositories: {},
-    });
+    expect(getReport()).toEqual({ problems: [], repositories: {} });
   });
 
   it('return report if reportType is set to logging', () => {
@@ -148,9 +145,7 @@ describe('instrumentation/reporting', () => {
 
     await exportStats(config);
     expect(mockClient.send.mock.calls[0][0]).toMatchObject({
-      input: {
-        Body: JSON.stringify(expectedReport),
-      },
+      input: { Body: JSON.stringify(expectedReport) },
     });
   });
 
@@ -193,20 +188,10 @@ describe('instrumentation/reporting', () => {
       reportType: 'logging',
     };
     const expectedReport = {
-      problems: [
-        {
-          level: 30,
-          msg: 'a root problem',
-        },
-      ],
+      problems: [{ level: 30, msg: 'a root problem' }],
       repositories: {
         'myOrg/myRepo': {
-          problems: [
-            {
-              level: 30,
-              msg: 'a repo problem',
-            },
-          ],
+          problems: [{ level: 30, msg: 'a repo problem' }],
           branches: branchInformation,
           packageFiles,
         },
@@ -217,15 +202,8 @@ describe('instrumentation/reporting', () => {
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     logger.getProblems.mockReturnValue([
-      {
-        repository: 'myOrg/myRepo',
-        level: 30,
-        msg: 'a repo problem',
-      },
-      {
-        level: 30,
-        msg: 'a root problem',
-      },
+      { repository: 'myOrg/myRepo', level: 30, msg: 'a repo problem' },
+      { level: 30, msg: 'a root problem' },
     ]);
     finalizeReport();
 

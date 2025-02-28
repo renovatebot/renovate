@@ -113,11 +113,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
@@ -136,11 +132,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
@@ -177,11 +169,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { RANDOM_VARIABLE: 'random' },
         ),
       ).toStrictEqual({
@@ -260,15 +248,10 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://gitlab.com/',
-          {
-            hostType: 'gitlab',
-            matchHost: 'gitlab.com',
-          },
+          { hostType: 'gitlab', matchHost: 'gitlab.com' },
           { env: 'value' },
         ),
-      ).toStrictEqual({
-        env: 'value',
-      });
+      ).toStrictEqual({ env: 'value' });
     });
 
     it('returns url with token for http hosts', () => {
@@ -331,11 +314,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com:89/org/repo.git',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',

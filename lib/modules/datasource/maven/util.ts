@@ -412,12 +412,7 @@ export async function downloadMavenXml(
 export function getDependencyParts(packageName: string): MavenDependency {
   const [group, name] = packageName.split(':');
   const dependencyUrl = `${group.replace(regEx(/\./g), '/')}/${name}`;
-  return {
-    display: packageName,
-    group,
-    name,
-    dependencyUrl,
-  };
+  return { display: packageName, group, name, dependencyUrl };
 }
 
 function extractSnapshotVersion(metadata: XmlDocument): string | null {

@@ -72,9 +72,7 @@ export class GalaxyDatasource extends Datasource {
     const resultObject = body.results[0];
     const versions = resultObject.summary_fields.versions;
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
 
     result.dependencyUrl = galaxyProjectUrl;
     const { github_user: user, github_repo: repo } = resultObject;

@@ -186,10 +186,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       .query({ exclude_fields: 'current_release' })
       .reply(200, Fixtures.get('puppetforge-response-with-nulls.json'));
 
-    const res = await getPkgReleases({
-      datasource,
-      packageName: 'foobar',
-    });
+    const res = await getPkgReleases({ datasource, packageName: 'foobar' });
 
     expect(res).toEqual({
       registryUrl: 'https://forgeapi.puppet.com',
@@ -212,10 +209,7 @@ describe('modules/datasource/puppet-forge/index', () => {
       .query({ exclude_fields: 'current_release' })
       .reply(200, Fixtures.get('puppetforge-no-releases.json'));
 
-    const res = await getPkgReleases({
-      datasource,
-      packageName: 'foobar',
-    });
+    const res = await getPkgReleases({ datasource, packageName: 'foobar' });
 
     expect(res).toBeNull();
   });

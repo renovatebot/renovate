@@ -8,12 +8,7 @@ import type { CpanRelease } from './types';
  */
 const MetaCpanApiFileSchema = z
   .object({
-    module: LooseArray(
-      z.object({
-        name: z.string(),
-        version: z.string(),
-      }),
-    ),
+    module: LooseArray(z.object({ name: z.string(), version: z.string() })),
     distribution: z.string(),
     date: MaybeTimestamp,
     deprecated: z.boolean(),
@@ -50,11 +45,7 @@ const MetaCpanApiFileSchema = z
 export const MetaCpanApiFileSearchResponse = z
   .object({
     hits: z.object({
-      hits: LooseArray(
-        z.object({
-          _source: MetaCpanApiFileSchema,
-        }),
-      ),
+      hits: LooseArray(z.object({ _source: MetaCpanApiFileSchema })),
     }),
   })
   .transform((data): CpanRelease[] => {

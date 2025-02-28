@@ -25,11 +25,7 @@ export function extractPackageFile(
         if (!(depName && currentValue)) {
           logger.warn({ content }, 'Incomplete npm.depends match');
         }
-        return {
-          depName,
-          currentValue,
-          datasource: NpmDatasource.id,
-        };
+        return { depName, currentValue, datasource: NpmDatasource.id };
       })
       .filter((dep) => dep.depName && dep.currentValue);
   } catch (err) /* istanbul ignore next */ {

@@ -87,9 +87,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = {
-    memCache: false,
-  };
+  const options: HttpOptions = { memCache: false };
   if (token) {
     options.token = token;
   } else {
@@ -199,10 +197,7 @@ export async function initRepo({
     hostType: 'bitbucket',
     url: defaults.endpoint,
   });
-  config = {
-    repository,
-    ignorePrAuthor,
-  } as Config;
+  config = { repository, ignorePrAuthor } as Config;
   let info: RepoInfo;
   let mainBranch: string;
   try {
@@ -378,9 +373,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
 
-  const res: Pr = {
-    ...utils.prInfo(pr),
-  };
+  const res: Pr = { ...utils.prInfo(pr) };
 
   if (is.nonEmptyArray(pr.reviewers)) {
     res.reviewers = pr.reviewers
@@ -416,10 +409,7 @@ async function getBranchCommit(
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({
-    branchName,
-    state: 'open',
-  });
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
@@ -431,10 +421,7 @@ async function getStatus(
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
-      {
-        paginate: true,
-        memCache,
-      },
+      { paginate: true, memCache },
     )
   ).body.values;
 }
@@ -564,18 +551,13 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   const [issue] = issues;
-  return {
-    number: issue.id,
-    body: issue.content?.raw,
-  };
+  return { number: issue.id, body: issue.content?.raw };
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
+    { body: { state: 'closed' } },
   );
 }
 
@@ -734,17 +716,13 @@ export async function addReviewers(
         username.endsWith('}') &&
         UUIDRegex.test(username.slice(1, -1));
       const key = isUUID ? 'uuid' : 'username';
-      return {
-        [key]: username,
-      };
+      return { [key]: username };
     }),
   };
 
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prId}`,
-    {
-      body,
-    },
+    { body },
   );
 }
 
@@ -892,9 +870,7 @@ export async function createPr({
     const reviewersResponse = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
-        {
-          paginate: true,
-        },
+        { paginate: true },
       )
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
@@ -906,16 +882,8 @@ export async function createPr({
   const body = {
     title,
     description: sanitize(description),
-    source: {
-      branch: {
-        name: sourceBranch,
-      },
-    },
-    destination: {
-      branch: {
-        name: base,
-      },
-    },
+    source: { branch: { name: sourceBranch } },
+    destination: { branch: { name: base } },
     close_source_branch: true,
     reviewers,
   };
@@ -924,9 +892,7 @@ export async function createPr({
     const prRes = (
       await bitbucketHttp.postJson<PrResponse>(
         `/2.0/repositories/${config.repository}/pullrequests`,
-        {
-          body,
-        },
+        { body },
       )
     ).body;
     const pr = utils.prInfo(prRes);
@@ -951,12 +917,7 @@ export async function createPr({
       const prRes = (
         await bitbucketHttp.postJson<PrResponse>(
           `/2.0/repositories/${config.repository}/pullrequests`,
-          {
-            body: {
-              ...body,
-              reviewers: sanitizedReviewers,
-            },
-          },
+          { body: { ...body, reviewers: sanitizedReviewers } },
         )
       ).body;
       const pr = utils.prInfo(prRes);
@@ -986,30 +947,17 @@ async function autoResolvePrTasks(pr: Pr): Promise<void> {
     ).body;
 
     logger.trace(
-      {
-        prId: pr.number,
-        listTaskRes: unResolvedTasks,
-      },
+      { prId: pr.number, listTaskRes: unResolvedTasks },
       'List PR tasks',
     );
 
     for (const task of unResolvedTasks) {
       const res = await bitbucketHttp.putJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/tasks/${task.id}`,
-        {
-          body: {
-            state: 'RESOLVED',
-            content: {
-              raw: task.content.raw,
-            },
-          },
-        },
+        { body: { state: 'RESOLVED', content: { raw: task.content.raw } } },
       );
       logger.trace(
-        {
-          prId: pr.number,
-          updateTaskResponse: res,
-        },
+        { prId: pr.number, updateTaskResponse: res },
         'Put PR tasks - mark resolved',
       );
     }
@@ -1041,11 +989,7 @@ export async function updatePr({
       reviewers: pr.reviewers,
     };
     if (targetBranch) {
-      body.destination = {
-        branch: {
-          name: targetBranch,
-        },
-      };
+      body.destination = { branch: { name: targetBranch } };
     }
 
     updatedPrRes = (
@@ -1107,9 +1051,7 @@ export async function mergePr({
   try {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,
-      {
-        body: mergeBodyTransformer(mergeStrategy),
-      },
+      { body: mergeBodyTransformer(mergeStrategy) },
     );
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {

@@ -85,11 +85,7 @@ function parseGitlabPath(pathname: string): Partial<PackageDependency> | null {
   const packageName = p0 + '/' + p1;
   if (p2 === '-' && p3 === 'archive' && p4) {
     return isHash(p4)
-      ? {
-          datasource: GitlabTagsDatasource.id,
-          packageName,
-          currentDigest: p4,
-        }
+      ? { datasource: GitlabTagsDatasource.id, packageName, currentDigest: p4 }
       : {
           datasource: GitlabReleasesDatasource.id,
           packageName,

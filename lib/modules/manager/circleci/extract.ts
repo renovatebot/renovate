@@ -58,9 +58,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
-    const parsed = parseSingleYaml(content, {
-      customSchema: CircleCiFile,
-    });
+    const parsed = parseSingleYaml(content, { customSchema: CircleCiFile });
 
     deps.push(...extractDefinition(parsed, config));
 

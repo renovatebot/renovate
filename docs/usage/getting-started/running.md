@@ -178,9 +178,7 @@ If you use a `config.js`, it will be expected to export a configuration via `mod
 The value can be either a plain JavaScript object like in this example where `config.js` exports a plain object:
 
 ```javascript
-module.exports = {
-  token: 'abcdefg',
-};
+module.exports = { token: 'abcdefg' };
 ```
 
 `config.js` may also export a `Promise` of such an object, or a function that will return either a plain JavaScript object or a `Promise` of such an object.

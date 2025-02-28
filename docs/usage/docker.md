@@ -153,13 +153,7 @@ If you wish to override Docker settings for one particular type of manager, use 
 For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would use this:
 
 ```json
-{
-  "docker-compose": {
-    "digest": {
-      "enabled": false
-    }
-  }
-}
+{ "docker-compose": { "digest": { "enabled": false } } }
 ```
 
 The following configuration options are applicable to Docker:
@@ -173,10 +167,7 @@ Add `"docker:disable"` to your `extends` array.
 Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
 ```json
-{
-  "extends": ["config:recommended"],
-  "ignorePaths": ["docker/old-files/"]
-}
+{ "extends": ["config:recommended"], "ignorePaths": ["docker/old-files/"] }
 ```
 
 ### Enable Docker major updates
@@ -248,9 +239,7 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
       "hostType": "docker",
       "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
       "username": "AKIAABCDEFGHIJKLMNOPQ",
-      "encrypted": {
-        "password": "w...A"
-      }
+      "encrypted": { "password": "w...A" }
     }
   ]
 }
@@ -269,9 +258,7 @@ To make use of this authentication mechanism, specify the username as `AWS`:
       "hostType": "docker",
       "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
       "username": "AWS",
-      "encrypted": {
-        "password": "w...A"
-      }
+      "encrypted": { "password": "w...A" }
     }
   ]
 }
@@ -364,9 +351,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
           {
             "matchHost": "europe-docker.pkg.dev",
             "username": "_json_key_base64",
-            "encrypted": {
-              "password": "<encrypted base64 service account>"
-            }
+            "encrypted": { "password": "<encrypted base64 service account>" }
           }
         ]
       }

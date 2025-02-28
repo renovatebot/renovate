@@ -148,9 +148,7 @@ function resolveSystemManifest(
       depName: 'fluxcd/flux2',
       datasource: GithubReleasesDatasource.id,
       currentValue: manifest.version,
-      managerData: {
-        components: manifest.components,
-      },
+      managerData: { components: manifest.components },
     },
   ];
 }
@@ -214,9 +212,7 @@ function resolveResourceManifest(
           continue;
         }
 
-        const dep: PackageDependency = {
-          depName: resource.spec.chart,
-        };
+        const dep: PackageDependency = { depName: resource.spec.chart };
 
         if (resource.spec.sourceRef.kind === 'HelmRepository') {
           dep.currentValue = resource.spec.version;
@@ -237,9 +233,7 @@ function resolveResourceManifest(
       }
 
       case 'GitRepository': {
-        const dep: PackageDependency = {
-          depName: resource.metadata.name,
-        };
+        const dep: PackageDependency = { depName: resource.metadata.name };
 
         if (resource.spec.ref?.commit) {
           const gitUrl = resource.spec.url;
@@ -361,10 +355,7 @@ export async function extractAllPackageFiles(
       }
     }
     if (deps?.length) {
-      results.push({
-        packageFile: manifest.file,
-        deps,
-      });
+      results.push({ packageFile: manifest.file, deps });
     }
   }
 

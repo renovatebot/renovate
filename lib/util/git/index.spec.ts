@@ -109,9 +109,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     GlobalConfig.set({ localDir: tmpDir.path });
-    await git.initRepo({
-      url: origin.path,
-    });
+    await git.initRepo({ url: origin.path });
     git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
     setNoVerify([]);
@@ -232,10 +230,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       it('sets non-master base branch with submodule update', async () => {
-        await git.initRepo({
-          cloneSubmodules: true,
-          url: base.path,
-        });
+        await git.initRepo({ cloneSubmodules: true, url: base.path });
         expect((await git.getRepoStatus()).isClean()).toBeTrue();
         await git.checkoutBranch('stable');
         expect((await git.getRepoStatus()).isClean()).toBeTrue();
@@ -350,18 +345,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should return false when author is ignored', async () => {
-      git.setUserRepoConfig({
-        gitIgnoredAuthors: ['custom@example.com'],
-      });
+      git.setUserRepoConfig({ gitIgnoredAuthors: ['custom@example.com'] });
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
       ).toBeFalse();
     });
 
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
-      git.setUserRepoConfig({
-        gitIgnoredAuthors: ['author1@example.com'],
-      });
+      git.setUserRepoConfig({ gitIgnoredAuthors: ['author1@example.com'] });
       expect(
         await git.isBranchModified(
           'renovate/branch_with_multiple_authors',
@@ -584,10 +575,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('deletes file', async () => {
-      const file: FileChange = {
-        type: 'deletion',
-        path: 'file_to_delete',
-      };
+      const file: FileChange = { type: 'deletion', path: 'file_to_delete' };
       const commit = await git.commitFiles({
         branchName: 'renovate/something',
         files: [file],
@@ -643,11 +631,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('updates git submodules', async () => {
       const files: FileChange[] = [
-        {
-          type: 'addition',
-          path: '.',
-          contents: 'some content',
-        },
+        { type: 'addition', path: '.', contents: 'some content' },
       ];
       const commit = await git.commitFiles({
         branchName: 'renovate/something',
@@ -659,11 +643,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('does not push when no diff', async () => {
       const files: FileChange[] = [
-        {
-          type: 'addition',
-          path: 'future_file',
-          contents: 'future',
-        },
+        { type: 'addition', path: 'future_file', contents: 'future' },
       ];
       const commit = await git.commitFiles({
         branchName: 'renovate/future_branch',
@@ -845,9 +825,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       await git.checkoutBranch('develop');
 
-      await git.initRepo({
-        url: base.path,
-      });
+      await git.initRepo({ url: base.path });
 
       expect(git.branchExists('test')).toBeTruthy();
 
@@ -866,16 +844,12 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await repo.commit('past message2');
       await repo.checkout(defaultBranch);
 
-      await git.initRepo({
-        url: base.path,
-      });
+      await git.initRepo({ url: base.path });
 
       git.setUserRepoConfig({ branchPrefix: 'renovate/' });
       expect(git.branchExists('renovate/test')).toBeTrue();
 
-      await git.initRepo({
-        url: base.path,
-      });
+      await git.initRepo({ url: base.path });
 
       await repo.checkout('renovate/test');
       await repo.commit('past message3', ['--amend']);
@@ -900,10 +874,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         'test',
       ]);
       await repo.commit('Add submodule');
-      await git.initRepo({
-        cloneSubmodules: true,
-        url: base.path,
-      });
+      await git.initRepo({ cloneSubmodules: true, url: base.path });
       await git.syncGit();
       expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
@@ -913,9 +884,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await fs.emptyDir(tmpDir.path);
       await git.initRepo({
         url: origin.path,
-        extraCloneOpts: {
-          '-c': 'extra.clone.config=test-extra-config-value',
-        },
+        extraCloneOpts: { '-c': 'extra.clone.config=test-extra-config-value' },
         fullClone: true,
       });
       git.getBranchCommit(defaultBranch);
@@ -1210,10 +1179,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should clone a specified base branch', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
-      await git.initRepo({
-        url: origin.path,
-        defaultBranch: 'develop',
-      });
+      await git.initRepo({ url: origin.path, defaultBranch: 'develop' });
       await git.syncGit();
       const tmpGit = Git(tmpDir.path);
       const branch = (

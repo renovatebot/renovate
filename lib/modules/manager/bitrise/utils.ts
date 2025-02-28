@@ -22,18 +22,10 @@ export function parseStep(
 
   // no version
   if (is.nullOrUndefined(currentValue)) {
-    return {
-      ...dep,
-      packageName: stepRef,
-      skipReason: 'unspecified-version',
-    };
+    return { ...dep, packageName: stepRef, skipReason: 'unspecified-version' };
   }
 
-  return {
-    ...dep,
-    ...refDep,
-    currentValue,
-  };
+  return { ...dep, ...refDep, currentValue };
 }
 
 export function parseStepRef(
@@ -43,20 +35,14 @@ export function parseStepRef(
   // handle local path
   // https://devcenter.bitrise.io/en/references/steps-reference/step-reference-id-format.html
   if (ref.startsWith('path::')) {
-    return {
-      depName: ref.split('::', 2)[1],
-      skipReason: 'local-dependency',
-    };
+    return { depName: ref.split('::', 2)[1], skipReason: 'local-dependency' };
   }
 
   // handle Git references
   // https://devcenter.bitrise.io/en/references/steps-reference/step-reference-id-format.html
   if (ref.startsWith('git::')) {
     const [, packageName] = ref.split('::');
-    return {
-      packageName,
-      datasource: GitTagsDatasource.id,
-    };
+    return { packageName, datasource: GitTagsDatasource.id };
   }
 
   // step library references

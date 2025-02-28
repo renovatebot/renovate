@@ -10,17 +10,10 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const body = [
         {
           name: 'v1.0.0',
-          commit: {
-            created_at: '2020-03-04T12:01:37.000-06:00',
-          },
+          commit: { created_at: '2020-03-04T12:01:37.000-06:00' },
         },
-        {
-          name: 'v1.1.0',
-          commit: {},
-        },
-        {
-          name: 'v1.1.1',
-        },
+        { name: 'v1.1.0', commit: {} },
+        { name: 'v1.1.1' },
       ];
       httpMock
         .scope('https://gitlab.company.com')
@@ -39,17 +32,10 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const body = [
         {
           name: 'v1.0.0',
-          commit: {
-            created_at: '2020-03-04T12:01:37.000-06:00',
-          },
+          commit: { created_at: '2020-03-04T12:01:37.000-06:00' },
         },
-        {
-          name: 'v1.1.0',
-          commit: {},
-        },
-        {
-          name: 'v1.1.1',
-        },
+        { name: 'v1.1.0', commit: {} },
+        { name: 'v1.1.1' },
       ];
       httpMock
         .scope('https://my.company.com/gitlab')
@@ -82,11 +68,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
   describe('getDigest', () => {
     it('returns commits from gitlab installation', async () => {
       const digest = 'abcd00001234';
-      const body = [
-        {
-          id: digest,
-        },
-      ];
+      const body = [{ id: digest }];
       httpMock
         .scope('https://gitlab.company.com')
         .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
@@ -101,9 +83,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
 
     it('returns commits from gitlab installation for a specific branch', async () => {
       const digest = 'abcd00001234';
-      const body = {
-        id: digest,
-      };
+      const body = { id: digest };
       httpMock
         .scope('https://gitlab.company.com')
         .get('/api/v4/projects/some%2Fdep2/repository/commits/branch')

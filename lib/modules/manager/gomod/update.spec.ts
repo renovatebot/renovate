@@ -51,10 +51,7 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v0.8.0',
         depType: 'require',
       };
-      const res1 = updateDependency({
-        fileContent: gomod1,
-        upgrade: upgrade1,
-      });
+      const res1 = updateDependency({ fileContent: gomod1, upgrade: upgrade1 });
       expect(res1).toBeString();
       expect(res1).not.toEqual(gomod1);
       expect(res1).toContain(upgrade1.newValue);
@@ -64,10 +61,7 @@ describe('modules/manager/gomod/update', () => {
         newValue: 'v1.15.36',
         depType: 'require',
       };
-      const res2 = updateDependency({
-        fileContent: res1!,
-        upgrade: upgrade2,
-      });
+      const res2 = updateDependency({ fileContent: res1!, upgrade: upgrade2 });
       expect(res2).not.toEqual(res1);
       expect(res2).toMatchSnapshot();
     });

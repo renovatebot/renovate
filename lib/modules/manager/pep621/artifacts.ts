@@ -14,11 +14,7 @@ export async function updateArtifacts(
   const project = parsePyProject(packageFileName, newPackageFileContent);
   if (is.nullOrUndefined(project)) {
     return [
-      {
-        artifactError: {
-          stderr: 'Failed to parse new package file content',
-        },
-      },
+      { artifactError: { stderr: 'Failed to parse new package file content' } },
     ];
   }
 

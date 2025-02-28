@@ -21,9 +21,7 @@ const osPlatformSpy = vi.spyOn(os, 'platform');
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
-    partial<StatusResult>({
-      modified: [`maven.mvn/wrapper/${fileName}`],
-    }),
+    partial<StatusResult>({ modified: [`maven.mvn/wrapper/${fileName}`] }),
   );
 }
 
@@ -32,10 +30,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     osPlatformSpy.mockImplementation(() => 'linux');
     GlobalConfig.set({ localDir: join('/tmp/github/some/repo') });
     fs.statLocalFile.mockResolvedValue(
-      partial<Stats>({
-        isFile: () => true,
-        mode: 0o555,
-      }),
+      partial<Stats>({ isFile: () => true, mode: 0o555 }),
     );
 
     resetPrefetchedImages();
@@ -258,12 +253,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
 
     expect(updatedDeps).toEqual([
-      {
-        artifactError: {
-          lockFile: 'maven',
-          stderr: 'temporary-error',
-        },
-      },
+      { artifactError: { lockFile: 'maven', stderr: 'temporary-error' } },
     ]);
     expect(git.getRepoStatus).not.toHaveBeenCalled();
   });
@@ -403,10 +393,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven-wrapper',
       newPackageFileContent: '',
       updatedDeps: [
-        {
-          depName: 'maven-wrapper',
-          replaceString: 'not a good url',
-        },
+        { depName: 'maven-wrapper', replaceString: 'not a good url' },
       ],
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });

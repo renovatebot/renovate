@@ -5,9 +5,7 @@ import { extractPackageFile } from '.';
 
 vi.mock('../../../util/fs');
 const config = partial<ExtractConfig>({
-  registryAliases: {
-    stable: 'https://charts.helm.sh/stable',
-  },
+  registryAliases: { stable: 'https://charts.helm.sh/stable' },
 });
 
 describe('modules/manager/helmv3/extract', () => {

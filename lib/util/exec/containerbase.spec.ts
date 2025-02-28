@@ -78,9 +78,7 @@ describe('util/exec/containerbase', () => {
 
     it('respects latest', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
-        tags: {
-          latest: '2.0.14',
-        },
+        tags: { latest: '2.0.14' },
         releases: [
           { version: '1.0.0' },
           { version: '1.1.0' },
@@ -114,9 +112,7 @@ describe('util/exec/containerbase', () => {
     });
 
     it('throws no releases', async () => {
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [],
-      });
+      datasource.getPkgReleases.mockResolvedValueOnce({ releases: [] });
       await expect(resolveConstraint({ toolName: 'composer' })).rejects.toThrow(
         'No tool releases found.',
       );
@@ -250,11 +246,7 @@ describe('util/exec/containerbase', () => {
     });
 
     it('returns install commands', async () => {
-      const toolConstraints: ToolConstraint[] = [
-        {
-          toolName: 'composer',
-        },
-      ];
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
       expect(await generateInstallCommands(toolConstraints)).toEqual([
         'install-tool composer 2.1.0',
       ]);

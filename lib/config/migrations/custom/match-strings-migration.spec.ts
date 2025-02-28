@@ -12,9 +12,7 @@ describe('config/migrations/custom/match-strings-migration', () => {
           '',
         ],
       },
-      {
-        matchStrings: ['(?<packageName>', '(?<packageName>(?<packageName>'],
-      },
+      { matchStrings: ['(?<packageName>', '(?<packageName>(?<packageName>'] },
     );
   });
 });

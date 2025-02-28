@@ -7,9 +7,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 export const url = 'https://cakebuild.net/docs';
 export const categories: Category[] = ['dotnet'];
 
-export const defaultConfig = {
-  fileMatch: ['\\.cake$'],
-};
+export const defaultConfig = { fileMatch: ['\\.cake$'] };
 
 export const supportedDatasources = [NugetDatasource.id];
 

@@ -38,9 +38,7 @@ export class EndoflifeDateDatasource extends Datasource {
 
     logger.trace(`${datasource}.getReleases(${registryUrl}, ${packageName})`);
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
 
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 

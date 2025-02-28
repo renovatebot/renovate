@@ -1,8 +1,5 @@
 export interface ServicesIndexRaw {
-  resources: {
-    '@id': string;
-    '@type': string;
-  }[];
+  resources: { '@id': string; '@type': string }[];
 }
 
 // See https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#catalog-entry
@@ -16,9 +13,7 @@ export interface CatalogEntry {
 
 export interface CatalogPage {
   '@id': string;
-  items: {
-    catalogEntry: CatalogEntry;
-  }[];
+  items: { catalogEntry: CatalogEntry }[];
 }
 
 export interface PackageRegistration {

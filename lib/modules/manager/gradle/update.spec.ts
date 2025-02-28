@@ -8,9 +8,7 @@ describe('modules/manager/gradle/update', () => {
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
-          managerData: {
-            fileReplacePosition: 3,
-          },
+          managerData: { fileReplacePosition: 3 },
         },
       }),
     ).toBe('###1.2.4###');
@@ -24,9 +22,7 @@ describe('modules/manager/gradle/update', () => {
           currentValue: '1.2.3',
           newValue: '1.2.5',
           sharedVariableName: 'group',
-          managerData: {
-            fileReplacePosition: 3,
-          },
+          managerData: { fileReplacePosition: 3 },
         },
       }),
     ).toBe('###1.2.5###');
@@ -40,9 +36,7 @@ describe('modules/manager/gradle/update', () => {
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
-          managerData: {
-            fileReplacePosition: 3,
-          },
+          managerData: { fileReplacePosition: 3 },
         },
       }),
     ).toBe(fileContent);
@@ -55,9 +49,7 @@ describe('modules/manager/gradle/update', () => {
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
-          managerData: {
-            fileReplacePosition: 3,
-          },
+          managerData: { fileReplacePosition: 3 },
         },
       }),
     ).toBeNull();
@@ -68,9 +60,7 @@ describe('modules/manager/gradle/update', () => {
         upgrade: {
           currentValue: '1.2.3',
           newValue: '1.2.4',
-          managerData: {
-            fileReplacePosition: 3,
-          },
+          managerData: { fileReplacePosition: 3 },
         },
       }),
     ).toBeNull();

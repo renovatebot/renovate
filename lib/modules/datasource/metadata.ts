@@ -132,10 +132,7 @@ export function addMetaData(
       delete dep.sourceUrl;
     } else {
       // try massaging it
-      dep.sourceUrl =
-        parse(massagedUrl, {
-          extraBaseUrls,
-        }) || dep.sourceUrl;
+      dep.sourceUrl = parse(massagedUrl, { extraBaseUrls }) || dep.sourceUrl;
     }
   }
   if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {

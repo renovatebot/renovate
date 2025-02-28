@@ -45,9 +45,7 @@ export function getPatch(version: string): null | number {
 
   if (typeof cleanerVersion === 'string') {
     const newVersion = semver.valid(
-      semver.coerce(cleanedVersion, {
-        loose: false,
-      }),
+      semver.coerce(cleanedVersion, { loose: false }),
       options,
     );
     return Number(newVersion?.split('.')[2]);
@@ -89,9 +87,7 @@ export function fixParsedRange(range: string): any {
       const operator = ordValues[i].includes('||')
         ? '||'
         : parsedRange[i].operator;
-      const NewSemVer: SemVer = {
-        major,
-      };
+      const NewSemVer: SemVer = { major };
 
       let full = `${coerceString(operator)}${major}`;
       if (minor) {
@@ -255,12 +251,7 @@ export function bumpRange(
 ): string | null {
   if (!containsOperators(currentValue) && currentValue.includes('||')) {
     return widenRange(
-      {
-        currentValue,
-        rangeStrategy: 'widen',
-        currentVersion,
-        newVersion,
-      },
+      { currentValue, rangeStrategy: 'widen', currentVersion, newVersion },
       options,
     );
   }

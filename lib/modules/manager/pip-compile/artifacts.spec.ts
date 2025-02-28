@@ -93,10 +93,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: {
-          ...config,
-          lockFiles: ['requirements.txt'],
-        },
+        config: { ...config, lockFiles: ['requirements.txt'] },
       }),
     ).toBeNull();
     expect(execSnapshots).toEqual([]);
@@ -112,10 +109,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: {
-          ...config,
-          lockFiles: ['requirements.txt'],
-        },
+        config: { ...config, lockFiles: ['requirements.txt'] },
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
@@ -132,9 +126,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: {
-          ...config,
-        },
+        config: { ...config },
       }),
     ).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
@@ -148,9 +140,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
@@ -178,9 +168,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
@@ -232,9 +220,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
@@ -272,9 +258,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     expect(
@@ -311,9 +295,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce(
       getCommandInUvHeader(
@@ -355,9 +337,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce(
       getCommandInUvHeader('uv pip compile requirements.in'),
@@ -367,10 +347,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: {
-          ...config,
-          lockFiles: ['requirements.txt'],
-        },
+        config: { ...config, lockFiles: ['requirements.txt'] },
       }),
     ).not.toBeNull();
 
@@ -395,9 +372,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     // Before 6.2.0, pip-compile didn't include Python version in header
     const noPythonVersionHeader = codeBlock`
@@ -447,9 +422,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: { ...config, lockFiles: ['requirements.txt'] },
       }),
     ).toEqual([
-      {
-        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
-      },
+      { artifactError: { lockFile: 'requirements.txt', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toEqual([]);
   });
@@ -459,9 +432,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
@@ -482,9 +453,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('dependency==1.2.3');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
@@ -499,9 +468,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'pip-compile requirements.in --upgrade-package=foo==1.0.2',
-      },
+      { cmd: 'pip-compile requirements.in --upgrade-package=foo==1.0.2' },
     ]);
   });
 
@@ -515,9 +482,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['requirements.txt'],
-      }),
+      partial<StatusResult>({ modified: ['requirements.txt'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -748,9 +713,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         { stdout: 'This one worked', stderr: '' },
       ]);
       git.getRepoStatus.mockResolvedValue(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       const results = await updateArtifacts({
         packageFileName: 'requirements.in',

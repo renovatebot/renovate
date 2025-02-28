@@ -27,18 +27,10 @@ export class BitbucketPrCache {
       | undefined;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
-      pullRequestCache = {
-        items: {},
-        updated_on: null,
-        author,
-      };
+      pullRequestCache = { items: {}, updated_on: null, author };
     } else if (pullRequestCache.author !== author) {
       logger.debug('Resetting PR cache because authors do not match');
-      pullRequestCache = {
-        items: {},
-        updated_on: null,
-        author,
-      };
+      pullRequestCache = { items: {}, updated_on: null, author };
     }
     repoCache.platform.bitbucket.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
@@ -157,11 +149,7 @@ export class BitbucketPrCache {
 
     logger.debug(`Total PRs cached: ${Object.values(this.cache.items).length}`);
     logger.trace(
-      {
-        items,
-        oldCache,
-        newCache: this.cache.items,
-      },
+      { items, oldCache, newCache: this.cache.items },
       `PR cache sync finished`,
     );
 

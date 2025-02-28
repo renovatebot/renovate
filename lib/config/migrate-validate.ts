@@ -29,10 +29,8 @@ export async function migrateAndValidate(
     const {
       warnings,
       errors,
-    }: {
-      warnings: ValidationMessage[];
-      errors: ValidationMessage[];
-    } = await configValidation.validateConfig('repo', massagedConfig);
+    }: { warnings: ValidationMessage[]; errors: ValidationMessage[] } =
+      await configValidation.validateConfig('repo', massagedConfig);
     /* v8 ignore start: hard to test */
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');

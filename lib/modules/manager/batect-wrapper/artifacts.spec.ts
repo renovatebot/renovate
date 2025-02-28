@@ -12,15 +12,9 @@ function artifactForPath(
 ): UpdateArtifact {
   return {
     packageFileName: path,
-    updatedDeps: [
-      {
-        depName: 'batect/batect',
-      },
-    ],
+    updatedDeps: [{ depName: 'batect/batect' }],
     newPackageFileContent: 'not used',
-    config: {
-      newVersion,
-    },
+    config: { newVersion },
   };
 }
 

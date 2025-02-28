@@ -11,17 +11,12 @@ describe('modules/manager/nuget/config-formatter', () => {
 
     it('returns xml with registries', () => {
       const registries: Registry[] = [
-        {
-          name: 'myRegistry',
-          url: 'https://my-registry.example.org',
-        },
+        { name: 'myRegistry', url: 'https://my-registry.example.org' },
         {
           name: 'myRegistry2',
           url: 'https://my-registry2.example.org/index.json',
         },
-        {
-          url: 'https://my-unnamed-registry.example.org/index.json',
-        },
+        { url: 'https://my-unnamed-registry.example.org/index.json' },
       ];
 
       const xml = createNuGetConfigXml(registries);
@@ -69,14 +64,8 @@ describe('modules/manager/nuget/config-formatter', () => {
       });
 
       const registries: Registry[] = [
-        {
-          name: 'myRegistry',
-          url: 'https://my-registry.example.org',
-        },
-        {
-          name: 'myRegistry2',
-          url: 'https://my-registry2.example.org',
-        },
+        { name: 'myRegistry', url: 'https://my-registry.example.org' },
+        { name: 'myRegistry2', url: 'https://my-registry2.example.org' },
       ];
 
       const xml = createNuGetConfigXml(registries);
@@ -244,10 +233,7 @@ describe('modules/manager/nuget/config-formatter', () => {
 
     it('excludes packageSourceMapping when undefined', () => {
       const registries: Registry[] = [
-        {
-          name: 'myRegistry',
-          url: 'https://my-registry.example.org',
-        },
+        { name: 'myRegistry', url: 'https://my-registry.example.org' },
         {
           name: 'myRegistry2',
           url: 'https://my-registry2.example.org/index.json',

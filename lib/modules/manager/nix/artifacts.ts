@@ -25,10 +25,7 @@ export async function updateArtifacts({
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
 
   const token = findGithubToken(
-    hostRules.find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    }),
+    hostRules.find({ hostType: 'github', url: 'https://api.github.com/' }),
   );
 
   if (token) {
@@ -47,12 +44,7 @@ export async function updateArtifacts({
   }
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
-    toolConstraints: [
-      {
-        toolName: 'nix',
-        constraint: config.constraints?.nix,
-      },
-    ],
+    toolConstraints: [{ toolName: 'nix', constraint: config.constraints?.nix }],
     docker: {},
     userConfiguredEnv: config.env,
   };
@@ -76,13 +68,6 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     logger.warn({ err }, 'Error updating flake.lock');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

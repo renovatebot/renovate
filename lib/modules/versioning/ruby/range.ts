@@ -33,11 +33,7 @@ const parse = (range: string): Range => {
     return { version, operator, delimiter };
   }
 
-  return {
-    version: '',
-    operator: '',
-    delimiter: ' ',
-  };
+  return { version: '', operator: '', delimiter: ' ' };
 };
 
 /** Wrapper for {@link satisfies} for {@link Range} record. */
@@ -65,10 +61,7 @@ export function parseRanges(range: string): Range[] {
       originalRanges[i].operator === PGTE &&
       originalRanges[i + 1].operator === GTE
     ) {
-      ranges.push({
-        ...originalRanges[i],
-        companion: originalRanges[i + 1],
-      });
+      ranges.push({ ...originalRanges[i], companion: originalRanges[i + 1] });
       i += 2;
     } else {
       ranges.push(originalRanges[i]);

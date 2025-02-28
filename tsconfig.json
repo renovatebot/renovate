@@ -23,9 +23,7 @@
     "checkJs": true,
     "ignoreDeprecations": "5.0",
     "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
-    "paths": {
-      "~test/*": ["./test/*"]
-    }
+    "paths": { "~test/*": ["./test/*"] }
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
@@ -40,8 +38,5 @@
     /* TODO: fix me */
     "eslint.config.mjs"
   ],
-  "ts-node": {
-    "transpileOnly": true,
-    "esm": false
-  }
+  "ts-node": { "transpileOnly": true, "esm": false }
 }

@@ -8,11 +8,7 @@ This means that `helmsman` won't search for any files, and you won't get any upd
 To enable the `helmsman` manager, provide a valid `fileMatch` yourself, for example:
 
 ```json
-{
-  "helmsman": {
-    "fileMatch": ["(^|/)desired_state\\.yaml$"]
-  }
-}
+{ "helmsman": { "fileMatch": ["(^|/)desired_state\\.yaml$"] } }
 ```
 
 ### File format

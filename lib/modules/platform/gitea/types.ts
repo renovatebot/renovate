@@ -32,17 +32,9 @@ export interface PR {
   updated_at: string;
   closed_at: string;
   diff_url: string;
-  base?: {
-    ref: string;
-  };
-  head?: {
-    label: string;
-    sha: LongCommitSha;
-    repo?: Repo;
-  };
-  assignee?: {
-    login?: string;
-  };
+  base?: { ref: string };
+  head?: { label: string; sha: LongCommitSha; repo?: Repo };
+  assignee?: { login?: string };
   assignees?: any[];
   user?: { username?: string };
 

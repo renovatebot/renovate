@@ -12,12 +12,7 @@ describe('modules/manager/mise/utils', () => {
         node = '16'
       `;
       const actual = parseTomlFile(fileContent, miseFilename);
-      expect(actual).toMatchObject({
-        tools: {
-          erlang: '23.3',
-          node: '16',
-        },
-      });
+      expect(actual).toMatchObject({ tools: { erlang: '23.3', node: '16' } });
     });
 
     it('invalid toml', () => {

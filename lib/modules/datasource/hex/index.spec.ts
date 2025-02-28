@@ -81,11 +81,7 @@ describe('modules/datasource/hex/index', () => {
 
     it('returns null with wrong auth token', async () => {
       httpMock
-        .scope(baseUrl, {
-          reqheaders: {
-            authorization: 'abc',
-          },
-        })
+        .scope(baseUrl, { reqheaders: { authorization: 'abc' } })
         .get('/packages/certifi')
         .reply(401);
 
@@ -94,10 +90,7 @@ describe('modules/datasource/hex/index', () => {
         token: 'abc',
       });
 
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'certifi',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'certifi' });
 
       expect(res).toBeNull();
     });
@@ -107,10 +100,7 @@ describe('modules/datasource/hex/index', () => {
         .scope(baseUrl)
         .get('/packages/certifi')
         .reply(200, certifiResponse);
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'certifi',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'certifi' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -122,10 +112,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/certifi')
         .reply(200, certifiResponse);
       hostRules.find.mockReturnValueOnce({});
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'certifi',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'certifi' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -137,20 +124,13 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/certifi')
         .reply(200, certifiResponse);
       hostRules.find.mockReturnValueOnce({});
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'certifi',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'certifi' });
       expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
     });
 
     it('processes a private repo with auth', async () => {
       httpMock
-        .scope(baseUrl, {
-          reqheaders: {
-            authorization: 'abc',
-          },
-        })
+        .scope(baseUrl, { reqheaders: { authorization: 'abc' } })
         .get('/repos/renovate_test/packages/private_package')
         .reply(200, privatePackageResponse);
 

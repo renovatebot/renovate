@@ -216,10 +216,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
           '.prettierrc',
           `{\n"extends":[":separateMajorReleases",":prImmediately",":renovatePrefix",":semanticPrefixFixDepsChoreOthers"]}`,
           'json',
-          {
-            amount: 0,
-            indent: '  ',
-          },
+          { amount: 0, indent: '  ' },
         ),
       ).resolves.toBe(
         `{\n  "extends": [":separateMajorReleases", ":prImmediately", ":renovatePrefix", ":semanticPrefixFixDepsChoreOthers"]\n}\n`,

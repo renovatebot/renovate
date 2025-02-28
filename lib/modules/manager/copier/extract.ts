@@ -25,7 +25,5 @@ export function extractPackageFile(
     },
   ];
 
-  return {
-    deps,
-  };
+  return { deps };
 }

@@ -498,9 +498,7 @@ export class Vulnerabilities {
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
-      force: {
-        ...packageFileConfig.vulnerabilityAlerts,
-      },
+      force: { ...packageFileConfig.vulnerabilityAlerts },
     };
   }
 
@@ -610,10 +608,6 @@ export class Vulnerabilities {
       severityLevel = severity.toUpperCase();
     }
 
-    return {
-      cvssVector,
-      score,
-      severityLevel,
-    };
+    return { cvssVector, score, severityLevel };
   }
 }

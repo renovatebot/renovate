@@ -25,11 +25,7 @@ export const Descriptor = z.object({
  * OCI platform properties
  * https://github.com/opencontainers/image-spec/blob/main/image-index.md
  */
-const OciPlatform = z
-  .object({
-    architecture: z.string().nullish(),
-  })
-  .nullish();
+const OciPlatform = z.object({ architecture: z.string().nullish() }).nullish();
 
 /**
  * OCI Image Configuration.

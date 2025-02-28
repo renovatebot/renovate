@@ -29,11 +29,7 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
         ],
       });
     });
@@ -51,11 +47,7 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
         ],
       });
     });
@@ -94,16 +86,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
         ],
       });
     });
@@ -122,16 +106,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
         ],
       });
     });
@@ -154,16 +130,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
         ],
       });
     });
@@ -183,16 +151,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
           {
             currentValue: 'invalid',
             datasource: 'devbox',
@@ -220,16 +180,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
           {
             currentValue: 'invalid',
             datasource: 'devbox',
@@ -251,16 +203,8 @@ describe('modules/manager/devbox/extract', () => {
       );
       expect(result).toEqual({
         deps: [
-          {
-            depName: 'nodejs',
-            currentValue: '20.1.8',
-            datasource: 'devbox',
-          },
-          {
-            depName: 'yarn',
-            currentValue: '1.22.10',
-            datasource: 'devbox',
-          },
+          { depName: 'nodejs', currentValue: '20.1.8', datasource: 'devbox' },
+          { depName: 'yarn', currentValue: '1.22.10', datasource: 'devbox' },
           {
             currentValue: 'invalid',
             datasource: 'devbox',

@@ -69,10 +69,7 @@ export async function lookupUpdates(
 
   try {
     logger.trace(
-      {
-        dependency: config.packageName,
-        currentValue: config.currentValue,
-      },
+      { dependency: config.packageName, currentValue: config.currentValue },
       'lookupUpdates',
     );
     if (config.currentValue && !is.string(config.currentValue)) {
@@ -156,10 +153,7 @@ export async function lookupUpdates(
           message: `Failed to look up ${config.datasource} package ${config.packageName}`,
         };
         logger.debug(
-          {
-            dependency: config.packageName,
-            packageFile: config.packageFile,
-          },
+          { dependency: config.packageName, packageFile: config.packageFile },
           warning.message,
         );
         // TODO: return warnings in own field
@@ -196,10 +190,7 @@ export async function lookupUpdates(
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
         logger.info(
-          {
-            dependency: config.packageName,
-            result: dependency,
-          },
+          { dependency: config.packageName, result: dependency },
           message,
         );
         if (!config.currentDigest) {

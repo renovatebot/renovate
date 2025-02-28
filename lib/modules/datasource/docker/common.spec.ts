@@ -171,9 +171,7 @@ describe('modules/datasource/docker/common', () => {
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
       hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
-        token: 'some-token',
-      });
+      hostRules.find.mockReturnValue({ token: 'some-token' });
 
       const headers = await getAuthHeaders(
         http,
@@ -267,9 +265,7 @@ describe('modules/datasource/docker/common', () => {
 
     expect(
       findHelmSourceUrl(
-        partial<OciHelmConfig>({
-          sources: ['https://some.test'],
-        }),
+        partial<OciHelmConfig>({ sources: ['https://some.test'] }),
       ),
     ).toBe('https://some.test');
   });

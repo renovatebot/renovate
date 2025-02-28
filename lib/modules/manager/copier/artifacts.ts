@@ -41,14 +41,7 @@ function artifactError(
   packageFileName: string,
   message: string,
 ): UpdateArtifactsResult[] {
-  return [
-    {
-      artifactError: {
-        lockFile: packageFileName,
-        stderr: message,
-      },
-    },
-  ];
+  return [{ artifactError: { lockFile: packageFileName, stderr: message } }];
 }
 
 export async function updateArtifacts({
@@ -80,14 +73,8 @@ export async function updateArtifacts({
     userConfiguredEnv: config.env,
     extraEnv: gitEnv,
     toolConstraints: [
-      {
-        toolName: 'python',
-        constraint: getPythonVersionConstraint(config),
-      },
-      {
-        toolName: 'copier',
-        constraint: getCopierVersionConstraint(config),
-      },
+      { toolName: 'python', constraint: getPythonVersionConstraint(config) },
+      { toolName: 'copier', constraint: getCopierVersionConstraint(config) },
     ],
   };
   try {
@@ -120,11 +107,7 @@ export async function updateArtifacts({
     ...status.conflicted,
   ]) {
     const fileRes: UpdateArtifactsResult = {
-      file: {
-        type: 'addition',
-        path: f,
-        contents: await readLocalFile(f),
-      },
+      file: { type: 'addition', path: f, contents: await readLocalFile(f) },
     };
     if (status.conflicted.includes(f)) {
       // Make the reviewer aware of the conflicts.
@@ -138,22 +121,12 @@ export async function updateArtifacts({
     res.push(fileRes);
   }
   for (const f of status.deleted) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f,
-      },
-    });
+    res.push({ file: { type: 'deletion', path: f } });
   }
   // `git status` might detect a rename, which is then not contained
   // in not_added/deleted. Ensure we respect renames as well if they happen.
   for (const f of status.renamed) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f.from,
-      },
-    });
+    res.push({ file: { type: 'deletion', path: f.from } });
     res.push({
       file: {
         type: 'addition',

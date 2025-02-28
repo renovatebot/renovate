@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-export const CircleCiDocker = z.object({
-  image: z.string(),
-});
+export const CircleCiDocker = z.object({ image: z.string() });
 
 export const CircleCiJob = z.object({
   docker: z.array(CircleCiDocker).optional(),
@@ -14,9 +12,7 @@ const baseOrb = z.object({
   jobs: z.record(z.string(), CircleCiJob).optional(),
 });
 
-type Orb = z.infer<typeof baseOrb> & {
-  orbs?: Record<string, string | Orb>;
-};
+type Orb = z.infer<typeof baseOrb> & { orbs?: Record<string, string | Orb> };
 
 export const CircleCiOrb: z.ZodType<Orb> = baseOrb.extend({
   orbs: z.lazy(() =>

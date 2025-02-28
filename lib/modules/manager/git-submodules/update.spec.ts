@@ -49,10 +49,7 @@ describe('modules/manager/git-submodules/update', () => {
     it('returns null on error', async () => {
       gitMock.submoduleUpdate.mockRejectedValue(new Error());
 
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBeNull();
     });
 
@@ -60,10 +57,7 @@ describe('modules/manager/git-submodules/update', () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
 
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBe('');
     });
 
@@ -76,10 +70,7 @@ describe('modules/manager/git-submodules/update', () => {
         token: 'abc123',
       });
 
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBe('');
       expect(gitMock.env).toHaveBeenCalledWith({
         GIT_CONFIG_COUNT: '3',
@@ -107,10 +98,7 @@ describe('modules/manager/git-submodules/update', () => {
         newValue: 'v0.0.2',
         packageFile: '.gitmodules',
       };
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBe(updatedGitModules);
       expect(gitMock.subModule).toHaveBeenCalledWith([
         'set-branch',
@@ -129,10 +117,7 @@ describe('modules/manager/git-submodules/update', () => {
         newValue: 'main',
         packageFile: '.gitmodules',
       };
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBe('');
       expect(gitMock.subModule).toHaveBeenCalledTimes(0);
     });
@@ -153,10 +138,7 @@ describe('modules/manager/git-submodules/update', () => {
         password: 'git-tags-password',
       });
 
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
+      const update = await updateDependency({ fileContent: '', upgrade });
       expect(update).toBe('');
       expect(gitMock.env).toHaveBeenCalledWith({
         GIT_CONFIG_COUNT: '6',

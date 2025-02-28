@@ -26,10 +26,7 @@ describe('util/git/pristine', () => {
 
     it('returns true', () => {
       repoCache.branches = [
-        partial<BranchCache>({
-          branchName: 'foo',
-          pristine: true,
-        }),
+        partial<BranchCache>({ branchName: 'foo', pristine: true }),
       ];
       expect(getCachedPristineResult('foo')).toBeTrue();
     });

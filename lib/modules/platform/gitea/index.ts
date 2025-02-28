@@ -136,18 +136,14 @@ function findCommentByContent(
 function getLabelList(): Promise<Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
-      .getRepoLabels(config.repository, {
-        memCache: false,
-      })
+      .getRepoLabels(config.repository, { memCache: false })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} repo labels`);
         return labels;
       });
 
     const orgLabels = helper
-      .getOrgLabels(config.repository.split('/')[0], {
-        memCache: false,
-      })
+      .getOrgLabels(config.repository.split('/')[0], { memCache: false })
       .then((labels) => {
         logger.debug(`Retrieved ${labels.length} org labels`);
         return labels;
@@ -186,16 +182,9 @@ async function fetchRepositories({
   const repos = await helper.searchRepos({
     uid: botUserID,
     archived: false,
-    ...(topic && {
-      topic: true,
-      q: topic,
-    }),
-    ...(sort && {
-      sort,
-    }),
-    ...(order && {
-      order,
-    }),
+    ...(topic && { topic: true, q: topic }),
+    ...(sort && { sort }),
+    ...(order && { order }),
   });
   return repos.filter(usableRepo).map((r) => r.full_name);
 }
@@ -244,10 +233,7 @@ const platform: Platform = {
       throw new Error('Init: Authentication failure');
     }
 
-    return {
-      endpoint: defaults.endpoint,
-      gitAuthor,
-    };
+    return { endpoint: defaults.endpoint, gitAuthor };
   },
 
   async getRawFile(
@@ -340,10 +326,7 @@ const platform: Platform = {
     const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
 
     // Initialize Git storage
-    await git.initRepo({
-      ...config,
-      url,
-    });
+    await git.initRepo({ ...config, url });
 
     // Reset cached resources
     config.issueList = null;
@@ -364,11 +347,7 @@ const platform: Platform = {
         logger.debug({ topics: config.topics }, 'Auto-discovering by topics');
         const fetchRepoArgs: FetchRepositoriesArgs[] = config.topics.map(
           (topic) => {
-            return {
-              topic,
-              sort: config.sort,
-              order: config.order,
-            };
+            return { topic, sort: config.sort, order: config.order };
           },
         );
         const repos = await map(fetchRepoArgs, fetchRepositories);
@@ -765,10 +744,7 @@ const platform: Platform = {
       const body = (
         await helper.getIssue(config.repository, number, { memCache })
       ).body;
-      return {
-        number,
-        body,
-      };
+      return { number, body };
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
@@ -889,9 +865,7 @@ const platform: Platform = {
             config.repository,
             // TODO #22198
             activeIssue.number!,
-            {
-              labels,
-            },
+            { labels },
           );
         }
 
@@ -1027,9 +1001,7 @@ const platform: Platform = {
     logger.debug(
       `Updating assignees '${assignees?.join(', ')}' on Issue #${number}`,
     );
-    await helper.updateIssue(config.repository, number, {
-      assignees,
-    });
+    await helper.updateIssue(config.repository, number, { assignees });
   },
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {

@@ -151,15 +151,11 @@ describe('workers/global/config/parse/file', () => {
         },
         "labels": ["renovate"]
       }`;
-      fs.writeFileSync(configFile, fileContent1, {
-        encoding: 'utf8',
-      });
+      fs.writeFileSync(configFile, fileContent1, { encoding: 'utf8' });
       const fileConfig = await file.getConfig({
         RENOVATE_CONFIG_FILE: configFile,
       });
-      expect(fileConfig).toMatchObject({
-        labels: ['renovate'],
-      });
+      expect(fileConfig).toMatchObject({ labels: ['renovate'] });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       fs.unlinkSync(configFile);
@@ -176,15 +172,11 @@ describe('workers/global/config/parse/file', () => {
         },
         "labels": ["renovate"]
       }`;
-      fs.writeFileSync(configFile, fileContent1, {
-        encoding: 'utf8',
-      });
+      fs.writeFileSync(configFile, fileContent1, { encoding: 'utf8' });
       const fileConfig = await file.getConfig({
         RENOVATE_CONFIG_FILE: configFile,
       });
-      expect(fileConfig).toMatchObject({
-        labels: ['renovate'],
-      });
+      expect(fileConfig).toMatchObject({ labels: ['renovate'] });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.valid_Key).toBe('true');
@@ -211,12 +203,7 @@ describe('workers/global/config/parse/file', () => {
     it('skip when config file does not exist', async () => {
       fsPathExistsSpy.mockResolvedValueOnce(false as never);
 
-      await file.deleteNonDefaultConfig(
-        {
-          RENOVATE_CONFIG_FILE: 'path',
-        },
-        true,
-      );
+      await file.deleteNonDefaultConfig({ RENOVATE_CONFIG_FILE: 'path' }, true);
 
       expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
     });
@@ -227,9 +214,7 @@ describe('workers/global/config/parse/file', () => {
         fsPathExistsSpy.mockResolvedValueOnce(true as never);
 
         await file.deleteNonDefaultConfig(
-          {
-            RENOVATE_CONFIG_FILE: '/path/to/config.js',
-          },
+          { RENOVATE_CONFIG_FILE: '/path/to/config.js' },
           deleteConfig === 'true',
         );
 
@@ -245,9 +230,7 @@ describe('workers/global/config/parse/file', () => {
       const configFile = '/path/to/config.js';
 
       await file.deleteNonDefaultConfig(
-        {
-          RENOVATE_CONFIG_FILE: configFile,
-        },
+        { RENOVATE_CONFIG_FILE: configFile },
         true,
       );
 
@@ -267,9 +250,7 @@ describe('workers/global/config/parse/file', () => {
       const configFile = '/path/to/config.js';
 
       await file.deleteNonDefaultConfig(
-        {
-          RENOVATE_CONFIG_FILE: configFile,
-        },
+        { RENOVATE_CONFIG_FILE: configFile },
         true,
       );
 

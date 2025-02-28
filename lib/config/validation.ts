@@ -168,10 +168,7 @@ export async function validateConfig(
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     /* v8 ignore next 7: TODO: test me */
     if (key === '__proto__') {
-      errors.push({
-        topic: 'Config security error',
-        message: '__proto__',
-      });
+      errors.push({ topic: 'Config security error', message: '__proto__' });
       continue;
     }
     if (
@@ -344,12 +341,7 @@ export async function validateConfig(
               }
             }
             if (isRegexOrGlobOption(key)) {
-              errors.push(
-                ...regexOrGlobValidator.check({
-                  val,
-                  currentPath,
-                }),
-              );
+              errors.push(...regexOrGlobValidator.check({ val, currentPath }));
             }
             if (key === 'extends') {
               for (const subval of val) {
@@ -431,19 +423,13 @@ export async function validateConfig(
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
                       packageRule,
                     )}`;
-                    errors.push({
-                      topic: 'Configuration Error',
-                      message,
-                    });
+                    errors.push({ topic: 'Configuration Error', message });
                   }
                   if (selectorLength === Object.keys(resolvedRule).length) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
                       packageRule,
                     )}`;
-                    warnings.push({
-                      topic: 'Configuration Error',
-                      message,
-                    });
+                    warnings.push({ topic: 'Configuration Error', message });
                   }
                   // It's too late to apply any of these options once you already have updates determined
                   const preLookupOptions = [
@@ -468,10 +454,7 @@ export async function validateConfig(
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
                           packageRule,
                         )}`;
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message,
-                        });
+                        errors.push({ topic: 'Configuration Error', message });
                       }
                     }
                   }
@@ -933,10 +916,7 @@ async function validateGlobalConfig(
       if (is.array(val)) {
         if (isRegexOrGlobOption(key)) {
           warnings.push(
-            ...regexOrGlobValidator.check({
-              val,
-              currentPath: currentPath!,
-            }),
+            ...regexOrGlobValidator.check({ val, currentPath: currentPath! }),
           );
         }
         if (key === 'gitNoVerify') {

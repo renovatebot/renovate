@@ -123,9 +123,7 @@ describe('modules/platform/comment', () => {
     it('deletes cached comment by topic', async () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
       await ensureCommentRemoval({ type: 'by-topic', number: 1, topic: 'aaa' });
-      expect(repoCache).toEqual({
-        prComments: { '1': {} },
-      });
+      expect(repoCache).toEqual({ prComments: { '1': {} } });
     });
 
     it('deletes cached comment by content', async () => {
@@ -135,9 +133,7 @@ describe('modules/platform/comment', () => {
         number: 1,
         content: '111',
       });
-      expect(repoCache).toEqual({
-        prComments: { '1': {} },
-      });
+      expect(repoCache).toEqual({ prComments: { '1': {} } });
     });
 
     it('deletes by content only one comment', async () => {

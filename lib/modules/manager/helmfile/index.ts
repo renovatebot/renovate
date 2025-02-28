@@ -10,9 +10,7 @@ export const url = 'https://helmfile.readthedocs.io';
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];
 
 export const defaultConfig = {
-  registryAliases: {
-    stable: 'https://charts.helm.sh/stable',
-  },
+  registryAliases: { stable: 'https://charts.helm.sh/stable' },
   commitMessageTopic: 'helm chart {{depName}}',
   fileMatch: ['(^|/)helmfile\\.ya?ml(?:\\.gotmpl)?$'],
 };

@@ -202,10 +202,7 @@ export const qStringValue = q.str((ctx: Ctx, node: lexer.Token) => {
 });
 
 export const qStringValueAsSymbol = q.str((ctx: Ctx, node: lexer.Token) => {
-  const nodeTransformed: lexer.SymbolToken = {
-    ...node,
-    type: 'symbol',
-  };
+  const nodeTransformed: lexer.SymbolToken = { ...node, type: 'symbol' };
   storeVarToken(ctx, nodeTransformed);
   return ctx;
 });
@@ -318,16 +315,18 @@ export const qDotOrBraceExpr = (
   symValue: q.SymMatcherValue,
   matcher: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> =>
-  q.sym<Ctx>(symValue).alt(
-    q.op<Ctx>('.').join(matcher),
-    q.tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      startsWith: '{',
-      endsWith: '}',
-      search: matcher,
-    }),
-  );
+  q
+    .sym<Ctx>(symValue)
+    .alt(
+      q.op<Ctx>('.').join(matcher),
+      q.tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '{',
+        endsWith: '}',
+        search: matcher,
+      }),
+    );
 
 export const qGroupId = qValueMatcher.handler((ctx) =>
   storeInTokenMap(ctx, 'groupId'),

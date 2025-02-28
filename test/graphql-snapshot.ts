@@ -90,10 +90,7 @@ function simplifyArguments(
     argNodes.forEach((argNode) => {
       const name = argNode.name.value;
       const valNode = argNode.value;
-      result = {
-        ...result,
-        ...getArguments(name, valNode),
-      };
+      result = { ...result, ...getArguments(name, valNode) };
     });
     return result;
   }

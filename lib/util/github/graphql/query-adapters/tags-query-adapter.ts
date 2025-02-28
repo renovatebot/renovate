@@ -15,12 +15,8 @@ const GithubGraphqlTag = z.object({
     }),
     z.object({
       type: z.literal('Tag'),
-      target: z.object({
-        oid: z.string(),
-      }),
-      tagger: z.object({
-        releaseTimestamp: Timestamp,
-      }),
+      target: z.object({ oid: z.string() }),
+      tagger: z.object({ releaseTimestamp: Timestamp }),
     }),
   ]),
 });

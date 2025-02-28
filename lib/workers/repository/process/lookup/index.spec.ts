@@ -35,10 +35,7 @@ import type { Timestamp } from '../../../../util/timestamp';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
-const qJson = {
-  ...Fixtures.getJson('01.json'),
-  latestVersion: '1.4.1',
-};
+const qJson = { ...Fixtures.getJson('01.json'), latestVersion: '1.4.1' };
 
 const helmetJson = Fixtures.get('02.json');
 const coffeelintJson = Fixtures.get('coffeelint.json');
@@ -629,12 +626,8 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('returns minor update if automerging both patch and minor', async () => {
-      config.patch = {
-        automerge: true,
-      };
-      config.minor = {
-        automerge: true,
-      };
+      config.patch = { automerge: true };
+      config.minor = { automerge: true };
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.packageName = 'q';
@@ -3718,14 +3711,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
-        ],
+        releases: [{ version: '8.0.0' }, { version: '8.1.0' }],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
@@ -4092,14 +4078,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
-        ],
+        releases: [{ version: '8.0.0' }, { version: '8.1.0' }],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
 
@@ -4131,14 +4110,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = DockerDatasource.id;
       config.versioning = composerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
-        ],
+        releases: [{ version: '8.0.0' }, { version: '8.1.0' }],
       });
 
       const res = await Result.wrap(
@@ -4161,15 +4133,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
-          {
-            version: 'alpine',
-          },
+          { version: '8.0.0' },
+          { version: '8.1.0' },
+          { version: 'alpine' },
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
@@ -4199,15 +4165,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
-          {
-            version: 'alpine',
-          },
+          { version: '8.0.0' },
+          { version: '8.1.0' },
+          { version: 'alpine' },
         ],
       });
       getDockerDigest.mockResolvedValueOnce(null);
@@ -4227,13 +4187,8 @@ describe('workers/repository/process/lookup/index', () => {
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
-          {
-            version: '8.0.0',
-            newDigest: 'sha256:0123456789abcdef',
-          },
-          {
-            version: '8.1.0',
-          },
+          { version: '8.0.0', newDigest: 'sha256:0123456789abcdef' },
+          { version: '8.1.0' },
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
@@ -4276,12 +4231,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = CustomDatasource.id;
       config.currentDigest = 'zzzzzzzzzzzzzzz';
       getCustomDatasourceReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '1.0.0',
-            newDigest: '0123456789abcdef',
-          },
-        ],
+        releases: [{ version: '1.0.0', newDigest: '0123456789abcdef' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4305,15 +4255,9 @@ describe('workers/repository/process/lookup/index', () => {
       config.pinDigests = true;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
-          {
-            version: 'alpine',
-          },
-          {
-            version: '8.0.0',
-          },
-          {
-            version: '8.1.0',
-          },
+          { version: 'alpine' },
+          { version: '8.0.0' },
+          { version: '8.1.0' },
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
@@ -4405,10 +4349,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.packageRules = [
-        {
-          matchCurrentAge: '> 1 day',
-          allowedVersions: '< 19.0.0',
-        },
+        { matchCurrentAge: '> 1 day', allowedVersions: '< 19.0.0' },
       ];
       getDockerReleases.mockResolvedValueOnce({
         releases: [
@@ -4419,12 +4360,8 @@ describe('workers/repository/process/lookup/index', () => {
               Date.now() - 25 * 60 * 60 * 1000,
             ).toISOString() as Timestamp,
           },
-          {
-            version: '18.0.0',
-          },
-          {
-            version: '19.0.0',
-          },
+          { version: '18.0.0' },
+          { version: '19.0.0' },
         ],
       });
 
@@ -4452,10 +4389,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.packageRules = [
-        {
-          matchDepNames: ['openjdk'],
-          allowedVersions: '< 19.0.0',
-        },
+        { matchDepNames: ['openjdk'], allowedVersions: '< 19.0.0' },
       ];
       const releaseTimestamp = new Date(
         Date.now() - 25 * 60 * 60 * 1000,
@@ -4467,12 +4401,8 @@ describe('workers/repository/process/lookup/index', () => {
             // a day old release
             releaseTimestamp,
           },
-          {
-            version: '18.0.0',
-          },
-          {
-            version: '19.0.0',
-          },
+          { version: '18.0.0' },
+          { version: '19.0.0' },
         ],
       });
 
@@ -4510,22 +4440,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.packageRules = [
-        {
-          matchCurrentAge: '> 1 day',
-          allowedVersions: '< 19.0.0',
-        },
+        { matchCurrentAge: '> 1 day', allowedVersions: '< 19.0.0' },
       ];
       getDockerReleases.mockResolvedValueOnce({
         releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-          {
-            version: '19.0.0',
-          },
+          { version: '17.0.0' },
+          { version: '18.0.0' },
+          { version: '19.0.0' },
         ],
       });
 
@@ -4563,14 +4484,7 @@ describe('workers/repository/process/lookup/index', () => {
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '18.0.0' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4605,14 +4519,7 @@ describe('workers/repository/process/lookup/index', () => {
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '18.0.0' }],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
@@ -4681,14 +4588,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementName = 'eclipse-temurin';
       config.replacementVersion = '19.0.0';
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '17.0.1',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '17.0.1' }],
         lookupName: 'openjdk',
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
@@ -4786,11 +4686,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(updates).toEqual([
-        {
-          updateType: 'replacement',
-          newName: 'r',
-          newValue: '2.0.0',
-        },
+        { updateType: 'replacement', newName: 'r', newValue: '2.0.0' },
       ]);
     });
 
@@ -4800,14 +4696,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '18.0.0' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4839,14 +4728,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementVersion = '18.0.0';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '18.0.0' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4878,14 +4760,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementName = 'eclipse-temurin';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
+        releases: [{ version: '17.0.0' }, { version: '18.0.0' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4917,11 +4792,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementVersion = '17.0.0-jre-alpine';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: 'alpine-jre',
-          },
-        ],
+        releases: [{ version: 'alpine-jre' }],
       });
 
       const { updates } = await Result.wrap(
@@ -4952,11 +4823,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(updates).toEqual([
-        {
-          updateType: 'replacement',
-          newName: 'foo:bar',
-          newValue: '2.0.0',
-        },
+        { updateType: 'replacement', newName: 'foo:bar', newValue: '2.0.0' },
       ]);
     });
 

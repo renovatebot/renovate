@@ -32,93 +32,55 @@ describe('modules/manager/npm/post-update/index', () => {
       { packageFile: 'dummy.txt' },
       {
         packageFile: 'packages/core/package.json',
-        managerData: {
-          npmLock: 'package-lock.json',
-        },
+        managerData: { npmLock: 'package-lock.json' },
         npmrc: '#dummy',
       },
       {
         packageFile: 'packages/cli/package.json',
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
+        managerData: { yarnLock: 'yarn.lock' },
       },
       {
         packageFile: 'packages/test/package.json',
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
+        managerData: { yarnLock: 'yarn.lock' },
       },
       {
         packageFile: 'packages/pnpm/package.json',
-        managerData: {
-          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
-        },
+        managerData: { pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml' },
       },
     ],
   };
 
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
-    baseConfig = partial<PostUpdateConfig>({
-      upgrades: [],
-    });
+    baseConfig = partial<PostUpdateConfig>({ upgrades: [] });
     updateConfig = {
       ...baseConfig,
       upgrades: [
-        {
-          isRemediation: true,
-        },
+        { isRemediation: true },
         {
           depName: 'postcss',
           isRemediation: true,
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
           rangeStrategy: 'widen',
         },
         {
           depName: 'core-js',
           isRemediation: true,
-          managerData: {
-            npmLock: 'randomFolder/package-lock.json',
-          },
+          managerData: { npmLock: 'randomFolder/package-lock.json' },
           lockFiles: ['randomFolder/package-lock.json'],
           rangeStrategy: 'pin',
         },
         {
           isLockfileUpdate: true,
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
         },
-        {
-          managerData: {
-            yarnLock: 'yarn.lock',
-          },
-          isLockfileUpdate: true,
-        },
+        { managerData: { yarnLock: 'yarn.lock' }, isLockfileUpdate: true },
       ],
       updatedPackageFiles: [
-        {
-          type: 'addition',
-          path: 'dummy.txt',
-          contents: '',
-        },
-        {
-          type: 'deletion',
-          path: 'some.txt',
-        },
-        {
-          type: 'addition',
-          path: 'package-lock.json',
-          contents: '{}',
-        },
-        {
-          type: 'addition',
-          path: 'yarn.lock',
-          contents: '{}',
-        },
+        { type: 'addition', path: 'dummy.txt', contents: '' },
+        { type: 'deletion', path: 'some.txt' },
+        { type: 'addition', path: 'package-lock.json', contents: '{}' },
+        { type: 'addition', path: 'yarn.lock', contents: '{}' },
         {
           type: 'addition',
           path: 'packages/pnpm/pnpm-lock.yaml',
@@ -129,21 +91,13 @@ describe('modules/manager/npm/post-update/index', () => {
           path: 'packages/core/package.json',
           contents: '{}',
         },
-        {
-          type: 'addition',
-          path: 'packages/cli/package.json',
-          contents: '{}',
-        },
+        { type: 'addition', path: 'packages/cli/package.json', contents: '{}' },
         {
           type: 'addition',
           path: 'packages/pnpm/package.json',
           contents: '{}',
         },
-        {
-          type: 'addition',
-          path: 'package.json',
-          contents: '{}',
-        },
+        { type: 'addition', path: 'package.json', contents: '{}' },
       ],
     };
 
@@ -174,9 +128,7 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [
               {
                 isLockfileUpdate: true,
-                managerData: {
-                  yarnLock: 'yarn.lock',
-                },
+                managerData: { yarnLock: 'yarn.lock' },
               },
             ],
           },
@@ -395,10 +347,7 @@ describe('modules/manager/npm/post-update/index', () => {
           { ...updateConfig, updateLockFiles: true },
           additionalFiles,
         ),
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
+      ).toStrictEqual({ artifactErrors: [], updatedArtifacts: [] });
     });
 
     it('works for npm', async () => {
@@ -417,11 +366,7 @@ describe('modules/manager/npm/post-update/index', () => {
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'package-lock.json',
-            contents: '{}',
-          },
+          { type: 'addition', path: 'package-lock.json', contents: '{}' },
         ],
       });
 
@@ -501,11 +446,7 @@ describe('modules/manager/npm/post-update/index', () => {
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'yarn.lock',
-            contents: '{}',
-          },
+          { type: 'addition', path: 'yarn.lock', contents: '{}' },
         ],
       });
       expect(fs.deleteLocalFile).toHaveBeenCalled();
@@ -554,10 +495,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('no lockfiles updates', async () => {
       expect(
         await getAdditionalFiles(baseConfig, additionalFiles),
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
+      ).toStrictEqual({ artifactErrors: [], updatedArtifacts: [] });
     });
 
     it('reuse existing up-to-date', async () => {
@@ -571,10 +509,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
+      ).toStrictEqual({ artifactErrors: [], updatedArtifacts: [] });
     });
 
     it('lockfile maintenance branch exists', async () => {
@@ -591,10 +526,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
           additionalFiles,
         ),
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
+      ).toStrictEqual({ artifactErrors: [], updatedArtifacts: [] });
     });
 
     it('fails for npm', async () => {
@@ -655,9 +587,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalNpmrcContent: [],
           additionalYarnRcYml: {
             npmRegistries: {
-              '//my-private-registry': {
-                npmAuthToken: 'xxxxxx',
-              },
+              '//my-private-registry': { npmAuthToken: 'xxxxxx' },
             },
           },
         });
@@ -683,11 +613,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
         spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
         await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
+          { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
           additionalFiles,
         );
         expect(fs.writeLocalFile).toHaveBeenCalledWith(

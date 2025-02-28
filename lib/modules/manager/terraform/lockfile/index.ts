@@ -223,13 +223,6 @@ export async function updateArtifacts({
     return [res];
   } catch (err) {
     /* istanbul ignore next */
-    return [
-      {
-        artifactError: {
-          lockFile: lockFilePath,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFilePath, stderr: err.message } }];
   }
 }

@@ -11,9 +11,7 @@ function convertLinesToVersions(content: string): ReleaseResult {
     return { version: value };
   });
 
-  return {
-    releases: versions,
-  };
+  return { releases: versions };
 }
 
 export class PlainFetcher implements CustomDatasourceFetcher {

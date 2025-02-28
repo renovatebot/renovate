@@ -20,9 +20,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     let upgrade: BranchUpgradeConfig;
 
     beforeAll(() => {
-      GlobalConfig.set({
-        localDir: '/temp',
-      });
+      GlobalConfig.set({ localDir: '/temp' });
     });
 
     beforeEach(() => {

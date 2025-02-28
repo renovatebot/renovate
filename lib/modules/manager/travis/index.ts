@@ -10,9 +10,7 @@ export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
   fileMatch: ['^\\.travis\\.ya?ml$'],
-  major: {
-    enabled: false,
-  },
+  major: { enabled: false },
   versioning: nodeVersioning.id,
 };
 

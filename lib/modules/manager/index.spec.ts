@@ -99,10 +99,9 @@ describe('modules/manager/index', () => {
 
   describe('extractAllPackageFiles()', () => {
     it('returns null', async () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
+      manager
+        .getManagers()
+        .set('dummy', { defaultConfig: {}, supportedDatasources: [] });
       expect(
         await manager.extractAllPackageFiles('unknown', {} as any, []),
       ).toBeNull();
@@ -112,11 +111,13 @@ describe('modules/manager/index', () => {
     });
 
     it('returns non-null', async () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        extractAllPackageFiles: () => Promise.resolve([]),
-      });
+      manager
+        .getManagers()
+        .set('dummy', {
+          defaultConfig: {},
+          supportedDatasources: [],
+          extractAllPackageFiles: () => Promise.resolve([]),
+        });
       expect(
         await manager.extractAllPackageFiles('dummy', {} as any, []),
       ).not.toBeNull();
@@ -129,10 +130,9 @@ describe('modules/manager/index', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
+      manager
+        .getManagers()
+        .set('dummy', { defaultConfig: {}, supportedDatasources: [] });
       expect(
         manager.extractPackageFile('unknown', '', 'filename', {}),
       ).toBeNull();
@@ -142,22 +142,26 @@ describe('modules/manager/index', () => {
     });
 
     it('handles custom managers', () => {
-      customManager.getCustomManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        extractPackageFile: () => Promise.resolve({ deps: [] }),
-      });
+      customManager
+        .getCustomManagers()
+        .set('dummy', {
+          defaultConfig: {},
+          supportedDatasources: [],
+          extractPackageFile: () => Promise.resolve({ deps: [] }),
+        });
       expect(
         manager.extractPackageFile('dummy', '', 'filename', {}),
       ).not.toBeNull();
     });
 
     it('returns non-null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        extractPackageFile: () => Promise.resolve({ deps: [] }),
-      });
+      manager
+        .getManagers()
+        .set('dummy', {
+          defaultConfig: {},
+          supportedDatasources: [],
+          extractPackageFile: () => Promise.resolve({ deps: [] }),
+        });
 
       expect(
         manager.extractPackageFile('dummy', '', 'filename', {}),
@@ -171,29 +175,29 @@ describe('modules/manager/index', () => {
 
   describe('getRangeStrategy', () => {
     it('returns null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
+      manager
+        .getManagers()
+        .set('dummy', { defaultConfig: {}, supportedDatasources: [] });
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
       ).toBeNull();
     });
 
     it('returns non-null', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        getRangeStrategy: () => 'replace',
-      });
+      manager
+        .getManagers()
+        .set('dummy', {
+          defaultConfig: {},
+          supportedDatasources: [],
+          getRangeStrategy: () => 'replace',
+        });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
 
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
+      manager
+        .getManagers()
+        .set('dummy', { defaultConfig: {}, supportedDatasources: [] });
       expect(
         manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
@@ -204,10 +208,9 @@ describe('modules/manager/index', () => {
     });
 
     it('returns update-lockfile for in-range-only', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
+      manager
+        .getManagers()
+        .set('dummy', { defaultConfig: {}, supportedDatasources: [] });
       expect(
         manager.getRangeStrategy({
           manager: 'dummy',
@@ -217,11 +220,13 @@ describe('modules/manager/index', () => {
     });
 
     it('returns update-lockfile for in-range-only if it is proposed my manager', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        getRangeStrategy: () => 'in-range-only',
-      });
+      manager
+        .getManagers()
+        .set('dummy', {
+          defaultConfig: {},
+          supportedDatasources: [],
+          getRangeStrategy: () => 'in-range-only',
+        });
       expect(
         manager.getRangeStrategy({
           manager: 'dummy',

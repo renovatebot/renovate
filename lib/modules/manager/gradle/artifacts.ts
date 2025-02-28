@@ -43,11 +43,7 @@ async function getUpdatedLockfiles(
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
-          file: {
-            type: 'addition',
-            path: modifiedFile,
-            contents: newContent,
-          },
+          file: { type: 'addition', path: modifiedFile, contents: newContent },
         });
       }
     }
@@ -250,12 +246,7 @@ export async function updateArtifacts({
 
     logger.debug({ err }, 'Error while updating Gradle dependency lockfiles');
     return [
-      {
-        artifactError: {
-          lockFile: packageFileName,
-          stderr: err.message,
-        },
-      },
+      { artifactError: { lockFile: packageFileName, stderr: err.message } },
     ];
   }
 }

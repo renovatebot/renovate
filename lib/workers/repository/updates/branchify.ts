@@ -8,10 +8,7 @@ import { generateBranchConfig } from './generate';
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,
-  {
-    branches: BranchConfig[];
-    branchList: string[];
-  }
+  { branches: BranchConfig[]; branchList: string[] }
 >;
 export async function branchifyUpgrades(
   config: RenovateConfig,
@@ -39,9 +36,7 @@ export async function branchifyUpgrades(
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
-    addMeta({
-      branch: branchName,
-    });
+    addMeta({ branch: branchName });
     const seenUpdates: Record<string, string> = {};
     // Filter out duplicates
     branchUpgrades[branchName] = branchUpgrades[branchName]

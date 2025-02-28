@@ -5,9 +5,7 @@
  * Docs: https://go-vela.github.io/docs/reference/yaml/
  */
 export interface VelaPipelineConfiguration {
-  secrets?: {
-    origin?: ObjectWithImageProp;
-  }[];
+  secrets?: { origin?: ObjectWithImageProp }[];
 
   services?: ObjectWithImageProp[];
 

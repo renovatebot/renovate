@@ -240,10 +240,7 @@ Here's an example:
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript
-module.exports = {
-  token: 'xxxxxxxx',
-  repositories: ['r4harry/testrepo1'],
-};
+module.exports = { token: 'xxxxxxxx', repositories: ['r4harry/testrepo1'] };
 ```
 
 <!-- markdownlint-disable MD029 -->

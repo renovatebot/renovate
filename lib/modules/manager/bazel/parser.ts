@@ -16,11 +16,7 @@ interface Ctx {
 }
 
 function emptyCtx(source: string): Ctx {
-  return {
-    source,
-    results: [],
-    stack: [],
-  };
+  return { source, results: [], stack: [] };
 }
 
 function currentFragment(ctx: Ctx): NestedFragment {
@@ -241,12 +237,7 @@ function ruleCall(
 }
 
 function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
-  ctx.stack.push({
-    type: 'record',
-    value: '',
-    offset,
-    children: {},
-  });
+  ctx.stack.push({ type: 'record', value: '', offset, children: {} });
   return ctx;
 }
 
@@ -288,11 +279,7 @@ const maybeRule = q
 
 const rule = q.alt<Ctx>(maybeRule, regularRule);
 
-const query = q.tree<Ctx>({
-  type: 'root-tree',
-  maxDepth: 16,
-  search: rule,
-});
+const query = q.tree<Ctx>({ type: 'root-tree', maxDepth: 16, search: rule });
 
 function getCacheKey(input: string): string {
   const hashedInput = hash(input);

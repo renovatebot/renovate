@@ -43,10 +43,7 @@ export function getGitStatusContextFromCombinedName(
     name = context.substring(lastSlash + 1);
     genre = context.substring(0, lastSlash);
   }
-  return {
-    genre,
-    name,
-  };
+  return { genre, name };
 }
 
 export function getBranchNameWithoutRefsheadsPrefix(
@@ -130,9 +127,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
     authValue = config.token!;
   }
   addSecretForSanitizing(authValue, 'global');
-  return {
-    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
-  };
+  return { '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}` };
 }
 
 export function max4000Chars(str: string): string {
@@ -149,16 +144,10 @@ export function getProjectAndRepo(str: string): {
   logger.trace(`getProjectAndRepo(${str})`);
   const strSplit = str.split(`/`);
   if (strSplit.length === 1) {
-    return {
-      project: str,
-      repo: str,
-    };
+    return { project: str, repo: str };
   }
   if (strSplit.length === 2) {
-    return {
-      project: strSplit[0],
-      repo: strSplit[1],
-    };
+    return { project: strSplit[0], repo: strSplit[1] };
   }
   const msg = `Azure repository can be only structured this way : 'repository' or 'projectName/repository'!`;
   logger.warn({ repository: str }, msg);

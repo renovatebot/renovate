@@ -19,27 +19,17 @@ export const HexRelease = z
               ]),
             ),
           )
-          .pipe(
-            z.object({
-              github: z.string(),
-            }),
-          ),
+          .pipe(z.object({ github: z.string() })),
       })
       .nullable()
       .catch(null),
     releases: LooseArray(
-      z.object({
-        version: z.string(),
-        inserted_at: MaybeTimestamp,
-      }),
+      z.object({ version: z.string(), inserted_at: MaybeTimestamp }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
     retirements: z
       .record(
         z.string(),
-        z.object({
-          message: z.string().nullable(),
-          reason: z.string(),
-        }),
+        z.object({ message: z.string().nullable(), reason: z.string() }),
       )
       .optional(),
   })

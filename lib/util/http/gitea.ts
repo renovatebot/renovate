@@ -39,10 +39,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions> {
     options?: InternalHttpOptions & GiteaHttpOptions,
   ): Promise<HttpResponse<T>> {
     const resolvedUrl = resolveUrl(path, options?.baseUrl ?? baseUrl);
-    const opts = {
-      baseUrl,
-      ...options,
-    };
+    const opts = { baseUrl, ...options };
     const res = await super.request<T>(resolvedUrl, opts);
     const pc = getPaginationContainer<T>(res.body);
     if (opts.paginate && pc) {

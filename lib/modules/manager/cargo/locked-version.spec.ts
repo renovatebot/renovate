@@ -77,10 +77,7 @@ describe('modules/manager/cargo/locked-version', () => {
             version: '1.1.0',
             source: 'registry+https://github.com/rust-lang/crates.io-index',
           },
-          {
-            name: 'bar',
-            version: '7.0.1',
-          },
+          { name: 'bar', version: '7.0.1' },
         ],
       });
     });
@@ -95,10 +92,7 @@ describe('modules/manager/cargo/locked-version', () => {
             version: '1.1.0',
             source: 'registry+https://github.com/rust-lang/crates.io-index',
           },
-          {
-            name: 'bar',
-            version: '7.0.1',
-          },
+          { name: 'bar', version: '7.0.1' },
         ],
       });
     });

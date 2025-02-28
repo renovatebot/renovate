@@ -7,10 +7,7 @@ import * as yarn from '../../../../../modules/manager/npm/post-update/yarn';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types';
 import * as _hostRules from '../../../../../util/host-rules';
 
-const config: PostUpdateConfig = {
-  upgrades: [],
-  branchName: 'some-branch',
-};
+const config: PostUpdateConfig = { upgrades: [], branchName: 'some-branch' };
 
 const hostRules = mocked(_hostRules);
 
@@ -23,12 +20,8 @@ const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 describe('workers/repository/update/branch/lock-files/index', () => {
   describe('writeUpdatedPackageFiles', () => {
     beforeEach(() => {
-      GlobalConfig.set({
-        localDir: 'some-tmp-dir',
-      });
-      hostRules.find.mockImplementation((_) => ({
-        token: 'abc',
-      }));
+      GlobalConfig.set({ localDir: 'some-tmp-dir' });
+      hostRules.find.mockImplementation((_) => ({ token: 'abc' }));
     });
 
     it('returns if no updated packageFiles', async () => {
@@ -39,11 +32,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
 
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
-        {
-          type: 'addition',
-          path: 'Dockerfile',
-          contents: 'some-contents',
-        },
+        { type: 'addition', path: 'Dockerfile', contents: 'some-contents' },
       ];
       await writeUpdatedPackageFiles(config);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(0);
@@ -62,10 +51,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
           contents:
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },
-        {
-          type: 'deletion',
-          path: 'frontent/package.json',
-        },
+        { type: 'deletion', path: 'frontent/package.json' },
       ];
       config.upgrades = [];
       await writeUpdatedPackageFiles(config);
@@ -75,9 +61,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
 
   describe('getAdditionalFiles', () => {
     beforeEach(() => {
-      GlobalConfig.set({
-        localDir: 'some-tmp-dir',
-      });
+      GlobalConfig.set({ localDir: 'some-tmp-dir' });
       git.getFile.mockResolvedValueOnce('some lock file contents');
       vi.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',

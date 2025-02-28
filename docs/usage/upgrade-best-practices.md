@@ -27,9 +27,7 @@ Renovate also has a `config:best-practices` preset that includes our upgrade bes
 You should extend from the `config:best-practices` preset:
 
 ```json
-{
-  "extends": ["config:best-practices"]
-}
+{ "extends": ["config:best-practices"] }
 ```
 
 If you're using `config:recommended` now, replace it with `config:best-practices`:

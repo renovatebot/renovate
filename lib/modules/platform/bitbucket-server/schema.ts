@@ -5,10 +5,7 @@ export const UserSchema = z.object({
   emailAddress: z.string(),
 });
 
-export const Comment = z.object({
-  text: z.string(),
-  id: z.number(),
-});
+export const Comment = z.object({ text: z.string(), id: z.number() });
 
 export type Comment = z.infer<typeof Comment>;
 

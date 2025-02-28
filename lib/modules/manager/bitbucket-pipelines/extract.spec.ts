@@ -83,11 +83,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
       const res = extractPackageFile(
         Fixtures.get('bitbucket-pipelines.yaml'),
         'bitbucket-pipelines.yaml',
-        {
-          registryAliases: {
-            jfrogecosystem: 'some.jfrog.mirror',
-          },
-        },
+        { registryAliases: { jfrogecosystem: 'some.jfrog.mirror' } },
       );
       expect(res).toMatchObject({
         deps: [

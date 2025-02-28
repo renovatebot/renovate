@@ -14,9 +14,7 @@ describe('util/toml', () => {
 
     expect(parseToml(input)).toStrictEqual({
       tool: {
-        poetry: {
-          include: ['README.md', { path: 'tests', format: 'sdist' }],
-        },
+        poetry: { include: ['README.md', { path: 'tests', format: 'sdist' }] },
       },
     });
   });

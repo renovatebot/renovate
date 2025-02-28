@@ -27,10 +27,7 @@ export type PubspecSchema = z.infer<typeof PubspecSchema>;
 export const PubspecYaml = Yaml.pipe(PubspecSchema);
 
 export const PubspecLockSchema = z.object({
-  sdks: z.object({
-    dart: z.string(),
-    flutter: z.string().optional(),
-  }),
+  sdks: z.object({ dart: z.string(), flutter: z.string().optional() }),
 });
 
 export type PubspecLockSchema = z.infer<typeof PubspecLockSchema>;

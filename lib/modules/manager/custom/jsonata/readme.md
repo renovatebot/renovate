@@ -96,18 +96,8 @@ You can also use the [JSONata test website](https://try.jsonata.org) to experime
 
 ```json title="Dependencies spread in different nodes, and we want to limit the extraction to a particular node"
 {
-  "production": [
-    {
-      "version": "1.2.3",
-      "package": "foo"
-    }
-  ],
-  "development": [
-    {
-      "version": "4.5.6",
-      "package": "bar"
-    }
-  ]
+  "production": [{ "version": "1.2.3", "package": "foo" }],
+  "development": [{ "version": "4.5.6", "package": "bar" }]
 }
 ```
 
@@ -119,18 +109,8 @@ production.{ "depName": package, "currentValue": version }
 
 ```json title="Dependencies spread in different nodes, and we want to extract all of them as if they were in the same node"
 {
-  "production": [
-    {
-      "version": "1.2.3",
-      "package": "foo"
-    }
-  ],
-  "development": [
-    {
-      "version": "4.5.6",
-      "package": "bar"
-    }
-  ]
+  "production": [{ "version": "1.2.3", "package": "foo" }],
+  "development": [{ "version": "4.5.6", "package": "bar" }]
 }
 ```
 
@@ -141,14 +121,7 @@ Query:
 ```
 
 ```json title="The dependency name is in a JSON node name, and the version is in a child leaf to that node"
-{
-  "foo": {
-    "version": "1.2.3"
-  },
-  "bar": {
-    "version": "4.5.6"
-  }
-}
+{ "foo": { "version": "1.2.3" }, "bar": { "version": "4.5.6" } }
 ```
 
 Query:
@@ -160,14 +133,8 @@ $each(function($v, $n) { { "depName": $n, "currentValue": $v.version } })
 ```json title="The dependency name and its version are both value nodes of the same parent node"
 {
   "packages": [
-    {
-      "version": "1.2.3",
-      "package": "foo"
-    },
-    {
-      "version": "4.5.6",
-      "package": "bar"
-    }
+    { "version": "1.2.3", "package": "foo" },
+    { "version": "4.5.6", "package": "bar" }
   ]
 }
 ```
@@ -179,9 +146,7 @@ packages.{ "depName": package, "currentValue": version }
 ```
 
 ```json title="The dependency name and version are part of the same string"
-{
-  "packages": ["foo@1.2.3", "bar@4.5.6"]
-}
+{ "packages": ["foo@1.2.3", "bar@4.5.6"] }
 ```
 
 Query:

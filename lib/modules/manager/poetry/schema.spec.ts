@@ -61,11 +61,7 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://some-source.com',
         },
-        {
-          name: 'pypi',
-          priority: 'primary',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'primary', url: 'https://pypi.org/pypi/' },
         {
           name: 'foo-primary',
           priority: 'primary',
@@ -99,11 +95,7 @@ describe('modules/manager/poetry/schema', () => {
           },
         ]),
       ).toEqual([
-        {
-          name: 'pypi',
-          priority: 'default',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'default', url: 'https://pypi.org/pypi/' },
         {
           name: 'foo-supplemental',
           priority: 'supplemental',
@@ -125,91 +117,45 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://some-vcs.com/primary',
         },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'secondary', url: 'https://pypi.org/pypi/' },
       ]);
     });
 
     it('source with priority="default"', () => {
       expect(
         PoetrySources.parse([
-          {
-            name: 'foo',
-            priority: 'default',
-            url: 'https://foo.bar/simple/',
-          },
+          { name: 'foo', priority: 'default', url: 'https://foo.bar/simple/' },
         ]),
       ).toEqual([
-        {
-          name: 'foo',
-          priority: 'default',
-          url: 'https://foo.bar/simple/',
-        },
+        { name: 'foo', priority: 'default', url: 'https://foo.bar/simple/' },
       ]);
     });
 
     it('PyPI source with priority="default"', () => {
       expect(
-        PoetrySources.parse([
-          {
-            name: 'PyPI',
-            priority: 'default',
-          },
-        ]),
+        PoetrySources.parse([{ name: 'PyPI', priority: 'default' }]),
       ).toEqual([
-        {
-          name: 'pypi',
-          priority: 'default',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'default', url: 'https://pypi.org/pypi/' },
       ]);
     });
 
     it('source with priority="primary"', () => {
       expect(
         PoetrySources.parse([
-          {
-            name: 'foo',
-            priority: 'primary',
-            url: 'https://foo.bar/simple/',
-          },
+          { name: 'foo', priority: 'primary', url: 'https://foo.bar/simple/' },
         ]),
       ).toEqual([
-        {
-          name: 'foo',
-          priority: 'primary',
-          url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'foo', priority: 'primary', url: 'https://foo.bar/simple/' },
+        { name: 'pypi', priority: 'secondary', url: 'https://pypi.org/pypi/' },
       ]);
     });
 
     it('source with implicit priority="primary"', () => {
       expect(
-        PoetrySources.parse([
-          {
-            name: 'foo',
-            url: 'https://foo.bar/simple/',
-          },
-        ]),
+        PoetrySources.parse([{ name: 'foo', url: 'https://foo.bar/simple/' }]),
       ).toEqual([
-        {
-          name: 'foo',
-          priority: 'primary',
-          url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'foo', priority: 'primary', url: 'https://foo.bar/simple/' },
+        { name: 'pypi', priority: 'secondary', url: 'https://pypi.org/pypi/' },
       ]);
     });
 
@@ -228,21 +174,9 @@ describe('modules/manager/poetry/schema', () => {
           },
         ]),
       ).toEqual([
-        {
-          name: 'pypi',
-          priority: 'default',
-          url: 'https://pypi.org/pypi/',
-        },
-        {
-          name: 'foo',
-          priority: 'secondary',
-          url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'bar',
-          priority: 'secondary',
-          url: 'https://bar.baz/simple/',
-        },
+        { name: 'pypi', priority: 'default', url: 'https://pypi.org/pypi/' },
+        { name: 'foo', priority: 'secondary', url: 'https://foo.bar/simple/' },
+        { name: 'bar', priority: 'secondary', url: 'https://bar.baz/simple/' },
       ]);
     });
 
@@ -254,39 +188,15 @@ describe('modules/manager/poetry/schema', () => {
             priority: 'secondary',
             url: 'https://foo.bar/simple/',
           },
-          {
-            name: 'bar',
-            url: 'https://bar.baz/simple/',
-          },
-          {
-            name: 'PyPI',
-          },
-          {
-            name: 'baz',
-            url: 'https://baz.bar/simple/',
-          },
+          { name: 'bar', url: 'https://bar.baz/simple/' },
+          { name: 'PyPI' },
+          { name: 'baz', url: 'https://baz.bar/simple/' },
         ]),
       ).toEqual([
-        {
-          name: 'bar',
-          priority: 'primary',
-          url: 'https://bar.baz/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'primary',
-          url: 'https://pypi.org/pypi/',
-        },
-        {
-          name: 'baz',
-          priority: 'primary',
-          url: 'https://baz.bar/simple/',
-        },
-        {
-          name: 'foo',
-          priority: 'secondary',
-          url: 'https://foo.bar/simple/',
-        },
+        { name: 'bar', priority: 'primary', url: 'https://bar.baz/simple/' },
+        { name: 'pypi', priority: 'primary', url: 'https://pypi.org/pypi/' },
+        { name: 'baz', priority: 'primary', url: 'https://baz.bar/simple/' },
+        { name: 'foo', priority: 'secondary', url: 'https://foo.bar/simple/' },
       ]);
     });
 
@@ -298,27 +208,12 @@ describe('modules/manager/poetry/schema', () => {
             priority: 'secondary',
             url: 'https://foo.bar/simple/',
           },
-          {
-            name: 'bar',
-            url: 'https://bar.baz/simple/',
-          },
+          { name: 'bar', url: 'https://bar.baz/simple/' },
         ]),
       ).toEqual([
-        {
-          name: 'bar',
-          priority: 'primary',
-          url: 'https://bar.baz/simple/',
-        },
-        {
-          name: 'foo',
-          priority: 'secondary',
-          url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'bar', priority: 'primary', url: 'https://bar.baz/simple/' },
+        { name: 'foo', priority: 'secondary', url: 'https://foo.bar/simple/' },
+        { name: 'pypi', priority: 'secondary', url: 'https://pypi.org/pypi/' },
       ]);
     });
 
@@ -332,11 +227,7 @@ describe('modules/manager/poetry/schema', () => {
           },
         ]),
       ).toEqual([
-        {
-          name: 'pypi',
-          priority: 'default',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'default', url: 'https://pypi.org/pypi/' },
         {
           name: 'supplemental',
           priority: 'supplemental',
@@ -355,11 +246,7 @@ describe('modules/manager/poetry/schema', () => {
           },
         ]),
       ).toEqual([
-        {
-          name: 'pypi',
-          priority: 'default',
-          url: 'https://pypi.org/pypi/',
-        },
+        { name: 'pypi', priority: 'default', url: 'https://pypi.org/pypi/' },
         {
           name: 'explicit',
           priority: 'explicit',

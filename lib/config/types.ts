@@ -204,10 +204,7 @@ export type UpdateConfig<
 
 export type RenovateRepository =
   | string
-  | {
-      repository: string;
-      secrets?: Record<string, string>;
-    };
+  | { repository: string; secrets?: Record<string, string> };
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';

@@ -70,11 +70,7 @@ describe('workers/global/limits', () => {
   describe('calcLimit', () => {
     it('handles single upgrade', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
       ]);
 
       expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(10);
@@ -98,21 +94,9 @@ describe('workers/global/limits', () => {
 
     it('returns 0 if atleast one upgrade has no limit in the branch', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 0,
-          branchConcurrentLimit: 0,
-          prConcurrentLimit: 0,
-        },
-        {
-          prHourlyLimit: 1,
-          branchConcurrentLimit: 1,
-          prConcurrentLimit: 1,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 0, branchConcurrentLimit: 0, prConcurrentLimit: 0 },
+        { prHourlyLimit: 1, branchConcurrentLimit: 1, prConcurrentLimit: 1 },
       ]);
 
       expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(0);
@@ -122,36 +106,16 @@ describe('workers/global/limits', () => {
 
     it('computes the lowest limit if multiple limits are present', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 1,
-          branchConcurrentLimit: 1,
-          prConcurrentLimit: 1,
-        },
-        {
-          prHourlyLimit: 5,
-          branchConcurrentLimit: 6,
-          prConcurrentLimit: 3,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 1, branchConcurrentLimit: 1, prConcurrentLimit: 1 },
+        { prHourlyLimit: 5, branchConcurrentLimit: 6, prConcurrentLimit: 3 },
         {
           prHourlyLimit: 5,
           branchConcurrentLimit: null,
           prConcurrentLimit: undefined,
         },
-        {
-          prHourlyLimit: 5,
-          branchConcurrentLimit: 6,
-          prConcurrentLimit: 2,
-        },
+        { prHourlyLimit: 5, branchConcurrentLimit: 6, prConcurrentLimit: 2 },
       ]);
 
       expect(calcLimit(upgrades, 'prHourlyLimit')).toBe(1);
@@ -163,11 +127,7 @@ describe('workers/global/limits', () => {
   describe('hasMultipleLimits', () => {
     it('handles single limit', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
       ]);
       expect(hasMultipleLimits(upgrades, 'prHourlyLimit')).toBe(false);
       expect(hasMultipleLimits(upgrades, 'branchConcurrentLimit')).toBe(false);
@@ -176,16 +136,8 @@ describe('workers/global/limits', () => {
 
     it('returns false if there are multiple limits with value', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
       ]);
       expect(hasMultipleLimits(upgrades, 'prHourlyLimit')).toBe(false);
       expect(hasMultipleLimits(upgrades, 'branchConcurrentLimit')).toBe(false);
@@ -194,21 +146,9 @@ describe('workers/global/limits', () => {
 
     it('handles multiple limits', () => {
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 11,
-          branchConcurrentLimit: 12,
-          prConcurrentLimit: 13,
-        },
-        {
-          prHourlyLimit: 0,
-          branchConcurrentLimit: null,
-          prConcurrentLimit: 3,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 11, branchConcurrentLimit: 12, prConcurrentLimit: 13 },
+        { prHourlyLimit: 0, branchConcurrentLimit: null, prConcurrentLimit: 3 },
       ]);
       expect(hasMultipleLimits(upgrades, 'prHourlyLimit')).toBe(true);
       expect(hasMultipleLimits(upgrades, 'branchConcurrentLimit')).toBe(true);
@@ -222,21 +162,9 @@ describe('workers/global/limits', () => {
       setCount('HourlyPRs', 1);
       incCountValue('Branches'); // using incCountValue so it gets test coverage
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 11,
-          branchConcurrentLimit: 12,
-          prConcurrentLimit: 13,
-        },
-        {
-          prHourlyLimit: 0,
-          branchConcurrentLimit: null,
-          prConcurrentLimit: 3,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 11, branchConcurrentLimit: 12, prConcurrentLimit: 13 },
+        { prHourlyLimit: 0, branchConcurrentLimit: null, prConcurrentLimit: 3 },
       ]);
       expect(
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
@@ -251,21 +179,9 @@ describe('workers/global/limits', () => {
       setCount('ConcurrentPRs', 2);
       setCount('HourlyPRs', 2);
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 11,
-          branchConcurrentLimit: 12,
-          prConcurrentLimit: 13,
-        },
-        {
-          prHourlyLimit: 2,
-          branchConcurrentLimit: null,
-          prConcurrentLimit: 3,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 11, branchConcurrentLimit: 12, prConcurrentLimit: 13 },
+        { prHourlyLimit: 2, branchConcurrentLimit: null, prConcurrentLimit: 3 },
       ]);
       expect(
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),
@@ -280,21 +196,9 @@ describe('workers/global/limits', () => {
       setCount('ConcurrentPRs', 3);
       setCount('HourlyPRs', 4);
       const upgrades = partial<BranchUpgradeConfig>([
-        {
-          prHourlyLimit: 10,
-          branchConcurrentLimit: 11,
-          prConcurrentLimit: 12,
-        },
-        {
-          prHourlyLimit: 11,
-          branchConcurrentLimit: 12,
-          prConcurrentLimit: 13,
-        },
-        {
-          prHourlyLimit: 5,
-          branchConcurrentLimit: null,
-          prConcurrentLimit: 3,
-        },
+        { prHourlyLimit: 10, branchConcurrentLimit: 11, prConcurrentLimit: 12 },
+        { prHourlyLimit: 11, branchConcurrentLimit: 12, prConcurrentLimit: 13 },
+        { prHourlyLimit: 5, branchConcurrentLimit: null, prConcurrentLimit: 3 },
       ]);
       expect(
         isLimitReached('Branches', partial<BranchConfig>({ upgrades })),

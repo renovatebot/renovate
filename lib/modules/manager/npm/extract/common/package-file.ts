@@ -69,10 +69,7 @@ export function extractPackageJson(
           dependencies as NpmPackageDependency,
         )) {
           const depName = parseDepName(depType, key);
-          let dep: PackageDependency = {
-            depType,
-            depName,
-          };
+          let dep: PackageDependency = { depType, depName };
           if (depName !== key) {
             dep.managerData = { key };
           }

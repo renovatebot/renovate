@@ -18,6 +18,4 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'widen',
 ];
 
-export const api: VersioningApi = {
-  ...npm,
-};
+export const api: VersioningApi = { ...npm };

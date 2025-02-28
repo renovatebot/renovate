@@ -115,12 +115,5 @@ export function parsePreset(input: string): ParsedPreset {
     }
   }
 
-  return {
-    presetSource,
-    presetPath,
-    repo,
-    presetName,
-    tag,
-    params,
-  };
+  return { presetSource, presetPath, repo, presetName, tag, params };
 }

@@ -78,12 +78,7 @@ interface User {
 
 let config: Config = {} as any;
 
-const defaults: {
-  endpoint?: string;
-  hostType: string;
-} = {
-  hostType: 'azure',
-};
+const defaults: { endpoint?: string; hostType: string } = { hostType: 'azure' };
 
 export const id = 'azure';
 
@@ -102,14 +97,10 @@ export function initPlatform({
     );
   }
   // TODO: Add a connection check that endpoint/token combination are valid (#9593)
-  const res = {
-    endpoint: ensureTrailingSlash(endpoint),
-  };
+  const res = { endpoint: ensureTrailingSlash(endpoint) };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
+  const platformConfig: PlatformResult = { endpoint: defaults.endpoint };
   return Promise.resolve(platformConfig);
 }
 
@@ -358,11 +349,7 @@ export async function getBranchPr(
   targetBranch?: string,
 ): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName}, ${targetBranch})`);
-  const existingPr = await findPr({
-    branchName,
-    state: 'open',
-    targetBranch,
-  });
+  const existingPr = await findPr({ branchName, state: 'open', targetBranch });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
@@ -480,11 +467,7 @@ export async function createPr({
   const targetRefName = getNewBranchName(targetBranch);
   const description = max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
-  const workItemRefs = [
-    {
-      id: platformPrOptions?.azureWorkItemId?.toString(),
-    },
-  ];
+  const workItemRefs = [{ id: platformPrOptions?.azureWorkItemId?.toString() }];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
     {
       sourceRefName,
@@ -535,9 +518,7 @@ export async function createPr({
   await Promise.all(
     labels!.map((label) =>
       azureApiGit.createPullRequestLabel(
-        {
-          name: label,
-        },
+        { name: label },
         config.repoId,
         // TODO #22198
         pr.pullRequestId!,
@@ -563,9 +544,7 @@ export async function updatePr({
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   const azureApiGit = await azureApi.gitApi();
-  const objToUpdate: GitPullRequest = {
-    title,
-  };
+  const objToUpdate: GitPullRequest = { title };
 
   if (targetBranch) {
     objToUpdate.targetRefName = getNewBranchName(targetBranch);
@@ -577,9 +556,7 @@ export async function updatePr({
 
   if (state === 'open') {
     await azureApiGit.updatePullRequest(
-      {
-        status: PullRequestStatus.Active,
-      },
+      { status: PullRequestStatus.Active },
       config.repoId,
       prNo,
     );
@@ -666,9 +643,7 @@ export async function ensureComment({
     );
   } else if (commentNeedsUpdating) {
     await azureApiGit.updateComment(
-      {
-        content: body,
-      },
+      { content: body },
       config.repoId,
       number,
       threadIdFound,
@@ -924,11 +899,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
         ) {
           if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
             // TODO #22198
-            ids.push({
-              id: m.identity.id!,
-              name: reviewer,
-              isRequired,
-            });
+            ids.push({ id: m.identity.id!, name: reviewer, isRequired });
 
             validReviewers.add(reviewer);
           }
@@ -1003,9 +974,7 @@ export async function addReviewers(
   await Promise.all(
     ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
-        {
-          isRequired: obj.isRequired,
-        },
+        { isRequired: obj.isRequired },
         config.repoId,
         prNo,
         obj.id,

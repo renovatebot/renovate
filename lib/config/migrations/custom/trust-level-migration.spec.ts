@@ -3,9 +3,7 @@ import { TrustLevelMigration } from './trust-level-migration';
 describe('config/migrations/custom/trust-level-migration', () => {
   it('should handle hight level', () => {
     expect(TrustLevelMigration).toMigrate(
-      {
-        trustLevel: 'high',
-      },
+      { trustLevel: 'high' },
       {
         allowCustomCrateRegistries: true,
         allowScripts: true,

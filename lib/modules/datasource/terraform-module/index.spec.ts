@@ -79,19 +79,10 @@ describe('modules/datasource/terraform-module/index', () => {
         homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
         registryUrl: 'https://registry.terraform.io',
         releases: [
-          {
-            version: '0.3.8',
-          },
-          {
-            version: '0.3.9',
-          },
-          {
-            version: '0.3.10',
-          },
-          {
-            releaseTimestamp: '2018-09-20T11:25:22.957Z',
-            version: '0.4.0',
-          },
+          { version: '0.3.8' },
+          { version: '0.3.9' },
+          { version: '0.3.10' },
+          { releaseTimestamp: '2018-09-20T11:25:22.957Z', version: '0.4.0' },
         ],
         sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
       });
@@ -160,21 +151,11 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://terraform.company.com',
         releases: [
-          {
-            version: '0.0.2',
-          },
-          {
-            version: '0.2.2',
-          },
-          {
-            version: '0.7.1',
-          },
-          {
-            version: '0.7.5',
-          },
-          {
-            version: '0.8.5',
-          },
+          { version: '0.0.2' },
+          { version: '0.2.2' },
+          { version: '0.7.1' },
+          { version: '0.7.5' },
+          { version: '0.8.5' },
         ],
       });
     });
@@ -193,14 +174,7 @@ describe('modules/datasource/terraform-module/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://terraform.company.com',
-        releases: [
-          {
-            version: '0.0.1',
-          },
-          {
-            version: '0.0.2',
-          },
-        ],
+        releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
         sourceUrl: 'https://gitlab.com/renovate-issue-25003/mymodule',
       });
     });
@@ -220,19 +194,10 @@ describe('modules/datasource/terraform-module/index', () => {
         homepage: 'https://registry.terraform.io/modules/hashicorp/consul/aws',
         registryUrl: 'https://registry.terraform.io',
         releases: [
-          {
-            version: '0.3.8',
-          },
-          {
-            version: '0.3.9',
-          },
-          {
-            version: '0.3.10',
-          },
-          {
-            releaseTimestamp: '2018-09-20T11:25:22.957Z',
-            version: '0.4.0',
-          },
+          { version: '0.3.8' },
+          { version: '0.3.9' },
+          { version: '0.3.10' },
+          { releaseTimestamp: '2018-09-20T11:25:22.957Z', version: '0.4.0' },
         ],
         sourceUrl: 'https://github.com/hashicorp/terraform-aws-consul',
       });
@@ -242,9 +207,7 @@ describe('modules/datasource/terraform-module/index', () => {
       httpMock
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo/versions')
-        .reply(200, {
-          modules: [],
-        })
+        .reply(200, { modules: [] })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -259,9 +222,7 @@ describe('modules/datasource/terraform-module/index', () => {
       httpMock
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo/versions')
-        .reply(200, {
-          modules: [],
-        })
+        .reply(200, { modules: [] })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
@@ -301,21 +262,11 @@ describe('modules/datasource/terraform-module/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://terraform.foo.bar',
         releases: [
-          {
-            version: '0.0.2',
-          },
-          {
-            version: '0.2.2',
-          },
-          {
-            version: '0.7.1',
-          },
-          {
-            version: '0.7.5',
-          },
-          {
-            version: '0.8.5',
-          },
+          { version: '0.0.2' },
+          { version: '0.2.2' },
+          { version: '0.7.1' },
+          { version: '0.7.5' },
+          { version: '0.8.5' },
         ],
       });
     });

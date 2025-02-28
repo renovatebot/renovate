@@ -10,9 +10,7 @@ describe('config/massage', () => {
     });
 
     it('massages strings to array', () => {
-      const config: RenovateConfig = {
-        schedule: 'before 5am' as never,
-      };
+      const config: RenovateConfig = { schedule: 'before 5am' as never };
       const res = massage.massageConfig(config);
       expect(Array.isArray(res.schedule)).toBeTrue();
     });
@@ -23,22 +21,15 @@ describe('config/massage', () => {
           {
             matchPackageNames: ['foo'],
             separateMajorMinor: false,
-            minor: {
-              semanticCommitType: 'feat',
-            },
-            patch: {
-              semanticCommitType: 'fix',
-            },
+            minor: { semanticCommitType: 'feat' },
+            patch: { semanticCommitType: 'fix' },
           },
         ],
       };
       const res = massage.massageConfig(config);
       expect(res).toEqual({
         packageRules: [
-          {
-            matchPackageNames: ['foo'],
-            separateMajorMinor: false,
-          },
+          { matchPackageNames: ['foo'], separateMajorMinor: false },
           {
             matchPackageNames: ['foo'],
             matchUpdateTypes: ['minor'],
@@ -57,12 +48,7 @@ describe('config/massage', () => {
     it('filters packageRules with only match/exclude', () => {
       const config: RenovateConfig = {
         packageRules: [
-          {
-            matchBaseBranches: ['main'],
-            major: {
-              enabled: true,
-            },
-          },
+          { matchBaseBranches: ['main'], major: { enabled: true } },
         ],
       };
       const res = massage.massageConfig(config);
@@ -84,9 +70,7 @@ describe('config/massage', () => {
       expect(res).toEqual({
         packageRules: [
           {
-            lockFileMaintenance: {
-              enabled: true,
-            },
+            lockFileMaintenance: { enabled: true },
             matchBaseBranches: ['release/ft10/1.9.x'],
             matchManagers: ['helmv3'],
             schedule: ['at any time'],

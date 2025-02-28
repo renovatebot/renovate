@@ -65,10 +65,7 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     toolConstraints: [
       nodeConstraints,
-      {
-        toolName: 'corepack',
-        constraint: config.constraints?.corepack,
-      },
+      { toolName: 'corepack', constraint: config.constraints?.corepack },
     ],
     docker: {},
     userConfiguredEnv: config.env,
@@ -99,12 +96,7 @@ export async function updateArtifacts({
     logger.warn({ err }, 'Error updating package.json');
     await resetNpmrcContent(pkgFileDir, npmrcContent);
     return [
-      {
-        artifactError: {
-          fileName: packageFileName,
-          stderr: err.message,
-        },
-      },
+      { artifactError: { fileName: packageFileName, stderr: err.message } },
     ];
   }
 }

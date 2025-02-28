@@ -30,9 +30,7 @@ export class GerritHttp extends Http {
         parseJson(text.replace(GerritHttp.magicPrefix, ''), path),
       ...options,
     };
-    opts.headers = {
-      ...opts.headers,
-    };
+    opts.headers = { ...opts.headers };
     return await super.request<T>(url, opts);
   }
 }

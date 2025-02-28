@@ -123,10 +123,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
       describe(scenarioName, () => {
         const username = 'abc';
         const password = '123';
-        const opts = {
-          username,
-          password,
-        };
+        const opts = { username, password };
 
         it('works gitUrl:undefined generate endpoint', () => {
           expect(

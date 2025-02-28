@@ -25,12 +25,7 @@ describe('modules/manager/crossplane/extract', () => {
     it('return invalid-value if deps are not valid images and ignore if missing', () => {
       const result = extractPackageFile(malformedPackages, 'packages.yml');
       expect(result).toMatchObject({
-        deps: [
-          {
-            depType: 'function',
-            skipReason: 'invalid-value',
-          },
-        ],
+        deps: [{ depType: 'function', skipReason: 'invalid-value' }],
       });
     });
 

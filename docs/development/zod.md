@@ -55,10 +55,7 @@ Only create or extend Zod schemas in this way if you _really_ need to.
 Schema names must start with a capital letter:
 
 ```ts
-const ComplexNumber = z.object({
-  re: z.number(),
-  im: z.number(),
-});
+const ComplexNumber = z.object({ re: z.number(), im: z.number() });
 ```
 
 Do _not_ add `Schema` to the end of the schema name.
@@ -74,10 +71,7 @@ While IDEs may confuse schema and type name sometimes, it's obvious which is whi
 Example:
 
 ```ts
-export const User = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-});
+export const User = z.object({ firstName: z.string(), lastName: z.string() });
 export type User = z.infer<typeof User>;
 ```
 
@@ -129,12 +123,7 @@ Use the helpers in `schema-utils.ts` for this purpose.
 The **wrong** way to parse from string:
 
 ```ts
-const ApiResults = z.array(
-  z.object({
-    id: z.number(),
-    value: z.string(),
-  }),
-);
+const ApiResults = z.array(z.object({ id: z.number(), value: z.string() }));
 type ApiResults = z.infer<typeof ApiResults>;
 
 let results: ApiResults | null = null;
@@ -150,12 +139,7 @@ The **correct** way to parse from string:
 
 ```ts
 const ApiResults = Json.pipe(
-  z.array(
-    z.object({
-      id: z.number(),
-      value: z.string(),
-    }),
-  ),
+  z.array(z.object({ id: z.number(), value: z.string() })),
 );
 
 const results = ApiResults.parse(input);
@@ -184,18 +168,10 @@ Instead, use the idiomatic `.transform()` method:
 
 ```ts
 const BoxVolume = z
-  .object({
-    width: z.number(),
-    height: z.number(),
-    length: z.number(),
-  })
+  .object({ width: z.number(), height: z.number(), length: z.number() })
   .transform(({ width, height, length }) => width * height * length);
 
-const volume = BoxVolume.parse({
-  width: 10,
-  height: 20,
-  length: 125,
-}); // => 25000
+const volume = BoxVolume.parse({ width: 10, height: 20, length: 125 }); // => 25000
 ```
 
 #### Rename and move fields at the top level transform
@@ -208,11 +184,7 @@ The **wrong** way is to make cascading transformations:
 const SourceUrl = z
   .object({
     meta: z
-      .object({
-        links: z.object({
-          Github: z.string().url(),
-        }),
-      })
+      .object({ links: z.object({ Github: z.string().url() }) })
       .transform(({ links }) => links.Github),
   })
   .transform(({ meta: sourceUrl }) => sourceUrl);
@@ -222,13 +194,7 @@ The **correct** way is to rename at the top-level:
 
 ```ts
 const SourceUrl = z
-  .object({
-    meta: z.object({
-      links: z.object({
-        Github: z.string().url(),
-      }),
-    }),
-  })
+  .object({ meta: z.object({ links: z.object({ Github: z.string().url() }) }) })
   .transform(({ meta }) => meta.links.Github);
 ```
 
@@ -262,14 +228,7 @@ If you only use methods from the `zod` library, you would need to write somethin
 
 ```ts
 const Versions = z
-  .array(
-    z
-      .object({
-        version: z.string(),
-      })
-      .nullable()
-      .catch(null),
-  )
+  .array(z.object({ version: z.string() }).nullable().catch(null))
   .transform((releases) =>
     releases.filter((x): x is { version: string } => x !== null),
   );
@@ -280,11 +239,7 @@ When trying to achieve permissive behavior, this pattern will emerge quite frequ
 Instead, you should use the `LooseArray` and `LooseRecord` helpers from `schema-utils.ts` to write simpler code:
 
 ```ts
-const Versions = LooseArray(
-  z.object({
-    version: z.string(),
-  }),
-);
+const Versions = LooseArray(z.object({ version: z.string() }));
 ```
 
 ### Combining with `Result` class

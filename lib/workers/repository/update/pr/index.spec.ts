@@ -325,10 +325,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('skips pr update if existing pr does not have labels in debugData', async () => {
-        const existingPr: Pr = {
-          ...pr,
-          labels: ['old_label'],
-        };
+        const existingPr: Pr = { ...pr, labels: ['old_label'] };
         platform.getBranchPr.mockResolvedValueOnce(existingPr);
 
         config.labels = ['new_label'];
@@ -496,10 +493,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr(config);
 
-        expect(res).toEqual({
-          type: 'with-pr',
-          pr: { number: 0 },
-        });
+        expect(res).toEqual({ type: 'with-pr', pr: { number: 0 } });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
@@ -563,9 +557,7 @@ describe('workers/repository/update/pr/index', () => {
           automerge: true,
           automergeType: 'branch',
           reviewers: ['somebody'],
-          dependencyDashboardChecks: {
-            'renovate-branch': 'approvePr',
-          },
+          dependencyDashboardChecks: { 'renovate-branch': 'approvePr' },
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });
@@ -573,10 +565,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('adds assignees for PR automerge with red status', async () => {
-        const changedPr: Pr = {
-          ...pr,
-          hasAssignees: false,
-        };
+        const changedPr: Pr = { ...pr, hasAssignees: false };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
@@ -714,10 +703,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('logs unknown error', async () => {
-        const changedPr: Pr = {
-          ...pr,
-          hasAssignees: false,
-        };
+        const changedPr: Pr = { ...pr, hasAssignees: false };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
@@ -738,10 +724,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('re-throws ExternalHostError', async () => {
-        const changedPr: Pr = {
-          ...pr,
-          hasAssignees: false,
-        };
+        const changedPr: Pr = { ...pr, hasAssignees: false };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
@@ -766,10 +749,7 @@ describe('workers/repository/update/pr/index', () => {
       `(
         're-throws error with specific message: "$message"',
         async ({ message }) => {
-          const changedPr: Pr = {
-            ...pr,
-            hasAssignees: false,
-          };
+          const changedPr: Pr = { ...pr, hasAssignees: false };
           platform.getBranchPr.mockResolvedValueOnce(changedPr);
           checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
@@ -833,10 +813,7 @@ describe('workers/repository/update/pr/index', () => {
       it('processes changelogs', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
-        const res = await ensurePr({
-          ...config,
-          upgrades: [dummyUpgrade],
-        });
+        const res = await ensurePr({ ...config, upgrades: [dummyUpgrade] });
 
         expect(res).toEqual({ type: 'with-pr', pr });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
@@ -982,9 +959,7 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('prCache', () => {
-      const existingPr: Pr = {
-        ...pr,
-      };
+      const existingPr: Pr = { ...pr };
       let cachedPr: PrCache | null = null;
 
       it('adds pr-cache when not present', async () => {
@@ -992,10 +967,7 @@ describe('workers/repository/update/pr/index', () => {
         cachedPr = null;
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr(config);
-        expect(res).toEqual({
-          type: 'with-pr',
-          pr: existingPr,
-        });
+        expect(res).toEqual({ type: 'with-pr', pr: existingPr });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
@@ -1010,10 +982,7 @@ describe('workers/repository/update/pr/index', () => {
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr(config);
-        expect(res).toEqual({
-          type: 'with-pr',
-          pr: existingPr,
-        });
+        expect(res).toEqual({ type: 'with-pr', pr: existingPr });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Pull Request #123 does not need updating',
         );
@@ -1035,10 +1004,7 @@ describe('workers/repository/update/pr/index', () => {
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr(config);
-        expect(res).toEqual({
-          type: 'with-pr',
-          pr: existingPr,
-        });
+        expect(res).toEqual({ type: 'with-pr', pr: existingPr });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR fingerprints mismatch, processing PR',
         );
@@ -1059,10 +1025,7 @@ describe('workers/repository/update/pr/index', () => {
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         const res = await ensurePr({ ...config, fetchChangeLogs: 'pr' });
-        expect(res).toEqual({
-          type: 'with-pr',
-          pr: existingPr,
-        });
+        expect(res).toEqual({ type: 'with-pr', pr: existingPr });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
         );

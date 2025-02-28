@@ -28,9 +28,7 @@ const localDir = '/tmp/github/some/repo/';
 describe('modules/manager/pipenv/extract', () => {
   beforeEach(() => {
     Fixtures.reset();
-    GlobalConfig.set({
-      localDir: join(localDir),
-    });
+    GlobalConfig.set({ localDir: join(localDir) });
   });
 
   describe('extractPackageFile()', () => {
@@ -94,9 +92,7 @@ describe('modules/manager/pipenv/extract', () => {
             currentValue: '==1.0.0',
             currentVersion: '1.0.0',
             datasource: 'pypi',
-            managerData: {
-              nestedVersion: true,
-            },
+            managerData: { nestedVersion: true },
           },
           {
             currentValue: '==1.2.3',
@@ -120,9 +116,7 @@ describe('modules/manager/pipenv/extract', () => {
             datasource: 'pypi',
           },
         ],
-        extractedConstraints: {
-          python: '== 3.6.2',
-        },
+        extractedConstraints: { python: '== 3.6.2' },
         lockFiles: ['Pipfile.lock'],
         registryUrls: [
           'https://pypi.org/simple',
@@ -181,9 +175,7 @@ describe('modules/manager/pipenv/extract', () => {
             datasource: 'pypi',
           },
         ],
-        extractedConstraints: {
-          python: '== 3.6.*',
-        },
+        extractedConstraints: { python: '== 3.6.*' },
         lockFiles: ['Pipfile.lock'],
         registryUrls: ['https://pypi.org/simple'],
       });
@@ -280,9 +272,7 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: 'pywinusb',
             currentValue: '*',
-            managerData: {
-              nestedVersion: true,
-            },
+            managerData: { nestedVersion: true },
             registryUrls: ['https://pypi.python.org/simple'],
             skipReason: 'unspecified-version',
           },
@@ -297,14 +287,10 @@ describe('modules/manager/pipenv/extract', () => {
             depName: 'unittest2',
             currentValue: '>=1.0,<3.0',
             datasource: 'pypi',
-            managerData: {
-              nestedVersion: true,
-            },
+            managerData: { nestedVersion: true },
           },
         ],
-        extractedConstraints: {
-          python: '== 2.7.*',
-        },
+        extractedConstraints: { python: '== 2.7.*' },
         lockFiles: ['Pipfile.lock'],
         registryUrls: ['https://pypi.python.org/simple'],
       });
@@ -321,9 +307,7 @@ describe('modules/manager/pipenv/extract', () => {
             currentValue: '==0.21.0',
             currentVersion: '0.21.0',
             datasource: 'pypi',
-            managerData: {
-              nestedVersion: true,
-            },
+            managerData: { nestedVersion: true },
             registryUrls: ['https://testpypi.python.org/pypi'],
           },
         ],

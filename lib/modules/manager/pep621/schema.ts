@@ -36,9 +36,7 @@ const HatchSchema = z.object({
     .optional(),
 });
 
-const UvIndexSource = z.object({
-  index: z.string(),
-});
+const UvIndexSource = z.object({ index: z.string() });
 
 const UvGitSource = z.object({
   git: z.string(),
@@ -48,17 +46,11 @@ const UvGitSource = z.object({
 });
 export type UvGitSource = z.infer<typeof UvGitSource>;
 
-const UvUrlSource = z.object({
-  url: z.string(),
-});
+const UvUrlSource = z.object({ url: z.string() });
 
-const UvPathSource = z.object({
-  path: z.string(),
-});
+const UvPathSource = z.object({ path: z.string() });
 
-const UvWorkspaceSource = z.object({
-  workspace: z.literal(true),
-});
+const UvWorkspaceSource = z.object({ workspace: z.literal(true) });
 
 // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
 const UvSource = z.union([
@@ -121,12 +113,7 @@ export const PyProjectSchema = z.object({
 
 export const PdmLockfileSchema = Toml.pipe(
   z.object({
-    package: LooseArray(
-      z.object({
-        name: z.string(),
-        version: z.string(),
-      }),
-    ),
+    package: LooseArray(z.object({ name: z.string(), version: z.string() })),
   }),
 )
   .transform(({ package: pkg }) =>
@@ -138,12 +125,7 @@ export const PdmLockfileSchema = Toml.pipe(
 
 export const UvLockfileSchema = Toml.pipe(
   z.object({
-    package: LooseArray(
-      z.object({
-        name: z.string(),
-        version: z.string(),
-      }),
-    ),
+    package: LooseArray(z.object({ name: z.string(), version: z.string() })),
   }),
 ).transform(({ package: pkg }) =>
   Object.fromEntries(

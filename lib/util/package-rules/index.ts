@@ -44,9 +44,7 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
       const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
         // Need to apply groupSlug otherwise the existing one will take precedence
-        toApply.groupSlug = slugify(packageRule.groupName, {
-          lower: true,
-        });
+        toApply.groupSlug = slugify(packageRule.groupName, { lower: true });
       }
       if (toApply.enabled === false && config.enabled !== false) {
         config.skipReason = 'package-rules';

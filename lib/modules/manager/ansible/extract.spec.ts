@@ -27,11 +27,7 @@ describe('modules/manager/ansible/extract', () => {
             name: myredis
             image: quay.io/redis:0.0.1`,
         '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-          },
-        },
+        { registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' } },
       );
       expect(res).toEqual({
         deps: [

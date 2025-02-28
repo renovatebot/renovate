@@ -105,12 +105,7 @@ export class GithubGraphqlDatasourceFetcher<
       cursor: this.cursor,
     };
 
-    return {
-      baseUrl,
-      repository,
-      readOnly: true,
-      body: { query, variables },
-    };
+    return { baseUrl, repository, readOnly: true, body: { query, variables } };
   }
 
   private async doRawQuery(): Promise<

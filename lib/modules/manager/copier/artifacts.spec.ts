@@ -18,9 +18,7 @@ vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {
-  ignoreScripts: true,
-};
+const config: UpdateArtifactsConfig = { ignoreScripts: true };
 
 const upgrades: Upgrade[] = [
   {
@@ -119,9 +117,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
     });
@@ -189,9 +185,7 @@ describe('modules/manager/copier/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
-          options: {
-            cwd: '/tmp/github/some/repo/apps/my-app',
-          },
+          options: { cwd: '/tmp/github/some/repo/apps/my-app' },
         },
       ]);
     });
@@ -227,10 +221,7 @@ describe('modules/manager/copier/artifacts', () => {
             packageFileName: '.copier-answers.yml',
             updatedDeps: upgrades,
             newPackageFileContent: '',
-            config: {
-              ...config,
-              constraints: constraintConfig,
-            },
+            config: { ...config, constraints: constraintConfig },
           }),
         ).not.toBeNull();
 
@@ -248,10 +239,7 @@ describe('modules/manager/copier/artifacts', () => {
       GlobalConfig.set({ ...adminConfig, allowScripts: true });
       const execSnapshots = mockExecAll();
 
-      const trustConfig = {
-        ...config,
-        ignoreScripts: false,
-      };
+      const trustConfig = { ...config, ignoreScripts: false };
 
       await updateArtifacts({
         packageFileName: '.copier-answers.yml',
@@ -368,18 +356,8 @@ describe('modules/manager/copier/artifacts', () => {
             contents: 'new file contents',
           },
         },
-        {
-          file: {
-            type: 'deletion',
-            path: 'old_file.py',
-          },
-        },
-        {
-          file: {
-            type: 'deletion',
-            path: 'renamed_old.py',
-          },
-        },
+        { file: { type: 'deletion', path: 'old_file.py' } },
+        { file: { type: 'deletion', path: 'renamed_old.py' } },
         {
           file: {
             type: 'addition',
@@ -449,12 +427,7 @@ describe('modules/manager/copier/artifacts', () => {
               'This file had merge conflicts. Please check the proposed changes carefully!',
           },
         },
-        {
-          file: {
-            type: 'deletion',
-            path: 'old_file.py',
-          },
-        },
+        { file: { type: 'deletion', path: 'old_file.py' } },
       ]);
     });
   });

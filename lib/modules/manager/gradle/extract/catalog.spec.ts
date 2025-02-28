@@ -59,23 +59,17 @@ describe('modules/manager/gradle/extract/catalog', () => {
       },
       {
         depName: 'google-firebase-analytics',
-        managerData: {
-          packageFile: 'gradle/libs.versions.toml',
-        },
+        managerData: { packageFile: 'gradle/libs.versions.toml' },
         skipReason: 'unspecified-version',
       },
       {
         depName: 'google-firebase-crashlytics',
-        managerData: {
-          packageFile: 'gradle/libs.versions.toml',
-        },
+        managerData: { packageFile: 'gradle/libs.versions.toml' },
         skipReason: 'unspecified-version',
       },
       {
         depName: 'google-firebase-messaging',
-        managerData: {
-          packageFile: 'gradle/libs.versions.toml',
-        },
+        managerData: { packageFile: 'gradle/libs.versions.toml' },
         skipReason: 'unspecified-version',
       },
       {

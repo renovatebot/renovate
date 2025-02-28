@@ -84,12 +84,7 @@ export function extractRoles(lines: string[]): PackageDependency[] {
     if (lineMatch) {
       const dep: AnsibleGalaxyPackageDependency = {
         depType: 'role',
-        managerData: {
-          name: null,
-          version: null,
-          scm: null,
-          src: null,
-        },
+        managerData: { name: null, version: null, scm: null, src: null },
       };
       do {
         const localdep = interpretLine(lineMatch, lineNumber, dep);

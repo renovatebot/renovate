@@ -90,9 +90,7 @@ describe('config/presets/index', () => {
       local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
       local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
       local.getPreset.mockResolvedValueOnce({ foo: 1 });
-      expect(await presets.resolveConfigPresets(config)).toEqual({
-        foo: 1,
-      });
+      expect(await presets.resolveConfigPresets(config)).toEqual({ foo: 1 });
       expect(local.getPreset).toHaveBeenCalledTimes(3);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Already seen preset local>some/repo:c in [local>some/repo:a, local>some/repo:c]',
@@ -223,11 +221,7 @@ describe('config/presets/index', () => {
       config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
-      expect(res).toEqual({
-        foo: 1,
-        ignoreDeps: [],
-        rangeStrategy: 'pin',
-      });
+      expect(res).toEqual({ foo: 1, ignoreDeps: [], rangeStrategy: 'pin' });
       expect(res.rangeStrategy).toBe('pin');
     });
 
@@ -250,10 +244,7 @@ describe('config/presets/index', () => {
 
     it('resolves packageRule', async () => {
       config.packageRules = [
-        {
-          extends: ['packages:eslint'],
-          groupName: 'eslint',
-        },
+        { extends: ['packages:eslint'], groupName: 'eslint' },
       ];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
@@ -400,9 +391,7 @@ describe('config/presets/index', () => {
     });
 
     it('default packageCache TTL should be 15 minutes', async () => {
-      GlobalConfig.set({
-        presetCachePersistence: true,
-      });
+      GlobalConfig.set({ presetCachePersistence: true });
 
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [
@@ -443,9 +432,7 @@ describe('config/presets/index', () => {
     it('use packageCache when presetCachePersistence is set', async () => {
       GlobalConfig.set({
         presetCachePersistence: true,
-        cacheTtlOverride: {
-          preset: 60,
-        },
+        cacheTtlOverride: { preset: 60 },
       });
 
       config.extends = ['github>username/preset-repo'];
@@ -504,11 +491,7 @@ describe('config/presets/index', () => {
   });
 
   describe('replaceArgs', () => {
-    const argMappings = {
-      arg0: 'a',
-      arg1: 'b',
-      arg2: 'c',
-    };
+    const argMappings = { arg0: 'a', arg1: 'b', arg2: 'c' };
 
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
@@ -525,12 +508,7 @@ describe('config/presets/index', () => {
     it('replaces objects', () => {
       const obj = {
         foo: 'ha {{arg0}}',
-        bar: {
-          baz: '{{arg1}} boo',
-          aaa: {
-            bbb: 'woo {{arg2}}',
-          },
-        },
+        bar: { baz: '{{arg1}} boo', aaa: { bbb: 'woo {{arg2}}' } },
       };
       const res = presets.replaceArgs(obj, argMappings);
       expect(res).toEqual({
@@ -540,13 +518,9 @@ describe('config/presets/index', () => {
     });
 
     it('replaces arrays', () => {
-      const obj = {
-        foo: ['{{arg0}}', { bar: '{{arg1}}', baz: 5 }],
-      };
+      const obj = { foo: ['{{arg0}}', { bar: '{{arg1}}', baz: 5 }] };
       const res = presets.replaceArgs(obj, argMappings);
-      expect(res).toEqual({
-        foo: ['a', { bar: 'b', baz: 5 }],
-      });
+      expect(res).toEqual({ foo: ['a', { bar: 'b', baz: 5 }] });
     });
   });
 
@@ -632,12 +606,7 @@ describe('config/presets/index', () => {
       );
       expect(res).toEqual({
         description: ['Group `eslint` packages into same branch/PR.'],
-        packageRules: [
-          {
-            extends: ['packages:eslint'],
-            groupName: 'eslint',
-          },
-        ],
+        packageRules: [{ extends: ['packages:eslint'], groupName: 'eslint' }],
       });
     });
 
@@ -645,12 +614,7 @@ describe('config/presets/index', () => {
       const res = await presets.getPreset(':group()', {});
       expect(res).toEqual({
         description: ['Group `{{arg1}}` packages into same branch/PR.'],
-        packageRules: [
-          {
-            extends: [],
-            groupName: '{{arg1}}',
-          },
-        ],
+        packageRules: [{ extends: [], groupName: '{{arg1}}' }],
       });
     });
 

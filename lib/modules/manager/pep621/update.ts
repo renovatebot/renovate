@@ -34,12 +34,7 @@ export function bumpPackageVersion(
     }
   } catch {
     logger.warn(
-      {
-        content,
-        currentValue,
-        bumpVersion,
-        manager: 'pep621',
-      },
+      { content, currentValue, bumpVersion, manager: 'pep621' },
       'Failed to bumpVersion',
     );
   }

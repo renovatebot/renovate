@@ -21,14 +21,8 @@ const lexerStates = {
     rightSquare: { match: ']' },
     leftFigure: { match: '{' },
     rightFigure: { match: '}' },
-    longDoubleQuoted: {
-      match: '"""',
-      push: 'longDoubleQuoted',
-    },
-    doubleQuoted: {
-      match: '"',
-      push: 'doubleQuoted',
-    },
+    longDoubleQuoted: { match: '"""', push: 'longDoubleQuoted' },
+    doubleQuoted: { match: '"', push: 'doubleQuoted' },
     // https://clojure.org/reference/reader#_reader_forms
     keyword: {
       match:
@@ -137,11 +131,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
       }
     } else if (tokenType === 'leftParen' || tokenType === 'leftSquare') {
       stack.push(state);
-      state = {
-        type: 'array',
-        startIndex: token.offset,
-        data: [],
-      };
+      state = { type: 'array', startIndex: token.offset, data: [] };
     } else if (tokenType === 'leftFigure') {
       stack.push(state);
       state = {

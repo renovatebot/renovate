@@ -14,9 +14,5 @@ export function copyResponse<T>(
         body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
         headers: clone(headers),
       }
-    : {
-        statusCode,
-        body,
-        headers,
-      };
+    : { statusCode, body, headers };
 }

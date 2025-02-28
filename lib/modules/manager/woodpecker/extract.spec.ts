@@ -134,11 +134,7 @@ describe('modules/manager/woodpecker/extract', () => {
         image: quay.io/nginx:0.0.1
       `,
         '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-          },
-        },
+        { registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' } },
       );
       expect(res).toEqual({
         deps: [

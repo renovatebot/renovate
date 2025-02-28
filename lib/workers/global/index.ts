@@ -146,9 +146,7 @@ export async function start(): Promise<number> {
       }
 
       // Set allowedHeaders in case hostRules headers are configured in file config
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-      });
+      GlobalConfig.set({ allowedHeaders: config.allowedHeaders });
       // initialize all submodules
       config = await globalInitialize(config);
 

@@ -12,20 +12,13 @@ describe('config/migrate-validate', () => {
   describe('migrateAndValidate()', () => {
     it('handles empty', async () => {
       const res = await migrateAndValidate(config, {});
-      expect(res).toEqual({
-        errors: [],
-        warnings: [],
-      });
+      expect(res).toEqual({ errors: [], warnings: [] });
     });
 
     it('handles migration', async () => {
       const input: RenovateConfig = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
-      expect(res).toEqual({
-        automerge: false,
-        errors: [],
-        warnings: [],
-      });
+      expect(res).toEqual({ automerge: false, errors: [], warnings: [] });
     });
 
     it('handles invalid', async () => {

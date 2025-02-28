@@ -197,10 +197,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        {
-          fileName: '.renovaterc',
-          config: {},
-        },
+        { fileName: '.renovaterc', config: {} },
         'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
@@ -218,12 +215,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        {
-          fileName: 'package.json',
-          config: {
-            renovate: {},
-          },
-        },
+        { fileName: 'package.json', config: { renovate: {} } },
         'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
@@ -247,11 +239,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.requireConfig = 'required';
       platform.findPr.mockResolvedValue(mock<Pr>());
       platform.getPrList.mockResolvedValueOnce([
-        {
-          ...mock<Pr>(),
-          sourceBranch: 'renovate/something',
-          state: 'open',
-        },
+        { ...mock<Pr>(), sourceBranch: 'renovate/something', state: 'open' },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
@@ -347,9 +335,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         false,
         true,
       );
-      expect(dummyCache).toMatchObject({
-        scan: {},
-      });
+      expect(dummyCache).toMatchObject({ scan: {} });
     });
 
     it('skips processing conflicted onboarding branch', async () => {

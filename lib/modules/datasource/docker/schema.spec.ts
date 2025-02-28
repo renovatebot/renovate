@@ -113,20 +113,14 @@ describe('modules/datasource/docker/schema', () => {
           size: 7143,
           digest:
             'sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f',
-          platform: {
-            architecture: 'ppc64le',
-            os: 'linux',
-          },
+          platform: { architecture: 'ppc64le', os: 'linux' },
         },
         {
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
           size: 7682,
           digest:
             'sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270',
-          platform: {
-            architecture: 'amd64',
-            os: 'linux',
-          },
+          platform: { architecture: 'amd64', os: 'linux' },
         },
       ],
       annotations: {
@@ -259,21 +253,14 @@ describe('modules/datasource/docker/schema', () => {
           digest:
             'sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f',
           size: 7143,
-          platform: {
-            architecture: 'ppc64le',
-            os: 'linux',
-          },
+          platform: { architecture: 'ppc64le', os: 'linux' },
         },
         {
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           digest:
             'sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270',
           size: 7682,
-          platform: {
-            architecture: 'amd64',
-            os: 'linux',
-            features: ['sse4'],
-          },
+          platform: { architecture: 'amd64', os: 'linux', features: ['sse4'] },
         },
       ],
     };
@@ -291,10 +278,7 @@ describe('modules/datasource/docker/schema', () => {
 
   it('parses OCI helm chart config', () => {
     const manifest = {
-      annotations: {
-        category: 'Infrastructure',
-        licenses: 'Apache-2.0',
-      },
+      annotations: { category: 'Infrastructure', licenses: 'Apache-2.0' },
       apiVersion: 'v2',
       appVersion: '2.8.2',
       dependencies: [
@@ -321,10 +305,7 @@ describe('modules/datasource/docker/schema', () => {
       icon: 'https://bitnami.com/assets/stacks/harbor-core/img/harbor-core-stack-220x234.png',
       keywords: ['docker', 'registry', 'vulnerability', 'scan'],
       maintainers: [
-        {
-          name: 'VMware, Inc.',
-          url: 'https://github.com/bitnami/charts',
-        },
+        { name: 'VMware, Inc.', url: 'https://github.com/bitnami/charts' },
       ],
       name: 'harbor',
       sources: ['https://github.com/bitnami/charts/tree/main/bitnami/harbor'],

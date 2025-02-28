@@ -16,9 +16,7 @@ describe('util/http/jira', () => {
     expect(await api.postJson('some-path')).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
   });

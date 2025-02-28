@@ -14,9 +14,7 @@ const helmMultiAndNestedImageValues = Fixtures.get(
 const config = partial<ExtractConfig>({});
 
 const configAliases = partial<ExtractConfig>({
-  registryAliases: {
-    'quay.io': 'registry.internal/mirror/quay.io',
-  },
+  registryAliases: { 'quay.io': 'registry.internal/mirror/quay.io' },
 });
 
 const packageFile = 'values.yaml';
@@ -40,12 +38,7 @@ describe('modules/manager/helm-values/extract', () => {
         config,
       );
       expect(result).toMatchSnapshot({
-        deps: [
-          {
-            currentValue: '1.16.1',
-            depName: 'nginx',
-          },
-        ],
+        deps: [{ currentValue: '1.16.1', depName: 'nginx' }],
       });
     });
 

@@ -84,12 +84,7 @@ export async function updateArtifacts({
       }
 
       for (const f of deletedFiles) {
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
+        fileChanges.push({ file: { type: 'deletion', path: f } });
       }
     } else {
       logger.error('Failed to get git status');
@@ -101,13 +96,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Vendir lock file');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

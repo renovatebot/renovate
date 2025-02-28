@@ -38,10 +38,7 @@ describe('modules/datasource/cpan/index', () => {
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).post('/v1/file/_search').reply(502);
       await expect(
-        getPkgReleases({
-          datasource: CpanDatasource.id,
-          packageName: 'Plack',
-        }),
+        getPkgReleases({ datasource: CpanDatasource.id, packageName: 'Plack' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

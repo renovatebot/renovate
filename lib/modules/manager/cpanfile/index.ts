@@ -9,9 +9,7 @@ export const url =
   'https://metacpan.org/dist/Module-CPANfile/view/lib/cpanfile.pod';
 export const categories: Category[] = ['perl'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)cpanfile$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)cpanfile$'] };
 
 export const supportedDatasources = [
   CpanDatasource.id,

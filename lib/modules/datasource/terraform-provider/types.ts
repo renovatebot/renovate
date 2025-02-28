@@ -44,13 +44,7 @@ export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
 
 export interface TerraformRegistryVersions {
   id: string;
-  versions: {
-    version: string;
-    platforms: {
-      os: string;
-      arch: string;
-    }[];
-  }[];
+  versions: { version: string; platforms: { os: string; arch: string }[] }[];
 }
 
 export interface TerraformRegistryBuildResponse {

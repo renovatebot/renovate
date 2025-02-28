@@ -107,9 +107,7 @@ kind: ConfigMap
 
     it('extracts images and replaces registries', () => {
       const res = extractPackageFile(kubernetesRegistryAlias, 'file.yaml', {
-        registryAliases: {
-          'quay.io': 'my-quay-mirror.registry.com',
-        },
+        registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' },
       });
       expect(res).toEqual({
         deps: [
@@ -129,9 +127,7 @@ kind: ConfigMap
 
     it('extracts images but does no replacement', () => {
       const res = extractPackageFile(kubernetesRegistryAlias, 'file.yaml', {
-        registryAliases: {
-          'index.docker.io': 'my-docker-mirror.registry.com',
-        },
+        registryAliases: { 'index.docker.io': 'my-docker-mirror.registry.com' },
       });
       expect(res).toEqual({
         deps: [

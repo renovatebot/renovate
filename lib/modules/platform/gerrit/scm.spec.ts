@@ -41,11 +41,7 @@ describe('modules/platform/gerrit/scm', () => {
         current_revision: 'currentRevSha',
         revisions: {
           currentRevSha: partial<GerritRevisionInfo>({
-            actions: {
-              rebase: {
-                enabled: true,
-              },
-            },
+            actions: { rebase: { enabled: true } },
           }),
         },
       });
@@ -60,9 +56,7 @@ describe('modules/platform/gerrit/scm', () => {
         current_revision: 'currentRevSha',
         revisions: {
           currentRevSha: partial<GerritRevisionInfo>({
-            actions: {
-              rebase: {},
-            },
+            actions: { rebase: {} },
           }),
         },
       });
@@ -164,10 +158,7 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
         'test/repo',
-        {
-          branchName: 'myBranchName',
-          state: 'open',
-        },
+        { branchName: 'myBranchName', state: 'open' },
         true,
       );
       expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
@@ -190,10 +181,7 @@ describe('modules/platform/gerrit/scm', () => {
       );
       expect(clientMock.findChanges).toHaveBeenCalledWith(
         'test/repo',
-        {
-          branchName: 'myBranchName',
-          state: 'open',
-        },
+        { branchName: 'myBranchName', state: 'open' },
         true,
       );
     });
@@ -220,10 +208,7 @@ describe('modules/platform/gerrit/scm', () => {
 
       expect(clientMock.findChanges).toHaveBeenCalledWith(
         'test/repo',
-        {
-          branchName: 'nonExistingChange',
-          state: 'open',
-        },
+        { branchName: 'nonExistingChange', state: 'open' },
         true,
       );
       expect(git.mergeToLocal).toHaveBeenCalledWith('nonExistingChange');
@@ -245,10 +230,7 @@ describe('modules/platform/gerrit/scm', () => {
 
       expect(clientMock.findChanges).toHaveBeenCalledWith(
         'test/repo',
-        {
-          branchName: 'existingChange',
-          state: 'open',
-        },
+        { branchName: 'existingChange', state: 'open' },
         true,
       );
       expect(git.mergeToLocal).toHaveBeenCalledWith('refs/changes/34/1234/1');

@@ -6,9 +6,7 @@ const BuildpackByName = z.object({
   version: z.string().optional(),
 });
 
-const BuildpackByURI = z.object({
-  uri: z.string(),
-});
+const BuildpackByURI = z.object({ uri: z.string() });
 
 const BuildpackGroup = BuildpackByName.or(BuildpackByURI);
 
@@ -34,14 +32,8 @@ const IoBuildpacks = z.object({
 });
 
 export const ProjectDescriptor = z.object({
-  _: z.object({
-    'schema-version': z.string(),
-  }),
-  io: z
-    .object({
-      buildpacks: IoBuildpacks.optional(),
-    })
-    .optional(),
+  _: z.object({ 'schema-version': z.string() }),
+  io: z.object({ buildpacks: IoBuildpacks.optional() }).optional(),
 });
 
 export type ProjectDescriptor = z.infer<typeof ProjectDescriptor>;

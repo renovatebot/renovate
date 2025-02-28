@@ -30,26 +30,20 @@ describe('modules/manager/bundler/common', () => {
   describe('getBundlerConstraint', () => {
     it('uses existing constraint', () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {
-          constraints: { bundler: '2.1.0' },
-        },
+        config: { constraints: { bundler: '2.1.0' } },
       };
       const version = getBundlerConstraint(config, lockedContent);
       expect(version).toBe('2.1.0');
     });
 
     it('extracts from lockfile', () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
-        config: {},
-      };
+      const config: Pick<UpdateArtifact, 'config'> = { config: {} };
       const version = getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
     });
 
     it('returns null', () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
-        config: {},
-      };
+      const config: Pick<UpdateArtifact, 'config'> = { config: {} };
       const version = getBundlerConstraint(config, '');
       expect(version).toBeNull();
     });
@@ -60,9 +54,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: gemfile,
-        config: {
-          constraints: { ruby: '2.1.0' },
-        },
+        config: { constraints: { ruby: '2.1.0' } },
       });
       const version = await getRubyConstraint(config);
       expect(version).toBe('2.1.0');

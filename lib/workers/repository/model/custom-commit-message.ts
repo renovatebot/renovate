@@ -19,9 +19,6 @@ export class CustomCommitMessage extends CommitMessage {
   override toJSON(): CustomCommitMessageJSON {
     const json = super.toJSON();
 
-    return {
-      ...json,
-      prefix: this._prefix,
-    };
+    return { ...json, prefix: this._prefix };
   }
 }

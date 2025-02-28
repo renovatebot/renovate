@@ -680,10 +680,7 @@ describe('modules/manager/maven/extract', () => {
               depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
               currentValue: '1.8.1',
             },
-            {
-              depName: 'org.example:extension-artefact',
-              currentValue: '1.0',
-            },
+            { depName: 'org.example:extension-artefact', currentValue: '1.0' },
             {
               depName: 'org.example:${artifact-id-placeholder}',
               skipReason: 'name-placeholder',
@@ -702,23 +699,14 @@ describe('modules/manager/maven/extract', () => {
               currentValue: '1.2.3.4',
               sharedVariableName: 'quuxVersion',
             },
-            {
-              depName: 'org.example:quuz',
-              currentValue: '1.2.3',
-            },
+            { depName: 'org.example:quuz', currentValue: '1.2.3' },
             {
               depName: 'org.example:quuuz',
               currentValue: "it's not a version",
             },
             { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
-            {
-              depName: 'org.example:optional',
-              currentValue: '1.0.0',
-            },
-            {
-              depName: 'org.example:relocation-artifact',
-              currentValue: '1.0',
-            },
+            { depName: 'org.example:optional', currentValue: '1.0.0' },
+            { depName: 'org.example:relocation-artifact', currentValue: '1.0' },
             {
               depName: 'org.example:profile-artifact',
               currentValue: '${profile-placeholder}',

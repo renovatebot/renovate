@@ -68,11 +68,7 @@ export const HelmRepositorySchema = z
               version,
               created: releaseTimestamp,
               digest: newDigest,
-            }): Release => ({
-              version,
-              releaseTimestamp,
-              newDigest,
-            }),
+            }): Release => ({ version, releaseTimestamp, newDigest }),
           );
           return { homepage, sourceUrl, releases };
         }),

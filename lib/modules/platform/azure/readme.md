@@ -106,10 +106,7 @@ module.exports = {
       token: process.env.RENOVATE_TOKEN,
       hostType: 'npm',
     },
-    {
-      matchHost: 'github.com',
-      token: process.env.GITHUB_COM_TOKEN,
-    },
+    { matchHost: 'github.com', token: process.env.GITHUB_COM_TOKEN },
   ],
   repositories: ['YOUR-PROJECT/YOUR-REPO'],
 };

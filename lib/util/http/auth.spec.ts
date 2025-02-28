@@ -75,9 +75,7 @@ describe('util/http/auth', () => {
       applyAuthorization(opts);
 
       expect(opts).toEqual({
-        headers: {
-          authorization: 'token XXX',
-        },
+        headers: { authorization: 'token XXX' },
         hostType: 'github',
         token: 'XXX',
       });
@@ -149,20 +147,14 @@ describe('util/http/auth', () => {
         headers: {},
         token: 'test',
         hostType: 'npm',
-        context: {
-          authType: 'Basic',
-        },
+        context: { authType: 'Basic' },
       };
 
       applyAuthorization(opts);
 
       expect(opts).toEqual({
-        context: {
-          authType: 'Basic',
-        },
-        headers: {
-          authorization: 'Basic test',
-        },
+        context: { authType: 'Basic' },
+        headers: { authorization: 'Basic test' },
         hostType: 'npm',
         token: 'test',
       });
@@ -172,20 +164,14 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         token: 'test',
-        context: {
-          authType: 'Token-Only',
-        },
+        context: { authType: 'Token-Only' },
       };
 
       applyAuthorization(opts);
 
       expect(opts).toEqual({
-        context: {
-          authType: 'Token-Only',
-        },
-        headers: {
-          authorization: 'test',
-        },
+        context: { authType: 'Token-Only' },
+        headers: { authorization: 'test' },
         token: 'test',
       });
     });
@@ -194,21 +180,15 @@ describe('util/http/auth', () => {
       const opts: GotOptions = {
         headers: {},
         token: 'test',
-        context: {
-          authType: 'Bearer',
-        },
+        context: { authType: 'Bearer' },
         hostType: 'custom',
       };
 
       applyAuthorization(opts);
 
       expect(opts).toEqual({
-        context: {
-          authType: 'Bearer',
-        },
-        headers: {
-          authorization: 'Bearer test',
-        },
+        context: { authType: 'Bearer' },
+        headers: { authorization: 'Bearer test' },
         hostType: 'custom',
         token: 'test',
       });
@@ -235,9 +215,7 @@ describe('util/http/auth', () => {
     it('Amazon', () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
-        headers: {
-          authorization: 'auth',
-        },
+        headers: { authorization: 'auth' },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
@@ -256,9 +234,7 @@ describe('util/http/auth', () => {
     it('Amazon ports', () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
-        headers: {
-          authorization: 'auth',
-        },
+        headers: { authorization: 'auth' },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         port: 3000,
@@ -278,9 +254,7 @@ describe('util/http/auth', () => {
     it('Azure blob', () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
-        headers: {
-          authorization: 'auth',
-        },
+        headers: { authorization: 'auth' },
         hostname: 'store123.blob.core.windows.net',
         href: 'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
       });
@@ -297,9 +271,7 @@ describe('util/http/auth', () => {
     it('keep auth', () => {
       const opts = partial<NormalizedOptions>({
         password: 'auth',
-        headers: {
-          authorization: 'auth',
-        },
+        headers: { authorization: 'auth' },
         hostname: 'renovate.com',
         href: 'https://renovate.com',
         search: 'something',
@@ -309,9 +281,7 @@ describe('util/http/auth', () => {
 
       expect(opts).toEqual({
         password: 'auth',
-        headers: {
-          authorization: 'auth',
-        },
+        headers: { authorization: 'auth' },
         hostname: 'renovate.com',
         href: 'https://renovate.com',
         search: 'something',

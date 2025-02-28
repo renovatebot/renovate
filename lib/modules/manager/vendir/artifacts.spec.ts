@@ -171,12 +171,7 @@ describe('modules/manager/vendir/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        artifactError: {
-          lockFile: 'vendir.yml',
-          stderr: 'not found',
-        },
-      },
+      { artifactError: { lockFile: 'vendir.yml', stderr: 'not found' } },
     ]);
   });
 
@@ -229,9 +224,7 @@ describe('modules/manager/vendir/artifacts', () => {
       packageFileName: 'vendir.yml',
       updatedDeps,
       newPackageFileContent: vendirFile,
-      config: {
-        ...config,
-      },
+      config: { ...config },
     });
     expect(test).toEqual([
       {
@@ -255,12 +248,7 @@ describe('modules/manager/vendir/artifacts', () => {
           contents: undefined,
         },
       },
-      {
-        file: {
-          type: 'deletion',
-          path: 'vendor/removed.yaml',
-        },
-      },
+      { file: { type: 'deletion', path: 'vendor/removed.yaml' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -293,9 +281,7 @@ describe('modules/manager/vendir/artifacts', () => {
     // artifacts
     fs.getSiblingFileName.mockReturnValueOnce('vendor');
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        not_added: ['vendor/Chart.yaml'],
-      }),
+      partial<StatusResult>({ not_added: ['vendor/Chart.yaml'] }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -303,9 +289,7 @@ describe('modules/manager/vendir/artifacts', () => {
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
-        config: {
-          ...config,
-        },
+        config: { ...config },
       }),
     ).toEqual([
       {
@@ -372,10 +356,7 @@ describe('modules/manager/vendir/artifacts', () => {
   });
 
   it('supports install mode', async () => {
-    GlobalConfig.set({
-      ...adminConfig,
-      binarySource: 'install',
-    });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
@@ -452,10 +433,7 @@ describe('modules/manager/vendir/artifacts', () => {
 
   describe('Docker', () => {
     beforeEach(() => {
-      GlobalConfig.set({
-        ...adminConfig,
-        binarySource: 'docker',
-      });
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     });
 
     it('returns updated vendir.yml for lockfile maintenance', async () => {

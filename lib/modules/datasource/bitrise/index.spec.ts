@@ -23,11 +23,7 @@ describe('modules/datasource/bitrise/index', () => {
         )
         .get('/script')
         .reply(200, [
-          {
-            type: 'dir',
-            name: '1.0.0',
-            path: 'steps/script/1.0.0',
-          },
+          { type: 'dir', name: '1.0.0', path: 'steps/script/1.0.0' },
         ])
         .get('/script/1.0.0/step.yml')
         .reply(200, {
@@ -183,11 +179,7 @@ describe('modules/datasource/bitrise/index', () => {
         )
         .get('/script')
         .reply(200, [
-          {
-            type: 'dir',
-            name: '1.0.0',
-            path: 'steps/script/1.0.0',
-          },
+          { type: 'dir', name: '1.0.0', path: 'steps/script/1.0.0' },
         ])
         .get('/script/1.0.0/step.yml')
         .reply(200, {
@@ -210,11 +202,7 @@ describe('modules/datasource/bitrise/index', () => {
         )
         .get('/script')
         .reply(200, [
-          {
-            type: 'dir',
-            name: '1.0.0',
-            path: 'steps/script/1.0.0',
-          },
+          { type: 'dir', name: '1.0.0', path: 'steps/script/1.0.0' },
         ])
         .get('/script/1.0.0/step.yml')
         .reply(200, {

@@ -11,22 +11,12 @@ describe('util/result', () => {
     describe('constructors', () => {
       it('ok result', () => {
         const res = Result.ok(42);
-        expect(res).toEqual({
-          res: {
-            ok: true,
-            val: 42,
-          },
-        });
+        expect(res).toEqual({ res: { ok: true, val: 42 } });
       });
 
       it('error result', () => {
         const res = Result.err('oops');
-        expect(res).toEqual({
-          res: {
-            ok: false,
-            err: 'oops',
-          },
-        });
+        expect(res).toEqual({ res: { ok: false, err: 'oops' } });
       });
     });
 
@@ -119,18 +109,12 @@ describe('util/result', () => {
     describe('Unwrapping', () => {
       it('unwraps successful value', () => {
         const res = Result.ok(42);
-        expect(res.unwrap()).toEqual({
-          ok: true,
-          val: 42,
-        });
+        expect(res.unwrap()).toEqual({ ok: true, val: 42 });
       });
 
       it('unwraps error value', () => {
         const res = Result.err('oops');
-        expect(res.unwrap()).toEqual({
-          ok: false,
-          err: 'oops',
-        });
+        expect(res.unwrap()).toEqual({ ok: false, err: 'oops' });
       });
 
       it('skips fallback for successful value', () => {
@@ -403,18 +387,12 @@ describe('util/result', () => {
     describe('Unwrapping', () => {
       it('unwraps successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrap()).resolves.toEqual({
-          ok: true,
-          val: 42,
-        });
+        await expect(res.unwrap()).resolves.toEqual({ ok: true, val: 42 });
       });
 
       it('unwraps error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrap()).resolves.toEqual({
-          ok: false,
-          err: 'oops',
-        });
+        await expect(res.unwrap()).resolves.toEqual({ ok: false, err: 'oops' });
       });
 
       it('skips fallback for successful AsyncResult', async () => {

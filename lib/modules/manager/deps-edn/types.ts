@@ -16,15 +16,8 @@ export type ParsedEdnData =
   | ParsedEdnArray;
 
 export type ParserState =
-  | {
-      type: 'root';
-      data: ParsedEdnData;
-    }
-  | {
-      type: 'array';
-      startIndex: number;
-      data: ParsedEdnArray;
-    }
+  | { type: 'root'; data: ParsedEdnData }
+  | { type: 'array'; startIndex: number; data: ParsedEdnArray }
   | {
       type: 'record';
       skipKey: boolean;

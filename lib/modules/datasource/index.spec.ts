@@ -120,15 +120,9 @@ class DummyDatasource5 extends Datasource {
 
 vi.mock('./metadata-manual', () => ({
   manualChangelogUrls: {
-    dummy: {
-      package: 'https://foo.bar/package/CHANGELOG.md',
-    },
+    dummy: { package: 'https://foo.bar/package/CHANGELOG.md' },
   },
-  manualSourceUrls: {
-    dummy: {
-      package: 'https://foo.bar/package',
-    },
-  },
+  manualSourceUrls: { dummy: { package: 'https://foo.bar/package' } },
 }));
 
 vi.mock('../../util/cache/package');
@@ -318,10 +312,7 @@ describe('modules/datasource/index', () => {
 
     it('defaultRegistryUrls function works', async () => {
       datasources.set(datasource, new DummyDatasource2());
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchObject({
         releases: [{ version: '1.2.3' }],
         registryUrl: 'https://reg1.com',
@@ -330,10 +321,7 @@ describe('modules/datasource/index', () => {
 
     it('defaultRegistryUrls function with customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource3());
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchObject({
         releases: [{ version: '1.2.3' }],
         registryUrl: 'https://reg1.com',
@@ -343,10 +331,7 @@ describe('modules/datasource/index', () => {
     // for coverage
     it('undefined defaultRegistryUrls with customRegistrySupport works', async () => {
       datasources.set(datasource, new DummyDatasource4());
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toBeNull();
     });
 
@@ -377,10 +362,7 @@ describe('modules/datasource/index', () => {
           },
         }),
       );
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'foobar',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'foobar' });
       expect(res).toMatchObject({ sourceUrl: 'https://abc.com' });
     });
 
@@ -394,10 +376,7 @@ describe('modules/datasource/index', () => {
           },
         }),
       );
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'foobar',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'foobar' });
       expect(res).toMatchObject({ sourceUrl: 'https://github.com/Jasig/cas' });
     });
 
@@ -457,11 +436,7 @@ describe('modules/datasource/index', () => {
             registryUrl: 'https://reg1.com',
           });
           expect(logger.logger.warn).toHaveBeenCalledWith(
-            {
-              datasource: 'dummy',
-              packageName: 'package',
-              registryUrls,
-            },
+            { datasource: 'dummy', packageName: 'package', registryUrls },
             'Excess registryUrls found for datasource lookup - using first configured only',
           );
         });
@@ -808,15 +783,8 @@ describe('modules/datasource/index', () => {
           const registries = {
             'https://foo.bar': {
               releases: [
-                {
-                  version: '0.0.1',
-                  constraints: {
-                    python: ['2.7'],
-                  },
-                },
-                {
-                  version: '0.0.2',
-                },
+                { version: '0.0.1', constraints: { python: ['2.7'] } },
+                { version: '0.0.2' },
               ],
             },
           } satisfies RegistriesMock;
@@ -835,15 +803,8 @@ describe('modules/datasource/index', () => {
           const registries = {
             'https://foo.bar': {
               releases: [
-                {
-                  version: '0.0.1',
-                  constraints: {
-                    python: ['2.7'],
-                  },
-                },
-                {
-                  version: '0.0.2',
-                },
+                { version: '0.0.1', constraints: { python: ['2.7'] } },
+                { version: '0.0.2' },
               ],
             },
           } satisfies RegistriesMock;
@@ -852,9 +813,7 @@ describe('modules/datasource/index', () => {
             datasource,
             packageName,
             defaultRegistryUrls: ['https://foo.bar'],
-            constraints: {
-              python: '2.7.0',
-            },
+            constraints: { python: '2.7.0' },
           });
           expect(res).toMatchObject({
             releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
@@ -867,34 +826,18 @@ describe('modules/datasource/index', () => {
               releases: [
                 {
                   version: '0.0.5',
-                  constraints: {
-                    python: ['>= 3.0.0, < 4.0'],
-                  },
+                  constraints: { python: ['>= 3.0.0, < 4.0'] },
                 },
                 {
                   version: '0.0.4',
-                  constraints: {
-                    python: ['>= 2.7, < 4.0'],
-                  },
+                  constraints: { python: ['>= 2.7, < 4.0'] },
                 },
                 {
                   version: '0.0.3',
-                  constraints: {
-                    python: ['>= 2.7, < 3.0'],
-                  },
+                  constraints: { python: ['>= 2.7, < 3.0'] },
                 },
-                {
-                  version: '0.0.2',
-                  constraints: {
-                    python: ['2.7'],
-                  },
-                },
-                {
-                  version: '0.0.1',
-                  constraints: {
-                    python: ['1.0'],
-                  },
-                },
+                { version: '0.0.2', constraints: { python: ['2.7'] } },
+                { version: '0.0.1', constraints: { python: ['1.0'] } },
               ],
             },
           } satisfies RegistriesMock;

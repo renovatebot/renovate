@@ -274,10 +274,7 @@ function overrideDepPosition(
   overrideBlock: OverrideDependency,
   parents: string[],
   depName: string,
-): {
-  depObjectReference: Record<string, string>;
-  overrideDepName: string;
-} {
+): { depObjectReference: Record<string, string>; overrideDepName: string } {
   // get override dep position when its nested in an object
   const lastParent = parents[parents.length - 1];
   let overrideDep: OverrideDependency = overrideBlock;

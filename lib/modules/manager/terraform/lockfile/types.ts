@@ -15,21 +15,12 @@ export interface ProviderLockUpdate extends ProviderLock {
 
 export interface ProviderSlice {
   lines: string[];
-  block: {
-    start: number;
-    end: number;
-  };
+  block: { start: number; end: number };
 }
 
 export interface LineNumbers {
   version?: number;
   constraint?: number;
-  block?: {
-    start: number;
-    end: number;
-  };
-  hashes: {
-    start?: number;
-    end?: number;
-  };
+  block?: { start: number; end: number };
+  hashes: { start?: number; end?: number };
 }

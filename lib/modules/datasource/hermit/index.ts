@@ -89,14 +89,8 @@ export class HermitDatasource extends Datasource {
     return {
       sourceUrl,
       releases: [
-        ...res.Versions.map((v) => ({
-          version: v,
-          sourceUrl,
-        })),
-        ...res.Channels.map((v) => ({
-          version: v,
-          sourceUrl,
-        })),
+        ...res.Versions.map((v) => ({ version: v, sourceUrl })),
+        ...res.Channels.map((v) => ({ version: v, sourceUrl })),
       ],
     };
   }
@@ -150,9 +144,7 @@ export class HermitDatasource extends Datasource {
     // https://docs.github.com/en/rest/releases/assets#get-a-release-asset
     const indexContent = await streamToString(
       this.http.stream(asset.url, {
-        headers: {
-          accept: 'application/octet-stream',
-        },
+        headers: { accept: 'application/octet-stream' },
       }),
     );
 

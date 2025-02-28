@@ -91,13 +91,7 @@ describe('util/schema-utils', () => {
 
       expect(errorData).toMatchObject({
         error: {
-          issues: [
-            {
-              code: 'custom',
-              message: 'Invalid input',
-              path: ['foo'],
-            },
-          ],
+          issues: [{ code: 'custom', message: 'Invalid input', path: ['foo'] }],
         },
         input: { bar: 'bar', foo: 'foo' },
       });
@@ -195,13 +189,7 @@ describe('util/schema-utils', () => {
 
       expect(Schema.safeParse('{{{}}}')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid JSON',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid JSON', code: 'custom', path: [] }],
         },
         success: false,
       });
@@ -261,13 +249,7 @@ describe('util/schema-utils', () => {
 
       expect(Schema.safeParse('{{{}}}')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid JSON5',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid JSON5', code: 'custom', path: [] }],
         },
         success: false,
       });
@@ -327,13 +309,7 @@ describe('util/schema-utils', () => {
 
       expect(Schema.safeParse('{')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid JSONC',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid JSONC', code: 'custom', path: [] }],
         },
         success: false,
       });
@@ -383,13 +359,7 @@ describe('util/schema-utils', () => {
     it('throws error for invalid yaml', () => {
       expect(Schema.safeParse('clearly: "invalid" "yaml"')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid YAML',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid YAML', code: 'custom', path: [] }],
         },
         success: false,
       });
@@ -397,13 +367,7 @@ describe('util/schema-utils', () => {
   });
 
   describe('MultidocYaml', () => {
-    const Schema = MultidocYaml.pipe(
-      z.array(
-        z.object({
-          foo: z.number(),
-        }),
-      ),
-    );
+    const Schema = MultidocYaml.pipe(z.array(z.object({ foo: z.number() })));
 
     it('parses valid yaml', () => {
       expect(
@@ -435,13 +399,7 @@ describe('util/schema-utils', () => {
     it('throws error for invalid yaml', () => {
       expect(Schema.safeParse('clearly: "invalid" "yaml"')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid YAML',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid YAML', code: 'custom', path: [] }],
         },
         success: false,
       });
@@ -449,13 +407,7 @@ describe('util/schema-utils', () => {
   });
 
   describe('multidocYaml()', () => {
-    const Schema = multidocYaml().pipe(
-      z.array(
-        z.object({
-          foo: z.number(),
-        }),
-      ),
-    );
+    const Schema = multidocYaml().pipe(z.array(z.object({ foo: z.number() })));
 
     it('parses valid yaml', () => {
       expect(
@@ -478,9 +430,7 @@ describe('util/schema-utils', () => {
         [foo]
         bar = "baz"
       `;
-      expect(Schema.parse(content)).toEqual({
-        foo: { bar: 'baz' },
-      });
+      expect(Schema.parse(content)).toEqual({ foo: { bar: 'baz' } });
     });
 
     it('throws error for invalid schema', () => {
@@ -506,13 +456,7 @@ describe('util/schema-utils', () => {
     it('throws error for invalid toml', () => {
       expect(Schema.safeParse('clearly_invalid')).toMatchObject({
         error: {
-          issues: [
-            {
-              message: 'Invalid TOML',
-              code: 'custom',
-              path: [],
-            },
-          ],
+          issues: [{ message: 'Invalid TOML', code: 'custom', path: [] }],
         },
         success: false,
       });

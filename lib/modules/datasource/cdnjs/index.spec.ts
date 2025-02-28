@@ -119,10 +119,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, '{}');
 
       const res = await getDigest(
-        {
-          datasource: CdnjsDatasource.id,
-          packageName: 'foo/bar',
-        },
+        { datasource: CdnjsDatasource.id, packageName: 'foo/bar' },
         '1.2.0',
       );
       expect(res).toBeNull();
@@ -135,10 +132,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, JSON.stringify({ sri: {} }));
 
       const res = await getDigest(
-        {
-          datasource: CdnjsDatasource.id,
-          packageName: 'foo/bar',
-        },
+        { datasource: CdnjsDatasource.id, packageName: 'foo/bar' },
         '1.2.0',
       );
       expect(res).toBeNull();
@@ -151,10 +145,7 @@ describe('modules/datasource/cdnjs/index', () => {
         .reply(200, JSON.stringify({ sri: { string: 'hash' } }));
 
       const res = await getDigest(
-        {
-          datasource: CdnjsDatasource.id,
-          packageName: 'foo/bar',
-        },
+        { datasource: CdnjsDatasource.id, packageName: 'foo/bar' },
         '1.2.0',
       );
       expect(res).toBeNull();
@@ -164,10 +155,7 @@ describe('modules/datasource/cdnjs/index', () => {
       httpMock.scope(baseUrl).get(pathForDigest('foo/bar', '1.2.0')).reply(404);
       await expect(
         getDigest(
-          {
-            datasource: CdnjsDatasource.id,
-            packageName: 'foo/bar',
-          },
+          { datasource: CdnjsDatasource.id, packageName: 'foo/bar' },
           '1.2.0',
         ),
       ).rejects.toThrow(HttpError);

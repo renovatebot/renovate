@@ -22,17 +22,13 @@ Read [our FAQ, Renovate core features not supported on all platforms](../faq.md#
 To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your `extends` array in the Renovate configuration file:
 
 ```json
-{
-  "extends": ["config:recommended", ":dependencyDashboard"]
-}
+{ "extends": ["config:recommended", ":dependencyDashboard"] }
 ```
 
 Or set `dependencyDashboard` to `true`:
 
 ```json
-{
-  "dependencyDashboard": true
-}
+{ "dependencyDashboard": true }
 ```
 
 ## How to disable the dashboard
@@ -40,9 +36,7 @@ Or set `dependencyDashboard` to `true`:
 To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
 ```json
-{
-  "extends": ["config:recommended", ":disableDependencyDashboard"]
-}
+{ "extends": ["config:recommended", ":disableDependencyDashboard"] }
 ```
 
 ## Use cases
@@ -102,9 +96,7 @@ But vulnerability remediation PRs will still get created immediately without req
 To require manual approval for _all updates_, add the `:dependencyDashboardApproval` presets to the `extends` array in your Renovate configuration file:
 
 ```json
-{
-  "extends": ["config:recommended", ":dependencyDashboardApproval"]
-}
+{ "extends": ["config:recommended", ":dependencyDashboardApproval"] }
 ```
 
 #### Require approval for major updates
@@ -117,11 +109,7 @@ Dependency Dashboard Approval is far superior to disabling major updates because
 If you want to require approval for major updates, set `dependencyDashboardApproval` to `true` within a `major` object:
 
 ```json
-{
-  "major": {
-    "dependencyDashboardApproval": true
-  }
-}
+{ "major": { "dependencyDashboardApproval": true } }
 ```
 
 #### Require approval for specific packages

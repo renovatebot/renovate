@@ -7,17 +7,9 @@ import type { PackageDependency } from '../../types';
 export const mavenRules = ['maven_install', '_maven_install'] as const;
 
 const ArtifactSpec = z.union([
-  z.object({
-    group: z.string(),
-    artifact: z.string(),
-    version: z.string(),
-  }),
+  z.object({ group: z.string(), artifact: z.string(), version: z.string() }),
   z
-    .object({
-      '0': z.string(),
-      '1': z.string(),
-      '2': z.string(),
-    })
+    .object({ '0': z.string(), '1': z.string(), '2': z.string() })
     .transform((x) => ({ group: x[0], artifact: x[1], version: x[2] })),
 ]);
 type ArtifactSpec = z.infer<typeof ArtifactSpec>;

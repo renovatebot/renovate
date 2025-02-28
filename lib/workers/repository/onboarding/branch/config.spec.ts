@@ -13,10 +13,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   let config: RenovateConfig;
 
   beforeAll(() => {
-    GlobalConfig.set({
-      localDir: '',
-      platform: 'github',
-    });
+    GlobalConfig.set({ localDir: '', platform: 'github' });
   });
 
   beforeEach(() => {

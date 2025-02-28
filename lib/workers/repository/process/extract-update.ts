@@ -45,23 +45,14 @@ function extractStats(
   if (!packageFiles) {
     return null;
   }
-  const stats: Stats = {
-    managers: {},
-    total: {
-      fileCount: 0,
-      depCount: 0,
-    },
-  };
+  const stats: Stats = { managers: {}, total: { fileCount: 0, depCount: 0 } };
   for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
     const fileCount = managerPackageFiles.length;
     let depCount = 0;
     for (const file of managerPackageFiles) {
       depCount += file.deps.length;
     }
-    stats.managers[manager] = {
-      fileCount,
-      depCount,
-    };
+    stats.managers[manager] = { fileCount, depCount };
     stats.total.fileCount += fileCount;
     stats.total.depCount += depCount;
   }

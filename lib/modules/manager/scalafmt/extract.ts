@@ -24,7 +24,5 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     extractVersion: '^v(?<version>\\S+)',
   };
 
-  return {
-    deps: [scalafmtDependency],
-  };
+  return { deps: [scalafmtDependency] };
 }

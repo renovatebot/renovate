@@ -38,8 +38,6 @@ const lexer: l.LexerConfig = {
   strings: [{ startsWith: "'" }, { startsWith: '"' }],
 };
 
-const parser: p.ParserConfig = {
-  useIndentBlocks: false,
-};
+const parser: p.ParserConfig = { useIndentBlocks: false };
 
 export const cpanfile = lang.createLang({ lexer, parser });

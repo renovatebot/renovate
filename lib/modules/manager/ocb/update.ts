@@ -33,12 +33,7 @@ export function bumpPackageVersion(
     }
   } catch {
     logger.warn(
-      {
-        content,
-        currentValue,
-        bumpVersion,
-        manager: 'ocb',
-      },
+      { content, currentValue, bumpVersion, manager: 'ocb' },
       'Failed to bumpVersion',
     );
   }

@@ -7,10 +7,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', async () => {
       const packageFiles: Partial<PackageFile>[] = [
-        {
-          packageFile: 'package.json',
-          deps: [],
-        },
+        { packageFile: 'package.json', deps: [] },
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toHaveLength(1);
@@ -20,38 +17,21 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
-          managerData: {
-            workspacesPackages: ['packages/*'],
-          },
+          managerData: { workspacesPackages: ['packages/*'] },
           deps: [
-            {
-              depName: '@org/a',
-            },
-            {
-              depName: '@org/b',
-            },
-            {
-              depName: '@org/c',
-            },
-            {
-              depName: 'foo',
-              currentValue: '6.1.0',
-            },
+            { depName: '@org/a' },
+            { depName: '@org/b' },
+            { depName: '@org/c' },
+            { depName: 'foo', currentValue: '6.1.0' },
           ],
         },
         {
           packageFile: 'packages/a/package.json',
           managerData: { packageJsonName: '@org/a' },
           deps: [
-            {
-              depName: '@org/b',
-            },
-            {
-              depName: '@org/c',
-            },
-            {
-              depName: 'bar',
-            },
+            { depName: '@org/b' },
+            { depName: '@org/c' },
+            { depName: 'bar' },
           ],
         },
         {
@@ -59,9 +39,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
           managerData: { packageJsonName: '@org/b' },
         },
         // for coverage
-        {
-          packageFile: 'packages/c/package.json',
-        },
+        { packageFile: 'packages/c/package.json' },
       ];
       await detectMonorepos(packageFiles);
       expect(
@@ -123,18 +101,14 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
-          managerData: {
-            hasPackageManager: true,
-          },
+          managerData: { hasPackageManager: true },
         },
         {
           extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '^3.2.0',
           },
-          managerData: {
-            hasPackageManager: true,
-          },
+          managerData: { hasPackageManager: true },
         },
       ]);
     });

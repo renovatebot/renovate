@@ -12,17 +12,12 @@ describe('workers/global/config/parse/cli', () => {
 
   describe('.getCliName(definition)', () => {
     it('generates CLI value', () => {
-      const option: ParseConfigOptions = {
-        name: 'oneTwoThree',
-      };
+      const option: ParseConfigOptions = { name: 'oneTwoThree' };
       expect(cli.getCliName(option)).toBe('--one-two-three');
     });
 
     it('generates returns empty if CLI false', () => {
-      const option: ParseConfigOptions = {
-        name: 'oneTwoThree',
-        cli: false,
-      };
+      const option: ParseConfigOptions = { name: 'oneTwoThree', cli: false };
       expect(cli.getCliName(option)).toBe('');
     });
   });
@@ -109,16 +104,12 @@ describe('workers/global/config/parse/cli', () => {
 
     it('parses [] correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=[]`);
-      expect(cli.getConfig(argv)).toEqual({
-        hostRules: [],
-      });
+      expect(cli.getConfig(argv)).toEqual({ hostRules: [] });
     });
 
     it('parses an empty string correctly as empty list of hostRules', () => {
       argv.push(`--host-rules=`);
-      expect(cli.getConfig(argv)).toEqual({
-        hostRules: [],
-      });
+      expect(cli.getConfig(argv)).toEqual({ hostRules: [] });
     });
 
     it.each`
@@ -143,24 +134,18 @@ describe('workers/global/config/parse/cli', () => {
 
     it('parses json object correctly when empty', () => {
       argv.push(`--onboarding-config=`);
-      expect(cli.getConfig(argv)).toEqual({
-        onboardingConfig: {},
-      });
+      expect(cli.getConfig(argv)).toEqual({ onboardingConfig: {} });
     });
 
     it('parses json {} object correctly', () => {
       argv.push(`--onboarding-config={}`);
-      expect(cli.getConfig(argv)).toEqual({
-        onboardingConfig: {},
-      });
+      expect(cli.getConfig(argv)).toEqual({ onboardingConfig: {} });
     });
 
     it('parses json object correctly', () => {
       argv.push(`--onboarding-config={"extends": ["config:recommended"]}`);
       expect(cli.getConfig(argv)).toEqual({
-        onboardingConfig: {
-          extends: ['config:recommended'],
-        },
+        onboardingConfig: { extends: ['config:recommended'] },
       });
     });
 

@@ -48,10 +48,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
 
     const toolConstraints: ToolConstraint[] = [
-      {
-        toolName: 'helm',
-        constraint: config.constraints?.helm,
-      },
+      { toolName: 'helm', constraint: config.constraints?.helm },
       {
         toolName: 'helmfile',
         constraint:
@@ -120,13 +117,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helmfile lock file');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

@@ -61,9 +61,7 @@ export type ComposerReleases = z.infer<typeof ComposerReleases>;
 export const ComposerPackagesResponse = z
   .object({
     packageName: z.string(),
-    packagesResponse: z.object({
-      packages: z.record(z.unknown()),
-    }),
+    packagesResponse: z.object({ packages: z.record(z.unknown()) }),
   })
   .transform(
     ({ packageName, packagesResponse }) =>

@@ -61,17 +61,11 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       // istanbul ignore if
       if (!is.nonEmptyString(parentElement)) {
         return [
-          {
-            ...abstractDep,
-            skipReason: 'invalid-dependency-specification',
-          },
+          { ...abstractDep, skipReason: 'invalid-dependency-specification' },
         ];
       }
       const test = getDep(parentElement, true, config.registryAliases);
-      const dep: PackageDependency = {
-        ...abstractDep,
-        ...test,
-      };
+      const dep: PackageDependency = { ...abstractDep, ...test };
       return [dep];
     }
 
@@ -84,12 +78,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       : null;
     if (is.nullOrUndefined(element)) {
       return leftPath.length === 1 // if this is the last element assume a false defined dependency
-        ? [
-            {
-              ...abstractDep,
-              skipReason: 'invalid-dependency-specification',
-            },
-          ]
+        ? [{ ...abstractDep, skipReason: 'invalid-dependency-specification' }]
         : [];
     }
     if (is.array(element)) {

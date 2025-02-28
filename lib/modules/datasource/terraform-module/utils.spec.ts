@@ -8,9 +8,7 @@ describe('modules/datasource/terraform-module/utils', () => {
       const result = createSDBackendURL(
         defaultRegistryURL,
         'modules.v1',
-        {
-          'modules.v1': '/v1/modules/',
-        },
+        { 'modules.v1': '/v1/modules/' },
         'hashicorp/consul/aws',
       );
       expect(result).toBe(
@@ -22,9 +20,7 @@ describe('modules/datasource/terraform-module/utils', () => {
       const result = createSDBackendURL(
         defaultRegistryURL,
         'providers.v1',
-        {
-          'providers.v1': '/v1/providers/',
-        },
+        { 'providers.v1': '/v1/providers/' },
         'hashicorp/azure',
       );
       expect(result).toBe(
@@ -36,9 +32,7 @@ describe('modules/datasource/terraform-module/utils', () => {
       const result = createSDBackendURL(
         defaultRegistryURL,
         'modules.v1',
-        {
-          'modules.v1': 'https://other.example.com/v1/modules/',
-        },
+        { 'modules.v1': 'https://other.example.com/v1/modules/' },
         'hashicorp/consul/aws',
       );
       expect(result).toBe(
@@ -50,9 +44,7 @@ describe('modules/datasource/terraform-module/utils', () => {
       const result = createSDBackendURL(
         defaultRegistryURL,
         'providers.v1',
-        {
-          'providers.v1': 'https://other.example.com/providers',
-        },
+        { 'providers.v1': 'https://other.example.com/providers' },
         'hashicorp/azure',
       );
       expect(result).toBe(
@@ -64,9 +56,7 @@ describe('modules/datasource/terraform-module/utils', () => {
       const result = createSDBackendURL(
         defaultRegistryURL,
         'providers.v1',
-        {
-          'providers.v1': '',
-        },
+        { 'providers.v1': '' },
         'hashicorp/azure',
       );
       expect(result).toBe('https://registry.example.com/hashicorp/azure');

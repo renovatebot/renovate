@@ -33,11 +33,7 @@ describe('workers/repository/extract/manager-files', () => {
     });
 
     it('skips files if null content returned', async () => {
-      const managerConfig = {
-        manager: 'npm',
-        fileList: [],
-        enabled: true,
-      };
+      const managerConfig = { manager: 'npm', fileList: [], enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);

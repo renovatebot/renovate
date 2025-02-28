@@ -104,9 +104,7 @@ describe('modules/manager/composer/artifacts', () => {
         cmd: 'composer update foo:1.0.0 bar:2.0.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
-          },
+          env: { COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer' },
         },
       },
     ]);
@@ -215,9 +213,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -253,9 +249,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -287,9 +281,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -326,9 +318,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghs_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghs_token"}}' },
         },
       },
     ]);
@@ -365,9 +355,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -438,9 +426,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -499,9 +485,7 @@ describe('modules/manager/composer/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         options: {
-          env: {
-            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
-          },
+          env: { COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}' },
         },
       },
     ]);
@@ -634,13 +618,7 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{}',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{}', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -674,33 +652,14 @@ describe('modules/manager/composer/artifacts', () => {
       config,
     });
     expect(res).toEqual([
+      { file: { contents: '{  }', path: 'composer.lock', type: 'addition' } },
       {
-        file: {
-          contents: '{  }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
+        file: { contents: 'Foo', path: 'vendor/foo/Foo.php', type: 'addition' },
       },
       {
-        file: {
-          contents: 'Foo',
-          path: 'vendor/foo/Foo.php',
-          type: 'addition',
-        },
+        file: { contents: 'Bar', path: 'vendor/bar/Bar.php', type: 'addition' },
       },
-      {
-        file: {
-          contents: 'Bar',
-          path: 'vendor/bar/Bar.php',
-          type: 'addition',
-        },
-      },
-      {
-        file: {
-          path: 'vendor/baz/Baz.php',
-          type: 'deletion',
-        },
-      },
+      { file: { path: 'vendor/baz/Baz.php', type: 'deletion' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
@@ -724,19 +683,10 @@ describe('modules/manager/composer/artifacts', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          isLockFileMaintenance: true,
-        },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{  }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{  }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -777,26 +727,16 @@ describe('modules/manager/composer/artifacts', () => {
         config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{  }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{  }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: { encoding: 'utf-8' },
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        options: {
-          encoding: 'utf-8',
-        },
+        options: { encoding: 'utf-8' },
       },
       {
         cmd:
@@ -816,9 +756,7 @@ describe('modules/manager/composer/artifacts', () => {
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
-          },
+          env: { COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer' },
         },
       },
     ]);
@@ -855,28 +793,16 @@ describe('modules/manager/composer/artifacts', () => {
         config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{  }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{  }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool php 7.3',
-      },
-      {
-        cmd: 'install-tool composer 1.10.17',
-      },
+      { cmd: 'install-tool php 7.3' },
+      { cmd: 'install-tool composer 1.10.17' },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
-          },
+          env: { COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer' },
         },
       },
     ]);
@@ -899,13 +825,7 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{ }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{ }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -929,12 +849,7 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        artifactError: {
-          lockFile: 'composer.lock',
-          stderr: 'not found',
-        },
-      },
+      { artifactError: { lockFile: 'composer.lock', stderr: 'not found' } },
     ]);
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -990,19 +905,10 @@ describe('modules/manager/composer/artifacts', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          composerIgnorePlatformReqs: undefined,
-        },
+        config: { ...config, composerIgnorePlatformReqs: undefined },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{ }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{ }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -1031,13 +937,7 @@ describe('modules/manager/composer/artifacts', () => {
         },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{ }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{ }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -1062,30 +962,18 @@ describe('modules/manager/composer/artifacts', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-        },
+        config: { ...config },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{ }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{ }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'git stash -- composer.json',
-      },
+      { cmd: 'git stash -- composer.json' },
       {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'git stash pop || true',
-      },
+      { cmd: 'git stash pop || true' },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1108,30 +996,18 @@ describe('modules/manager/composer/artifacts', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-        },
+        config: { ...config },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: '{ }',
-          path: 'composer.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: '{ }', path: 'composer.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'git stash -- composer.json',
-      },
+      { cmd: 'git stash -- composer.json' },
       {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
       },
-      {
-        cmd: 'git stash pop || true',
-      },
+      { cmd: 'git stash pop || true' },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
@@ -1175,10 +1051,7 @@ describe('modules/manager/composer/artifacts', () => {
         packageFileName: 'composer.json',
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
-        config: {
-          ...config,
-          ignorePlugins: true,
-        },
+        config: { ...config, ignorePlugins: true },
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([

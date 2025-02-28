@@ -6,10 +6,7 @@ describe('modules/manager/terragrunt/modules', () => {
       const groups = githubRefMatchRegex.exec(
         'github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
-      expect(groups).toEqual({
-        project: 'hashicorp/example',
-        tag: 'v1.0.0',
-      });
+      expect(groups).toEqual({ project: 'hashicorp/example', tag: 'v1.0.0' });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {

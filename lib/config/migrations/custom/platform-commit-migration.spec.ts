@@ -7,9 +7,7 @@ describe('config/migrations/custom/platform-commit-migration', () => {
         // @ts-expect-error: old type
         platformCommit: true,
       },
-      {
-        platformCommit: 'enabled',
-      },
+      { platformCommit: 'enabled' },
     );
   });
 
@@ -19,20 +17,14 @@ describe('config/migrations/custom/platform-commit-migration', () => {
         // @ts-expect-error: old type
         platformCommit: false,
       },
-      {
-        platformCommit: 'disabled',
-      },
+      { platformCommit: 'disabled' },
     );
   });
 
   it('should not migrate platformCommit=auto', () => {
     expect(PlatformCommitMigration).not.toMigrate(
-      {
-        platformCommit: 'auto',
-      },
-      {
-        platformCommit: 'auto',
-      },
+      { platformCommit: 'auto' },
+      { platformCommit: 'auto' },
     );
   });
 });

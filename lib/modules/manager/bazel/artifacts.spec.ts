@@ -56,13 +56,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -114,13 +108,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -173,13 +161,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -388,13 +370,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -455,13 +431,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -522,13 +492,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -589,13 +553,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -659,13 +617,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 
@@ -731,13 +683,7 @@ describe('modules/manager/bazel/artifacts', () => {
     );
 
     expect(res).toEqual([
-      {
-        file: {
-          contents: output,
-          path: 'WORKSPACE',
-          type: 'addition',
-        },
-      },
+      { file: { contents: output, path: 'WORKSPACE', type: 'addition' } },
     ]);
   });
 });

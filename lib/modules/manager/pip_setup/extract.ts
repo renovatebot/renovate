@@ -49,9 +49,7 @@ function depStringHandler(
     depName,
     packageName: normalizePythonDepName(depName),
     currentValue,
-    managerData: {
-      lineNumber: token.line - 1,
-    },
+    managerData: { lineNumber: token.line - 1 },
     datasource: PypiDatasource.id,
   };
 

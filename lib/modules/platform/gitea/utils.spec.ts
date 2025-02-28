@@ -15,11 +15,7 @@ describe('modules/platform/gitea/utils', () => {
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
-    permissions: {
-      pull: true,
-      push: true,
-      admin: false,
-    },
+    permissions: { pull: true, push: true, admin: false },
     has_pull_requests: true,
   });
 

@@ -105,21 +105,9 @@ describe('util/git/modified-cache', () => {
       setCachedModifiedResult('foo-3', false);
       expect(repoCache).toEqual({
         branches: [
-          {
-            branchName: 'foo-1',
-            sha: '111',
-            isModified: false,
-          },
-          {
-            branchName: 'foo-2',
-            sha: 'aaa',
-            isModified: true,
-          },
-          {
-            branchName: 'foo-3',
-            sha: '222',
-            isModified: false,
-          },
+          { branchName: 'foo-1', sha: '111', isModified: false },
+          { branchName: 'foo-2', sha: 'aaa', isModified: true },
+          { branchName: 'foo-3', sha: '222', isModified: false },
         ],
       });
     });

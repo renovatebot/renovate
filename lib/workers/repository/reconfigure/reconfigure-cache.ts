@@ -6,10 +6,7 @@ export function setReconfigureBranchCache(
   isConfigValid: boolean,
 ): void {
   const cache = getCache();
-  const reconfigureBranchCache = {
-    reconfigureBranchSha,
-    isConfigValid,
-  };
+  const reconfigureBranchCache = { reconfigureBranchSha, isConfigValid };
   if (cache.reconfigureBranchCache) {
     logger.debug({ reconfigureBranchCache }, 'Update reconfigure branch cache');
   } else {

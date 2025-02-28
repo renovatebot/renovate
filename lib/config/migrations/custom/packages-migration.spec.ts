@@ -3,12 +3,8 @@ import { PackagesMigration } from './packages-migration';
 describe('config/migrations/custom/packages-migration', () => {
   it('should migrate to package rules', () => {
     expect(PackagesMigration).toMigrate(
-      {
-        packages: [{ matchPackageNames: ['*'] }],
-      },
-      {
-        packageRules: [{ matchPackageNames: ['*'] }],
-      },
+      { packages: [{ matchPackageNames: ['*'] }] },
+      { packageRules: [{ matchPackageNames: ['*'] }] },
     );
   });
 
@@ -30,9 +26,7 @@ describe('config/migrations/custom/packages-migration', () => {
         packages: { matchPackageNames: ['*'] },
         packageRules: [{ matchPackageNames: [] }],
       },
-      {
-        packageRules: [{ matchPackageNames: [] }],
-      },
+      { packageRules: [{ matchPackageNames: [] }] },
     );
   });
 });

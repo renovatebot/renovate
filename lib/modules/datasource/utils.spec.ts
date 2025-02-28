@@ -27,9 +27,11 @@ describe('modules/datasource/utils', () => {
 
   it('retrieves a Google Access token', async () => {
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
-      })),
+      vi
+        .fn()
+        .mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        })),
     );
 
     const res = await getGoogleAuthToken();
@@ -38,9 +40,11 @@ describe('modules/datasource/utils', () => {
 
   it('no Google Access token results in null', async () => {
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockReturnValue(''),
-      })),
+      vi
+        .fn()
+        .mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockReturnValue(''),
+        })),
     );
 
     const res = await getGoogleAuthToken();
@@ -50,9 +54,11 @@ describe('modules/datasource/utils', () => {
   it('Google Access token error throws an exception', async () => {
     const err = 'some-error';
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockRejectedValue(new Error(err)),
-      })),
+      vi
+        .fn()
+        .mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockRejectedValue(new Error(err)),
+        })),
     );
 
     await expect(getGoogleAuthToken()).rejects.toThrow('some-error');
@@ -60,11 +66,15 @@ describe('modules/datasource/utils', () => {
 
   it('Google Access token could not load default credentials', async () => {
     googleAuth.mockImplementationOnce(
-      vi.fn().mockImplementationOnce(() => ({
-        getAccessToken: vi.fn().mockRejectedValue({
-          message: 'Could not load the default credentials',
-        }),
-      })),
+      vi
+        .fn()
+        .mockImplementationOnce(() => ({
+          getAccessToken: vi
+            .fn()
+            .mockRejectedValue({
+              message: 'Could not load the default credentials',
+            }),
+        })),
     );
 
     const res = await getGoogleAuthToken();

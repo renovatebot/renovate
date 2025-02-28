@@ -10,9 +10,7 @@ export function getExtraDeps(
 ): ExtraDep[] {
   const result: ExtraDep[] = [];
 
-  const diff = diffLines(goModBefore, goModAfter, {
-    newlineIsToken: true,
-  });
+  const diff = diffLines(goModBefore, goModAfter, { newlineIsToken: true });
 
   const addDeps: Record<string, string> = {};
   const rmDeps: Record<string, string> = {};
@@ -45,11 +43,7 @@ export function getExtraDeps(
 
     const newValue = addDeps[depName];
     if (newValue) {
-      result.push({
-        depName,
-        currentValue,
-        newValue,
-      });
+      result.push({ depName, currentValue, newValue });
     }
   }
 
@@ -67,9 +61,7 @@ export function extraDepsTable(extraDeps: ExtraDep[]): string {
     tableLines.push([depNameQuoted, versionChangeQuoted]);
   }
 
-  return markdownTable(tableLines, {
-    align: ['l', 'l'],
-  });
+  return markdownTable(tableLines, { align: ['l', 'l'] });
 }
 
 export function getExtraDepsNotice(

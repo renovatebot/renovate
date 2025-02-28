@@ -83,9 +83,7 @@ const moduleMatch = q
     delete ctx.currentValue;
 
     if (depName) {
-      const dep: PackageDependency = {
-        depName,
-      };
+      const dep: PackageDependency = { depName };
       if (currentValue) {
         dep.currentValue = currentValue;
       } else {
@@ -121,11 +119,7 @@ const onMatch = q
   .join(phaseMatch)
   .op('=>')
   .sym('sub')
-  .tree({
-    type: 'wrapped-tree',
-    maxDepth: 1,
-    search: moduleMatch,
-  })
+  .tree({ type: 'wrapped-tree', maxDepth: 1, search: moduleMatch })
   .handler((ctx) => {
     delete ctx.phase;
     return ctx;
@@ -140,7 +134,5 @@ const query = q.tree<Ctx>({
 export function parse(
   content: string,
 ): Pick<Ctx, 'deps' | 'perlVersion'> | null {
-  return cpanfile.query(content, query, {
-    deps: [],
-  });
+  return cpanfile.query(content, query, { deps: [] });
 }

@@ -61,9 +61,7 @@ function getAuthJson(): string | null {
   );
 
   if (selectedGithubToken) {
-    authJson['github-oauth'] = {
-      'github.com': selectedGithubToken,
-    };
+    authJson['github-oauth'] = { 'github.com': selectedGithubToken };
   }
 
   for (const gitlabHostRule of hostRules.findAll({ hostType: 'gitlab' })) {
@@ -219,21 +217,12 @@ export async function updateArtifacts({
     for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
+          file: { type: 'addition', path: f, contents: await readLocalFile(f) },
         });
       }
     }
     for (const f of status.deleted) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
+      res.push({ file: { type: 'deletion', path: f } });
     }
 
     return res;
@@ -253,13 +242,6 @@ export async function updateArtifacts({
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

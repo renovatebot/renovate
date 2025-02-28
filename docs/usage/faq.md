@@ -102,9 +102,7 @@ You may even configure Renovate bot to ask for approval for _all_ updates.
 The `dependencyDashboardApproval` config option is outside of a `packageRules` array, and so applies to all updates:
 
 ```json
-{
-  "dependencyDashboardApproval": true
-}
+{ "dependencyDashboardApproval": true }
 ```
 
 Read our documentation on the [dependencyDashboardApproval](./configuration-options.md#dependencydashboardapproval) config option.
@@ -117,9 +115,7 @@ You can configure the PR target branch via the `baseBranches` option.
 Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
 
 ```json
-{
-  "baseBranches": ["next"]
-}
+{ "baseBranches": ["next"] }
 ```
 
 You can set more than one PR target branch in the `baseBranches` array.
@@ -183,10 +179,7 @@ e.g.
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["abc"],
-      "assignees": ["importantreviewer"]
-    }
+    { "matchPackageNames": ["abc"], "assignees": ["importantreviewer"] }
   ]
 }
 ```
@@ -198,10 +191,7 @@ Do the same as above, but instead of an exact match, use a glob prefix:
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": "abc**",
-      "assignees": ["importantreviewer"]
-    }
+    { "matchPackageNames": "abc**", "assignees": ["importantreviewer"] }
   ]
 }
 ```
@@ -215,10 +205,7 @@ As above, but apply a `groupName`:
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": "abc**",
-      "groupName": ["abc packages"]
-    }
+    { "matchPackageNames": "abc**", "groupName": ["abc packages"] }
   ]
 }
 ```

@@ -130,9 +130,7 @@ function detectDatasource(registryUrl: string): PackageDependency {
       };
   }
 
-  return {
-    skipReason: 'unsupported-url',
-  };
+  return { skipReason: 'unsupported-url' };
 }
 
 function extractContainer(

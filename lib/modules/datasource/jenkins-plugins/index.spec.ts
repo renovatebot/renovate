@@ -10,20 +10,14 @@ import { JenkinsPluginsDatasource } from '.';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {
-    foobar: {
-      name: 'foobar',
-      scm: 'https://source-url.example.com',
-    },
+    foobar: { name: 'foobar', scm: 'https://source-url.example.com' },
   },
 };
 
 const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
   plugins: {
     foobar: {
-      '1.0.0': {
-        version: '1.0.0',
-        url: 'https://download.example.com',
-      },
+      '1.0.0': { version: '1.0.0', url: 'https://download.example.com' },
       '2.0.0': {
         version: '2.0.0',
         url: 'https://download.example.com',
@@ -82,10 +76,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://updates.jenkins.io',
         releases: [
-          {
-            downloadUrl: 'https://download.example.com',
-            version: '1.0.0',
-          },
+          { downloadUrl: 'https://download.example.com', version: '1.0.0' },
           {
             downloadUrl: 'https://download.example.com',
             releaseTimestamp: '2020-01-02T00:00:00.000Z' as Timestamp,
@@ -150,10 +141,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://custom.registry.renovatebot.com',
         releases: [
-          {
-            downloadUrl: 'https://download.example.com',
-            version: '1.0.0',
-          },
+          { downloadUrl: 'https://download.example.com', version: '1.0.0' },
           {
             downloadUrl: 'https://download.example.com',
             releaseTimestamp: '2020-01-02T00:00:00.000Z' as Timestamp,

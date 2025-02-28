@@ -24,11 +24,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
     url: string | URL,
     options?: InternalHttpOptions & GitlabHttpOptions,
   ): Promise<HttpResponse<T>> {
-    const opts = {
-      baseUrl,
-      ...options,
-      throwHttpErrors: true,
-    };
+    const opts = { baseUrl, ...options, throwHttpErrors: true };
 
     try {
       const result = await super.request<T>(url, opts);

@@ -535,10 +535,7 @@ describe('util/fs/index', () => {
 
   describe('getLocalFiles', () => {
     it('reads list of files from local fs', async () => {
-      const fileContentMap = {
-        file1: 'foobar',
-        file2: 'foobar2',
-      };
+      const fileContentMap = { file1: 'foobar', file2: 'foobar2' };
 
       await fs.outputFile(`${localDir}/file1`, fileContentMap.file1);
       await fs.outputFile(`${localDir}/file2`, fileContentMap.file2);
@@ -548,9 +545,7 @@ describe('util/fs/index', () => {
 
     it('returns null as content if file is not found', async () => {
       const res = await getLocalFiles(['invalidfile']);
-      expect(res).toStrictEqual({
-        invalidfile: null,
-      });
+      expect(res).toStrictEqual({ invalidfile: null });
     });
   });
 });

@@ -26,12 +26,7 @@ const SecurityVulnerabilitySchema = z
 
 const SecurityAdvisorySchema = z.object({
   description: z.string(),
-  identifiers: z.array(
-    z.object({
-      type: z.string(),
-      value: z.string(),
-    }),
-  ),
+  identifiers: z.array(z.object({ type: z.string(), value: z.string() })),
   references: z.array(z.object({ url: z.string() })).optional(),
 });
 
@@ -40,9 +35,7 @@ export const VulnerabilityAlertSchema = LooseArray(
     dismissed_reason: z.string().nullish(),
     security_advisory: SecurityAdvisorySchema,
     security_vulnerability: SecurityVulnerabilitySchema,
-    dependency: z.object({
-      manifest_path: z.string(),
-    }),
+    dependency: z.object({ manifest_path: z.string() }),
   }),
   {
     onError: /* istanbul ignore next */ ({ error }) => {
@@ -55,10 +48,7 @@ export const VulnerabilityAlertSchema = LooseArray(
 );
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
-const GithubResponseMetadata = z.object({
-  name: z.string(),
-  path: z.string(),
-});
+const GithubResponseMetadata = z.object({ name: z.string(), path: z.string() });
 
 export const GithubFileMeta = GithubResponseMetadata.extend({
   type: z.literal('file'),

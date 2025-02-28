@@ -31,10 +31,7 @@ export function getRepoUrl(
   }
 
   // Find options for current host and determine Git endpoint
-  const opts = hostRules.find({
-    hostType: 'gitea',
-    url: endpoint,
-  });
+  const opts = hostRules.find({ hostType: 'gitea', url: endpoint });
 
   if (gitUrl === 'endpoint') {
     const url = parseUrl(endpoint);

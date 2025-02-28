@@ -248,11 +248,7 @@ export async function extractAllPackageFiles(
       let pkgFile: PackageFile = packageFilesByName[key];
       // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
-        pkgFile = {
-          packageFile: key,
-          datasource: mavenDatasource,
-          deps: [],
-        };
+        pkgFile = { packageFile: key, datasource: mavenDatasource, deps: [] };
       }
 
       if (!dep.datasource) {

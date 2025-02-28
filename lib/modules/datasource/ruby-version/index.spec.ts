@@ -12,10 +12,7 @@ describe('modules/datasource/ruby-version/index', () => {
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, Fixtures.get('releases.html'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'ruby',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'ruby' });
       expect(res).toMatchSnapshot();
     });
 
@@ -24,10 +21,7 @@ describe('modules/datasource/ruby-version/index', () => {
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, {});
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'ruby',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'ruby' });
       expect(res).toBeNull();
     });
 

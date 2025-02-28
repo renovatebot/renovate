@@ -90,10 +90,7 @@ export function asTimestamp(input: unknown): Timestamp | null {
 export const Timestamp = z.unknown().transform((input, ctx) => {
   const timestamp = asTimestamp(input);
   if (!timestamp) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Invalid timestamp',
-    });
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid timestamp' });
     return z.NEVER;
   }
 

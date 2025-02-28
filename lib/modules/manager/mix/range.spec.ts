@@ -38,10 +38,7 @@ describe('modules/manager/mix/range', () => {
   });
 
   it('defaults to update-lockfile', () => {
-    const config: RangeConfig = {
-      rangeStrategy: 'auto',
-      depType: 'prod',
-    };
+    const config: RangeConfig = { rangeStrategy: 'auto', depType: 'prod' };
     expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 });

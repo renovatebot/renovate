@@ -8,9 +8,7 @@ const MiseToolSchema = z.union([
 ]);
 export type MiseToolSchema = z.infer<typeof MiseToolSchema>;
 
-export const MiseFileSchema = z.object({
-  tools: z.record(MiseToolSchema),
-});
+export const MiseFileSchema = z.object({ tools: z.record(MiseToolSchema) });
 export type MiseFileSchema = z.infer<typeof MiseFileSchema>;
 
 export const MiseFileSchemaToml = Toml.pipe(MiseFileSchema);

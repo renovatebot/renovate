@@ -80,9 +80,7 @@ export async function getReleaseList(
 
   const res = await http.getJson(
     `${apiUrl}?draft=false`,
-    {
-      paginate: true,
-    },
+    { paginate: true },
     ReleasesSchema,
   );
   return res.body.map((release) => ({

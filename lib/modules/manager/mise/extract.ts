@@ -96,9 +96,5 @@ function createDependency(
   if (config === null) {
     return { depName: name, skipReason: 'unsupported-datasource' };
   }
-  return {
-    depName: name,
-    currentValue: version,
-    ...config,
-  };
+  return { depName: name, currentValue: version, ...config };
 }

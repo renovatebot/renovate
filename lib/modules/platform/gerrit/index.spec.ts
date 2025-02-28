@@ -20,13 +20,7 @@ import * as gerrit from '.';
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
 const codeReviewLabel: GerritLabelTypeInfo = {
-  values: {
-    '-2': 'bad',
-    '-1': 'unlikely',
-    0: 'neutral',
-    1: 'ok',
-    2: 'good',
-  },
+  values: { '-2': 'bad', '-1': 'unlikely', 0: 'neutral', 1: 'ok', 2: 'good' },
   default_value: 0,
 };
 
@@ -38,14 +32,8 @@ const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/index', () => {
   beforeEach(async () => {
-    hostRules.find.mockReturnValue({
-      username: 'user',
-      password: 'pass',
-    });
-    writeToConfig({
-      repository: 'test/repo',
-      labels: {},
-    });
+    hostRules.find.mockReturnValue({ username: 'user', password: 'pass' });
+    writeToConfig({ repository: 'test/repo', labels: {} });
     await gerrit.initPlatform({
       endpoint: gerritEndpointUrl,
       username: 'user',
@@ -92,10 +80,7 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('initRepo()', () => {
-    const projectInfo: GerritProjectInfo = {
-      id: 'repo1',
-      name: 'test-repo2',
-    };
+    const projectInfo: GerritProjectInfo = { id: 'repo1', name: 'test-repo2' };
 
     beforeEach(() => {
       clientMock.getBranchInfo.mockResolvedValueOnce({
@@ -192,9 +177,7 @@ describe('modules/platform/gerrit/index', () => {
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message',
-            },
+            commit: { message: 'some message' },
           }),
         },
       });
@@ -202,9 +185,7 @@ describe('modules/platform/gerrit/index', () => {
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'subject',
-        platformPrOptions: {
-          autoApprove: true,
-        },
+        platformPrOptions: { autoApprove: true },
       });
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
@@ -225,9 +206,7 @@ describe('modules/platform/gerrit/index', () => {
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message',
-            },
+            commit: { message: 'some message' },
           }),
         },
       });
@@ -290,11 +269,7 @@ describe('modules/platform/gerrit/index', () => {
       _number: 123456,
       current_revision: 'some-revision',
       revisions: {
-        'some-revision': partial<GerritRevisionInfo>({
-          commit: {
-            message,
-          },
-        }),
+        'some-revision': partial<GerritRevisionInfo>({ commit: { message } }),
       },
     });
 
@@ -315,9 +290,7 @@ describe('modules/platform/gerrit/index', () => {
         targetBranch: 'target',
         prTitle: 'title',
         prBody: 'body',
-        platformPrOptions: {
-          autoApprove: false,
-        },
+        platformPrOptions: { autoApprove: false },
       });
       expect(pr).toHaveProperty('number', 123456);
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
@@ -334,9 +307,7 @@ describe('modules/platform/gerrit/index', () => {
         targetBranch: 'target',
         prTitle: change.subject,
         prBody: 'body',
-        platformPrOptions: {
-          autoApprove: true,
-        },
+        platformPrOptions: { autoApprove: true },
       });
       expect(pr).toHaveProperty('number', 123456);
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
@@ -361,9 +332,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getBranchPr() - found', async () => {
-      const change = partial<GerritChange>({
-        _number: 123456,
-      });
+      const change = partial<GerritChange>({ _number: 123456 });
       clientMock.findChanges.mockResolvedValue([change]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
@@ -425,9 +394,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getBranchStatus() - branchname/changes found, submittable and not hasProblems => green', async () => {
-      const change = partial<GerritChange>({
-        submittable: true,
-      });
+      const change = partial<GerritChange>({ submittable: true });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
         gerrit.getBranchStatus('renovate/dependency-1.x'),
@@ -462,9 +429,7 @@ describe('modules/platform/gerrit/index', () => {
       const changeWithProblems = { ...submittableChange };
       changeWithProblems.submittable = false;
       changeWithProblems.problems = [];
-      changeWithProblems.labels = {
-        Verified: { blocking: true },
-      };
+      changeWithProblems.labels = { Verified: { blocking: true } };
       clientMock.findChanges.mockResolvedValueOnce([
         changeWithProblems,
         submittableChange,
@@ -526,9 +491,7 @@ describe('modules/platform/gerrit/index', () => {
         },
       ])('$ctx/$labels', async ({ label, labelValue, expectedState }) => {
         const change = partial<GerritChange>({
-          labels: {
-            [label]: partial<GerritLabelInfo>({ ...labelValue }),
-          },
+          labels: { [label]: partial<GerritLabelInfo>({ ...labelValue }) },
         });
         clientMock.findChanges.mockResolvedValueOnce([change]);
         await expect(
@@ -705,11 +668,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getRawFile() - repo/branch from config', async () => {
-      writeToConfig({
-        repository: 'repo',
-        head: 'master',
-        labels: {},
-      });
+      writeToConfig({ repository: 'repo', head: 'master', labels: {} });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
       expect(clientMock.getFile).toHaveBeenCalledWith(
         'repo',
@@ -719,11 +678,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getRawFile() - repo/branch defaults', async () => {
-      writeToConfig({
-        repository: undefined,
-        head: undefined,
-        labels: {},
-      });
+      writeToConfig({ repository: undefined, head: undefined, labels: {} });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
       expect(clientMock.getFile).toHaveBeenCalledWith(
         'All-Projects',

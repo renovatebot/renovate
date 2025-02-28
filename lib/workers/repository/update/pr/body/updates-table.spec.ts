@@ -208,9 +208,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       manager: 'some-manager',
       branchName: 'some-branch',
       updateType: 'pin',
-      prBodyDefinitions: {
-        Pending: '{{{displayPending}}}',
-      },
+      prBodyDefinitions: { Pending: '{{{displayPending}}}' },
       depNameLinked:
         '[mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha))',
       depType: 'devDependencies',

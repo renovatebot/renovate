@@ -4,27 +4,19 @@ import { MaybeTimestamp } from '../../../util/timestamp';
 export type GalaxyV3 = z.infer<typeof GalaxyV3>;
 export const GalaxyV3 = z.object({
   deprecated: z.boolean(),
-  highest_version: z.object({
-    version: z.string(),
-  }),
+  highest_version: z.object({ version: z.string() }),
 });
 
 export type GalaxyV3Versions = z.infer<typeof GalaxyV3Versions>;
 export const GalaxyV3Versions = z
   .object({
     data: z.array(
-      z.object({
-        version: z.string(),
-        created_at: MaybeTimestamp,
-      }),
+      z.object({ version: z.string(), created_at: MaybeTimestamp }),
     ),
   })
   .transform(({ data }) => {
     return data.map((value) => {
-      return {
-        version: value.version,
-        releaseTimestamp: value.created_at,
-      };
+      return { version: value.version, releaseTimestamp: value.created_at };
     });
   });
 
@@ -33,9 +25,7 @@ export const GalaxyV3DetailedVersion = z
   .object({
     version: z.string(),
     download_url: z.string(),
-    artifact: z.object({
-      sha256: z.string(),
-    }),
+    artifact: z.object({ sha256: z.string() }),
     metadata: z.object({
       homepage: z.string(),
       repository: z.string(),

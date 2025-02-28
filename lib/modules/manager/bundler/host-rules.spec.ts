@@ -22,11 +22,7 @@ describe('modules/manager/bundler/host-rules', () => {
     });
 
     it('returns the authentication header with the token', () => {
-      expect(
-        getAuthenticationHeaderValue({
-          token: 'token',
-        }),
-      ).toBe('token');
+      expect(getAuthenticationHeaderValue({ token: 'token' })).toBe('token');
     });
 
     it('escapes special characters in the username but not the password', () => {

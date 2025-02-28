@@ -270,12 +270,7 @@ describe('workers/repository/update/pr/body/index', () => {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }, {}],
           },
         ],
       };

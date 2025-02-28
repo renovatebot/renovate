@@ -89,10 +89,7 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFileContent = {
-    registryUrls: [],
-    deps: [],
-  };
+  const res: PackageFileContent = { registryUrls: [], deps: [] };
 
   const variables: Record<string, string> = {};
 

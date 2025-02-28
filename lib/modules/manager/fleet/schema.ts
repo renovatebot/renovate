@@ -13,9 +13,7 @@ export type FleetHelmBlock = z.infer<typeof FleetHelmBlock>;
   @link https://fleet.rancher.io/gitrepo-add/#create-gitrepo-instance
  */
 export const GitRepo = z.object({
-  metadata: z.object({
-    name: z.string(),
-  }),
+  metadata: z.object({ name: z.string() }),
   kind: z.string(),
   spec: z.object({
     repo: z.string().optional(),
@@ -32,10 +30,7 @@ export const FleetFile = z.object({
   helm: FleetHelmBlock,
   targetCustomizations: z
     .array(
-      z.object({
-        name: z.string(),
-        helm: FleetHelmBlock.partial().optional(),
-      }),
+      z.object({ name: z.string(), helm: FleetHelmBlock.partial().optional() }),
     )
     .optional(),
 });

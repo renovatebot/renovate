@@ -29,11 +29,7 @@ export abstract class CommitMessage {
   }
 
   toJSON(): CommitMessageJSON {
-    return {
-      body: this._body,
-      footer: this._footer,
-      subject: this._subject,
-    };
+    return { body: this._body, footer: this._footer, subject: this._subject };
   }
 
   toString(): string {

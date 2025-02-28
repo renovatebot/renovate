@@ -24,10 +24,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     ): PackageFile<NpmManagerData>[] {
       return [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-            yarnLock: 'yarn.lock',
-          },
+          managerData: { npmLock: 'package-lock.json', yarnLock: 'yarn.lock' },
           extractedConstraints: {},
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
@@ -106,16 +103,8 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         {
           extractedConstraints: { yarn: '^2.0.0' },
           deps: [
-            {
-              currentValue: '1.0.0',
-              depName: 'a',
-              lockedVersion: '1.0.0',
-            },
-            {
-              currentValue: '2.0.0',
-              depName: 'b',
-              lockedVersion: '2.0.0',
-            },
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
             {
               currentValue: '^2.1.0',
               depName: 'yarn',
@@ -153,16 +142,8 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         {
           extractedConstraints: { yarn: '^2.2.0' },
           deps: [
-            {
-              currentValue: '1.0.0',
-              depName: 'a',
-              lockedVersion: '1.0.0',
-            },
-            {
-              currentValue: '2.0.0',
-              depName: 'b',
-              lockedVersion: '2.0.0',
-            },
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
             {
               currentValue: '^2.2.0',
               depName: 'yarn',
@@ -330,9 +311,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
           extractedConstraints: {},
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
@@ -344,18 +323,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: {
-            npm: '<9',
-          },
+          extractedConstraints: { npm: '<9' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           packageFile: 'some-file',
           lockFiles: ['package-lock.json'],
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
         },
       ]);
     });
@@ -367,12 +342,8 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-          extractedConstraints: {
-            npm: '>=7.0.0',
-          },
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: { npm: '>=7.0.0' },
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
@@ -383,9 +354,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: {
-            npm: '>=7.0.0 <9',
-          },
+          extractedConstraints: { npm: '>=7.0.0 <9' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
@@ -404,12 +373,8 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-          extractedConstraints: {
-            npm: '>=9.0.0',
-          },
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: { npm: '>=9.0.0' },
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
@@ -420,9 +385,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: {
-            npm: '>=9.0.0',
-          },
+          extractedConstraints: { npm: '>=9.0.0' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
@@ -436,30 +399,16 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
 
     it('appends <7 to npm extractedConstraints', async () => {
       npm.getNpmLock.mockResolvedValue({
-        lockedVersions: {
-          a: '1.0.0',
-          b: '2.0.0',
-          c: '3.0.0',
-        },
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 1,
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-          extractedConstraints: {
-            npm: '>=6.0.0',
-          },
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: { npm: '>=6.0.0' },
           deps: [
-            {
-              depName: 'a',
-              currentValue: '1.0.0',
-            },
-            {
-              depName: 'b',
-              currentValue: '2.0.0',
-            },
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
           ],
           packageFile: 'some-file',
         },
@@ -481,30 +430,16 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
 
     it('skips appending <7 to npm extractedConstraints', async () => {
       npm.getNpmLock.mockResolvedValue({
-        lockedVersions: {
-          a: '1.0.0',
-          b: '2.0.0',
-          c: '3.0.0',
-        },
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 1,
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-          extractedConstraints: {
-            npm: '^8.0.0',
-          },
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: { npm: '^8.0.0' },
           deps: [
-            {
-              depName: 'a',
-              currentValue: '1.0.0',
-            },
-            {
-              depName: 'b',
-              currentValue: '2.0.0',
-            },
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
           ],
           packageFile: 'some-file',
         },
@@ -528,35 +463,17 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
   it('uses pnpm-lock', async () => {
     pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
-        '.': {
-          dependencies: {
-            a: '1.0.0',
-            b: '2.0.0',
-            c: '3.0.0',
-          },
-        },
+        '.': { dependencies: { a: '1.0.0', b: '2.0.0', c: '3.0.0' } },
       },
       lockfileVersion: 6.0,
     });
     const packageFiles = [
       {
-        managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
-        },
-        extractedConstraints: {
-          pnpm: '>=6.0.0',
-        },
+        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [
-          {
-            depName: 'a',
-            depType: 'dependencies',
-            currentValue: '1.0.0',
-          },
-          {
-            depName: 'b',
-            depType: 'dependencies',
-            currentValue: '2.0.0',
-          },
+          { depName: 'a', depType: 'dependencies', currentValue: '1.0.0' },
+          { depName: 'b', depType: 'dependencies', currentValue: '2.0.0' },
         ],
         packageFile: 'package.json',
       },
@@ -589,23 +506,15 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
   it('uses pnpm-lock for pnpm.catalog depType', async () => {
     pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithCatalog: {
-        default: {
-          a: '1.0.0',
-        },
-        named: {
-          b: '2.0.0',
-        },
+        default: { a: '1.0.0' },
+        named: { b: '2.0.0' },
       },
       lockfileVersion: 9.0,
     });
     const packageFiles = [
       {
-        managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
-        },
-        extractedConstraints: {
-          pnpm: '9.15.3',
-        },
+        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        extractedConstraints: { pnpm: '9.15.3' },
         deps: [
           {
             depName: 'a',
@@ -649,35 +558,17 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
   it('uses pnpm-lock in subfolder', async () => {
     pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
-        '.': {
-          dependencies: {
-            a: '1.0.0',
-            b: '2.0.0',
-            c: '3.0.0',
-          },
-        },
+        '.': { dependencies: { a: '1.0.0', b: '2.0.0', c: '3.0.0' } },
       },
       lockfileVersion: 6.0,
     });
     const packageFiles = [
       {
-        managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
-        },
-        extractedConstraints: {
-          pnpm: '>=6.0.0',
-        },
+        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [
-          {
-            depName: 'a',
-            depType: 'dependencies',
-            currentValue: '1.0.0',
-          },
-          {
-            depName: 'b',
-            depType: 'dependencies',
-            currentValue: '2.0.0',
-          },
+          { depName: 'a', depType: 'dependencies', currentValue: '1.0.0' },
+          { depName: 'b', depType: 'dependencies', currentValue: '2.0.0' },
         ],
         packageFile: 'subfolder/package.json',
       },
@@ -711,44 +602,24 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     pnpm.getPnpmLock.mockResolvedValue({
       lockedVersionsWithPath: {
         'workspace-package': {
-          dependencies: {
-            a: '1.0.0',
-            b: '2.0.0',
-            c: '3.0.0',
-          },
+          dependencies: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         },
       },
       lockfileVersion: 6.0,
     });
     const packageFiles = [
       {
-        managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
-        },
-        extractedConstraints: {
-          pnpm: '>=6.0.0',
-        },
+        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [],
         packageFile: 'subfolder/package.json',
       },
       {
-        managerData: {
-          pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml',
-        },
-        extractedConstraints: {
-          pnpm: '>=6.0.0',
-        },
+        managerData: { pnpmShrinkwrap: 'subfolder/pnpm-lock.yaml' },
+        extractedConstraints: { pnpm: '>=6.0.0' },
         deps: [
-          {
-            depName: 'a',
-            depType: 'dependencies',
-            currentValue: '1.0.0',
-          },
-          {
-            depName: 'b',
-            depType: 'dependencies',
-            currentValue: '2.0.0',
-          },
+          { depName: 'a', depType: 'dependencies', currentValue: '1.0.0' },
+          { depName: 'b', depType: 'dependencies', currentValue: '2.0.0' },
         ],
         packageFile: 'subfolder/workspace-package/package.json',
       },
@@ -792,9 +663,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     });
     const packageFiles = [
       {
-        managerData: {
-          npmLock: 'package-lock.json',
-        },
+        managerData: { npmLock: 'package-lock.json' },
         extractedConstraints: {},
         deps: [
           { depName: 'a', currentValue: '1.0.0' },
@@ -806,10 +675,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
     await getLockedVersions(packageFiles);
     expect(packageFiles).toEqual(packageFiles);
     expect(logger.logger.warn).toHaveBeenCalledWith(
-      {
-        lockfileVersion: 99,
-        npmLock: 'package-lock.json',
-      },
+      { lockfileVersion: 99, npmLock: 'package-lock.json' },
       'Found unsupported npm lockfile version',
     );
   });
@@ -817,18 +683,12 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('lockfileVersion 3', () => {
     it('uses package-lock.json with npm v9.0.0', async () => {
       npm.getNpmLock.mockResolvedValue({
-        lockedVersions: {
-          a: '1.0.0',
-          b: '2.0.0',
-          c: '3.0.0',
-        },
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 3,
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
           extractedConstraints: {},
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
@@ -840,39 +700,27 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: {
-            npm: '>=7',
-          },
+          extractedConstraints: { npm: '>=7' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           packageFile: 'some-file',
           lockFiles: ['package-lock.json'],
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
         },
       ]);
     });
 
     it('uses package-lock.json with npm v7.0.0', async () => {
       npm.getNpmLock.mockResolvedValue({
-        lockedVersions: {
-          a: '1.0.0',
-          b: '2.0.0',
-          c: '3.0.0',
-        },
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
         lockfileVersion: 3,
       });
       const packageFiles = [
         {
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
-          extractedConstraints: {
-            npm: '^9.0.0',
-          },
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: { npm: '^9.0.0' },
           deps: [
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
@@ -883,18 +731,14 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: {
-            npm: '^9.0.0',
-          },
+          extractedConstraints: { npm: '^9.0.0' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           packageFile: 'some-file',
           lockFiles: ['package-lock.json'],
-          managerData: {
-            npmLock: 'package-lock.json',
-          },
+          managerData: { npmLock: 'package-lock.json' },
         },
       ]);
     });

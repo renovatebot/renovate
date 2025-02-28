@@ -83,17 +83,11 @@ Fill the array with alternate index URL(s).
 ## Disabling Python support
 
 ```json title="Disabling all managers where language is set to Python"
-{
-  "python": {
-    "enabled": false
-  }
-}
+{ "python": { "enabled": false } }
 ```
 
 Alternatively, you can use `enabledManagers` to tell Renovate what package managers it can use.
 
 ```json title="Only use Renovate's npm package manager"
-{
-  "enabledManagers": ["npm"]
-}
+{ "enabledManagers": ["npm"] }
 ```

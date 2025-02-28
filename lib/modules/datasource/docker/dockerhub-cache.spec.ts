@@ -49,13 +49,7 @@ function newItem(): DockerHubTag {
 function newCacheData(): DockerHubCacheData {
   const { items } = oldCacheData();
   const item = newItem();
-  return {
-    items: {
-      ...items,
-      [item.id]: item,
-    },
-    updatedAt: '2022-01-04',
-  };
+  return { items: { ...items, [item.id]: item }, updatedAt: '2022-01-04' };
 }
 
 describe('modules/datasource/docker/dockerhub-cache', () => {
@@ -72,10 +66,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     expect(res).toEqual({
       dockerRepository,
-      cache: {
-        items: {},
-        updatedAt: null,
-      },
+      cache: { items: {}, updatedAt: null },
       isChanged: false,
       reconciledIds: new Set(),
     });
@@ -194,9 +185,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
   it('reconciles from empty cache', async () => {
     const item = newItem();
     const expectedCache = {
-      items: {
-        [item.id]: item,
-      },
+      items: { [item.id]: item },
       updatedAt: item.last_updated,
     };
     const cache = await DockerHubCache.init(dockerRepository);

@@ -27,15 +27,10 @@ describe('workers/repository/updates/flatten', () => {
       // TODO #22198
       config.lockFileMaintenance!.enabled = true;
       config.packageRules = [
-        {
-          matchUpdateTypes: ['minor'],
-          automerge: true,
-        },
+        { matchUpdateTypes: ['minor'], automerge: true },
         {
           matchFileNames: ['frontend/package.json'],
-          lockFileMaintenance: {
-            enabled: false,
-          },
+          lockFileMaintenance: { enabled: false },
         },
         {
           matchPackageNames: ['@monorepo/package'],
@@ -89,10 +84,7 @@ describe('workers/repository/updates/flatten', () => {
                   },
                 ],
               },
-              {
-                updateTypes: ['pin'],
-                updates: [{ newValue: '2.0.0' }],
-              },
+              { updateTypes: ['pin'], updates: [{ newValue: '2.0.0' }] },
               {
                 depName: 'abc',
                 updates: [
@@ -159,10 +151,7 @@ describe('workers/repository/updates/flatten', () => {
                 depName: 'gopkg.in/warnings.v0',
                 updates: [{ newValue: '0.1.3' }],
               },
-              {
-                depName: 'github.com/blang/semver',
-                updates: [],
-              },
+              { depName: 'github.com/blang/semver', updates: [] },
             ],
           },
         ],

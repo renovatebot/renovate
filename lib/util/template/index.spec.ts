@@ -9,10 +9,7 @@ const execUtils = mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
-    execUtils.getChildEnv.mockReturnValue({
-      CUSTOM_FOO: 'foo',
-      HOME: '/root',
-    });
+    execUtils.getChildEnv.mockReturnValue({ CUSTOM_FOO: 'foo', HOME: '/root' });
   });
 
   it('returns empty string if cannot compile', () => {
@@ -100,11 +97,7 @@ describe('util/template/index', () => {
     const userTemplate = '{{{ toJSON upgrades }}}';
     const input = {
       upgrades: [
-        {
-          depName: 'foo-lib',
-          currentVersion: '1.0.0',
-          newVersion: '1.0.1',
-        },
+        { depName: 'foo-lib', currentVersion: '1.0.0', newVersion: '1.0.1' },
       ],
     };
     const output = template.compile(userTemplate, input);
@@ -135,11 +128,7 @@ describe('util/template/index', () => {
     const input = {
       platform: 'github',
       isMajor: true,
-      upgrades: [
-        {
-          depName: 'foo-lib',
-        },
-      ],
+      upgrades: [{ depName: 'foo-lib' }],
     };
     const output = template.compile(userTemplate, input);
     expect(JSON.parse(output)).toEqual({
@@ -169,15 +158,7 @@ describe('util/template/index', () => {
   it('and has access to prBodyDefinitions', () => {
     const userTemplate =
       'Issues: {{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}';
-    const config = {
-      upgrades: [
-        {
-          prBodyDefinitions: {
-            Issue: '1234',
-          },
-        },
-      ],
-    };
+    const config = { upgrades: [{ prBodyDefinitions: { Issue: '1234' } }] };
     const output = template.compile(userTemplate, config);
     expect(output).toBe('Issues: 1234 ');
   });
@@ -221,9 +202,7 @@ describe('util/template/index', () => {
     it('supports object nesting', () => {
       const warnVariables = new Set<string>();
       const proxy = template.proxyCompileInput(
-        {
-          [allowedField]: compileInput,
-        },
+        { [allowedField]: compileInput },
         warnVariables,
       );
 
@@ -237,9 +216,7 @@ describe('util/template/index', () => {
     it('supports array nesting', () => {
       const warnVariables = new Set<string>();
       const proxy = template.proxyCompileInput(
-        {
-          [allowedField]: [compileInput],
-        },
+        { [allowedField]: [compileInput] },
         warnVariables,
       );
 
@@ -299,10 +276,7 @@ describe('util/template/index', () => {
     it('equals', () => {
       const output = template.compile(
         '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
-        {
-          datasource: 'git-refs',
-          packageName: 'renovatebot/renovate',
-        },
+        { datasource: 'git-refs', packageName: 'renovatebot/renovate' },
       );
       expect(output).toBe('https://github.com/renovatebot/renovate');
     });
@@ -310,10 +284,7 @@ describe('util/template/index', () => {
     it('not equals', () => {
       const output = template.compile(
         '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
-        {
-          datasource: 'github-releases',
-          packageName: 'renovatebot/renovate',
-        },
+        { datasource: 'github-releases', packageName: 'renovatebot/renovate' },
       );
       expect(output).toBe('renovatebot/renovate');
     });
@@ -321,9 +292,7 @@ describe('util/template/index', () => {
     it('not strict equals', () => {
       const output = template.compile(
         '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
-        {
-          newMajor: 3,
-        },
+        { newMajor: 3 },
       );
       expect(output).toBe('not equals');
     });
@@ -333,9 +302,7 @@ describe('util/template/index', () => {
     it('includes is true', () => {
       const output = template.compile(
         '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
-        {
-          labels: ['dependencies'],
-        },
+        { labels: ['dependencies'] },
       );
 
       expect(output).toBe('production');
@@ -344,9 +311,7 @@ describe('util/template/index', () => {
     it('includes is false', () => {
       const output = template.compile(
         '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
-        {
-          labels: ['devDependencies'],
-        },
+        { labels: ['devDependencies'] },
       );
 
       expect(output).toBe('notProduction');
@@ -355,9 +320,7 @@ describe('util/template/index', () => {
     it('includes with incorrect type first argument', () => {
       const output = template.compile(
         '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
-        {
-          labels: 'devDependencies',
-        },
+        { labels: 'devDependencies' },
       );
 
       expect(output).toBe('notProduction');
@@ -366,9 +329,7 @@ describe('util/template/index', () => {
     it('includes with incorrect type second argument', () => {
       const output = template.compile(
         '{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}',
-        {
-          labels: ['devDependencies'],
-        },
+        { labels: ['devDependencies'] },
       );
 
       expect(output).toBe('notProduction');
@@ -400,9 +361,7 @@ describe('util/template/index', () => {
     it('should return array element', () => {
       const output = template.compile(
         "{{ lookup (split packageName '-') 1 }}",
-        {
-          packageName: 'foo-bar-test',
-        },
+        { packageName: 'foo-bar-test' },
       );
       expect(output).toBe('bar');
     });
@@ -414,17 +373,9 @@ describe('util/template/index', () => {
         '{{#each (lookupArray upgrades "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
         {
           upgrades: [
-            {
-              prBodyDefinitions: {
-                Issue: 'ABC-123',
-              },
-            },
+            { prBodyDefinitions: { Issue: 'ABC-123' } },
             {},
-            {
-              prBodyDefinitions: {
-                Issue: 'DEF-456',
-              },
-            },
+            { prBodyDefinitions: { Issue: 'DEF-456' } },
             null,
             undefined,
           ],
@@ -437,9 +388,7 @@ describe('util/template/index', () => {
     it('handles null input array', () => {
       const output = template.compile(
         '{{#each (lookupArray testArray "prBodyDefinitions")}} {{{Issue}}}{{/each}}',
-        {
-          testArray: null,
-        },
+        { testArray: null },
         false,
       );
 
@@ -449,13 +398,7 @@ describe('util/template/index', () => {
     it('handles empty string key', () => {
       const output = template.compile(
         '{{#each (lookupArray testArray "")}} {{{.}}}{{/each}}',
-        {
-          testArray: [
-            {
-              '': 'ABC-123',
-            },
-          ],
-        },
+        { testArray: [{ '': 'ABC-123' }] },
         false,
       );
 
@@ -465,13 +408,7 @@ describe('util/template/index', () => {
     it('handles null key', () => {
       const output = template.compile(
         '{{#each (lookupArray testArray null)}} {{{.}}}{{/each}}',
-        {
-          testArray: [
-            {
-              null: 'ABC-123',
-            },
-          ],
-        },
+        { testArray: [{ null: 'ABC-123' }] },
         false,
       );
 
@@ -485,21 +422,9 @@ describe('util/template/index', () => {
         '{{#each (distinct (lookupArray (lookupArray upgrades "prBodyDefinitions") "Issue"))}} {{{.}}}{{/each}}',
         {
           upgrades: [
-            {
-              prBodyDefinitions: {
-                Issue: 'ABC-123',
-              },
-            },
-            {
-              prBodyDefinitions: {
-                Issue: 'DEF-456',
-              },
-            },
-            {
-              prBodyDefinitions: {
-                Issue: 'ABC-123',
-              },
-            },
+            { prBodyDefinitions: { Issue: 'ABC-123' } },
+            { prBodyDefinitions: { Issue: 'DEF-456' } },
+            { prBodyDefinitions: { Issue: 'ABC-123' } },
           ],
         },
       );
@@ -510,9 +435,7 @@ describe('util/template/index', () => {
     it('handles null elements', () => {
       const output = template.compile(
         '{{#each (distinct input)}}{{{.}}}{{/each}}',
-        {
-          input: [null, null],
-        },
+        { input: [null, null] },
         false,
       );
 
@@ -522,9 +445,7 @@ describe('util/template/index', () => {
     it('handles null input', () => {
       const output = template.compile(
         '{{#each (distinct input)}}{{{.}}}{{/each}}',
-        {
-          input: null,
-        },
+        { input: null },
         false,
       );
 

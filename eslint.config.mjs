@@ -43,14 +43,10 @@ export default tseslint.config(
   eslintPluginPromise.configs['flat/recommended'],
   eslintContainerbase.configs.all,
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
+    linterOptions: { reportUnusedDisableDirectives: true },
 
     languageOptions: {
-      globals: {
-        ...globals.node,
-      },
+      globals: { ...globals.node },
 
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -63,15 +59,9 @@ export default tseslint.config(
     },
 
     settings: {
-      'import/parsers': {
-        '@typescript-eslint/parser': ['.ts'],
-      },
+      'import/parsers': { '@typescript-eslint/parser': ['.ts'] },
 
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-        },
-      },
+      'import/resolver': { typescript: { alwaysTryTypes: true } },
     },
   },
 
@@ -115,50 +105,28 @@ export default tseslint.config(
         },
       ],
 
-      'import/no-unresolved': [
-        'error',
-        {
-          ignore: ['^mdast$'],
-        },
-      ],
+      'import/no-unresolved': ['error', { ignore: ['^mdast$'] }],
 
-      'import/order': [
-        'error',
-        {
-          alphabetize: {
-            order: 'asc',
-          },
-        },
-      ],
+      'import/order': ['error', { alphabetize: { order: 'asc' } }],
 
       'no-restricted-imports': [
         2,
-        {
-          paths: ['nock', 'parse-link-header', 'path'],
-        },
+        { paths: ['nock', 'parse-link-header', 'path'] },
       ],
 
       '@typescript-eslint/consistent-type-assertions': [
         'error',
-        {
-          assertionStyle: 'as',
-          objectLiteralTypeAssertions: 'allow',
-        },
+        { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' },
       ],
 
       '@typescript-eslint/consistent-type-imports': [
         'error',
-        {
-          disallowTypeAnnotations: false,
-        },
+        { disallowTypeAnnotations: false },
       ],
 
       '@typescript-eslint/explicit-function-return-type': [
         'error',
-        {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true,
-        },
+        { allowExpressions: true, allowTypedFunctionExpressions: true },
       ],
 
       '@typescript-eslint/no-explicit-any': 0,
@@ -166,11 +134,7 @@ export default tseslint.config(
 
       '@typescript-eslint/no-unused-vars': [
         2,
-        {
-          vars: 'all',
-          args: 'none',
-          ignoreRestSiblings: true,
-        },
+        { vars: 'all', args: 'none', ignoreRestSiblings: true },
       ],
 
       '@typescript-eslint/prefer-optional-chain': 2,
@@ -185,47 +149,28 @@ export default tseslint.config(
 
       '@typescript-eslint/restrict-template-expressions': [
         2,
-        {
-          allowNumber: true,
-          allowBoolean: true,
-        },
+        { allowNumber: true, allowBoolean: true },
       ],
 
       '@typescript-eslint/restrict-plus-operands': 2,
 
       '@typescript-eslint/naming-convention': [
         2,
-        {
-          selector: 'enumMember',
-          format: ['PascalCase'],
-        },
+        { selector: 'enumMember', format: ['PascalCase'] },
       ],
 
-      '@typescript-eslint/unbound-method': [
-        2,
-        {
-          ignoreStatic: true,
-        },
-      ],
+      '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
 
       '@typescript-eslint/no-empty-object-type': [
         2,
-        {
-          allowInterfaces: 'with-single-extends',
-        },
+        { allowInterfaces: 'with-single-extends' },
       ],
 
       // TODO: not compatible with recent versions of typescript-eslint
       // 'typescript-enum/no-const-enum': 2,
       // 'typescript-enum/no-enum': 2,
 
-      'object-shorthand': [
-        'error',
-        'always',
-        {
-          avoidQuotes: true,
-        },
-      ],
+      'object-shorthand': ['error', 'always', { avoidQuotes: true }],
     },
   },
   {
@@ -233,17 +178,9 @@ export default tseslint.config(
 
     plugins: { vitest },
 
-    languageOptions: {
-      globals: {
-        ...globals.vitest,
-      },
-    },
+    languageOptions: { globals: { ...globals.vitest } },
 
-    settings: {
-      vitest: {
-        typecheck: true,
-      },
-    },
+    settings: { vitest: { typecheck: true } },
 
     rules: {
       ...vitest.configs.recommended.rules,
@@ -272,19 +209,10 @@ export default tseslint.config(
   {
     files: ['tools/**/*.{ts,js,mjs,cjs}'],
 
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
+    languageOptions: { globals: { ...globals.node } },
 
     rules: {
-      'import/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: true,
-        },
-      ],
+      'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
 
       'no-console': 'off',
     },
@@ -292,16 +220,12 @@ export default tseslint.config(
   {
     files: ['tools/**/*.{js,cjs}', 'bin/*.{js,cjs}'],
 
-    rules: {
-      '@typescript-eslint/no-var-requires': 'off',
-    },
+    rules: { '@typescript-eslint/no-var-requires': 'off' },
   },
   {
     files: ['**/*.mjs'],
 
-    rules: {
-      'import/extensions': 0,
-    },
+    rules: { 'import/extensions': 0 },
   },
   {
     files: ['tools/docs/test/**/*.mjs'],
@@ -314,8 +238,6 @@ export default tseslint.config(
       },
     },
 
-    rules: {
-      '@typescript-eslint/no-floating-promises': 0,
-    },
+    rules: { '@typescript-eslint/no-floating-promises': 0 },
   },
 );

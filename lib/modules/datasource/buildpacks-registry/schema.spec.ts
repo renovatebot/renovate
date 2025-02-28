@@ -27,17 +27,8 @@ describe('modules/datasource/buildpacks-registry/schema', () => {
       ],
     };
     expect(BuildpacksRegistryResponseSchema.parse(response)).toMatchObject({
-      latest: {
-        homepage: 'https://github.com/heroku/buildpacks-python',
-      },
-      versions: [
-        {
-          version: '0.2.0',
-        },
-        {
-          version: '0.1.0',
-        },
-      ],
+      latest: { homepage: 'https://github.com/heroku/buildpacks-python' },
+      versions: [{ version: '0.2.0' }, { version: '0.1.0' }],
     });
   });
 });

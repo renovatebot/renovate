@@ -17,26 +17,17 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
 
   const repo = doc.spec?.repo;
   if (!repo) {
-    return {
-      ...dep,
-      skipReason: 'missing-depname',
-    };
+    return { ...dep, skipReason: 'missing-depname' };
   }
   dep.sourceUrl = repo;
   dep.depName = repo;
 
   const currentValue = doc.spec.revision;
   if (!currentValue) {
-    return {
-      ...dep,
-      skipReason: 'unspecified-version',
-    };
+    return { ...dep, skipReason: 'unspecified-version' };
   }
 
-  return {
-    ...dep,
-    currentValue,
-  };
+  return { ...dep, currentValue };
 }
 
 function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
@@ -46,10 +37,7 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   };
 
   if (!doc.chart) {
-    return {
-      ...dep,
-      skipReason: 'missing-depname',
-    };
+    return { ...dep, skipReason: 'missing-depname' };
   }
 
   if (isOCIRegistry(doc.chart)) {
@@ -72,30 +60,18 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
 
   if (!doc.repo) {
     if (checkIfStringIsPath(doc.chart)) {
-      return {
-        ...dep,
-        skipReason: 'local-chart',
-      };
+      return { ...dep, skipReason: 'local-chart' };
     }
-    return {
-      ...dep,
-      skipReason: 'no-repository',
-    };
+    return { ...dep, skipReason: 'no-repository' };
   }
   dep.registryUrls = [doc.repo];
 
   const currentValue = doc.version;
   if (!doc.version) {
-    return {
-      ...dep,
-      skipReason: 'unspecified-version',
-    };
+    return { ...dep, skipReason: 'unspecified-version' };
   }
 
-  return {
-    ...dep,
-    currentValue,
-  };
+  return { ...dep, currentValue };
 }
 
 function extractFleetFile(doc: FleetFile): PackageDependency[] {

@@ -13,10 +13,7 @@ vi.mock('./config');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {
-    GlobalConfig.set({
-      localDir: '',
-      platform: 'github',
-    });
+    GlobalConfig.set({ localDir: '', platform: 'github' });
   });
 
   describe('rebaseOnboardingBranch()', () => {
@@ -54,10 +51,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     it('uses the onboardingConfigFileName if set', async () => {
       await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: '.github/renovate.json',
-        },
+        { ...config, onboardingConfigFileName: '.github/renovate.json' },
         hash,
       );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
@@ -71,10 +65,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
 
     it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
       await rebaseOnboardingBranch(
-        {
-          ...config,
-          onboardingConfigFileName: undefined,
-        },
+        { ...config, onboardingConfigFileName: undefined },
         hash,
       );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);

@@ -134,10 +134,7 @@ const getNewValue = ({
         });
         break;
       case 'widen':
-        newValue = widen({
-          range: vtrim(currentValue),
-          to: vtrim(newVersion),
-        });
+        newValue = widen({ range: vtrim(currentValue), to: vtrim(newVersion) });
         break;
       // istanbul ignore next
       default:

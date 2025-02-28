@@ -95,14 +95,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       },
     };
     const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
+      { depName: 'dep1', packageName: 'dep1' },
+      { depName: 'dep2', packageName: 'dep2' },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -184,22 +178,10 @@ describe('modules/manager/pep621/processors/uv', () => {
     };
 
     const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
-      {
-        depName: 'dep3',
-        packageName: 'dep3',
-      },
-      {
-        depName: 'dep4',
-        packageName: 'dep4',
-      },
+      { depName: 'dep1', packageName: 'dep1' },
+      { depName: 'dep2', packageName: 'dep2' },
+      { depName: 'dep3', packageName: 'dep3' },
+      { depName: 'dep4', packageName: 'dep4' },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -248,14 +230,8 @@ describe('modules/manager/pep621/processors/uv', () => {
     };
 
     const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
+      { depName: 'dep1', packageName: 'dep1' },
+      { depName: 'dep2', packageName: 'dep2' },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -278,9 +254,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     const pyproject = {
       tool: {
         uv: {
-          sources: {
-            dep1: { index: 'foo' },
-          },
+          sources: { dep1: { index: 'foo' } },
           index: [
             {
               name: 'foo',
@@ -294,14 +268,8 @@ describe('modules/manager/pep621/processors/uv', () => {
     };
 
     const dependencies = [
-      {
-        depName: 'dep1',
-        packageName: 'dep1',
-      },
-      {
-        depName: 'dep2',
-        packageName: 'dep2',
-      },
+      { depName: 'dep1', packageName: 'dep1' },
+      { depName: 'dep2', packageName: 'dep2' },
     ];
 
     const result = processor.process(pyproject, dependencies);
@@ -313,11 +281,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         registryUrls: ['https://foo.com/simple'],
         packageName: 'dep1',
       },
-      {
-        depName: 'dep2',
-        registryUrls: [],
-        packageName: 'dep2',
-      },
+      { depName: 'dep2', registryUrls: [], packageName: 'dep2' },
     ]);
   });
 
@@ -368,12 +332,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        },
-        {
-          cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -480,9 +440,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
-        })),
+        vi
+          .fn()
+          .mockImplementationOnce(() => ({
+            getAccessToken: vi.fn().mockResolvedValue('some-token'),
+          })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -546,9 +508,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           tool: {
             uv: {
-              sources: {
-                dep6: { index: 'pinned-index' },
-              },
+              sources: { dep6: { index: 'pinned-index' } },
               index: [
                 {
                   name: 'pinned-index',
@@ -611,9 +571,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        vi
+          .fn()
+          .mockImplementation(() => ({
+            getAccessToken: vi.fn().mockResolvedValue(undefined),
+          })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -660,9 +622,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           tool: {
             uv: {
-              sources: {
-                dep2: { index: 'pinned-index' },
-              },
+              sources: { dep2: { index: 'pinned-index' } },
               index: [
                 {
                   name: 'pinned-index',
@@ -710,9 +670,11 @@ describe('modules/manager/pep621/processors/uv', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       googleAuth.mockImplementation(
-        vi.fn().mockImplementation(() => ({
-          getAccessToken: vi.fn().mockResolvedValue(undefined),
-        })),
+        vi
+          .fn()
+          .mockImplementation(() => ({
+            getAccessToken: vi.fn().mockResolvedValue(undefined),
+          })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
@@ -786,9 +748,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
-            isLockFileMaintenance: true,
-          },
+          config: { isLockFileMaintenance: true },
           updatedDeps: [],
         },
         {},
@@ -805,9 +765,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'uv lock --upgrade',
-          options: {
-            cwd: '/tmp/github/some/repo/folder',
-          },
+          options: { cwd: '/tmp/github/some/repo/folder' },
         },
       ]);
     });

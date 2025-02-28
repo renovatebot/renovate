@@ -42,17 +42,8 @@ interface GithubGraphqlRepoData<T = unknown> {
 }
 
 export type GithubGraphqlResponse<T = unknown> =
-  | {
-      data: T;
-      errors?: never;
-    }
-  | {
-      data?: never;
-      errors: {
-        type?: string;
-        message: string;
-      }[];
-    };
+  | { data: T; errors?: never }
+  | { data?: never; errors: { type?: string; message: string }[] };
 
 function handleGotError(
   err: GotLegacyError,
@@ -118,10 +109,7 @@ function handleGotError(
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
     const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
     logger.debug(
-      {
-        token: maskToken(opts.token),
-        err,
-      },
+      { token: maskToken(opts.token), err },
       'GitHub failure: Bad credentials',
     );
     if (rateLimit === '60') {
@@ -254,10 +242,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
     cache.platform.github.graphqlPageCache ??= {};
     const graphqlPageCache = cache.platform.github
       .graphqlPageCache as GraphqlPageCache;
-    graphqlPageCache[fieldName] = {
-      pageLastResizedAt,
-      pageSize: newPageSize,
-    };
+    graphqlPageCache[fieldName] = { pageLastResizedAt, pageSize: newPageSize };
   }
 }
 
@@ -313,10 +298,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
     const accept = constructAcceptString(opts.headers?.accept);
 
-    opts.headers = {
-      ...opts.headers,
-      accept,
-    };
+    opts.headers = { ...opts.headers, accept };
 
     try {
       const result = await super.request<T>(url, opts);
@@ -390,11 +372,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     const { paginate, count = MAX_GRAPHQL_PAGE_SIZE, cursor = null } = options;
     let { variables } = options;
     if (paginate) {
-      variables = {
-        ...variables,
-        count,
-        cursor,
-      };
+      variables = { ...variables, count, cursor };
     }
     const body = variables ? { query, variables } : { query };
 
@@ -511,9 +489,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
   ): Promise<HttpResponse> {
     const newOptions: InternalHttpOptions & GithubHttpOptions = {
       ...options,
-      headers: {
-        accept: 'application/vnd.github.raw+json',
-      },
+      headers: { accept: 'application/vnd.github.raw+json' },
     };
 
     let newURL = url;

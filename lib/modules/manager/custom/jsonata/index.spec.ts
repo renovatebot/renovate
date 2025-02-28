@@ -5,9 +5,7 @@ import { defaultConfig, extractPackageFile } from '.';
 
 describe('modules/manager/custom/jsonata/index', () => {
   it('has default config', () => {
-    expect(defaultConfig).toEqual({
-      pinDigests: false,
-    });
+    expect(defaultConfig).toEqual({ pinDigests: false });
   });
 
   it('returns null when content does not match specified file format', async () => {
@@ -318,16 +316,8 @@ describe('modules/manager/custom/jsonata/index', () => {
     expect(res).toMatchObject({
       ...config,
       deps: [
-        {
-          depName: 'foo',
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
-        {
-          depName: 'bar',
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
+        { depName: 'foo', currentValue: '1.0.0', datasource: 'npm' },
+        { depName: 'bar', currentValue: '1.0.0', datasource: 'npm' },
       ],
     });
   });
@@ -345,16 +335,8 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toMatchObject({
       deps: [
-        {
-          depName: 'foo',
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
-        {
-          depName: 'bar',
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
+        { depName: 'foo', currentValue: '1.0.0', datasource: 'npm' },
+        { depName: 'bar', currentValue: '1.0.0', datasource: 'npm' },
       ],
       fileFormat: 'json',
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],

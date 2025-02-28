@@ -1,17 +1,9 @@
 import { fingerprint } from './fingerprint';
 
 describe('util/fingerprint', () => {
-  const obj: any = {
-    name: 'object',
-    type: 'object',
-    isObject: true,
-  };
+  const obj: any = { name: 'object', type: 'object', isObject: true };
 
-  const obj2: any = {
-    type: 'object',
-    name: 'object',
-    isObject: true,
-  };
+  const obj2: any = { type: 'object', name: 'object', isObject: true };
 
   it('returns empty string', () => {
     const res = fingerprint(undefined);

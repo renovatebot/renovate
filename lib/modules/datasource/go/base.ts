@@ -88,10 +88,7 @@ export class BaseGoDatasource {
             regEx(/\.git$/),
             '',
           );
-        return {
-          datasource: GitTagsDatasource.id,
-          packageName,
-        };
+        return { datasource: GitTagsDatasource.id, packageName };
       }
     }
 
@@ -228,11 +225,7 @@ export class BaseGoDatasource {
         ? endpoint.replace(regEx(/\/api\/v4\/?$/), '/')
         : `${parsedUrl.protocol}//${parsedUrl.host}`;
 
-      return {
-        datasource: GitlabTagsDatasource.id,
-        registryUrl,
-        packageName,
-      };
+      return { datasource: GitlabTagsDatasource.id, registryUrl, packageName };
     }
     /* istanbul ignore next */
     return null;
@@ -302,10 +295,7 @@ export class BaseGoDatasource {
         };
       }
       default: {
-        return {
-          datasource: GitTagsDatasource.id,
-          packageName: goImportURL,
-        };
+        return { datasource: GitTagsDatasource.id, packageName: goImportURL };
       }
     }
   }

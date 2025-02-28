@@ -75,14 +75,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
         '/some-dir',
       );
       GlobalConfig.set({ localDir: '/', cacheDir: '/tmp/cache' });
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
       const config = {
-        constraints: {
-          yarn: yarnCompatibility,
-        },
+        constraints: { yarn: yarnCompatibility },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile(
@@ -101,20 +96,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
   );
 
   it('only skips build if skipInstalls is false', async () => {
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir',
-    );
-    const execSnapshots = mockExecAll({
-      stdout: '3.0.0',
-      stderr: '',
-    });
+    Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+    const execSnapshots = mockExecAll({ stdout: '3.0.0', stderr: '' });
     const config = {
-      constraints: {
-        yarn: '3.0.0',
-      },
+      constraints: { yarn: '3.0.0' },
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       skipInstalls: false,
     };
@@ -129,22 +114,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
       allowScripts: true,
       cacheDir: '/tmp/cache',
     });
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir',
-    );
-    const execSnapshots = mockExecAll({
-      stdout: '3.0.0',
-      stderr: '',
-    });
-    const config = {
-      constraints: {
-        yarn: '3.0.0',
-      },
-      ignoreScripts: true,
-    };
+    Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+    const execSnapshots = mockExecAll({ stdout: '3.0.0', stderr: '' });
+    const config = { constraints: { yarn: '3.0.0' }, ignoreScripts: true };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -159,21 +131,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
       allowScripts: true,
       cacheDir: '/tmp/cache',
     });
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir',
-    );
-    const execSnapshots = mockExecAll({
-      stdout: '3.0.0',
-      stderr: '',
-    });
-    const config = {
-      constraints: {
-        yarn: '3.0.0',
-      },
-    };
+    Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+    const execSnapshots = mockExecAll({ stdout: '3.0.0', stderr: '' });
+    const config = { constraints: { yarn: '3.0.0' } };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchObject([
@@ -186,20 +146,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
   });
 
   it('does not use global cache if zero install is detected', async () => {
-    Fixtures.mock(
-      {
-        'yarn.lock': 'package-lock-contents',
-      },
-      'some-dir',
-    );
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
     const config = {
-      constraints: {
-        yarn: '>= 2.0.0',
-      },
+      constraints: { yarn: '>= 2.0.0' },
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       managerData: { yarnZeroInstall: true },
     };
@@ -215,32 +165,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
   ])(
     'performs lock file updates using yarn v%s',
     async (yarnVersion, yarnCompatibility) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir',
-      );
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
-      const config = {
-        constraints: {
-          yarn: yarnCompatibility,
-        },
-      };
+      Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
+      const config = { constraints: { yarn: yarnCompatibility } };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
-        {
-          depName: 'some-dep',
-          newValue: '^1.0.0',
-          isLockfileUpdate: true,
-        },
-        {
-          depName: 'some-dep',
-          newValue: '^1.0.0',
-          isLockfileUpdate: true,
-        },
+        { depName: 'some-dep', newValue: '^1.0.0', isLockfileUpdate: true },
+        { depName: 'some-dep', newValue: '^1.0.0', isLockfileUpdate: true },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -250,21 +180,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it.each([['1.22.0']])(
     'performs lock file updates and full install using yarn v%s',
     async (yarnVersion) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir',
-      );
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
+      Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
-        {
-          depName: 'some-dep',
-          isLockfileUpdate: true,
-        },
+        { depName: 'some-dep', isLockfileUpdate: true },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -279,20 +198,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
       Fixtures.mock(
-        {
-          '.yarnrc': null,
-          'yarn.lock': 'package-lock-contents',
-        },
+        { '.yarnrc': null, 'yarn.lock': 'package-lock-contents' },
         'some-dir',
       );
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
       const config = {
-        constraints: {
-          yarn: yarnCompatibility,
-        },
+        constraints: { yarn: yarnCompatibility },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
@@ -327,14 +238,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
         'some-dir',
       );
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
       const config = {
-        constraints: {
-          yarn: yarnCompatibility,
-        },
+        constraints: { yarn: yarnCompatibility },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile(
@@ -364,27 +270,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
   ])(
     'performs yarn binary update using yarn v%s',
     async (yarnVersion, yarnCompatibility) => {
-      Fixtures.mock(
-        {
-          'yarn.lock': 'package-lock-contents',
-        },
-        'some-dir',
-      );
-      const execSnapshots = mockExecAll({
-        stdout: yarnVersion,
-        stderr: '',
-      });
-      const config = {
-        constraints: {
-          yarn: yarnCompatibility,
-        },
-      };
+      Fixtures.mock({ 'yarn.lock': 'package-lock-contents' }, 'some-dir');
+      const execSnapshots = mockExecAll({ stdout: yarnVersion, stderr: '' });
+      const config = { constraints: { yarn: yarnCompatibility } };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
-        {
-          depName: 'yarn',
-          depType: 'packageManager',
-          newValue: '3.0.1',
-        },
+        { depName: 'yarn', depType: 'packageManager', newValue: '3.0.1' },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -418,15 +308,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
-      constraints: {
-        yarn: '^3.0.0',
-      },
+      constraints: { yarn: '^3.0.0' },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(execSnapshots).toMatchObject([
@@ -468,10 +353,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
     });
@@ -511,19 +393,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({
-      constraints: {
-        yarn: '^3.0.0',
-      },
+      constraints: { yarn: '^3.0.0' },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
-      {
-        managerData: { hasPackageManager: true },
-      },
+      { managerData: { hasPackageManager: true } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
@@ -568,17 +443,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
       ],
     });
 
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
 
     const config = partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
-      constraints: {
-        yarn: '^3.0.0',
-        corepack: '^0.17.0',
-      },
+      constraints: { yarn: '^3.0.0', corepack: '^0.17.0' },
     });
 
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
@@ -622,10 +491,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     mockedFunction(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }, { version: '2.4.3' }],
     });
-    const execSnapshots = mockExecAll({
-      stdout: '2.1.0',
-      stderr: '',
-    });
+    const execSnapshots = mockExecAll({ stdout: '2.1.0', stderr: '' });
     const config = partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
     });
@@ -744,10 +610,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
     it('returns yarn path in subdir', async () => {
       Fixtures.mock(
-        {
-          '.yarn/cli.js': '',
-          '.yarnrc': 'yarn-path "./.yarn/cli.js"\n',
-        },
+        { '.yarn/cli.js': '', '.yarnrc': 'yarn-path "./.yarn/cli.js"\n' },
         'some-dir',
       );
       expect(await yarnHelper.checkYarnrc('some-dir')).toEqual({
@@ -758,9 +621,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
     it('returns offline mirror', async () => {
       Fixtures.mock(
-        {
-          '/tmp/renovate/.yarnrc': 'yarn-offline-mirror "./packages-cache"\n',
-        },
+        { '/tmp/renovate/.yarnrc': 'yarn-offline-mirror "./packages-cache"\n' },
         '/',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
@@ -787,9 +648,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
     it('returns offline mirror and no yarn path for non-existant yarn-path binary', async () => {
       Fixtures.mock(
-        {
-          '.yarnrc': 'yarn-path ./.yarn/cli.js\n',
-        },
+        { '.yarnrc': 'yarn-path ./.yarn/cli.js\n' },
         '/tmp/renovate',
       );
       GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
@@ -841,19 +700,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
           yarnHelper.fuzzyMatchAdditionalYarnrcYml(
             {
               npmRegistries: additionalRegistry?.reduce(
-                (acc, cur) => ({
-                  ...acc,
-                  [cur]: { npmAuthToken: 'xxxxxx' },
-                }),
+                (acc, cur) => ({ ...acc, [cur]: { npmAuthToken: 'xxxxxx' } }),
                 {},
               ),
             },
             {
               npmRegistries: existingRegistry?.reduce(
-                (acc, cur) => ({
-                  ...acc,
-                  [cur]: { npmAuthToken: 'xxxxxx' },
-                }),
+                (acc, cur) => ({ ...acc, [cur]: { npmAuthToken: 'xxxxxx' } }),
                 {},
               ),
             },

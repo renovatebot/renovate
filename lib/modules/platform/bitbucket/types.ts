@@ -27,18 +27,11 @@ export interface PagedResult<T = any> {
 }
 
 export interface RepoBranchingModel {
-  development: {
-    name: string;
-    branch?: {
-      name: string;
-    };
-  };
+  development: { name: string; branch?: { name: string } };
 }
 
 export interface BranchResponse {
-  target: {
-    hash: string;
-  };
+  target: { hash: string };
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
@@ -52,22 +45,10 @@ export interface PrResponse {
   id: number;
   title: string;
   state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
+  links: { commits: { href: string } };
   summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
+  source: { branch: { name: string } };
+  destination: { branch: { name: string } };
   reviewers: Account[];
   created_on: string;
   updated_on: string;

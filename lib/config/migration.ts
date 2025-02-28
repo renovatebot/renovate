@@ -126,10 +126,7 @@ export function migrateConfig(
       if (is.nonEmptyObject(migratedConfig[language])) {
         migratedConfig.packageRules ??= [];
         const currentContent = migratedConfig[language] as any;
-        const packageRule = {
-          matchCategories: [language],
-          ...currentContent,
-        };
+        const packageRule = { matchCategories: [language], ...currentContent };
         migratedConfig.packageRules.unshift(packageRule);
         delete migratedConfig[language];
       }

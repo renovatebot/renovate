@@ -145,16 +145,12 @@ export async function removeDockerContainer(
   const containerName = getContainerName(image, prefix);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(cmd, { encoding: 'utf-8' });
     const containerId = res?.stdout?.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {
-        encoding: 'utf-8',
-      });
+      await rawExec(cmd, { encoding: 'utf-8' });
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -180,9 +176,7 @@ export async function removeDanglingContainers(): Promise<void> {
     );
     const res = await rawExec(
       `docker ps --filter label=${containerLabel} -aq`,
-      {
-        encoding: 'utf-8',
-      },
+      { encoding: 'utf-8' },
     );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout

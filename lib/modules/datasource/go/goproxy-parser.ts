@@ -50,23 +50,14 @@ const noproxyLexer = moo.states({
       match: /\s*?,\s*?/, // TODO #12870
       value: (_: string) => '|',
     },
-    asterisk: {
-      match: '*',
-      value: (_: string) => '[^/]*',
-    },
-    qmark: {
-      match: '?',
-      value: (_: string) => '[^/]',
-    },
+    asterisk: { match: '*', value: (_: string) => '[^/]*' },
+    qmark: { match: '?', value: (_: string) => '[^/]' },
     characterRangeOpen: {
       match: '[',
       push: 'characterRange',
       value: (_: string) => '[',
     },
-    trailingSlash: {
-      match: /\/$/,
-      value: (_: string) => '',
-    },
+    trailingSlash: { match: /\/$/, value: (_: string) => '' },
     char: {
       match: /[^*?\\[\n]/,
       value: (s: string) => s.replace(regEx('\\.', 'g'), '\\.'),
@@ -82,10 +73,7 @@ const noproxyLexer = moo.states({
       match: /\\./, // TODO #12870
       value: (s: string) => s.slice(1),
     },
-    characterRangeEnd: {
-      match: ']',
-      pop: 1,
-    },
+    characterRangeEnd: { match: ']', pop: 1 },
   },
 });
 

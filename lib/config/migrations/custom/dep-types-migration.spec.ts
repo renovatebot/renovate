@@ -4,27 +4,14 @@ describe('config/migrations/custom/dep-types-migration', () => {
   it('should only add depTypes to packageRules', () => {
     expect(DepTypesMigration).toMigrate(
       {
-        peerDependencies: {
-          versionStrategy: 'widen',
-        },
-        dependencies: {
-          versionStrategy: 'widen',
-        },
-        engines: {
-          rangeStrategy: 'auto',
-        },
-        optionalDependencies: {
-          versionStrategy: 'widen',
-        },
-        devDependencies: {
-          versionStrategy: 'widen',
-        },
+        peerDependencies: { versionStrategy: 'widen' },
+        dependencies: { versionStrategy: 'widen' },
+        engines: { rangeStrategy: 'auto' },
+        optionalDependencies: { versionStrategy: 'widen' },
+        devDependencies: { versionStrategy: 'widen' },
         depTypes: [
           'dependencies',
-          {
-            depType: 'optionalDependencies',
-            respectLatest: false,
-          },
+          { depType: 'optionalDependencies', respectLatest: false },
         ],
         packageRules: [
           {
@@ -34,12 +21,7 @@ describe('config/migrations/custom/dep-types-migration', () => {
           },
           {
             packageNames: ['foo'],
-            packageRules: [
-              {
-                depTypeList: ['bar'],
-                automerge: true,
-              },
-            ],
+            packageRules: [{ depTypeList: ['bar'], automerge: true }],
           },
         ],
       },
@@ -52,37 +34,14 @@ describe('config/migrations/custom/dep-types-migration', () => {
           },
           {
             packageNames: ['foo'],
-            packageRules: [
-              {
-                depTypeList: ['bar'],
-                automerge: true,
-              },
-            ],
+            packageRules: [{ depTypeList: ['bar'], automerge: true }],
           },
-          {
-            matchDepTypes: ['peerDependencies'],
-            versionStrategy: 'widen',
-          },
-          {
-            matchDepTypes: ['dependencies'],
-            versionStrategy: 'widen',
-          },
-          {
-            matchDepTypes: ['engines'],
-            rangeStrategy: 'auto',
-          },
-          {
-            matchDepTypes: ['optionalDependencies'],
-            versionStrategy: 'widen',
-          },
-          {
-            matchDepTypes: ['devDependencies'],
-            versionStrategy: 'widen',
-          },
-          {
-            matchDepTypes: ['optionalDependencies'],
-            respectLatest: false,
-          },
+          { matchDepTypes: ['peerDependencies'], versionStrategy: 'widen' },
+          { matchDepTypes: ['dependencies'], versionStrategy: 'widen' },
+          { matchDepTypes: ['engines'], rangeStrategy: 'auto' },
+          { matchDepTypes: ['optionalDependencies'], versionStrategy: 'widen' },
+          { matchDepTypes: ['devDependencies'], versionStrategy: 'widen' },
+          { matchDepTypes: ['optionalDependencies'], respectLatest: false },
         ],
       },
     );

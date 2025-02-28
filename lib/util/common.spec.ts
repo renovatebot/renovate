@@ -52,14 +52,8 @@ describe('util/common', () => {
     });
 
     it('uses host rules', () => {
-      hostRules.add({
-        hostType: 'bitbucket',
-        matchHost: 'bb.example.com',
-      });
-      hostRules.add({
-        hostType: 'gitea',
-        matchHost: 'gt.example.com',
-      });
+      hostRules.add({ hostType: 'bitbucket', matchHost: 'bb.example.com' });
+      hostRules.add({ hostType: 'gitea', matchHost: 'gt.example.com' });
       hostRules.add({
         hostType: 'github-changelog',
         matchHost: 'gh.example.com',
@@ -68,10 +62,7 @@ describe('util/common', () => {
         hostType: 'gitlab-changelog',
         matchHost: 'gl.example.com',
       });
-      hostRules.add({
-        hostType: 'unknown',
-        matchHost: 'f.example.com',
-      });
+      hostRules.add({ hostType: 'unknown', matchHost: 'f.example.com' });
 
       expect(detectPlatform('https://bb.example.com/chalk/chalk')).toBe(
         'bitbucket',

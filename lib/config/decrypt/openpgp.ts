@@ -40,13 +40,8 @@ export async function tryDecryptOpenPgp(
     if (!armoredMessage.endsWith(endBlock)) {
       armoredMessage = `${armoredMessage}${endBlock}`;
     }
-    const message = await pgp.readMessage({
-      armoredMessage,
-    });
-    const { data } = await pgp.decrypt({
-      message,
-      decryptionKeys: pk,
-    });
+    const message = await pgp.readMessage({ armoredMessage });
+    const { data } = await pgp.decrypt({ message, decryptionKeys: pk });
     logger.debug('Decrypted config using openpgp');
     return data;
   } catch (err) {

@@ -96,10 +96,7 @@ async function getPlatformConfig(
   config: RepoParams,
 ): Promise<WorkerPlatformConfig> {
   const platformConfig = await platform.initRepo(config);
-  return {
-    ...config,
-    ...platformConfig,
-  };
+  return { ...config, ...platformConfig };
 }
 
 // TODO: fix types (#22198)

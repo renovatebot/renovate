@@ -69,21 +69,13 @@ This is because there is no commonly accepted file/directory naming convention f
 If most `.yaml` files in your repository are Flux manifests, then you could add this to your config:
 
 ```json
-{
-  "flux": {
-    "fileMatch": ["\\.yaml$"]
-  }
-}
+{ "flux": { "fileMatch": ["\\.yaml$"] } }
 ```
 
 If instead you have all your Flux manifests inside a `flux/` directory, you would add this:
 
 ```json
-{
-  "flux": {
-    "fileMatch": ["flux/.+\\.yaml$"]
-  }
-}
+{ "flux": { "fileMatch": ["flux/.+\\.yaml$"] } }
 ```
 
 ### Versioning

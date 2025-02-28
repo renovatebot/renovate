@@ -45,13 +45,7 @@ export async function rebaseMigrationBranch(
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName,
-    files: [
-      {
-        type: 'addition',
-        path: configFileName,
-        contents,
-      },
-    ],
+    files: [{ type: 'addition', path: configFileName, contents }],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
   });

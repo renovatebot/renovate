@@ -8,11 +8,7 @@ describe('modules/manager/pip-compile/utils', () => {
         outputFile: 'subdir/reqs.txt',
         result: '.',
       },
-      {
-        fileName: 'subdir/reqs.txt',
-        outputFile: 'reqs.txt',
-        result: 'subdir',
-      },
+      { fileName: 'subdir/reqs.txt', outputFile: 'reqs.txt', result: 'subdir' },
     ])(
       'returns object on correct options',
       ({ fileName, outputFile, result }) => {

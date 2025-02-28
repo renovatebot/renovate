@@ -229,28 +229,16 @@ describe('modules/manager/terraform/lockfile/hash', () => {
               version: '14.3.1',
               protocols: ['5.0'],
               platforms: [
-                {
-                  os: 'linux',
-                  arch: 'amd64',
-                },
-                {
-                  os: 'darwin',
-                  arch: 'amd64',
-                },
+                { os: 'linux', arch: 'amd64' },
+                { os: 'darwin', arch: 'amd64' },
               ],
             },
             {
               version: '1.33.0',
               protocols: ['4.0', '5.0'],
               platforms: [
-                {
-                  os: 'linux',
-                  arch: 'amd64',
-                },
-                {
-                  os: 'darwin',
-                  arch: 'amd64',
-                },
+                { os: 'linux', arch: 'amd64' },
+                { os: 'darwin', arch: 'amd64' },
               ],
             },
           ],

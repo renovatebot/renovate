@@ -9,11 +9,7 @@ export class Throttle {
   private throttle: ReturnType<typeof pThrottle>;
 
   constructor(interval: number) {
-    this.throttle = pThrottle({
-      strict: true,
-      limit: 1,
-      interval,
-    });
+    this.throttle = pThrottle({ strict: true, limit: 1, interval });
   }
 
   add<T>(task: () => Promise<T>): Promise<T> {

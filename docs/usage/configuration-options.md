@@ -61,14 +61,8 @@ Consider this example:
 {
   "labels": ["dependencies"],
   "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "labels": ["linting"]
-    },
-    {
-      "matchDepTypes": ["optionalDependencies"],
-      "addLabels": ["optional"]
-    }
+    { "matchPackageNames": ["/eslint/"], "labels": ["linting"] },
+    { "matchDepTypes": ["optionalDependencies"], "addLabels": ["optional"] }
   ]
 }
 ```
@@ -94,9 +88,7 @@ Say you're using a monorepo and want to split pull requests based on the locatio
 This can be done with this configuration:
 
 ```json
-{
-  "additionalBranchPrefix": "{{parentDir}}-"
-}
+{ "additionalBranchPrefix": "{{parentDir}}-" }
 ```
 
 ## additionalReviewers
@@ -191,12 +183,7 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
-    }
-  ]
+  "packageRules": [{ "matchDepTypes": ["devDependencies"], "automerge": true }]
 }
 ```
 
@@ -310,9 +297,7 @@ If so then Renovate will reflect this setting in its description and use package
 `baseBranches` supports Regular Expressions that must begin and end with `/`, e.g.:
 
 ```json
-{
-  "baseBranches": ["main", "/^release\\/.*/"]
-}
+{ "baseBranches": ["main", "/^release\\/.*/"] }
 ```
 
 You can negate the regex by prefixing it with `!`.
@@ -320,17 +305,13 @@ Only use a single negation and do not mix it with other branch names, since all 
 With a negation, all branches except those matching the regex will be added to the result:
 
 ```json
-{
-  "baseBranches": ["!/^pre-release\\/.*/"]
-}
+{ "baseBranches": ["!/^pre-release\\/.*/"] }
 ```
 
 You can also use the special `"$default"` string to denote the repository's default branch, which is useful if you have it in an org preset, e.g.:
 
 ```json
-{
-  "baseBranches": ["$default", "/^release\\/.*/"]
-}
+{ "baseBranches": ["$default", "/^release\\/.*/"] }
 ```
 
 <!-- prettier-ignore -->
@@ -359,9 +340,7 @@ This limit is enforced on a per-repository basis.
 Example config:
 
 ```json
-{
-  "branchConcurrentLimit": 3
-}
+{ "branchConcurrentLimit": 3 }
 ```
 
 <!-- prettier-ignore -->
@@ -472,9 +451,7 @@ Configure this if you wish Renovate to add a commit body, otherwise Renovate use
 For example, To add `[skip ci]` to every commit you could configure:
 
 ```json
-{
-  "commitBody": "[skip ci]"
-}
+{ "commitBody": "[skip ci]" }
 ```
 
 Another example would be if you want to configure a DCO sign off to each commit.
@@ -482,9 +459,7 @@ Another example would be if you want to configure a DCO sign off to each commit.
 If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
-{
-  "extends": [":gitSignOff"]
-}
+{ "extends": [":gitSignOff"] }
 ```
 
 ## commitBodyTable
@@ -527,10 +502,7 @@ We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules
 ```json
 {
   "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "commitMessageTopic": "{{depName}}"
-    }
+    { "matchManagers": ["github-actions"], "commitMessageTopic": "{{depName}}" }
   ]
 }
 ```
@@ -613,23 +585,13 @@ Constraints are also used to manually restrict which _datasource_ versions are p
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
-{
-  "constraints": {
-    "python": "2.7"
-  }
-}
+{ "constraints": { "python": "2.7" } }
 ```
 
 If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
 
 ```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+{ "force": { "constraints": { "node": "< 15.0.0" } } }
 ```
 
 <!-- prettier-ignore -->
@@ -1006,19 +968,9 @@ But the second custom manager will upgrade both definitions as its first `matchS
 ```json title="example.json"
 {
   "backup": {
-    "test": {
-      "name": "grafana/loki",
-      "type": "docker",
-      "value": "1.6.1"
-    }
+    "test": { "name": "grafana/loki", "type": "docker", "value": "1.6.1" }
   },
-  "setup": {
-    "test": {
-      "name": "python",
-      "type": "docker",
-      "value": "3.9.0"
-    }
-  }
+  "setup": { "test": { "name": "python", "type": "docker", "value": "3.9.0" } }
 }
 ```
 
@@ -1142,9 +1094,7 @@ Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default
 To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
 
 ```json
-{
-  "extends": ["config:recommended", ":disableDependencyDashboard"]
-}
+{ "extends": ["config:recommended", ":disableDependencyDashboard"] }
 ```
 
 Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository.
@@ -1185,19 +1135,13 @@ You can configure Renovate to wait for approval for:
 If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
 
 ```json
-{
-  "dependencyDashboardApproval": true
-}
+{ "dependencyDashboardApproval": true }
 ```
 
 If you want to require approval for _major_ updates, set `dependencyDashboardApproval` to `true` within a `major` object:
 
 ```json
-{
-  "major": {
-    "dependencyDashboardApproval": true
-  }
-}
+{ "major": { "dependencyDashboardApproval": true } }
 ```
 
 If you want to approve _specific_ packages, set `dependencyDashboardApproval` to `true` within a `packageRules` entry where you have defined a specific package or pattern.
@@ -1260,9 +1204,7 @@ Add to this object if you wish to define rules that apply only to PRs that updat
 If you want the PRs created by Renovate to be considered as drafts rather than normal PRs, you could add this property to your `renovate.json`:
 
 ```json
-{
-  "draftPR": true
-}
+{ "draftPR": true }
 ```
 
 This option is evaluated at PR/MR creation time.
@@ -1279,22 +1221,13 @@ The most common use of `enabled` is if you want to turn Renovate's functionality
 For example, if you wanted to disable Renovate completely on a repository, you could make this your `renovate.json`:
 
 ```json
-{
-  "enabled": false
-}
+{ "enabled": false }
 ```
 
 To disable Renovate for all `eslint` packages, you can configure a package rule like:
 
 ```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["eslint**"],
-      "enabled": false
-    }
-  ]
-}
+{ "packageRules": [{ "matchPackageNames": ["eslint**"], "enabled": false }] }
 ```
 
 To disable Renovate for npm `devDependencies` but keep it for `dependencies` you could configure:
@@ -1318,9 +1251,7 @@ This is a way to allow only certain package managers and implicitly disable all 
 Example:
 
 ```json
-{
-  "enabledManagers": ["dockerfile", "npm"]
-}
+{ "enabledManagers": ["dockerfile", "npm"] }
 ```
 
 To enable custom managers you will need to add `custom.` prefix before their names
@@ -1328,9 +1259,7 @@ To enable custom managers you will need to add `custom.` prefix before their nam
 Example:
 
 ```json
-{
-  "enabledManagers": ["custom.regex"]
-}
+{ "enabledManagers": ["custom.regex"] }
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
@@ -1388,11 +1317,7 @@ Behavior:
 - Values set in the `env` configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
 
 ```json title="Example renovate.json with env configuration"
-{
-  "env": {
-    "SOME_ENV_VARIABLE": "SOME_STRING_VALUE"
-  }
-}
+{ "env": { "SOME_ENV_VARIABLE": "SOME_STRING_VALUE" } }
 ```
 
 ## excludeCommitPaths
@@ -1402,9 +1327,7 @@ The initial intended use is to allow the user to exclude certain dependencies fr
 Example:
 
 ```json
-{
-  "excludeCommitPaths": ["vendor/golang.org/x/text/**"]
-}
+{ "excludeCommitPaths": ["vendor/golang.org/x/text/**"] }
 ```
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
@@ -1458,10 +1381,7 @@ A similar one could strip leading `v` prefixes:
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["baz"],
-      "extractVersion": "^v(?<version>.*)$"
-    }
+    { "matchPackageNames": ["baz"], "extractVersion": "^v(?<version>.*)$" }
   ]
 }
 ```
@@ -1511,11 +1431,7 @@ This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerf
 Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could add the missing file like this:
 
 ```json
-{
-  "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
-  }
-}
+{ "dockerfile": { "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"] } }
 ```
 
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
@@ -1536,10 +1452,7 @@ The main use case is to follow a pre-release tag of a dependency, say TypeScript
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["typescript"],
-      "followTag": "insiders"
-    }
+    { "matchPackageNames": ["typescript"], "followTag": "insiders" }
   ]
 }
 ```
@@ -1633,9 +1546,7 @@ If you have other bots which commit on top of Renovate PRs, and don't want Renov
 Example:
 
 ```json
-{
-  "gitIgnoredAuthors": ["some-bot@example.org"]
-}
+{ "gitIgnoredAuthors": ["some-bot@example.org"] }
 ```
 
 ## gitLabIgnoreApprovals
@@ -1651,9 +1562,7 @@ By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
 If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option:
 
 ```json
-{
-  "goGetDirs": ["./some-project/", "./tools/..."]
-}
+{ "goGetDirs": ["./some-project/", "./tools/..."] }
 ```
 
 ## group
@@ -1748,35 +1657,19 @@ If multiple `hostRules` match a request, then they will be applied in the follow
 To disable requests to a particular host, you can configure a rule like:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "registry.npmjs.org",
-      "enabled": false
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "registry.npmjs.org", "enabled": false }] }
 ```
 
 A preset alternative to the above is:
 
 ```json
-{
-  "extends": [":disableHost(registry.npmjs.org)"]
-}
+{ "extends": [":disableHost(registry.npmjs.org)"] }
 ```
 
 To match specific ports you have to add a protocol to `matchHost`:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "https://domain.com:9118",
-      "enabled": false
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "https://domain.com:9118", "enabled": false }] }
 ```
 
 <!-- prettier-ignore -->
@@ -1794,14 +1687,7 @@ This field can be used to configure status codes that Renovate ignores and passe
 For example to also skip 404 responses then configure the following:
 
 ```json
-{
-  "hostRules": [
-    {
-      "abortOnError": true,
-      "abortIgnoreStatusCodes": [404]
-    }
-  ]
-}
+{ "hostRules": [{ "abortOnError": true, "abortIgnoreStatusCodes": [404] }] }
 ```
 
 <!-- prettier-ignore -->
@@ -1816,39 +1702,19 @@ By default, Renovate will only abort for known public hosts, which has the downs
 To abort Renovate runs for HTTP failures from _any_ host:
 
 ```json
-{
-  "hostRules": [
-    {
-      "abortOnError": true
-    }
-  ]
-}
+{ "hostRules": [{ "abortOnError": true }] }
 ```
 
 To abort Renovate runs for any `docker` datasource failures:
 
 ```json
-{
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "abortOnError": true
-    }
-  ]
-}
+{ "hostRules": [{ "hostType": "docker", "abortOnError": true }] }
 ```
 
 To abort Renovate for errors for a specific `docker` host:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "docker.company.com",
-      "abortOnError": true
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "docker.company.com", "abortOnError": true }] }
 ```
 
 When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) gets a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
@@ -1928,12 +1794,7 @@ Example config:
 
 ```json
 {
-  "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "concurrentRequestLimit": 2
-    }
-  ]
+  "hostRules": [{ "matchHost": "api.github.com", "concurrentRequestLimit": 2 }]
 }
 ```
 
@@ -1965,9 +1826,7 @@ For example:
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
-      "headers": {
-        "X-custom-header": "secret"
-      }
+      "headers": { "X-custom-header": "secret" }
     }
   ]
 }
@@ -2005,14 +1864,7 @@ This is insecure and is not recommended.
 Example:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "reg.insecure.com",
-      "insecureRegistry": true
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "reg.insecure.com", "insecureRegistry": true }] }
 ```
 
 ### keepAlive
@@ -2059,14 +1911,7 @@ Default value `0` means no limit.
 Example config:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "maxRequestsPerSecond": 2
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "api.github.com", "maxRequestsPerSecond": 2 }] }
 ```
 
 ### maxRetryAfter
@@ -2079,14 +1924,7 @@ If the `Retry-After` value is more than 60 seconds, Renovate will abort the requ
 You can configure a different maximum value in seconds using `maxRetryAfter`:
 
 ```json
-{
-  "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "maxRetryAfter": 25
-    }
-  ]
-}
+{ "hostRules": [{ "matchHost": "api.github.com", "maxRetryAfter": 25 }] }
 ```
 
 ### newLogLevel
@@ -2114,11 +1952,7 @@ This option could be used to avoid rate limits for certain platforms like GitHub
 ```json
 {
   "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "readOnly": true,
-      "token": "********"
-    }
+    { "matchHost": "api.github.com", "readOnly": true, "token": "********" }
   ]
 }
 ```
@@ -2132,13 +1966,7 @@ The default is 60s, which is quite high.
 To adjust it down to 10s for all queries, do this:
 
 ```json
-{
-  "hostRules": [
-    {
-      "timeout": 10000
-    }
-  ]
-}
+{ "hostRules": [{ "timeout": 10000 }] }
 ```
 
 ## ignoreDeprecated
@@ -2154,9 +1982,7 @@ The `ignoreDeps` configuration field allows you to define a list of dependency n
 Currently it supports only "exact match" dependency names and not any patterns. e.g. to ignore both `eslint` and `eslint-config-base` you would add this to your config:
 
 ```json
-{
-  "ignoreDeps": ["eslint", "eslint-config-base"]
-}
+{ "ignoreDeps": ["eslint", "eslint-config-base"] }
 ```
 
 The above is the same as if you wrote this package rule:
@@ -2164,10 +1990,7 @@ The above is the same as if you wrote this package rule:
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["eslint", "eslint-config-base"],
-      "enabled": false
-    }
+    { "matchPackageNames": ["eslint", "eslint-config-base"], "enabled": false }
   ]
 }
 ```
@@ -2180,9 +2003,7 @@ With this setting you can selectively ignore package files that would normally b
 For instance if you have a project with an `"examples/"` directory you wish to ignore:
 
 ```json
-{
-  "ignorePaths": ["**/examples/**"]
-}
+{ "ignorePaths": ["**/examples/**"] }
 ```
 
 Renovate's default ignore is `node_modules` and `bower_components` only.
@@ -2209,10 +2030,7 @@ Use this if you are extending a complex preset but don't want to use every "sub 
 For example, consider this config:
 
 ```json
-{
-  "extends": ["config:recommended"],
-  "ignorePresets": ["group:monorepos"]
-}
+{ "extends": ["config:recommended"], "ignorePresets": ["group:monorepos"] }
 ```
 
 It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `"group:monorepos"` rule.
@@ -2224,10 +2042,7 @@ If tests have failed, Renovate then does add them, but only if the assignees and
 In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
 
 ```json
-{
-  "reviewers": ["foo"],
-  "ignoreReviewers": ["renovate-approve"]
-}
+{ "reviewers": ["foo"], "ignoreReviewers": ["renovate-approve"] }
 ```
 
 ## ignoreScripts
@@ -2305,12 +2120,7 @@ Consider this example:
 ```json
 {
   "labels": ["dependencies"],
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "labels": ["linting"]
-    }
-  ]
+  "packageRules": [{ "matchPackageNames": ["/eslint/"], "labels": ["linting"] }]
 }
 ```
 
@@ -2366,9 +2176,7 @@ By default, `lockFileMaintenance` is disabled.
 To enable `lockFileMaintenance` add this to your configuration:
 
 ```json
-{
-  "lockFileMaintenance": { "enabled": true }
-}
+{ "lockFileMaintenance": { "enabled": true } }
 ```
 
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
@@ -2383,14 +2191,8 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ```json
 {
   "logLevelRemap": [
-    {
-      "matchMessage": "/^pip-compile:/",
-      "newLogLevel": "info"
-    },
-    {
-      "matchMessage": "Package lookup error",
-      "newLogLevel": "warn"
-    },
+    { "matchMessage": "/^pip-compile:/", "newLogLevel": "info" },
+    { "matchMessage": "Package lookup error", "newLogLevel": "warn" },
     {
       "matchMessage": "/^Please upgrade the version of Node.js/",
       "newLogLevel": "info"
@@ -2409,9 +2211,7 @@ If set to the number of an existing [GitHub milestone](https://docs.github.com/e
 Renovate will only add a milestone when it _creates_ the PR.
 
 ```json title="Example Renovate config"
-{
-  "milestone": 12
-}
+{ "milestone": 12 }
 ```
 
 ## minimumReleaseAge
@@ -2458,10 +2258,7 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 ```json
 {
   "packageRules": [
-    {
-      "matchDatasources": ["npm"],
-      "minimumReleaseAge": "3 days"
-    }
+    { "matchDatasources": ["npm"], "minimumReleaseAge": "3 days" }
   ]
 }
 ```
@@ -2560,10 +2357,7 @@ Here is an example if you want to group together all packages starting with `esl
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["eslint**"],
-      "groupName": "eslint packages"
-    }
+    { "matchPackageNames": ["eslint**"], "groupName": "eslint packages" }
   ]
 }
 ```
@@ -2623,10 +2417,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 ```json
 {
   "packageRules": [
-    {
-      "matchFileNames": ["package.json"],
-      "dependencyDashboardApproval": true
-    }
+    { "matchFileNames": ["package.json"], "dependencyDashboardApproval": true }
   ]
 }
 ```
@@ -2649,10 +2440,7 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["angular"],
-      "allowedVersions": "<=1.5"
-    }
+    { "matchPackageNames": ["angular"], "allowedVersions": "<=1.5" }
   ]
 }
 ```
@@ -2687,10 +2475,7 @@ You must use the `!/ /` syntax, like this:
 ```json
 {
   "packageRules": [
-    {
-      "matchPackageNames": ["chalk"],
-      "allowedVersions": "!/java$/"
-    }
+    { "matchPackageNames": ["chalk"], "allowedVersions": "!/java$/" }
   ]
 }
 ```
@@ -2763,14 +2548,7 @@ The categories can be found in the [manager documentation](modules/manager/index
     If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
 
 ```json
-{
-  "packageRules": [
-    {
-      "matchCategories": ["python"],
-      "addLabels": ["py"]
-    }
-  ]
-}
+{ "packageRules": [{ "matchCategories": ["python"], "addLabels": ["py"] }] }
 ```
 
 ### matchConfidence
@@ -2800,10 +2578,7 @@ For example, if you want to group updates for dependencies where the existing ve
 ```json
 {
   "packageRules": [
-    {
-      "matchCurrentAge": "> 2 years",
-      "groupName": "old dependencies"
-    }
+    { "matchCurrentAge": "> 2 years", "groupName": "old dependencies" }
   ]
 }
 ```
@@ -2877,10 +2652,7 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 ```json
 {
   "packageRules": [
-    {
-      "matchCurrentVersion": ">=1.0.0",
-      "matchPackageNames": ["angular"]
-    }
+    { "matchCurrentVersion": ">=1.0.0", "matchPackageNames": ["angular"] }
   ]
 }
 ```
@@ -2924,10 +2696,7 @@ Use this field to restrict rules to a particular datasource. e.g.
 ```json
 {
   "packageRules": [
-    {
-      "matchDatasources": ["orb"],
-      "labels": ["circleci-orb!!"]
-    }
+    { "matchDatasources": ["orb"], "labels": ["circleci-orb!!"] }
   ]
 }
 ```
@@ -2948,14 +2717,7 @@ Renovate will compare `matchFileNames` glob matching against the dependency's pa
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
 ```json
-{
-  "packageRules": [
-    {
-      "matchFileNames": ["package.json"],
-      "labels": ["npm"]
-    }
-  ]
-}
+{ "packageRules": [{ "matchFileNames": ["package.json"], "labels": ["npm"] }] }
 ```
 
 The following example matches any `package.json`, including files like `backend/package.json`:
@@ -3147,10 +2909,7 @@ For example to apply a special label to `major` updates:
 ```json
 {
   "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "labels": ["UPDATE-MAJOR"]
-    }
+    { "matchUpdateTypes": ["major"], "labels": ["UPDATE-MAJOR"] }
   ]
 }
 ```
@@ -3167,14 +2926,7 @@ For more details on supported syntax see Renovate's [string pattern matching doc
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
 ```json
-{
-  "hostRules": [
-    {
-      "hostType": "merge-confidence",
-      "token": "********"
-    }
-  ]
-}
+{ "hostRules": [{ "hostType": "merge-confidence", "token": "********" }] }
 ```
 
 ### overrideDatasource
@@ -3251,14 +3003,8 @@ Here's an example of how you would define PR priority so that `devDependencies` 
 ```json
 {
   "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "prPriority": -1
-    },
-    {
-      "matchPackageNames": ["react"],
-      "prPriority": 5
-    }
+    { "matchDepTypes": ["devDependencies"], "prPriority": -1 },
+    { "matchPackageNames": ["react"], "prPriority": 5 }
   ]
 }
 ```
@@ -3545,11 +3291,7 @@ You can configure this object to either:
 - _add_ a definition for a new/additional column.
 
 ```json title="Modifying the default value for the Package column to put it inside a code block"
-{
-  "prBodyDefinitions": {
-    "Package": "`{{{depName}}}`"
-  }
-}
+{ "prBodyDefinitions": { "Package": "`{{{depName}}}`" } }
 ```
 
 ```json title="Adding a custom Sourcegraph column definition"
@@ -3865,9 +3607,7 @@ Add to this object if you wish to define rules that apply only to PRs that repla
 For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
 
 ```json
-{
-  "replacementApproach": "alias"
-}
+{ "replacementApproach": "alias" }
 ```
 
 ## respectLatest
@@ -3885,9 +3625,7 @@ If you're assigning a team to review on GitHub, you must use the prefix `team:` 
 Say the full team name on GitHub is `@organization/foo`, then you'd set the config option like this:
 
 ```json
-{
-  "reviewers": ["team:foo"]
-}
+{ "reviewers": ["team:foo"] }
 ```
 
 **Required reviewers on Azure DevOps**
@@ -3897,9 +3635,7 @@ To mark a reviewer as required on Azure DevOps, you must use the prefix `require
 For example: if the username or team name is `bar` then you would set the config option like this:
 
 ```json
-{
-  "reviewers": ["required:bar"]
-}
+{ "reviewers": ["required:bar"] }
 ```
 
 ## reviewersFromCodeOwners
@@ -4085,9 +3821,7 @@ By default, Renovate listens to the label: `"stop-updating"`.
 You can set your own label name with the `"stopUpdatingLabel"` field:
 
 ```json
-{
-  "stopUpdatingLabel": "take-a-break-renovate"
-}
+{ "stopUpdatingLabel": "take-a-break-renovate" }
 ```
 
 ## suppressNotifications
@@ -4096,9 +3830,7 @@ Use this field to suppress various types of warnings and other notifications fro
 For example:
 
 ```json
-{
-  "suppressNotifications": ["prIgnoreNotification"]
-}
+{ "suppressNotifications": ["prIgnoreNotification"] }
 ```
 
 The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
@@ -4273,11 +4005,7 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
 ```json title="Disabling vulnerability alerts"
-{
-  "vulnerabilityAlerts": {
-    "enabled": false
-  }
-}
+{ "vulnerabilityAlerts": { "enabled": false } }
 ```
 
 <!-- prettier-ignore -->
@@ -4292,9 +4020,5 @@ For example, if the current version is `1.0.0`, and a vulnerability is fixed in 
 If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its normal strategy for picking upgrades, e.g. in the above example it will propose an update to `1.2.0` to fix the vulnerability.
 
 ```json title="Setting vulnerabilityFixStrategy to highest"
-{
-  "vulnerabilityAlerts": {
-    "vulnerabilityFixStrategy": "highest"
-  }
-}
+{ "vulnerabilityAlerts": { "vulnerabilityFixStrategy": "highest" } }
 ```

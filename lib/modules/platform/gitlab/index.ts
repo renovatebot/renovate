@@ -119,9 +119,7 @@ export async function initPlatform({
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
+  const platformConfig: PlatformResult = { endpoint: defaults.endpoint };
   let gitlabVersion: string;
   try {
     if (!gitAuthor) {
@@ -202,12 +200,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJsonUnchecked<RepoResponse[]>(url, {
-            paginate: true,
-          }),
-        {
-          concurrency: 2,
-        },
+          gitlabApi.getJsonUnchecked<RepoResponse[]>(url, { paginate: true }),
+        { concurrency: 2 },
       )
     ).flatMap((response) => response.body);
 
@@ -372,10 +366,7 @@ export async function initRepo({
     delete config.prList;
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
-    await git.initRepo({
-      ...config,
-      url,
-    });
+    await git.initRepo({ ...config, url });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
@@ -549,9 +540,7 @@ export async function getBranchStatus(
 // Pull Request
 
 async function fetchPrList(): Promise<Pr[]> {
-  const searchParams = {
-    per_page: '100',
-  } as any;
+  const searchParams = { per_page: '100' } as any;
   // istanbul ignore if
   if (!config.ignorePrAuthor) {
     searchParams.scope = 'created_by_me';
@@ -561,9 +550,7 @@ async function fetchPrList(): Promise<Pr[]> {
   try {
     const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
       urlString,
-      {
-        paginate: true,
-      },
+      { paginate: true },
     );
     return res.body.map((pr) => prInfo(pr));
   } catch (err) /* istanbul ignore next */ {
@@ -585,13 +572,10 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJsonUnchecked<
-      {
-        name: string;
-        rule_type: string;
-        id: number;
-      }[]
-    >(url);
+    const { body: rules } =
+      await gitlabApi.getJsonUnchecked<
+        { name: string; rule_type: string; id: number }[]
+      >(url);
 
     const ruleName = 'renovateIgnoreApprovals';
 
@@ -624,10 +608,7 @@ async function ignoreApprovals(pr: number): Promise<void> {
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {
       await gitlabApi.postJson(url, {
-        body: {
-          name: ruleName,
-          approvals_required: 0,
-        },
+        body: { name: ruleName, approvals_required: 0 },
       });
     }
   } catch (err) {
@@ -672,9 +653,7 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
-          pipeline: {
-            status: string;
-          };
+          pipeline: { status: string };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
@@ -871,11 +850,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   try {
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
-      {
-        body: {
-          should_remove_source_branch: true,
-        },
-      },
+      { body: { should_remove_source_branch: true } },
     );
     return true;
   } catch (err) /* istanbul ignore next */ {
@@ -972,10 +947,7 @@ export async function getBranchPr(
   branchName: string,
 ): Promise<GitlabPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({
-    branchName,
-    state: 'open',
-  });
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 
@@ -1015,11 +987,7 @@ export async function setBranchStatus({
   } else if (renovateState === 'red') {
     state = 'failed';
   }
-  const options: any = {
-    state,
-    description,
-    context,
-  };
+  const options: any = { state, description, context };
 
   if (targetUrl) {
     options.target_url = targetUrl;
@@ -1119,10 +1087,7 @@ export async function getIssue(
         { memCache: useCache },
       )
     ).body.description;
-    return {
-      number,
-      body: issueBody,
-    };
+    return { number, body: issueBody };
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
@@ -1212,9 +1177,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
       logger.debug({ issue }, 'Closing issue');
       await gitlabApi.putJson(
         `projects/${config.repository}/issues/${issue.iid}`,
-        {
-          body: { state_event: 'close' },
-        },
+        { body: { state_event: 'close' } },
       );
     }
   }
@@ -1322,9 +1285,7 @@ export async function deleteLabel(
       .join(',');
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${issueNo}`,
-      {
-        body: { labels },
-      },
+      { body: { labels } },
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
@@ -1346,9 +1307,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
   await gitlabApi.postJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes`,
-    {
-      body: { body },
-    },
+    { body: { body } },
   );
 }
 
@@ -1360,9 +1319,7 @@ async function editComment(
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
-    {
-      body: { body },
-    },
+    { body: { body } },
   );
 }
 

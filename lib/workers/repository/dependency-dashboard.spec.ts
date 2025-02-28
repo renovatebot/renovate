@@ -65,10 +65,7 @@ function genRandPackageFile(
 ): Record<string, PackageFile[]> {
   const deps: PackageDependency[] = [];
   for (let i = 0; i < depsNum; i++) {
-    deps.push({
-      depName: genRandString(depNameLen),
-      currentValue: '1.0.0',
-    });
+    deps.push({ depName: genRandString(depNameLen), currentValue: '1.0.0' });
   }
   return { npm: [{ packageFile: 'package.json', deps }] };
 }
@@ -324,10 +321,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('do nothing if it has no dependencyDashboardApproval branches', async () => {
       const branches = [
-        {
-          ...mock<BranchConfig>(),
-          prTitle: 'pr1',
-        },
+        { ...mock<BranchConfig>(), prTitle: 'pr1' },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
@@ -369,11 +363,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
       const branches: BranchConfig[] = [
-        {
-          ...mock<BranchConfig>(),
-          prTitle: 'pr1',
-          result: 'automerged',
-        },
+        { ...mock<BranchConfig>(), prTitle: 'pr1', result: 'automerged' },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
@@ -424,12 +414,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
       const branches: BranchConfig[] = [];
       config.repository = 'test';
-      config.packageRules = [
-        {
-          dependencyDashboardApproval: true,
-        },
-        {},
-      ];
+      config.packageRules = [{ dependencyDashboardApproval: true }, {}];
       config.dependencyDashboardHeader =
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
@@ -734,12 +719,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('adds a checkbox for config migration', async () => {
       const branches: BranchConfig[] = [];
       config.repository = 'test';
-      config.packageRules = [
-        {
-          dependencyDashboardApproval: true,
-        },
-        {},
-      ];
+      config.packageRules = [{ dependencyDashboardApproval: true }, {}];
       config.dependencyDashboardHeader =
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
@@ -748,9 +728,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config,
         branches,
         undefined,
-        {
-          result: 'add-checkbox',
-        },
+        { result: 'add-checkbox' },
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -765,12 +743,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('adds config migration pr link when it exists', async () => {
       const branches: BranchConfig[] = [];
       config.repository = 'test';
-      config.packageRules = [
-        {
-          dependencyDashboardApproval: true,
-        },
-        {},
-      ];
+      config.packageRules = [{ dependencyDashboardApproval: true }, {}];
       config.dependencyDashboardHeader =
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
@@ -779,10 +752,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config,
         branches,
         undefined,
-        {
-          result: 'pr-exists',
-          prNumber: 1,
-        },
+        { result: 'pr-exists', prNumber: 1 },
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -797,12 +767,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('adds related text when config migration pr has been modified', async () => {
       const branches: BranchConfig[] = [];
       config.repository = 'test';
-      config.packageRules = [
-        {
-          dependencyDashboardApproval: true,
-        },
-        {},
-      ];
+      config.packageRules = [{ dependencyDashboardApproval: true }, {}];
       config.dependencyDashboardHeader =
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
@@ -811,10 +776,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config,
         branches,
         undefined,
-        {
-          result: 'pr-modified',
-          prNumber: 1,
-        },
+        { result: 'pr-modified', prNumber: 1 },
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
@@ -829,12 +791,7 @@ describe('workers/repository/dependency-dashboard', () => {
     it('does not add a config migration checkbox when not needed', async () => {
       const branches: BranchConfig[] = [];
       config.repository = 'test';
-      config.packageRules = [
-        {
-          dependencyDashboardApproval: true,
-        },
-        {},
-      ];
+      config.packageRules = [{ dependencyDashboardApproval: true }, {}];
       config.dependencyDashboardHeader =
         'This is a header for platform:{{platform}}';
       config.dependencyDashboardFooter =
@@ -868,35 +825,13 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       logger.getProblems.mockReturnValueOnce([
-        {
-          level: ERROR,
-          msg: 'everything is broken',
-        },
-        {
-          level: WARN,
-          msg: 'just a bit',
-        },
-        {
-          level: ERROR,
-          msg: 'i am a duplicated problem',
-        },
-        {
-          level: ERROR,
-          msg: 'i am a duplicated problem',
-        },
-        {
-          level: ERROR,
-          msg: 'i am a non-duplicated problem',
-        },
-        {
-          level: WARN,
-          msg: 'i am a non-duplicated problem',
-        },
-        {
-          level: WARN,
-          msg: 'i am an artifact error',
-          artifactErrors: {},
-        },
+        { level: ERROR, msg: 'everything is broken' },
+        { level: WARN, msg: 'just a bit' },
+        { level: ERROR, msg: 'i am a duplicated problem' },
+        { level: ERROR, msg: 'i am a duplicated problem' },
+        { level: ERROR, msg: 'i am a non-duplicated problem' },
+        { level: WARN, msg: 'i am a non-duplicated problem' },
+        { level: WARN, msg: 'i am an artifact error', artifactErrors: {} },
       ]);
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(
@@ -922,10 +857,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       logger.getProblems.mockReturnValueOnce([
-        {
-          level: ERROR,
-          msg: 'i am a non-duplicated problem',
-        },
+        { level: ERROR, msg: 'i am a non-duplicated problem' },
       ]);
       config.dependencyDashboard = true;
       config.customizeDashboard = {
@@ -1395,11 +1327,7 @@ None detected
           PackageFiles.add('main', {
             npm: [{ packageFile: 'package.json', deps: [] }],
           });
-          const dep = [
-            {
-              warnings: [{ message: 'dependency-2', topic: '' }],
-            },
-          ];
+          const dep = [{ warnings: [{ message: 'dependency-2', topic: '' }] }];
           const packageFiles: Record<string, PackageFile[]> = {
             npm: [{ packageFile: 'package.json', deps: dep }],
           };
@@ -1501,10 +1429,7 @@ None detected
 
     it('return empty string if summary is set to none', async () => {
       const result = await getDashboardMarkdownVulnerabilities(
-        {
-          ...config,
-          dependencyDashboardOSVVulnerabilitySummary: 'none',
-        },
+        { ...config, dependencyDashboardOSVVulnerabilitySummary: 'none' },
         packageFiles,
       );
       expect(result).toBeEmpty();
@@ -1518,10 +1443,7 @@ None detected
 
       fetchVulnerabilitiesMock.mockResolvedValueOnce([]);
       const result = await getDashboardMarkdownVulnerabilities(
-        {
-          ...config,
-          dependencyDashboardOSVVulnerabilitySummary: 'all',
-        },
+        { ...config, dependencyDashboardOSVVulnerabilitySummary: 'all' },
         {},
       );
       expect(result).toBe(
@@ -1540,22 +1462,14 @@ None detected
           packageName: 'express',
           depVersion: '4.17.3',
           fixedVersion: '4.18.1',
-          packageFileConfig: {
-            manager: 'npm',
-          },
-          vulnerability: {
-            id: 'GHSA-29mw-wpgm-hmr9',
-          },
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-29mw-wpgm-hmr9' },
         },
         {
           packageName: 'cookie-parser',
           depVersion: '1.4.6',
-          packageFileConfig: {
-            manager: 'npm',
-          },
-          vulnerability: {
-            id: 'GHSA-35jh-r3h4-6jhm',
-          },
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-35jh-r3h4-6jhm' },
         },
       ]);
       const result = await getDashboardMarkdownVulnerabilities(
@@ -1607,29 +1521,18 @@ None detected
           packageName: 'express',
           depVersion: '4.17.3',
           fixedVersion: '4.18.1',
-          packageFileConfig: {
-            manager: 'npm',
-          },
-          vulnerability: {
-            id: 'GHSA-29mw-wpgm-hmr9',
-          },
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-29mw-wpgm-hmr9' },
         },
         {
           packageName: 'cookie-parser',
           depVersion: '1.4.6',
-          packageFileConfig: {
-            manager: 'npm',
-          },
-          vulnerability: {
-            id: 'GHSA-35jh-r3h4-6jhm',
-          },
+          packageFileConfig: { manager: 'npm' },
+          vulnerability: { id: 'GHSA-35jh-r3h4-6jhm' },
         },
       ]);
       const result = await getDashboardMarkdownVulnerabilities(
-        {
-          ...config,
-          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
-        },
+        { ...config, dependencyDashboardOSVVulnerabilitySummary: 'unresolved' },
         packageFiles,
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities

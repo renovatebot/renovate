@@ -51,16 +51,8 @@ describe('modules/manager/gleam/locked-version', () => {
       logger.debug({ parseLockFileResult }, 'parseLockFile');
       expect(parseLockFileResult).toStrictEqual({
         packages: [
-          {
-            name: 'foo',
-            version: '1.0.4',
-            requirements: ['bar'],
-          },
-          {
-            name: 'bar',
-            version: '2.1.0',
-            requirements: [],
-          },
+          { name: 'foo', version: '1.0.4', requirements: ['bar'] },
+          { name: 'bar', version: '2.1.0', requirements: [] },
         ],
       });
     });

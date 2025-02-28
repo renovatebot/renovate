@@ -7,9 +7,7 @@ export { extractPackageFile } from './extract';
 export const url = 'https://kubernetes.io/docs';
 export const categories: Category[] = ['kubernetes'];
 
-export const defaultConfig = {
-  fileMatch: [],
-};
+export const defaultConfig = { fileMatch: [] };
 
 export const supportedDatasources = [
   DockerDatasource.id,

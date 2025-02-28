@@ -7,29 +7,17 @@ describe('util/assign-keys', () => {
       bar: number | boolean;
       baz?: number;
     }
-    const left: Left = {
-      foo: 'foo',
-      bar: false,
-      baz: 42,
-    };
+    const left: Left = { foo: 'foo', bar: false, baz: 42 };
 
     interface Right {
       foo?: number;
       bar?: number;
       baz?: number;
     }
-    const right: Right = {
-      foo: 1,
-      bar: 2,
-      baz: 3,
-    };
+    const right: Right = { foo: 1, bar: 2, baz: 3 };
 
     const result = assignKeys(left, right, ['foo', 'bar']);
-    expect(result).toEqual({
-      foo: 1,
-      bar: 2,
-      baz: 42,
-    });
+    expect(result).toEqual({ foo: 1, bar: 2, baz: 42 });
     expect(result).toBe(left);
   });
 });

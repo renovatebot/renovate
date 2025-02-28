@@ -63,30 +63,21 @@ describe('modules/datasource/python-version/index', () => {
     it('throws for 500', async () => {
       httpMock.scope(defaultRegistryUrl).get('').reply(500);
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'python',
-        }),
+        getPkgReleases({ datasource, packageName: 'python' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for error', async () => {
       httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        }),
+        await getPkgReleases({ datasource, packageName: 'python' }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        }),
+        await getPkgReleases({ datasource, packageName: 'python' }),
       ).toBeNull();
     });
 
@@ -99,10 +90,7 @@ describe('modules/datasource/python-version/index', () => {
       });
 
       it('returns the correct data', async () => {
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        });
+        const res = await getPkgReleases({ datasource, packageName: 'python' });
         expect(res?.releases[0]).toEqual({
           isDeprecated: true,
           isStable: true,
@@ -112,10 +100,7 @@ describe('modules/datasource/python-version/index', () => {
       });
 
       it('only returns stable versions', async () => {
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        });
+        const res = await getPkgReleases({ datasource, packageName: 'python' });
         expect(res?.releases).toHaveLength(2);
         for (const release of res?.releases ?? []) {
           expect(release.isStable).toBeTrue();
@@ -123,10 +108,7 @@ describe('modules/datasource/python-version/index', () => {
       });
 
       it('only returns versions that are prebuilt', async () => {
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        });
+        const res = await getPkgReleases({ datasource, packageName: 'python' });
         expect(
           res?.releases.filter((release) =>
             satisfies(release.version, '>3.12.1'),
@@ -135,10 +117,7 @@ describe('modules/datasource/python-version/index', () => {
       });
 
       it('returns isDeprecated status for Python 3 minor releases', async () => {
-        const res = await getPkgReleases({
-          datasource,
-          packageName: 'python',
-        });
+        const res = await getPkgReleases({ datasource, packageName: 'python' });
         expect(res?.releases).toHaveLength(2);
         for (const release of res?.releases ?? []) {
           expect(release.isDeprecated).toBeBoolean();

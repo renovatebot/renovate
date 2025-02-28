@@ -64,11 +64,7 @@ function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
     return null;
   }
 
-  const result: GithubReleaseItem = {
-    version,
-    releaseTimestamp,
-    url,
-  };
+  const result: GithubReleaseItem = { version, releaseTimestamp, url };
 
   if (id) {
     result.id = id;

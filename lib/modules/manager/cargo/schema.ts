@@ -69,13 +69,15 @@ const CargoDep = z.union([
         return dep;
       },
     ),
-  z.string().transform(
-    (version): PackageDependency<CargoManagerData> => ({
-      currentValue: version,
-      managerData: { nestedVersion: false },
-      datasource: CrateDatasource.id,
-    }),
-  ),
+  z
+    .string()
+    .transform(
+      (version): PackageDependency<CargoManagerData> => ({
+        currentValue: version,
+        managerData: { nestedVersion: false },
+        datasource: CrateDatasource.id,
+      }),
+    ),
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
@@ -99,11 +101,7 @@ const CargoSection = z.object({
 
 const CargoWorkspace = z.object({
   dependencies: withDepType(CargoDeps, 'workspace.dependencies').optional(),
-  package: z
-    .object({
-      version: z.string().optional(),
-    })
-    .optional(),
+  package: z.object({ version: z.string().optional() }).optional(),
 });
 
 const CargoTarget = z.record(z.string(), CargoSection);
@@ -122,9 +120,7 @@ export const CargoManifestSchema = Toml.pipe(
   }),
 );
 
-const CargoConfigRegistry = z.object({
-  index: z.string().optional(),
-});
+const CargoConfigRegistry = z.object({ index: z.string().optional() });
 
 const CargoConfigSource = z.object({
   'replace-with': z.string().optional(),

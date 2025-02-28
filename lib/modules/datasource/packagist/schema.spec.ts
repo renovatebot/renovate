@@ -22,9 +22,7 @@ describe('modules/datasource/packagist/schema', () => {
             version: '2.0.0',
             version_normalized: '2.0.0.0',
             type: 'library',
-            scripts: {
-              foo: 'bar',
-            },
+            scripts: { foo: 'bar' },
             license: ['MIT'],
           },
           {
@@ -46,9 +44,7 @@ describe('modules/datasource/packagist/schema', () => {
           version: '2.0.0',
           version_normalized: '2.0.0.0',
           type: 'library',
-          scripts: {
-            foo: 'bar',
-          },
+          scripts: { foo: 'bar' },
           license: ['MIT'],
         },
         {

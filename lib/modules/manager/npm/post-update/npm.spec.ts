@@ -225,12 +225,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toHaveLength(2);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'npm install --no-audit --ignore-scripts',
-      },
-      {
-        cmd: 'npm dedupe',
-      },
+      { cmd: 'npm install --no-audit --ignore-scripts' },
+      { cmd: 'npm dedupe' },
     ]);
   });
 
@@ -264,12 +260,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toHaveLength(2);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'npm install --no-audit --ignore-scripts',
-      },
-      {
-        cmd: 'npm dedupe',
-      },
+      { cmd: 'npm install --no-audit --ignore-scripts' },
+      { cmd: 'npm dedupe' },
     ]);
   });
 
@@ -418,9 +410,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool npm 6.0.0' },
       { cmd: 'hash -d npm 2>/dev/null || true' },
-      {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-      },
+      { cmd: 'npm install --package-lock-only --no-audit --ignore-scripts' },
     ]);
   });
 
@@ -433,9 +423,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '1.1.0',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/web/b/package.json',
@@ -444,9 +432,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '2.2.0',
         newValue: '^2.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/docs/a/package.json',
@@ -455,9 +441,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/package.json',
@@ -466,9 +450,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '9.4.8',
         newValue: '^9.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/web/b/package.json',
@@ -477,9 +459,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/package.json',
@@ -488,9 +468,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/web/b/package.json',
@@ -499,9 +477,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '1.1.1',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/docs/a/package.json',
@@ -510,9 +486,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '1.1.1',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-dir/docs/dir.has.period/package.json',
@@ -521,9 +495,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '1.1.1',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
       {
         packageFile: 'some-missing-dir/docs/a/package.json',
@@ -532,9 +504,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '1.1.1',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
-        managerData: {
-          workspacesPackages: ['docs/*', 'web/*'],
-        },
+        managerData: { workspacesPackages: ['docs/*', 'web/*'] },
       },
     ];
 
@@ -617,9 +587,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '9.4.8',
             newValue: '^9.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
           },
           {
             packageFile: 'package.json',
@@ -628,9 +596,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '8.4.8',
             newValue: '^8.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
           },
         ],
         lockWorkspacesUpdates: [
@@ -641,9 +607,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '1.1.0',
             newValue: '^1.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'docs/a',
           },
           {
@@ -653,9 +617,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '2.2.0',
             newValue: '^2.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'web/b',
           },
           {
@@ -665,9 +627,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '8.4.8',
             newValue: '^8.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'docs/a',
           },
           {
@@ -677,9 +637,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '8.4.8',
             newValue: '^8.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'web/b',
           },
           {
@@ -689,9 +647,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '1.1.1',
             newValue: '^1.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'web/b',
           },
           {
@@ -701,9 +657,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '1.1.1',
             newValue: '^1.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'docs/a',
           },
           {
@@ -713,9 +667,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             newVersion: '1.1.1',
             newValue: '^1.0.0',
             isLockfileUpdate: true,
-            managerData: {
-              workspacesPackages: ['docs/*', 'web/*'],
-            },
+            managerData: { workspacesPackages: ['docs/*', 'web/*'] },
             workspace: 'docs/dir.has.period',
           },
         ],

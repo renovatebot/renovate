@@ -158,9 +158,7 @@ describe('modules/manager/gradle/parser/common', () => {
           { type: 'string-value', value: 'baz' },
         ]),
         ctx,
-        {
-          bar: { key: '', value: 'BAR' },
-        },
+        { bar: { key: '', value: 'BAR' } },
       ),
     ).toBe('fooBARbaz');
     expect(

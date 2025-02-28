@@ -80,11 +80,7 @@ You can set language constraints in the Renovate config.
 For example:
 
 ```json title="Renovate config with Node.js constraints"
-{
-  "constraints": {
-    "node": "^18.0.0 || >=20.0.0"
-  }
-}
+{ "constraints": { "node": "^18.0.0 || >=20.0.0" } }
 ```
 
 You may need to set constraints in the Renovate config when:

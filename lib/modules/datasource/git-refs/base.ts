@@ -64,11 +64,7 @@ export abstract class GitDatasource extends Datasource {
         }
         match = headMatch.exec(line);
         if (match?.groups) {
-          return {
-            type: '',
-            value: 'HEAD',
-            hash: match.groups.hash,
-          };
+          return { type: '', value: 'HEAD', hash: match.groups.hash };
         }
         logger.trace(`malformed ref: ${line}`);
         return null;

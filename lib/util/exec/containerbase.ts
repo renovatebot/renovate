@@ -166,11 +166,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'pipenv',
     versioning: pep440VersioningId,
   },
-  pnpm: {
-    datasource: 'npm',
-    packageName: 'pnpm',
-    versioning: npmVersioningId,
-  },
+  pnpm: { datasource: 'npm', packageName: 'pnpm', versioning: npmVersioningId },
   poetry: {
     datasource: 'pypi',
     packageName: 'poetry',
@@ -191,16 +187,8 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'rust',
     versioning: semverVersioningId,
   },
-  uv: {
-    datasource: 'pypi',
-    packageName: 'uv',
-    versioning: pep440VersioningId,
-  },
-  yarn: {
-    datasource: 'npm',
-    packageName: 'yarn',
-    versioning: npmVersioningId,
-  },
+  uv: { datasource: 'pypi', packageName: 'uv', versioning: pep440VersioningId },
+  yarn: { datasource: 'npm', packageName: 'yarn', versioning: npmVersioningId },
   'yarn-slim': {
     datasource: 'npm',
     packageName: 'yarn',

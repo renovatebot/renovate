@@ -54,13 +54,9 @@ describe('modules/datasource/deno/index', () => {
             sourceUrl: 'https://github.com/denoland/deno_std',
             releaseTimestamp: '2022-10-20T12:10:21.592Z',
           },
-          {
-            version: '0.161.0',
-          },
+          { version: '0.161.0' },
         ],
-        tags: {
-          popularity: 'top_5_percent',
-        },
+        tags: { popularity: 'top_5_percent' },
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
@@ -116,9 +112,7 @@ describe('modules/datasource/deno/index', () => {
 
     it('returns null if we could not match a deno land dependency', async () => {
       expect(
-        await deno.getReleases({
-          packageName: 'https://myexample.com/std',
-        }),
+        await deno.getReleases({ packageName: 'https://myexample.com/std' }),
       ).toBeNull();
     });
 
@@ -126,10 +120,7 @@ describe('modules/datasource/deno/index', () => {
       httpMock
         .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/postgres')
-        .reply(200, {
-          versions: ['v0.16.0', 'v0.16.1'],
-          tags: [],
-        })
+        .reply(200, { versions: ['v0.16.0', 'v0.16.1'], tags: [] })
         .get('/v2/modules/postgres/v0.16.0')
         .reply(200, {
           version: 'v0.16.0',
@@ -157,14 +148,8 @@ describe('modules/datasource/deno/index', () => {
       });
       expect(result).toMatchObject({
         releases: [
-          {
-            version: 'v0.16.0',
-            releaseTimestamp: '2022-06-01T20:29:52.413Z',
-          },
-          {
-            version: 'v0.16.1',
-            releaseTimestamp: '2022-06-07T22:43:44.098Z',
-          },
+          { version: 'v0.16.0', releaseTimestamp: '2022-06-01T20:29:52.413Z' },
+          { version: 'v0.16.1', releaseTimestamp: '2022-06-07T22:43:44.098Z' },
         ],
       });
     });
@@ -173,10 +158,7 @@ describe('modules/datasource/deno/index', () => {
       httpMock
         .scope('https://api.example.com')
         .get('/v2/modules/postgres')
-        .reply(200, {
-          versions: ['v0.16.0', 'v0.16.1'],
-          tags: [],
-        })
+        .reply(200, { versions: ['v0.16.0', 'v0.16.1'], tags: [] })
         .get('/v2/modules/postgres/v0.16.0')
         .reply(200, {
           version: 'v0.16.0',
@@ -204,14 +186,8 @@ describe('modules/datasource/deno/index', () => {
       });
       expect(result).toMatchObject({
         releases: [
-          {
-            version: 'v0.16.0',
-            releaseTimestamp: '2022-06-01T20:29:52.413Z',
-          },
-          {
-            version: 'v0.16.1',
-            releaseTimestamp: '2022-06-07T22:43:44.098Z',
-          },
+          { version: 'v0.16.0', releaseTimestamp: '2022-06-01T20:29:52.413Z' },
+          { version: 'v0.16.1', releaseTimestamp: '2022-06-07T22:43:44.098Z' },
         ],
       });
     });

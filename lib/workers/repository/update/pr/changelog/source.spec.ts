@@ -13,10 +13,7 @@ describe('workers/repository/update/pr/changelog/source', () => {
   describe('getBaseUrl', () => {
     it('handles unsupported sourceUrl', () => {
       expect(
-        changelogSource.getBaseUrl({
-          ...upgrade,
-          sourceUrl: undefined,
-        }),
+        changelogSource.getBaseUrl({ ...upgrade, sourceUrl: undefined }),
       ).toBeEmptyString();
     });
 

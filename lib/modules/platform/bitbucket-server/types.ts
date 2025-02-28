@@ -52,9 +52,7 @@ export interface BbsRestRepo {
   slug: string;
   project: { key: string };
   origin?: { name: string; slug: string }; // only present in forks
-  links: {
-    clone?: { href: string; name: string }[];
-  };
+  links: { clone?: { href: string; name: string }[] };
 }
 
 export interface BbsRestBranch {

@@ -20,9 +20,7 @@ describe('workers/repository/update/pr/labels', () => {
     });
 
     it('only addLabels', () => {
-      const result = prepareLabels({
-        addLabels: ['labelA', 'labelB'],
-      });
+      const result = prepareLabels({ addLabels: ['labelA', 'labelB'] });
       expect(result).toBeArrayOfSize(2);
       expect(result).toEqual(['labelA', 'labelB']);
     });

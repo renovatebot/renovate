@@ -74,12 +74,7 @@ function parseFullBody(body: string): VersionsEndpointResult {
   const contentLength = body.length;
   const contentTail = getContentTail(body);
 
-  return Result.ok({
-    packageVersions,
-    syncedAt,
-    contentLength,
-    contentTail,
-  });
+  return Result.ok({ packageVersions, syncedAt, contentLength, contentTail });
 }
 
 type VersionsEndpointResult = Result<VersionsEndpointData, 'unsupported-api'>;

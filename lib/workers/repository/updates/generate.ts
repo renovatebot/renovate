@@ -53,13 +53,7 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
     return [datasource, name, currentVersion, newVersion];
   }
   logger.trace(
-    {
-      datasource,
-      packageName,
-      depName,
-      currentVersion,
-      newVersion,
-    },
+    { datasource, packageName, depName, currentVersion, newVersion },
     'Cannot determine table values',
   );
   return null;
@@ -172,9 +166,7 @@ export function generateBranchConfig(
     branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
   }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
-  let config: BranchConfig = {
-    upgrades: [],
-  } as any;
+  let config: BranchConfig = { upgrades: [] } as any;
   const hasGroupName = branchUpgrades[0].groupName !== null;
   logger.trace(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled

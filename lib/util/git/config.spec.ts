@@ -17,9 +17,7 @@ describe('util/git/config', () => {
     GlobalConfig.set({ gitTimeout: 50000 });
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
-      timeout: {
-        block: 50000,
-      },
+      timeout: { block: 50000 },
       config: ['core.quotePath=false'],
     });
   });

@@ -121,9 +121,7 @@ describe('modules/datasource/metadata', () => {
       const packageName = 'some-chart';
 
       addMetaData(dep, datasource, packageName);
-      expect(dep).toMatchObject({
-        sourceUrl: expectedSourceUrl,
-      });
+      expect(dep).toMatchObject({ sourceUrl: expectedSourceUrl });
     },
   );
 
@@ -192,9 +190,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'django-filter';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
-      sourceUrl: 'https://github.com/some/repo',
-    });
+    expect(dep).toMatchSnapshot({ sourceUrl: 'https://github.com/some/repo' });
   });
 
   it('Should handle parsing of sourceUrls correctly for GitLab also', () => {
@@ -238,9 +234,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
-      sourceUrl: 'https://gitlab-nope',
-    });
+    expect(dep).toMatchSnapshot({ sourceUrl: 'https://gitlab-nope' });
   });
 
   it('Should handle failed parsing of sourceUrls for other', () => {
@@ -261,9 +255,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
-      sourceUrl: 'https://nope-nope-nope',
-    });
+    expect(dep).toMatchSnapshot({ sourceUrl: 'https://nope-nope-nope' });
   });
 
   it('Should handle non-url', () => {
@@ -449,18 +441,9 @@ describe('modules/datasource/metadata', () => {
     addMetaData(dep, MavenDatasource.id, 'foobar');
     expect(dep).toMatchObject({
       releases: [
-        {
-          version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56.000Z',
-        },
-        {
-          version: '1.0.2',
-          releaseTimestamp: '2000-01-02T12:34:56.000Z',
-        },
-        {
-          version: '1.0.3',
-          releaseTimestamp: '2000-01-03T12:34:56.000Z',
-        },
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56.000Z' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T12:34:56.000Z' },
       ],
       sourceUrl: 'https://github.com/foo/bar',
     });
@@ -489,18 +472,9 @@ describe('modules/datasource/metadata', () => {
     expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
-        {
-          version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56.000Z',
-        },
-        {
-          version: '1.0.2',
-          releaseTimestamp: '2000-01-02T12:34:56.000Z',
-        },
-        {
-          version: '1.0.3',
-          releaseTimestamp: '2000-01-03T12:34:56.000Z',
-        },
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56.000Z' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T12:34:56.000Z' },
       ],
     });
   });
@@ -527,18 +501,9 @@ describe('modules/datasource/metadata', () => {
     expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/meno/repo',
       releases: [
-        {
-          version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56.000Z',
-        },
-        {
-          version: '1.0.2',
-          releaseTimestamp: '2000-01-02T12:34:56.000Z',
-        },
-        {
-          version: '1.0.3',
-          releaseTimestamp: '2000-01-03T12:34:56.000Z',
-        },
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56.000Z' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T12:34:56.000Z' },
       ],
     });
   });
@@ -565,18 +530,9 @@ describe('modules/datasource/metadata', () => {
     expect(dep).toMatchObject({
       homepage: 'https://somesource.com/',
       releases: [
-        {
-          version: '1.0.1',
-          releaseTimestamp: '2000-01-01T12:34:56.000Z',
-        },
-        {
-          version: '1.0.2',
-          releaseTimestamp: '2000-01-02T12:34:56.000Z',
-        },
-        {
-          version: '1.0.3',
-          releaseTimestamp: '2000-01-03T12:34:56.000Z',
-        },
+        { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56.000Z' },
+        { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
+        { version: '1.0.3', releaseTimestamp: '2000-01-03T12:34:56.000Z' },
       ],
     });
   });

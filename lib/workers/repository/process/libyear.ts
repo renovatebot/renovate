@@ -75,12 +75,7 @@ export function calculateLibYears(
   const [totalDepsCount, outdatedDepsCount, totalLibYears] = getCounts(allDeps);
   const managerLibYears = getManagerLibYears(allDeps);
   logger.debug(
-    {
-      managerLibYears,
-      totalLibYears,
-      totalDepsCount,
-      outdatedDepsCount,
-    },
+    { managerLibYears, totalLibYears, totalDepsCount, outdatedDepsCount },
     'Repository libYears',
   );
 

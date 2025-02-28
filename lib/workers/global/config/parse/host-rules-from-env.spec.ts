@@ -17,9 +17,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   });
 
   it('supports password-only', () => {
-    const envParam: NodeJS.ProcessEnv = {
-      NPM_PASSWORD: 'some-password',
-    };
+    const envParam: NodeJS.ProcessEnv = { NPM_PASSWORD: 'some-password' };
     expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'npm', password: 'some-password' },
     ]);
@@ -74,17 +72,13 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     const unsupportedEnv = ['GITHUB_TOKEN'];
 
     for (const e of unsupportedEnv) {
-      const envParam: NodeJS.ProcessEnv = {
-        [e]: 'private-key',
-      };
+      const envParam: NodeJS.ProcessEnv = { [e]: 'private-key' };
       expect(hostRulesFromEnv(envParam)).toMatchObject([]);
     }
   });
 
   it('supports datasource env token', () => {
-    const envParam: NodeJS.ProcessEnv = {
-      PYPI_TOKEN: 'some-token',
-    };
+    const envParam: NodeJS.ProcessEnv = { PYPI_TOKEN: 'some-token' };
     expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'pypi', token: 'some-token' },
     ]);
@@ -106,9 +100,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
   });
 
   it('rejects incomplete datasource env token', () => {
-    const envParam: NodeJS.ProcessEnv = {
-      PYPI_FOO_TOKEN: 'some-token',
-    };
+    const envParam: NodeJS.ProcessEnv = { PYPI_FOO_TOKEN: 'some-token' };
     expect(hostRulesFromEnv(envParam)).toHaveLength(0);
   });
 

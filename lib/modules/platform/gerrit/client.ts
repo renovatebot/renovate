@@ -170,9 +170,7 @@ class GerritClient {
     await this.gerritHttp.putJson<GerritAccountInfo>(
       // TODO: refactor this as this API removed in Gerrit 3.8
       `a/changes/${changeNumber}/assignee`,
-      {
-        body: { assignee },
-      },
+      { body: { assignee } },
     );
   }
 

@@ -154,13 +154,7 @@ async function queryApi(
   // istanbul ignore if
   if (cachedResult) {
     logger.debug(
-      {
-        datasource,
-        packageName,
-        currentVersion,
-        newVersion,
-        cachedResult,
-      },
+      { datasource, packageName, currentVersion, newVersion, cachedResult },
       'using merge confidence cached result',
     );
     return cachedResult;
@@ -237,10 +231,7 @@ function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
 }
 
 export function getApiToken(): string | undefined {
-  return hostRules.find({
-    url: apiBaseUrl,
-    hostType,
-  })?.token;
+  return hostRules.find({ url: apiBaseUrl, hostType })?.token;
 }
 
 /**

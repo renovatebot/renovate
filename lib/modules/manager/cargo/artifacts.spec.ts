@@ -46,11 +46,7 @@ describe('modules/manager/cargo/artifacts', () => {
 
   it('returns null if no Cargo.lock found', async () => {
     fs.statLocalFile.mockRejectedValue(new Error('not found!'));
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -80,11 +76,7 @@ describe('modules/manager/cargo/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
 
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -103,11 +95,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -355,12 +343,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'renamedDep1',
-        packageName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'renamedDep1', packageName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -385,11 +368,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'crates/one/Cargo.toml',
@@ -425,11 +404,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -438,13 +413,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -464,9 +433,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
+          env: { CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase' },
         },
       },
     ]);
@@ -475,26 +442,16 @@ describe('modules/manager/cargo/artifacts', () => {
   it('supports docker mode with credentials', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
-      {
-        token: 'some-token',
-        hostType: 'github',
-        matchHost: 'api.github.com',
-      },
+      { token: 'some-token', hostType: 'github', matchHost: 'api.github.com' },
       { token: 'some-other-token', matchHost: 'https://gitea.com' },
     ]);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -503,13 +460,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -571,15 +522,9 @@ describe('modules/manager/cargo/artifacts', () => {
   it('supports docker mode with many credentials', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
-      {
-        token: 'some-token',
-        matchHost: 'api.github.com',
-        hostType: 'github',
-      },
+      { token: 'some-token', matchHost: 'api.github.com', hostType: 'github' },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
@@ -595,11 +540,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -608,13 +549,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -657,9 +592,7 @@ describe('modules/manager/cargo/artifacts', () => {
   it('supports docker mode and ignores non git credentials', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token',
@@ -671,11 +604,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -684,13 +613,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -716,9 +639,7 @@ describe('modules/manager/cargo/artifacts', () => {
   it('supports docker mode with Cargo specific credential', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token-cargo',
@@ -730,11 +651,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -743,13 +660,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -788,11 +699,7 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
@@ -801,13 +708,7 @@ describe('modules/manager/cargo/artifacts', () => {
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'Cargo.lock',
-          type: 'addition',
-        },
-      },
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -815,18 +716,14 @@ describe('modules/manager/cargo/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           encoding: 'utf-8',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
+          env: { CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase' },
         },
       },
       {
         cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
+          env: { CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase' },
         },
       },
     ]);
@@ -839,11 +736,7 @@ describe('modules/manager/cargo/artifacts', () => {
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-      },
-    ];
+    const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',

@@ -25,15 +25,8 @@ export const presets: Record<string, Preset> = {
     description:
       'Only update dependencies if vulnerabilities have been detected.',
     extends: ['config:recommended'],
-    packageRules: [
-      {
-        enabled: false,
-        matchPackageNames: ['*'],
-      },
-    ],
-    vulnerabilityAlerts: {
-      enabled: true,
-    },
+    packageRules: [{ enabled: false, matchPackageNames: ['*'] }],
+    vulnerabilityAlerts: { enabled: true },
     osvVulnerabilityAlerts: true,
   },
 };

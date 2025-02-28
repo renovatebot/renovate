@@ -7,14 +7,9 @@ export interface PoetrySection {
 }
 
 export interface PoetryFile {
-  tool?: {
-    poetry?: PoetrySection;
-  };
+  tool?: { poetry?: PoetrySection };
 
-  'build-system'?: {
-    requires: string[];
-    'build-backend'?: string;
-  };
+  'build-system'?: { requires: string[]; 'build-backend'?: string };
 }
 
 export interface PoetryDependency {

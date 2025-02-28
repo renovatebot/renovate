@@ -4,16 +4,10 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   disable: {
-    circleci: {
-      enabled: false,
-    },
+    circleci: { enabled: false },
     description: 'Disable Docker updates.',
-    'docker-compose': {
-      enabled: false,
-    },
-    dockerfile: {
-      enabled: false,
-    },
+    'docker-compose': { enabled: false },
+    dockerfile: { enabled: false },
   },
   disableMajor: {
     description: 'Disable Docker `major` updates.',
@@ -38,10 +32,7 @@ export const presets: Record<string, Preset> = {
   pinDigests: {
     description: 'Pin Docker digests.',
     packageRules: [
-      {
-        matchDatasources: ['docker'],
-        pinDigests: true,
-      },
+      { matchDatasources: ['docker'], pinDigests: true },
       {
         matchManagers: ['argocd', 'devcontainer', 'helmv3', 'pyenv'],
         pinDigests: false,

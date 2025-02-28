@@ -18,9 +18,7 @@ The end-result should look like this:
     {
       "matchHost": "circleci.com",
       "authType": "Token-Only",
-      "encrypted": {
-        "token": "****"
-      }
+      "encrypted": { "token": "****" }
     }
   ]
 }

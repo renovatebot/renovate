@@ -134,16 +134,8 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
 
 function nullFor(token: Token): Token {
   return token.type === TYPE_NUMBER
-    ? {
-        prefix: token.prefix,
-        type: TYPE_NUMBER,
-        val: 0,
-      }
-    : {
-        prefix: token.prefix,
-        type: TYPE_QUALIFIER,
-        val: '',
-      };
+    ? { prefix: token.prefix, type: TYPE_NUMBER, val: 0 }
+    : { prefix: token.prefix, type: TYPE_QUALIFIER, val: '' };
 }
 
 function commonOrder(token: Token): number {

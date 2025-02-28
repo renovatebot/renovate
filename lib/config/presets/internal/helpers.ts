@@ -23,12 +23,7 @@ export const presets: Record<string, Preset> = {
   },
   pinGitHubActionDigests: {
     description: 'Pin `github-action` digests.',
-    packageRules: [
-      {
-        matchDepTypes: ['action'],
-        pinDigests: true,
-      },
-    ],
+    packageRules: [{ matchDepTypes: ['action'], pinDigests: true }],
   },
   pinGitHubActionDigestsToSemver: {
     description: 'Convert pinned GitHub Action digests to SemVer.',

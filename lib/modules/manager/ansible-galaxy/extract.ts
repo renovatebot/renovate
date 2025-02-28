@@ -39,10 +39,7 @@ export function extractPackageFile(
     } else {
       // interpret requirements file
       // check if new or old format is used and save start lines for collection and roles.
-      const positions = {
-        collections: -1,
-        roles: -1,
-      };
+      const positions = { collections: -1, roles: -1 };
       // find role and collection block
       lines.forEach((line, index) => {
         if (regEx(/^collections:/).exec(line)) {

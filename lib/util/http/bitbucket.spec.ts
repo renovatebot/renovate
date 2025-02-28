@@ -37,9 +37,7 @@ describe('util/http/bitbucket', () => {
     expect(await api.postJson('some-url')).toEqual({
       authorization: true,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
 
@@ -47,9 +45,7 @@ describe('util/http/bitbucket', () => {
     expect(await api.postJson('some-url')).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
   });
@@ -74,10 +70,7 @@ describe('util/http/bitbucket', () => {
         next: `${baseUrl}/some-url?foo=bar&pagelen=100&page=3`,
       })
       .get('/some-url?foo=bar&pagelen=100&page=3')
-      .reply(200, {
-        values: valuesPageThree,
-        page: '3',
-      });
+      .reply(200, { values: valuesPageThree, page: '3' });
     const res = await api.getJsonUnchecked('/some-url?foo=bar', {
       paginate: true,
     });
@@ -110,10 +103,7 @@ describe('util/http/bitbucket', () => {
         next: `${baseUrl}/some-url?pagelen=10&page=3`,
       })
       .get('/some-url?pagelen=10&page=3')
-      .reply(200, {
-        values: valuesPageThree,
-        page: '3',
-      });
+      .reply(200, { values: valuesPageThree, page: '3' });
     const res = await api.getJsonUnchecked('some-url?pagelen=10', {
       paginate: true,
     });
@@ -146,10 +136,7 @@ describe('util/http/bitbucket', () => {
         next: `${baseUrl}/some-url?pagelen=20&page=3`,
       })
       .get('/some-url?pagelen=20&page=3')
-      .reply(200, {
-        values: valuesPageThree,
-        page: '3',
-      });
+      .reply(200, { values: valuesPageThree, page: '3' });
     const res = await api.getJsonUnchecked('some-url', {
       paginate: true,
       pagelen: 20,

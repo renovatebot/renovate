@@ -13,32 +13,19 @@ describe('modules/datasource/flutter-version/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(500);
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(200, { releases: [] });
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('processes real data', async () => {
@@ -46,10 +33,7 @@ describe('modules/datasource/flutter-version/index', () => {
         .scope(baseUrl)
         .get(urlPath)
         .reply(200, Fixtures.get('index.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(31);
     });

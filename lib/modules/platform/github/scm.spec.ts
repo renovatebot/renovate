@@ -21,10 +21,7 @@ describe('modules/platform/github/scm', () => {
   } satisfies CommitFilesConfig;
 
   it('platformCommit = disabled => delegate to git', async () => {
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'disabled',
-    });
+    await githubScm.commitAndPush({ ...commitObj, platformCommit: 'disabled' });
 
     expect(git.commitFiles).toHaveBeenCalledWith({
       ...commitObj,
@@ -34,10 +31,7 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = enabled => delegate to github', async () => {
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'enabled',
-    });
+    await githubScm.commitAndPush({ ...commitObj, platformCommit: 'enabled' });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
     expect(github.commitFiles).toHaveBeenCalledWith({
@@ -47,10 +41,7 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = auto => delegate to git', async () => {
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
+    await githubScm.commitAndPush({ ...commitObj, platformCommit: 'auto' });
 
     expect(git.commitFiles).toHaveBeenCalledWith({
       ...commitObj,
@@ -62,10 +53,7 @@ describe('modules/platform/github/scm', () => {
   it('platformCommit = auto and is a github app => delegate to github', async () => {
     github.isGHApp.mockReturnValueOnce(true);
 
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
+    await githubScm.commitAndPush({ ...commitObj, platformCommit: 'auto' });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
     expect(github.commitFiles).toHaveBeenCalledWith({

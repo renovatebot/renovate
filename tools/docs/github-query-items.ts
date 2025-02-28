@@ -33,11 +33,7 @@ const GhOutputSchema = z.array(
   z.object({
     url: z.string(),
     title: z.string(),
-    labels: z.array(
-      z.object({
-        name: z.string(),
-      }),
-    ),
+    labels: z.array(z.object({ name: z.string() })),
     number: z.number(),
   }),
 );

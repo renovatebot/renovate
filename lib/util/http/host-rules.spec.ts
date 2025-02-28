@@ -10,23 +10,15 @@ const url = 'https://github.com';
 vi.mock('global-agent');
 
 describe('util/http/host-rules', () => {
-  const options: GotOptions = {
-    hostType: 'github',
-  };
+  const options: GotOptions = { hostType: 'github' };
 
   beforeEach(() => {
     delete process.env.HTTP_PROXY;
 
     // clean up hostRules
     hostRules.clear();
-    hostRules.add({
-      hostType: 'github',
-      token: 'token',
-    });
-    hostRules.add({
-      hostType: 'gitea',
-      password: 'password',
-    });
+    hostRules.add({ hostType: 'github', token: 'token' });
+    hostRules.add({ hostType: 'gitea', password: 'password' });
 
     hostRules.add({
       hostType: 'npm',
@@ -35,15 +27,9 @@ describe('util/http/host-rules', () => {
       timeout: 5000,
     });
 
-    hostRules.add({
-      hostType: 'gitlab',
-      token: 'abc',
-    });
+    hostRules.add({ hostType: 'gitlab', token: 'abc' });
 
-    hostRules.add({
-      hostType: 'bitbucket',
-      token: 'cdef',
-    });
+    hostRules.add({ hostType: 'bitbucket', token: 'cdef' });
   });
 
   afterEach(() => {
@@ -53,13 +39,9 @@ describe('util/http/host-rules', () => {
   it('adds token', () => {
     const opts = { ...options };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'github',
       token: 'token',
     });
@@ -68,9 +50,7 @@ describe('util/http/host-rules', () => {
   it('adds auth', () => {
     const opts = { hostType: 'gitea' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      password: 'password',
-    });
+    expect(hostRule).toEqual({ password: 'password' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'gitea',
       password: 'password',
@@ -87,9 +67,7 @@ describe('util/http/host-rules', () => {
       token: 'XXX',
     });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: 'Basic',
-      },
+      context: { authType: 'Basic' },
       hostType: 'npm',
       timeout: 5000,
       token: 'XXX',
@@ -99,9 +77,7 @@ describe('util/http/host-rules', () => {
   it('skips', () => {
     const opts = { ...options, token: 'xxx' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       token: 'xxx',
@@ -113,10 +89,7 @@ describe('util/http/host-rules', () => {
 
     const opts = { ...options, token: 'xxx' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      enableHttp2: true,
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ enableHttp2: true, token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       http2: true,
@@ -129,10 +102,7 @@ describe('util/http/host-rules', () => {
 
     const opts = { ...options, token: 'xxx' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      keepAlive: true,
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ keepAlive: true, token: 'token' });
     expect(applyHostRule(url, opts, hostRule).agent).toBeDefined();
   });
 
@@ -143,10 +113,7 @@ describe('util/http/host-rules', () => {
 
     const opts = { ...options, token: 'xxx' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      enableHttp2: true,
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ enableHttp2: true, token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       token: 'xxx',
@@ -156,9 +123,7 @@ describe('util/http/host-rules', () => {
   it('noAuth', () => {
     const opts = { ...options, noAuth: true };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       noAuth: true,
@@ -175,14 +140,10 @@ describe('util/http/host-rules', () => {
     const url = 'https://custom.datasource.ca/data/path';
     const opts = { ...options, hostType: 'maven' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      httpsCertificateAuthority: 'ca-cert',
-    });
+    expect(hostRule).toEqual({ httpsCertificateAuthority: 'ca-cert' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'maven',
-      https: {
-        certificateAuthority: 'ca-cert',
-      },
+      https: { certificateAuthority: 'ca-cert' },
     });
   });
 
@@ -196,14 +157,10 @@ describe('util/http/host-rules', () => {
     const url = 'https://custom.datasource.key/data/path';
     const opts = { ...options, hostType: 'maven' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      httpsPrivateKey: 'key',
-    });
+    expect(hostRule).toEqual({ httpsPrivateKey: 'key' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'maven',
-      https: {
-        key: 'key',
-      },
+      https: { key: 'key' },
     });
   });
 
@@ -217,14 +174,10 @@ describe('util/http/host-rules', () => {
     const url = 'https://custom.datasource.cert/data/path';
     const opts = { ...options, hostType: 'maven' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      httpsCertificate: 'cert',
-    });
+    expect(hostRule).toEqual({ httpsCertificate: 'cert' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'maven',
-      https: {
-        certificate: 'cert',
-      },
+      https: { certificate: 'cert' },
     });
   });
 
@@ -234,14 +187,8 @@ describe('util/http/host-rules', () => {
       username: 'some2',
       password: 'xxx2',
     });
-    hostRules.add({
-      hostType: 'github-changelog',
-      token: 'changelogtoken',
-    });
-    hostRules.add({
-      hostType: 'pod',
-      token: 'pod-token',
-    });
+    hostRules.add({ hostType: 'github-changelog', token: 'changelogtoken' });
+    hostRules.add({ hostType: 'pod', token: 'pod-token' });
     hostRules.add({
       hostType: 'github-releases',
       username: 'some',
@@ -253,10 +200,7 @@ describe('util/http/host-rules', () => {
 
     opts = { ...options, hostType: 'github-releases' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      password: 'xxx',
-      username: 'some',
-    });
+    expect(hostRule).toEqual({ password: 'xxx', username: 'some' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github-releases',
       username: 'some',
@@ -265,10 +209,7 @@ describe('util/http/host-rules', () => {
 
     opts = { ...options, hostType: 'github-tags' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      password: 'xxx2',
-      username: 'some2',
-    });
+    expect(hostRule).toEqual({ password: 'xxx2', username: 'some2' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github-tags',
       username: 'some2',
@@ -277,26 +218,18 @@ describe('util/http/host-rules', () => {
 
     opts = { ...options, hostType: 'pod' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'pod-token',
-    });
+    expect(hostRule).toEqual({ token: 'pod-token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'pod',
       token: 'pod-token',
     });
 
     opts = { ...options, hostType: 'github-changelog' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'changelogtoken',
-    });
+    expect(hostRule).toEqual({ token: 'changelogtoken' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'github-changelog',
       token: 'changelogtoken',
     });
@@ -308,96 +241,63 @@ describe('util/http/host-rules', () => {
 
     opts = { ...options, hostType: 'github-tags' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'github-tags',
       token: 'token',
     });
 
     opts = { ...options, hostType: 'github-changelog' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'github-changelog',
       token: 'token',
     });
 
     opts = { ...options, hostType: 'pod' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'token',
-    });
+    expect(hostRule).toEqual({ token: 'token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'pod',
       token: 'token',
     });
   });
 
   it('no fallback to gitlab', () => {
-    hostRules.add({
-      hostType: 'gitlab-packages',
-      token: 'package-token',
-    });
-    hostRules.add({
-      hostType: 'gitlab-releases',
-      token: 'release-token',
-    });
-    hostRules.add({
-      hostType: 'gitlab-tags',
-      token: 'tags-token',
-    });
+    hostRules.add({ hostType: 'gitlab-packages', token: 'package-token' });
+    hostRules.add({ hostType: 'gitlab-releases', token: 'release-token' });
+    hostRules.add({ hostType: 'gitlab-tags', token: 'tags-token' });
 
     let opts: GotOptions;
     let hostRule: HostRule;
 
     opts = { ...options, hostType: 'gitlab-tags' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'tags-token',
-    });
+    expect(hostRule).toEqual({ token: 'tags-token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-tags',
       token: 'tags-token',
     });
 
     opts = { ...options, hostType: 'gitlab-releases' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'release-token',
-    });
+    expect(hostRule).toEqual({ token: 'release-token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-releases',
       token: 'release-token',
     });
 
     opts = { ...options, hostType: 'gitlab-packages' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'package-token',
-    });
+    expect(hostRule).toEqual({ token: 'package-token' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-packages',
       token: 'package-token',
     });
@@ -409,52 +309,36 @@ describe('util/http/host-rules', () => {
 
     opts = { ...options, hostType: 'gitlab-tags' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'abc',
-    });
+    expect(hostRule).toEqual({ token: 'abc' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-tags',
       token: 'abc',
     });
 
     opts = { ...options, hostType: 'gitlab-releases' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'abc',
-    });
+    expect(hostRule).toEqual({ token: 'abc' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-releases',
       token: 'abc',
     });
 
     opts = { ...options, hostType: 'gitlab-packages' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'abc',
-    });
+    expect(hostRule).toEqual({ token: 'abc' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-packages',
       token: 'abc',
     });
 
     opts = { ...options, hostType: 'gitlab-changelog' };
     hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'abc',
-    });
+    expect(hostRule).toEqual({ token: 'abc' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitlab-changelog',
       token: 'abc',
     });
@@ -468,10 +352,7 @@ describe('util/http/host-rules', () => {
     });
     const opts = { ...options, hostType: 'bitbucket-tags' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      password: 'xxx',
-      username: 'some',
-    });
+    expect(hostRule).toEqual({ password: 'xxx', username: 'some' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'bitbucket-tags',
       username: 'some',
@@ -482,33 +363,22 @@ describe('util/http/host-rules', () => {
   it('fallback to bitbucket', () => {
     const opts = { ...options, hostType: 'bitbucket-tags' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'cdef',
-    });
+    expect(hostRule).toEqual({ token: 'cdef' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'bitbucket-tags',
       token: 'cdef',
     });
   });
 
   it('no fallback to gitea', () => {
-    hostRules.add({
-      hostType: 'gitea-tags',
-      token: 'abc',
-    });
+    hostRules.add({ hostType: 'gitea-tags', token: 'abc' });
 
     const opts = { ...options, hostType: 'gitea-tags' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      token: 'abc',
-    });
+    expect(hostRule).toEqual({ token: 'abc' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
-      context: {
-        authType: undefined,
-      },
+      context: { authType: undefined },
       hostType: 'gitea-tags',
       token: 'abc',
     });
@@ -517,9 +387,7 @@ describe('util/http/host-rules', () => {
   it('fallback to gitea', () => {
     const opts = { ...options, hostType: 'gitea-tags' };
     const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      password: 'password',
-    });
+    expect(hostRule).toEqual({ password: 'password' });
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'gitea-tags',
       password: 'password',
@@ -531,16 +399,11 @@ describe('util/http/host-rules', () => {
     GlobalConfig.set({ allowedHeaders: ['X-*'] });
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',
-      headers: {
-        'X-Auth-Token': 'token',
-        unallowedHeader: 'token',
-      },
+      headers: { 'X-Auth-Token': 'token', unallowedHeader: 'token' },
     };
 
     expect(applyHostRule(url, {}, hostRule)).toEqual({
-      headers: {
-        'X-Auth-Token': 'token',
-      },
+      headers: { 'X-Auth-Token': 'token' },
     });
   });
 
@@ -548,19 +411,11 @@ describe('util/http/host-rules', () => {
     GlobalConfig.set({ allowedHeaders: ['Accept'] });
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',
-      headers: {
-        Accept: 'replacement',
-      },
+      headers: { Accept: 'replacement' },
     };
-    const options = {
-      headers: {
-        Accept: 'default',
-      },
-    };
+    const options = { headers: { Accept: 'default' } };
     expect(applyHostRule(url, options, hostRule)).toEqual({
-      headers: {
-        Accept: 'replacement',
-      },
+      headers: { Accept: 'replacement' },
     });
   });
 });

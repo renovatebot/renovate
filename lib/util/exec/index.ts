@@ -128,10 +128,7 @@ async function prepareRawExec(
       { hermitEnvVars },
       'merging hermit environment variables into the execution options',
     );
-    rawOptions.env = {
-      ...rawOptions.env,
-      ...hermitEnvVars,
-    };
+    rawOptions.env = { ...rawOptions.env, ...hermitEnvVars };
   }
 
   return { rawCommands, rawOptions };
@@ -181,11 +178,7 @@ export async function exec(
     }
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
-      {
-        durationMs,
-        stdout: res.stdout,
-        stderr: res.stderr,
-      },
+      { durationMs, stdout: res.stdout, stderr: res.stderr },
       'exec completed',
     );
   }

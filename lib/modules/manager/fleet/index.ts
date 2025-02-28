@@ -9,9 +9,7 @@ export const displayName = 'Rancher Fleet';
 export const url = 'https://fleet.rancher.io';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)fleet\\.ya?ml'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)fleet\\.ya?ml'] };
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

@@ -33,9 +33,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       expect(res).toMatchObject({
         serverUrl: 'https://dev.azure.com/renovate1',
-        authHandler: {
-          token: '123test',
-        },
+        authHandler: { token: '123test' },
       });
     });
 
@@ -54,9 +52,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       expect(res).toMatchObject({
         serverUrl: 'https://dev.azure.com/renovate2',
-        authHandler: {
-          token: 'testtoken',
-        },
+        authHandler: { token: 'testtoken' },
       });
     });
 
@@ -76,10 +72,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
       expect(res).toMatchObject({
         serverUrl: 'https://dev.azure.com/renovate3',
-        authHandler: {
-          username: 'user',
-          password: 'pass',
-        },
+        authHandler: { username: 'user', password: 'pass' },
       });
     });
   });

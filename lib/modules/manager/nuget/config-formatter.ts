@@ -30,11 +30,7 @@ export function createNuGetConfigXml(registries: Registry[]): string {
     });
 
     if (is.nonEmptyString(password) || is.nonEmptyString(username)) {
-      credentials.push({
-        name: registryName,
-        password,
-        username,
-      });
+      credentials.push({ name: registryName, password, username });
     }
 
     if (registry.sourceMappedPackagePatterns) {

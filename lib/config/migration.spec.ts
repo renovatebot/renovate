@@ -24,9 +24,7 @@ describe('config/migration', () => {
             password: 'some-password',
           },
         ],
-        compatibility: {
-          python: '3.7',
-        },
+        compatibility: { python: '3.7' },
         extends: [
           ':automergeBranchMergeCommit',
           'default:js-app',
@@ -61,20 +59,10 @@ describe('config/migration', () => {
         branchPrefix: 'renovate/{{parentDir}}-',
         renovateFork: true,
         ignoreNodeModules: true,
-        node: {
-          enabled: true,
-        },
-        poetry: {
-          rebaseStalePrs: true,
-          versionScheme: 'pep440',
-        },
-        pipenv: {
-          rebaseStalePrs: false,
-          rebaseConflictedPrs: true,
-        },
-        pip_setup: {
-          rebaseConflictedPrs: false,
-        },
+        node: { enabled: true },
+        poetry: { rebaseStalePrs: true, versionScheme: 'pep440' },
+        pipenv: { rebaseStalePrs: false, rebaseConflictedPrs: true },
+        pip_setup: { rebaseConflictedPrs: false },
         rebaseStalePrs: null,
         rebaseConflictedPrs: true,
         meteor: true,
@@ -84,47 +72,23 @@ describe('config/migration', () => {
           '{{semanticPrefix}}some commit message {{depNameShort}} {{lookupName}}',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
-        pathRules: [
-          {
-            paths: ['examples/**'],
-            extends: ['foo'],
-          },
-        ],
-        peerDependencies: {
-          versionStrategy: 'widen',
-        },
+        pathRules: [{ paths: ['examples/**'], extends: ['foo'] }],
+        peerDependencies: { versionStrategy: 'widen' },
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)' as never,
             groupName: ['angular packages'] as never,
             excludedPackageNames: 'foo',
           },
-          {
-            packagePatterns: ['^foo'],
-            groupName: ['foo'] as never,
-          },
-          {
-            packageName: 'angular',
-            packagePattern: 'ang',
-            enabled: false,
-          },
-          {
-            packageNames: ['guava'],
-            versionScheme: 'maven',
-          },
+          { packagePatterns: ['^foo'], groupName: ['foo'] as never },
+          { packageName: 'angular', packagePattern: 'ang', enabled: false },
+          { packageNames: ['guava'], versionScheme: 'maven' },
           {
             packageNames: ['foo'],
-            packageRules: [
-              {
-                depTypeList: ['bar'],
-                automerge: true,
-              },
-            ],
+            packageRules: [{ depTypeList: ['bar'], automerge: true }],
           },
         ],
-        dotnet: {
-          enabled: false,
-        },
+        dotnet: { enabled: false },
         exposeEnv: true,
         lockFileMaintenance: {
           exposeEnv: false,
@@ -132,26 +96,11 @@ describe('config/migration', () => {
           automerge: 'any' as never,
           schedule: 'before 5am every day' as never,
         },
-        devDependencies: {
-          automerge: 'minor',
-          schedule: null,
-        },
+        devDependencies: { automerge: 'minor', schedule: null },
         python: {
-          packageRules: [
-            {
-              matchPackageNames: ['foo'],
-              enabled: false,
-            },
-          ],
+          packageRules: [{ matchPackageNames: ['foo'], enabled: false }],
         },
-        nvmrc: {
-          pathRules: [
-            {
-              paths: ['node/**'],
-              extends: 'node',
-            },
-          ],
-        },
+        nvmrc: { pathRules: [{ paths: ['node/**'], extends: 'node' }] },
         depTypes: [
           'dependencies',
           {
@@ -176,9 +125,7 @@ describe('config/migration', () => {
 
     it('migrates before and after schedules', () => {
       const config = {
-        major: {
-          schedule: 'after 10pm and before 7am' as never,
-        },
+        major: { schedule: 'after 10pm and before 7am' as never },
         minor: {
           schedule: 'after 10pm and before 7am on every weekday' as never,
         },
@@ -196,9 +143,7 @@ describe('config/migration', () => {
     });
 
     it('migrates every friday', () => {
-      const config = {
-        schedule: 'every friday' as never,
-      };
+      const config = { schedule: 'every friday' as never };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
@@ -206,9 +151,7 @@ describe('config/migration', () => {
     });
 
     it('migrates semantic prefix with no scope', () => {
-      const config = {
-        semanticPrefix: 'fix',
-      };
+      const config = { semanticPrefix: 'fix' };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
@@ -216,9 +159,7 @@ describe('config/migration', () => {
     });
 
     it('does not migrate every weekday', () => {
-      const config = {
-        schedule: 'every weekday' as never,
-      };
+      const config = { schedule: 'every weekday' as never };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeFalse();
@@ -237,9 +178,7 @@ describe('config/migration', () => {
     });
 
     it('does not migrate hour range', () => {
-      const config = {
-        schedule: 'after 1:00pm and before 5:00pm' as never,
-      };
+      const config = { schedule: 'after 1:00pm and before 5:00pm' as never };
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(migratedConfig.schedule).toEqual(config.schedule);
@@ -272,10 +211,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         automerge: 'minor' as never,
         packages: [
-          {
-            packagePatterns: '^(@angular|typescript)',
-            automerge: 'patch',
-          },
+          { packagePatterns: '^(@angular|typescript)', automerge: 'patch' },
         ],
       };
       const { isMigrated, migratedConfig } =
@@ -301,10 +237,7 @@ describe('config/migration', () => {
         lockFileMaintenance: {
           depTypes: [
             'dependencies',
-            {
-              depType: 'optionalDependencies',
-              respectLatest: false,
-            },
+            { depType: 'optionalDependencies', respectLatest: false },
           ],
         },
       };
@@ -350,14 +283,8 @@ describe('config/migration', () => {
           {
             packageFile: 'package.json',
             packageRules: [
-              {
-                pinVersions: true,
-                depTypeList: ['devDependencies'],
-              },
-              {
-                pinVersions: true,
-                depTypeList: ['dependencies'],
-              },
+              { pinVersions: true, depTypeList: ['devDependencies'] },
+              { pinVersions: true, depTypeList: ['dependencies'] },
             ],
           },
         ],
@@ -474,30 +401,19 @@ describe('config/migration', () => {
         extends: ['foo', 'npm:unpublishSafe', 'bar'],
       });
 
-      config = {
-        unpublishSafe: false,
-        extends: ['foo', 'bar'],
-      };
+      config = { unpublishSafe: false, extends: ['foo', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
-      expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'bar'],
-      });
+      expect(res.migratedConfig).toMatchObject({ extends: ['foo', 'bar'] });
 
-      config = {
-        unpublishSafe: true,
-        extends: ['foo', 'bar'],
-      };
+      config = { unpublishSafe: true, extends: ['foo', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'bar', 'npm:unpublishSafe'],
       });
 
-      config = {
-        unpublishSafe: true,
-        extends: [':unpublishSafeDisabled'],
-      };
+      config = { unpublishSafe: true, extends: [':unpublishSafeDisabled'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -549,14 +465,8 @@ describe('config/migration', () => {
     it('migrates in order of precedence', () => {
       const config: TestRenovateConfig = {
         packageRules: [
-          {
-            matchFiles: ['matchFiles'],
-            matchPaths: ['matchPaths'],
-          },
-          {
-            matchPaths: ['matchPaths'],
-            matchFiles: ['matchFiles'],
-          },
+          { matchFiles: ['matchFiles'], matchPaths: ['matchPaths'] },
+          { matchPaths: ['matchPaths'], matchFiles: ['matchFiles'] },
         ],
       };
       const { isMigrated, migratedConfig } =
@@ -564,12 +474,8 @@ describe('config/migration', () => {
       expect(isMigrated).toBeTrue();
       expect(migratedConfig).toEqual({
         packageRules: [
-          {
-            matchFileNames: ['matchPaths'],
-          },
-          {
-            matchFileNames: ['matchFiles'],
-          },
+          { matchFileNames: ['matchPaths'] },
+          { matchFileNames: ['matchFiles'] },
         ],
       });
     });
@@ -578,22 +484,13 @@ describe('config/migration', () => {
   it('migrates nested packageRules', () => {
     const config: TestRenovateConfig = {
       packageRules: [
-        {
-          matchDepTypes: ['devDependencies'],
-          enabled: false,
-        },
+        { matchDepTypes: ['devDependencies'], enabled: false },
         {
           automerge: true,
           excludePackageNames: ['@types/react-table'],
           packageRules: [
-            {
-              groupName: 'definitelyTyped',
-              matchPackageNames: ['@types/**'],
-            },
-            {
-              matchDepTypes: ['dependencies'],
-              automerge: false,
-            },
+            { groupName: 'definitelyTyped', matchPackageNames: ['@types/**'] },
+            { matchDepTypes: ['dependencies'], automerge: false },
           ],
         },
       ],
@@ -607,14 +504,9 @@ describe('config/migration', () => {
 
   it('migrates presets', () => {
     GlobalConfig.set({
-      migratePresets: {
-        '@org': 'local>org/renovate-config',
-        '@org2/foo': '',
-      },
+      migratePresets: { '@org': 'local>org/renovate-config', '@org2/foo': '' },
     });
-    const config: RenovateConfig = {
-      extends: ['@org', '@org2/foo'],
-    } as any;
+    const config: RenovateConfig = { extends: ['@org', '@org2/foo'] } as any;
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
@@ -680,15 +572,9 @@ describe('config/migration', () => {
 
   it('migrates gradle-lite', () => {
     const config: RenovateConfig = {
-      'gradle-lite': {
-        enabled: true,
-        fileMatch: ['foo'],
-      },
+      'gradle-lite': { enabled: true, fileMatch: ['foo'] },
       packageRules: [
-        {
-          matchManagers: ['gradle-lite'],
-          separateMinorPatch: true,
-        },
+        { matchManagers: ['gradle-lite'], separateMinorPatch: true },
       ],
     };
     const { isMigrated, migratedConfig } =
@@ -698,9 +584,7 @@ describe('config/migration', () => {
   });
 
   it('migrates empty requiredStatusChecks', () => {
-    const config: RenovateConfig = {
-      requiredStatusChecks: [],
-    };
+    const config: RenovateConfig = { requiredStatusChecks: [] };
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBe(true);

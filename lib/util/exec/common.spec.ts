@@ -172,10 +172,7 @@ describe('util/exec/common', () => {
           cmd,
           partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
         ),
-      ).resolves.toEqual({
-        stderr,
-        stdout,
-      });
+      ).resolves.toEqual({ stderr, stdout });
     });
 
     it('should invoke the output listeners', async () => {
@@ -211,10 +208,7 @@ describe('util/exec/common', () => {
             },
           }),
         ),
-      ).resolves.toEqual({
-        stderr,
-        stdout,
-      });
+      ).resolves.toEqual({ stderr, stdout });
 
       expect(stringify(stdoutListenerBuffer)).toEqual(stdout);
       expect(stringify(stderrListenerBuffer)).toEqual(stderr);
@@ -289,13 +283,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(
-          cmd,
-          partial<RawExecOptions>({
-            encoding: 'utf8',
-            maxBuffer: 5,
-          }),
-        ),
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8', maxBuffer: 5 })),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stdout maxBuffer exceeded',
@@ -313,13 +301,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(
-          cmd,
-          partial<RawExecOptions>({
-            encoding: 'utf8',
-            maxBuffer: 5,
-          }),
-        ),
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8', maxBuffer: 5 })),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stderr maxBuffer exceeded',

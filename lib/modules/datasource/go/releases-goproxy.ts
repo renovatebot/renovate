@@ -35,11 +35,7 @@ export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
   const { digest: newDigest, timestamp } = match;
   const releaseTimestamp = asTimestamp(timestamp);
 
-  return {
-    version: pseudoVersion,
-    newDigest,
-    releaseTimestamp,
-  };
+  return { version: pseudoVersion, newDigest, releaseTimestamp };
 }
 
 export class GoProxyDatasource extends Datasource {
@@ -165,9 +161,7 @@ export class GoProxyDatasource extends Datasource {
     );
     const res = await this.http.getJsonUnchecked<VersionInfo>(url);
 
-    const result: Release = {
-      version: res.body.Version,
-    };
+    const result: Release = { version: res.body.Version };
 
     const releaseTimestamp = asTimestamp(res.body.Time);
     if (releaseTimestamp) {

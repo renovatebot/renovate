@@ -58,10 +58,7 @@ const defaultConfig = {
     commitMessageExtra: 'to {{newDigestShort}}',
     commitMessageTopic:
       '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
-    group: {
-      commitMessageTopic: '{{{groupName}}}',
-      commitMessageExtra: '',
-    },
+    group: { commitMessageTopic: '{{{groupName}}}', commitMessageExtra: '' },
   },
   pin: {
     commitMessageExtra: '',
@@ -139,12 +136,7 @@ export class DockerDatasource extends Datasource {
       }
       if (err.statusCode === 404) {
         logger.debug(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            tag,
-          },
+          { err, registryHost, dockerRepository, tag },
           'Docker Manifest is unknown',
         );
         return null;
@@ -164,12 +156,7 @@ export class DockerDatasource extends Datasource {
         return null;
       }
       logger.debug(
-        {
-          err,
-          registryHost,
-          dockerRepository,
-          tag,
-        },
+        { err, registryHost, dockerRepository, tag },
         'Unknown Error looking up docker manifest',
       );
       return null;
@@ -213,10 +200,7 @@ export class DockerDatasource extends Datasource {
     );
     return await this.http.getJson(
       url,
-      {
-        headers,
-        noAuth: true,
-      },
+      { headers, noAuth: true },
       OciImageConfig,
     );
   }
@@ -258,10 +242,7 @@ export class DockerDatasource extends Datasource {
     );
     return await this.http.getJson(
       url,
-      {
-        headers,
-        noAuth: true,
-      },
+      { headers, noAuth: true },
       OciHelmConfig,
     );
   }
@@ -546,12 +527,7 @@ export class DockerDatasource extends Datasource {
       }
 
       if (labels) {
-        logger.debug(
-          {
-            labels,
-          },
-          'found labels in manifest',
-        );
+        logger.debug({ labels }, 'found labels in manifest');
       }
       return labels;
     } catch (err) /* istanbul ignore next: should be tested in future */ {
@@ -565,24 +541,14 @@ export class DockerDatasource extends Datasource {
         );
       } else if (err.statusCode === 404) {
         logger.warn(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            tag,
-          },
+          { err, registryHost, dockerRepository, tag },
           'Config Manifest is unknown',
         );
       } else if (err.statusCode === 429 && isDockerHost(registryHost)) {
         logger.warn({ err }, 'docker registry failure: too many requests');
       } else if (err.statusCode >= 500 && err.statusCode < 600) {
         logger.debug(
-          {
-            err,
-            registryHost,
-            dockerRepository,
-            tag,
-          },
+          { err, registryHost, dockerRepository, tag },
           'docker registry failure: internal error',
         );
       } else if (
@@ -622,9 +588,7 @@ export class DockerDatasource extends Datasource {
     let url: string | null = pageUrl(page);
     while (url && page <= 20) {
       interface QuayRestDockerTags {
-        tags: {
-          name: string;
-        }[];
+        tags: { name: string }[];
         has_additional: boolean;
       }
 
@@ -939,11 +903,7 @@ export class DockerDatasource extends Datasource {
           `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
         return this.getDigest(
-          {
-            registryUrl,
-            packageName: 'library/' + packageName,
-            currentDigest,
-          },
+          { registryUrl, packageName: 'library/' + packageName, currentDigest },
           newValue,
         );
       }
@@ -957,11 +917,7 @@ export class DockerDatasource extends Datasource {
         throw err;
       }
       logger.debug(
-        {
-          err,
-          packageName,
-          newTag,
-        },
+        { err, packageName, newTag },
         'Unknown Error looking up docker image digest',
       );
     }
@@ -1085,10 +1041,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    const ret: ReleaseResult = {
-      registryUrl: registryHost,
-      releases,
-    };
+    const ret: ReleaseResult = { registryUrl: registryHost, releases };
     if (dockerRepository !== packageName) {
       // This will be reused later if a getDigest() call is made
       ret.lookupName = dockerRepository;

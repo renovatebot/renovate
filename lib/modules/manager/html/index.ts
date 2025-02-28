@@ -11,9 +11,7 @@ export const categories: Category[] = ['cd'];
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
   versioning: semverVersioning.id,
-  digest: {
-    enabled: false,
-  },
+  digest: { enabled: false },
   pinDigests: false,
 };
 

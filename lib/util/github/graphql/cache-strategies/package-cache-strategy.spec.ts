@@ -23,11 +23,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
     const item2 = { version: '2', releaseTimestamp: isoTs('2020-01-01 11:00') };
     const item3 = { version: '3', releaseTimestamp: isoTs('2020-01-01 12:00') };
 
-    const oldItems = {
-      '1': item1,
-      '2': item2,
-      '3': item3,
-    };
+    const oldItems = { '1': item1, '2': item2, '3': item3 };
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-15 12:00'),
@@ -57,12 +53,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
         '_test-namespace',
         'bar',
         {
-          items: {
-            '1': item1,
-            '2': item2,
-            '3': item3,
-            '4': newItem,
-          },
+          items: { '1': item1, '2': item2, '3': item3, '4': newItem },
           createdAt: isoTs('2022-10-15 12:00'),
         },
         15 * 24 * 60,

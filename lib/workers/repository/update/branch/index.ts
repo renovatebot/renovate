@@ -184,11 +184,7 @@ export async function processBranch(
       logger.debug(
         `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
       );
-      return {
-        branchExists: false,
-        prNo: branchPr?.number,
-        result: 'pending',
-      };
+      return { branchExists: false, prNo: branchPr?.number, result: 'pending' };
     }
     if (!branchExists) {
       if (config.mode === 'silent' && !dependencyDashboardCheck) {
@@ -280,11 +276,7 @@ export async function processBranch(
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
-            return {
-              branchExists,
-              prNo: branchPr.number,
-              result: 'pr-edited',
-            };
+            return { branchExists, prNo: branchPr.number, result: 'pr-edited' };
           }
         }
       } else if (branchIsModified) {
@@ -295,10 +287,7 @@ export async function processBranch(
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
-          return {
-            branchExists,
-            result: 'pr-edited',
-          };
+          return { branchExists, result: 'pr-edited' };
         }
         const branchSha = await scm.getBranchCommit(config.branchName);
         const oldPrSha = oldPr?.sha;
@@ -312,10 +301,7 @@ export async function processBranch(
             { oldPrNumber: oldPr.number, oldPrSha, branchSha },
             'Found old PR but the SHA is different',
           );
-          return {
-            branchExists,
-            result: 'pr-edited',
-          };
+          return { branchExists, result: 'pr-edited' };
         }
       }
     }
@@ -344,10 +330,7 @@ export async function processBranch(
         !(config.automerge && config.automergeType === 'branch') // if branch is configured for automerge there's no need for a PR
       ) {
         logger.debug('Skipping PR creation out of schedule');
-        return {
-          branchExists,
-          result: 'not-scheduled',
-        };
+        return { branchExists, result: 'not-scheduled' };
       }
       logger.debug(
         'Branch + PR exists but is not scheduled -- will update if necessary',
@@ -422,11 +405,7 @@ export async function processBranch(
         logger.debug(
           'Skipping branch creation due to internal status checks not met',
         );
-        return {
-          branchExists,
-          prNo: branchPr?.number,
-          result: 'pending',
-        };
+        return { branchExists, prNo: branchPr?.number, result: 'pending' };
       }
     }
 
@@ -458,11 +437,7 @@ export async function processBranch(
       !dependencyDashboardCheck
     ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'no-work',
-      };
+      return { branchExists, prNo: branchPr?.number, result: 'no-work' };
     }
     // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
     // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
@@ -622,11 +597,7 @@ export async function processBranch(
       }
     }
     if (!commitSha && !branchExists) {
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'no-work',
-      };
+      return { branchExists, prNo: branchPr?.number, result: 'no-work' };
     }
     if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
@@ -675,11 +646,7 @@ export async function processBranch(
         logger.debug(
           'Branch cannot automerge now because automergeSchedule is off schedule - skipping',
         );
-        return {
-          branchExists,
-          result: 'not-scheduled',
-          commitSha,
-        };
+        return { branchExists, result: 'not-scheduled', commitSha };
       }
       if (
         mergeStatus === 'stale' &&
@@ -781,12 +748,7 @@ export async function processBranch(
       logger.warn({ err }, `Error updating branch`);
     }
     // Don't throw here - we don't want to stop the other renovations
-    return {
-      branchExists,
-      prNo: branchPr?.number,
-      result: 'error',
-      commitSha,
-    };
+    return { branchExists, prNo: branchPr?.number, result: 'error', commitSha };
   }
   try {
     logger.debug('Ensuring PR');
@@ -818,36 +780,16 @@ export async function processBranch(
         };
       }
       if (prBlockedBy === 'AwaitingTests') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'pending',
-          commitSha,
-        };
+        return { branchExists, prBlockedBy, result: 'pending', commitSha };
       }
       if (prBlockedBy === 'BranchAutomerge') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'done',
-          commitSha,
-        };
+        return { branchExists, prBlockedBy, result: 'done', commitSha };
       }
       if (prBlockedBy === 'Error') {
-        return {
-          branchExists,
-          prBlockedBy,
-          result: 'error',
-          commitSha,
-        };
+        return { branchExists, prBlockedBy, result: 'error', commitSha };
       }
       logger.warn({ prBlockedBy }, 'Unknown PrBlockedBy result');
-      return {
-        branchExists,
-        prBlockedBy,
-        result: 'error',
-        commitSha,
-      };
+      return { branchExists, prBlockedBy, result: 'error', commitSha };
     }
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
@@ -919,11 +861,7 @@ export async function processBranch(
             logger.debug('checking auto-merge');
             const prAutomergeResult = await checkAutoMerge(pr, config);
             if (prAutomergeResult?.automerged) {
-              return {
-                branchExists,
-                result: 'automerged',
-                commitSha,
-              };
+              return { branchExists, result: 'automerged', commitSha };
             }
           }
         } else {

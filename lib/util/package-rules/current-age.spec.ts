@@ -17,9 +17,7 @@ describe('util/package-rules/current-age', () => {
 
     it('returns false if release is older', () => {
       const result = matcher.matches(
-        {
-          currentVersionTimestamp: '2020-01-01',
-        },
+        { currentVersionTimestamp: '2020-01-01' },
         {
           matchCurrentAge: '< 1 year', // younger than 1 year
         },
@@ -29,9 +27,7 @@ describe('util/package-rules/current-age', () => {
 
     it('returns false if release is younger', () => {
       const result = matcher.matches(
-        {
-          currentVersionTimestamp: '2020-01-01',
-        },
+        { currentVersionTimestamp: '2020-01-01' },
         {
           matchCurrentAge: '> 10 years', // older than 10 yrs
         },
@@ -41,9 +37,7 @@ describe('util/package-rules/current-age', () => {
 
     it('returns null if release invalid', () => {
       const result = matcher.matches(
-        {
-          currentVersionTimestamp: 'abc',
-        },
+        { currentVersionTimestamp: 'abc' },
         {
           matchCurrentAge: '> 2 days', // older than 2 days
         },
@@ -53,9 +47,7 @@ describe('util/package-rules/current-age', () => {
 
     it('returns false if release undefined', () => {
       const result = matcher.matches(
-        {
-          currentVersionTimestamp: undefined,
-        },
+        { currentVersionTimestamp: undefined },
         {
           matchCurrentAge: '> 2 days', // older than 2 days
         },
@@ -65,9 +57,7 @@ describe('util/package-rules/current-age', () => {
 
     it('returns true if age matches', () => {
       const result = matcher.matches(
-        {
-          currentVersionTimestamp: '2020-01-01',
-        },
+        { currentVersionTimestamp: '2020-01-01' },
         {
           matchCurrentAge: '> 3 years', // older than 3 years
         },

@@ -12,9 +12,7 @@ export const url = 'https://helm.sh/docs';
 export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const defaultConfig = {
-  registryAliases: {
-    stable: 'https://charts.helm.sh/stable',
-  },
+  registryAliases: { stable: 'https://charts.helm.sh/stable' },
   commitMessageTopic: 'helm chart {{depName}}',
   fileMatch: ['(^|/)Chart\\.ya?ml$'],
 };

@@ -45,10 +45,7 @@ describe('modules/platform/azure/util', () => {
       const context = getGitStatusContextFromCombinedName(
         'my-genre/status-name',
       );
-      expect(context).toEqual({
-        genre: 'my-genre',
-        name: 'status-name',
-      });
+      expect(context).toEqual({ genre: 'my-genre', name: 'status-name' });
     });
 
     it('should parse valid genre and name with multiple slashes', () => {
@@ -63,10 +60,7 @@ describe('modules/platform/azure/util', () => {
 
     it('should parse valid empty genre and name without a slash', () => {
       const context = getGitStatusContextFromCombinedName('status-name');
-      expect(context).toEqual({
-        genre: undefined,
-        name: 'status-name',
-      });
+      expect(context).toEqual({ genre: undefined, name: 'status-name' });
     });
   });
 

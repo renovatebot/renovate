@@ -18,32 +18,19 @@ describe('modules/datasource/java-version/index', () => {
         .scope(defaultRegistryUrl)
         .get(getPath(0))
         .replyWithError('error');
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(404);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -51,22 +38,14 @@ describe('modules/datasource/java-version/index', () => {
         .scope(defaultRegistryUrl)
         .get(getPath(0))
         .reply(200, { versions: [] });
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('throws for 5xx', async () => {
       httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(502);
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('processes real data', async () => {
@@ -74,10 +53,7 @@ describe('modules/datasource/java-version/index', () => {
         .scope(defaultRegistryUrl)
         .get(getPath(0))
         .reply(200, Fixtures.get('page.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
     });
@@ -87,10 +63,7 @@ describe('modules/datasource/java-version/index', () => {
         .scope(defaultRegistryUrl)
         .get(getPath(0, 'jre'))
         .reply(200, Fixtures.get('jre.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'java-jre',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'java-jre' });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(2);
     });
@@ -105,10 +78,7 @@ describe('modules/datasource/java-version/index', () => {
         .reply(200, { versions })
         .get(getPath(1))
         .reply(404);
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(50);
     });

@@ -20,17 +20,12 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if no meta fields', () => {
-      const rec = {
-        foo: 'bar',
-      };
+      const rec = { foo: 'bar' };
       expect(prettyStdout.getMeta(rec as any)).toBeEmptyString();
     });
 
     it('supports single meta', () => {
-      const rec = {
-        foo: 'bar',
-        repository: 'a/b',
-      };
+      const rec = { foo: 'bar', repository: 'a/b' };
       expect(prettyStdout.getMeta(rec as any)).toEqual(
         chalk.gray(' (repository=a/b)'),
       );
@@ -59,21 +54,12 @@ describe('logger/pretty-stdout', () => {
     });
 
     it('returns empty string if all are meta fields', () => {
-      const rec = {
-        branch: 'bar',
-        v: 0,
-      };
+      const rec = { branch: 'bar', v: 0 };
       expect(prettyStdout.getDetails(rec as any)).toBeEmptyString();
     });
 
     it('supports a config', () => {
-      const rec = {
-        v: 0,
-        config: {
-          a: 'b',
-          d: ['e', 'f'],
-        },
-      };
+      const rec = { v: 0, config: { a: 'b', d: ['e', 'f'] } };
       expect(prettyStdout.getDetails(rec as any)).toBe(
         `       "config": {"a": "b", "d": ["e", "f"]}\n`,
       );
@@ -94,10 +80,7 @@ describe('logger/pretty-stdout', () => {
         level: 10,
         msg: 'test message',
         v: 0,
-        config: {
-          a: 'b',
-          d: ['e', 'f'],
-        },
+        config: { a: 'b', d: ['e', 'f'] },
       };
       expect(prettyStdout.formatRecord(rec)).toEqual(
         [

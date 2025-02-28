@@ -5,26 +5,11 @@ describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
-        {
-          updateType: 'major' as UpdateType,
-          prTitle: 'some major update',
-        },
-        {
-          updateType: 'pin' as UpdateType,
-          prTitle: 'some pin',
-        },
-        {
-          updateType: 'minor' as UpdateType,
-          prTitle: 'a minor update',
-        },
-        {
-          updateType: 'pin' as UpdateType,
-          prTitle: 'some other other pin',
-        },
-        {
-          updateType: 'pin' as UpdateType,
-          prTitle: 'some other pin',
-        },
+        { updateType: 'major' as UpdateType, prTitle: 'some major update' },
+        { updateType: 'pin' as UpdateType, prTitle: 'some pin' },
+        { updateType: 'minor' as UpdateType, prTitle: 'a minor update' },
+        { updateType: 'pin' as UpdateType, prTitle: 'some other other pin' },
+        { updateType: 'pin' as UpdateType, prTitle: 'some other pin' },
       ];
       sortBranches(branches);
       expect(branches).toEqual([
@@ -58,10 +43,7 @@ describe('workers/repository/process/sort', () => {
           prTitle: 'a minor update',
           prPriority: -1,
         },
-        {
-          updateType: 'patch' as UpdateType,
-          prTitle: 'a patch update',
-        },
+        { updateType: 'patch' as UpdateType, prTitle: 'a patch update' },
       ];
       sortBranches(branches);
       expect(branches).toEqual([

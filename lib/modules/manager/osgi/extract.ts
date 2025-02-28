@@ -76,10 +76,7 @@ export function extractPackageFile(
     // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
     const parts = gav.split(':');
     if (parts.length < 3 || parts.length > 5) {
-      deps.push({
-        depName: gav,
-        skipReason: 'invalid-value',
-      });
+      deps.push({ depName: gav, skipReason: 'invalid-value' });
       continue;
     }
     // parsing should use the last entry for the version

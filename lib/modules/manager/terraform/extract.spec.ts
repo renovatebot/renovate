@@ -531,11 +531,7 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.21.4',
           depType: 'kubernetes_deployment_v1',
         },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.5',
-          depType: 'kubernetes_job',
-        },
+        { depName: 'nginx', currentValue: '1.21.5', depType: 'kubernetes_job' },
         {
           depType: 'kubernetes_job',
           skipReason: 'invalid-dependency-specification',
@@ -545,11 +541,7 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.21.6',
           depType: 'kubernetes_job_v1',
         },
-        {
-          depName: 'nginx',
-          currentValue: '1.21.7',
-          depType: 'kubernetes_pod',
-        },
+        { depName: 'nginx', currentValue: '1.21.7', depType: 'kubernetes_pod' },
         {
           depName: 'nginx',
           currentValue: '1.21.8',
@@ -752,9 +744,7 @@ describe('modules/manager/terraform/extract', () => {
           depType: 'tfe_workspace',
           extractVersion: 'v(?<version>.*)$',
         },
-        {
-          skipReason: 'unspecified-version',
-        },
+        { skipReason: 'unspecified-version' },
         {
           currentValue: '1.1.9',
           datasource: 'github-releases',

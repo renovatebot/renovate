@@ -152,12 +152,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'terraform-aws-modules/security-group/aws',
             depType: 'terragrunt',
           },
-          {
-            skipReason: 'local',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'local' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
@@ -200,12 +196,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'gitTags',
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'no-source' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',
@@ -370,12 +362,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'terraform-aws-modules/security-group/aws',
             depType: 'terragrunt',
           },
-          {
-            skipReason: 'local',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'local' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
@@ -425,12 +413,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'gitTags',
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'no-source' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',
@@ -588,12 +572,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'terraform-aws-modules/security-group/aws',
             depType: 'terragrunt',
           },
-          {
-            skipReason: 'local',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'local' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
@@ -636,12 +616,8 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'gitTags',
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
-          },
+          { skipReason: 'no-source' },
+          { skipReason: 'no-source' },
           {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',

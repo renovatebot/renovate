@@ -141,12 +141,7 @@ export function extractCollections(lines: string[]): PackageDependency[] {
     if (lineMatch) {
       const dep: AnsibleGalaxyPackageDependency = {
         depType: 'galaxy-collection',
-        managerData: {
-          name: null,
-          version: null,
-          type: null,
-          source: null,
-        },
+        managerData: { name: null, version: null, type: null, source: null },
       };
       do {
         interpretLine(lineMatch, dep);

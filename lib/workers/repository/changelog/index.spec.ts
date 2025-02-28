@@ -5,9 +5,7 @@ import { embedChangelogs } from '.';
 
 vi.mock('../update/pr/changelog');
 
-mockedFunction(getChangeLogJSON).mockResolvedValue({
-  hasReleaseNotes: true,
-});
+mockedFunction(getChangeLogJSON).mockResolvedValue({ hasReleaseNotes: true });
 
 describe('workers/repository/changelog/index', () => {
   it('embedChangelogs', async () => {

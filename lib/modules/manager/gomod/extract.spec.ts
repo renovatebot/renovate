@@ -61,9 +61,7 @@ describe('modules/manager/gomod/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            managerData: {
-              lineNumber: 1,
-            },
+            managerData: { lineNumber: 1 },
             depName: 'go',
             depType: 'golang',
             currentValue: '1.23',
@@ -71,39 +69,28 @@ describe('modules/manager/gomod/extract', () => {
             versioning: 'go-mod-directive',
           },
           {
-            managerData: {
-              lineNumber: 2,
-            },
+            managerData: { lineNumber: 2 },
             depName: 'github.com/pravesht/gocql',
             depType: 'replace',
             currentValue: 'v0.0.0',
             datasource: 'go',
           },
           {
-            managerData: {
-              lineNumber: 4,
-              multiLine: true,
-            },
+            managerData: { lineNumber: 4, multiLine: true },
             depName: 'k8s.io/client-go',
             depType: 'replace',
             currentValue: 'v0.21.9',
             datasource: 'go',
           },
           {
-            managerData: {
-              lineNumber: 7,
-              multiLine: true,
-            },
+            managerData: { lineNumber: 7, multiLine: true },
             depName: 'k8s.io/cloud-provider',
             depType: 'replace',
             currentValue: 'v0.17.3',
             datasource: 'go',
           },
           {
-            managerData: {
-              lineNumber: 8,
-              multiLine: true,
-            },
+            managerData: { lineNumber: 8, multiLine: true },
             depName: 'k8s.io/cluster-bootstrap',
             depType: 'indirect',
             enabled: false,
@@ -111,10 +98,7 @@ describe('modules/manager/gomod/extract', () => {
             datasource: 'go',
           },
           {
-            managerData: {
-              lineNumber: 9,
-              multiLine: true,
-            },
+            managerData: { lineNumber: 9, multiLine: true },
             depName: 'k8s.io/code-generator',
             depType: 'replace',
             currentValue: 'v0.17.3',
@@ -135,9 +119,7 @@ describe('modules/manager/gomod/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            managerData: {
-              lineNumber: 1,
-            },
+            managerData: { lineNumber: 1 },
             depName: 'go',
             depType: 'golang',
             currentValue: '1.23',
@@ -145,18 +127,14 @@ describe('modules/manager/gomod/extract', () => {
             versioning: 'go-mod-directive',
           },
           {
-            managerData: {
-              lineNumber: 2,
-            },
+            managerData: { lineNumber: 2 },
             depName: 'go',
             depType: 'toolchain',
             currentValue: '1.23.3',
             datasource: 'golang-version',
           },
           {
-            managerData: {
-              lineNumber: 3,
-            },
+            managerData: { lineNumber: 3 },
             depName: 'github.com/pravesht/gocql',
             depType: 'replace',
             currentValue: 'v0.0.0',

@@ -72,10 +72,7 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=fakepackage')
         .reply(200);
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'fakepackage/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'fakepackage/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -85,10 +82,7 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, {});
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'fakepackage/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'fakepackage/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -99,10 +93,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(404);
       config.registryUrls = ['https://fake.bintray.com/'];
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'poco/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -112,10 +103,7 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=fakepackage')
         .reply(200, fakeJson);
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'fakepackage/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'fakepackage/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -125,28 +113,15 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=poco')
         .reply(200, pocoJson);
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'poco/1.2@_/_' }),
       ).toEqual({
         registryUrl: 'https://not.conan.io',
         releases: [
-          {
-            version: '1.8.1',
-          },
-          {
-            version: '1.9.3',
-          },
-          {
-            version: '1.9.4',
-          },
-          {
-            version: '1.10.0',
-          },
-          {
-            version: '1.10.1',
-          },
+          { version: '1.8.1' },
+          { version: '1.9.3' },
+          { version: '1.9.4' },
+          { version: '1.10.0' },
+          { version: '1.10.1' },
         ],
       });
     });
@@ -157,22 +132,13 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=FooBar')
         .reply(200, mixedCaseJson);
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'FooBar/1.0.0@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'FooBar/1.0.0@_/_' }),
       ).toEqual({
         registryUrl: 'https://not.conan.io',
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.1.0',
-          },
-          {
-            version: '2.2.0',
-          },
+          { version: '1.0.0' },
+          { version: '1.1.0' },
+          { version: '2.2.0' },
         ],
       });
     });
@@ -193,27 +159,13 @@ describe('modules/datasource/conan/index', () => {
       ).toEqual({
         registryUrl: 'https://center2.conan.io',
         releases: [
-          {
-            version: '1.8.1',
-          },
-          {
-            version: '1.9.3',
-          },
-          {
-            version: '1.9.4',
-          },
-          {
-            version: '1.10.0',
-          },
-          {
-            version: '1.10.1',
-          },
-          {
-            version: '1.11.0',
-          },
-          {
-            version: '1.11.1',
-          },
+          { version: '1.8.1' },
+          { version: '1.9.3' },
+          { version: '1.9.4' },
+          { version: '1.10.0' },
+          { version: '1.10.1' },
+          { version: '1.11.0' },
+          { version: '1.11.1' },
         ],
       });
     });
@@ -251,10 +203,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(200, pocoJson);
       config.packageName = 'poco';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@un/matched',
-        }),
+        await getPkgReleases({ ...config, packageName: 'poco/1.2@un/matched' }),
       ).toBeNull();
     });
 
@@ -265,17 +214,10 @@ describe('modules/datasource/conan/index', () => {
         .reply(200, malformedJson);
       config.packageName = 'bad';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'bad/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'bad/1.2@_/_' }),
       ).toEqual({
         registryUrl: 'https://not.conan.io',
-        releases: [
-          {
-            version: '1.9.3',
-          },
-        ],
+        releases: [{ version: '1.9.3' }],
       });
     });
 
@@ -287,10 +229,7 @@ describe('modules/datasource/conan/index', () => {
       config.registryUrls = ['https://fake.bintray.com/'];
       config.packageName = 'poco';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'poco/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -302,10 +241,7 @@ describe('modules/datasource/conan/index', () => {
       config.registryUrls = ['https://fake.bintray.com'];
       config.packageName = 'poco';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'poco/1.2@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'poco/1.2@_/_' }),
       ).toBeNull();
     });
 
@@ -316,9 +252,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(
           200,
           { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
-          {
-            'x-jfrog-version': 'latest',
-          },
+          { 'x-jfrog-version': 'latest' },
         );
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
@@ -335,9 +269,7 @@ describe('modules/datasource/conan/index', () => {
           '/_/arti/1.1.1/_/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/export/conanfile.py?properties=conan.package.url',
         )
         .reply(200, {
-          properties: {
-            'conan.package.url': 'https://fake.conan.url.com',
-          },
+          properties: { 'conan.package.url': 'https://fake.conan.url.com' },
         });
 
       config.registryUrls = [
@@ -345,21 +277,11 @@ describe('modules/datasource/conan/index', () => {
       ];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
-        releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.1.1',
-          },
-        ],
+        releases: [{ version: '1.0.0' }, { version: '1.1.1' }],
         sourceUrl: 'https://fake.conan.url.com',
       });
     });
@@ -371,27 +293,15 @@ describe('modules/datasource/conan/index', () => {
         .reply(
           200,
           { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
-          {
-            'x-jfrog-version': 'latest',
-          },
+          { 'x-jfrog-version': 'latest' },
         );
       config.registryUrls = ['https://fake.artifactory.com'];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toEqual({
         registryUrl: 'https://fake.artifactory.com',
-        releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.1.1',
-          },
-        ],
+        releases: [{ version: '1.0.0' }, { version: '1.1.1' }],
       });
     });
 
@@ -401,9 +311,7 @@ describe('modules/datasource/conan/index', () => {
         .get('/v2/conans/search?q=arti')
         .reply(
           200,
-          {
-            results: ['arti/invalid_version@_/_'],
-          },
+          { results: ['arti/invalid_version@_/_'] },
           { 'x-jfrog-version': 'latest' },
         );
       config.registryUrls = [
@@ -411,10 +319,7 @@ describe('modules/datasource/conan/index', () => {
       ];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
@@ -432,10 +337,7 @@ describe('modules/datasource/conan/index', () => {
       ];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toBeNull();
     });
 
@@ -446,9 +348,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(
           200,
           { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
-          {
-            'x-jfrog-version': 'latest',
-          },
+          { 'x-jfrog-version': 'latest' },
         );
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
@@ -471,21 +371,11 @@ describe('modules/datasource/conan/index', () => {
       ];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
-        releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.1.1',
-          },
-        ],
+        releases: [{ version: '1.0.0' }, { version: '1.1.1' }],
       });
     });
 
@@ -496,9 +386,7 @@ describe('modules/datasource/conan/index', () => {
         .reply(
           200,
           { results: ['arti/1.0.0@_/_', 'arti/1.1.1@_/_'] },
-          {
-            'x-jfrog-version': 'latest',
-          },
+          { 'x-jfrog-version': 'latest' },
         );
       httpMock
         .scope('https://fake.artifactory.com/artifactory/api/conan/test-repo/')
@@ -510,21 +398,11 @@ describe('modules/datasource/conan/index', () => {
       ];
       config.packageName = 'arti';
       expect(
-        await getPkgReleases({
-          ...config,
-          packageName: 'arti/1.1@_/_',
-        }),
+        await getPkgReleases({ ...config, packageName: 'arti/1.1@_/_' }),
       ).toEqual({
         registryUrl:
           'https://fake.artifactory.com/artifactory/api/conan/test-repo',
-        releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '1.1.1',
-          },
-        ],
+        releases: [{ version: '1.0.0' }, { version: '1.1.1' }],
       });
     });
   });

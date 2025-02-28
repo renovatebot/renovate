@@ -8,9 +8,6 @@ export { extractPackageFile };
 export const displayName = 'CDN URL';
 export const categories: Category[] = ['cd'];
 
-export const defaultConfig = {
-  fileMatch: [],
-  versioning: semverVersioning.id,
-};
+export const defaultConfig = { fileMatch: [], versioning: semverVersioning.id };
 
 export const supportedDatasources = [CdnjsDatasource.id];

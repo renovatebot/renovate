@@ -4,10 +4,7 @@ import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
 
 vi.mock('./config', () => ({
-  getOnboardingConfigContents: () =>
-    JSON.stringify({
-      foo: 'bar',
-    }),
+  getOnboardingConfigContents: () => JSON.stringify({ foo: 'bar' }),
 }));
 
 describe('workers/repository/onboarding/branch/create', () => {
@@ -273,13 +270,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
-          files: [
-            {
-              type: 'addition',
-              path,
-              contents: '{"foo":"bar"}',
-            },
-          ],
+          files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           force: true,
           message,
           platformCommit: 'auto',

@@ -123,10 +123,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('use github.com only as registry when running against github.com', () => {
-      GlobalConfig.set({
-        platform: 'github',
-        endpoint: 'https://github.com',
-      });
+      GlobalConfig.set({ platform: 'github', endpoint: 'https://github.com' });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
@@ -498,9 +495,7 @@ describe('modules/manager/github-actions/extract', () => {
             datasource: 'gitea-tags',
             registryUrls: ['https://code.forgejo.org/'],
           },
-          {
-            skipReason: 'unsupported-url',
-          },
+          { skipReason: 'unsupported-url' },
         ],
       });
 

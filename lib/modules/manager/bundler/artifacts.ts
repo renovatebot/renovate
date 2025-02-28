@@ -42,9 +42,7 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
       .split('-')
       .join('___'),
   );
-  return {
-    [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
-  };
+  return { [varName]: `${getAuthenticationHeaderValue(hostRule)}` };
 }
 
 const resolvedPkgRegex = regEx(
@@ -104,11 +102,7 @@ export async function updateArtifacts(
         commands.push('bundler lock --update --bundler');
       }
 
-      const updateTypes = {
-        patch: '--patch ',
-        minor: '--minor ',
-        major: '',
-      };
+      const updateTypes = { patch: '--patch ', minor: '--minor ', major: '' };
       for (const [updateType, updateArg] of Object.entries(updateTypes)) {
         const deps = updatedDeps
           .filter((dep) => (dep.updateType ?? 'major') === updateType)
@@ -135,9 +129,7 @@ export async function updateArtifacts(
       }
     }
 
-    const bundlerHostRules = findAllAuthenticatable({
-      hostType: 'rubygems',
-    });
+    const bundlerHostRules = findAllAuthenticatable({ hostType: 'rubygems' });
 
     const bundlerHostRulesVariables = bundlerHostRules.reduce(
       (variables, hostRule) => ({
@@ -166,10 +158,7 @@ export async function updateArtifacts(
           toolName: 'ruby',
           constraint: await getRubyConstraint(updateArtifact),
         },
-        {
-          toolName: 'bundler',
-          constraint: bundler,
-        },
+        { toolName: 'bundler', constraint: bundler },
       ],
       preCommands,
     };
@@ -199,14 +188,7 @@ export async function updateArtifacts(
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
     ) {
-      return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: output,
-          },
-        },
-      ];
+      return [{ artifactError: { lockFile: lockFileName, stderr: output } }];
     }
     if (
       err.stdout?.includes('Please supply credentials for this source') ||

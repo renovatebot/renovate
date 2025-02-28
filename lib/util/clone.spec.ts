@@ -24,11 +24,7 @@ describe('util/clone', () => {
   });
 
   it('maintains same order', () => {
-    const obj: any = {
-      b: 'foo',
-      a: 'bar',
-      c: 'baz',
-    };
+    const obj: any = { b: 'foo', a: 'bar', c: 'baz' };
 
     const res = clone(obj);
     expect(Object.entries(res)).toMatchObject([
@@ -39,11 +35,7 @@ describe('util/clone', () => {
   });
 
   it('assigns "[Circular]" to circular references', () => {
-    const obj: any = {
-      name: 'object',
-      type: 'object',
-      isObject: true,
-    };
+    const obj: any = { name: 'object', type: 'object', isObject: true };
     obj.circular = obj;
 
     expect(clone(obj)).toMatchObject({

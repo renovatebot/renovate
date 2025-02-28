@@ -207,16 +207,8 @@ export interface ArtifactError {
 }
 
 export type UpdateArtifactsResult =
-  | {
-      file?: FileChange;
-      notice?: ArtifactNotice;
-      artifactError?: undefined;
-    }
-  | {
-      file?: undefined;
-      notice?: undefined;
-      artifactError?: ArtifactError;
-    };
+  | { file?: FileChange; notice?: ArtifactNotice; artifactError?: undefined }
+  | { file?: undefined; notice?: undefined; artifactError?: ArtifactError };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;

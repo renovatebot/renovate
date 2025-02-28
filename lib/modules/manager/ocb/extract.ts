@@ -53,10 +53,7 @@ export function extractPackageFile(
   deps.push(...processModule(definition.processors, 'processors'));
   deps.push(...processModule(definition.receivers, 'receivers'));
 
-  return {
-    packageFileVersion: definition.dist.version,
-    deps,
-  };
+  return { packageFileVersion: definition.dist.version, deps };
 }
 
 export function processModule(
@@ -70,12 +67,7 @@ export function processModule(
 
   for (const element of module) {
     const [depName, currentValue] = element.gomod.trim().split(regEx(/\s+/));
-    deps.push({
-      datasource: GoDatasource.id,
-      depType,
-      depName,
-      currentValue,
-    });
+    deps.push({ datasource: GoDatasource.id, depType, depName, currentValue });
   }
 
   return deps;

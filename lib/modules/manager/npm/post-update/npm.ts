@@ -245,13 +245,7 @@ export async function generateLockFile(
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.debug(
-      {
-        err,
-        type: 'npm',
-      },
-      'lock file error',
-    );
+    logger.debug({ err, type: 'npm' }, 'lock file error');
     if (err.stderr?.includes('ENOSPC: no space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }

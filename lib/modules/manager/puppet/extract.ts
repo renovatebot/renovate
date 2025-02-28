@@ -47,21 +47,13 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
     logger.debug(
       `Access to github is only allowed for https, your url was: ${git}`,
     );
-    return {
-      depName: moduleName,
-      sourceUrl: git,
-      skipReason: 'invalid-url',
-    };
+    return { depName: moduleName, sourceUrl: git, skipReason: 'invalid-url' };
   }
   const gitOwnerRepo = parseGitOwnerRepo(git, githubUrl);
 
   if (!gitOwnerRepo) {
     // failed to parse git url
-    return {
-      depName: moduleName,
-      sourceUrl: git,
-      skipReason: 'invalid-url',
-    };
+    return { depName: moduleName, sourceUrl: git, skipReason: 'invalid-url' };
   }
 
   const packageDependency: PackageDependency = {

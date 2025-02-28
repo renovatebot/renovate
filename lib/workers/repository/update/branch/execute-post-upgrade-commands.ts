@@ -36,10 +36,7 @@ export async function postUpgradeCommandsExecutor(
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
     logger.trace(
-      {
-        tasks: upgrade.postUpgradeTasks,
-        allowedCommands,
-      },
+      { tasks: upgrade.postUpgradeTasks, allowedCommands },
       `Checking for post-upgrade tasks`,
     );
     const commands = upgrade.postUpgradeTasks?.commands;
@@ -84,10 +81,7 @@ export async function postUpgradeCommandsExecutor(
           }
         } else {
           logger.warn(
-            {
-              cmd,
-              allowedCommands,
-            },
+            { cmd, allowedCommands },
             'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
@@ -165,10 +159,7 @@ export async function postUpgradeCommandsExecutor(
               { file: relativePath, pattern },
               'Post-upgrade file removed',
             );
-            updatedArtifacts.push({
-              type: 'deletion',
-              path: relativePath,
-            });
+            updatedArtifacts.push({ type: 'deletion', path: relativePath });
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'addition' && ua.path === relativePath),

@@ -9,8 +9,6 @@ export const supportsLockFileMaintenance = true;
 export const url = 'https://pipenv.pypa.io/en/latest';
 export const categories: Category[] = ['python'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)Pipfile$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)Pipfile$'] };
 
 export const supportedDatasources = [PypiDatasource.id];

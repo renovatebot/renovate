@@ -59,12 +59,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       docker: {},
       userConfiguredEnv: config.env,
-      toolConstraints: [
-        {
-          toolName,
-          constraint,
-        },
-      ],
+      toolConstraints: [{ toolName, constraint }],
     };
 
     await exec(cmd, execOptions);
@@ -87,14 +82,7 @@ export async function updateArtifacts({
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }
 

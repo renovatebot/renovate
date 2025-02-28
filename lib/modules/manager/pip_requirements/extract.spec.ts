@@ -263,9 +263,7 @@ some-package==0.3.1`;
       const res = extractPackageFile('-r requirements-other.txt');
       expect(res).toMatchObject({
         deps: [],
-        managerData: {
-          requirementsFiles: ['requirements-other.txt'],
-        },
+        managerData: { requirementsFiles: ['requirements-other.txt'] },
       });
     });
 
@@ -273,9 +271,7 @@ some-package==0.3.1`;
       const res = extractPackageFile('-c constraints.txt');
       expect(res).toMatchObject({
         deps: [],
-        managerData: {
-          constraintsFiles: ['constraints.txt'],
-        },
+        managerData: { constraintsFiles: ['constraints.txt'] },
       });
     });
   });

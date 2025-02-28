@@ -52,10 +52,7 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
 
     it('validates versions', async () => {
       expect(
-        await updateLockedDependency({
-          ...config,
-          newVersion: '^2.0.0',
-        }),
+        await updateLockedDependency({ ...config, newVersion: '^2.0.0' }),
       ).toMatchObject({});
     });
 

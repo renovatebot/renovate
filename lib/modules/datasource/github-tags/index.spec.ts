@@ -14,9 +14,7 @@ describe('modules/datasource/github-tags/index', () => {
 
   beforeEach(() => {
     vi.spyOn(hostRules, 'hosts').mockReturnValue([]);
-    vi.spyOn(hostRules, 'find').mockReturnValue({
-      token: 'some-token',
-    });
+    vi.spyOn(hostRules, 'find').mockReturnValue({ token: 'some-token' });
   });
 
   describe('getDigest', () => {

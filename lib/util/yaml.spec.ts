@@ -14,13 +14,7 @@ describe('util/yaml', () => {
       myObject:
         aString: value
       `),
-      ).toEqual([
-        {
-          myObject: {
-            aString: 'value',
-          },
-        },
-      ]);
+      ).toEqual([{ myObject: { aString: 'value' } }]);
     });
 
     it('should parse content with single document with schema', () => {
@@ -32,19 +26,11 @@ describe('util/yaml', () => {
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
           },
         ),
-      ).toEqual([
-        {
-          myObject: {
-            aString: 'value',
-          },
-        },
-      ]);
+      ).toEqual([{ myObject: { aString: 'value' } }]);
     });
 
     it('should parse content with multiple documents', () => {
@@ -55,16 +41,7 @@ describe('util/yaml', () => {
       ---
       foo: bar
       `),
-      ).toEqual([
-        {
-          myObject: {
-            aString: 'value',
-          },
-        },
-        {
-          foo: 'bar',
-        },
-      ]);
+      ).toEqual([{ myObject: { aString: 'value' } }, { foo: 'bar' }]);
     });
 
     it('should parse content with multiple documents with schema', () => {
@@ -79,23 +56,13 @@ describe('util/yaml', () => {
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
           },
         ),
       ).toEqual([
-        {
-          myObject: {
-            aString: 'foo',
-          },
-        },
-        {
-          myObject: {
-            aString: 'bar',
-          },
-        },
+        { myObject: { aString: 'foo' } },
+        { myObject: { aString: 'bar' } },
       ]);
     });
 
@@ -110,9 +77,7 @@ describe('util/yaml', () => {
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
           },
         ),
@@ -130,9 +95,7 @@ describe('util/yaml', () => {
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
             failureBehaviour: 'throw',
           },
@@ -151,20 +114,12 @@ describe('util/yaml', () => {
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
             failureBehaviour: 'filter',
           },
         ),
-      ).toEqual([
-        {
-          myObject: {
-            aString: 'foo',
-          },
-        },
-      ]);
+      ).toEqual([{ myObject: { aString: 'foo' } }]);
     });
 
     it('should parse content with templates', () => {
@@ -178,16 +133,7 @@ describe('util/yaml', () => {
       `,
           { removeTemplates: true },
         ),
-      ).toEqual([
-        {
-          myObject: {
-            aString: null,
-          },
-        },
-        {
-          foo: null,
-        },
-      ]);
+      ).toEqual([{ myObject: { aString: null } }, { foo: null }]);
     });
   });
 
@@ -202,11 +148,7 @@ describe('util/yaml', () => {
       myObject:
         aString: value
       `),
-      ).toEqual({
-        myObject: {
-          aString: 'value',
-        },
-      });
+      ).toEqual({ myObject: { aString: 'value' } });
     });
 
     it('should parse invalid content using strict=false', () => {
@@ -232,17 +174,11 @@ services:
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
           },
         ),
-      ).toEqual({
-        myObject: {
-          aString: 'value',
-        },
-      });
+      ).toEqual({ myObject: { aString: 'value' } });
     });
 
     it('should throw with single document with schema if parsing fails', () => {
@@ -253,9 +189,7 @@ services:
       `,
           {
             customSchema: z.object({
-              myObject: z.object({
-                aString: z.string(),
-              }),
+              myObject: z.object({ aString: z.string() }),
             }),
           },
         ),
@@ -287,12 +221,7 @@ services:
           { removeTemplates: true },
         ),
       ).toEqual({
-        myObject: {
-          aString: null,
-          myNestedObject: {
-            aNestedString: null,
-          },
-        },
+        myObject: { aString: null, myNestedObject: { aNestedString: null } },
       });
     });
 
@@ -306,12 +235,7 @@ services:
       `,
           { removeTemplates: true },
         ),
-      ).toEqual({
-        myObject: {
-          aString: 'value',
-          aStringWithTag: 'null',
-        },
-      });
+      ).toEqual({ myObject: { aString: 'value', aStringWithTag: 'null' } });
     });
   });
 });

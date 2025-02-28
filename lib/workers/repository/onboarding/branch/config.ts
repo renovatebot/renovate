@@ -80,12 +80,7 @@ async function searchDefaultOnboardingPreset(
       const orgPresetName = `local>${repo}:${presetName}`;
       logger.debug(`Checking for preset: ${orgPresetName}`);
 
-      if (
-        await getPreset({
-          repo,
-          presetName,
-        })
-      ) {
+      if (await getPreset({ repo, presetName })) {
         foundPreset = orgPresetName;
       }
     } catch (err) {

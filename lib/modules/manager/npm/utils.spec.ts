@@ -13,11 +13,7 @@ describe('modules/manager/npm/utils', () => {
           lockfileVersion: 2,
           name: 'lockfile-parsing',
           packages: {
-            '': {
-              license: 'ISC',
-              name: 'lockfile-parsing',
-              version: '1.0.0',
-            },
+            '': { license: 'ISC', name: 'lockfile-parsing', version: '1.0.0' },
           },
           requires: true,
           version: '1.0.0',
@@ -41,11 +37,7 @@ describe('modules/manager/npm/utils', () => {
         lockfileVersion: 2,
         name: 'lockfile-parsing',
         packages: {
-          '': {
-            license: 'ISC',
-            name: 'lockfile-parsing',
-            version: '1.0.0',
-          },
+          '': { license: 'ISC', name: 'lockfile-parsing', version: '1.0.0' },
         },
         requires: true,
         version: '1.0.0',

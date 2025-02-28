@@ -91,12 +91,7 @@ export async function updateArtifacts({
   } catch (err) {
     logger.debug({ err }, 'Error setting new Maven Wrapper release value');
     return [
-      {
-        artifactError: {
-          lockFile: packageFileName,
-          stderr: err.message,
-        },
-      },
+      { artifactError: { lockFile: packageFileName, stderr: err.message } },
     ];
   }
 }

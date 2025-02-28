@@ -21,9 +21,7 @@ export class PackageFilesMigration extends AbstractMigration {
           delete packageFile.packageFile;
 
           if (Object.keys(packageFile).length > 1) {
-            packageRules.push({
-              ...packageFile,
-            });
+            packageRules.push({ ...packageFile });
           }
         } else if (is.array(packageFile, is.string)) {
           fileList.push(...packageFile);

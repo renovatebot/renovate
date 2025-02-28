@@ -81,10 +81,7 @@ export async function findPnpmWorkspace(
     return null;
   }
 
-  return {
-    lockFilePath: pnpmLockfilePath,
-    workspaceYamlPath,
-  };
+  return { lockFilePath: pnpmLockfilePath, workspaceYamlPath };
 }
 
 export async function detectPnpmWorkspaces(
@@ -253,11 +250,10 @@ function getLockedDependencyVersions(
   return res;
 }
 
-export function tryParsePnpmWorkspaceYaml(content: string):
-  | {
-      success: true;
-      data: PnpmWorkspaceFile;
-    }
+export function tryParsePnpmWorkspaceYaml(
+  content: string,
+):
+  | { success: true; data: PnpmWorkspaceFile }
   | { success: false; data?: never } {
   try {
     const data = parseSingleYaml(content, {
@@ -288,12 +284,7 @@ export async function extractPnpmWorkspaceFile(
     pnpmShrinkwrap = filePath;
   }
 
-  return {
-    deps,
-    managerData: {
-      pnpmShrinkwrap,
-    },
-  };
+  return { deps, managerData: { pnpmShrinkwrap } };
 }
 
 /**
@@ -342,10 +333,7 @@ function pnpmCatalogsToArray({
   }
 
   for (const [name, dependencies] of Object.entries(namedCatalogs)) {
-    result.push({
-      name,
-      dependencies,
-    });
+    result.push({ name, dependencies });
   }
 
   return result;

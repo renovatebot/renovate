@@ -68,9 +68,7 @@ export class GitlabPackagesDatasource extends Datasource {
       packagePart,
     );
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
 
     let response: GitlabPackage[];
     try {

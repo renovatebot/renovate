@@ -107,9 +107,7 @@ describe('modules/datasource/repology/index', () => {
         status: 200,
         body: '[]',
       });
-      mockResolverCall('debian_stable', 'nginx', 'srcname', {
-        status: 403,
-      });
+      mockResolverCall('debian_stable', 'nginx', 'srcname', { status: 403 });
       mockApiCall('nginx', { status: 500 });
 
       await expect(
@@ -122,9 +120,7 @@ describe('modules/datasource/repology/index', () => {
     });
 
     it('throws error on unexpected Resolver response with binary package', async () => {
-      mockResolverCall('debian_stable', 'nginx', 'binname', {
-        status: 500,
-      });
+      mockResolverCall('debian_stable', 'nginx', 'binname', { status: 500 });
 
       await expect(
         getPkgReleases({
@@ -140,9 +136,7 @@ describe('modules/datasource/repology/index', () => {
         status: 200,
         body: '[]',
       });
-      mockResolverCall('debian_stable', 'nginx', 'srcname', {
-        status: 500,
-      });
+      mockResolverCall('debian_stable', 'nginx', 'srcname', { status: 500 });
 
       await expect(
         getPkgReleases({
@@ -158,9 +152,7 @@ describe('modules/datasource/repology/index', () => {
         status: 200,
         body: '[]',
       });
-      mockResolverCall('debian_stable', 'nginx', 'srcname', {
-        status: 403,
-      });
+      mockResolverCall('debian_stable', 'nginx', 'srcname', { status: 403 });
       mockApiCall('nginx', { code: 'ETIMEDOUT' });
 
       await expect(
@@ -415,14 +407,9 @@ describe('modules/datasource/repology/index', () => {
       ];
       const pkgsJSON = JSON.stringify(pkgs);
 
-      mockResolverCall('some_repo', 'some-package', 'binname', {
-        status: 403,
-      });
+      mockResolverCall('some_repo', 'some-package', 'binname', { status: 403 });
 
-      mockApiCall('some-package', {
-        status: 200,
-        body: pkgsJSON,
-      });
+      mockApiCall('some-package', { status: 200, body: pkgsJSON });
 
       const res = await getPkgReleases({
         datasource,
@@ -431,12 +418,7 @@ describe('modules/datasource/repology/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://repology.org',
-        releases: [
-          { version: '1.0.0' },
-          {
-            version: '4.0.0',
-          },
-        ],
+        releases: [{ version: '1.0.0' }, { version: '4.0.0' }],
       });
     });
 
@@ -460,9 +442,7 @@ describe('modules/datasource/repology/index', () => {
         registryUrl: 'https://repology.org',
         releases: [
           { version: '3.8.2-1ubuntu1' },
-          {
-            version: '3.8.10-0ubuntu1~20.04.2',
-          },
+          { version: '3.8.10-0ubuntu1~20.04.2' },
         ],
       });
     });

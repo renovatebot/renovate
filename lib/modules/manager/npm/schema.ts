@@ -7,9 +7,7 @@ export const PnpmCatalogsSchema = z.object({
 });
 
 export const PnpmWorkspaceFileSchema = z
-  .object({
-    packages: z.array(z.string()),
-  })
+  .object({ packages: z.array(z.string()) })
   .and(PnpmCatalogsSchema);
 
 export const PackageManagerSchema = z

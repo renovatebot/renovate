@@ -77,9 +77,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('content');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: [''],
-      }),
+      partial<StatusResult>({ modified: [''] }),
     );
 
     const res = await updateArtifacts({
@@ -97,9 +95,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -126,9 +122,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     hostRules.find.mockReturnValueOnce({ token: 'token' });
@@ -156,9 +150,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     hostRules.find.mockReturnValueOnce({ token: 'x-access-token:token' });
@@ -186,9 +178,7 @@ describe('modules/manager/nix/artifacts', () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -199,14 +189,7 @@ describe('modules/manager/nix/artifacts', () => {
       config: { ...config, constraints: { nix: '2.10.0' } },
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          path: 'flake.lock',
-          type: 'addition',
-        },
-      },
-    ]);
+    expect(res).toEqual([{ file: { path: 'flake.lock', type: 'addition' } }]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -231,9 +214,7 @@ describe('modules/manager/nix/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -244,20 +225,10 @@ describe('modules/manager/nix/artifacts', () => {
       config: { ...config, constraints: { nix: '2.10.0' } },
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          path: 'flake.lock',
-          type: 'addition',
-        },
-      },
-    ]);
+    expect(res).toEqual([{ file: { path: 'flake.lock', type: 'addition' } }]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool nix 2.10.0' },
-      {
-        cmd: updateInputCmd,
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: updateInputCmd, options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -273,9 +244,7 @@ describe('modules/manager/nix/artifacts', () => {
     });
 
     expect(res).toEqual([
-      {
-        artifactError: { lockFile: 'flake.lock', stderr: 'exec error' },
-      },
+      { artifactError: { lockFile: 'flake.lock', stderr: 'exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
@@ -284,9 +253,7 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -313,9 +280,7 @@ describe('modules/manager/nix/artifacts', () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['flake.lock'],
-      }),
+      partial<StatusResult>({ modified: ['flake.lock'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
 
@@ -323,20 +288,10 @@ describe('modules/manager/nix/artifacts', () => {
       packageFileName: 'flake.nix',
       updatedDeps: [{ depName: 'nixpkgs' }],
       newPackageFileContent: 'some new content',
-      config: {
-        ...config,
-        constraints: { nix: '2.10.0' },
-      },
+      config: { ...config, constraints: { nix: '2.10.0' } },
     });
 
-    expect(res).toEqual([
-      {
-        file: {
-          path: 'flake.lock',
-          type: 'addition',
-        },
-      },
-    ]);
+    expect(res).toEqual([{ file: { path: 'flake.lock', type: 'addition' } }]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },

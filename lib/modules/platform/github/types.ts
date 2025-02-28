@@ -24,9 +24,7 @@ export interface Comment {
 export interface GhRestRepo {
   full_name: string;
   default_branch: string;
-  owner: {
-    login: string;
-  };
+  owner: { login: string };
   archived: boolean;
   topics: string[];
 }
@@ -35,17 +33,9 @@ export interface GhRestPr {
   head: {
     ref: string;
     sha: LongCommitSha;
-    repo: {
-      full_name: string;
-      pushed_at?: string;
-    };
+    repo: { full_name: string; pushed_at?: string };
   };
-  base: {
-    repo: {
-      pushed_at?: string;
-    };
-    ref: string;
-  };
+  base: { repo: { pushed_at?: string }; ref: string };
   mergeable_state: string;
   number: number;
   title: string;
@@ -115,9 +105,7 @@ export type BranchProtection = any;
 export interface GhRepo {
   id: string;
   isFork: boolean;
-  parent?: {
-    nameWithOwner: string;
-  };
+  parent?: { nameWithOwner: string };
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
@@ -126,19 +114,12 @@ export interface GhRepo {
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
-  defaultBranchRef: {
-    name: string;
-    target: {
-      oid: string;
-    };
-  };
+  defaultBranchRef: { name: string; target: { oid: string } };
   issues: { nodes: unknown[] };
 }
 
 export interface GhAutomergeResponse {
-  enablePullRequestAutoMerge: {
-    pullRequest: { number: number };
-  };
+  enablePullRequestAutoMerge: { pullRequest: { number: number } };
 }
 
 export interface ApiPageItem {

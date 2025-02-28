@@ -9,14 +9,9 @@
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
   "baseBranches": ["$default", "next"],
-  "dockerfile": {
-    "semanticCommitType": "build"
-  },
+  "dockerfile": { "semanticCommitType": "build" },
   "packageRules": [
-    {
-      "matchPackageNames": ["containerbase/node"],
-      "versioning": "node"
-    },
+    { "matchPackageNames": ["containerbase/node"], "versioning": "node" },
     {
       "matchDepTypes": ["dependencies", "optionalDependencies"],
       "semanticCommitType": "build"
@@ -25,14 +20,8 @@
       "matchPackageNames": ["semantic-release"],
       "semanticCommitType": "build"
     },
-    {
-      "matchPackageNames": ["@types/jest"],
-      "groupName": "jest monorepo"
-    },
-    {
-      "matchFileNames": ["**/__fixtures__/**"],
-      "enabled": false
-    },
+    { "matchPackageNames": ["@types/jest"], "groupName": "jest monorepo" },
+    { "matchFileNames": ["**/__fixtures__/**"], "enabled": false },
     {
       "description": "set fix scope for base image",
       "matchPackageNames": ["ghcr.io/renovatebot/base-image"],

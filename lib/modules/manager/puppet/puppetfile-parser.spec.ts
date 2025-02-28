@@ -96,18 +96,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       );
 
       expect(defaultRegistryModules).toEqual([
-        {
-          name: 'puppetlabs/stdlib',
-          version: '8.0.0',
-        },
-        {
-          name: 'puppetlabs/apache',
-          version: '6.5.1',
-        },
-        {
-          name: 'puppetlabs/puppetdb',
-          version: '7.9.0',
-        },
+        { name: 'puppetlabs/stdlib', version: '8.0.0' },
+        { name: 'puppetlabs/apache', version: '6.5.1' },
+        { name: 'puppetlabs/puppetdb', version: '7.9.0' },
       ]);
 
       const someOtherPuppetForgeModules = puppetfile.getModulesOfForge(
@@ -115,18 +106,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       );
 
       expect(someOtherPuppetForgeModules).toEqual([
-        {
-          name: 'mock/mockstdlib',
-          version: '10.0.0',
-        },
-        {
-          name: 'mock/mockapache',
-          version: '2.5.1',
-        },
-        {
-          name: 'mock/mockpuppetdb',
-          version: '1.9.0',
-        },
+        { name: 'mock/mockstdlib', version: '10.0.0' },
+        { name: 'mock/mockapache', version: '2.5.1' },
+        { name: 'mock/mockpuppetdb', version: '1.9.0' },
       ]);
     });
 
@@ -143,18 +125,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
-        {
-          name: 'puppetlabs/stdlib',
-          version: '8.0.0',
-        },
-        {
-          name: 'puppetlabs/apache',
-          version: '6.5.1',
-        },
-        {
-          name: 'puppetlabs/puppetdb',
-          version: '7.9.0',
-        },
+        { name: 'puppetlabs/stdlib', version: '8.0.0' },
+        { name: 'puppetlabs/apache', version: '6.5.1' },
+        { name: 'puppetlabs/puppetdb', version: '7.9.0' },
       ]);
     });
 
@@ -174,18 +147,9 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       );
 
       expect(defaultRegistryModules).toEqual([
-        {
-          name: 'puppetlabs/stdlib',
-          version: '8.0.0',
-        },
-        {
-          name: 'puppetlabs/apache',
-          version: '6.5.1',
-        },
-        {
-          name: 'puppetlabs/puppetdb',
-          version: '7.9.0',
-        },
+        { name: 'puppetlabs/stdlib', version: '8.0.0' },
+        { name: 'puppetlabs/apache', version: '6.5.1' },
+        { name: 'puppetlabs/puppetdb', version: '7.9.0' },
       ]);
     });
 
@@ -198,24 +162,15 @@ describe('modules/manager/puppet/puppetfile-parser', () => {
       const defaultRegistryModules = puppetfile.getModulesOfForge(undefined);
 
       expect(defaultRegistryModules).toEqual([
-        {
-          name: 'puppetlabs/stdlib',
-          version: '8.0.0',
-        },
-        {
-          name: 'puppetlabs/apache',
-          version: '6.5.1',
-        },
+        { name: 'puppetlabs/stdlib', version: '8.0.0' },
+        { name: 'puppetlabs/apache', version: '6.5.1' },
         {
           name: 'apache',
           tags: new Map([
             ['git', 'https://github.com/puppetlabs/puppetlabs-apache'],
           ]),
         },
-        {
-          name: 'stdlib',
-          tags: new Map([['tag', '5.0.0']]),
-        },
+        { name: 'stdlib', tags: new Map([['tag', '5.0.0']]) },
         {
           name: 'stdlib2',
           tags: new Map([

@@ -36,9 +36,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         if (is.string(value)) {
           dep = {
             currentValue: value,
-            managerData: {
-              moduleName: requiredProviderName,
-            },
+            managerData: { moduleName: requiredProviderName },
           };
         } else {
           // block declaration aws = { source = 'aws', version = '2.0.0' }

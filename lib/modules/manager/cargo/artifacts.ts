@@ -212,13 +212,6 @@ async function updateArtifactsImpl(
 
     logger.debug({ err }, 'Failed to update Cargo lock file');
 
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

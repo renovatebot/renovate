@@ -39,10 +39,7 @@ export class GitTagsDatasource extends GitDatasource {
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/\/$/), '');
 
-    const result: ReleaseResult = {
-      sourceUrl,
-      releases,
-    };
+    const result: ReleaseResult = { sourceUrl, releases };
 
     return result;
   }

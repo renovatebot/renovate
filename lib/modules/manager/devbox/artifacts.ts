@@ -70,13 +70,6 @@ export async function updateArtifacts(
     ];
   } catch (err) {
     logger.warn({ err }, 'Error updating devbox.lock');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

@@ -52,10 +52,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] | null {
     }
     const slice: ProviderSlice = {
       lines: lines.slice(start, end),
-      block: {
-        start,
-        end,
-      },
+      block: { start, end },
     };
     return slice;
   });
@@ -68,10 +65,7 @@ export function extractLocks(lockFileContent: string): ProviderLock[] | null {
     let constraints = '';
     const relativeLineNumbers: LineNumbers = {
       block: slice.block,
-      hashes: {
-        start: -1,
-        end: -1,
-      },
+      hashes: { start: -1, end: -1 },
     };
     const hashes: string[] = [];
 
@@ -219,11 +213,7 @@ export function writeLockUpdates(
   const newContent = newLines.join('\n');
 
   return {
-    file: {
-      type: 'addition',
-      path: lockFilePath,
-      contents: newContent,
-    },
+    file: { type: 'addition', path: lockFilePath, contents: newContent },
   };
 }
 

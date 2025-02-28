@@ -8,10 +8,7 @@ If you wish to upgrade this value every time there's a new minor Go release, con
 ```json
 {
   "packageRules": [
-    {
-      "matchDatasources": ["golang-version"],
-      "rangeStrategy": "bump"
-    }
+    { "matchDatasources": ["golang-version"], "rangeStrategy": "bump" }
   ]
 }
 ```

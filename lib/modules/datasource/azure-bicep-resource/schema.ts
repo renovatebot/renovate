@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 export const BicepResourceVersionIndex = z
-  .object({
-    resources: z.record(z.string(), z.unknown()),
-  })
+  .object({ resources: z.record(z.string(), z.unknown()) })
   .transform(({ resources }) => {
     const releaseMap = new Map<string, string[]>();
 

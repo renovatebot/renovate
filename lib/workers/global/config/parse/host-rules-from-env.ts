@@ -99,9 +99,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           setHostRuleValue(existingRule, suffix, env[envName]);
         } else {
           // Create a new rule
-          const newRule: HostRule = {
-            hostType,
-          };
+          const newRule: HostRule = { hostType };
           if (matchHost) {
             newRule.matchHost = matchHost;
           }

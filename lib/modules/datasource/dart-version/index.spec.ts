@@ -15,22 +15,14 @@ describe('modules/datasource/dart-version/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(500);
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -42,12 +34,7 @@ describe('modules/datasource/dart-version/index', () => {
           )
           .reply(200, { prefixes: [] });
       }
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('processes real data', async () => {
@@ -60,10 +47,7 @@ describe('modules/datasource/dart-version/index', () => {
           .reply(200, Fixtures.get(`${channel}.json`));
       }
 
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
 
       expect(res).toBeDefined();
       expect(res?.sourceUrl).toBe('https://github.com/dart-lang/sdk');

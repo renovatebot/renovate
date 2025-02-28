@@ -109,9 +109,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      }),
+      partial<StatusResult>({ modified: [] }),
     );
 
     expect(
@@ -146,9 +144,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -160,13 +156,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       {
@@ -204,37 +194,16 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [],
       newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodVendor'],
-      },
+      config: { ...config, postUpdateOptions: ['gomodVendor'] },
     });
     expect(res).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
-      {
-        file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
+      { file: { contents: 'New go.mod', path: 'go.mod', type: 'addition' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod vendor', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -255,41 +224,17 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [],
       newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodVendor'],
-      },
+      config: { ...config, postUpdateOptions: ['gomodVendor'] },
     });
     expect(res).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
-      {
-        file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
+      { file: { contents: 'New go.mod', path: 'go.mod', type: 'addition' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go work vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go work sync',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go work vendor', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go work sync', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -316,19 +261,10 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [],
       newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodTidy'],
-      },
+      config: { ...config, postUpdateOptions: ['gomodTidy'] },
     });
     expect(res).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       {
         file: {
           contents: 'Foo go.sum',
@@ -343,42 +279,16 @@ describe('modules/manager/gomod/artifacts', () => {
           type: 'addition',
         },
       },
-      {
-        file: {
-          path: 'vendor/github.com/baz/baz/go.mod',
-          type: 'deletion',
-        },
-      },
-      {
-        file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
-          type: 'addition',
-        },
-      },
+      { file: { path: 'vendor/github.com/baz/baz/go.mod', type: 'deletion' } },
+      { file: { contents: 'New go.mod', path: 'go.mod', type: 'addition' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod vendor', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -402,33 +312,15 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [],
       newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodSkipVendor'],
-      },
+      config: { ...config, postUpdateOptions: ['gomodSkipVendor'] },
     });
     expect(res).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
-      {
-        file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
+      { file: { contents: 'New go.mod', path: 'go.mod', type: 'addition' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -457,19 +349,10 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [],
       newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodTidy'],
-      },
+      config: { ...config, postUpdateOptions: ['gomodTidy'] },
     });
     expect(res).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       {
         file: {
           contents: 'New go.work.sum',
@@ -491,46 +374,17 @@ describe('modules/manager/gomod/artifacts', () => {
           type: 'addition',
         },
       },
-      {
-        file: {
-          path: 'vendor/github.com/baz/baz/go.mod',
-          type: 'deletion',
-        },
-      },
-      {
-        file: {
-          contents: 'New go.mod',
-          path: 'go.mod',
-          type: 'addition',
-        },
-      },
+      { file: { path: 'vendor/github.com/baz/baz/go.mod', type: 'deletion' } },
+      { file: { contents: 'New go.mod', path: 'go.mod', type: 'addition' } },
     ]);
 
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go work vendor',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go work sync',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go work vendor', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go work sync', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -540,9 +394,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -557,13 +409,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -588,10 +434,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' && ' +
           'go get -d -t ./...' +
           '"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {},
-        },
+        options: { cwd: '/tmp/github/some/repo', env: {} },
       },
     ]);
   });
@@ -602,9 +445,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -619,22 +460,13 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool golang 1.23.3' },
       {
         cmd: 'go get -d -t ./...',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {},
-        },
+        options: { cwd: '/tmp/github/some/repo', env: {} },
       },
     ]);
   });
@@ -645,9 +477,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -659,42 +489,25 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
   it('supports docker mode with credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
-      {
-        token: 'some-token',
-        hostType: 'github',
-        matchHost: 'api.github.com',
-      },
+      { token: 'some-token', hostType: 'github', matchHost: 'api.github.com' },
       { token: 'some-other-token', matchHost: 'https://gitea.com' },
     ]);
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -709,13 +522,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -782,15 +589,9 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('supports docker mode with 2 credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
-      {
-        token: 'some-token',
-        hostType: 'github',
-        matchHost: 'api.github.com',
-      },
+      { token: 'some-token', hostType: 'github', matchHost: 'api.github.com' },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
@@ -801,9 +602,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -818,13 +617,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -869,9 +662,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -886,13 +677,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -934,9 +719,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -951,13 +734,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -1008,9 +785,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -1025,13 +800,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -1057,15 +826,9 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('supports docker mode with many credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
-      {
-        token: 'some-token',
-        matchHost: 'api.github.com',
-        hostType: 'github',
-      },
+      { token: 'some-token', matchHost: 'api.github.com', hostType: 'github' },
       {
         token: 'some-enterprise-token',
         matchHost: 'github.enterprise.com',
@@ -1081,9 +844,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -1098,13 +859,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -1147,9 +902,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
   it('supports docker mode and ignores non git credentials', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({ token: 'some-token' });
     hostRules.getAll.mockReturnValueOnce([
       {
         token: 'some-enterprise-token',
@@ -1162,9 +915,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -1179,13 +930,7 @@ describe('modules/manager/gomod/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
@@ -1215,9 +960,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1231,10 +974,7 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidy'],
-        },
+        config: { ...config, postUpdateOptions: ['gomodTidy'] },
       }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
@@ -1279,9 +1019,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1295,10 +1033,7 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidy1.17'],
-        },
+        config: { ...config, postUpdateOptions: ['gomodTidy1.17'] },
       }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
@@ -1343,9 +1078,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1407,9 +1140,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1423,10 +1154,7 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidyE'],
-        },
+        config: { ...config, postUpdateOptions: ['gomodTidyE'] },
       }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
@@ -1495,9 +1223,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1522,10 +1248,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1534,14 +1257,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1550,9 +1267,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1578,10 +1293,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1594,14 +1306,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=github.com/caarlos0/env/v6 -t=7',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1610,9 +1316,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1635,18 +1339,9 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1655,9 +1350,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1680,18 +1373,9 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1701,9 +1385,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1729,18 +1411,9 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1749,9 +1422,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1774,10 +1445,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1786,9 +1454,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1799,21 +1465,14 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          updateType: 'major',
-          newMajor: 28,
-        },
+        config: { ...config, updateType: 'major', newMajor: 28 },
       }),
     ).toEqual([
       { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1823,9 +1482,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1842,9 +1499,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
-          constraints: {
-            gomodMod: 'v1.2.3',
-          },
+          constraints: { gomodMod: 'v1.2.3' },
         },
       }),
     ).toEqual([
@@ -1853,10 +1508,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1865,14 +1517,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1882,9 +1528,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1901,9 +1545,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
-          constraints: {
-            gomodMod: 'a.b.c',
-          },
+          constraints: { gomodMod: 'a.b.c' },
         },
       }),
     ).toEqual([
@@ -1912,10 +1554,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1924,14 +1563,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -1940,9 +1573,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1966,10 +1597,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1982,14 +1610,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=gopkg.in/foo.v0 -t=1',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -2000,9 +1622,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -2029,10 +1649,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool golang 1.23.3' },
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go get -d -t ./...', options: { cwd: '/tmp/github/some/repo' } },
       {
         cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
         options: { cwd: '/tmp/github/some/repo' },
@@ -2041,14 +1658,8 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
         options: { cwd: '/tmp/github/some/repo' },
       },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-      {
-        cmd: 'go mod tidy',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
+      { cmd: 'go mod tidy', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -2059,9 +1670,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -2088,9 +1697,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     const expectedResult = [
-      {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
-      },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -2133,9 +1740,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
     mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -2172,9 +1777,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum', 'main.go'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum', 'main.go'] }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -2192,9 +1795,7 @@ describe('modules/manager/gomod/artifacts', () => {
       config: {
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
-        constraints: {
-          go: '1.14',
-        },
+        constraints: { go: '1.14' },
       },
     });
     expect(res).toEqual([
@@ -2203,9 +1804,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     const expectedResult = [
-      {
-        cmd: 'docker pull ghcr.io/containerbase/sidecar',
-      },
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       {},
       {
         cmd:
@@ -2245,9 +1844,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      }),
+      partial<StatusResult>({ modified: [] }),
     );
 
     expect(
@@ -2264,9 +1861,7 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: "go get -d -t . foo .bar/... '&&' cat",
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -2276,9 +1871,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -2287,27 +1880,13 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          goGetDirs: ['.'],
-        },
+        config: { ...config, goGetDirs: ['.'] },
       }),
     ).toEqual([
-      {
-        file: {
-          contents: 'New go.sum',
-          path: 'go.sum',
-          type: 'addition',
-        },
-      },
+      { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t .',
-        options: {
-          cwd: '/tmp/github/some/repo',
-        },
-      },
+      { cmd: 'go get -d -t .', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
 
@@ -2316,9 +1895,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
+      partial<StatusResult>({ modified: ['go.sum'] }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -2327,10 +1904,7 @@ describe('modules/manager/gomod/artifacts', () => {
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          goGetDirs: ['/etc', '../../../'],
-        },
+        config: { ...config, goGetDirs: ['/etc', '../../../'] },
       }),
     ).toEqual([
       { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },

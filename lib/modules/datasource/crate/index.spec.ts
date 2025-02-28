@@ -59,11 +59,7 @@ function setupErrorGitMock(): {
       Promise.reject(new Error('mocked error')),
     );
 
-  simpleGit.mockReturnValue(
-    partial<SimpleGit>({
-      clone: mockClone,
-    }),
-  );
+  simpleGit.mockReturnValue(partial<SimpleGit>({ clone: mockClone }));
 
   return { mockClone };
 }
@@ -402,10 +398,7 @@ describe('modules/datasource/crate/index', () => {
       const releaseOrig = { version: '4.5.17' };
 
       const res = await datasource.postprocessRelease(
-        {
-          packageName: 'clap',
-          registryUrl: 'https://example.com',
-        },
+        { packageName: 'clap', registryUrl: 'https://example.com' },
         releaseOrig,
       );
 
@@ -417,16 +410,11 @@ describe('modules/datasource/crate/index', () => {
         .scope(API_BASE_URL)
         .get('/crates/clap/4.5.17')
         .reply(200, {
-          version: {
-            created_at: '2024-09-04T19:16:41.355243+00:00',
-          },
+          version: { created_at: '2024-09-04T19:16:41.355243+00:00' },
         });
 
       const res = await datasource.postprocessRelease(
-        {
-          packageName: 'clap',
-          registryUrl: 'https://crates.io',
-        },
+        { packageName: 'clap', registryUrl: 'https://crates.io' },
         { version: '4.5.17' },
       );
 

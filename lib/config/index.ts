@@ -15,10 +15,7 @@ export function getManagerConfig(
   config: RenovateConfig,
   manager: string,
 ): ManagerConfig {
-  let managerConfig: ManagerConfig = {
-    ...config,
-    manager,
-  };
+  let managerConfig: ManagerConfig = { ...config, manager };
   const categories = get(manager, 'categories');
   if (categories) {
     managerConfig.categories = categories;

@@ -38,10 +38,7 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
       ? `${prefix}-${suffix}`
       : prefix;
 
-    return {
-      release,
-      compatibility,
-    };
+    return { release, compatibility };
   }
 
   override isStable(version: string): boolean {

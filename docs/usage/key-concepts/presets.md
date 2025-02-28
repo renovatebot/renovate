@@ -23,9 +23,7 @@ Instead of writing your own Renovate config, you search the docs, and find the `
 Then you add the preset to the `"extends"` array in your Renovate configuration file:
 
 ```json
-{
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"]
-}
+{ "extends": ["config:recommended", "helpers:pinGitHubActionDigests"] }
 ```
 
 In the example above, Renovate follows the rules from the `config:recommended` preset, plus the rules for `helpers:pinGitHubActionDigests`.

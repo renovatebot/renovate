@@ -30,10 +30,7 @@ function parseDynamicRevision(str: string): Revision | null {
   if (str.endsWith('.+')) {
     const value = str.replace(SUBREV_REGEX, '');
     if (isSingleVersion(value)) {
-      return {
-        type: REV_TYPE_SUBREV,
-        value,
-      };
+      return { type: REV_TYPE_SUBREV, value };
     }
   }
 
@@ -41,10 +38,7 @@ function parseDynamicRevision(str: string): Revision | null {
   if (range && range.length === 1) {
     const rangeValue = rangeToStr(range);
     if (rangeValue) {
-      return {
-        type: REV_TYPE_RANGE,
-        value: rangeValue,
-      };
+      return { type: REV_TYPE_RANGE, value: rangeValue };
     }
   }
 

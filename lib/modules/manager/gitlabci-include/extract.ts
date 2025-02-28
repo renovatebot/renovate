@@ -75,9 +75,7 @@ export function extractPackageFile(
       : null;
   try {
     // TODO: use schema (#9610)
-    const docs = parseYaml<GitlabPipeline>(content, {
-      uniqueKeys: false,
-    });
+    const docs = parseYaml<GitlabPipeline>(content, { uniqueKeys: false });
     for (const doc of docs) {
       if (is.object(doc)) {
         const includes = getAllIncludeProjects(doc);

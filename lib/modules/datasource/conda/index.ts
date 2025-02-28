@@ -45,9 +45,7 @@ export class CondaDatasource extends Datasource {
 
     const url = joinUrlParts(registryUrl, packageName);
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
 
     let response: { body: CondaPackage };
 
@@ -58,9 +56,7 @@ export class CondaDatasource extends Datasource {
       result.sourceUrl = response.body.dev_url;
 
       response.body.versions.forEach((version: string) => {
-        const thisRelease: Release = {
-          version,
-        };
+        const thisRelease: Release = { version };
         result.releases.push(thisRelease);
       });
     } catch (err) {

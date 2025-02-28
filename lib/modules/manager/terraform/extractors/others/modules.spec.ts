@@ -26,18 +26,9 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const depth2 = githubRefMatchRegex.exec(
         'github.com/hashicorp/example?ref=v1.0.0&depth=1',
       )?.groups;
-      expect(groups).toEqual({
-        project: 'hashicorp/example',
-        tag: 'v1.0.0',
-      });
-      expect(depth).toEqual({
-        project: 'hashicorp/example',
-        tag: 'v1.0.0',
-      });
-      expect(depth2).toEqual({
-        project: 'hashicorp/example',
-        tag: 'v1.0.0',
-      });
+      expect(groups).toEqual({ project: 'hashicorp/example', tag: 'v1.0.0' });
+      expect(depth).toEqual({ project: 'hashicorp/example', tag: 'v1.0.0' });
+      expect(depth2).toEqual({ project: 'hashicorp/example', tag: 'v1.0.0' });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
@@ -92,10 +83,7 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         project: 'hashicorp/example',
         tag: 'v1.0.0',
       });
-      expect(folder).toMatchObject({
-        project: '/bar',
-        tag: 'v1.0.0',
-      });
+      expect(folder).toMatchObject({ project: '/bar', tag: 'v1.0.0' });
     });
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
@@ -311,12 +299,8 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         'example.com/my/terraform/module',
       )?.groups;
 
-      expect(host1).toEqual({
-        hostname: 'git-lab.git-server.com',
-      });
-      expect(host2).toEqual({
-        hostname: 'example.com',
-      });
+      expect(host1).toEqual({ hostname: 'git-lab.git-server.com' });
+      expect(host2).toEqual({ hostname: 'example.com' });
     });
   });
 });

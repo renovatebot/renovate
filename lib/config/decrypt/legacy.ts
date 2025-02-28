@@ -9,10 +9,7 @@ export function tryDecryptPublicKeyPKCS1(
   try {
     decryptedStr = crypto
       .privateDecrypt(
-        {
-          key: privateKey,
-          padding: crypto.constants.RSA_PKCS1_PADDING,
-        },
+        { key: privateKey, padding: crypto.constants.RSA_PKCS1_PADDING },
         Buffer.from(encryptedStr, 'base64'),
       )
       .toString();

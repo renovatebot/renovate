@@ -29,12 +29,7 @@ In that case you might create a config like this:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["/eslint/"],
-      "groupName": "eslint"
-    }
-  ]
+  "packageRules": [{ "matchPackageNames": ["/eslint/"], "groupName": "eslint" }]
 }
 ```
 

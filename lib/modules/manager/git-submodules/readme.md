@@ -5,9 +5,7 @@ You can customize the per-submodule checks of the git-submodules manager like th
 ```json
 {
   "ignoreDeps": ["path/to/submodule", "path/to/submodule2"],
-  "git-submodules": {
-    "enabled": true
-  }
+  "git-submodules": { "enabled": true }
 }
 ```
 

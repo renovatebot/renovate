@@ -170,9 +170,7 @@ export function extractPackageFile(
   let deps: PackageDependency[] = [];
   try {
     // TODO: use schema (#9610)
-    const docs = parseYaml<GitlabPipeline>(content, {
-      uniqueKeys: false,
-    });
+    const docs = parseYaml<GitlabPipeline>(content, { uniqueKeys: false });
     for (const doc of docs) {
       if (is.object(doc)) {
         for (const [property, value] of Object.entries(doc)) {
@@ -259,9 +257,7 @@ export async function extractAllPackageFiles(
     let docs: GitlabPipeline[];
     try {
       // TODO: use schema (#9610)
-      docs = parseYaml(content, {
-        uniqueKeys: false,
-      });
+      docs = parseYaml(content, { uniqueKeys: false });
     } catch (err) {
       logger.debug(
         { err, packageFile: file },
@@ -290,10 +286,7 @@ export async function extractAllPackageFiles(
 
     const result = extractPackageFile(content, file, config);
     if (result !== null) {
-      results.push({
-        packageFile: file,
-        deps: result.deps,
-      });
+      results.push({ packageFile: file, deps: result.deps });
     }
   }
 

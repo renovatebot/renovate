@@ -35,9 +35,7 @@ describe('modules/datasource/go/releases-direct', () => {
     it('throws for getDatasource error', async () => {
       getDatasourceSpy.mockRejectedValueOnce(new Error('unknown'));
       await expect(
-        datasource.getReleases({
-          packageName: 'golang.org/foo/something',
-        }),
+        datasource.getReleases({ packageName: 'golang.org/foo/something' }),
       ).rejects.toThrow();
     });
 

@@ -193,12 +193,7 @@ export async function updateArtifacts({
         if (!isFileInDir(chartsPath, file)) {
           continue;
         }
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: file,
-          },
-        });
+        fileChanges.push({ file: { type: 'deletion', path: file } });
       }
     }
 
@@ -209,13 +204,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Helm lock file');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

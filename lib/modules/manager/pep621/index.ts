@@ -10,8 +10,6 @@ export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';
 export const categories: Category[] = ['python'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)pyproject\\.toml$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)pyproject\\.toml$'] };
 
 export const supportedDatasources = [PypiDatasource.id];

@@ -20,9 +20,5 @@ This way Renovate avoids ambiguity with Gradle config files that use the `.gradl
 If you want to manage other Kotlin Script files, you may use the `fileMatch` config option to let Renovate update these files:
 
 ```json
-{
-  "kotlin-script": {
-    "fileMatch": ["^.*\\.kts$"]
-  }
-}
+{ "kotlin-script": { "fileMatch": ["^.*\\.kts$"] } }
 ```

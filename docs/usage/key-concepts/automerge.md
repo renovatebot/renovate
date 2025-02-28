@@ -37,12 +37,7 @@ The lowest risk type of update to automerge is probably `lockFileMaintenance`.
 When Renovate performs lock file maintenance, it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that the latest versions according to the package file constraints are installed.
 
 ```json title="Example of automerging lock file maintenance"
-{
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
-  }
-}
+{ "lockFileMaintenance": { "enabled": true, "automerge": true } }
 ```
 
 ### Automerge lint tool updates
@@ -261,11 +256,6 @@ To turn off automerge for all dependencies of a selected repository, you need to
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>org-name/.github:renovate-config"],
-  "packageRules": [
-    {
-      "matchPackageNames": ["*"],
-      "automerge": false
-    }
-  ]
+  "packageRules": [{ "matchPackageNames": ["*"], "automerge": false }]
 }
 ```

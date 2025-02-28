@@ -520,10 +520,7 @@ export async function getCommitMessages(): Promise<string[]> {
     await syncGit();
   }
   try {
-    const res = await git.log({
-      n: 20,
-      format: { message: '%s' },
-    });
+    const res = await git.log({ n: 20, format: { message: '%s' } });
     return res.all.map((commit) => commit.message);
   } catch /* istanbul ignore next */ {
     return [];
@@ -1144,10 +1141,7 @@ export async function pushCommit({
   logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
-    const pushOptions: TaskOptions = {
-      '--force-with-lease': null,
-      '-u': null,
-    };
+    const pushOptions: TaskOptions = { '--force-with-lease': null, '-u': null };
     if (getNoVerify().includes('push')) {
       pushOptions['--no-verify'] = null;
     }

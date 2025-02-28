@@ -11,29 +11,15 @@ describe('logger/err-serializer', () => {
       a: 1,
       b: 2,
       message: 'some message',
-      response: {
-        body: 'some response body',
-        url: 'some/path',
-      },
-      options: {
-        headers: {
-          authorization: 'Bearer testtoken',
-        },
-      },
+      response: { body: 'some response body', url: 'some/path' },
+      options: { headers: { authorization: 'Bearer testtoken' } },
     });
     expect(errSerializer(err)).toEqual({
       a: 1,
       b: 2,
       message: 'some message',
-      response: {
-        body: 'some response body',
-        url: 'some/path',
-      },
-      options: {
-        headers: {
-          authorization: 'Bearer testtoken',
-        },
-      },
+      response: { body: 'some response body', url: 'some/path' },
+      options: { headers: { authorization: 'Bearer testtoken' } },
     });
   });
 
@@ -56,11 +42,7 @@ describe('logger/err-serializer', () => {
     beforeEach(() => {
       // clean up hostRules
       hostRules.clear();
-      hostRules.add({
-        hostType: 'any',
-        matchHost: baseUrl,
-        token: 'token',
-      });
+      hostRules.add({ hostType: 'any', matchHost: baseUrl, token: 'token' });
     });
 
     it('handles http error', async () => {

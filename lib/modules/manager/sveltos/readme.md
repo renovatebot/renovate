@@ -11,27 +11,15 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 #### `fileMatch` pattern examples
 
 ```json title="If most .yaml files in your repository are for Sveltos"
-{
-  "sveltos": {
-    "fileMatch": ["\\.yaml$"]
-  }
-}
+{ "sveltos": { "fileMatch": ["\\.yaml$"] } }
 ```
 
 ```json title="Sveltos YAML files are in a sveltos/ directory"
-{
-  "sveltos": {
-    "fileMatch": ["sveltos/.+\\.yaml$"]
-  }
-}
+{ "sveltos": { "fileMatch": ["sveltos/.+\\.yaml$"] } }
 ```
 
 ```json title="One Sveltos file in a directory"
-{
-  "sveltos": {
-    "fileMatch": ["^config/sveltos\\.yaml$"]
-  }
-}
+{ "sveltos": { "fileMatch": ["^config/sveltos\\.yaml$"] } }
 ```
 
 ### Disabling parts of the sveltos manager

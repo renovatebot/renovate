@@ -27,11 +27,7 @@ Some managers have no default `fileMatch` regular expression, because they have 
 In such a case, the manager will be disabled until you create a `fileMatch` regular expression, e.g. like the following:
 
 ```json
-{
-  "kubernetes": {
-    "fileMatch": ["^config/.*\\.yaml$"]
-  }
-}
+{ "kubernetes": { "fileMatch": ["^config/.*\\.yaml$"] } }
 ```
 
 #### Extending a manager's default fileMatch
@@ -39,11 +35,7 @@ In such a case, the manager will be disabled until you create a `fileMatch` regu
 If the default `fileMatch` regular expression for a manager does not match against one of your relevant files, you can _extend_ the existing regular expression(s) by configuring a manager's `fileMatch` like in this example:
 
 ```json
-{
-  "dockerfile": {
-    "fileMatch": ["does-not-look-like-a-docker-file"]
-  }
-}
+{ "dockerfile": { "fileMatch": ["does-not-look-like-a-docker-file"] } }
 ```
 
 #### Ignoring files that match the default fileMatch
@@ -63,21 +55,13 @@ For those that aren't, typically because they are considered experimental, you c
 If there was a manager called `some-new-manager` you would enable it like this:
 
 ```json
-{
-  "some-new-manager": {
-    "enabled": true
-  }
-}
+{ "some-new-manager": { "enabled": true } }
 ```
 
 #### Disabling managers
 
 ```json title="Example of disabling a specific manager (gradle)"
-{
-  "gradle": {
-    "enabled": false
-  }
-}
+{ "gradle": { "enabled": false } }
 ```
 
 Please check the [list of supported managers](#supported-managers).
@@ -88,9 +72,7 @@ Say you only want to use Renovate for JavaScript packages, and to update your Do
 You can use the `enabledManagers` array, to list the managers you want to use (`npm`, `dockerfile`):
 
 ```json
-{
-  "enabledManagers": ["npm", "dockerfile"]
-}
+{ "enabledManagers": ["npm", "dockerfile"] }
 ```
 
 Using the `enabledManagers` array disables all other managers, this includes Bundler, Composer, Docker Compose, etc.

@@ -160,11 +160,7 @@ export function bumpPackageVersion(
     }
   } catch {
     logger.warn(
-      {
-        content,
-        currentValue,
-        bumpVersion,
-      },
+      { content, currentValue, bumpVersion },
       'Failed to bumpVersion',
     );
   }

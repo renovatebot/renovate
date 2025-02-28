@@ -86,10 +86,7 @@ describe('modules/manager/maven/index', () => {
         updateDependency({ fileContent: groupingContent, upgrade: upgrade1 }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.2'));
       expect(
-        updateDependency({
-          fileContent: updatedOutside,
-          upgrade: upgrade1,
-        }),
+        updateDependency({ fileContent: updatedOutside, upgrade: upgrade1 }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.2'));
 
       const updatedByPrevious = updateDependency({
@@ -98,16 +95,10 @@ describe('modules/manager/maven/index', () => {
       })!;
 
       expect(
-        updateDependency({
-          fileContent: updatedByPrevious,
-          upgrade: upgrade2,
-        }),
+        updateDependency({ fileContent: updatedByPrevious, upgrade: upgrade2 }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.3'));
       expect(
-        updateDependency({
-          fileContent: updatedOutside,
-          upgrade: upgrade2,
-        }),
+        updateDependency({ fileContent: updatedOutside, upgrade: upgrade2 }),
       ).toEqual(groupingContent.replace('1.0.0', '1.0.3'));
 
       expect(

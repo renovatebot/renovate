@@ -72,10 +72,7 @@ export async function extractPackageFile(
         ) {
           needKustomize = true;
         }
-        deps.push({
-          depName: dep.name,
-          skipReason: 'local-chart',
-        });
+        deps.push({ depName: dep.name, skipReason: 'local-chart' });
         continue;
       }
 
@@ -92,10 +89,7 @@ export async function extractPackageFile(
       }
 
       if (!is.string(dep.version)) {
-        deps.push({
-          depName,
-          skipReason: 'invalid-version',
-        });
+        deps.push({ depName, skipReason: 'invalid-version' });
         continue;
       }
 

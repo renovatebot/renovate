@@ -5,10 +5,7 @@ import { checkIfConfigured } from './configured';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  config = partial<RenovateConfig>({
-    enabled: true,
-    forkProcessing: 'auto',
-  });
+  config = partial<RenovateConfig>({ enabled: true, forkProcessing: 'auto' });
 });
 
 describe('workers/repository/configured', () => {

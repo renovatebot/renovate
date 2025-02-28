@@ -9,8 +9,6 @@ export const url =
   'https://github.com/open-telemetry/opentelemetry-collector/tree/main/cmd/builder';
 export const categories: Category[] = ['golang'];
 
-export const defaultConfig = {
-  fileMatch: [],
-};
+export const defaultConfig = { fileMatch: [] };
 
 export const supportedDatasources = [GoDatasource.id];

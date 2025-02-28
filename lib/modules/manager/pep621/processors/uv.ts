@@ -215,12 +215,7 @@ export class UvProcessor implements PyProjectProcessor {
       }
       logger.debug({ err }, 'Failed to update uv lock file');
       return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.message,
-          },
-        },
+        { artifactError: { lockFile: lockFileName, stderr: err.message } },
       ];
     }
   }
@@ -322,9 +317,7 @@ async function getUvExtraIndexUrl(
     extraIndexUrls.push(parsedUrl.toString());
   }
 
-  return {
-    UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
-  };
+  return { UV_EXTRA_INDEX_URL: extraIndexUrls.join(' ') };
 }
 
 async function getUvIndexCredentials(

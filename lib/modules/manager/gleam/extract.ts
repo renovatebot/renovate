@@ -51,10 +51,7 @@ function toPackageDeps({
 
 function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
   return dependencySections.flatMap((sectionKey) =>
-    toPackageDeps({
-      deps: gleamToml[sectionKey],
-      sectionKey,
-    }),
+    toPackageDeps({ deps: gleamToml[sectionKey], sectionKey }),
   );
 }
 

@@ -150,14 +150,8 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          {
-            version: 'v1.0.0',
-            releaseTimestamp: '2018-08-13T15:31:12.000Z',
-          },
-          {
-            version: 'v1.0.1',
-            releaseTimestamp: '2019-10-16T16:15:28.000Z',
-          },
+          { version: 'v1.0.0', releaseTimestamp: '2018-08-13T15:31:12.000Z' },
+          { version: 'v1.0.1', releaseTimestamp: '2019-10-16T16:15:28.000Z' },
           {
             version: 'v1.28.1-20230721020619-4464c06fa399.4',
             releaseTimestamp: '2023-07-21T02:06:19.000Z',

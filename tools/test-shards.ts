@@ -112,16 +112,9 @@ for (const [os, groups] of Object.entries(shardGrouping)) {
       .digest('hex');
 
     const runnerTimeoutMinutes =
-      {
-        ubuntu: 10,
-        windows: 20,
-        macos: 20,
-      }[platform] ?? 20;
+      { ubuntu: 10, windows: 20, macos: 20 }[platform] ?? 20;
 
-    const testTimeoutMilliseconds =
-      {
-        windows: 240000,
-      }[platform] ?? 120000;
+    const testTimeoutMilliseconds = { windows: 240000 }[platform] ?? 120000;
 
     shardGroups.push({
       os: os as RunsOn,

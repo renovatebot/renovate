@@ -36,9 +36,7 @@ const getReleasesProxyMock = vi.fn();
 vi.mock('./releases-goproxy', () => {
   return {
     GoProxyDatasource: vi.fn().mockImplementation(() => {
-      return {
-        getReleases: () => getReleasesProxyMock(),
-      };
+      return { getReleases: () => getReleasesProxyMock() };
     }),
   };
 });
@@ -186,9 +184,7 @@ describe('modules/datasource/go/index', () => {
     it('support bitbucket digest', async () => {
       getDigestBitbucketMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
-        {
-          packageName: 'bitbucket.org/golang/text',
-        },
+        { packageName: 'bitbucket.org/golang/text' },
         undefined,
       );
       expect(res).toBe('123');
@@ -197,9 +193,7 @@ describe('modules/datasource/go/index', () => {
     it('support gitea digest', async () => {
       getDigestGiteaMock.mockResolvedValueOnce('123');
       const res = await datasource.getDigest(
-        {
-          packageName: 'gitea.com/go-chi/cache',
-        },
+        { packageName: 'gitea.com/go-chi/cache' },
         undefined,
       );
       expect(res).toBe('123');

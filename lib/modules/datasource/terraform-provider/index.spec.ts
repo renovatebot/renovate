@@ -91,13 +91,8 @@ describe('modules/datasource/terraform-provider/index', () => {
         homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
         registryUrl: 'https://registry.terraform.io',
         releases: [
-          {
-            version: '2.52.0',
-          },
-          {
-            releaseTimestamp: '2019-11-26T08:22:56.000Z',
-            version: '2.53.0',
-          },
+          { version: '2.52.0' },
+          { releaseTimestamp: '2019-11-26T08:22:56.000Z', version: '2.53.0' },
         ],
         sourceUrl:
           'https://github.com/terraform-providers/terraform-provider-azurerm',
@@ -167,15 +162,9 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
-          {
-            version: '2.49.0',
-          },
-          {
-            version: '3.0.0',
-          },
-          {
-            version: '3.0.1',
-          },
+          { version: '2.49.0' },
+          { version: '3.0.0' },
+          { version: '3.0.1' },
         ],
       });
     });
@@ -184,9 +173,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/google-beta')
-        .reply(404, {
-          errors: ['Not Found'],
-        })
+        .reply(404, { errors: ['Not Found'] })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       httpMock
@@ -201,15 +188,9 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://releases.hashicorp.com',
         releases: [
-          {
-            version: '1.19.0',
-          },
-          {
-            version: '1.20.0',
-          },
-          {
-            version: '2.0.0',
-          },
+          { version: '1.19.0' },
+          { version: '1.20.0' },
+          { version: '2.0.0' },
         ],
         sourceUrl:
           'https://github.com/terraform-providers/terraform-provider-google-beta',
@@ -220,9 +201,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/datadog')
-        .reply(404, {
-          errors: ['Not Found'],
-        })
+        .reply(404, { errors: ['Not Found'] })
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryResult);
       httpMock

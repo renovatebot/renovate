@@ -49,9 +49,7 @@ describe('modules/platform/bitbucket/comments', () => {
 
     it('finds reopen comment', async () => {
       const prComment = {
-        content: {
-          raw: 'reopen! comment',
-        },
+        content: { raw: 'reopen! comment' },
         user: {
           display_name: 'Bob Smith',
           uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
@@ -63,18 +61,14 @@ describe('modules/platform/bitbucket/comments', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
-        .reply(200, {
-          values: [prComment],
-        });
+        .reply(200, { values: [prComment] });
 
       expect(await comments.reopenComments(config, 5)).toEqual([prComment]);
     });
 
     it('finds no reopen comment', async () => {
       const prComment = {
-        content: {
-          raw: 'comment',
-        },
+        content: { raw: 'comment' },
         user: {
           display_name: 'Bob Smith',
           uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
@@ -86,9 +80,7 @@ describe('modules/platform/bitbucket/comments', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
-        .reply(200, {
-          values: [prComment],
-        });
+        .reply(200, { values: [prComment] });
 
       expect(await comments.reopenComments(config, 5)).toBeEmptyArray();
     });
@@ -122,14 +114,7 @@ describe('modules/platform/bitbucket/comments', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
-        .reply(200, {
-          values: [
-            {
-              id: 5,
-              content: { raw: 'blablabla' },
-            },
-          ],
-        });
+        .reply(200, { values: [{ id: 5, content: { raw: 'blablabla' } }] });
       expect(
         await comments.ensureComment({
           config,
@@ -164,10 +149,7 @@ describe('modules/platform/bitbucket/comments', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, {
           values: [
-            {
-              id: 5,
-              content: { raw: '### some-subject\n\nsome-content' },
-            },
+            { id: 5, content: { raw: '### some-subject\n\nsome-content' } },
           ],
         })
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
@@ -188,12 +170,7 @@ describe('modules/platform/bitbucket/comments', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, {
-          values: [
-            {
-              id: 5,
-              content: { raw: '\n\nsome-content\n\n' },
-            },
-          ],
+          values: [{ id: 5, content: { raw: '\n\nsome-content\n\n' } }],
         })
         .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
         .reply(200);

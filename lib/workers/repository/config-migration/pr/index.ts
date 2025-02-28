@@ -81,11 +81,7 @@ ${
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would update migration PR');
     } else {
-      await platform.updatePr({
-        number: existingPr.number,
-        prTitle,
-        prBody,
-      });
+      await platform.updatePr({ number: existingPr.number, prTitle, prBody });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }
     return existingPr;

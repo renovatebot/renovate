@@ -39,11 +39,7 @@ export async function createConfigMigrationBranch(
     await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
 
   const files: FileChange[] = [
-    {
-      type: 'addition',
-      path: configFileName,
-      contents,
-    },
+    { type: 'addition', path: configFileName, contents },
   ];
 
   if (pJsonMigration) {

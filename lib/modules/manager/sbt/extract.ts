@@ -105,10 +105,7 @@ const packageFileVersionMatch = q
   );
 
 const variableNameMatch = q
-  .sym<Ctx>((ctx, { value: varName }) => ({
-    ...ctx,
-    currentVarName: varName,
-  }))
+  .sym<Ctx>((ctx, { value: varName }) => ({ ...ctx, currentVarName: varName }))
   .opt(q.op<Ctx>(':').sym('String'));
 
 const variableValueMatch = q.str<Ctx>((ctx, { value }) => {
@@ -266,14 +263,15 @@ const resolverMatch = q
     return ctx;
   });
 
-const addResolverMatch = q.sym<Ctx>('resolvers').alt(
-  q.op<Ctx>('+=').join(resolverMatch),
-  q.op<Ctx>('++=').sym('Seq').tree({
-    type: 'wrapped-tree',
-    maxDepth: 1,
-    search: resolverMatch,
-  }),
-);
+const addResolverMatch = q
+  .sym<Ctx>('resolvers')
+  .alt(
+    q.op<Ctx>('+=').join(resolverMatch),
+    q
+      .op<Ctx>('++=')
+      .sym('Seq')
+      .tree({ type: 'wrapped-tree', maxDepth: 1, search: resolverMatch }),
+  );
 
 function registryUrlHandler(ctx: Ctx): Ctx {
   for (const dep of ctx.deps) {
@@ -344,9 +342,7 @@ function extractPackageFileInternal(
         registryUrls: [],
       };
 
-      return {
-        deps: [sbtDependency],
-      };
+      return { deps: [sbtDependency] };
     } else {
       return null;
     }

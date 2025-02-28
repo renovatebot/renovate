@@ -34,9 +34,7 @@ describe('modules/manager/vendir/extract', () => {
 
     it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
       const result = extractPackageFile(validContents, 'vendir.yml', {
-        registryAliases: {
-          test: 'quay.example.com/organization',
-        },
+        registryAliases: { test: 'quay.example.com/organization' },
       });
       expect(result).toMatchObject({
         deps: [

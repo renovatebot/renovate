@@ -50,11 +50,7 @@ export class HermitVersioning extends RegExpVersioningApi {
       release.push(Number.parseInt(build, 10));
     }
 
-    return {
-      release,
-      prerelease,
-      compatibility,
-    };
+    return { release, prerelease, compatibility };
   }
 
   protected override _parse(version: string): RegExpVersion | null {
@@ -98,11 +94,7 @@ export class HermitVersioning extends RegExpVersioningApi {
       release.push(Number.parseInt(build, 10));
     }
 
-    return {
-      release,
-      prerelease,
-      compatibility,
-    };
+    return { release, prerelease, compatibility };
   }
 
   private static _isChannel(version: string): boolean {

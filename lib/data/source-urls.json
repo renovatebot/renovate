@@ -39,18 +39,12 @@
     "interoperator": "https://github.com/cloudfoundry/service-fabrik-broker",
     "kyverno": "https://github.com/kyverno/kyverno"
   },
-  "kubernetes": {
-    "node": "https://github.com/nodejs/node"
-  },
+  "kubernetes": { "node": "https://github.com/nodejs/node" },
   "maven": {
     "com.figure.gradle.semver-plugin:com.figure.gradle.semver-plugin.gradle.plugin": "https://github.com/FigureTechnologies/gradle-semver-plugin"
   },
-  "npm": {
-    "node": "https://github.com/nodejs/node"
-  },
-  "nvm": {
-    "node": "https://github.com/nodejs/node"
-  },
+  "npm": { "node": "https://github.com/nodejs/node" },
+  "nvm": { "node": "https://github.com/nodejs/node" },
   "pypi": {
     "mkdocs": "https://github.com/mkdocs/mkdocs",
     "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",

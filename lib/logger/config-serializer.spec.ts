@@ -2,10 +2,7 @@ import configSerializer from './config-serializer';
 
 describe('logger/config-serializer', () => {
   it('squashes templates', () => {
-    const config = {
-      nottoken: 'b',
-      prBody: 'foo',
-    };
+    const config = { nottoken: 'b', prBody: 'foo' };
     expect(configSerializer(config)).toEqual({
       nottoken: 'b',
       prBody: '[Template]',
@@ -13,20 +10,12 @@ describe('logger/config-serializer', () => {
   });
 
   it('suppresses content', () => {
-    const config = {
-      content: {},
-    };
-    expect(configSerializer(config)).toEqual({
-      content: '[content]',
-    });
+    const config = { content: {} };
+    expect(configSerializer(config)).toEqual({ content: '[content]' });
   });
 
   it('suppresses packageFiles', () => {
-    const config = {
-      packageFiles: [],
-    };
-    expect(configSerializer(config)).toEqual({
-      packageFiles: '[Array]',
-    });
+    const config = { packageFiles: [] };
+    expect(configSerializer(config)).toEqual({ packageFiles: '[Array]' });
   });
 });

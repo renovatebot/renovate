@@ -8,10 +8,7 @@ export interface NpmrcRules {
 }
 
 export interface NpmResponseVersion {
-  repository?: {
-    url: string;
-    directory: string;
-  };
+  repository?: { url: string; directory: string };
   homepage?: string;
   deprecated?: boolean;
   gitHead?: string;
@@ -24,10 +21,7 @@ export interface NpmResponse {
   _id: string;
   name: string;
   versions?: Record<string, NpmResponseVersion>;
-  repository?: {
-    url?: string;
-    directory?: string;
-  };
+  repository?: { url?: string; directory?: string };
   homepage?: string;
   time?: Record<string, string>;
   'dist-tags'?: Record<string, string>;

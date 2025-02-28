@@ -40,9 +40,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
 
     if (platform === 'azure' && endpoint && token) {
       const auth = Buffer.from(`renovate:${token}`).toString('base64');
-      const opts: HttpOptions = {
-        headers: { authorization: `Basic ${auth}` },
-      };
+      const opts: HttpOptions = { headers: { authorization: `Basic ${auth}` } };
       const results = await this.getTasks(
         `${endpoint}/_apis/distributedtask/tasks/`,
         opts,

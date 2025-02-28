@@ -58,15 +58,7 @@ function configureShardingOrFallbackTo(
   }
 
   const reportsDirectory = `./coverage/shard/${shardKey}`;
-  return {
-    test: {
-      include,
-      exclude,
-      coverage: {
-        reportsDirectory,
-      },
-    },
-  };
+  return { test: { include, exclude, coverage: { reportsDirectory } } };
 }
 
 // https://vitejs.dev/config/
@@ -116,9 +108,7 @@ export default defineConfig(() =>
       },
     } satisfies ViteUserConfig,
     configureShardingOrFallbackTo({
-      test: {
-        exclude: [...defaultExclude, 'tools/docs/test/**/*.test.mjs'],
-      },
+      test: { exclude: [...defaultExclude, 'tools/docs/test/**/*.test.mjs'] },
     }),
   ),
 );

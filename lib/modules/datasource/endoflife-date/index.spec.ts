@@ -24,10 +24,7 @@ describe('modules/datasource/endoflife-date/index', () => {
         .scope(registryUrl)
         .get(eksMockPath)
         .reply(200, Fixtures.getJson(`eks.json`));
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toEqual({
         registryUrl: 'https://endoflife.date/api',
         releases: [
@@ -91,32 +88,19 @@ describe('modules/datasource/endoflife-date/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(404);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty result', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(200, []);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('throws for 5xx', async () => {
       httpMock.scope(registryUrl).get(eksMockPath).reply(502);
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('detects boolean discontinuation', async () => {

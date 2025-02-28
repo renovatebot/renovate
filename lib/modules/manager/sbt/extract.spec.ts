@@ -113,12 +113,7 @@ describe('modules/manager/sbt/extract', () => {
         libraryDependencies += "foo" % "bar" % version
       `;
       expect(extractPackageFile(content)).toMatchObject({
-        deps: [
-          {
-            currentValue: '1.2.3',
-            sharedVariableName: 'version',
-          },
-        ],
+        deps: [{ currentValue: '1.2.3', sharedVariableName: 'version' }],
       });
     });
 
@@ -143,9 +138,7 @@ describe('modules/manager/sbt/extract', () => {
             variableName: 'sbtReleaseVersion',
           },
         ],
-        managerData: {
-          scalaVersion: undefined,
-        },
+        managerData: { scalaVersion: undefined },
         packageFileVersion: '1.0.1',
       });
     });
@@ -157,10 +150,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.13.0-RC5',
           },
-          {
-            packageName: 'com.example:foo_2.13.0-RC5',
-            currentValue: '0.7.1',
-          },
+          { packageName: 'com.example:foo_2.13.0-RC5', currentValue: '0.7.1' },
           { packageName: 'com.abc:abc', currentValue: '1.2.3' },
           { packageName: 'com.abc:abc-a', currentValue: '1.2.3' },
           { packageName: 'com.abc:abc-b', currentValue: '1.2.3' },
@@ -182,10 +172,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
           },
-          {
-            packageName: 'org.example:bar_2.12',
-            currentValue: '0.0.2',
-          },
+          { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
         ],
       });
     });
@@ -204,10 +191,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
           },
-          {
-            packageName: 'org.example:bar_2.12',
-            currentValue: '0.0.2',
-          },
+          { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
         ],
       });
     });
@@ -223,10 +207,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
           },
-          {
-            packageName: 'org.example:bar_2.12',
-            currentValue: '0.0.2',
-          },
+          { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
         ],
       });
     });
@@ -258,10 +239,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala3-library_3',
             currentValue: '3.3.4',
           },
-          {
-            packageName: 'org.example:bar_3',
-            currentValue: '0.0.5',
-          },
+          { packageName: 'org.example:bar_3', currentValue: '0.0.5' },
         ],
       });
     });
@@ -278,10 +256,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
           },
-          {
-            packageName: 'org.example:bar_2.12',
-            currentValue: '0.0.2',
-          },
+          { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
         ],
       });
     });
@@ -295,14 +270,8 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.13.0-RC5',
           },
-          {
-            packageName: 'com.example:foo_2.13.0-RC5',
-            currentValue: '0.7.1',
-          },
-          {
-            packageName: 'com.abc:abc',
-            currentValue: '1.2.3',
-          },
+          { packageName: 'com.example:foo_2.13.0-RC5', currentValue: '0.7.1' },
+          { packageName: 'com.abc:abc', currentValue: '1.2.3' },
         ],
         packageFileVersion: undefined,
       });

@@ -55,10 +55,7 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`,
 ): Promise<OutgoingHttpHeaders | null> {
   try {
-    const options = {
-      throwHttpErrors: false,
-      noAuth: true,
-    };
+    const options = { throwHttpErrors: false, noAuth: true };
     const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
       ? await http.get(apiCheckUrl, options)
       : // use json request, as this will be cached for tags, so it returns json
@@ -207,9 +204,7 @@ export async function getAuthHeaders(
     }
     // sanitize token
     addSecretForSanitizing(token);
-    return {
-      authorization: `Bearer ${token}`,
-    };
+    return { authorization: `Bearer ${token}` };
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
@@ -273,10 +268,7 @@ export function getRegistryRepository(
       const { origin, pathname } = parseUrl(fullUrl)!;
       registryHost = origin;
       dockerRepository = pathname.substring(1);
-      return {
-        registryHost,
-        dockerRepository,
-      };
+      return { registryHost, dockerRepository };
     }
   }
   let registryHost = registryUrl;
@@ -313,10 +305,7 @@ export function getRegistryRepository(
   if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
     dockerRepository = 'library/' + dockerRepository;
   }
-  return {
-    registryHost,
-    dockerRepository,
-  };
+  return { registryHost, dockerRepository };
 }
 
 export function extractDigestFromResponseBody(

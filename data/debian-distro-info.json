@@ -131,14 +131,6 @@
     "eol_lts": "2028-06-30",
     "eol_elts": "2033-06-30"
   },
-  "v13": {
-    "codename": "Trixie",
-    "series": "trixie",
-    "created": "2023-06-10"
-  },
-  "v14": {
-    "codename": "Forky",
-    "series": "forky",
-    "created": "2025-08-01"
-  }
+  "v13": { "codename": "Trixie", "series": "trixie", "created": "2023-06-10" },
+  "v14": { "codename": "Forky", "series": "forky", "created": "2025-08-01" }
 }

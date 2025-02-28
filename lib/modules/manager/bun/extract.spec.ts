@@ -23,11 +23,7 @@ describe('modules/manager/bun/extract', () => {
         fs.getSiblingFileName.mockReturnValueOnce('package.json');
         fs.readLocalFile.mockResolvedValueOnce(
           // This package.json returns null from the extractor
-          JSON.stringify({
-            _id: 1,
-            _args: 1,
-            _from: 1,
-          }),
+          JSON.stringify({ _id: 1, _args: 1, _from: 1 }),
         );
         expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
       });
@@ -38,9 +34,7 @@ describe('modules/manager/bun/extract', () => {
           JSON.stringify({
             name: 'test',
             version: '0.0.1',
-            dependencies: {
-              dep1: '1.0.0',
-            },
+            dependencies: { dep1: '1.0.0' },
           }),
         );
         expect(await extractAllPackageFiles({}, ['bun.lockb'])).toMatchObject([
@@ -56,10 +50,7 @@ describe('modules/manager/bun/extract', () => {
             ],
             extractedConstraints: {},
             lockFiles: ['bun.lockb'],
-            managerData: {
-              hasPackageManager: false,
-              packageJsonName: 'test',
-            },
+            managerData: { hasPackageManager: false, packageJsonName: 'test' },
             packageFile: 'package.json',
             packageFileVersion: '0.0.1',
           },
@@ -81,11 +72,7 @@ describe('modules/manager/bun/extract', () => {
         fs.getSiblingFileName.mockReturnValueOnce('package.json');
         fs.readLocalFile.mockResolvedValueOnce(
           // This package.json returns null from the extractor
-          JSON.stringify({
-            _id: 1,
-            _args: 1,
-            _from: 1,
-          }),
+          JSON.stringify({ _id: 1, _args: 1, _from: 1 }),
         );
         expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
       });
@@ -96,9 +83,7 @@ describe('modules/manager/bun/extract', () => {
           JSON.stringify({
             name: 'test',
             version: '0.0.1',
-            dependencies: {
-              dep1: '1.0.0',
-            },
+            dependencies: { dep1: '1.0.0' },
           }),
         );
         expect(await extractAllPackageFiles({}, ['bun.lock'])).toMatchObject([
@@ -114,10 +99,7 @@ describe('modules/manager/bun/extract', () => {
             ],
             extractedConstraints: {},
             lockFiles: ['bun.lock'],
-            managerData: {
-              hasPackageManager: false,
-              packageJsonName: 'test',
-            },
+            managerData: { hasPackageManager: false, packageJsonName: 'test' },
             packageFile: 'package.json',
             packageFileVersion: '0.0.1',
           },

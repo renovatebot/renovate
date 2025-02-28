@@ -43,9 +43,7 @@ export const PathRepo = z.object({
 });
 export type PathRepo = z.infer<typeof PathRepo>;
 
-export const PackageRepo = z.object({
-  type: z.literal('package'),
-});
+export const PackageRepo = z.object({ type: z.literal('package') });
 
 export const Repo = z.discriminatedUnion('type', [
   ComposerRepo,
@@ -167,11 +165,7 @@ export const PackageFile = z
   .object({
     type: z.string().optional(),
     config: z
-      .object({
-        platform: z.object({
-          php: z.string(),
-        }),
-      })
+      .object({ platform: z.object({ php: z.string() }) })
       .nullable()
       .catch(null),
     repositories: Repos,
@@ -185,20 +179,11 @@ export const PackageFile = z
       repositories,
       require,
       'require-dev': requireDev,
-    }) => ({
-      composerJsonType,
-      config,
-      repositories,
-      require,
-      requireDev,
-    }),
+    }) => ({ composerJsonType, config, repositories, require, requireDev }),
   );
 export type PackageFile = z.infer<typeof PackageFile>;
 
-const LockedPackage = z.object({
-  name: z.string(),
-  version: z.string(),
-});
+const LockedPackage = z.object({ name: z.string(), version: z.string() });
 type LockedPackage = z.infer<typeof LockedPackage>;
 
 export const Lockfile = z
@@ -217,17 +202,10 @@ export const Lockfile = z
 export type Lockfile = z.infer<typeof Lockfile>;
 
 export const ComposerExtract = z
-  .object({
-    content: z.string(),
-    fileName: z.string(),
-  })
+  .object({ content: z.string(), fileName: z.string() })
   .transform(({ content, fileName }) => {
     const lockfileName = fileName.replace(/\.json$/, '.lock');
-    return {
-      file: content,
-      lockfileName,
-      lockfile: lockfileName,
-    };
+    return { file: content, lockfileName, lockfile: lockfileName };
   })
   .pipe(
     z.object({
@@ -258,11 +236,7 @@ export const ComposerExtract = z
     const deps: PackageDependency[] = [];
 
     const profiles = [
-      {
-        depType: 'require',
-        req: require,
-        locked: lockfile?.packages ?? [],
-      },
+      { depType: 'require', req: require, locked: lockfile?.packages ?? [] },
       {
         depType: 'require-dev',
         req: requireDev,
@@ -293,11 +267,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
-          depType,
-          depName,
-          currentValue,
-        };
+        const dep: PackageDependency = { depType, depName, currentValue };
 
         if (!depName.includes('/')) {
           dep.skipReason = 'unsupported';

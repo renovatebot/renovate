@@ -78,10 +78,7 @@ export class MetadataCache {
           ): Promise<Result<ReleaseResult, CacheError>> => {
             const dataHash = hashReleases(data);
             if (dataHash === versionsHash) {
-              await saveCache({
-                hash: dataHash,
-                data,
-              });
+              await saveCache({ hash: dataHash, data });
               return Result.ok(data);
             }
 

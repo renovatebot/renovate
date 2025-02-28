@@ -147,20 +147,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     let options = merge<SetRequired<GotOptions, 'method'>, InternalHttpOptions>(
-      {
-        method: 'get',
-        ...this.options,
-        hostType: this.hostType,
-      },
+      { method: 'get', ...this.options, hostType: this.hostType },
       httpOptions,
       { isMergeableObject: is.plainObject },
     );
 
     logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
 
-    options.hooks = {
-      beforeRedirect: [removeAuthorization],
-    };
+    options.hooks = { beforeRedirect: [removeAuthorization] };
 
     applyDefaultHeaders(options);
 
@@ -281,10 +275,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     url: string,
     options: HttpOptions = {},
   ): Promise<HttpResponse<Buffer>> {
-    return this.request<Buffer>(url, {
-      ...options,
-      responseType: 'buffer',
-    });
+    return this.request<Buffer>(url, { ...options, responseType: 'buffer' });
   }
 
   private async requestJson<ResT = unknown>(
@@ -298,10 +289,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       responseType: 'json',
     };
     // signal that we expect a json response
-    opts.headers = {
-      accept: 'application/json',
-      ...opts.headers,
-    };
+    opts.headers = { accept: 'application/json', ...opts.headers };
     if (body) {
       opts.json = body;
     }
@@ -337,12 +325,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   async getPlain(url: string, options?: Opts): Promise<HttpResponse> {
     const opt = options ?? {};
-    return await this.get(url, {
-      headers: {
-        Accept: 'text/plain',
-      },
-      ...opt,
-    });
+    return await this.get(url, { headers: { Accept: 'text/plain' }, ...opt });
   }
 
   /**
@@ -381,10 +364,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       schema = arg2 as Schema;
     }
 
-    const opts: InternalHttpOptions = {
-      ...httpOptions,
-      method: 'get',
-    };
+    const opts: InternalHttpOptions = { ...httpOptions, method: 'get' };
 
     const res = await this.get(url, opts);
     const body = await schema.parseAsync(parseSingleYaml(res.body));

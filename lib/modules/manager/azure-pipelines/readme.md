@@ -4,11 +4,7 @@ This is because there's no way for Renovate to know whether new task versions ar
 To opt into running it, set the following:
 
 ```json
-{
-  "azure-pipelines": {
-    "enabled": true
-  }
-}
+{ "azure-pipelines": { "enabled": true } }
 ```
 
 In most cases only major version numbers are specified in YAML when referencing a task version: `NodeTool@0`.

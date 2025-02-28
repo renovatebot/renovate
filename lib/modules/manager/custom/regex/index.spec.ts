@@ -11,9 +11,7 @@ const exampleGitlabCiYml = Fixtures.get(`gitlab-ci.yml`);
 
 describe('modules/manager/custom/regex/index', () => {
   it('has default config', () => {
-    expect(defaultConfig).toEqual({
-      pinDigests: false,
-    });
+    expect(defaultConfig).toEqual({ pinDigests: false });
   });
 
   it('has displayName', () => {

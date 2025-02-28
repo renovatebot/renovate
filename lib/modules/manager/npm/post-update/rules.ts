@@ -16,9 +16,7 @@ export function processHostRules(): HostRulesResult {
 
   // Determine the additional npmrc content to add based on host rules
   const additionalNpmrcContent = [];
-  const npmHostRules = hostRules.findAll({
-    hostType: 'npm',
-  });
+  const npmHostRules = hostRules.findAll({ hostType: 'npm' });
   logger.debug(`Found ${npmHostRules.length} npm host rule(s)`);
   for (const hostRule of npmHostRules) {
     if (!hostRule.resolvedHost) {
@@ -46,18 +44,14 @@ export function processHostRules(): HostRulesResult {
       additionalNpmrcContent.push(`${cleanedUri}:${key}=${hostRule.token}`);
 
       if (hostRule.authType === 'Basic') {
-        const registry = {
-          npmAuthIdent: hostRule.token,
-        };
+        const registry = { npmAuthIdent: hostRule.token };
         additionalYarnRcYml.npmRegistries[cleanedUri] = registry;
         additionalYarnRcYml.npmRegistries[uri] = registry;
 
         continue;
       }
 
-      const registry = {
-        npmAuthToken: hostRule.token,
-      };
+      const registry = { npmAuthToken: hostRule.token };
       additionalYarnRcYml.npmRegistries[cleanedUri] = registry;
       additionalYarnRcYml.npmRegistries[uri] = registry;
 

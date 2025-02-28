@@ -123,9 +123,7 @@ Read the [Full Config Presets](./presets-config.md) page to learn more about our
 A typical onboarding `renovate.json` looks like this:
 
 ```json
-{
-  "extends": ["config:recommended"]
-}
+{ "extends": ["config:recommended"] }
 ```
 
 Here's an example of using presets to change Renovate's behavior.
@@ -134,9 +132,7 @@ You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` pres
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
 ```json
-{
-  "extends": ["config:recommended", "schedule:nonOfficeHours"]
-}
+{ "extends": ["config:recommended", "schedule:nonOfficeHours"] }
 ```
 
 ## Preset Parameters
@@ -159,9 +155,7 @@ If you browse the "default" presets, you will see some that have parameters, e.g
 Here is how you would use these in your Renovate config:
 
 ```json
-{
-  "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"]
-}
+{ "extends": [":labels(dependencies,devops)", ":assignee(rarkins)"] }
 ```
 
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
@@ -179,9 +173,7 @@ To host your preset config on GitHub:
 - In other repos, reference it in an extends array like `"github>owner/name"`, for example:
 
   ```json
-  {
-    "extends": ["github>rarkins/renovate-config"]
-  }
+  { "extends": ["github>rarkins/renovate-config"] }
   ```
 
 From then on Renovate will use the Renovate config from the preset repo's default branch.
@@ -250,9 +242,7 @@ Read the [templates](./templates.md) section to learn more.
 The following example shows a self-hosted Renovate preset located in a GitLab repository called `renovate/presets`.
 
 ```json
-{
-  "extends": ["local>renovate/presets"]
-}
+{ "extends": ["local>renovate/presets"] }
 ```
 
 Usually you want to validate the preset before you put it in your Renovate configuration
@@ -261,9 +251,7 @@ Here is an example of how you can use templating to validate and load the preset
 ```javascript
 // config.js
 module.exports = {
-  customEnvVariables: {
-    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main',
-  },
+  customEnvVariables: { GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main' },
   extends: ['local>renovate/presets#{{ env.GITLAB_REF }}'],
 };
 ```
@@ -315,9 +303,7 @@ For example:
   "name": "renovate-config-fastcore",
   "version": "0.0.1",
   "renovate-config": {
-    "default": {
-      "extends": ["config:recommended", "schedule:nonOfficeHours"]
-    }
+    "default": { "extends": ["config:recommended", "schedule:nonOfficeHours"] }
   }
 }
 ```
@@ -325,9 +311,7 @@ For example:
 Then in each of your repositories you can add your Renovate config like:
 
 ```json
-{
-  "extends": ["fastcore"]
-}
+{ "extends": ["fastcore"] }
 ```
 
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
@@ -335,7 +319,5 @@ Any repository including this config will then adopt the rules of the default `l
 If you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
 
 ```json
-{
-  "extends": ["@fastcore"]
-}
+{ "extends": ["@fastcore"] }
 ```

@@ -54,9 +54,7 @@ describe('workers/repository/process/extract-update', () => {
 
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
-      const config = {
-        repoIsOnboarded: true,
-      };
+      const config = { repoIsOnboarded: true };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       const packageFiles = await extract(config);
@@ -81,12 +79,8 @@ describe('workers/repository/process/extract-update', () => {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
-        javascript: {
-          labels: ['js'],
-        },
-        npm: {
-          addLabels: 'npm',
-        },
+        javascript: { labels: ['js'] },
+        npm: { addLabels: 'npm' },
       };
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -96,10 +90,7 @@ describe('workers/repository/process/extract-update', () => {
 
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
-      const config = {
-        repoIsOnboarded: true,
-        baseBranch: 'master',
-      };
+      const config = { repoIsOnboarded: true, baseBranch: 'master' };
       repositoryCache.getCache.mockReturnValueOnce({
         scan: {
           master: {
@@ -118,10 +109,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('fetches vulnerabilities', async () => {
-      const config = {
-        repoIsOnboarded: true,
-        osvVulnerabilityAlerts: true,
-      };
+      const config = { repoIsOnboarded: true, osvVulnerabilityAlerts: true };
       const appendVulnerabilityPackageRulesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
@@ -137,10 +125,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
-      const config = {
-        repoIsOnboarded: true,
-        osvVulnerabilityAlerts: true,
-      };
+      const config = { repoIsOnboarded: true, osvVulnerabilityAlerts: true };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);

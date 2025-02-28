@@ -37,14 +37,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'mix.exs could not be written');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -106,10 +99,7 @@ export async function updateArtifacts({
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
         constraint: config.constraints?.erlang ?? '^26',
       },
-      {
-        toolName: 'elixir',
-        constraint: config.constraints?.elixir,
-      },
+      { toolName: 'elixir', constraint: config.constraints?.elixir },
     ],
     preCommands,
   };
@@ -135,14 +125,7 @@ export async function updateArtifacts({
       'Failed to update Mix lock file',
     );
 
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 
   const newMixLockContent = await readLocalFile(lockFileName, 'utf8');

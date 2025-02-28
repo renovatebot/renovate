@@ -49,9 +49,7 @@ export class ModuleExtractor extends DependencyExtractor {
           depName,
           depType: 'module',
           currentValue: moduleElement.version,
-          managerData: {
-            source: moduleElement.source,
-          },
+          managerData: { source: moduleElement.source },
         };
         dependencies.push(this.analyseTerraformModule(dep));
       }

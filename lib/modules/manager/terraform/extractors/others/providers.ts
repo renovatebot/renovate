@@ -34,9 +34,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
         const dep = this.analyzeTerraformProvider(
           {
             currentValue: providerTypeElement.version,
-            managerData: {
-              moduleName: providerTypeName,
-            },
+            managerData: { moduleName: providerTypeName },
           },
           locks,
           'provider',

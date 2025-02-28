@@ -45,10 +45,7 @@ export function getMatchHostFromNpmrcHost(input: string): string {
 }
 
 export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
-  const rules: NpmrcRules = {
-    hostRules: [],
-    packageRules: [],
-  };
+  const rules: NpmrcRules = { hostRules: [], packageRules: [] };
   // Generate hostRules
   const hostType = 'npm';
   const hosts: Record<string, HostRule> = {};
@@ -91,10 +88,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   if (is.nonEmptyString(registry)) {
     if (isHttpUrl(registry)) {
       // Default registry
-      rules.packageRules?.push({
-        matchDatasources,
-        registryUrls: [registry],
-      });
+      rules.packageRules?.push({ matchDatasources, registryUrls: [registry] });
     } else {
       logger.warn({ registry }, 'Invalid npmrc registry= URL');
     }

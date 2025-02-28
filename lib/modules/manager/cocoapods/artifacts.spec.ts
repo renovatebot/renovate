@@ -80,9 +80,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
 
   it('returns null for invalid local directory', async () => {
     const execSnapshots = mockExecAll();
-    GlobalConfig.set({
-      localDir: '',
-    });
+    GlobalConfig.set({ localDir: '' });
 
     expect(
       await updateArtifacts({
@@ -113,9 +111,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: [],
-      }),
+      partial<StatusResult>({ modified: [] }),
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
@@ -137,9 +133,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile');
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['Podfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Podfile.lock'] }),
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
@@ -240,9 +234,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['Podfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Podfile.lock'] }),
     );
 
     await updateArtifacts({
@@ -283,9 +275,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['Podfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Podfile.lock'] }),
     );
 
     await updateArtifacts({

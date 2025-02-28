@@ -58,13 +58,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== 'github'
   ) {
-    res = {
-      ...hostRules.find({
-        hostType: 'github',
-        url,
-      }),
-      ...res,
-    };
+    res = { ...hostRules.find({ hostType: 'github', url }), ...res };
   }
 
   // Fallback to `gitlab` hostType
@@ -73,13 +67,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== 'gitlab'
   ) {
-    res = {
-      ...hostRules.find({
-        hostType: 'gitlab',
-        url,
-      }),
-      ...res,
-    };
+    res = { ...hostRules.find({ hostType: 'gitlab', url }), ...res };
   }
 
   // Fallback to `bitbucket` hostType
@@ -88,13 +76,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== 'bitbucket'
   ) {
-    res = {
-      ...hostRules.find({
-        hostType: 'bitbucket',
-        url,
-      }),
-      ...res,
-    };
+    res = { ...hostRules.find({ hostType: 'bitbucket', url }), ...res };
   }
 
   // Fallback to `gitea` hostType
@@ -103,13 +85,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     GITEA_API_USING_HOST_TYPES.includes(hostType) &&
     hostType !== 'gitea'
   ) {
-    res = {
-      ...hostRules.find({
-        hostType: 'gitea',
-        url,
-      }),
-      ...res,
-    };
+    res = { ...hostRules.find({ hostType: 'gitea', url }), ...res };
   }
 
   return res;
@@ -175,10 +151,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
       }
     }
 
-    options.headers = {
-      ...options.headers,
-      ...filteredHeaders,
-    };
+    options.headers = { ...options.headers, ...filteredHeaders };
   }
 
   if (hostRule.keepAlive) {
@@ -197,10 +170,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   }
 
   if (is.nonEmptyString(hostRule.httpsPrivateKey)) {
-    options.https = {
-      ...(options.https ?? {}),
-      key: hostRule.httpsPrivateKey,
-    };
+    options.https = { ...(options.https ?? {}), key: hostRule.httpsPrivateKey };
   }
 
   if (is.nonEmptyString(hostRule.httpsCertificate)) {

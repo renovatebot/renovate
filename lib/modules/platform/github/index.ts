@@ -101,10 +101,7 @@ const GitHubMaxPrBodyLen = 60000;
 
 export function resetConfigs(): void {
   config = {} as never;
-  platformConfig = {
-    hostType: 'github',
-    endpoint: 'https://api.github.com/',
-  };
+  platformConfig = { hostType: 'github', endpoint: 'https://api.github.com/' };
 }
 
 resetConfigs();
@@ -502,16 +499,17 @@ export async function initRepo({
       );
     }
 
-    const res = await githubApi.requestGraphql<{
-      repository: GhRepo;
-    }>(infoQuery, {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        user: renovateUsername,
+    const res = await githubApi.requestGraphql<{ repository: GhRepo }>(
+      infoQuery,
+      {
+        variables: {
+          owner: config.repositoryOwner,
+          name: config.repositoryName,
+          user: renovateUsername,
+        },
+        readOnly: true,
       },
-      readOnly: true,
-    });
+    );
 
     if (res?.errors) {
       if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
@@ -637,11 +635,7 @@ export async function initRepo({
           sha: repo.defaultBranchRef.target.oid,
         };
         logger.debug(
-          {
-            defaultBranch: config.defaultBranch,
-            forkDefaultBranch,
-            body,
-          },
+          { defaultBranch: config.defaultBranch, forkDefaultBranch, body },
           'Fork has different default branch to parent, attempting to create branch',
         );
         try {
@@ -687,10 +681,7 @@ export async function initRepo({
           `Updating forked repository default sha ${sha} to match upstream`,
         );
         await githubApi.patchJson(url, {
-          body: {
-            sha,
-            force: true,
-          },
+          body: { sha, force: true },
           token: coerceString(forkToken, opts.token),
         });
       } catch (err) /* istanbul ignore next */ {
@@ -732,10 +723,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = `${config.repository}.git`;
   const url = URL.format(parsedEndpoint);
-  await git.initRepo({
-    ...config,
-    url,
-  });
+  await git.initRepo({ ...config, url });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
@@ -941,10 +929,7 @@ async function ensureBranchSha(
 export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
 
-  const openPr = await findPr({
-    branchName,
-    state: 'open',
-  });
+  const openPr = await findPr({ branchName, state: 'open' });
 
   if (openPr) {
     return openPr;
@@ -972,12 +957,7 @@ export async function tryReuseAutoclosedPr(
     const title = autoclosedPr.title.replace(regEx(/ - autoclosed$/), '');
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.repository}/pulls/${number}`,
-      {
-        body: {
-          state: 'open',
-          title,
-        },
-      },
+      { body: { state: 'open', title } },
     );
     logger.info(
       { branchName, title, number },
@@ -1050,9 +1030,7 @@ export async function getBranchStatus(
       branchName,
     )}/check-runs?per_page=100`;
     const opts = {
-      headers: {
-        accept: 'application/vnd.github.antiope-preview+json',
-      },
+      headers: { accept: 'application/vnd.github.antiope-preview+json' },
       paginate: true,
       paginationField: 'check_runs',
     };
@@ -1242,9 +1220,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
     const repo = config.parentRepo ?? config.repository;
     const { body: issue } = await githubApi.getJson(
       `repos/${repo}/issues/${number}`,
-      {
-        cacheProvider: repoCacheProvider,
-      },
+      { cacheProvider: repoCacheProvider },
       Issue,
     );
     GithubIssueCache.updateIssue(issue);
@@ -1362,13 +1338,7 @@ export async function ensureIssue({
     }
     const { body: createdIssue } = await githubApi.postJson(
       `repos/${config.parentRepo ?? config.repository}/issues`,
-      {
-        body: {
-          title,
-          body,
-          labels: labels ?? [],
-        },
-      },
+      { body: { title, body, labels: labels ?? [] } },
       Issue,
     );
     logger.info('Issue created');
@@ -1409,10 +1379,7 @@ async function tryAddMilestone(
   }
 
   logger.debug(
-    {
-      milestone: milestoneNo,
-      pr: issueNo,
-    },
+    { milestone: milestoneNo, pr: issueNo },
     'Adding milestone to PR',
   );
   try {
@@ -1426,11 +1393,7 @@ async function tryAddMilestone(
   } catch (err) {
     const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
-      {
-        milestone: milestoneNo,
-        pr: issueNo,
-        err: actualError,
-      },
+      { milestone: milestoneNo, pr: issueNo, err: actualError },
       'Unable to add milestone to PR',
     );
   }
@@ -1465,12 +1428,7 @@ export async function addReviewers(
       `repos/${
         config.parentRepo ?? config.repository
       }/pulls/${prNo}/requested_reviewers`,
-      {
-        body: {
-          reviewers: userReviewers,
-          team_reviewers: teamReviewers,
-        },
-      },
+      { body: { reviewers: userReviewers, team_reviewers: teamReviewers } },
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Failed to assign reviewer');
@@ -1518,9 +1476,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
     `repos/${
       config.parentRepo ?? config.repository
     }/issues/${issueNo}/comments`,
-    {
-      body: { body },
-    },
+    { body: { body } },
   );
 }
 
@@ -1530,9 +1486,7 @@ async function editComment(commentId: number, body: string): Promise<void> {
     `repos/${
       config.parentRepo ?? config.repository
     }/issues/comments/${commentId}`,
-    {
-      body: { body },
-    },
+    { body: { body } },
   );
 }
 
@@ -1553,10 +1507,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   try {
     const { body: comments } = await githubApi.getJsonUnchecked<Comment[]>(
       url,
-      {
-        paginate: true,
-        cacheProvider: repoCacheProvider,
-      },
+      { paginate: true, cacheProvider: repoCacheProvider },
     );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
@@ -1733,15 +1684,7 @@ export async function createPr({
   // TODO: can `repository` be null? (#22198)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
-  const options: any = {
-    body: {
-      title,
-      head,
-      base,
-      body,
-      draft: draftPR,
-    },
-  };
+  const options: any = { body: { title, head, base, body, draft: draftPR } };
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
@@ -1793,9 +1736,7 @@ export async function updatePr({
   if (state) {
     patchBody.state = state;
   }
-  const options: any = {
-    body: patchBody,
-  };
+  const options: any = { body: patchBody };
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
@@ -1852,9 +1793,7 @@ export async function mergePr({
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
-  const options: GithubHttpOptions = {
-    body: {},
-  };
+  const options: GithubHttpOptions = { body: {} };
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;

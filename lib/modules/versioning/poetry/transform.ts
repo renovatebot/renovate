@@ -19,10 +19,7 @@ function parseLetterTag(letter?: string, number?: string): LetterTag | null {
       r: 'post',
       rev: 'post',
     };
-    return {
-      letter: spellings[letter] || letter,
-      number: number ?? '0',
-    };
+    return { letter: spellings[letter] || letter, number: number ?? '0' };
   }
   if (letter === undefined && number !== undefined) {
     return { letter: 'post', number };

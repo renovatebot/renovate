@@ -74,9 +74,7 @@ export async function updateArtifacts({
         { toolName: 'python', constraint: config.constraints?.python },
         { toolName: 'hashin', constraint: config.constraints?.hashin },
       ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
+      extraEnv: { PIP_CACHE_DIR: await ensureCacheDir('pip') },
     };
     await exec(cmd, execOptions);
     const newContent = await readLocalFile(packageFileName, 'utf8');
@@ -87,11 +85,7 @@ export async function updateArtifacts({
     logger.debug(`Returning updated ${packageFileName}`);
     return [
       {
-        file: {
-          type: 'addition',
-          path: packageFileName,
-          contents: newContent,
-        },
+        file: { type: 'addition', path: packageFileName, contents: newContent },
       },
     ];
   } catch (err) {

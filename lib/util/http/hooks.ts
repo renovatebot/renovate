@@ -20,6 +20,4 @@ export function hook(response: Response): Response {
   return response;
 }
 
-export const hooks: Hooks = {
-  afterResponse: [hook],
-};
+export const hooks: Hooks = { afterResponse: [hook] };

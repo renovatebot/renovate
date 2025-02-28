@@ -56,10 +56,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
 
     it('returns null if @types', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          currentVersion: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, currentVersion: undefined }),
       ).toBeNull();
     });
 
@@ -113,11 +110,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         .get('/repos/chalk/chalk')
         .times(4)
         .reply(500);
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
@@ -148,11 +141,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         { version: 'v2.4.2' },
       ] as never);
       githubReleasesMock.mockResolvedValue([]);
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
@@ -207,10 +196,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
       githubReleasesMock.mockResolvedValueOnce([]);
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depType: 'engines',
-        }),
+        await getChangeLogJSON({ ...upgrade, depType: 'engines' }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
@@ -233,39 +219,25 @@ describe('workers/repository/update/pr/changelog/index', () => {
 
     it('handles no sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: undefined }),
       ).toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'http://example.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'http://example.com' }),
       ).toBeNull();
     });
 
     it('handles missing Github token', async () => {
       GlobalConfig.set({ githubTokenWarn: true });
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://github.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'https://github.com' }),
       ).toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          releases: [],
-        }),
-      ).toBeNull();
+      expect(await getChangeLogJSON({ ...upgrade, releases: [] })).toBeNull();
     });
 
     it('handles not enough releases', async () => {
@@ -278,10 +250,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('will call getInRangeReleases when releases is undefined', async () => {
-      await getChangeLogJSON({
-        ...upgrade,
-        releases: undefined,
-      });
+      await getChangeLogJSON({ ...upgrade, releases: undefined });
       expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
     });
 

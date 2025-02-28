@@ -143,10 +143,7 @@ module.exports = {
   token: 'AWS_SESSION_TOKEN_GOES_HERE',
   gitAuthor: 'your_email@domain',
   packageRules: [
-    {
-      matchPackageNames: ['package_name', 'package_name2'],
-      enabled: false,
-    },
+    { matchPackageNames: ['package_name', 'package_name2'], enabled: false },
   ],
 };
 ```

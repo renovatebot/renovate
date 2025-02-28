@@ -21,9 +21,7 @@ export interface Logger {
   fatal(msg: string): void;
   fatal(meta: Record<string, any>, msg?: string): void;
 
-  once: Logger & {
-    reset: () => void;
-  };
+  once: Logger & { reset: () => void };
 }
 
 export interface BunyanRecord extends Record<string, any> {

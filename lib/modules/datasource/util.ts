@@ -22,10 +22,7 @@ export async function getGoogleAuthHostRule(): Promise<HostRule | null> {
     if (accessToken) {
       // sanitize token
       addSecretForSanitizing(accessToken);
-      return {
-        username: 'oauth2accesstoken',
-        password: accessToken,
-      };
+      return { username: 'oauth2accesstoken', password: accessToken };
     } else {
       logger.warn(
         'Could not retrieve access token using google-auth-library getAccessToken',

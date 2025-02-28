@@ -29,9 +29,7 @@ export async function getReleaseNotesMd(
       `${apiPrefix}tree?per_page=100${
         sourceDirectory ? `&path=${sourceDirectory}` : ''
       }`,
-      {
-        paginate: true,
-      },
+      { paginate: true },
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
@@ -71,9 +69,7 @@ export async function getReleaseList(
 
   const res = await http.getJsonUnchecked<GitlabRelease[]>(
     `${apiUrl}?per_page=100`,
-    {
-      paginate: true,
-    },
+    { paginate: true },
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,

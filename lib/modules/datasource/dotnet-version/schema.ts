@@ -7,9 +7,7 @@ export const ReleasesIndex = z
   .object({
     'releases-index': LooseArray(
       z
-        .object({
-          'releases.json': z.string(),
-        })
+        .object({ 'releases.json': z.string() })
         .transform(({ 'releases.json': releasesUrl }) => releasesUrl),
     ).catch([]),
   })
@@ -19,16 +17,12 @@ const ReleaseBase = z.object({
   'release-date': MaybeTimestamp,
   'release-notes': z.string(),
 });
-const ReleaseDetails = z.object({
-  version: z.string(),
-});
+const ReleaseDetails = z.object({ version: z.string() });
 
 export const DotnetSdkReleases = z
   .object({
     releases: LooseArray(
-      ReleaseBase.extend({
-        sdks: z.array(ReleaseDetails),
-      }),
+      ReleaseBase.extend({ sdks: z.array(ReleaseDetails) }),
     ).catch([]),
   })
   .transform(({ releases }): Release[] =>
@@ -48,11 +42,9 @@ export const DotnetSdkReleases = z
 
 export const DotnetRuntimeReleases = z
   .object({
-    releases: LooseArray(
-      ReleaseBase.extend({
-        runtime: ReleaseDetails,
-      }),
-    ).catch([]),
+    releases: LooseArray(ReleaseBase.extend({ runtime: ReleaseDetails })).catch(
+      [],
+    ),
   })
   .transform(({ releases }): Release[] =>
     releases.map(

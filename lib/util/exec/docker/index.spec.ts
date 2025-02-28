@@ -204,10 +204,7 @@ describe('util/exec/docker/index', () => {
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
     const image = sideCarImage;
-    const dockerOptions = {
-      cwd: '/tmp/foobar',
-      envVars,
-    };
+    const dockerOptions = { cwd: '/tmp/foobar', envVars };
     const command = (img: string, vol?: string, opts?: string): string =>
       `docker run --rm ` +
       `--name=renovate_${img} ` +

@@ -62,10 +62,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status if statusCheckNames is undefined', async () => {
-      await setArtifactErrorStatus({
-        ...config,
-        statusCheckNames: undefined,
-      });
+      await setArtifactErrorStatus({ ...config, statusCheckNames: undefined });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );

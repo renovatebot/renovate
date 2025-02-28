@@ -9,9 +9,7 @@ import * as npmExtract from '.';
 
 vi.mock('../../../../util/fs');
 
-const defaultExtractConfig = {
-  skipInstalls: null,
-} satisfies ExtractConfig;
+const defaultExtractConfig = { skipInstalls: null } satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
@@ -44,9 +42,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [{ skipReason: 'invalid-name' }],
-      });
+      expect(res).toMatchSnapshot({ deps: [{ skipReason: 'invalid-name' }] });
     });
 
     it('ignores vendorised package.json', async () => {
@@ -154,11 +150,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
-      });
+      expect(res).toMatchSnapshot({ managerData: { yarnLock: 'yarn.lock' } });
     });
 
     it('warns when multiple lock files found', async () => {
@@ -180,10 +172,7 @@ describe('modules/manager/npm/extract/index', () => {
         'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
       );
       expect(res).toMatchObject({
-        managerData: {
-          npmLock: 'package-lock.json',
-          yarnLock: 'yarn.lock',
-        },
+        managerData: { npmLock: 'package-lock.json', yarnLock: 'yarn.lock' },
       });
     });
 
@@ -363,9 +352,7 @@ describe('modules/manager/npm/extract/index', () => {
 
     it('extracts engines', async () => {
       const pJson = {
-        dependencies: {
-          angular: '1.6.0',
-        },
+        dependencies: { angular: '1.6.0' },
         devDependencies: {
           '@angular/cli': '1.6.0',
           foo: '*',
@@ -455,9 +442,7 @@ describe('modules/manager/npm/extract/index', () => {
     it('extracts volta', async () => {
       const pJson = {
         main: 'index.js',
-        engines: {
-          node: '8.9.2',
-        },
+        engines: { node: '8.9.2' },
         volta: {
           node: '8.9.2',
           yarn: '1.12.3',
@@ -495,13 +480,8 @@ describe('modules/manager/npm/extract/index', () => {
     it('extracts volta yarn unspecified-version', async () => {
       const pJson = {
         main: 'index.js',
-        engines: {
-          node: '8.9.2',
-        },
-        volta: {
-          node: '8.9.2',
-          yarn: 'unknown',
-        },
+        engines: { node: '8.9.2' },
+        volta: { node: '8.9.2', yarn: 'unknown' },
       };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
@@ -536,13 +516,8 @@ describe('modules/manager/npm/extract/index', () => {
     it('extracts volta yarn higher than 1', async () => {
       const pJson = {
         main: 'index.js',
-        engines: {
-          node: '16.0.0',
-        },
-        volta: {
-          node: '16.0.0',
-          yarn: '3.2.4',
-        },
+        engines: { node: '16.0.0' },
+        volta: { node: '16.0.0', yarn: '3.2.4' },
       };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
@@ -719,15 +694,9 @@ describe('modules/manager/npm/extract/index', () => {
         return Promise.resolve(null);
       });
       const pJson = {
-        dependencies: {
-          a: 'github:owner/a#v1.1.0',
-        },
-        engines: {
-          node: '8.9.2',
-        },
-        volta: {
-          yarn: '3.2.4',
-        },
+        dependencies: { a: 'github:owner/a#v1.1.0' },
+        engines: { node: '8.9.2' },
+        volta: { yarn: '3.2.4' },
       };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
@@ -843,9 +812,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts packageManager', async () => {
-      const pJson = {
-        packageManager: 'yarn@3.0.0',
-      };
+      const pJson = { packageManager: 'yarn@3.0.0' };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
@@ -1182,9 +1149,7 @@ describe('modules/manager/npm/extract/index', () => {
               prettyDepType: 'pnpm.catalog.default',
             },
           ],
-          managerData: {
-            pnpmShrinkwrap: undefined,
-          },
+          managerData: { pnpmShrinkwrap: undefined },
           packageFile: 'pnpm-workspace.yaml',
         },
       ]);

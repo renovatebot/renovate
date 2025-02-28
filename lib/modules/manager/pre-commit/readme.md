@@ -18,11 +18,7 @@ repos:
 To enable the `pre-commit` manager, add the following config:
 
 ```json
-{
-  "pre-commit": {
-    "enabled": true
-  }
-}
+{ "pre-commit": { "enabled": true } }
 ```
 
 Alternatively, add `:enablePreCommit` to your `extends` array.

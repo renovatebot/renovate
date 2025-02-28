@@ -99,10 +99,7 @@ export async function bake(
 
 export function sign(
   image: string,
-  opts: {
-    args?: string[];
-    exitOnError?: boolean;
-  },
+  opts: { args?: string[]; exitOnError?: boolean },
 ): void {
   logger.info(`Signing ${image} ...`);
   const result = exec('cosign', ['sign', '--yes', image]);

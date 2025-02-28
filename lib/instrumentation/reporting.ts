@@ -9,10 +9,7 @@ import { getS3Client, parseS3Url } from '../util/s3';
 import type { ExtractResult } from '../workers/repository/process/extract-update';
 import type { Report } from './types';
 
-const report: Report = {
-  problems: [],
-  repositories: {},
-};
+const report: Report = { problems: [], repositories: {} };
 
 /**
  * Reset the report

@@ -14,9 +14,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     commitMessageTopic: 'resource {{depName}}',
     commitMessageExtra: 'to {{{newVersion}}}',
     prBodyColumns: ['Resource', 'Change'],
-    prBodyDefinitions: {
-      Resource: '{{{depNameLinked}}}',
-    },
+    prBodyDefinitions: { Resource: '{{{depNameLinked}}}' },
   };
 
   override readonly defaultVersioning = azureRestApiVersioningApi.id;

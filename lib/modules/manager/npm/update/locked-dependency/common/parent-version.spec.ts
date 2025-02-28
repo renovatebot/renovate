@@ -13,12 +13,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, {
           name: 'send',
           repository: {},
-          versions: {
-            '0.11.0': {},
-            '0.11.1': {},
-            '0.12.0': {},
-            '0.13.0': {},
-          },
+          versions: { '0.11.0': {}, '0.11.1': {}, '0.12.0': {}, '0.13.0': {} },
           'dist-tags': { latest: '0.13.0' },
         });
       httpMock
@@ -38,9 +33,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, {
           name: 'buffer-crc32',
           repository: {},
-          versions: {
-            '10.0.0': {},
-          },
+          versions: { '10.0.0': {} },
           'dist-tags': { latest: '10.0.0' },
         });
 
@@ -61,11 +54,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, {
           name: 'qs',
           repository: {},
-          versions: {
-            '0.6.6': {},
-            '6.0.4': {},
-            '6.2.0': {},
-          },
+          versions: { '0.6.6': {}, '6.0.4': {}, '6.2.0': {} },
           'dist-tags': { latest: '6.2.0' },
         });
 
@@ -81,10 +70,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, {
           name: 'type-is',
           repository: {},
-          versions: {
-            '1.2.1': {},
-            '1.6.15': {},
-          },
+          versions: { '1.2.1': {}, '1.6.15': {} },
           'dist-tags': { latest: '1.6.15' },
         });
 
@@ -100,9 +86,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, {
           name: 'debug',
           repository: {},
-          versions: {
-            '10.0.0': {},
-          },
+          versions: { '10.0.0': {} },
           'dist-tags': { latest: '10.0.0' },
         });
 

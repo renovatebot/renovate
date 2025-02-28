@@ -281,10 +281,7 @@ describe('modules/manager/osgi/extract', () => {
       );
       expect(packageFile).toEqual({
         deps: [
-          {
-            depName: 'commons-codec:1.15',
-            skipReason: 'invalid-value',
-          },
+          { depName: 'commons-codec:1.15', skipReason: 'invalid-value' },
           {
             datasource: 'maven',
             depName: 'commons-codec:commons-codec',

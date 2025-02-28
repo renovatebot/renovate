@@ -21,10 +21,7 @@ describe('modules/datasource/dart/index', () => {
     });
 
     it('returns null for empty fields', async () => {
-      const withoutVersions = {
-        ...body,
-        versions: undefined,
-      };
+      const withoutVersions = { ...body, versions: undefined };
       httpMock
         .scope(baseUrl)
         .get('/shared_preferences')
@@ -36,10 +33,7 @@ describe('modules/datasource/dart/index', () => {
         }),
       ).toBeNull();
 
-      const withoutLatest = {
-        ...body,
-        latest: undefined,
-      };
+      const withoutLatest = { ...body, latest: undefined };
       httpMock
         .scope(baseUrl)
         .get('/shared_preferences')

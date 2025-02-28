@@ -27,11 +27,6 @@ export function check({
   }
 
   return managersErrMessage
-    ? [
-        {
-          topic: 'Configuration Error',
-          message: managersErrMessage,
-        },
-      ]
+    ? [{ topic: 'Configuration Error', message: managersErrMessage }]
     : [];
 }

@@ -12,10 +12,7 @@ export class DepTypesMigration extends AbstractMigration {
   override run(value: unknown, key: string): void {
     const packageRules: PackageRule[] = this.get('packageRules') ?? [];
     if (is.nonEmptyObject(value) && !is.array(value)) {
-      packageRules.push({
-        matchDepTypes: [key],
-        ...value,
-      });
+      packageRules.push({ matchDepTypes: [key], ...value });
     }
 
     if (is.array(value)) {

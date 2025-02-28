@@ -7,9 +7,6 @@ export { updateArtifacts } from './artifacts';
 
 export const categories: Category[] = ['batect'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)batect$'],
-  versioning,
-};
+export const defaultConfig = { fileMatch: ['(^|/)batect$'], versioning };
 
 export const supportedDatasources = [GithubReleasesDatasource.id];

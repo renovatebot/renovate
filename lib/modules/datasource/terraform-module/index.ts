@@ -116,9 +116,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      releases: res.versions.map((version) => ({
-        version,
-      })),
+      releases: res.versions.map((version) => ({ version })),
     };
     if (res.source) {
       dep.sourceUrl = res.source;
@@ -165,9 +163,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
-      releases: res.modules[0].versions.map(({ version }) => ({
-        version,
-      })),
+      releases: res.modules[0].versions.map(({ version }) => ({ version })),
     };
 
     // Add the source URL if given
@@ -194,10 +190,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       registry = `https://${registry}`;
     }
     const repository = split.join('/');
-    return {
-      registry,
-      repository,
-    };
+    return { registry, repository };
   }
 
   private static getCacheKey({

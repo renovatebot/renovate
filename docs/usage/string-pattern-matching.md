@@ -13,21 +13,15 @@ The value `*` is a special case which means "match everything".
 It is not valid to combine `*` with any other positive or negative match.
 
 ```json title="Example of valid wildcard use"
-{
-  "allowedEnv": ["*"]
-}
+{ "allowedEnv": ["*"] }
 ```
 
 ```json title="Example of invalid wildcard use with additional match"
-{
-  "allowedEnv": ["*", "ABC"]
-}
+{ "allowedEnv": ["*", "ABC"] }
 ```
 
 ```json title="Example of invalid wildcard use with negation"
-{
-  "allowedEnv": ["*", "!ABC"]
-}
+{ "allowedEnv": ["*", "!ABC"] }
 ```
 
 In the latter case, the `*` can be omitted and achieve the same thing.

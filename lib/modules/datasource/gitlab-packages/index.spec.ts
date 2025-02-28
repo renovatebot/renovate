@@ -31,10 +31,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/user%2Fproject1/packages')
-        .query({
-          package_name: 'mypkg',
-          per_page: '100',
-        })
+        .query({ package_name: 'mypkg', per_page: '100' })
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,
@@ -49,10 +46,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/user%2Fproject1/packages')
-        .query({
-          package_name: 'mypkg',
-          per_page: '100',
-        })
+        .query({ package_name: 'mypkg', per_page: '100' })
         .reply(404);
       expect(
         await getPkgReleases({
@@ -67,10 +61,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/user%2Fproject1/packages')
-        .query({
-          package_name: 'mypkg',
-          per_page: '100',
-        })
+        .query({ package_name: 'mypkg', per_page: '100' })
         .reply(200, []);
       expect(
         await getPkgReleases({
@@ -85,10 +76,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/user%2Fproject1/packages')
-        .query({
-          package_name: 'mypkg',
-          per_page: '100',
-        })
+        .query({ package_name: 'mypkg', per_page: '100' })
         .reply(502);
       await expect(
         getPkgReleases({

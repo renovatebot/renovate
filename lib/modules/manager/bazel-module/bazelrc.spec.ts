@@ -235,9 +235,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
           build --jobs 600
           `,
       });
-      mockIsValidLocalPath({
-        '.bazelrc': true,
-      });
+      mockIsValidLocalPath({ '.bazelrc': true });
       const result = await read('.');
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('jobs', '600')]),

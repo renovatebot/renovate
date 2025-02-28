@@ -42,9 +42,7 @@ export class GlasskubePackagesDatasource extends Datasource {
       this.handleGenericErrors(versionsErr);
     }
 
-    result.releases = versions.versions.map((it) => ({
-      version: it.version,
-    }));
+    result.releases = versions.versions.map((it) => ({ version: it.version }));
     result.tags = { latest: versions.latestVersion };
 
     const { val: latestManifest, err: latestManifestErr } = await this.http

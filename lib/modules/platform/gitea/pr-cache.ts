@@ -27,11 +27,7 @@ export class GiteaPrCache {
       | GiteaPrCacheData
       | undefined;
     if (!pullRequestCache || pullRequestCache.author !== author) {
-      pullRequestCache = {
-        items: {},
-        updated_at: null,
-        author,
-      };
+      pullRequestCache = { items: {}, updated_at: null, author };
     }
     repoCache.platform.gitea.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
@@ -147,10 +143,7 @@ export class GiteaPrCache {
       // TODO: use zod, typescript can't infer the type of the response #22198
       const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
         `${API_PATH}/repos/${this.repo}/pulls?${query}`,
-        {
-          memCache: false,
-          paginate: false,
-        },
+        { memCache: false, paginate: false },
       );
 
       const needNextPage = this.reconcile(res.body);

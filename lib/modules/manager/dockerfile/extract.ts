@@ -119,9 +119,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
     if (cleanedCurrentFrom?.includes(variableMarker)) {
       // If cleanedCurrentFrom contains a variable, after cleaning, e.g. "$REGISTRY/alpine", we do not support this.
-      return {
-        skipReason: 'contains-variable',
-      };
+      return { skipReason: 'contains-variable' };
     }
   }
 
@@ -172,9 +170,7 @@ export function getDep(
     !is.string(currentFrom) ||
     !is.nonEmptyStringAndNotWhitespace(currentFrom)
   ) {
-    return {
-      skipReason: 'invalid-value',
-    };
+    return { skipReason: 'invalid-value' };
   }
 
   // Resolve registry aliases first so that we don't need special casing later on:

@@ -15,9 +15,7 @@ async function updateArtifact(
     const response = await http.get(url);
     const contents = response.body;
 
-    return {
-      file: { type: 'addition', path, contents },
-    };
+    return { file: { type: 'addition', path, contents } };
   } catch (err) {
     const errorDescription: string = err.toString();
 

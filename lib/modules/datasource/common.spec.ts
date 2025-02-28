@@ -27,9 +27,7 @@ describe('modules/datasource/common', () => {
     });
 
     it('returns datasource for known datasource', () => {
-      expect(getDatasourceFor('npm')).toMatchObject({
-        id: NpmDatasource.id,
-      });
+      expect(getDatasourceFor('npm')).toMatchObject({ id: NpmDatasource.id });
     });
   });
 
@@ -57,33 +55,22 @@ describe('modules/datasource/common', () => {
 
   describe('isGetPkgReleasesConfig', () => {
     it('returns true for valid input', () => {
-      const input = {
-        datasource: 'npm',
-        packageName: 'lodash',
-      };
+      const input = { datasource: 'npm', packageName: 'lodash' };
       expect(isGetPkgReleasesConfig(input)).toBe(true);
     });
 
     it('returns false for invalid input', () => {
-      const input = {
-        datasource: '',
-        packageName: 'lodash',
-      };
+      const input = { datasource: '', packageName: 'lodash' };
       expect(isGetPkgReleasesConfig(input)).toBe(false);
     });
 
     it('returns false for input with missing properties', () => {
-      const input = {
-        datasource: 'npm',
-      };
+      const input = { datasource: 'npm' };
       expect(isGetPkgReleasesConfig(input)).toBe(false);
     });
 
     it('returns false for input with non-string properties', () => {
-      const input = {
-        datasource: 123,
-        packageName: 'lodash',
-      };
+      const input = { datasource: 123, packageName: 'lodash' };
       expect(isGetPkgReleasesConfig(input)).toBe(false);
     });
   });
@@ -281,9 +268,7 @@ describe('modules/datasource/common', () => {
       const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
       expect(
         applyVersionCompatibility(input, versionCompatibility, '-alpine'),
-      ).toMatchObject({
-        releases: [{ version: '2.0.0' }],
-      });
+      ).toMatchObject({ releases: [{ version: '2.0.0' }] });
     });
   });
 });

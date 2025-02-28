@@ -116,10 +116,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(res).toEqual([...Object.values(oldItems), newItem]);
     expect(isPaginationDone).toBe(false);
     expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual({
-      items: {
-        ...oldItems,
-        '4': newItem,
-      },
+      items: { ...oldItems, '4': newItem },
       createdAt: isoTs('2022-10-30 12:00'),
     });
   });

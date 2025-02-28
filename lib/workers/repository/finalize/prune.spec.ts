@@ -72,9 +72,7 @@ describe('workers/repository/finalize/prune', () => {
         config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'foo - autoclosed',
-        }),
+        partial<Pr>({ title: 'foo - autoclosed' }),
       );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);

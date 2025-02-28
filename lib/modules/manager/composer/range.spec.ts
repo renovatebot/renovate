@@ -49,9 +49,7 @@ describe('modules/manager/composer/range', () => {
 
   it('defaults to widen for TYPO3 extensions', () => {
     const config: RangeConfig = {
-      managerData: {
-        composerJsonType: 'typo3-cms-extension',
-      },
+      managerData: { composerJsonType: 'typo3-cms-extension' },
       rangeStrategy: 'auto',
       depType: 'require',
     };

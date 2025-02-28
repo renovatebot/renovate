@@ -21,9 +21,7 @@ describe('modules/manager/helmfile/extract', () => {
         `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toBeNull();
     });
@@ -36,9 +34,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toBeNull();
     });
@@ -53,9 +49,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toBeNull();
     });
@@ -72,9 +66,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -96,21 +88,13 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchSnapshot({
         datasource: 'helm',
         deps: [
-          {
-            currentValue: '1.0.0',
-            skipReason: 'unsupported-chart-type',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-          },
+          { currentValue: '1.0.0', skipReason: 'unsupported-chart-type' },
+          { currentValue: '1.0.0', depName: 'example' },
         ],
       });
     });
@@ -127,9 +111,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -148,9 +130,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -172,9 +152,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -192,9 +170,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
@@ -206,11 +182,7 @@ describe('modules/manager/helmfile/extract', () => {
       const result = await extractPackageFile(
         Fixtures.get('multidoc.yaml'),
         fileName,
-        {
-          registryAliases: {
-            stable: 'https://charts.helm.sh/stable',
-          },
-        },
+        { registryAliases: { stable: 'https://charts.helm.sh/stable' } },
       );
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -258,21 +230,13 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-          },
+          { currentValue: '1.0.0', depName: 'example' },
+          { currentValue: '1.0.0', depName: 'example' },
         ],
       });
     });
@@ -295,20 +259,13 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
-          {
-            skipReason: 'invalid-version',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-          },
+          { skipReason: 'invalid-version' },
+          { currentValue: '1.0.0', depName: 'example' },
         ],
       });
     });
@@ -335,9 +292,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -403,9 +358,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -426,27 +379,14 @@ describe('modules/manager/helmfile/extract', () => {
       const result = await extractPackageFile(
         Fixtures.get('go-template.yaml'),
         filename,
-        {
-          registryAliases: {
-            stable: 'https://charts.helm.sh/stable',
-          },
-        },
+        { registryAliases: { stable: 'https://charts.helm.sh/stable' } },
       );
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
-          {
-            depName: '',
-            skipReason: 'local-chart',
-          },
-          {
-            depName: '',
-            skipReason: 'local-chart',
-          },
-          {
-            depName: '',
-            skipReason: 'local-chart',
-          },
+          { depName: '', skipReason: 'local-chart' },
+          { depName: '', skipReason: 'local-chart' },
+          { depName: '', skipReason: 'local-chart' },
           {
             depName: 'ingress-nginx',
             currentValue: '3.37.0',
@@ -487,19 +427,12 @@ describe('modules/manager/helmfile/extract', () => {
       const result = await extractPackageFile(
         Fixtures.get('uses-kustomization.yaml'),
         `${parentDir}/helmfile.yaml`, // In subdir
-        {
-          registryAliases: {
-            stable: 'https://charts.helm.sh/stable',
-          },
-        },
+        { registryAliases: { stable: 'https://charts.helm.sh/stable' } },
       );
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
-          {
-            depName: 'my-chart',
-            skipReason: 'local-chart',
-          },
+          { depName: 'my-chart', skipReason: 'local-chart' },
           {
             depName: 'memcached',
             currentValue: '6.0.0',
@@ -519,9 +452,7 @@ describe('modules/manager/helmfile/extract', () => {
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
-        registryAliases: {
-          stable: 'https://charts.helm.sh/stable',
-        },
+        registryAliases: { stable: 'https://charts.helm.sh/stable' },
       });
       expect(result).toMatchObject({
         datasource: 'helm',

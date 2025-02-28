@@ -183,14 +183,9 @@ function collectDeps(
   key: string,
   registryUrls: string[],
   vars: ExtractedVariables,
-  options: CollectDepsOptions = {
-    nested: true,
-  },
+  options: CollectDepsOptions = { nested: true },
 ): PackageDependency[] {
-  const ctx = {
-    depType: options.depType ?? key,
-    registryUrls,
-  };
+  const ctx = { depType: options.depType ?? key, registryUrls };
   // A vector like [["dep-1" "1.0.0"] ["dep-2" "0.0.0"]] is nested
   // A vector like ["dep-1" "1.0.0"] is not
   const dimensions = options.nested ? 2 : 1;

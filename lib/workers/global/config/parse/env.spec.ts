@@ -346,48 +346,34 @@ describe('workers/global/config/parse/env', () => {
 
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
-      const option: ParseConfigOptions = {
-        name: 'foo',
-        env: false,
-      };
+      const option: ParseConfigOptions = { name: 'foo', env: false };
       expect(env.getEnvName(option)).toBe('');
     });
 
     it('returns existing env', () => {
-      const option: ParseConfigOptions = {
-        name: 'foo',
-        env: 'FOO',
-      };
+      const option: ParseConfigOptions = { name: 'foo', env: 'FOO' };
       expect(env.getEnvName(option)).toBe('FOO');
     });
 
     it('generates RENOVATE_ env', () => {
-      const option: ParseConfigOptions = {
-        name: 'oneTwoThree',
-      };
+      const option: ParseConfigOptions = { name: 'oneTwoThree' };
       expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
 
     it('dryRun boolean true', async () => {
-      const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_DRY_RUN: 'true',
-      };
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_DRY_RUN: 'true' };
       const config = await env.getConfig(envParam);
       expect(config.dryRun).toBe('full');
     });
 
     it('dryRun boolean false', async () => {
-      const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_DRY_RUN: 'false',
-      };
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_DRY_RUN: 'false' };
       const config = await env.getConfig(envParam);
       expect(config.dryRun).toBeUndefined();
     });
 
     it('dryRun null', async () => {
-      const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_DRY_RUN: 'null',
-      };
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_DRY_RUN: 'null' };
       const config = await env.getConfig(envParam);
       expect(config.dryRun).toBeUndefined();
     });
@@ -409,17 +395,13 @@ describe('workers/global/config/parse/env', () => {
     });
 
     it('platformCommit boolean true', async () => {
-      const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM_COMMIT: 'true',
-      };
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_PLATFORM_COMMIT: 'true' };
       const config = await env.getConfig(envParam);
       expect(config.platformCommit).toBe('enabled');
     });
 
     it('platformCommit boolean false', async () => {
-      const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_PLATFORM_COMMIT: 'false',
-      };
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_PLATFORM_COMMIT: 'false' };
       const config = await env.getConfig(envParam);
       expect(config.platformCommit).toBe('disabled');
     });

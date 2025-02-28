@@ -8,9 +8,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     resetCache();
   });
 
-  const http = new Http('test', {
-    cacheProvider: repoCacheProvider,
-  });
+  const http = new Http('test', { cacheProvider: repoCacheProvider });
 
   it('reuses data with etag', async () => {
     const scope = httpMock.scope('https://example.com');
@@ -73,10 +71,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
 
     scope.get('/foo/bar').reply(304);
     const res2 = await http.getJsonUnchecked('https://example.com/foo/bar');
-    expect(res2).toMatchObject({
-      statusCode: 304,
-      authorization: false,
-    });
+    expect(res2).toMatchObject({ statusCode: 304, authorization: false });
   });
 
   it('bypasses for statuses other than 200 and 304', async () => {
@@ -85,10 +80,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
 
     const res = await http.getJsonUnchecked('https://example.com/foo/bar');
 
-    expect(res).toMatchObject({
-      statusCode: 203,
-      authorization: false,
-    });
+    expect(res).toMatchObject({ statusCode: 203, authorization: false });
   });
 
   it('supports authorization', async () => {

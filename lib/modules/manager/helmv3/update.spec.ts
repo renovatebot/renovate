@@ -3,11 +3,7 @@ import * as helmv3Updater from '.';
 
 describe('modules/manager/helmv3/update', () => {
   describe('.bumpPackageVersion()', () => {
-    const content = dump({
-      apiVersion: 'v2',
-      name: 'test',
-      version: '0.0.2',
-    });
+    const content = dump({ apiVersion: 'v2', name: 'test', version: '0.0.2' });
 
     it('increments', () => {
       const { bumpedContent } = helmv3Updater.bumpPackageVersion(

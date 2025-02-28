@@ -93,10 +93,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
-        toolName: 'node',
-        constraint: '16.15.0',
-      });
+      ).toEqual({ toolName: 'node', constraint: '16.15.0' });
     });
 
     it('returns getNodeConstraint', async () => {
@@ -107,10 +104,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
-        toolName: 'node',
-        constraint: '^12.16.0',
-      });
+      ).toEqual({ toolName: 'node', constraint: '^12.16.0' });
     });
   });
 });

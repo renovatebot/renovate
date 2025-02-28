@@ -37,11 +37,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
       const res = getExtraDeps(goModBefore, goModAfter, excludeDeps);
 
       expect(res).toEqual([
-        {
-          depName: 'go',
-          currentValue: '1.22.0',
-          newValue: '1.22.2',
-        },
+        { depName: 'go', currentValue: '1.22.0', newValue: '1.22.2' },
         {
           depName: 'github.com/bar/bar',
           currentValue: 'v2.0.0',

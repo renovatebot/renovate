@@ -141,10 +141,7 @@ export async function getUpdatedPackageFiles(
         { packageFile, depName },
         'Rebasing branch after file not found',
       );
-      return getUpdatedPackageFiles({
-        ...config,
-        reuseExistingBranch: false,
-      });
+      return getUpdatedPackageFiles({ ...config, reuseExistingBranch: false });
     }
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
@@ -397,9 +394,7 @@ export async function getUpdatedPackageFiles(
   }
   if (!reuseExistingBranch) {
     const lockFileMaintenancePackageFiles: FilePath[] =
-      lockFileMaintenanceFiles.map((name) => ({
-        path: name,
-      }));
+      lockFileMaintenanceFiles.map((name) => ({ path: name }));
     // Only perform lock file maintenance if it's a fresh commit
     if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
       logger.debug('updateArtifacts for lockFileMaintenanceFiles');

@@ -46,11 +46,7 @@ export function findDepConstraints(
             // Workaround for old versions of npm which wrote the exact version in requires instead of the constraint
             requires[depName] = newVersion;
           }
-          parents.push({
-            parentDepName,
-            parentVersion: version,
-            constraint,
-          });
+          parents.push({ parentDepName, parentVersion: version, constraint });
         }
       } else {
         logger.warn(

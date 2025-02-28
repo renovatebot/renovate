@@ -143,9 +143,7 @@ const SingleVersionOverrideToPackageDep = RuleFragmentSchema.extend({
 
 const UnsupportedOverrideToPackageDep = RuleFragmentSchema.extend({
   rule: z.enum(['archive_override', 'local_path_override']),
-  children: z.object({
-    module_name: StringFragmentSchema,
-  }),
+  children: z.object({ module_name: StringFragmentSchema }),
 }).transform(
   ({ rule, children: { module_name: moduleName } }): OverridePackageDep => {
     let bazelDepSkipReason: SkipReason = 'unsupported';

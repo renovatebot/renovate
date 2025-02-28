@@ -16,23 +16,14 @@ describe('modules/datasource/npm/index', () => {
     setNpmrc();
     npmResponse = {
       name: 'foobar',
-      versions: {
-        '0.0.1': {
-          foo: 1,
-        },
-        '0.0.2': {
-          foo: 2,
-        },
-      },
+      versions: { '0.0.1': { foo: 1 }, '0.0.2': { foo: 2 } },
       repository: {
         type: 'git',
         url: 'git://github.com/renovateapp/dummy.git',
         directory: 'src/a',
       },
       homepage: 'https://github.com/renovateapp/dummy',
-      'dist-tags': {
-        latest: '0.0.1',
-      },
+      'dist-tags': { latest: '0.0.1' },
       time: {
         '0.0.1': '2018-05-06T07:21:53+02:00',
         '0.0.2': '2018-05-07T07:21:53+02:00',
@@ -64,21 +55,10 @@ describe('modules/datasource/npm/index', () => {
   it('should parse repo url', async () => {
     const pkg = {
       name: 'foobar',
-      versions: {
-        '0.0.1': {
-          foo: 1,
-        },
-      },
-      repository: {
-        type: 'git',
-        url: 'git:github.com/renovateapp/dummy',
-      },
-      'dist-tags': {
-        latest: '0.0.1',
-      },
-      time: {
-        '0.0.1': '2018-05-06T07:21:53+02:00',
-      },
+      versions: { '0.0.1': { foo: 1 } },
+      repository: { type: 'git', url: 'git:github.com/renovateapp/dummy' },
+      'dist-tags': { latest: '0.0.1' },
+      time: { '0.0.1': '2018-05-06T07:21:53+02:00' },
     };
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
@@ -89,17 +69,9 @@ describe('modules/datasource/npm/index', () => {
   it('should parse repo url (string)', async () => {
     const pkg = {
       name: 'foobar',
-      versions: {
-        '0.0.1': {
-          repository: 'git:github.com/renovateapp/dummy',
-        },
-      },
-      'dist-tags': {
-        latest: '0.0.1',
-      },
-      time: {
-        '0.0.1': '2018-05-06T07:21:53+02:00',
-      },
+      versions: { '0.0.1': { repository: 'git:github.com/renovateapp/dummy' } },
+      'dist-tags': { latest: '0.0.1' },
+      time: { '0.0.1': '2018-05-06T07:21:53+02:00' },
     };
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
@@ -111,21 +83,14 @@ describe('modules/datasource/npm/index', () => {
     const deprecatedPackage = {
       name: 'foobar',
       versions: {
-        '0.0.1': {
-          foo: 1,
-        },
-        '0.0.2': {
-          foo: 2,
-          deprecated: 'This is deprecated',
-        },
+        '0.0.1': { foo: 1 },
+        '0.0.2': { foo: 2, deprecated: 'This is deprecated' },
       },
       repository: {
         type: 'git',
         url: 'git://github.com/renovateapp/dummy.git',
       },
-      'dist-tags': {
-        latest: '0.0.2',
-      },
+      'dist-tags': { latest: '0.0.2' },
       time: {
         '0.0.1': '2018-05-06T07:21:53+02:00',
         '0.0.2': '2018-05-07T07:21:53+02:00',
@@ -212,9 +177,7 @@ describe('modules/datasource/npm/index', () => {
 
   it('should not send an authorization header if public package', async () => {
     httpMock
-      .scope('https://registry.npmjs.org', {
-        badheaders: ['authorization'],
-      })
+      .scope('https://registry.npmjs.org', { badheaders: ['authorization'] })
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
@@ -267,9 +230,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock
       .scope(
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
-        {
-          reqheaders: { authorization: 'Bearer abc' },
-        },
+        { reqheaders: { authorization: 'Bearer abc' } },
       )
       .get('/foobar')
       .reply(200, npmResponse);

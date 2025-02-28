@@ -11,9 +11,7 @@ vi.mock('../../../util/exec/env');
 vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 
-const globalConfig: RepoGlobalConfig = {
-  localDir: '',
-};
+const globalConfig: RepoGlobalConfig = { localDir: '' };
 
 const devboxJson = codeBlock`
   {
@@ -95,9 +93,7 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       const execSnapshots = mockExecAll();
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: ['devbox.lock'],
-        }),
+        partial<StatusResult>({ modified: ['devbox.lock'] }),
       );
       const oldLockFileContent = Buffer.from('old devbox.lock');
       const newLockFileContent = Buffer.from('New devbox.lock');
@@ -108,9 +104,7 @@ describe('modules/manager/devbox/artifacts', () => {
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
-          config: {
-            isLockFileMaintenance: true,
-          },
+          config: { isLockFileMaintenance: true },
         }),
       ).toEqual([
         {
@@ -139,9 +133,7 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       mockExecAll();
       expect(
@@ -158,9 +150,7 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       mockExecAll();
       const oldLockFileContent = Buffer.from('Old devbox.lock');
@@ -179,9 +169,7 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(null);
@@ -199,9 +187,7 @@ describe('modules/manager/devbox/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({
-          modified: [],
-        }),
+        partial<StatusResult>({ modified: [] }),
       );
       mockExecAll();
       const oldLockFileContent = Buffer.from('Old devbox.lock');

@@ -15,9 +15,7 @@ const githubApiHost = 'https://api.github.com';
 describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValue({ token: 'some-token' });
   });
 
   describe('getReleases', () => {

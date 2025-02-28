@@ -17,9 +17,7 @@ export class NugetV2Api {
     feedUrl: string,
     pkgName: string,
   ): Promise<ReleaseResult | null> {
-    const dep: ReleaseResult = {
-      releases: [],
-    };
+    const dep: ReleaseResult = { releases: [] };
     let pkgUrlList: string | null = `${feedUrl.replace(
       regEx(/\/+$/),
       '',

@@ -244,11 +244,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     const releasesResult = await queryReleases(config, this.http);
     const releases = releasesResult.map((item) => {
       const { version, releaseTimestamp, isStable } = item;
-      const result: Release = {
-        version,
-        gitRef: version,
-        releaseTimestamp,
-      };
+      const result: Release = { version, gitRef: version, releaseTimestamp };
       if (is.boolean(isStable)) {
         result.isStable = isStable;
       }

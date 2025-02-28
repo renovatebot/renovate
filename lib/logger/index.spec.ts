@@ -25,9 +25,7 @@ import {
 const initialContext = 'initial_context';
 
 vi.unmock('.');
-vi.mock('nanoid', () => ({
-  nanoid: () => 'initial_context',
-}));
+vi.mock('nanoid', () => ({ nanoid: () => 'initial_context' }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
@@ -215,12 +213,9 @@ describe('logger/index', () => {
   });
 
   it('should contain path or stream parameters', () => {
-    expect(() =>
-      addStream({
-        name: 'logfile',
-        level: 'error',
-      }),
-    ).toThrow("Missing 'stream' or 'path' for bunyan stream");
+    expect(() => addStream({ name: 'logfile', level: 'error' })).toThrow(
+      "Missing 'stream' or 'path' for bunyan stream",
+    );
   });
 
   it("doesn't support rotating files", () => {
@@ -246,11 +241,7 @@ describe('logger/index', () => {
       }),
     );
 
-    addStream({
-      name: 'logfile',
-      path: 'file.log',
-      level: 'error',
-    });
+    addStream({ name: 'logfile', path: 'file.log', level: 'error' });
 
     logger.error('foo');
 
@@ -269,11 +260,7 @@ describe('logger/index', () => {
       }),
     );
 
-    addStream({
-      name: 'logfile',
-      path: 'file.log',
-      level: 'error',
-    });
+    addStream({ name: 'logfile', path: 'file.log', level: 'error' });
 
     const meta: Record<string, any> = { foo: null, bar: [] };
     meta.foo = meta;
@@ -297,11 +284,7 @@ describe('logger/index', () => {
       }),
     );
 
-    addStream({
-      name: 'logfile',
-      path: 'file.log',
-      level: 'error',
-    });
+    addStream({ name: 'logfile', path: 'file.log', level: 'error' });
     add({ password: 'secret"password' });
 
     class SomeClass {
@@ -316,9 +299,7 @@ describe('logger/index', () => {
       buffer: Buffer.from('test'),
       content: 'test',
       prBody,
-      secrets: {
-        foo: 'barsecret',
-      },
+      secrets: { foo: 'barsecret' },
       someFn: () => 'secret"password',
       someObject: new SomeClass('secret"password'),
     });

@@ -306,13 +306,7 @@ export async function generateLockFile(
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.debug(
-      {
-        err,
-        type: 'yarn',
-      },
-      'lock file error',
-    );
+    logger.debug({ err, type: 'yarn' }, 'lock file error');
     const stdouterr = String(err.stdout) + String(err.stderr);
     if (
       stdouterr.includes('ENOSPC: no space left on device') ||

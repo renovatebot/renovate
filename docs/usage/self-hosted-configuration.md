@@ -73,9 +73,7 @@ If this list is empty then no tasks will be executed.
 For example:
 
 ```json
-{
-  "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
-}
+{ "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"] }
 ```
 
 This configuration option was formerly known as `allowedPostUpgradeCommands`.
@@ -88,20 +86,13 @@ Only environment variables matching the list will be accepted in the [`env`](./c
 Examples:
 
 ```json title="renovate.json"
-{
-  "env": {
-    "SOME_ENV_VARIABLE": "some_value",
-    "EXTRA_ENV_NAME": "value"
-  }
-}
+{ "env": { "SOME_ENV_VARIABLE": "some_value", "EXTRA_ENV_NAME": "value" } }
 ```
 
 The above would require `allowedEnv` to be configured similar to the following:
 
 ```js title="config.js"
-module.exports = {
-  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
-};
+module.exports = { allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'] };
 ```
 
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
@@ -130,9 +121,7 @@ Examples:
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
-      "headers": {
-        "X-Auth-Token": "secret"
-      }
+      "headers": { "X-Auth-Token": "secret" }
     }
   ]
 }
@@ -141,9 +130,7 @@ Examples:
 Or with custom `allowedHeaders`:
 
 ```js title="config.js"
-module.exports = {
-  allowedHeaders: ['custom-header'],
-};
+module.exports = { allowedHeaders: ['custom-header'] };
 ```
 
 ## autodiscover
@@ -176,9 +163,7 @@ RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 The configuration:
 
 ```json
-{
-  "autodiscoverFilter": ["my-org/*"]
-}
+{ "autodiscoverFilter": ["my-org/*"] }
 ```
 
 The search for repositories is case-insensitive.
@@ -188,9 +173,7 @@ The search for repositories is case-insensitive.
 All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
-{
-  "autodiscoverFilter": ["/project/.*/"]
-}
+{ "autodiscoverFilter": ["/project/.*/"] }
 ```
 
 You can negate the regex by putting an `!` in front.
@@ -198,9 +181,7 @@ Only use a single negation and don't mix with other filters because all filters 
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
-{
-  "autodiscoverFilter": ["!/project/.*/"]
-}
+{ "autodiscoverFilter": ["!/project/.*/"] }
 ```
 
 ## autodiscoverNamespaces
@@ -257,9 +238,7 @@ topics. Set this variable to a list of strings, all of which will be topics for 
 For example:
 
 ```json
-{
-  "autodiscoverTopics": ["managed-by-renovate"]
-}
+{ "autodiscoverTopics": ["managed-by-renovate"] }
 ```
 
 ## baseDir
@@ -270,9 +249,7 @@ You can override this default with the `baseDir` option.
 For example:
 
 ```json
-{
-  "baseDir": "/my-own-different-temporary-folder"
-}
+{ "baseDir": "/my-own-different-temporary-folder" }
 ```
 
 ## bbUseDevelopmentBranch
@@ -341,11 +318,7 @@ Utilize this key-value map to override the default package cache TTL values for 
 For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
 
 ```json
-{
-  "cacheTtlOverride": {
-    "datasource-docker-tags": 120
-  }
-}
+{ "cacheTtlOverride": { "datasource-docker-tags": 120 } }
 ```
 
 Valid codes for namespaces are as follows:
@@ -522,11 +495,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 ```json
 {
   "hostRules": [
-    {
-      "hostType": "npm",
-      "matchHost": "registry.npmjs.org",
-      "token": "abc123"
-    }
+    { "hostType": "npm", "matchHost": "registry.npmjs.org", "token": "abc123" }
   ]
 }
 ```
@@ -557,11 +526,7 @@ You can skip the host part, and use only the datasource and credentials.
 ```json
 {
   "hostRules": [
-    {
-      "hostType": "docker",
-      "username": "bot",
-      "password": "botpass123"
-    }
+    { "hostType": "docker", "username": "bot", "password": "botpass123" }
   ]
 }
 ```
@@ -619,9 +584,7 @@ Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
 ```json
-{
-  "dockerSidecarImage": "ghcr.io/your_company/sidecar"
-}
+{ "dockerSidecarImage": "ghcr.io/your_company/sidecar" }
 ```
 
 Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/containerbase/sidecar`.
@@ -635,9 +598,7 @@ Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#us
 Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 ```json title="Setting UID to 1001 and GID to 1002"
-{
-  "dockerUser": "1001:1002"
-}
+{ "dockerUser": "1001:1002" }
 ```
 
 If you use `binarySource=docker|install` read the section below.
@@ -877,9 +838,7 @@ Otherwise, it queries all the supported datasources (check default value).
 Example:
 
 ```js
-modules.exports = {
-  mergeConfidenceDatasources: ['npm'],
-};
+modules.exports = { mergeConfidenceDatasources: ['npm'] };
 ```
 
 ## mergeConfidenceEndpoint
@@ -910,9 +869,7 @@ Example:
 
 ```js
 modules.exports = {
-  migratePresets: {
-    '@company': 'local>org/renovate-config',
-  },
+  migratePresets: { '@company': 'local>org/renovate-config' },
 };
 ```
 
@@ -1296,11 +1253,7 @@ Secrets may be configured by a bot admin in `config.js`, which will then make th
 For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
-module.exports = {
-  secrets: {
-    GOOGLE_TOKEN: 'abc123',
-  },
-};
+module.exports = { secrets: { GOOGLE_TOKEN: 'abc123' } };
 ```
 
 They can also be configured per repository, e.g.
@@ -1308,12 +1261,7 @@ They can also be configured per repository, e.g.
 ```js
 module.exports = {
   repositories: [
-    {
-      repository: 'abc/def',
-      secrets: {
-        GOOGLE_TOKEN: 'abc123',
-      },
-    },
+    { repository: 'abc/def', secrets: { GOOGLE_TOKEN: 'abc123' } },
   ],
 };
 ```
@@ -1323,10 +1271,7 @@ It could then be used in a repository config or preset like so:
 ```json
 {
   "hostRules": [
-    {
-      "matchHost": "google.com",
-      "token": "{{ secrets.GOOGLE_TOKEN }}"
-    }
+    { "matchHost": "google.com", "token": "{{ secrets.GOOGLE_TOKEN }}" }
   ]
 }
 ```

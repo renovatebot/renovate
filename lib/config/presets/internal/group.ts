@@ -10,9 +10,7 @@ const staticGroups = {
     description: 'Group all updates together.',
     groupName: 'all dependencies',
     groupSlug: 'all',
-    lockFileMaintenance: {
-      enabled: false,
-    },
+    lockFileMaintenance: { enabled: false },
     packageRules: [
       {
         groupName: 'all dependencies',
@@ -66,19 +64,13 @@ const staticGroups = {
   codemirror: {
     description: 'Group CodeMirror packages together.',
     packageRules: [
-      {
-        groupName: 'CodeMirror',
-        matchPackageNames: ['@codemirror/**'],
-      },
+      { groupName: 'CodeMirror', matchPackageNames: ['@codemirror/**'] },
     ],
   },
   definitelyTyped: {
     description: 'Group all `@types` packages together.',
     packageRules: [
-      {
-        groupName: 'definitelyTyped',
-        matchPackageNames: ['@types/**'],
-      },
+      { groupName: 'definitelyTyped', matchPackageNames: ['@types/**'] },
     ],
   },
   dotNetCore: {
@@ -103,10 +95,7 @@ const staticGroups = {
   fortawesome: {
     description: 'Group all packages by Font Awesome together.',
     packageRules: [
-      {
-        groupName: 'Font Awesome',
-        matchPackageNames: ['@fortawesome/**'],
-      },
+      { groupName: 'Font Awesome', matchPackageNames: ['@fortawesome/**'] },
     ],
   },
   fusionjs: {
@@ -154,10 +143,7 @@ const staticGroups = {
   googleapis: {
     description: 'Group `googleapis` packages together.',
     packageRules: [
-      {
-        extends: ['packages:googleapis'],
-        groupName: 'googleapis packages',
-      },
+      { extends: ['packages:googleapis'], groupName: 'googleapis packages' },
     ],
   },
   goOpenapi: {
@@ -183,10 +169,7 @@ const staticGroups = {
   hibernateCore: {
     description: 'Group Java Hibernate Core packages.',
     packageRules: [
-      {
-        groupName: 'hibernate core',
-        matchPackageNames: ['org.hibernate:**'],
-      },
+      { groupName: 'hibernate core', matchPackageNames: ['org.hibernate:**'] },
     ],
   },
   hibernateOgm: {
@@ -252,10 +235,7 @@ const staticGroups = {
   jsTest: {
     description: 'Group JS test packages together.',
     packageRules: [
-      {
-        extends: ['packages:jsTest'],
-        groupName: 'JS test packages',
-      },
+      { extends: ['packages:jsTest'], groupName: 'JS test packages' },
     ],
   },
   jsTestNonMajor: {
@@ -271,10 +251,7 @@ const staticGroups = {
   jsUnitTest: {
     description: 'Group JavaScript unit test packages together.',
     packageRules: [
-      {
-        extends: ['packages:jsUnitTest'],
-        groupName: 'JS unit test packages',
-      },
+      { extends: ['packages:jsUnitTest'], groupName: 'JS unit test packages' },
     ],
   },
   jsUnitTestNonMajor: {
@@ -340,12 +317,7 @@ const staticGroups = {
   },
   linters: {
     description: 'Group various lint packages together.',
-    packageRules: [
-      {
-        extends: ['packages:linters'],
-        groupName: 'linters',
-      },
-    ],
+    packageRules: [{ extends: ['packages:linters'], groupName: 'linters' }],
   },
   micrometer: {
     description:
@@ -391,19 +363,13 @@ const staticGroups = {
   polymer: {
     description: 'Group all `@polymer` packages together.',
     packageRules: [
-      {
-        groupName: 'polymer packages',
-        matchPackageNames: ['@polymer/**'],
-      },
+      { groupName: 'polymer packages', matchPackageNames: ['@polymer/**'] },
     ],
   },
   postcss: {
     description: 'Group PostCSS packages together.',
     packageRules: [
-      {
-        extends: ['packages:postcss'],
-        groupName: 'postcss packages',
-      },
+      { extends: ['packages:postcss'], groupName: 'postcss packages' },
     ],
   },
   pulumi: {
@@ -574,10 +540,7 @@ const staticGroups = {
   socketio: {
     description: 'Group socket.io packages.',
     packageRules: [
-      {
-        groupName: 'socket.io packages',
-        matchPackageNames: ['socket.io**'],
-      },
+      { groupName: 'socket.io packages', matchPackageNames: ['socket.io**'] },
     ],
   },
   springAmqp: {
@@ -610,10 +573,7 @@ const staticGroups = {
   springBoot: {
     description: 'Group Java Spring Boot packages.',
     packageRules: [
-      {
-        groupName: 'spring boot',
-        matchDepNames: ['org.springframework.boot'],
-      },
+      { groupName: 'spring boot', matchDepNames: ['org.springframework.boot'] },
       {
         groupName: 'spring boot',
         matchPackageNames: ['org.springframework.boot:**'],
@@ -803,12 +763,7 @@ const staticGroups = {
   },
   test: {
     description: 'Group all test packages together.',
-    packageRules: [
-      {
-        extends: ['packages:test'],
-        groupName: 'test packages',
-      },
-    ],
+    packageRules: [{ extends: ['packages:test'], groupName: 'test packages' }],
   },
   testNonMajor: {
     description: 'Group all non-major test package updates together.',
@@ -823,10 +778,7 @@ const staticGroups = {
   unitTest: {
     description: 'Group all unit test packages together.',
     packageRules: [
-      {
-        extends: ['packages:unitTest'],
-        groupName: 'unit test packages',
-      },
+      { extends: ['packages:unitTest'], groupName: 'unit test packages' },
     ],
   },
   unitTestNonMajor: {
@@ -841,12 +793,7 @@ const staticGroups = {
   },
   vite: {
     description: 'Group all Vite related packages together.',
-    packageRules: [
-      {
-        extends: ['packages:vite'],
-        groupName: 'Vite packages',
-      },
-    ],
+    packageRules: [{ extends: ['packages:vite'], groupName: 'Vite packages' }],
   },
 };
 

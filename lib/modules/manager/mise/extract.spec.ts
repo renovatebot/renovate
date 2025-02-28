@@ -39,11 +39,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '23.3',
             datasource: 'github-tags',
           },
-          {
-            depName: 'node',
-            currentValue: '16',
-            datasource: 'node-version',
-          },
+          { depName: 'node', currentValue: '16', datasource: 'node-version' },
         ],
       });
     });
@@ -55,12 +51,7 @@ describe('modules/manager/mise/extract', () => {
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'terraform',
-            currentValue: '1.8.0',
-          },
-        ],
+        deps: [{ depName: 'terraform', currentValue: '1.8.0' }],
       });
     });
 
@@ -78,11 +69,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '23.3',
             datasource: 'github-tags',
           },
-          {
-            depName: 'node',
-            currentValue: '16',
-            datasource: 'node-version',
-          },
+          { depName: 'node', currentValue: '16', datasource: 'node-version' },
         ],
       });
     });
@@ -94,12 +81,7 @@ describe('modules/manager/mise/extract', () => {
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'python',
-            currentValue: '3.11',
-          },
-        ],
+        deps: [{ depName: 'python', currentValue: '3.11' }],
       });
     });
 
@@ -110,12 +92,7 @@ describe('modules/manager/mise/extract', () => {
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'fake-tool',
-            skipReason: 'unsupported-datasource',
-          },
-        ],
+        deps: [{ depName: 'fake-tool', skipReason: 'unsupported-datasource' }],
       });
     });
 
@@ -126,12 +103,7 @@ describe('modules/manager/mise/extract', () => {
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'python',
-            skipReason: 'unspecified-version',
-          },
-        ],
+        deps: [{ depName: 'python', skipReason: 'unspecified-version' }],
       });
     });
 
@@ -142,12 +114,7 @@ describe('modules/manager/mise/extract', () => {
     `;
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'python',
-            skipReason: 'unspecified-version',
-          },
-        ],
+        deps: [{ depName: 'python', skipReason: 'unspecified-version' }],
       });
     });
 
@@ -160,14 +127,8 @@ describe('modules/manager/mise/extract', () => {
       const result = extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
         deps: [
-          {
-            depName: 'java',
-            currentValue: '21.0.2',
-          },
-          {
-            depName: 'erlang',
-            skipReason: 'unspecified-version',
-          },
+          { depName: 'java', currentValue: '21.0.2' },
+          { depName: 'erlang', skipReason: 'unspecified-version' },
         ],
       });
     });
@@ -186,11 +147,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '23.3',
             datasource: 'github-tags',
           },
-          {
-            depName: 'node',
-            currentValue: '16',
-            datasource: 'node-version',
-          },
+          { depName: 'node', currentValue: '16', datasource: 'node-version' },
         ],
       });
     });
@@ -216,14 +173,8 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '23.3',
             datasource: 'github-tags',
           },
-          {
-            depName: 'terraform',
-            currentValue: '1.8.0',
-          },
-          {
-            depName: 'fake-tool',
-            skipReason: 'unsupported-datasource',
-          },
+          { depName: 'terraform', currentValue: '1.8.0' },
+          { depName: 'fake-tool', skipReason: 'unsupported-datasource' },
         ],
       });
     });

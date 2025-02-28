@@ -184,9 +184,7 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
-        {
-          depName: 'inline_gem',
-        },
+        { depName: 'inline_gem' },
         {
           depName: 'inline_source_gem',
           registryUrls: ['https://gems.foo.com'],
@@ -266,13 +264,8 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
-        {
-          depName: 'gem_without_values',
-        },
-        {
-          depName: 'gem_with_one_value',
-          currentValue: '">= 3.0.5"',
-        },
+        { depName: 'gem_without_values' },
+        { depName: 'gem_with_one_value', currentValue: '">= 3.0.5"' },
         {
           depName: 'gem_with_multiple_values',
           currentValue: '">= 3.0.5", "< 3.2"',
@@ -291,13 +284,8 @@ describe('modules/manager/bundler/extract', () => {
     const res = await extractPackageFile(pathGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
-        {
-          depName: 'foo',
-          skipReason: 'internal-package',
-        },
-        {
-          depName: 'bar',
-        },
+        { depName: 'foo', skipReason: 'internal-package' },
+        { depName: 'bar' },
       ],
     });
   });

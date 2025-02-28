@@ -68,9 +68,7 @@ export function init(): void {
   }
 
   const contextManager = new AsyncLocalStorageContextManager();
-  traceProvider.register({
-    contextManager,
-  });
+  traceProvider.register({ contextManager });
 
   instrumentations = [
     new HttpInstrumentation({
@@ -90,9 +88,7 @@ export function init(): void {
     }),
     new BunyanInstrumentation(),
   ];
-  registerInstrumentations({
-    instrumentations,
-  });
+  registerInstrumentations({ instrumentations });
 }
 
 /* v8 ignore start: not easily testable */

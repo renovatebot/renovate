@@ -10,12 +10,7 @@ It needs to be compatible with any version in the `3.x.x` range but _not_ with v
 For example:
 
 ```json
-{
-  "sdk": {
-    "version": "6.0.300",
-    "rollForward": "major"
-  }
-}
+{ "sdk": { "version": "6.0.300", "rollForward": "major" } }
 ```
 
 The roll-forward policy to use when selecting an SDK version, either as a fallback when a specific SDK version is missing or as a directive to use a higher version. In this case with `major` it means that select the latest version with the same major.

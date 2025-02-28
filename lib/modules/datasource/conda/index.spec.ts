@@ -12,22 +12,14 @@ describe('modules/datasource/conda/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock.scope(defaultRegistryUrl).get(depUrl).replyWithError('error');
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(defaultRegistryUrl).get(depUrl).reply(404);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -35,22 +27,14 @@ describe('modules/datasource/conda/index', () => {
         .scope(defaultRegistryUrl)
         .get(depUrl)
         .reply(200, { versions: [] });
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).toBeNull();
+      expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
     it('throws for 5xx', async () => {
       httpMock.scope(defaultRegistryUrl).get(depUrl).reply(502);
-      await expect(
-        getPkgReleases({
-          datasource,
-          packageName,
-        }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      await expect(getPkgReleases({ datasource, packageName })).rejects.toThrow(
+        EXTERNAL_HOST_ERROR,
+      );
     });
 
     it('processes real data', async () => {
@@ -58,10 +42,7 @@ describe('modules/datasource/conda/index', () => {
         .scope(defaultRegistryUrl)
         .get(depUrl)
         .reply(200, Fixtures.get('pytest.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ datasource, packageName });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
     });
@@ -96,11 +77,7 @@ describe('modules/datasource/conda/index', () => {
           'https://api.anaconda.org/package/nvidia',
         ],
       };
-      const res = await getPkgReleases({
-        ...config,
-        datasource,
-        packageName,
-      });
+      const res = await getPkgReleases({ ...config, datasource, packageName });
       expect(res).toMatchObject({
         homepage: 'http://anaconda.org/anaconda/pytest',
         registryUrl: 'https://api.anaconda.org/package/conda-forge',

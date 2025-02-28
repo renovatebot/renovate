@@ -46,17 +46,11 @@ export class ArtifactoryDatasource extends Datasource {
 
     const url = joinUrlParts(registryUrl, packageName);
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
     try {
       const response = await this.http.get(url);
       const body = parse(response.body, {
-        blockTextElements: {
-          script: true,
-          noscript: true,
-          style: true,
-        },
+        blockTextElements: { script: true, noscript: true, style: true },
       });
       const nodes = body.querySelectorAll('a');
 
@@ -76,10 +70,7 @@ export class ArtifactoryDatasource extends Datasource {
               node.nextSibling?.text?.trimStart()?.split(regEx(/\s{2,}/))?.[0],
             );
 
-            const thisRelease: Release = {
-              version,
-              releaseTimestamp,
-            };
+            const thisRelease: Release = { version, releaseTimestamp };
 
             result.releases.push(thisRelease);
           },

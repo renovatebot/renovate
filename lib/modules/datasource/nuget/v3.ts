@@ -192,9 +192,7 @@ export class NugetV3Api {
       nupkgUrl ??= massageUrl(last.packageContent);
     }
 
-    const dep: ReleaseResult = {
-      releases,
-    };
+    const dep: ReleaseResult = { releases };
 
     try {
       const packageBaseAddress = await this.getResourceUrl(

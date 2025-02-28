@@ -410,12 +410,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         config,
       }),
     ).toEqual([
-      {
-        artifactError: {
-          lockFile: 'helmfile.lock',
-          stderr: errorMessage,
-        },
-      },
+      { artifactError: { lockFile: 'helmfile.lock', stderr: errorMessage } },
     ]);
   });
 

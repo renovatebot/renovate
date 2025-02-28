@@ -22,11 +22,7 @@ export function parseFileConfig(
         '`',
         "'",
       )}\``;
-      return {
-        success: false,
-        validationError,
-        validationMessage,
-      };
+      return { success: false, validationError, validationMessage };
     }
   } else {
     let allowDuplicateKeys = true;
@@ -37,11 +33,7 @@ export function parseFileConfig(
     if (jsonValidationError) {
       const validationError = 'Invalid JSON (parsing failed)';
       const validationMessage = jsonValidationError;
-      return {
-        success: false,
-        validationError,
-        validationMessage,
-      };
+      return { success: false, validationError, validationMessage };
     }
     allowDuplicateKeys = false;
     jsonValidationError = jsonValidator.validate(
@@ -51,11 +43,7 @@ export function parseFileConfig(
     if (jsonValidationError) {
       const validationError = 'Duplicate keys in JSON';
       const validationMessage = JSON.stringify(jsonValidationError);
-      return {
-        success: false,
-        validationError,
-        validationMessage,
-      };
+      return { success: false, validationError, validationMessage };
     }
     try {
       return {

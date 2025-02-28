@@ -13,9 +13,7 @@ export async function tryDecryptKbPgp(
   try {
     const pk = await new Promise<kbpgp.KeyManager>((resolve, reject) => {
       kbpgp.KeyManager.import_from_armored_pgp(
-        {
-          armored: privateKey.replace(regEx(/\n[ \t]+/g), '\n'),
-        },
+        { armored: privateKey.replace(regEx(/\n[ \t]+/g), '\n') },
         (err: Error, pk) => {
           if (err) {
             reject(err);
@@ -41,10 +39,7 @@ export async function tryDecryptKbPgp(
 
     const data = await new Promise<kbpgp.Literal>((resolve, reject) => {
       kbpgp.unbox(
-        {
-          keyfetch: ring,
-          armored: armoredMessage,
-        },
+        { keyfetch: ring, armored: armoredMessage },
         (err: Error, literals: any) => {
           if (err) {
             reject(err);

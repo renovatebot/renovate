@@ -4,10 +4,7 @@ import { LooseArray } from '../../../util/schema-utils';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
-export const DenoApiTag = z.object({
-  kind: z.string(),
-  value: z.string(),
-});
+export const DenoApiTag = z.object({ kind: z.string(), value: z.string() });
 
 export const DenoAPIModuleResponse = z.object({
   tags: LooseArray(DenoApiTag)
@@ -42,11 +39,6 @@ export const DenoAPIModuleVersionResponse = z
       if (type === 'github') {
         sourceUrl = getGithubSourceUrl(repository);
       }
-      return {
-        version,
-        gitRef,
-        releaseTimestamp,
-        sourceUrl,
-      };
+      return { version, gitRef, releaseTimestamp, sourceUrl };
     },
   );

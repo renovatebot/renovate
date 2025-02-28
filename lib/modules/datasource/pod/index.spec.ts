@@ -158,11 +158,7 @@ describe('modules/datasource/pod/index', () => {
         }),
       ).toEqual({
         registryUrl: 'https://github.com/CocoaPods/Specs',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -177,11 +173,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.com/Artsy/Specs',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -198,11 +190,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.com/Artsy/Specs',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -221,11 +209,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.com/Artsy/Specs',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -246,11 +230,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.com/Artsy/Specs',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -265,11 +245,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.foo.com/foo/bar',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -286,11 +262,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.foo.com/foo/bar',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -309,11 +281,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.foo.com/foo/bar',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
 
@@ -334,11 +302,7 @@ describe('modules/datasource/pod/index', () => {
       });
       expect(res).toEqual({
         registryUrl: 'https://github.foo.com/foo/bar',
-        releases: [
-          {
-            version: '1.2.3',
-          },
-        ],
+        releases: [{ version: '1.2.3' }],
       });
     });
   });

@@ -20,9 +20,7 @@ const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
 export function mergeBodyTransformer(
   mergeStrategy: MergeStrategy | undefined,
 ): MergeRequestBody {
-  const body: MergeRequestBody = {
-    close_source_branch: true,
-  };
+  const body: MergeRequestBody = { close_source_branch: true };
 
   // The `auto` strategy will use the strategy configured inside Bitbucket.
   if (mergeStrategy && mergeStrategy !== 'auto') {

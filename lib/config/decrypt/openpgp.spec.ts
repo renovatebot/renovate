@@ -54,9 +54,7 @@ describe('config/decrypt/openpgp', () => {
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         CONFIG_VALIDATION,
       );
-      config.encrypted = {
-        token: 'too-short',
-      };
+      config.encrypted = { token: 'too-short' };
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         CONFIG_VALIDATION,
       );

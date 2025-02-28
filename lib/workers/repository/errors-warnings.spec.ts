@@ -19,10 +19,7 @@ describe('workers/repository/errors-warnings', () => {
 
     it('returns warning text', () => {
       config.warnings = [
-        {
-          topic: 'foo',
-          message: 'Failed to look up dependency',
-        },
+        { topic: 'foo', message: 'Failed to look up dependency' },
       ];
       const res = getWarnings(config);
       expect(res).toMatchInlineSnapshot(`
@@ -53,30 +50,17 @@ describe('workers/repository/errors-warnings', () => {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }, {}],
           },
           {
             packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }],
           },
         ],
         dockerfile: [
           {
             packageFile: 'Dockerfile',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 2', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 2', topic: '' }] }],
           },
         ],
       };
@@ -101,30 +85,17 @@ describe('workers/repository/errors-warnings', () => {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }, {}],
           },
           {
             packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }],
           },
         ],
         dockerfile: [
           {
             packageFile: 'Dockerfile',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 2', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 2', topic: '' }] }],
           },
         ],
       };
@@ -166,30 +137,17 @@ describe('workers/repository/errors-warnings', () => {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'dependency-1', topic: '' }],
-              },
-              {},
-            ],
+            deps: [{ warnings: [{ message: 'dependency-1', topic: '' }] }, {}],
           },
           {
             packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'dependency-1', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'dependency-1', topic: '' }] }],
           },
         ],
         dockerfile: [
           {
             packageFile: 'Dockerfile',
-            deps: [
-              {
-                warnings: [{ message: 'dependency-2', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'dependency-2', topic: '' }] }],
           },
         ],
       };
@@ -235,12 +193,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns error text', () => {
-      config.errors = [
-        {
-          topic: 'renovate.json',
-          message: 'Failed to parse',
-        },
-      ];
+      config.errors = [{ topic: 'renovate.json', message: 'Failed to parse' }];
       const res = getErrors(config);
       expect(res).toMatchInlineSnapshot(`
         "
@@ -269,36 +222,21 @@ describe('workers/repository/errors-warnings', () => {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-              {},
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }, {}],
           },
           partial<PackageFile>(), // for coverage
           {
             packageFile: 'backend/package.json',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 1', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 1', topic: '' }] }],
           },
         ],
         dockerfile: [
           {
             packageFile: 'Dockerfile',
-            deps: [
-              {
-                warnings: [{ message: 'Warning 2', topic: '' }],
-              },
-            ],
+            deps: [{ warnings: [{ message: 'Warning 2', topic: '' }] }],
           },
           // coverage
-          partial<PackageFile>({
-            packageFile: 'Dockerfile',
-          }),
+          partial<PackageFile>({ packageFile: 'Dockerfile' }),
         ],
       };
       const res = getDepWarningsOnboardingPR(packageFiles, config);

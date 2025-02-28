@@ -6,14 +6,8 @@
       "type": "object",
       "properties": {
         "description": { "type": "string" },
-        "extends": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "ignoreDeps": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
+        "extends": { "type": "array", "items": { "type": "string" } },
+        "ignoreDeps": { "type": "array", "items": { "type": "string" } }
       },
       "required": ["description", "extends"]
     }

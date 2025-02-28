@@ -68,10 +68,7 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
     .filter((dependency) => !dependency.repository.startsWith('file:')) // skip repositories which are locally referenced
     .map((dependency) => {
       // remove additional keys to prevent interference at deduplication
-      return {
-        name: dependency.name,
-        repository: dependency.repository,
-      };
+      return { name: dependency.name, repository: dependency.repository };
     });
   const dedup = new Set();
   return repositoryList.filter((el) => {
@@ -92,10 +89,7 @@ export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
   return Object.entries(registryAliases).map(([alias, url]) => {
-    return {
-      name: alias,
-      repository: url,
-    };
+    return { name: alias, repository: url };
   });
 }
 

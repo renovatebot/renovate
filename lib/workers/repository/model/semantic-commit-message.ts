@@ -43,11 +43,7 @@ export class SemanticCommitMessage extends CommitMessage {
   override toJSON(): SemanticCommitMessageJSON {
     const json = super.toJSON();
 
-    return {
-      ...json,
-      scope: this._scope,
-      type: this._type,
-    };
+    return { ...json, scope: this._scope, type: this._type };
   }
 
   set scope(value: string) {

@@ -5,10 +5,7 @@ export const presets: Record<string, Preset> = {
   approveMajorUpdates: {
     description: 'Require Dependency Dashboard approval for `major` updates.',
     packageRules: [
-      {
-        dependencyDashboardApproval: true,
-        matchUpdateTypes: ['major'],
-      },
+      { dependencyDashboardApproval: true, matchUpdateTypes: ['major'] },
     ],
   },
   assignAndReview: {
@@ -31,9 +28,7 @@ export const presets: Record<string, Preset> = {
   },
   automergeDigest: {
     description: 'Automerge `digest` upgrades if they pass tests.',
-    digest: {
-      automerge: true,
-    },
+    digest: { automerge: true },
   },
   automergeDisabled: {
     automerge: false,
@@ -42,12 +37,7 @@ export const presets: Record<string, Preset> = {
   },
   automergeLinters: {
     description: 'Update lint packages automatically if tests pass.',
-    packageRules: [
-      {
-        automerge: true,
-        extends: ['packages:linters'],
-      },
-    ],
+    packageRules: [{ automerge: true, extends: ['packages:linters'] }],
   },
   automergeMajor: {
     automerge: true,
@@ -56,30 +46,16 @@ export const presets: Record<string, Preset> = {
   },
   automergeMinor: {
     description: 'Automerge `patch` and `minor` upgrades if they pass tests.',
-    lockFileMaintenance: {
-      automerge: true,
-    },
-    minor: {
-      automerge: true,
-    },
-    patch: {
-      automerge: true,
-    },
-    pin: {
-      automerge: true,
-    },
+    lockFileMaintenance: { automerge: true },
+    minor: { automerge: true },
+    patch: { automerge: true },
+    pin: { automerge: true },
   },
   automergePatch: {
     description: 'Automerge `patch` upgrades if they pass tests.',
-    lockFileMaintenance: {
-      automerge: true,
-    },
-    patch: {
-      automerge: true,
-    },
-    pin: {
-      automerge: true,
-    },
+    lockFileMaintenance: { automerge: true },
+    patch: { automerge: true },
+    pin: { automerge: true },
     separateMinorPatch: true,
   },
   automergePr: {
@@ -103,21 +79,11 @@ export const presets: Record<string, Preset> = {
   },
   automergeTesters: {
     description: 'Update testing packages automatically if tests pass.',
-    packageRules: [
-      {
-        automerge: true,
-        extends: ['packages:test'],
-      },
-    ],
+    packageRules: [{ automerge: true, extends: ['packages:test'] }],
   },
   automergeTypes: {
     description: 'Update `@types/*` packages automatically if tests pass.',
-    packageRules: [
-      {
-        automerge: true,
-        matchPackageNames: ['@types/**'],
-      },
-    ],
+    packageRules: [{ automerge: true, matchPackageNames: ['@types/**'] }],
   },
   combinePatchMinorReleases: {
     description:
@@ -151,27 +117,15 @@ export const presets: Record<string, Preset> = {
   },
   disableDigestUpdates: {
     description: 'Disable `digest` and Git hash updates.',
-    digest: {
-      enabled: false,
-    },
+    digest: { enabled: false },
   },
   disableDomain: {
     description: 'Disable requests to a particular domain.',
-    hostRules: [
-      {
-        enabled: false,
-        matchHost: '{{arg0}}',
-      },
-    ],
+    hostRules: [{ enabled: false, matchHost: '{{arg0}}' }],
   },
   disableHost: {
     description: 'Disable requests to a particular host.',
-    hostRules: [
-      {
-        enabled: false,
-        matchHost: 'https://{{arg0}}',
-      },
-    ],
+    hostRules: [{ enabled: false, matchHost: 'https://{{arg0}}' }],
   },
   disableLockFiles: {
     description: 'Disable lock file updates.',
@@ -179,18 +133,11 @@ export const presets: Record<string, Preset> = {
   },
   disableMajorUpdates: {
     description: 'Disable `major` updates.',
-    major: {
-      enabled: false,
-    },
+    major: { enabled: false },
   },
   disablePeerDependencies: {
     description: 'Do not update `peerDependencies` versions/ranges.',
-    packageRules: [
-      {
-        enabled: false,
-        matchDepTypes: ['peerDependencies'],
-      },
-    ],
+    packageRules: [{ enabled: false, matchDepTypes: ['peerDependencies'] }],
   },
   disablePrControls: {
     description: 'Remove the checkbox controls from PRs.',
@@ -202,79 +149,45 @@ export const presets: Record<string, Preset> = {
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
   },
-  disableRenovate: {
-    description: 'Disable Renovate.',
-    enabled: false,
-  },
+  disableRenovate: { description: 'Disable Renovate.', enabled: false },
   disableVulnerabilityAlerts: {
     description: 'Disable vulnerability alerts completely.',
-    vulnerabilityAlerts: {
-      enabled: false,
-    },
+    vulnerabilityAlerts: { enabled: false },
   },
   docker: {
     description: 'Keep Dockerfile `FROM` sources updated.',
-    'docker-compose': {
-      enabled: true,
-    },
-    dockerfile: {
-      enabled: true,
-    },
+    'docker-compose': { enabled: true },
+    dockerfile: { enabled: true },
   },
   doNotPinPackage: {
     description: 'Disable version pinning for `{{arg0}}`.',
     packageRules: [
-      {
-        matchPackageNames: ['{{arg0}}'],
-        rangeStrategy: 'replace',
-      },
+      { matchPackageNames: ['{{arg0}}'], rangeStrategy: 'replace' },
     ],
   },
   enablePreCommit: {
     description: 'Enable the pre-commit manager.',
-    'pre-commit': {
-      enabled: true,
-    },
+    'pre-commit': { enabled: true },
   },
-  enableRenovate: {
-    description: 'Enable Renovate.',
-    enabled: true,
-  },
+  enableRenovate: { description: 'Enable Renovate.', enabled: true },
   enableVulnerabilityAlerts: {
     description: 'Raise PR when vulnerability alerts are detected.',
-    vulnerabilityAlerts: {
-      enabled: true,
-    },
+    vulnerabilityAlerts: { enabled: true },
   },
   enableVulnerabilityAlertsWithLabel: {
     description:
       'Raise PR when vulnerability alerts are detected with label `{{arg0}}`.',
-    vulnerabilityAlerts: {
-      enabled: true,
-      labels: ['{{arg0}}'],
-    },
+    vulnerabilityAlerts: { enabled: true, labels: ['{{arg0}}'] },
   },
   followTag: {
     description:
       'For package `{{arg0}}`, strictly follow release tag `{{arg1}}`.',
-    packageRules: [
-      {
-        followTag: '{{arg1}}',
-        matchPackageNames: ['{{arg0}}'],
-      },
-    ],
+    packageRules: [{ followTag: '{{arg1}}', matchPackageNames: ['{{arg0}}'] }],
   },
   githubComToken: {
     description:
       'Use provided token for `github.com` lookups. Do not configure this if you are already running on `github.com`.',
-    hostRules: [
-      {
-        encrypted: {
-          token: '{{arg0}}',
-        },
-        matchHost: 'github.com',
-      },
-    ],
+    hostRules: [{ encrypted: { token: '{{arg0}}' }, matchHost: 'github.com' }],
   },
   gitSignOff: {
     commitBody: 'Signed-off-by: {{{gitAuthor}}}',
@@ -282,18 +195,11 @@ export const presets: Record<string, Preset> = {
   },
   gomod: {
     description: 'Enable Go modules support.',
-    gomod: {
-      enabled: true,
-    },
+    gomod: { enabled: true },
   },
   group: {
     description: 'Group `{{arg1}}` packages into same branch/PR.',
-    packageRules: [
-      {
-        extends: ['{{arg0}}'],
-        groupName: '{{arg1}}',
-      },
-    ],
+    packageRules: [{ extends: ['{{arg0}}'], groupName: '{{arg1}}' }],
   },
   ignoreModulesAndTests: {
     description:
@@ -339,30 +245,20 @@ export const presets: Record<string, Preset> = {
   maintainLockFilesDisabled: {
     description:
       'Update existing lock files only when `package.json` is modified.',
-    lockFileMaintenance: {
-      enabled: false,
-    },
+    lockFileMaintenance: { enabled: false },
   },
   maintainLockFilesMonthly: {
     description:
       'Run lock file maintenance (updates) on the first day of each month.',
-    lockFileMaintenance: {
-      enabled: true,
-      extends: ['schedule:monthly'],
-    },
+    lockFileMaintenance: { enabled: true, extends: ['schedule:monthly'] },
   },
   maintainLockFilesWeekly: {
     description: 'Run lock file maintenance (updates) early Monday mornings.',
-    lockFileMaintenance: {
-      enabled: true,
-      extends: ['schedule:weekly'],
-    },
+    lockFileMaintenance: { enabled: true, extends: ['schedule:weekly'] },
   },
   meteor: {
     description: 'Keep Meteor Npm.depends packages updated.',
-    meteor: {
-      enabled: true,
-    },
+    meteor: { enabled: true },
   },
   noUnscheduledUpdates: {
     description: 'Only update branches when scheduled.',
@@ -370,42 +266,26 @@ export const presets: Record<string, Preset> = {
   },
   npm: {
     description: 'Keep `package.json` npm dependencies updated.',
-    npm: {
-      enabled: true,
-    },
+    npm: { enabled: true },
   },
   pathSemanticCommitType: {
     description:
       'Use semanticCommitType `{{arg1}}` for all package files matching path `{{arg0}}`.',
     packageRules: [
-      {
-        matchFileNames: ['{{arg0}}'],
-        semanticCommitType: '{{arg1}}',
-      },
+      { matchFileNames: ['{{arg0}}'], semanticCommitType: '{{arg1}}' },
     ],
   },
   pinAllExceptPeerDependencies: {
     description: 'Pin all dependency versions except `peerDependencies`.',
     packageRules: [
-      {
-        matchPackageNames: ['*'],
-        rangeStrategy: 'pin',
-      },
-      {
-        matchDepTypes: ['engines', 'peerDependencies'],
-        rangeStrategy: 'auto',
-      },
+      { matchPackageNames: ['*'], rangeStrategy: 'pin' },
+      { matchDepTypes: ['engines', 'peerDependencies'], rangeStrategy: 'auto' },
     ],
   },
   pinDependencies: {
     description:
       'Pin dependency versions where `depType=dependencies`. Usually applies only to non-dev dependencies in `package.json`.',
-    packageRules: [
-      {
-        matchDepTypes: ['dependencies'],
-        rangeStrategy: 'pin',
-      },
-    ],
+    packageRules: [{ matchDepTypes: ['dependencies'], rangeStrategy: 'pin' }],
   },
   pinDevDependencies: {
     description: 'Pin dependency versions for development dependencies.',
@@ -424,25 +304,17 @@ export const presets: Record<string, Preset> = {
     description:
       'Pin dependency versions for development dependencies and retain SemVer ranges for others.',
     packageRules: [
-      {
-        matchPackageNames: ['*'],
-        rangeStrategy: 'replace',
-      },
+      { matchPackageNames: ['*'], rangeStrategy: 'replace' },
       {
         matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
         rangeStrategy: 'pin',
       },
-      {
-        matchDepTypes: ['peerDependencies'],
-        rangeStrategy: 'widen',
-      },
+      { matchDepTypes: ['peerDependencies'], rangeStrategy: 'widen' },
     ],
   },
   pinSkipCi: {
     description: 'Add `[skip ci]` to commit message body whenever pinning.',
-    pin: {
-      commitBody: '[skip ci]',
-    },
+    pin: { commitBody: '[skip ci]' },
   },
   pinVersions: {
     description:
@@ -534,10 +406,7 @@ export const presets: Record<string, Preset> = {
     description:
       'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
-      {
-        matchFileNames: ['**/*'],
-        semanticCommitType: '{{arg0}}',
-      },
+      { matchFileNames: ['**/*'], semanticCommitType: '{{arg0}}' },
     ],
   },
   semanticPrefixChore: {
@@ -554,14 +423,8 @@ export const presets: Record<string, Preset> = {
     description:
       'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
-      {
-        matchPackageNames: ['*'],
-        semanticCommitType: 'chore',
-      },
-      {
-        matchDepTypes: ['dependencies', 'require'],
-        semanticCommitType: 'fix',
-      },
+      { matchPackageNames: ['*'], semanticCommitType: 'chore' },
+      { matchDepTypes: ['dependencies', 'require'], semanticCommitType: 'fix' },
       {
         matchDatasources: ['maven'],
         matchDepTypes: [
@@ -626,10 +489,7 @@ export const presets: Record<string, Preset> = {
     description:
       'Always widen `peerDependencies` SemVer ranges when updating, instead of replacing.',
     packageRules: [
-      {
-        matchDepTypes: ['peerDependencies'],
-        rangeStrategy: 'widen',
-      },
+      { matchDepTypes: ['peerDependencies'], rangeStrategy: 'widen' },
     ],
   },
 };

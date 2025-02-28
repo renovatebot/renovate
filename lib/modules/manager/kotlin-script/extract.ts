@@ -35,8 +35,5 @@ export function extractPackageFile(
     return null;
   }
 
-  return {
-    deps,
-    ...(registryUrls.length && { registryUrls }),
-  };
+  return { deps, ...(registryUrls.length && { registryUrls }) };
 }

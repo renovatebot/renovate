@@ -52,9 +52,7 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(7);
-      expect(res?.extractedConstraints).toEqual({
-        python: '~2.7 || ^3.4',
-      });
+      expect(res?.extractedConstraints).toEqual({ python: '~2.7 || ^3.4' });
     });
 
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
@@ -481,17 +479,13 @@ describe('modules/manager/poetry/extract', () => {
             depName: 'typer',
             currentValue: '^0.9.0',
             registryUrls: ['https://pypi.org/pypi/'],
-            managerData: {
-              sourceName: 'pypi',
-            },
+            managerData: { sourceName: 'pypi' },
           },
           {
             depName: 'requests-cache',
             currentValue: '^1.1.0',
             registryUrls: ['https://example.com'],
-            managerData: {
-              sourceName: 'artifactory',
-            },
+            managerData: { sourceName: 'artifactory' },
           },
         ]);
       });

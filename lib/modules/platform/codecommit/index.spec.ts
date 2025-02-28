@@ -76,18 +76,13 @@ describe('modules/platform/codecommit/index', () => {
           username: 'abc',
           password: '123',
         }),
-      ).toEqual({
-        endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
-      });
+      ).toEqual({ endpoint: 'https://git-codecommit.REGION.amazonaws.com/' });
     });
 
     it('should init with env vars', async () => {
       process.env.AWS_REGION = 'REGION';
       await expect(
-        codeCommit.initPlatform({
-          username: 'abc',
-          password: '123',
-        }),
+        codeCommit.initPlatform({ username: 'abc', password: '123' }),
       ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
@@ -96,9 +91,7 @@ describe('modules/platform/codecommit/index', () => {
     it('should', async () => {
       await expect(
         codeCommit.initPlatform({ endpoint: 'non://parsable.url' }),
-      ).resolves.toEqual({
-        endpoint: 'non://parsable.url',
-      });
+      ).resolves.toEqual({ endpoint: 'non://parsable.url' });
     });
 
     it('should as well', async () => {
@@ -113,12 +106,11 @@ describe('modules/platform/codecommit/index', () => {
       vi.spyOn(git, 'initRepo').mockImplementationOnce(() => {
         throw new Error('any error');
       });
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
-        repositoryMetadata: {
-          defaultBranch: 'main',
-          repositoryId: 'id',
-        },
-      });
+      codeCommitClient
+        .on(GetRepositoryCommand)
+        .resolvesOnce({
+          repositoryMetadata: { defaultBranch: 'main', repositoryId: 'id' },
+        });
 
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' }),
@@ -145,11 +137,9 @@ describe('modules/platform/codecommit/index', () => {
 
     it('getRepositoryInfo returns bad results 2', async () => {
       vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
-        repositoryMetadata: {
-          repositoryId: 'id',
-        },
-      });
+      codeCommitClient
+        .on(GetRepositoryCommand)
+        .resolvesOnce({ repositoryMetadata: { repositoryId: 'id' } });
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' }),
       ).rejects.toThrow(new Error(REPOSITORY_EMPTY));
@@ -157,12 +147,11 @@ describe('modules/platform/codecommit/index', () => {
 
     it('initiates repo successfully', async () => {
       vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
-        repositoryMetadata: {
-          defaultBranch: 'main',
-          repositoryId: 'id',
-        },
-      });
+      codeCommitClient
+        .on(GetRepositoryCommand)
+        .resolvesOnce({
+          repositoryMetadata: { defaultBranch: 'main', repositoryId: 'id' },
+        });
       process.env.AWS_ACCESS_KEY_ID = 'something';
       process.env.AWS_SECRET_ACCESS_KEY = 'something';
       await expect(
@@ -196,13 +185,7 @@ describe('modules/platform/codecommit/index', () => {
       process.env.AWS_SECRET_ACCESS_KEY = '';
       process.env.AWS_REGION = 'eu-central-1';
       expect(
-        getCodeCommitUrl(
-          {
-            defaultBranch: 'main',
-            repositoryId: 'id',
-          },
-          'name',
-        ),
+        getCodeCommitUrl({ defaultBranch: 'main', repositoryId: 'id' }, 'name'),
       ).toBe('https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/name');
     });
 
@@ -221,13 +204,7 @@ describe('modules/platform/codecommit/index', () => {
       const dateTime = signer.getDateTime();
       const token = `${dateTime}Z${signer.signature()}`;
       expect(
-        getCodeCommitUrl(
-          {
-            defaultBranch: 'main',
-            repositoryId: 'id',
-          },
-          'name',
-        ),
+        getCodeCommitUrl({ defaultBranch: 'main', repositoryId: 'id' }, 'name'),
       ).toBe(
         `https://access-key-id:${token}@git-codecommit.eu-central-1.amazonaws.com/v1/repos/name`,
       );
@@ -237,12 +214,7 @@ describe('modules/platform/codecommit/index', () => {
   describe('getRepos()', () => {
     it('returns repos', async () => {
       const result = {
-        repositories: [
-          {
-            repositoryId: 'id',
-            repositoryName: 'repoName',
-          },
-        ],
+        repositories: [{ repositoryId: 'id', repositoryName: 'repoName' }],
       };
       codeCommitClient.on(ListRepositoriesCommand).resolvesOnce(result);
 
@@ -570,9 +542,7 @@ describe('modules/platform/codecommit/index', () => {
             {
               sourceReference: 'refs/heads/sourceBranch',
               destinationReference: 'refs/heads/targetBranch',
-              mergeMetadata: {
-                isMerged: true,
-              },
+              mergeMetadata: { isMerged: true },
             },
           ],
         },
@@ -683,10 +653,7 @@ describe('modules/platform/codecommit/index', () => {
           title: 'someTitle',
           description: 'mybody',
           pullRequestTargets: [
-            {
-              sourceCommit: '123',
-              destinationCommit: '321',
-            },
+            { sourceCommit: '123', destinationCommit: '321' },
           ],
         },
       };
@@ -712,10 +679,7 @@ describe('modules/platform/codecommit/index', () => {
 
     it('doesnt return a title', async () => {
       const prRes: CreatePullRequestOutput = {
-        pullRequest: {
-          pullRequestId: '1',
-          pullRequestStatus: 'OPEN',
-        },
+        pullRequest: { pullRequestId: '1', pullRequestStatus: 'OPEN' },
       };
 
       codeCommitClient.on(CreatePullRequestCommand).resolvesOnce(prRes);
@@ -977,12 +941,7 @@ describe('modules/platform/codecommit/index', () => {
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
-            comments: [
-              {
-                commentId: '1',
-                content: 'my comment content',
-              },
-            ],
+            comments: [{ commentId: '1', content: 'my comment content' }],
           },
         ],
       };
@@ -1094,12 +1053,7 @@ describe('modules/platform/codecommit/index', () => {
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
-            comments: [
-              {
-                commentId: '1',
-                content: 'my comment content',
-              },
-            ],
+            comments: [{ commentId: '1', content: 'my comment content' }],
           },
         ],
       };
@@ -1261,12 +1215,7 @@ describe('modules/platform/codecommit/index', () => {
             repositoryName: 'someRepo',
             beforeCommitId: 'beforeCommitId',
             afterCommitId: 'afterCommitId',
-            comments: [
-              {
-                commentId: '1',
-                content: 'my comment content',
-              },
-            ],
+            comments: [{ commentId: '1', content: 'my comment content' }],
           },
         ],
       };

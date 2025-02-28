@@ -142,10 +142,7 @@ export const presets: Record<string, Preset> = {
     description: 'All Stylelint packages.',
     matchPackageNames: ['stylelint**'],
   },
-  test: {
-    description: 'Test packages.',
-    extends: ['packages:unitTest'],
-  },
+  test: { description: 'Test packages.', extends: ['packages:unitTest'] },
   tslint: {
     description: 'All TSLint packages.',
     matchPackageNames: ['codelyzer', '/\\btslint\\b/'],

@@ -358,9 +358,7 @@ describe('util/merge-confidence/index', () => {
           'using merge confidence API base found in environment variables',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          {
-            supportedDatasources: ['go'],
-          },
+          { supportedDatasources: ['go'] },
           'merge confidence API - successfully authenticated',
         );
       });

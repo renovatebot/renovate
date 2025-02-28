@@ -47,10 +47,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
             matchHost: 'domain.com',
             token: '123test',
           },
-          {
-            matchHost: 'https://domain.com/',
-            token: '123test',
-          },
+          { matchHost: 'https://domain.com/', token: '123test' },
           {
             hostType: 'docker',
             matchHost: 'https://domain.com/',

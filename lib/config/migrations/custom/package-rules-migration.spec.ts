@@ -35,22 +35,12 @@ describe('config/migrations/custom/package-rules-migration', () => {
     expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
-          {
-            paths: [],
-            packgageRules: {
-              languages: ['javascript'],
-            },
-          },
+          { paths: [], packgageRules: { languages: ['javascript'] } },
         ],
       },
       {
         packageRules: [
-          {
-            matchFileNames: [],
-            packgageRules: {
-              languages: ['javascript'],
-            },
-          },
+          { matchFileNames: [], packgageRules: { languages: ['javascript'] } },
         ],
       },
     );
@@ -60,26 +50,14 @@ describe('config/migrations/custom/package-rules-migration', () => {
     expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
-          {
-            matchLanguages: ['docker', 'js'],
-            addLabels: ['docker'],
-          },
-          {
-            languages: ['java'],
-            addLabels: ['java'],
-          },
+          { matchLanguages: ['docker', 'js'], addLabels: ['docker'] },
+          { languages: ['java'], addLabels: ['java'] },
         ],
       },
       {
         packageRules: [
-          {
-            matchCategories: ['docker', 'js'],
-            addLabels: ['docker'],
-          },
-          {
-            matchCategories: ['java'],
-            addLabels: ['java'],
-          },
+          { matchCategories: ['docker', 'js'], addLabels: ['docker'] },
+          { matchCategories: ['java'], addLabels: ['java'] },
         ],
       },
     );
@@ -87,22 +65,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
 
   it('should migrate single match rule', () => {
     expect(PackageRulesMigration).toMigrate(
-      {
-        packageRules: [
-          {
-            matchLanguages: ['python'],
-            addLabels: ['py'],
-          },
-        ],
-      },
-      {
-        packageRules: [
-          {
-            matchCategories: ['python'],
-            addLabels: ['py'],
-          },
-        ],
-      },
+      { packageRules: [{ matchLanguages: ['python'], addLabels: ['py'] }] },
+      { packageRules: [{ matchCategories: ['python'], addLabels: ['py'] }] },
     );
   });
 
@@ -110,10 +74,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
     expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
-          {
-            excludePackageNames: ['foo', 'bar'],
-            automerge: true,
-          },
+          { excludePackageNames: ['foo', 'bar'], automerge: true },
           {
             matchPackageNames: ['baz'],
             excludePackageNames: ['foo', 'bar'],
@@ -123,14 +84,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
       },
       {
         packageRules: [
-          {
-            automerge: true,
-            matchPackageNames: ['!foo', '!bar'],
-          },
-          {
-            automerge: true,
-            matchPackageNames: ['baz', '!foo', '!bar'],
-          },
+          { automerge: true, matchPackageNames: ['!foo', '!bar'] },
+          { automerge: true, matchPackageNames: ['baz', '!foo', '!bar'] },
         ],
       },
     );
@@ -140,14 +95,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
     expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
-          {
-            matchPackagePatterns: ['*'],
-            automerge: true,
-          },
-          {
-            matchPackagePatterns: ['foo', 'bar'],
-            automerge: true,
-          },
+          { matchPackagePatterns: ['*'], automerge: true },
+          { matchPackagePatterns: ['foo', 'bar'], automerge: true },
           {
             matchPackageNames: ['baz'],
             matchPackagePatterns: ['foo', 'bar'],
@@ -157,18 +106,9 @@ describe('config/migrations/custom/package-rules-migration', () => {
       },
       {
         packageRules: [
-          {
-            automerge: true,
-            matchPackageNames: ['*'],
-          },
-          {
-            automerge: true,
-            matchPackageNames: ['/foo/', '/bar/'],
-          },
-          {
-            automerge: true,
-            matchPackageNames: ['baz', '/foo/', '/bar/'],
-          },
+          { automerge: true, matchPackageNames: ['*'] },
+          { automerge: true, matchPackageNames: ['/foo/', '/bar/'] },
+          { automerge: true, matchPackageNames: ['baz', '/foo/', '/bar/'] },
         ],
       },
     );

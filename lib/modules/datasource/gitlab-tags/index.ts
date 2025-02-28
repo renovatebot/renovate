@@ -49,9 +49,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJsonUnchecked<GitlabTag[]>(url, {
-        paginate: true,
-      })
+      await this.http.getJsonUnchecked<GitlabTag[]>(url, { paginate: true })
     ).body;
 
     const dependency: ReleaseResult = {

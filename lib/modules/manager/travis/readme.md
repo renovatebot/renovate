@@ -16,11 +16,5 @@ If you enable major updates and use a version matrix, then you will likely need 
 Here's how to enable major updates in your Renovate config:
 
 ```json
-{
-  "travis": {
-    "major": {
-      "enabled": true
-    }
-  }
-}
+{ "travis": { "major": { "enabled": true } } }
 ```

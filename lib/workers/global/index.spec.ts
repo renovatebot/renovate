@@ -128,9 +128,7 @@ describe('workers/global/index', () => {
   });
 
   it('handles local', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      platform: 'local',
-    });
+    parseConfigs.mockResolvedValueOnce({ platform: 'local' });
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
@@ -182,12 +180,7 @@ describe('workers/global/index', () => {
       repositories: [],
     });
     logger.getProblems.mockReset();
-    logger.getProblems.mockImplementation(() => [
-      {
-        level: ERROR,
-        msg: 'meh',
-      },
-    ]);
+    logger.getProblems.mockImplementation(() => [{ level: ERROR, msg: 'meh' }]);
     await expect(globalWorker.start()).resolves.not.toBe(0);
   });
 
@@ -199,12 +192,7 @@ describe('workers/global/index', () => {
       repositories: [],
     });
     logger.getProblems.mockReset();
-    logger.getProblems.mockImplementation(() => [
-      {
-        level: WARN,
-        msg: 'meh',
-      },
-    ]);
+    logger.getProblems.mockImplementation(() => [{ level: WARN, msg: 'meh' }]);
     await expect(globalWorker.start()).resolves.toBe(0);
   });
 

@@ -108,27 +108,15 @@ export function extractImage(
 
   if (digest) {
     if (!is.string(digest) || !digest.startsWith('sha256:')) {
-      return {
-        depName,
-        currentValue: digest,
-        skipReason: 'invalid-value',
-      };
+      return { depName, currentValue: digest, skipReason: 'invalid-value' };
     }
 
-    return {
-      ...nameDep,
-      currentDigest: digest,
-      replaceString: digest,
-    };
+    return { ...nameDep, currentDigest: digest, replaceString: digest };
   }
 
   if (newTag) {
     if (!is.string(newTag) || newTag.startsWith('sha256:')) {
-      return {
-        depName,
-        currentValue: newTag,
-        skipReason: 'invalid-value',
-      };
+      return { depName, currentValue: newTag, skipReason: 'invalid-value' };
     }
 
     const dep = getDep(`${depName}:${newTag}`, false, aliases);
@@ -141,10 +129,7 @@ export function extractImage(
   }
 
   if (image.newName) {
-    return {
-      ...nameDep,
-      replaceString: image.newName,
-    };
+    return { ...nameDep, replaceString: image.newName };
   }
 
   return null;
@@ -224,10 +209,7 @@ export function extractPackageFile(
   for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: pkg.kind,
-      });
+      deps.push({ ...dep, depType: pkg.kind });
     }
   }
 
@@ -235,10 +217,7 @@ export function extractPackageFile(
   for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: pkg.kind,
-      });
+      deps.push({ ...dep, depType: pkg.kind });
     }
   }
 
@@ -246,10 +225,7 @@ export function extractPackageFile(
   for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: pkg.kind,
-      });
+      deps.push({ ...dep, depType: pkg.kind });
     }
   }
 
@@ -257,10 +233,7 @@ export function extractPackageFile(
   for (const image of coerceArray(pkg.images)) {
     const dep = extractImage(image, config.registryAliases);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: pkg.kind,
-      });
+      deps.push({ ...dep, depType: pkg.kind });
     }
   }
 
@@ -268,10 +241,7 @@ export function extractPackageFile(
   for (const helmChart of coerceArray(pkg.helmCharts)) {
     const dep = extractHelmChart(helmChart, config.registryAliases);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: 'HelmChart',
-      });
+      deps.push({ ...dep, depType: 'HelmChart' });
     }
   }
 

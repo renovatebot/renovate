@@ -50,16 +50,7 @@ After all transformations, the resulting JSON must match one of these formats:
 Minimal-supported object:
 
 ```json
-{
-  "releases": [
-    {
-      "version": "v1.1.0"
-    },
-    {
-      "version": "v1.2.0"
-    }
-  ]
-}
+{ "releases": [{ "version": "v1.1.0" }, { "version": "v1.2.0" }] }
 ```
 
 All available options:
@@ -97,10 +88,7 @@ If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../
 ```json title="Getting trace logs from the Mend Renovate app"
 {
   "logLevelRemap": [
-    {
-      "matchMessage": "/^Custom manager fetcher/",
-      "newLogLevel": "info"
-    }
+    { "matchMessage": "/^Custom manager fetcher/", "newLogLevel": "info" }
   ]
 }
 ```
@@ -137,15 +125,9 @@ When Renovate receives this response with the `plain` format, it will convert it
 ```json
 {
   "releases": [
-    {
-      "version": "1.0.0"
-    },
-    {
-      "version": "2.0.0"
-    },
-    {
-      "version": "3.0.0"
-    }
+    { "version": "1.0.0" },
+    { "version": "2.0.0" },
+    { "version": "3.0.0" }
   ]
 }
 ```
@@ -170,15 +152,9 @@ When Renovate receives this response with the `yaml` format, it will convert it 
 ```json
 {
   "releases": [
-    {
-      "version": "1.0.0"
-    },
-    {
-      "version": "2.0.0"
-    },
-    {
-      "version": "3.0.0"
-    }
+    { "version": "1.0.0" },
+    { "version": "2.0.0" },
+    { "version": "3.0.0" }
   ]
 }
 ```
@@ -206,12 +182,8 @@ The following JSON will be generated:
 ```json
 {
   "releases": [
-    {
-      "version": "package-1.0.tar.gz"
-    },
-    {
-      "version": "package-1.0.tar.gz"
-    }
+    { "version": "package-1.0.tar.gz" },
+    { "version": "package-1.0.tar.gz" }
   ]
 }
 ```
@@ -328,14 +300,7 @@ These files are served via HTTP(S), so that Renovate can access them.
 For example, imagine the following file `versiontracker.json` for the software `something`:
 
 ```json
-[
-  {
-    "version": "77"
-  },
-  {
-    "version": "76"
-  }
-]
+[{ "version": "77" }, { "version": "76" }]
 ```
 
 By writing a custom datasource, Renovate can process the `versiontracker.json` file, see below.

@@ -94,9 +94,7 @@ describe('modules/manager/pub/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'flutter pub get --no-precompile',
-      },
+      { cmd: 'flutter pub get --no-precompile' },
     ]);
   });
 
@@ -115,9 +113,7 @@ describe('modules/manager/pub/artifacts', () => {
         }),
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
-        },
+        { cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}` },
       ]);
     });
 
@@ -141,9 +137,7 @@ describe('modules/manager/pub/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}`,
-        },
+        { cmd: `${params.sdk} pub upgrade ${depNamesWithSpace}` },
       ]);
     });
 
@@ -168,9 +162,7 @@ describe('modules/manager/pub/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: `${params.sdk} pub get --no-precompile`,
-        },
+        { cmd: `${params.sdk} pub get --no-precompile` },
       ]);
     });
 
@@ -195,9 +187,7 @@ describe('modules/manager/pub/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: `${params.sdk} pub upgrade`,
-        },
+        { cmd: `${params.sdk} pub upgrade` },
       ]);
     });
 
@@ -226,12 +216,8 @@ describe('modules/manager/pub/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        },
-        {
-          cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -309,10 +295,7 @@ describe('modules/manager/pub/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
     fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
     expect(
-      await pub.updateArtifacts({
-        ...updateArtifact,
-        newPackageFileContent,
-      }),
+      await pub.updateArtifacts({ ...updateArtifact, newPackageFileContent }),
     ).toEqual([
       {
         file: {
@@ -340,10 +323,7 @@ describe('modules/manager/pub/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
     fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
     expect(
-      await pub.updateArtifacts({
-        ...updateArtifact,
-        newPackageFileContent,
-      }),
+      await pub.updateArtifacts({ ...updateArtifact, newPackageFileContent }),
     ).toEqual([
       {
         file: {

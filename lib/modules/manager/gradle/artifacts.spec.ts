@@ -74,9 +74,7 @@ describe('modules/manager/gradle/artifacts', () => {
       'gradle.lockfile': 'Current gradle.lockfile',
     });
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['build.gradle', 'gradle.lockfile'],
-      }),
+      partial<StatusResult>({ modified: ['build.gradle', 'gradle.lockfile'] }),
     );
 
     fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
@@ -159,9 +157,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
@@ -202,9 +198,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: 'gradlew.bat --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
@@ -245,9 +239,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
@@ -296,9 +288,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --write-locks',
@@ -437,9 +427,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
@@ -476,20 +464,13 @@ describe('modules/manager/gradle/artifacts', () => {
           config: { isLockFileMaintenance: true },
         }),
       ).toEqual([
-        {
-          artifactError: {
-            lockFile: 'build.gradle',
-            stderr: 'failed',
-          },
-        },
+        { artifactError: { lockFile: 'build.gradle', stderr: 'failed' } },
       ]);
 
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
     });
@@ -649,9 +630,7 @@ describe('modules/manager/gradle/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q properties',
-          options: {
-            cwd: '/tmp/github/some/repo',
-          },
+          options: { cwd: '/tmp/github/some/repo' },
         },
         {
           cmd: './gradlew --console=plain --dependency-verification lenient -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',

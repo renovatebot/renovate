@@ -35,9 +35,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   },
   elixir: {
     misePluginUrl: 'https://mise.jdx.dev/lang/elixir.html',
-    config: {
-      datasource: HexpmBobDatasource.id,
-    },
+    config: { datasource: HexpmBobDatasource.id },
   },
   erlang: {
     misePluginUrl: 'https://mise.jdx.dev/lang/erlang.html',
@@ -130,10 +128,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   },
   node: {
     misePluginUrl: 'https://mise.jdx.dev/lang/node.html',
-    config: {
-      packageName: 'nodejs',
-      datasource: NodeVersionDatasource.id,
-    },
+    config: { packageName: 'nodejs', datasource: NodeVersionDatasource.id },
   },
   python: {
     misePluginUrl: 'https://mise.jdx.dev/lang/python.html',
@@ -168,9 +163,6 @@ export const miseTooling: Record<string, ToolingDefinition> = {
   },
   zig: {
     misePluginUrl: 'https://mise.jdx.dev/lang/zig.html',
-    config: {
-      packageName: 'ziglang/zig',
-      datasource: GithubTagsDatasource.id,
-    },
+    config: { packageName: 'ziglang/zig', datasource: GithubTagsDatasource.id },
   },
 };

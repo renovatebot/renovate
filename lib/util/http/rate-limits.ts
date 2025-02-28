@@ -5,18 +5,9 @@ import type { ConcurrencyLimitRule, ThrottleLimitRule } from './types';
 
 // The first match wins
 const concurrencyDefaults: ConcurrencyLimitRule[] = [
-  {
-    matchHost: 'registry.npmjs.org',
-    concurrency: 999,
-  },
-  {
-    matchHost: 'repology.org',
-    concurrency: 1,
-  },
-  {
-    matchHost: '*',
-    concurrency: 16,
-  },
+  { matchHost: 'registry.npmjs.org', concurrency: 999 },
+  { matchHost: 'repology.org', concurrency: 1 },
+  { matchHost: '*', concurrency: 16 },
 ];
 
 // The first match wins
@@ -39,10 +30,7 @@ const throttleDefaults: ThrottleLimitRule[] = [
     matchHost: 'https://plugins.gradle.org',
     throttleMs: 50,
   },
-  {
-    matchHost: 'repology.org',
-    throttleMs: 2000,
-  },
+  { matchHost: 'repology.org', throttleMs: 2000 },
 ];
 
 let throttleLimits: ThrottleLimitRule[] = [];

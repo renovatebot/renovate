@@ -37,9 +37,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -124,9 +122,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
         },
         {
           manager: 'some-manager',
@@ -135,9 +131,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -159,14 +153,10 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           automerge: true,
-          constraints: {
-            foo: '1.0.0',
-          },
+          constraints: { foo: '1.0.0' },
         },
         {
           manager: 'some-manager',
@@ -179,15 +169,10 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
-          constraints: {
-            foo: '1.0.0',
-            bar: '2.0.0',
-          },
+          constraints: { foo: '1.0.0', bar: '2.0.0' },
         },
         {
           manager: 'some-manager',
@@ -200,9 +185,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
         },
@@ -212,10 +195,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toBe('2017-02-07T20:01:41+00:00');
       expect(res.automerge).toBeFalse();
-      expect(res.constraints).toEqual({
-        foo: '1.0.0',
-        bar: '2.0.0',
-      });
+      expect(res.constraints).toEqual({ foo: '1.0.0', bar: '2.0.0' });
       expect(res.recreateClosed).toBe(false);
     });
 
@@ -398,9 +378,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
@@ -418,9 +396,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
@@ -453,9 +429,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
@@ -472,9 +446,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
           updateType: 'minor',
           separateMinorPatch: true,
@@ -505,9 +477,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.3',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
@@ -521,9 +491,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '^6.0',
           newVersion: '6.0.1',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
@@ -548,9 +516,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '^6.0.1',
           newVersion: '6.0.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
@@ -564,9 +530,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '^6.0.0',
           newVersion: '6.0.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
@@ -592,9 +556,7 @@ describe('workers/repository/updates/generate', () => {
           currentDigest: 'abcdefghijklmnopqrstuvwxyz',
           newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
         },
         {
           manager: 'some-manager',
@@ -606,9 +568,7 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           foo: 1,
           newValue: 'zzzzzzzzzz',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -649,9 +609,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '>= 5.1.2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
@@ -665,9 +623,7 @@ describe('workers/repository/updates/generate', () => {
           foo: 1,
           newValue: '^5,1,2',
           newVersion: '5.1.2',
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           releaseTimestamp: '2017-02-08T20:01:41+00:00' as Timestamp,
         },
       ] satisfies BranchUpgradeConfig[];
@@ -689,9 +645,7 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           newVersion: '1.2.0',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           branchName: 'some-branch',
         },
       ] satisfies BranchUpgradeConfig[];
@@ -767,9 +721,7 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           newVersion: '1.2.0',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           branchName: 'some-branch',
         },
       ] satisfies BranchUpgradeConfig[];
@@ -796,9 +748,7 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           newVersion: '1.2.0',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           branchName: 'some-branch',
         },
       ] satisfies BranchUpgradeConfig[];
@@ -826,9 +776,7 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           newVersion: '1.2.0',
           foo: 1,
-          group: {
-            foo: 2,
-          },
+          group: { foo: 2 },
           branchName: 'some-branch',
         },
       ] satisfies BranchUpgradeConfig[];
@@ -1586,9 +1534,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.2.0',
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
-          prBodyDefinitions: {
-            Issue: 'I1',
-          },
+          prBodyDefinitions: { Issue: 'I1' },
         },
       ] satisfies BranchUpgradeConfig[];
 
@@ -1619,9 +1565,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.2.0',
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
-          prBodyDefinitions: {
-            Issue: 'I1',
-          },
+          prBodyDefinitions: { Issue: 'I1' },
         },
         {
           ...commonOptions,
@@ -1630,9 +1574,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.0.0',
           updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
-          prBodyDefinitions: {
-            Issue: 'I2',
-          },
+          prBodyDefinitions: { Issue: 'I2' },
         },
         {
           ...commonOptions,
@@ -1641,9 +1583,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.2.3',
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
-          prBodyDefinitions: {
-            Issue: 'I3',
-          },
+          prBodyDefinitions: { Issue: 'I3' },
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);

@@ -31,12 +31,7 @@ describe('workers/repository/process/fetch', () => {
 
     it('handles ignored, skipped and disabled', async () => {
       config.ignoreDeps = ['abcd'];
-      config.packageRules = [
-        {
-          matchPackageNames: ['foo'],
-          enabled: false,
-        },
-      ];
+      config.packageRules = [{ matchPackageNames: ['foo'], enabled: false }];
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {

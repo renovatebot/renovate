@@ -67,10 +67,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     return null;
   }
 
-  let res: NugetFloatingRange = {
-    type: 'nuget-floating-range',
-    major: 0,
-  };
+  let res: NugetFloatingRange = { type: 'nuget-floating-range', major: 0 };
 
   const {
     major,
@@ -160,10 +157,7 @@ export function parseExactRange(input: string): NugetExactRange | null {
     return null;
   }
 
-  return {
-    type: 'nuget-exact-range',
-    version,
-  };
+  return { type: 'nuget-exact-range', version };
 }
 
 const maxBracketRangeRegex = regEx(

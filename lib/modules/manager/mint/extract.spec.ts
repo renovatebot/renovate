@@ -45,14 +45,8 @@ describe('modules/manager/mint/extract', () => {
       `);
       expect(res).toEqual({
         deps: [
-          {
-            depName: 'yonaskolb/xcodegen',
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'realm/SwiftLint',
-            skipReason: 'unspecified-version',
-          },
+          { depName: 'yonaskolb/xcodegen', skipReason: 'unspecified-version' },
+          { depName: 'realm/SwiftLint', skipReason: 'unspecified-version' },
         ],
       });
     });
@@ -71,10 +65,7 @@ describe('modules/manager/mint/extract', () => {
             datasource: 'git-tags',
             packageName: 'https://github.com/SwiftGen/SwiftGen.git',
           },
-          {
-            depName: 'yonaskolb/xcodegen',
-            skipReason: 'unspecified-version',
-          },
+          { depName: 'yonaskolb/xcodegen', skipReason: 'unspecified-version' },
           {
             depName: 'realm/SwiftLint',
             currentValue: '0.48.0',
@@ -101,10 +92,7 @@ describe('modules/manager/mint/extract', () => {
             datasource: 'git-tags',
             packageName: 'https://github.com/SwiftGen/SwiftGen.git',
           },
-          {
-            depName: 'yonaskolb/xcodegen',
-            skipReason: 'unspecified-version',
-          },
+          { depName: 'yonaskolb/xcodegen', skipReason: 'unspecified-version' },
           {
             depName: 'realm/SwiftLint',
             currentValue: '0.48.0',

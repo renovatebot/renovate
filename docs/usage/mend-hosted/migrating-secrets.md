@@ -15,9 +15,7 @@ This method is deprecated:
   "hostRules": [
     {
       "matchHost": "github.com",
-      "encrypted": {
-        "token": "drsMDVf6M2hTZCN......+gQm/0Rpw"
-      }
+      "encrypted": { "token": "drsMDVf6M2hTZCN......+gQm/0Rpw" }
     }
   ]
 }
@@ -30,10 +28,7 @@ This is the new method that you should start using:
 ```json title="Reference the app secret in the Renovate config"
 {
   "hostRules": [
-    {
-      "matchHost": "github.com",
-      "token": "{{ secrets.GITHUB_COM_TOKEN }}"
-    }
+    { "matchHost": "github.com", "token": "{{ secrets.GITHUB_COM_TOKEN }}" }
   ]
 }
 ```

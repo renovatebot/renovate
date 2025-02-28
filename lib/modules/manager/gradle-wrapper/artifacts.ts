@@ -229,12 +229,7 @@ export async function updateArtifacts({
   } catch (err) {
     logger.debug({ err }, 'Error setting new Gradle Wrapper release value');
     return [
-      {
-        artifactError: {
-          lockFile: packageFileName,
-          stderr: err.message,
-        },
-      },
+      { artifactError: { lockFile: packageFileName, stderr: err.message } },
     ];
   }
 }

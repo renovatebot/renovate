@@ -33,14 +33,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: 'v4.0.0',
       };
       const input = JSON.stringify({
-        dependencies: {
-          gulp: 'gulpjs/gulp#v4.0.0-alpha.2',
-        },
+        dependencies: { gulp: 'gulpjs/gulp#v4.0.0-alpha.2' },
       });
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        upgrade,
-      });
+      const res = npmUpdater.updateDependency({ fileContent: input, upgrade });
       expect(res).toBeJsonString();
       expect(JSON.parse(res!)).toEqual({
         dependencies: { gulp: 'gulpjs/gulp#v4.0.0' },
@@ -57,14 +52,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '18.3.1',
       };
       const input = JSON.stringify({
-        dependencies: {
-          hapi: 'npm:@hapi/hapi@18.3.0',
-        },
+        dependencies: { hapi: 'npm:@hapi/hapi@18.3.0' },
       });
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        upgrade,
-      });
+      const res = npmUpdater.updateDependency({ fileContent: input, upgrade });
       expect(res).toBeJsonString();
       expect(JSON.parse(res!)).toEqual({
         dependencies: { hapi: 'npm:@hapi/hapi@18.3.1' },
@@ -80,14 +70,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newDigest: '0000000000111111111122222222223333333333',
       };
       const input = JSON.stringify({
-        dependencies: {
-          gulp: 'gulpjs/gulp#abcdef7',
-        },
+        dependencies: { gulp: 'gulpjs/gulp#abcdef7' },
       });
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        upgrade,
-      });
+      const res = npmUpdater.updateDependency({ fileContent: input, upgrade });
       expect(res).toBeJsonString();
       expect(JSON.parse(res!)).toEqual({
         dependencies: { gulp: 'gulpjs/gulp#0000000' },
@@ -103,14 +88,9 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: 'v1.1.0',
       };
       const input = JSON.stringify({
-        dependencies: {
-          n: 'git+https://github.com/owner/n#v1.0.0',
-        },
+        dependencies: { n: 'git+https://github.com/owner/n#v1.0.0' },
       });
-      const res = npmUpdater.updateDependency({
-        fileContent: input,
-        upgrade,
-      });
+      const res = npmUpdater.updateDependency({ fileContent: input, upgrade });
       expect(res).toMatchSnapshot();
       expect(res).toContain('v1.1.0');
     });

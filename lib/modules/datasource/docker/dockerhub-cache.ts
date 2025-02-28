@@ -25,10 +25,7 @@ export class DockerHubCache {
       dockerRepository,
     );
 
-    repoCache ??= {
-      items: {},
-      updatedAt: null,
-    };
+    repoCache ??= { items: {}, updatedAt: null };
 
     return new DockerHubCache(dockerRepository, repoCache);
   }

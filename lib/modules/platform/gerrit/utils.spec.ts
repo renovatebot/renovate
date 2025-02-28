@@ -27,10 +27,7 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('getGerritRepoUrl()', () => {
     it('create a git url with username/password', () => {
-      hostRules.find.mockReturnValue({
-        username: 'abc',
-        password: '123',
-      });
+      hostRules.find.mockReturnValue({ username: 'abc', password: '123' });
       const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl);
       expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
     });
@@ -125,9 +122,7 @@ describe('modules/platform/gerrit/utils', () => {
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: ['username'],
-        bodyStruct: {
-          hash: hashBody('Last PR-Body'),
-        },
+        bodyStruct: { hash: hashBody('Last PR-Body') },
       });
     });
 
@@ -145,9 +140,7 @@ describe('modules/platform/gerrit/utils', () => {
         sourceBranch: 'main',
         targetBranch: 'main',
         reviewers: [],
-        bodyStruct: {
-          hash: hashBody(''),
-        },
+        bodyStruct: { hash: hashBody('') },
       });
     });
   });
@@ -163,9 +156,7 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
+            commit: { message: 'some message...' },
           }),
         },
       });
@@ -202,9 +193,7 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
+            commit: { message: 'some message...' },
           }),
         },
       });

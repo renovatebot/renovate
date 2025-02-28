@@ -16,10 +16,7 @@ export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
 export function getGerritRepoUrl(repository: string, endpoint: string): string {
   // Find options for current host and determine Git endpoint
-  const opts = hostRules.find({
-    hostType: 'gerrit',
-    url: endpoint,
-  });
+  const opts = hostRules.find({ hostType: 'gerrit', url: endpoint });
 
   const url = parseUrl(endpoint);
   if (!url) {
@@ -71,9 +68,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
       change.reviewers?.REVIEWER?.filter(
         (reviewer) => typeof reviewer.username === 'string',
       ).map((reviewer) => reviewer.username!) ?? [],
-    bodyStruct: {
-      hash: hashBody(findPullRequestBody(change)),
-    },
+    bodyStruct: { hash: hashBody(findPullRequestBody(change)) },
   };
 }
 

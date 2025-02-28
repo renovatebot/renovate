@@ -125,9 +125,7 @@ export async function initRepo({
 
   const url = client.getCodeCommitUrl(metadata, repository);
   try {
-    await git.initRepo({
-      url,
-    });
+    await git.initRepo({ url });
   } catch (err) {
     logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
@@ -236,10 +234,7 @@ export async function getBranchPr(
   branchName: string,
 ): Promise<CodeCommitPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
-  const existingPr = await findPr({
-    branchName,
-    state: 'open',
-  });
+  const existingPr = await findPr({ branchName, state: 'open' });
   return existingPr ? getPr(existingPr.number) : null;
 }
 

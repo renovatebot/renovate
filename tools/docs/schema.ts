@@ -32,18 +32,17 @@ type JsonSchemaBasicType =
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
-  const temp: Record<string, any> & {
-    type?: JsonSchemaType;
-  } & Omit<Partial<RenovateOptions>, 'type'> = {};
+  const temp: Record<string, any> & { type?: JsonSchemaType } & Omit<
+      Partial<RenovateOptions>,
+      'type'
+    > = {};
   if (option.description) {
     temp.description = option.description;
   }
   temp.type = option.type;
   if (option.type === 'array') {
     if (option.subType) {
-      temp.items = {
-        type: option.subType,
-      };
+      temp.items = { type: option.subType };
       if (hasKey('format', option) && option.format) {
         temp.items.format = option.format;
       }

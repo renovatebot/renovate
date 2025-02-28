@@ -358,10 +358,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     if (nameValue) {
       localVariables = {
         ...localVariables,
-        name: {
-          key: 'name',
-          value: nameValue,
-        },
+        name: { key: 'name', value: nameValue },
       };
     }
   }

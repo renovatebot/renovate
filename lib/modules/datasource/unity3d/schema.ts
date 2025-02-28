@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-const UnityReleaseNote = z.object({
-  url: z.string(),
-});
+const UnityReleaseNote = z.object({ url: z.string() });
 
 const UnityRelease = z.object({
   version: z.string(),
@@ -11,6 +9,4 @@ const UnityRelease = z.object({
   shortRevision: z.string(),
 });
 
-export const UnityReleasesJSON = z.object({
-  results: UnityRelease.array(),
-});
+export const UnityReleasesJSON = z.object({ results: UnityRelease.array() });

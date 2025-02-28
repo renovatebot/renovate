@@ -9,12 +9,7 @@ describe('config/migrations/base/abstract-migration', () => {
         this.rewrite(false);
       }
     }
-    const customMigration = new CustomMigration(
-      {
-        fooBar: true,
-      },
-      {},
-    );
+    const customMigration = new CustomMigration({ fooBar: true }, {});
 
     expect(() => customMigration.run()).toThrow();
   });
@@ -27,12 +22,7 @@ describe('config/migrations/base/abstract-migration', () => {
         this.delete();
       }
     }
-    const customMigration = new CustomMigration(
-      {
-        fooBar: true,
-      },
-      {},
-    );
+    const customMigration = new CustomMigration({ fooBar: true }, {});
 
     expect(() => customMigration.run()).toThrow();
   });

@@ -71,9 +71,7 @@ describe('workers/global/initialize', () => {
         return Promise.resolve(r);
       });
 
-      const config: RenovateConfig = {
-        hostRules: [hostRule],
-      };
+      const config: RenovateConfig = { hostRules: [hostRule] };
 
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();

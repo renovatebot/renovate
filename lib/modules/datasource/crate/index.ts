@@ -92,10 +92,7 @@ export class CrateDatasource extends Datasource {
 
     const metadata = await this.getCrateMetadata(registryInfo, packageName);
 
-    const result: ReleaseResult = {
-      dependencyUrl,
-      releases: [],
-    };
+    const result: ReleaseResult = { dependencyUrl, releases: [] };
 
     if (metadata?.homepage) {
       result.homepage = metadata.homepage;
@@ -107,16 +104,12 @@ export class CrateDatasource extends Datasource {
 
     result.releases = lines
       .map((version) => {
-        const release: Release = {
-          version: version.vers.replace(/\+.*$/, ''),
-        };
+        const release: Release = { version: version.vers.replace(/\+.*$/, '') };
         if (version.yanked) {
           release.isDeprecated = true;
         }
         if (version.rust_version) {
-          release.constraints = {
-            rust: [version.rust_version],
-          };
+          release.constraints = { rust: [version.rust_version] };
         }
         return release;
       })

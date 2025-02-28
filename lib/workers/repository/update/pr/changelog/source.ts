@@ -89,9 +89,7 @@ export abstract class ChangeLogSource {
     const tokenResponse = this.hasValidToken(config);
     if (!tokenResponse.isValid) {
       if (tokenResponse.error) {
-        return {
-          error: tokenResponse.error,
-        };
+        return { error: tokenResponse.error };
       }
       return null;
     }

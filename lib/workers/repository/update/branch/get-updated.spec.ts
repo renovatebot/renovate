@@ -197,40 +197,20 @@ describe('workers/repository/update/branch/get-updated', () => {
       gomod.updateDependency.mockReturnValue('some new content');
       gomod.updateArtifacts.mockResolvedValueOnce([
         {
-          file: {
-            type: 'addition',
-            path: 'go.mod',
-            contents: 'some content',
-          },
-          notice: {
-            file: 'go.mod',
-            message: 'some notice',
-          },
+          file: { type: 'addition', path: 'go.mod', contents: 'some content' },
+          notice: { file: 'go.mod', message: 'some notice' },
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toEqual({
         artifactErrors: [],
-        artifactNotices: [
-          {
-            file: 'go.mod',
-            message: 'some notice',
-          },
-        ],
+        artifactNotices: [{ file: 'go.mod', message: 'some notice' }],
         reuseExistingBranch: false,
         updatedArtifacts: [
-          {
-            contents: 'some content',
-            path: 'go.mod',
-            type: 'addition',
-          },
+          { contents: 'some content', path: 'go.mod', type: 'addition' },
         ],
         updatedPackageFiles: [
-          {
-            contents: 'some new content',
-            path: 'go.mod',
-            type: 'addition',
-          },
+          { contents: 'some new content', path: 'go.mod', type: 'addition' },
         ],
       });
     });
@@ -291,9 +271,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       await getUpdatedPackageFiles(config);
       expect(composer.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
-          config: expect.objectContaining({
-            lockFiles: ['composer.lock'],
-          }),
+          config: expect.objectContaining({ lockFiles: ['composer.lock'] }),
         }),
       );
     });
@@ -330,9 +308,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       await getUpdatedPackageFiles(config);
       expect(composer.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
-          config: expect.objectContaining({
-            lockFiles: ['composer.lock'],
-          }),
+          config: expect.objectContaining({ lockFiles: ['composer.lock'] }),
         }),
       );
     });
@@ -366,9 +342,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       await getUpdatedPackageFiles(config);
       expect(composer.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
-          config: expect.objectContaining({
-            lockFiles: ['composer.lock'],
-          }),
+          config: expect.objectContaining({ lockFiles: ['composer.lock'] }),
         }),
       );
     });
@@ -449,12 +423,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
       composer.updateArtifacts.mockResolvedValueOnce([
-        {
-          artifactError: {
-            lockFile: 'composer.lock',
-            stderr: 'some error',
-          },
-        },
+        { artifactError: { lockFile: 'composer.lock', stderr: 'some error' } },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -471,12 +440,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
-        {
-          artifactError: {
-            lockFile: 'composer.lock',
-            stderr: 'some error',
-          },
-        },
+        { artifactError: { lockFile: 'composer.lock', stderr: 'some error' } },
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
@@ -568,11 +532,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'abc.tf',
-            contents: 'existing content',
-          },
+          { type: 'addition', path: 'abc.tf', contents: 'existing content' },
         ],
       });
     });
@@ -585,9 +545,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: '',
         isLockfileUpdate: true,
       });
-      npm.updateLockedDependency.mockResolvedValue({
-        status: 'unsupported',
-      });
+      npm.updateLockedDependency.mockResolvedValue({ status: 'unsupported' });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchInlineSnapshot(`
         {
@@ -663,11 +621,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'package.json',
-            contents: 'new version',
-          },
+          { type: 'addition', path: 'package.json', contents: 'new version' },
         ],
       });
     });
@@ -687,11 +641,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'Chart.yaml',
-            contents: 'version: 0.0.2',
-          },
+          { type: 'addition', path: 'Chart.yaml', contents: 'version: 0.0.2' },
         ],
       });
     });
@@ -892,14 +842,8 @@ describe('workers/repository/update/branch/get-updated', () => {
         });
         config.packageFiles = {
           'pip-compile': [
-            {
-              packageFile: 'requirement.in',
-              deps: [],
-            },
-            {
-              packageFile: 'requirements-dev.in',
-              deps: [],
-            },
+            { packageFile: 'requirement.in', deps: [] },
+            { packageFile: 'requirements-dev.in', deps: [] },
           ],
         };
 

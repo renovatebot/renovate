@@ -51,14 +51,8 @@ describe('modules/manager/bazel/extract', () => {
           currentDigest: '0356bef3fbbabec5f0e196ecfacdeb6db62d48c0',
           packageName: 'google/subpar',
         },
-        {
-          currentValue: '0.6.0',
-          packageName: 'bazelbuild/bazel-skylib',
-        },
-        {
-          currentValue: '0.5.0',
-          packageName: 'bazelbuild/stardoc',
-        },
+        { currentValue: '0.6.0', packageName: 'bazelbuild/bazel-skylib' },
+        { currentValue: '0.5.0', packageName: 'bazelbuild/stardoc' },
       ]);
     });
 

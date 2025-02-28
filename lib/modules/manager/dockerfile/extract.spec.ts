@@ -1333,11 +1333,7 @@ describe('modules/manager/dockerfile/extract', () => {
     const res = extractPackageFile(
       'FROM index.docker.io/myName/myPackage:0.6.2\n',
       'Dockerfile',
-      {
-        registryAliases: {
-          'docker.io': 'my-docker-mirror.registry.com',
-        },
-      },
+      { registryAliases: { 'docker.io': 'my-docker-mirror.registry.com' } },
     );
     expect(res).toEqual({
       deps: [

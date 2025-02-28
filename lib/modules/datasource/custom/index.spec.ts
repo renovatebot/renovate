@@ -23,9 +23,7 @@ describe('modules/datasource/custom/index', () => {
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
-        customDatasources: {
-          foo: {},
-        },
+        customDatasources: { foo: {} },
       });
       expect(result).toBeNull();
     });
@@ -45,46 +43,35 @@ describe('modules/datasource/custom/index', () => {
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'aPackageName',
         customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-          },
+          foo: { defaultRegistryUrlTemplate: 'https://example.com/v1' },
         },
       });
       expect(result).toBeNull();
     });
 
     it('return null if schema validation fails', async () => {
-      httpMock.scope('https://example.com').get('/v1').reply(200, {
-        version: 'v1.0.0',
-      });
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, { version: 'v1.0.0' });
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
         customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-          },
+          foo: { defaultRegistryUrlTemplate: 'https://example.com/v1' },
         },
       });
       expect(result).toBeNull();
     });
 
     it('return releases for api directly exposing in renovate format', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'v1.0.0' }] };
       httpMock.scope('https://example.com').get('/v1').reply(200, expected);
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
         customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-          },
+          foo: { defaultRegistryUrlTemplate: 'https://example.com/v1' },
         },
       });
       expect(result).toEqual(expected);
@@ -92,29 +79,17 @@ describe('modules/datasource/custom/index', () => {
 
     it('return releases with digests for api directly exposing in renovate format', async () => {
       const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-            newDigest: '0123456789abcdef',
-          },
-        ],
+        releases: [{ version: 'v1.0.0', newDigest: '0123456789abcdef' }],
       };
       const content = {
-        releases: [
-          {
-            version: 'v1.0.0',
-            digest: '0123456789abcdef',
-          },
-        ],
+        releases: [{ version: 'v1.0.0', digest: '0123456789abcdef' }],
       };
       httpMock.scope('https://example.com').get('/v1').reply(200, content);
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
         customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-          },
+          foo: { defaultRegistryUrlTemplate: 'https://example.com/v1' },
         },
       });
       expect(result).toEqual(expected);
@@ -122,28 +97,16 @@ describe('modules/datasource/custom/index', () => {
 
     it('return releases with tags and other optional fields for api directly exposing in renovate format', async () => {
       const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-        tags: {
-          latest: 'v1.0.0',
-        },
+        releases: [{ version: 'v1.0.0' }],
+        tags: { latest: 'v1.0.0' },
         sourceUrl: 'https://example.com/foo.git',
         sourceDirectory: '/',
         changelogUrl: 'https://example.com/foo/blob/main/CHANGELOG.md',
         homepage: 'https://example.com/foo',
       };
       const content = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-        tags: {
-          latest: 'v1.0.0',
-        },
+        releases: [{ version: 'v1.0.0' }],
+        tags: { latest: 'v1.0.0' },
         sourceUrl: 'https://example.com/foo.git',
         sourceDirectory: '/',
         changelogUrl: 'https://example.com/foo/blob/main/CHANGELOG.md',
@@ -155,9 +118,7 @@ describe('modules/datasource/custom/index', () => {
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
         customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-          },
+          foo: { defaultRegistryUrlTemplate: 'https://example.com/v1' },
         },
       });
       expect(result).toEqual(expected);
@@ -166,23 +127,15 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for plain text API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
       httpMock
         .scope('https://example.com')
         .get('/v1')
-        .reply(200, '1.0.0\n2.0.0\n3.0.0', {
-          'Content-Type': 'text/plain',
-        });
+        .reply(200, '1.0.0\n2.0.0\n3.0.0', { 'Content-Type': 'text/plain' });
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
@@ -199,15 +152,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for plain text API and trim the content', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
       httpMock
@@ -280,16 +227,11 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases for plain text API when only returns a single version', async () => {
-      const expected = {
-        releases: [
-          {
-            version: '1.0.0',
-          },
-        ],
-      };
-      httpMock.scope('https://example.com').get('/v1').reply(200, '1.0.0', {
-        'Content-Type': 'text/plain',
-      });
+      const expected = { releases: [{ version: '1.0.0' }] };
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, '1.0.0', { 'Content-Type': 'text/plain' });
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
@@ -306,15 +248,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for yaml API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
 
@@ -325,9 +261,10 @@ describe('modules/datasource/custom/index', () => {
           - version: 3.0.0
       `;
 
-      httpMock.scope('https://example.com').get('/v1').reply(200, yaml, {
-        'Content-Type': 'text/yaml',
-      });
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, yaml, { 'Content-Type': 'text/yaml' });
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -346,15 +283,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for yaml file directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
 
@@ -382,15 +313,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for json file directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
 
@@ -436,15 +361,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases for plain text file directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
-          {
-            version: '1.0.0',
-          },
-          {
-            version: '2.0.0',
-          },
-          {
-            version: '3.0.0',
-          },
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
         ],
       };
 
@@ -469,13 +388,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return release when templating registryUrl', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'v1.0.0' }] };
       httpMock
         .scope('https://example.com')
         .get('/v1/myPackage')
@@ -494,26 +407,14 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return release with templated path', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'v1.0.0' }] };
 
       httpMock
         .scope('https://example.com')
         .get('/v1')
         .reply(200, {
           myPackage: expected,
-          otherPackage: {
-            releases: [
-              {
-                version: 'v2.0.0',
-              },
-            ],
-          },
+          otherPackage: { releases: [{ version: 'v2.0.0' }] },
         });
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -529,13 +430,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return release with templated path with multiple layers', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'v1.0.0',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'v1.0.0' }] };
 
       httpMock
         .scope('https://example.com')
@@ -543,13 +438,7 @@ describe('modules/datasource/custom/index', () => {
         .reply(200, {
           groupName: {
             myPackage: expected,
-            otherPackage: {
-              releases: [
-                {
-                  version: 'v2.0.0',
-                },
-              ],
-            },
+            otherPackage: { releases: [{ version: 'v2.0.0' }] },
           },
         });
       const result = await getPkgReleases({
@@ -566,13 +455,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases from HTML links', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'package-1.0.tar.gz',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'package-1.0.tar.gz' }] };
 
       const content = html`
         <html>
@@ -585,9 +468,7 @@ describe('modules/datasource/custom/index', () => {
       httpMock
         .scope('https://example.com')
         .get('/index.html')
-        .reply(200, content, {
-          'Content-Type': 'text/html',
-        });
+        .reply(200, content, { 'Content-Type': 'text/html' });
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -604,13 +485,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases from HTML links - local file', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'package-1.0.tar.gz',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'package-1.0.tar.gz' }] };
 
       const content = html`
         <html>
@@ -656,15 +531,9 @@ describe('modules/datasource/custom/index', () => {
     it('return releases from nginx directory listing', async () => {
       const expected = {
         releases: [
-          {
-            version: 'nginx-0.1.0.tar.gz',
-          },
-          {
-            version: 'nginx-0.1.1.tar.gz',
-          },
-          {
-            version: 'nginx-0.1.11.tar.gz',
-          },
+          { version: 'nginx-0.1.0.tar.gz' },
+          { version: 'nginx-0.1.1.tar.gz' },
+          { version: 'nginx-0.1.11.tar.gz' },
         ],
       };
 
@@ -675,9 +544,7 @@ describe('modules/datasource/custom/index', () => {
           'Content-Type': 'text/html',
         })
         .get('/download')
-        .reply(301, undefined, {
-          Location: 'http://nginx.org/download/',
-        });
+        .reply(301, undefined, { Location: 'http://nginx.org/download/' });
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -694,13 +561,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases for malformed HTML', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'package-1.0.tar.gz',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'package-1.0.tar.gz' }] };
 
       const content = html`
         <html>
@@ -712,9 +573,7 @@ describe('modules/datasource/custom/index', () => {
       httpMock
         .scope('https://example.com')
         .get('/malformed.html')
-        .reply(200, content, {
-          'Content-Type': 'text/html',
-        });
+        .reply(200, content, { 'Content-Type': 'text/html' });
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -731,13 +590,7 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases for incomplete HTML', async () => {
-      const expected = {
-        releases: [
-          {
-            version: 'package-1.0.tar.gz',
-          },
-        ],
-      };
+      const expected = { releases: [{ version: 'package-1.0.tar.gz' }] };
 
       const content = html`
         <html>
@@ -749,9 +602,7 @@ describe('modules/datasource/custom/index', () => {
       httpMock
         .scope('https://example.com')
         .get('/incomplete.html')
-        .reply(200, content, {
-          'Content-Type': 'text/html',
-        });
+        .reply(200, content, { 'Content-Type': 'text/html' });
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,

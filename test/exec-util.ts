@@ -20,10 +20,7 @@ export interface ExecSnapshot {
 export type ExecSnapshots = ExecSnapshot[];
 
 function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
-  const snapshot = {
-    cmd,
-    options,
-  };
+  const snapshot = { cmd, options };
 
   const cwd = upath.toUnix(process.cwd());
 

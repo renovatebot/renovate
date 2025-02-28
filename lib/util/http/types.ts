@@ -6,9 +6,7 @@ import type {
 } from 'got';
 import type { HttpCacheProvider } from './cache/types';
 
-export type GotContextOptions = {
-  authType?: string;
-} & Record<string, unknown>;
+export type GotContextOptions = { authType?: string } & Record<string, unknown>;
 
 // TODO: Move options to context
 export type GotOptions = GotBufferOptions | GotJSONOptions;

@@ -176,13 +176,7 @@ describe('modules/platform/github/issue', () => {
 
       GithubIssueCache.deleteIssue(1);
 
-      expect(cache).toEqual({
-        platform: {
-          github: {
-            issuesCache: {},
-          },
-        },
-      });
+      expect(cache).toEqual({ platform: { github: { issuesCache: {} } } });
     });
 
     it('reconciles cache', () => {

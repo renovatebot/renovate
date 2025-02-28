@@ -27,14 +27,8 @@ describe('modules/datasource/hermit/index', () => {
         .get(releaseUrl)
         .reply(200, {
           assets: [
-            {
-              name: 'source.tar.gz',
-              url: `${githubApiHost}${sourceAssetUrl}`,
-            },
-            {
-              name: 'index.json',
-              url: `${githubApiHost}${indexAssetUrl}`,
-            },
+            { name: 'source.tar.gz', url: `${githubApiHost}${sourceAssetUrl}` },
+            { name: 'index.json', url: `${githubApiHost}${indexAssetUrl}` },
           ],
         });
 
@@ -47,30 +41,12 @@ describe('modules/datasource/hermit/index', () => {
 
       expect(res).toStrictEqual({
         releases: [
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '1.17.9',
-          },
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '1.17.10',
-          },
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '1.18',
-          },
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '1.18.1',
-          },
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '@1.17',
-          },
-          {
-            sourceUrl: 'https://github.com/golang/golang',
-            version: '@1.18',
-          },
+          { sourceUrl: 'https://github.com/golang/golang', version: '1.17.9' },
+          { sourceUrl: 'https://github.com/golang/golang', version: '1.17.10' },
+          { sourceUrl: 'https://github.com/golang/golang', version: '1.18' },
+          { sourceUrl: 'https://github.com/golang/golang', version: '1.18.1' },
+          { sourceUrl: 'https://github.com/golang/golang', version: '@1.17' },
+          { sourceUrl: 'https://github.com/golang/golang', version: '@1.18' },
         ],
         sourceUrl: 'https://github.com/golang/golang',
       });
@@ -82,24 +58,15 @@ describe('modules/datasource/hermit/index', () => {
         .get(releaseUrl)
         .reply(200, {
           assets: [
-            {
-              name: 'source.tar.gz',
-              url: `${githubApiHost}${sourceAssetUrl}`,
-            },
-            {
-              name: 'index.json',
-              url: `${githubApiHost}${indexAssetUrl}`,
-            },
+            { name: 'source.tar.gz', url: `${githubApiHost}${sourceAssetUrl}` },
+            { name: 'index.json', url: `${githubApiHost}${indexAssetUrl}` },
           ],
         });
 
       httpMock.scope(githubApiHost).get(indexAssetUrl).reply(200, []);
 
       await expect(
-        datasource.getReleases({
-          packageName: 'go',
-          registryUrl,
-        }),
+        datasource.getReleases({ packageName: 'go', registryUrl }),
       ).resolves.toBeNull();
     });
 
@@ -109,24 +76,15 @@ describe('modules/datasource/hermit/index', () => {
         .get(releaseUrl)
         .reply(200, {
           assets: [
-            {
-              name: 'source.tar.gz',
-              url: `${githubApiHost}${sourceAssetUrl}`,
-            },
-            {
-              name: 'index.json',
-              url: `${githubApiHost}${indexAssetUrl}`,
-            },
+            { name: 'source.tar.gz', url: `${githubApiHost}${sourceAssetUrl}` },
+            { name: 'index.json', url: `${githubApiHost}${indexAssetUrl}` },
           ],
         });
 
       httpMock.scope(githubApiHost).get(indexAssetUrl).reply(404);
 
       await expect(
-        datasource.getReleases({
-          packageName: 'go',
-          registryUrl,
-        }),
+        datasource.getReleases({ packageName: 'go', registryUrl }),
       ).rejects.toThrow();
     });
 
@@ -165,9 +123,7 @@ describe('modules/datasource/hermit/index', () => {
 
     it('should get null result on empty registryUrl', async () => {
       await expect(
-        datasource.getReleases({
-          packageName: 'go',
-        }),
+        datasource.getReleases({ packageName: 'go' }),
       ).resolves.toBeNull();
     });
 
@@ -177,18 +133,12 @@ describe('modules/datasource/hermit/index', () => {
         .get(releaseUrl)
         .reply(200, {
           assets: [
-            {
-              name: 'source.tar.gz',
-              url: `${githubApiHost}${sourceAssetUrl}`,
-            },
+            { name: 'source.tar.gz', url: `${githubApiHost}${sourceAssetUrl}` },
           ],
         });
 
       await expect(
-        datasource.getReleases({
-          packageName: 'go',
-          registryUrl,
-        }),
+        datasource.getReleases({ packageName: 'go', registryUrl }),
       ).resolves.toBeNull();
     });
 
@@ -198,10 +148,7 @@ describe('modules/datasource/hermit/index', () => {
         .get(releaseUrl)
         .reply(200, {
           assets: [
-            {
-              name: 'index.json',
-              url: `${githubApiHost}${indexAssetUrl}`,
-            },
+            { name: 'index.json', url: `${githubApiHost}${indexAssetUrl}` },
           ],
         });
 
@@ -211,10 +158,7 @@ describe('modules/datasource/hermit/index', () => {
         .reply(200, 'invalid content');
 
       await expect(
-        datasource.getReleases({
-          packageName: 'go',
-          registryUrl,
-        }),
+        datasource.getReleases({ packageName: 'go', registryUrl }),
       ).resolves.toBeNull();
     });
 

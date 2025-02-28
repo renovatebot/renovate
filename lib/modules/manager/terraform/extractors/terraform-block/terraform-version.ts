@@ -24,9 +24,7 @@ export class TerraformVersionExtractor extends DependencyExtractor {
       }
 
       dependencies.push(
-        this.analyseTerraformVersion({
-          currentValue: requiredVersion,
-        }),
+        this.analyseTerraformVersion({ currentValue: requiredVersion }),
       );
     }
     return dependencies;

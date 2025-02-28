@@ -15,15 +15,8 @@ export const BatectConfigSchema = Yaml.pipe(
       .catch([]),
     include: LooseArray(
       z.union([
-        z.object({
-          type: z.literal('git'),
-          repo: z.string(),
-          ref: z.string(),
-        }),
-        z.object({
-          type: z.literal('file'),
-          path: z.string(),
-        }),
+        z.object({ type: z.literal('git'), repo: z.string(), ref: z.string() }),
+        z.object({ type: z.literal('file'), path: z.string() }),
         z.string().transform((path) => ({ type: 'file' as const, path })),
       ]),
     ).catch([]),
@@ -49,11 +42,7 @@ export const BatectConfigSchema = Yaml.pipe(
     }
   }
 
-  return {
-    imageDependencies,
-    bundleDependencies,
-    fileIncludes,
-  };
+  return { imageDependencies, bundleDependencies, fileIncludes };
 });
 
 export type BatectConfig = z.infer<typeof BatectConfigSchema>;

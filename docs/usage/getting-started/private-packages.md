@@ -70,10 +70,7 @@ Other credential terms are not supported yet.
 ```json title="Example host rules"
 {
   "hostRules": [
-    {
-      "matchHost": "registry.npmjs.org",
-      "token": "abc123"
-    },
+    { "matchHost": "registry.npmjs.org", "token": "abc123" },
     {
       "matchHost": "https://registry.company.com/pypi-simple/",
       "username": "engineering",
@@ -93,10 +90,7 @@ If you need to use different credentials for a specific GitHub repo, then you ca
 ```json
 {
   "hostRules": [
-    {
-      "matchHost": "https://api.github.com/repos/org/repo",
-      "token": "abc123"
-    },
+    { "matchHost": "https://api.github.com/repos/org/repo", "token": "abc123" },
     {
       "matchHost": "https://github.domain.com/api/v3/repos/org/repo",
       "token": "abc123"
@@ -287,9 +281,7 @@ This merge approach is similar to how `npm` itself behaves if `.npmrc` is found 
 If you are using the main npmjs registry then you can configure only the `npmToken` instead:
 
 ```json
-{
-  "npmToken": "abcdefghi-1234-jklmno-aac6-12345567889"
-}
+{ "npmToken": "abcdefghi-1234-jklmno-aac6-12345567889" }
 ```
 
 #### Add an encrypted npm token to Renovate config
@@ -349,9 +341,7 @@ The end-result looks like this:
     {
       "matchHost": "https://npm.pkg.github.com/",
       "hostType": "npm",
-      "encrypted": {
-        "token": "<Encrypted PAT Token>"
-      }
+      "encrypted": { "token": "<Encrypted PAT Token>" }
     }
   ],
   "npmrc": "@organizationName:registry=https://npm.pkg.github.com/"
@@ -372,9 +362,7 @@ For example, the Renovate configuration:
     {
       "matchHost": "https://npm.pkg.github.com/",
       "hostType": "npm",
-      "encrypted": {
-        "token": "<Encrypted PAT Token>"
-      }
+      "encrypted": { "token": "<Encrypted PAT Token>" }
     }
   ]
 }
@@ -484,9 +472,7 @@ private-package==1.2.3
 
 ```json
 {
-  "pip-compile": {
-    "fileMatch": ["requirements.in"]
-  },
+  "pip-compile": { "fileMatch": ["requirements.in"] },
   "hostRules": [
     {
       "matchHost": "pypi.my.domain",
@@ -603,10 +589,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
    ```json
    {
      "hostRules": [
-       {
-         "matchHost": "github.com",
-         "token": "{{ secrets.GITHUB_COM_TOKEN }}"
-       }
+       { "matchHost": "github.com", "token": "{{ secrets.GITHUB_COM_TOKEN }}" }
      ]
    }
    ```

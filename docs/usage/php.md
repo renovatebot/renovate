@@ -61,9 +61,7 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
     {
       "matchHost": "bearer-auth.for.vendor.com",
       "hostType": "packagist",
-      "encrypted": {
-        "token": "<your-encrypted-token>"
-      }
+      "encrypted": { "token": "<your-encrypted-token>" }
     }
   ]
 }

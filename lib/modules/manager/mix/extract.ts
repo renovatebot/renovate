@@ -59,10 +59,7 @@ export async function extractPackageFile(
           }
         }
 
-        const dep: PackageDependency = {
-          depName: app,
-          depType: 'prod',
-        };
+        const dep: PackageDependency = { depName: app, depType: 'prod' };
 
         if (git ?? github) {
           dep.currentDigest = ref;

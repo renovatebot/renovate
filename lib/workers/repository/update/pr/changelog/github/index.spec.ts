@@ -55,10 +55,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
 
     it('returns null if @types', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          currentVersion: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, currentVersion: undefined }),
       ).toBeNull();
     });
 
@@ -91,11 +88,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
     });
 
     it('works without Github', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
@@ -116,11 +109,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
     });
 
     it('uses GitHub tags', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
@@ -142,10 +131,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
 
     it('filters unnecessary warns', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          packageName: '@renovate/no',
-        }),
+        await getChangeLogJSON({ ...upgrade, packageName: '@renovate/no' }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
@@ -168,10 +154,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
 
     it('supports node engines', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depType: 'engines',
-        }),
+        await getChangeLogJSON({ ...upgrade, depType: 'engines' }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
@@ -194,49 +177,32 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
 
     it('handles no sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: undefined }),
       ).toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'http://example.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'http://example.com' }),
       ).toBeNull();
     });
 
     it('handles missing Github token', async () => {
       GlobalConfig.set({ githubTokenWarn: true });
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://github.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'https://github.com' }),
       ).toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles suppressed Github warnings', async () => {
       GlobalConfig.set({ githubTokenWarn: false });
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://github.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'https://github.com' }),
       ).toBeNull();
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          releases: [],
-        }),
-      ).toBeNull();
+      expect(await getChangeLogJSON({ ...upgrade, releases: [] })).toBeNull();
     });
 
     it('handles not enough releases', async () => {
@@ -342,11 +308,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
           { version: '0.1.1', gitRef: 'npm_1.0.0' },
         ],
       });
-      expect(
-        await getChangeLogJSON({
-          ...upgradeData,
-        }),
-      ).toMatchObject({
+      expect(await getChangeLogJSON({ ...upgradeData })).toMatchObject({
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',

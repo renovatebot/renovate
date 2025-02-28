@@ -1,21 +1,12 @@
 {
   "name": "Renovate",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "build": { "dockerfile": "Dockerfile" },
   "init": true,
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "8gb",
-    "storage": "32gb"
-  },
+  "hostRequirements": { "cpus": 4, "memory": "8gb", "storage": "32gb" },
   "customizations": {
     "vscode": {
       "terminal.integrated.profiles.linux": {
-        "bash": {
-          "path": "bash",
-          "icon": "terminal-bash"
-        }
+        "bash": { "path": "bash", "icon": "terminal-bash" }
       },
       "extensions": [
         "dbaeumer.vscode-eslint",

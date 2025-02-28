@@ -89,10 +89,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
-    config: {
-      datasource: GithubTagsDatasource.id,
-      packageName: 'aws/aws-cli',
-    },
+    config: { datasource: GithubTagsDatasource.id, packageName: 'aws/aws-cli' },
   },
   bun: {
     asdfPluginUrl: 'https://github.com/cometkim/asdf-bun',
@@ -157,9 +154,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   dart: {
     asdfPluginUrl: 'https://github.com/PatOConnor43/asdf-dart',
-    config: {
-      datasource: DartVersionDatasource.id,
-    },
+    config: { datasource: DartVersionDatasource.id },
   },
   deno: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-deno',
@@ -209,9 +204,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   elixir: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-elixir',
-    config: {
-      datasource: HexpmBobDatasource.id,
-    },
+    config: { datasource: HexpmBobDatasource.id },
   },
   elm: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-elm',
@@ -502,10 +495,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   nodejs: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-nodejs',
-    config: {
-      depName: 'node',
-      datasource: NodeVersionDatasource.id,
-    },
+    config: { depName: 'node', datasource: NodeVersionDatasource.id },
   },
   ocaml: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-ocaml',
@@ -564,10 +554,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   poetry: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-poetry',
-    config: {
-      datasource: PypiDatasource.id,
-      packageName: 'poetry',
-    },
+    config: { datasource: PypiDatasource.id, packageName: 'poetry' },
   },
   'pre-commit': {
     asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pre-commit.git',
@@ -757,10 +744,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   zig: {
     asdfPluginUrl: 'https://github.com/cheetah/asdf-zig',
-    config: {
-      datasource: GithubTagsDatasource.id,
-      packageName: 'ziglang/zig',
-    },
+    config: { datasource: GithubTagsDatasource.id, packageName: 'ziglang/zig' },
   },
   maestro: {
     asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-maestro',
@@ -795,10 +779,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   tuist: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-tuist',
-    config: {
-      datasource: GithubTagsDatasource.id,
-      packageName: 'tuist/tuist',
-    },
+    config: { datasource: GithubTagsDatasource.id, packageName: 'tuist/tuist' },
   },
   typos: {
     asdfPluginUrl: 'https://github.com/aschiavon91/asdf-typos',

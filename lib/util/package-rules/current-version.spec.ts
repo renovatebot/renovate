@@ -12,9 +12,7 @@ describe('util/package-rules/current-version', () => {
           versioning: null,
           currentValue: '1.2.3',
         },
-        {
-          matchCurrentVersion: '1.2.3',
-        },
+        { matchCurrentVersion: '1.2.3' },
       );
       expect(result).toBeTrue();
     });
@@ -24,13 +22,8 @@ describe('util/package-rules/current-version', () => {
         throw new Error();
       });
       const result = matcher.matches(
-        {
-          versioning: 'pep440',
-          currentValue: '===>1.2.3',
-        },
-        {
-          matchCurrentVersion: '1.2.3',
-        },
+        { versioning: 'pep440', currentValue: '===>1.2.3' },
+        { matchCurrentVersion: '1.2.3' },
       );
       expect(result).toBeFalse();
       expect(spy.mock.calls).toHaveLength(1);
@@ -38,13 +31,8 @@ describe('util/package-rules/current-version', () => {
 
     it('return true for a valid match', () => {
       const result = matcher.matches(
-        {
-          versioning: 'pep440',
-          currentValue: '1.2.3',
-        },
-        {
-          matchCurrentVersion: '<1.2.3.5',
-        },
+        { versioning: 'pep440', currentValue: '1.2.3' },
+        { matchCurrentVersion: '<1.2.3.5' },
       );
       expect(result).toBeTrue();
     });
@@ -56,22 +44,15 @@ describe('util/package-rules/current-version', () => {
           currentValue: 'aaaaaa',
           lockedVersion: 'bbbbbb',
         },
-        {
-          matchCurrentVersion: 'bbbbbb',
-        },
+        { matchCurrentVersion: 'bbbbbb' },
       );
       expect(result).toBeFalse();
     });
 
     it('case insensitive match', () => {
       const result = matcher.matches(
-        {
-          versioning: 'pep440',
-          currentValue: 'bbbbbb',
-        },
-        {
-          matchCurrentVersion: '/BBB.*/i',
-        },
+        { versioning: 'pep440', currentValue: 'bbbbbb' },
+        { matchCurrentVersion: '/BBB.*/i' },
       );
       expect(result).toBeTrue();
     });
@@ -83,9 +64,7 @@ describe('util/package-rules/current-version', () => {
           currentValue: '"~> 1.1.0"',
           lockedVersion: '1.1.4',
         },
-        {
-          matchCurrentVersion: '/^v?[~ -]?0/',
-        },
+        { matchCurrentVersion: '/^v?[~ -]?0/' },
       );
       expect(result).toBeFalse();
     });
@@ -97,48 +76,31 @@ describe('util/package-rules/current-version', () => {
           currentValue: '"~> 0.1.0"',
           lockedVersion: '0.1.0',
         },
-        {
-          matchCurrentVersion: '/^v?[~ -]?0/',
-        },
+        { matchCurrentVersion: '/^v?[~ -]?0/' },
       );
       expect(result).toBeTrue();
     });
 
     it('return false for regex value match', () => {
       const result = matcher.matches(
-        {
-          versioning: 'ruby',
-          currentValue: '"~> 0.1.0"',
-        },
-        {
-          matchCurrentVersion: '/^v?[~ -]?0/',
-        },
+        { versioning: 'ruby', currentValue: '"~> 0.1.0"' },
+        { matchCurrentVersion: '/^v?[~ -]?0/' },
       );
       expect(result).toBeFalse();
     });
 
     it('return true for same-major verisioning if version lies in expected range', () => {
       const result = matcher.matches(
-        {
-          versioning: 'same-major',
-          currentValue: '6.0.300',
-        },
-        {
-          matchCurrentVersion: '6.0.400',
-        },
+        { versioning: 'same-major', currentValue: '6.0.300' },
+        { matchCurrentVersion: '6.0.400' },
       );
       expect(result).toBeTrue();
     });
 
     it('return false for same-major verisioning if version lies outside of expected range', () => {
       const result = matcher.matches(
-        {
-          versioning: 'same-major',
-          currentValue: '6.0.300',
-        },
-        {
-          matchCurrentVersion: '6.0.100',
-        },
+        { versioning: 'same-major', currentValue: '6.0.300' },
+        { matchCurrentVersion: '6.0.100' },
       );
       expect(result).toBeFalse();
     });

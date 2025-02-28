@@ -25,9 +25,7 @@ function testSqlite() {
     try {
       if (e.status === 1) {
         console.log(`Retry re2 install ...`);
-        execSync('pnpm rb re2', {
-          stdio: 'inherit',
-        });
+        execSync('pnpm rb re2', { stdio: 'inherit' });
         testRe2();
         return;
       }
@@ -48,9 +46,7 @@ function testSqlite() {
     try {
       if (e.status === 1) {
         console.log(`Retry better-sqlite3 install ...`);
-        execSync('pnpm rb better-sqlite3', {
-          stdio: 'inherit',
-        });
+        execSync('pnpm rb better-sqlite3', { stdio: 'inherit' });
         testSqlite();
         return;
       }

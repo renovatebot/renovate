@@ -34,10 +34,7 @@ describe('modules/manager/composer/schema', () => {
     it('parses repositories', () => {
       expect(
         ReposArray.parse([
-          {
-            type: 'composer',
-            url: 'https://wpackagist.org',
-          },
+          { type: 'composer', url: 'https://wpackagist.org' },
           { name: 'someGit', type: 'vcs', url: 'https://some-vcs.com' },
           { name: 'somePath', type: 'path', url: '/some/path' },
           { packagist: false },

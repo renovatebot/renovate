@@ -402,10 +402,7 @@ describe('util/exec/index', () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: {
-          dockerUser: 'foobar',
-          binarySource: 'docker',
-        },
+        adminConfig: { dockerUser: 'foobar', binarySource: 'docker' },
       },
     ],
 
@@ -460,10 +457,7 @@ describe('util/exec/index', () => {
             maxBuffer: 10485760,
           },
         ],
-        adminConfig: {
-          dockerChildPrefix: 'myprefix_',
-          binarySource: 'docker',
-        },
+        adminConfig: { dockerChildPrefix: 'myprefix_', binarySource: 'docker' },
       },
     ],
 
@@ -527,9 +521,7 @@ describe('util/exec/index', () => {
       {
         processEnv,
         inCmd,
-        inOpts: {
-          timeout: 20 * 60 * 1000,
-        },
+        inOpts: { timeout: 20 * 60 * 1000 },
         outCmd,
         outOpts: [
           {
@@ -569,9 +561,7 @@ describe('util/exec/index', () => {
       {
         processEnv,
         inCmd,
-        inOpts: {
-          maxBuffer: 1024,
-        },
+        inOpts: { maxBuffer: 1024 },
         outCmd,
         outOpts: [
           {
@@ -597,18 +587,13 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: {
-              ...containerbaseEnv,
-              CUSTOM_KEY: 'CUSTOM_VALUE',
-            },
+            env: { ...containerbaseEnv, CUSTOM_KEY: 'CUSTOM_VALUE' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
         adminConfig: {
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
+          customEnvVariables: { CUSTOM_KEY: 'CUSTOM_VALUE' },
           binarySource: 'docker',
         },
       },
@@ -625,18 +610,13 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: {
-              ...containerbaseEnv,
-              CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-            },
+            env: { ...containerbaseEnv, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
         adminConfig: {
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
+          customEnvVariables: { CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
           binarySource: 'docker',
         },
       },
@@ -659,18 +639,13 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: {
-              ...containerbaseEnv,
-              CUSTOM_KEY: 'CUSTOM_VALUE',
-            },
+            env: { ...containerbaseEnv, CUSTOM_KEY: 'CUSTOM_VALUE' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
         adminConfig: {
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_VALUE',
-          },
+          customEnvVariables: { CUSTOM_KEY: 'CUSTOM_VALUE' },
           binarySource: 'docker',
         },
       },
@@ -693,18 +668,13 @@ describe('util/exec/index', () => {
           {
             cwd,
             encoding,
-            env: {
-              ...containerbaseEnv,
-              CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-            },
+            env: { ...containerbaseEnv, CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
             timeout: 900000,
             maxBuffer: 10485760,
           },
         ],
         adminConfig: {
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
+          customEnvVariables: { CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
           binarySource: 'docker',
         },
       },
@@ -715,10 +685,7 @@ describe('util/exec/index', () => {
       {
         processEnv,
         inCmd,
-        inOpts: {
-          ignoreStdout: true,
-          cwdFile: '/somefile',
-        },
+        inOpts: { ignoreStdout: true, cwdFile: '/somefile' },
         outCmd,
         outOpts: [
           {
@@ -742,9 +709,7 @@ describe('util/exec/index', () => {
           PATH: '/home/user-a/bin;/usr/local/bin',
         },
         inCmd,
-        inOpts: {
-          cwd,
-        },
+        inOpts: { cwd },
         outCmd: [inCmd],
         outOpts: [
           {
@@ -765,9 +730,7 @@ describe('util/exec/index', () => {
           PATH: '/usr/src/app/repository-a/bin/;/home/user-a/bin;/usr/local/bin;',
         },
         adminConfig: {
-          customEnvVariables: {
-            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
-          },
+          customEnvVariables: { CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE' },
           binarySource: 'hermit',
         },
       },

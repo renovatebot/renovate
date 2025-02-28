@@ -20,10 +20,7 @@ describe('modules/manager/asdf/extract', () => {
       const res = extractPackageFile('unsupported 1.22.5\n');
       expect(res).toEqual({
         deps: [
-          {
-            depName: 'unsupported',
-            skipReason: 'unsupported-datasource',
-          },
+          { depName: 'unsupported', skipReason: 'unsupported-datasource' },
         ],
       });
     });
@@ -745,10 +742,7 @@ dummy 1.2.3
             depName: 'steampipe',
             extractVersion: '^v(?<version>\\S+)',
           },
-          {
-            depName: 'dummy',
-            skipReason: 'unsupported-datasource',
-          },
+          { depName: 'dummy', skipReason: 'unsupported-datasource' },
         ],
       });
     });
@@ -858,12 +852,7 @@ awscli    2.8.6
       });
       const unknownRes = extractPackageFile('java unknown-16.0.0+36');
       expect(unknownRes).toEqual({
-        deps: [
-          {
-            depName: 'java',
-            skipReason: 'unsupported-datasource',
-          },
-        ],
+        deps: [{ depName: 'java', skipReason: 'unsupported-datasource' }],
       });
     });
 
@@ -893,25 +882,14 @@ awscli    2.8.6
       });
       const unknownRes = extractPackageFile('scala 0.0.0');
       expect(unknownRes).toEqual({
-        deps: [
-          {
-            depName: 'scala',
-            skipReason: 'unsupported-datasource',
-          },
-        ],
+        deps: [{ depName: 'scala', skipReason: 'unsupported-datasource' }],
       });
     });
 
     describe('comment handling', () => {
       const validComments = [
-        {
-          entry: 'nodejs 16.16.0 # tidy comment',
-          expect: '16.16.0',
-        },
-        {
-          entry: 'nodejs 16.16.0 #sloppy-comment',
-          expect: '16.16.0',
-        },
+        { entry: 'nodejs 16.16.0 # tidy comment', expect: '16.16.0' },
+        { entry: 'nodejs 16.16.0 #sloppy-comment', expect: '16.16.0' },
       ];
 
       describe.each(validComments)(

@@ -38,10 +38,7 @@ export class LocalFs implements PlatformScm {
       fileList = stdout.split('\n');
     } catch {
       logger.debug('Could not get file list using git, using glob instead');
-      fileList ??= await glob('**', {
-        dot: true,
-        nodir: true,
-      });
+      fileList ??= await glob('**', { dot: true, nodir: true });
     }
 
     return fileList;

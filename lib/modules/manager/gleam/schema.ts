@@ -16,9 +16,7 @@ const Package = z.object({
 });
 
 export const ManifestToml = Toml.pipe(
-  z.object({
-    packages: z.array(Package).optional(),
-  }),
+  z.object({ packages: z.array(Package).optional() }),
 );
 
 export type GleamToml = z.infer<typeof GleamToml>;

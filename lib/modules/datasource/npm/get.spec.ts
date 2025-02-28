@@ -40,9 +40,7 @@ describe('modules/datasource/npm/get', () => {
       expect.assertions(2);
       httpMock
         .scope('https://test.org', {
-          reqheaders: {
-            authorization: 'Bearer XXX',
-          },
+          reqheaders: { authorization: 'Bearer XXX' },
         })
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
@@ -73,9 +71,7 @@ describe('modules/datasource/npm/get', () => {
       expect.assertions(2);
       httpMock
         .scope('https://test.org', {
-          reqheaders: {
-            authorization: 'Basic dGVzdDp0ZXN0',
-          },
+          reqheaders: { authorization: 'Basic dGVzdDp0ZXN0' },
         })
         .get(getPath(npmrc))
         .reply(200, { name: '@myco/test' });
@@ -122,9 +118,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://test.org', {
-        reqheaders: {
-          authorization: 'Basic dGVzdDp0ZXN0',
-        },
+        reqheaders: { authorization: 'Basic dGVzdDp0ZXN0' },
       })
       .get(getPath(npmrc))
       .reply(200, { name: '@myco/test' });
@@ -136,16 +130,11 @@ describe('modules/datasource/npm/get', () => {
   it('uses hostRules token auth', async () => {
     expect.assertions(1);
     const npmrc = ``;
-    hostRules.add({
-      matchHost: 'https://registry.npmjs.org',
-      token: 'XXX',
-    });
+    hostRules.add({ matchHost: 'https://registry.npmjs.org', token: 'XXX' });
 
     httpMock
       .scope('https://registry.npmjs.org', {
-        reqheaders: {
-          authorization: 'Bearer XXX',
-        },
+        reqheaders: { authorization: 'Bearer XXX' },
       })
       .get('/renovate')
       .reply(200, { name: 'renovate' });
@@ -165,9 +154,7 @@ describe('modules/datasource/npm/get', () => {
 
     httpMock
       .scope('https://registry.npmjs.org', {
-        reqheaders: {
-          authorization: 'Basic abc',
-        },
+        reqheaders: { authorization: 'Basic abc' },
       })
       .get('/renovate')
       .reply(200, { name: 'renovate' });
@@ -300,10 +287,7 @@ describe('modules/datasource/npm/get', () => {
   });
 
   it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
-    hostRules.add({
-      matchHost: 'registry.npmjs.org',
-      abortOnError: false,
-    });
+    hostRules.add({ matchHost: 'registry.npmjs.org', abortOnError: false });
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/npm-parse-error')
@@ -316,10 +300,7 @@ describe('modules/datasource/npm/get', () => {
 
   it('throw ExternalHostError when error happens on custom host when hostRules enables abortOnError', async () => {
     setNpmrc('registry=https://test.org');
-    hostRules.add({
-      matchHost: 'https://test.org',
-      abortOnError: true,
-    });
+    hostRules.add({ matchHost: 'https://test.org', abortOnError: true });
     httpMock
       .scope('https://test.org')
       .get('/npm-parse-error')
@@ -404,10 +385,7 @@ describe('modules/datasource/npm/get', () => {
       .get('/vue')
       .reply(200, {
         name: 'vue',
-        repository: {
-          type: 'git',
-          url: 'https://github.com/vuejs/vue.git',
-        },
+        repository: { type: 'git', url: 'https://github.com/vuejs/vue.git' },
         versions: {
           '2.0.0': {
             repository: {
@@ -420,9 +398,7 @@ describe('modules/datasource/npm/get', () => {
               type: 'git',
               url: 'https://github.com/vuejs/vue-next.git',
             },
-            engines: {
-              node: '>= 8.9.0',
-            },
+            engines: { node: '>= 8.9.0' },
           },
         },
         'dist-tags': { latest: '2.0.0' },
@@ -445,23 +421,12 @@ describe('modules/datasource/npm/get', () => {
       .get('/vue')
       .reply(200, {
         name: 'vue',
-        repository: {
-          type: 'git',
-          url: 'https://github.com/vuejs/vue',
-        },
+        repository: { type: 'git', url: 'https://github.com/vuejs/vue' },
         versions: {
-          '2.0.0': {
-            repository: 'vuejs/vue',
-          },
-          '3.0.0': {
-            repository: 'github:vuejs/vue-next',
-          },
-          '4.0.0': {
-            repository: 'gitlab:vuejs/vue',
-          },
-          '5.0.0': {
-            repository: 'bitbucket:vuejs/vue',
-          },
+          '2.0.0': { repository: 'vuejs/vue' },
+          '3.0.0': { repository: 'github:vuejs/vue-next' },
+          '4.0.0': { repository: 'gitlab:vuejs/vue' },
+          '5.0.0': { repository: 'bitbucket:vuejs/vue' },
         },
         'dist-tags': { latest: '2.0.0' },
       });
@@ -572,10 +537,7 @@ describe('modules/datasource/npm/get', () => {
     httpMock
       .scope('https://test.org')
       .get('/@neutrinojs%2Freact')
-      .reply(200, {
-        name: '@neutrinojs/react',
-        versions: { '1.0.0': {} },
-      });
+      .reply(200, { name: '@neutrinojs/react', versions: { '1.0.0': {} } });
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 

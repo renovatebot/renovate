@@ -76,11 +76,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       }
     }
 
-    return {
-      release,
-      prerelease,
-      compatibility,
-    };
+    return { release, prerelease, compatibility };
   }
 
   override isCompatible(version: string, current: string): boolean {

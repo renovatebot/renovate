@@ -11,12 +11,7 @@ const jsonnetfileLocalDependencies = Fixtures.get(
 );
 const jsonnetfileEmptyGitSource = JSON.stringify({
   version: 1,
-  dependencies: [
-    {
-      source: { git: {} },
-      version: 'v0.50.0',
-    },
-  ],
+  dependencies: [{ source: { git: {} }, version: 'v0.50.0' }],
 });
 
 describe('modules/manager/jsonnet-bundler/extract', () => {

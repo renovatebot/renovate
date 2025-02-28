@@ -117,9 +117,7 @@ export class PdmProcessor implements PyProjectProcessor {
         constraint: config.constraints?.pdm,
       };
 
-      const extraEnv = {
-        ...getGitEnvironmentVariables(['pep621']),
-      };
+      const extraEnv = { ...getGitEnvironmentVariables(['pep621']) };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
         extraEnv,
@@ -162,12 +160,7 @@ export class PdmProcessor implements PyProjectProcessor {
       }
       logger.debug({ err }, 'Failed to update PDM lock file');
       return [
-        {
-          artifactError: {
-            lockFile: lockFileName,
-            stderr: err.message,
-          },
-        },
+        { artifactError: { lockFile: lockFileName, stderr: err.message } },
       ];
     }
   }

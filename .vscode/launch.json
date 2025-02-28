@@ -6,9 +6,7 @@
       "request": "launch",
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
-      "env": {
-        "LOG_LEVEL": "debug"
-      },
+      "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
       "skipFiles": ["<node_internals>/**/*.js"]
@@ -18,9 +16,7 @@
       "request": "launch",
       "name": "debug (clean cache)",
       "program": "${workspaceFolder}/lib/renovate.ts",
-      "env": {
-        "LOG_LEVEL": "debug"
-      },
+      "env": { "LOG_LEVEL": "debug" },
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
@@ -41,9 +37,7 @@
         "--hook-timeout=0",
         "${relativeFile}"
       ],
-      "env": {
-        "LOG_LEVEL": "debug"
-      },
+      "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal"
     }
   ]

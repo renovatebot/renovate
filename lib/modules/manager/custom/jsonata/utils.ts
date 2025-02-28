@@ -27,10 +27,7 @@ export async function handleMatching(
     // if some issues arise then the isValidDependency call will catch them later on
     if (!queryResult || is.emptyArray(queryResult)) {
       logger.debug(
-        {
-          jsonataQuery: query,
-          packageFile,
-        },
+        { jsonataQuery: query, packageFile },
         'The jsonata query returned no matches. Possible error, please check your query. Skipping',
       );
       return [];

@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import { LooseArray, multidocYaml } from '../../../util/schema-utils';
 
-export const KubernetesResource = z.object({
-  apiVersion: z.string(),
-});
+export const KubernetesResource = z.object({ apiVersion: z.string() });
 
 export const ApplicationKustomize = z.object({
   images: LooseArray(z.string()).optional(),
@@ -29,11 +27,7 @@ export const Application = KubernetesResource.extend({
 
 export const ApplicationSet = KubernetesResource.extend({
   kind: z.literal('ApplicationSet'),
-  spec: z.object({
-    template: z.object({
-      spec: ApplicationSpec,
-    }),
-  }),
+  spec: z.object({ template: z.object({ spec: ApplicationSpec }) }),
 });
 
 export const ApplicationDefinition = Application.or(ApplicationSet);

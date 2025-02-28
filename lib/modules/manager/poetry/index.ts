@@ -16,9 +16,7 @@ export const supportsLockFileMaintenance = true;
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)pyproject\\.toml$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)pyproject\\.toml$'] };
 
 export const supportedDatasources = [
   PypiDatasource.id,

@@ -12,10 +12,7 @@ describe('modules/platform/github/api-cache', () => {
   it('stores and retrieves items', () => {
     const item1 = { number: 1, updated_at: t1 };
     const item2 = { number: 2, updated_at: t2 };
-    const apiCache = new ApiCache({
-      items: { 1: item1 },
-      lastModified: t1,
-    });
+    const apiCache = new ApiCache({ items: { 1: item1 }, lastModified: t1 });
 
     expect(apiCache.getItem(1)).toBe(item1);
     expect(apiCache.getItem(2)).toBeNull();
@@ -31,11 +28,7 @@ describe('modules/platform/github/api-cache', () => {
       const item2 = { number: 2, updated_at: t2 };
       const item3 = { number: 3, updated_at: t3 };
       const apiCache = new ApiCache({
-        items: {
-          1: item1,
-          2: item2,
-          3: item3,
-        },
+        items: { 1: item1, 2: item2, 3: item3 },
       });
 
       const res = apiCache.getItems();
@@ -47,12 +40,7 @@ describe('modules/platform/github/api-cache', () => {
       const item1 = { number: 1, updated_at: t1 };
       const item2 = { number: 2, updated_at: t2 };
       const item3 = { number: 3, updated_at: t3 };
-      const apiCache = new ApiCache({
-        items: {
-          1: item1,
-          2: item2,
-        },
-      });
+      const apiCache = new ApiCache({ items: { 1: item1, 2: item2 } });
 
       const numbers1 = apiCache.getItems();
       apiCache.updateItem(item3);
@@ -70,12 +58,7 @@ describe('modules/platform/github/api-cache', () => {
       const item1 = { number: 1, updated_at: t1 };
       const item2 = { number: 2, updated_at: t2 };
       const item3 = { number: 3, updated_at: t3 };
-      const apiCache = new ApiCache({
-        items: {
-          1: item1,
-          2: item2,
-        },
-      });
+      const apiCache = new ApiCache({ items: { 1: item1, 2: item2 } });
 
       const numbers1 = apiCache.getItems();
       apiCache.reconcile([item3]);
@@ -139,9 +122,7 @@ describe('modules/platform/github/api-cache', () => {
     });
 
     it('ignores page overlap', () => {
-      const apiCache = new ApiCache({
-        items: {},
-      });
+      const apiCache = new ApiCache({ items: {} });
 
       const res1 = apiCache.reconcile([
         { number: 5, updated_at: t5 },

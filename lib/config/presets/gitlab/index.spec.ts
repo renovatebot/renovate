@@ -12,20 +12,14 @@ describe('config/presets/gitlab/index', () => {
     it('throws EXTERNAL_HOST_ERROR', async () => {
       httpMock.scope(gitlabApiHost).get(projectPath).reply(500);
       await expect(
-        gitlab.getPreset({
-          repo: 'some/repo',
-          presetName: 'non-default',
-        }),
+        gitlab.getPreset({ repo: 'some/repo', presetName: 'non-default' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws if project could not be found', async () => {
       httpMock.scope(gitlabApiHost).get(projectPath).reply(404);
       await expect(
-        gitlab.getPreset({
-          repo: 'some/repo',
-          presetName: 'non-default',
-        }),
+        gitlab.getPreset({ repo: 'some/repo', presetName: 'non-default' }),
       ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
     });
 
@@ -48,9 +42,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'main',
-        })
+        .reply(200, { default_branch: 'main' })
         .get(`${basePath}/files/default.json/raw?ref=main`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -75,9 +67,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'master',
-        })
+        .reply(200, { default_branch: 'master' })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -93,9 +83,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'master',
-        })
+        .reply(200, { default_branch: 'master' })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -111,9 +99,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'master',
-        })
+        .reply(200, { default_branch: 'master' })
         .get(`${basePath}/files/path%2Fcustom.json5/raw?ref=master`)
         .reply(200, { foo: 'bar' }, {});
 
@@ -131,9 +117,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'devel',
-        })
+        .reply(200, { default_branch: 'devel' })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(200, { preset: { file: {} } });
       expect(
@@ -149,9 +133,7 @@ describe('config/presets/gitlab/index', () => {
       httpMock
         .scope('https://gitlab.example.org')
         .get(projectPath)
-        .reply(200, {
-          default_branch: 'devel',
-        })
+        .reply(200, { default_branch: 'devel' })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(404);
       await expect(

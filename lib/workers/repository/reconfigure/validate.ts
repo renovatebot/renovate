@@ -27,12 +27,7 @@ async function setBranchStatus(
     return;
   }
 
-  await platform.setBranchStatus({
-    branchName,
-    context,
-    description,
-    state,
-  });
+  await platform.setBranchStatus({ branchName, context, description, state });
 }
 
 export async function validateReconfigureBranch(

@@ -92,9 +92,7 @@ describe('modules/manager/docker-compose/extract', () => {
             image: quay.io/nginx:0.0.1
       `;
       const res = extractPackageFile(compose, '', {
-        registryAliases: {
-          'quay.io': 'my-quay-mirror.registry.com',
-        },
+        registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' },
       });
       expect(res).toEqual({
         deps: [
@@ -120,9 +118,7 @@ describe('modules/manager/docker-compose/extract', () => {
             image: quay.io/nginx:0.0.1
       `;
       const res = extractPackageFile(compose, '', {
-        registryAliases: {
-          'index.docker.io': 'my-docker-mirror.registry.com',
-        },
+        registryAliases: { 'index.docker.io': 'my-docker-mirror.registry.com' },
       });
       expect(res).toEqual({
         deps: [

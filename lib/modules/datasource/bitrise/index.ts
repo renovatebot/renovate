@@ -58,9 +58,7 @@ export class BitriseDatasource extends Datasource {
       return null;
     }
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
 
     const massagedPackageName = encodeURIComponent(packageName);
     const baseApiURL =

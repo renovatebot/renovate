@@ -115,10 +115,7 @@ export async function checkConfigMigrationBranch(
   if (!GlobalConfig.get('dryRun')) {
     await scm.checkoutBranch(configMigrationBranch);
   }
-  return {
-    migrationBranch: configMigrationBranch,
-    result,
-  };
+  return { migrationBranch: configMigrationBranch, result };
 }
 
 export async function migrationPrExists(

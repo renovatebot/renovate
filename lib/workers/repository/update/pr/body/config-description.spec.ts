@@ -11,10 +11,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
     };
 
     it('renders stopUpdating=true', () => {
-      const res = getPrConfigDescription({
-        ...config,
-        stopUpdating: true,
-      });
+      const res = getPrConfigDescription({ ...config, stopUpdating: true });
 
       expect(res).toContain(
         `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
@@ -22,10 +19,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
     });
 
     it('renders rebaseWhen="never"', () => {
-      const res = getPrConfigDescription({
-        ...config,
-        rebaseWhen: 'never',
-      });
+      const res = getPrConfigDescription({ ...config, rebaseWhen: 'never' });
 
       expect(res).toContain(
         `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
@@ -64,18 +58,12 @@ describe('workers/repository/update/pr/body/config-description', () => {
     });
 
     it('renders recreateClosed=true', () => {
-      const res = getPrConfigDescription({
-        ...config,
-        recreateClosed: true,
-      });
+      const res = getPrConfigDescription({ ...config, recreateClosed: true });
       expect(res).toContain(`**Immortal**`);
     });
 
     it('does not render recreateClosed=false', () => {
-      const res = getPrConfigDescription({
-        ...config,
-        recreateClosed: false,
-      });
+      const res = getPrConfigDescription({ ...config, recreateClosed: false });
       expect(res).not.toContain(`**Immortal**`);
     });
 
@@ -85,10 +73,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
     });
 
     it('renders singular', () => {
-      const res = getPrConfigDescription({
-        ...config,
-        upgrades: [config],
-      });
+      const res = getPrConfigDescription({ ...config, upgrades: [config] });
       expect(res).toContain(`this update`);
     });
 

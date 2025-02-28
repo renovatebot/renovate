@@ -47,20 +47,13 @@ const AllSchema = z.object({
 });
 
 export const ReplacementsSchema = z
-  .object({
-    $schema: z.string(),
-    all: AllSchema,
-  })
+  .object({ $schema: z.string(), all: AllSchema })
   .catchall(RuleSetSchema);
 
 export const ChangelogUrlsSchema = z
-  .object({
-    $schema: z.string(),
-  })
+  .object({ $schema: z.string() })
   .catchall(z.record(z.string(), z.string().url()));
 
 export const SourceUrlsSchema = z
-  .object({
-    $schema: z.string(),
-  })
+  .object({ $schema: z.string() })
   .catchall(z.record(z.string(), z.string().url()));

@@ -28,26 +28,16 @@ describe('config/presets/local/index', () => {
     });
 
     it('throws for unsupported platform', async () => {
-      GlobalConfig.set({
-        platform: 'unsupported-platform',
-      });
+      GlobalConfig.set({ platform: 'unsupported-platform' });
       await expect(async () => {
-        await local.getPreset({
-          repo: 'some/repo',
-          presetName: 'default',
-        });
+        await local.getPreset({ repo: 'some/repo', presetName: 'default' });
       }).rejects.toThrow();
     });
 
     it('throws for missing platform', async () => {
-      GlobalConfig.set({
-        platform: undefined,
-      });
+      GlobalConfig.set({ platform: undefined });
       await expect(async () => {
-        await local.getPreset({
-          repo: 'some/repo',
-          presetName: 'default',
-        });
+        await local.getPreset({ repo: 'some/repo', presetName: 'default' });
       }).rejects.toThrow();
     });
 
@@ -109,12 +99,8 @@ describe('config/presets/local/index', () => {
     });
 
     it('forwards to gitea', async () => {
-      GlobalConfig.set({
-        platform: 'gitea',
-      });
-      const content = await local.getPreset({
-        repo: 'some/repo',
-      });
+      GlobalConfig.set({ platform: 'gitea' });
+      const content = await local.getPreset({ repo: 'some/repo' });
 
       expect(gitea.getPresetFromEndpoint).toHaveBeenCalledOnce();
       expect(gitea.getPresetFromEndpoint).toHaveBeenCalledWith(
@@ -148,12 +134,8 @@ describe('config/presets/local/index', () => {
     });
 
     it('forwards to github', async () => {
-      GlobalConfig.set({
-        platform: 'github',
-      });
-      const content = await local.getPreset({
-        repo: 'some/repo',
-      });
+      GlobalConfig.set({ platform: 'github' });
+      const content = await local.getPreset({ repo: 'some/repo' });
 
       expect(github.getPresetFromEndpoint).toHaveBeenCalledOnce();
       expect(github.getPresetFromEndpoint).toHaveBeenCalledWith(
@@ -188,9 +170,7 @@ describe('config/presets/local/index', () => {
     });
 
     it('forwards to github with a tag', async () => {
-      GlobalConfig.set({
-        platform: 'github',
-      });
+      GlobalConfig.set({ platform: 'github' });
       const content = await local.getPreset({
         repo: 'some/repo',
         tag: 'someTag',
@@ -230,9 +210,7 @@ describe('config/presets/local/index', () => {
     });
 
     it('forwards to gitlab', async () => {
-      GlobalConfig.set({
-        platform: 'gitlab',
-      });
+      GlobalConfig.set({ platform: 'gitlab' });
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',

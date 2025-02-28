@@ -35,9 +35,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const res = await extractPnpmFilters(workSpaceFilePath);
       expect(res).toBeUndefined();
       expect(logger.logger.trace).toHaveBeenCalledWith(
-        {
-          fileName: expect.any(String),
-        },
+        { fileName: expect.any(String) },
         'Failed to find required "packages" array in pnpm-workspace.yaml',
       );
     });
@@ -346,23 +344,15 @@ describe('modules/manager/npm/extract/pnpm', () => {
           { catalog: {}, catalogs: {} },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
-        deps: [],
-      });
+      ).toMatchObject({ deps: [] });
     });
 
     it('parses valid pnpm-workspace.yaml file', async () => {
       expect(
         await extractPnpmWorkspaceFile(
           {
-            catalog: {
-              react: '18.3.0',
-            },
-            catalogs: {
-              react17: {
-                react: '17.0.2',
-              },
-            },
+            catalog: { react: '18.3.0' },
+            catalogs: { react17: { react: '17.0.2' } },
           },
           'pnpm-workspace.yaml',
         ),
@@ -433,18 +423,10 @@ describe('modules/manager/npm/extract/pnpm', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-lock.yaml');
       expect(
         await extractPnpmWorkspaceFile(
-          {
-            catalog: {
-              react: '18.3.1',
-            },
-          },
+          { catalog: { react: '18.3.1' } },
           'pnpm-workspace.yaml',
         ),
-      ).toMatchObject({
-        managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
-        },
-      });
+      ).toMatchObject({ managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' } });
     });
   });
 });

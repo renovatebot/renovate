@@ -23,13 +23,7 @@ async function createCacheRecord(
   const hashedJsonStr = hash(jsonStr);
   const payload = await compressToBase64(jsonStr);
 
-  return {
-    revision,
-    repository,
-    fingerprint,
-    payload,
-    hash: hashedJsonStr,
-  };
+  return { revision, repository, fingerprint, payload, hash: hashedJsonStr };
 }
 
 describe('util/cache/repository/impl/local', () => {

@@ -86,11 +86,7 @@ Message: some-message
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
-      const pr = partial<Pr>({
-        title: 'onboarding',
-        number: 1,
-        state: 'open',
-      });
+      const pr = partial<Pr>({ title: 'onboarding', number: 1, state: 'open' });
       platform.getBranchPr.mockResolvedValue(pr);
 
       const res = await raiseConfigWarningIssue(config, error);
@@ -105,10 +101,7 @@ Message: some-message
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
-      const pr = partial<Pr>({
-        number: 1,
-        state: 'open',
-      });
+      const pr = partial<Pr>({ number: 1, state: 'open' });
       platform.getBranchPr.mockResolvedValue(pr);
       GlobalConfig.set({ dryRun: 'full' });
 

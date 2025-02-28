@@ -34,9 +34,7 @@ export async function getReleaseNotesMd(
   const rootFiles = (
     await bitbucketHttp.getJson(
       repositorySourceURl,
-      {
-        paginate: true,
-      },
+      { paginate: true },
       PagedSourceResultsSchema,
     )
   ).body.values;

@@ -116,11 +116,7 @@ export async function extractDependencies(
   config: RenovateConfig,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);
-  let res: ExtractResult = {
-    branches: [],
-    branchList: [],
-    packageFiles: {},
-  };
+  let res: ExtractResult = { branches: [], branchList: [], packageFiles: {} };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,

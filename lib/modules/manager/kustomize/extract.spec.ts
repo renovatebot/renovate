@@ -199,11 +199,7 @@ describe('modules/manager/kustomize/extract', () => {
 
   describe('extractHelmChart', () => {
     it('should return null on a null input', () => {
-      const pkg = extractHelmChart({
-        name: '',
-        repo: '',
-        version: '',
-      });
+      const pkg = extractHelmChart({ name: '', repo: '', version: '' });
       expect(pkg).toBeNull();
     });
 
@@ -242,10 +238,7 @@ describe('modules/manager/kustomize/extract', () => {
 
   describe('image extraction', () => {
     it('should return null on a null input', () => {
-      const pkg = extractImage({
-        name: '',
-        newTag: '',
-      });
+      const pkg = extractImage({ name: '', newTag: '' });
       expect(pkg).toBeNull();
     });
 
@@ -483,19 +476,13 @@ describe('modules/manager/kustomize/extract', () => {
         extractPackageFile(newTag, 'kustomization.yaml', {}),
       ).toMatchSnapshot({
         deps: [
-          {
-            currentDigest: undefined,
-            currentValue: '11',
-            replaceString: '11',
-          },
+          { currentDigest: undefined, currentValue: '11', replaceString: '11' },
           {
             currentDigest: postgresDigest,
             currentValue: '11',
             replaceString: `11@${postgresDigest}`,
           },
-          {
-            skipReason: 'invalid-value',
-          },
+          { skipReason: 'invalid-value' },
         ],
       });
     });
@@ -515,15 +502,9 @@ describe('modules/manager/kustomize/extract', () => {
             currentValue: '11',
             replaceString: postgresDigest,
           },
-          {
-            skipReason: 'invalid-dependency-specification',
-          },
-          {
-            skipReason: 'invalid-value',
-          },
-          {
-            skipReason: 'invalid-value',
-          },
+          { skipReason: 'invalid-dependency-specification' },
+          { skipReason: 'invalid-value' },
+          { skipReason: 'invalid-value' },
         ],
       });
     });
@@ -851,9 +832,7 @@ describe('modules/manager/kustomize/extract', () => {
       'extracts correct project from $name',
       ({ url, host, project, packageName }) => {
         const version = 'v1.0.0';
-        const sample: any = {
-          currentValue: version,
-        };
+        const sample: any = { currentValue: version };
         if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
           sample.depName = project;
           sample.datasource = GithubTagsDatasource.id;

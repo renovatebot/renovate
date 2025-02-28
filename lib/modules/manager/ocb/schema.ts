@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-const Entry = z.object({
-  gomod: z.string(),
-});
+const Entry = z.object({ gomod: z.string() });
 
 const ModuleSchema = z.array(Entry).optional();
 export type Module = z.infer<typeof ModuleSchema>;

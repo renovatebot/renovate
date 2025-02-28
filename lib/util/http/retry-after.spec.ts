@@ -111,9 +111,7 @@ describe('util/http/retry-after', () => {
         getRetryAfter(
           requestError({
             statusCode: 429,
-            headers: {
-              'retry-after': 'Wed, 21 Oct 2015 07:28:00 GMT',
-            },
+            headers: { 'retry-after': 'Wed, 21 Oct 2015 07:28:00 GMT' },
           }),
         ),
       ).toBeNull();
@@ -125,9 +123,7 @@ describe('util/http/retry-after', () => {
         getRetryAfter(
           requestError({
             statusCode: 429,
-            headers: {
-              'retry-after': 'Wed, 01 Jan 2020 00:00:42 GMT',
-            },
+            headers: { 'retry-after': 'Wed, 01 Jan 2020 00:00:42 GMT' },
           }),
         ),
       ).toBe(42);
@@ -136,12 +132,7 @@ describe('util/http/retry-after', () => {
     it('returns delay in seconds from number', () => {
       expect(
         getRetryAfter(
-          requestError({
-            statusCode: 429,
-            headers: {
-              'retry-after': '42',
-            },
-          }),
+          requestError({ statusCode: 429, headers: { 'retry-after': '42' } }),
         ),
       ).toBe(42);
     });
@@ -151,9 +142,7 @@ describe('util/http/retry-after', () => {
         getRetryAfter(
           requestError({
             statusCode: 429,
-            headers: {
-              'retry-after': 'invalid',
-            },
+            headers: { 'retry-after': 'invalid' },
           }),
         ),
       ).toBeNull();

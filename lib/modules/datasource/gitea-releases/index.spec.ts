@@ -281,10 +281,7 @@ describe('modules/datasource/gitea-releases/index', () => {
           '/api/v1/repos/some/dep2/commits?stat=false&verification=false&files=false&page=1&limit=1',
         )
         .reply(200, []);
-      const res = await getDigest({
-        datasource,
-        packageName: 'some/dep2',
-      });
+      const res = await getDigest({ datasource, packageName: 'some/dep2' });
       expect(res).toBeNull();
     });
   });
@@ -308,10 +305,7 @@ describe('modules/datasource/gitea-releases/index', () => {
         .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
         .reply(200, body);
       const res = await getDigest(
-        {
-          datasource,
-          packageName: 'gitea/helm-chart',
-        },
+        { datasource, packageName: 'gitea/helm-chart' },
         'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');

@@ -145,9 +145,7 @@ For example:
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "nuget": {
-    "ignorePaths": ["IgnoreThisPackage/**"]
-  }
+  "nuget": { "ignorePaths": ["IgnoreThisPackage/**"] }
 }
 ```
 

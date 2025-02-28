@@ -18,54 +18,16 @@ const upgrade = partial<BranchUpgradeConfig>({
 
 const bitbucketTreeResponse = {
   values: [
-    {
-      type: 'commit_directory',
-      path: 'lib',
-      commit: {
-        hash: '1234',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'CHANGELOG',
-      commit: {
-        hash: 'cdef',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'CHANGELOG.json',
-      commit: {
-        hash: 'defg',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'CHANGELOG.md',
-      commit: {
-        hash: 'abcd',
-      },
-    },
-    {
-      type: 'commit_file',
-      path: 'RELEASE_NOTES.md',
-      commit: {
-        hash: 'asdf',
-      },
-    },
+    { type: 'commit_directory', path: 'lib', commit: { hash: '1234' } },
+    { type: 'commit_file', path: 'CHANGELOG', commit: { hash: 'cdef' } },
+    { type: 'commit_file', path: 'CHANGELOG.json', commit: { hash: 'defg' } },
+    { type: 'commit_file', path: 'CHANGELOG.md', commit: { hash: 'abcd' } },
+    { type: 'commit_file', path: 'RELEASE_NOTES.md', commit: { hash: 'asdf' } },
   ],
 };
 
 const bitbucketTreeResponseNoChangelogFiles = {
-  values: [
-    {
-      type: 'commit_directory',
-      path: 'lib',
-      commit: {
-        hash: '1234',
-      },
-    },
-  ],
+  values: [{ type: 'commit_directory', path: 'lib', commit: { hash: '1234' } }],
 };
 
 const bitbucketProject = partial<ChangeLogProject>({

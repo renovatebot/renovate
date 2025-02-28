@@ -53,11 +53,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
     foo,
   }: TestAdapterInput): TestAdapterOutput | null =>
     version && releaseTimestamp && foo
-      ? {
-          version,
-          releaseTimestamp: releaseTimestamp as Timestamp,
-          bar: foo,
-        }
+      ? { version, releaseTimestamp: releaseTimestamp as Timestamp, bar: foo }
       : null,
 };
 
@@ -67,17 +63,11 @@ function resp(
   cursor: string | undefined = undefined,
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
-    repository: {
-      isRepoPrivate,
-      payload: { nodes },
-    },
+    repository: { isRepoPrivate, payload: { nodes } },
   };
 
   if (cursor) {
-    data.repository.payload.pageInfo = {
-      endCursor: cursor,
-      hasNextPage: true,
-    };
+    data.repository.payload.pageInfo = { endCursor: cursor, hasNextPage: true };
   }
 
   return { data };
@@ -86,9 +76,7 @@ function resp(
 function err(
   ...messages: string[]
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
-  return {
-    errors: messages.map((message) => ({ message })),
-  };
+  return { errors: messages.map((message) => ({ message })) };
 }
 
 async function catchError<T>(cb: () => Promise<T>): Promise<Error> {

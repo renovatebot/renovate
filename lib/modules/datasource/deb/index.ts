@@ -91,12 +91,7 @@ export class DebDatasource extends Datasource {
         lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
         logger.warn(
-          {
-            compressedFile,
-            componentUrl,
-            compression,
-            error: error.message,
-          },
+          { compressedFile, componentUrl, compression, error: error.message },
           'Failed to extract package file from compressed file',
         );
       } finally {
@@ -204,9 +199,7 @@ export class DebDatasource extends Datasource {
     lastDownloadTimestamp: Date,
   ): Promise<boolean> {
     const options: HttpOptions = {
-      headers: {
-        'If-Modified-Since': lastDownloadTimestamp.toUTCString(),
-      },
+      headers: { 'If-Modified-Since': lastDownloadTimestamp.toUTCString() },
     };
 
     try {

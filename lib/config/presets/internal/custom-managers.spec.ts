@@ -22,11 +22,7 @@ describe('config/presets/internal/custom-managers', () => {
       );
 
       expect(res?.deps).toMatchObject([
-        {
-          currentValue: '1.7.3',
-          datasource: 'npm',
-          depName: '@biomejs/biome',
-        },
+        { currentValue: '1.7.3', datasource: 'npm', depName: '@biomejs/biome' },
       ]);
     });
 

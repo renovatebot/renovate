@@ -72,12 +72,8 @@ describe('modules/manager/pep621/processors/pdm', () => {
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'docker pull ghcr.io/containerbase/sidecar',
-        },
-        {
-          cmd: 'docker ps --filter name=renovate_sidecar -aq',
-        },
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -137,10 +133,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [
-        {
-          packageName: 'dep1',
-          depType: depTypes.dependencies,
-        },
+        { packageName: 'dep1', depType: depTypes.dependencies },
         { packageName: 'dep2', depType: depTypes.dependencies },
         {
           packageName: 'dep3',
@@ -198,21 +191,11 @@ describe('modules/manager/pep621/processors/pdm', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'pdm update --no-sync --update-eager dep1 dep2',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -G group1 dep3 dep4',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -dG group2 dep5 dep6',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8',
-        },
-        {
-          cmd: 'pdm update --no-sync --update-eager -dG dev dep10',
-        },
+        { cmd: 'pdm update --no-sync --update-eager dep1 dep2' },
+        { cmd: 'pdm update --no-sync --update-eager -G group1 dep3 dep4' },
+        { cmd: 'pdm update --no-sync --update-eager -dG group2 dep5 dep6' },
+        { cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8' },
+        { cmd: 'pdm update --no-sync --update-eager -dG dev dep10' },
       ]);
     });
 
@@ -232,18 +215,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [
-        {
-          packageName: 'dep3',
-          depType: depTypes.optionalDependencies,
-        },
-        {
-          packageName: 'dep5',
-          depType: depTypes.pdmDevDependencies,
-        },
-        {
-          packageName: 'dep10',
-          depType: depTypes.dependencyGroups,
-        },
+        { packageName: 'dep3', depType: depTypes.optionalDependencies },
+        { packageName: 'dep5', depType: depTypes.pdmDevDependencies },
+        { packageName: 'dep10', depType: depTypes.dependencyGroups },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -278,9 +252,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
-            isLockFileMaintenance: true,
-          },
+          config: { isLockFileMaintenance: true },
           updatedDeps: [],
         },
         {},
@@ -297,9 +269,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'pdm update --no-sync --update-eager',
-          options: {
-            cwd: '/tmp/github/some/repo/folder',
-          },
+          options: { cwd: '/tmp/github/some/repo/folder' },
         },
       ]);
     });
@@ -328,9 +298,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
-            isLockFileMaintenance: true,
-          },
+          config: { isLockFileMaintenance: true },
           updatedDeps: [],
         },
         {},

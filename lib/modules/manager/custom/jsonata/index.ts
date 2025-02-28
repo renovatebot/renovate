@@ -11,9 +11,7 @@ import { handleMatching } from './utils';
 
 export const categories: Category[] = ['custom'];
 
-export const defaultConfig = {
-  pinDigests: false,
-};
+export const defaultConfig = { pinDigests: false };
 export const supportedDatasources = ['*'];
 export const displayName = 'JSONata';
 

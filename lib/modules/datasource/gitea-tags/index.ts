@@ -67,15 +67,8 @@ export class GiteaTagsDatasource extends Datasource {
     const url = `${GiteaTagsDatasource.getApiUrl(
       registryUrl,
     )}repos/${repo}/tags`;
-    const tags = (
-      await this.http.getJson(
-        url,
-        {
-          paginate: true,
-        },
-        TagsSchema,
-      )
-    ).body;
+    const tags = (await this.http.getJson(url, { paginate: true }, TagsSchema))
+      .body;
 
     const dependency: ReleaseResult = {
       sourceUrl: GiteaTagsDatasource.getSourceUrl(repo, registryUrl),

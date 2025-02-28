@@ -19,9 +19,7 @@ export const PackageRepository = z.object({
     name: z.string(),
     annotations: z.record(z.string(), z.string()).optional(),
   }),
-  spec: z.object({
-    url: z.string(),
-  }),
+  spec: z.object({ url: z.string() }),
 });
 
 export const GlasskubeResource = Package.or(PackageRepository);

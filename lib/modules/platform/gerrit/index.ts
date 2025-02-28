@@ -39,9 +39,7 @@ import {
 
 export const id = 'gerrit';
 
-const defaults: {
-  endpoint?: string;
-} = {};
+const defaults: { endpoint?: string } = {};
 
 let config: {
   repository?: string;
@@ -49,9 +47,7 @@ let config: {
   config?: GerritProjectInfo;
   labels: Record<string, GerritLabelTypeInfo>;
   gerritUsername?: string;
-} = {
-  labels: {},
-};
+} = { labels: {} };
 
 export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
@@ -74,9 +70,7 @@ export function initPlatform({
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
+  const platformConfig: PlatformResult = { endpoint: defaults.endpoint };
   return Promise.resolve(platformConfig);
 }
 

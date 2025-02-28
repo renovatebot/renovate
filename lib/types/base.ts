@@ -8,6 +8,4 @@ export interface ModuleApi {
   urls?: string[];
 }
 
-export type RenovatePackageJson = PackageJson & {
-  version: string;
-};
+export type RenovatePackageJson = PackageJson & { version: string };

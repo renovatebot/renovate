@@ -20,7 +20,5 @@ export async function updateMR(
   logger.debug(`updateMR(${iid})`);
 
   const url = `projects/${repository}/merge_requests/${iid}`;
-  await gitlabApi.putJson(url, {
-    body: data,
-  });
+  await gitlabApi.putJson(url, { body: data });
 }

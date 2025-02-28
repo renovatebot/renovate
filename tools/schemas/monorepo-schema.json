@@ -8,10 +8,7 @@
         "^[a-zA-Z0-9. -]+$": {
           "oneOf": [
             { "type": "string", "format": "uri" },
-            {
-              "type": "array",
-              "items": { "type": "string", "format": "uri" }
-            }
+            { "type": "array", "items": { "type": "string", "format": "uri" } }
           ]
         }
       },
@@ -23,10 +20,7 @@
         "^[a-zA-Z0-9. -]+$": {
           "oneOf": [
             { "type": "string", "format": "uri" },
-            {
-              "type": "array",
-              "items": { "type": "string", "format": "uri" }
-            }
+            { "type": "array", "items": { "type": "string", "format": "uri" } }
           ]
         }
       },

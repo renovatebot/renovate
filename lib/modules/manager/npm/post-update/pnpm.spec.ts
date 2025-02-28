@@ -156,9 +156,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
-      {
-        cmd: 'pnpm dedupe --config.ignore-scripts=true',
-      },
+      { cmd: 'pnpm dedupe --config.ignore-scripts=true' },
     ]);
   });
 
@@ -190,12 +188,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-folder',
       {},
       configTemp,
-      [
-        {
-          depType: 'packageManager',
-          depName: 'pnpm',
-        },
-      ],
+      [{ depType: 'packageManager', depName: 'pnpm' }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -232,12 +225,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-folder',
       {},
       configTemp,
-      [
-        {
-          depType: 'packageManager',
-          depName: 'pnpm',
-        },
-      ],
+      [{ depType: 'packageManager', depName: 'pnpm' }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');

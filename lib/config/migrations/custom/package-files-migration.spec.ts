@@ -3,14 +3,7 @@ import { PackageFilesMigration } from './package-files-migration';
 describe('config/migrations/custom/package-files-migration', () => {
   it('should migrate value to array', () => {
     expect(PackageFilesMigration).toMigrate(
-      {
-        packageFiles: [
-          {
-            packageFile: 'package.json',
-            packageRules: [],
-          },
-        ],
-      },
+      { packageFiles: [{ packageFile: 'package.json', packageRules: [] }] },
       {
         includePaths: ['package.json'],
         packageRules: [{ paths: ['package.json'], packageRules: [] }],
@@ -20,12 +13,8 @@ describe('config/migrations/custom/package-files-migration', () => {
 
   it('should handle multiple packageFile', () => {
     expect(PackageFilesMigration).toMigrate(
-      {
-        packageFiles: [['package.json', 'Chart.yaml']],
-      },
-      {
-        includePaths: ['package.json', 'Chart.yaml'],
-      },
+      { packageFiles: [['package.json', 'Chart.yaml']] },
+      { includePaths: ['package.json', 'Chart.yaml'] },
     );
   });
 
@@ -44,10 +33,7 @@ describe('config/migrations/custom/package-files-migration', () => {
         includePaths: ['package.json'],
         packageRules: [
           { labels: ['lint'] },
-          {
-            paths: ['package.json'],
-            packageRules: [{ labels: ['breaking'] }],
-          },
+          { paths: ['package.json'], packageRules: [{ labels: ['breaking'] }] },
         ],
       },
     );
@@ -55,12 +41,8 @@ describe('config/migrations/custom/package-files-migration', () => {
 
   it('should work for non-object packageFiles', () => {
     expect(PackageFilesMigration).toMigrate(
-      {
-        packageFiles: ['package.json'],
-      },
-      {
-        includePaths: ['package.json'],
-      },
+      { packageFiles: ['package.json'] },
+      { includePaths: ['package.json'] },
     );
   });
 

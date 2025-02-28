@@ -17,11 +17,7 @@ export function getParts(splitOne: string): Parts | null {
   if (c === null) {
     return null;
   }
-  return {
-    major: c.slice(0, 2),
-    minor: c.slice(2, 3),
-    patch: c.slice(3),
-  };
+  return { major: c.slice(0, 2), minor: c.slice(2, 3), patch: c.slice(3) };
 }
 
 export function plusOne(majorOne: number[]): string {

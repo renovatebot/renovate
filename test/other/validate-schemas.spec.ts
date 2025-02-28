@@ -54,10 +54,7 @@ describe('other/validate-schemas', () => {
       expect(res).toMatchObject({
         schemaName,
         dataFileName,
-        settledPromise: {
-          status: 'fulfilled',
-          reason: undefined,
-        },
+        settledPromise: { status: 'fulfilled', reason: undefined },
       });
     }
   });

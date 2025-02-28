@@ -11,9 +11,7 @@ export const urls = [
   'https://devcenter.bitrise.io/en/steps-and-workflows/introduction-to-steps.html',
 ];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)bitrise\\.ya?ml$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)bitrise\\.ya?ml$'] };
 
 export const supportedDatasources = [
   BitriseDatasource.id,

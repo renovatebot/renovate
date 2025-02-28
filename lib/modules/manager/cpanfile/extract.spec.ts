@@ -61,51 +61,15 @@ describe('modules/manager/cpanfile/extract', () => {
             depName: 'Try::Tiny',
             skipReason: 'unspecified-version',
           },
-          {
-            datasource: 'cpan',
-            depName: 'URI',
-            currentValue: '1.59',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'HTTP::Tiny',
-            currentValue: '0.034',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'Capture::Tiny',
-            currentValue: '0',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'A',
-            currentValue: '1.1',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'AA',
-            currentValue: '1.1',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'B',
-            currentValue: '1.2',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'BB',
-            currentValue: '1.2',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'C',
-            currentValue: '1.3',
-          },
-          {
-            datasource: 'cpan',
-            depName: 'CC',
-            currentValue: '1.3',
-          },
+          { datasource: 'cpan', depName: 'URI', currentValue: '1.59' },
+          { datasource: 'cpan', depName: 'HTTP::Tiny', currentValue: '0.034' },
+          { datasource: 'cpan', depName: 'Capture::Tiny', currentValue: '0' },
+          { datasource: 'cpan', depName: 'A', currentValue: '1.1' },
+          { datasource: 'cpan', depName: 'AA', currentValue: '1.1' },
+          { datasource: 'cpan', depName: 'B', currentValue: '1.2' },
+          { datasource: 'cpan', depName: 'BB', currentValue: '1.2' },
+          { datasource: 'cpan', depName: 'C', currentValue: '1.3' },
+          { datasource: 'cpan', depName: 'CC', currentValue: '1.3' },
         ],
       });
     });

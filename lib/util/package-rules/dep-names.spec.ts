@@ -6,12 +6,8 @@ describe('util/package-rules/dep-names', () => {
   describe('match', () => {
     it('should return false if packageFile is not defined', () => {
       const result = depNameMatcher.matches(
-        {
-          depName: undefined,
-        },
-        {
-          matchDepNames: ['@opentelemetry/http'],
-        },
+        { depName: undefined },
+        { matchDepNames: ['@opentelemetry/http'] },
       );
       expect(result).toBeFalse();
     });
@@ -19,22 +15,14 @@ describe('util/package-rules/dep-names', () => {
     it('should return false if depName is excluded prefix', () => {
       expect(
         depNameMatcher.matches(
-          {
-            depName: '@opentelemetry/http',
-          },
-          {
-            matchDepNames: ['!/^@opentelemetry/'],
-          },
+          { depName: '@opentelemetry/http' },
+          { matchDepNames: ['!/^@opentelemetry/'] },
         ),
       ).toBeFalse();
       expect(
         depNameMatcher.matches(
-          {
-            depName: '@opentelemetry/http',
-          },
-          {
-            matchDepNames: ['!@opentelemetry{/,}**'],
-          },
+          { depName: '@opentelemetry/http' },
+          { matchDepNames: ['!@opentelemetry{/,}**'] },
         ),
       ).toBeFalse();
     });
@@ -42,22 +30,14 @@ describe('util/package-rules/dep-names', () => {
     it('should return true if depName is included prefix', () => {
       expect(
         depNameMatcher.matches(
-          {
-            depName: '@opentelemetry/http',
-          },
-          {
-            matchDepNames: ['/^@opentelemetry/'],
-          },
+          { depName: '@opentelemetry/http' },
+          { matchDepNames: ['/^@opentelemetry/'] },
         ),
       ).toBeTrue();
       expect(
         depNameMatcher.matches(
-          {
-            depName: '@opentelemetry/http',
-          },
-          {
-            matchDepNames: ['@opentelemetry{/,}**'],
-          },
+          { depName: '@opentelemetry/http' },
+          { matchDepNames: ['@opentelemetry{/,}**'] },
         ),
       ).toBeTrue();
     });
@@ -65,12 +45,8 @@ describe('util/package-rules/dep-names', () => {
     it('should return false if for wrong prefix', () => {
       expect(
         depNameMatcher.matches(
-          {
-            depName: '@opentelemetry/http',
-          },
-          {
-            matchDepNames: ['@opentelemetry**'],
-          },
+          { depName: '@opentelemetry/http' },
+          { matchDepNames: ['@opentelemetry**'] },
         ),
       ).toBeFalse();
     });

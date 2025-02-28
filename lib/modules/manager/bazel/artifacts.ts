@@ -144,13 +144,5 @@ export async function updateArtifacts(
     }
   }
 
-  return [
-    {
-      file: {
-        type: 'addition',
-        path,
-        contents,
-      },
-    },
-  ];
+  return [{ file: { type: 'addition', path, contents } }];
 }

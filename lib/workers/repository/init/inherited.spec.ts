@@ -105,10 +105,7 @@ describe('workers/repository/init/inherited', () => {
     );
     const res = await mergeInheritedConfig(config);
     expect(hostRules.getAll()).toMatchObject([
-      {
-        matchHost: 'some-host-url',
-        token: 'some-token',
-      },
+      { matchHost: 'some-host-url', token: 'some-token' },
     ]);
     expect(res.hostRules).toBeUndefined();
   });
@@ -129,10 +126,7 @@ describe('workers/repository/init/inherited', () => {
       secrets: { SECRET_TOKEN: 'some-secret-token' },
     });
     expect(hostRules.getAll()).toMatchObject([
-      {
-        matchHost: 'some-host-url',
-        token: 'some-secret-token',
-      },
+      { matchHost: 'some-host-url', token: 'some-secret-token' },
     ]);
     expect(res.hostRules).toBeUndefined();
   });
@@ -160,17 +154,9 @@ describe('workers/repository/init/inherited', () => {
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
     vi.spyOn(validation, 'validateConfig')
+      .mockResolvedValueOnce({ warnings: [], errors: [] })
       .mockResolvedValueOnce({
-        warnings: [],
-        errors: [],
-      })
-      .mockResolvedValueOnce({
-        warnings: [
-          {
-            message: 'some warning',
-            topic: 'Configuration Error',
-          },
-        ],
+        warnings: [{ message: 'some warning', topic: 'Configuration Error' }],
         errors: [],
       });
     presets.resolveConfigPresets.mockResolvedValue({
@@ -181,14 +167,7 @@ describe('workers/repository/init/inherited', () => {
     const res = await mergeInheritedConfig(config);
     expect(res.binarySource).toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(
-      {
-        warnings: [
-          {
-            message: 'some warning',
-            topic: 'Configuration Error',
-          },
-        ],
-      },
+      { warnings: [{ message: 'some warning', topic: 'Configuration Error' }] },
       'Found warnings in presets inside the inherited configuration.',
     );
   });
@@ -198,18 +177,10 @@ describe('workers/repository/init/inherited', () => {
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
     vi.spyOn(validation, 'validateConfig')
+      .mockResolvedValueOnce({ warnings: [], errors: [] })
       .mockResolvedValueOnce({
         warnings: [],
-        errors: [],
-      })
-      .mockResolvedValueOnce({
-        warnings: [],
-        errors: [
-          {
-            message: 'some error',
-            topic: 'Configuration Error',
-          },
-        ],
+        errors: [{ message: 'some error', topic: 'Configuration Error' }],
       });
     presets.resolveConfigPresets.mockResolvedValue({
       labels: ['test'],
@@ -219,14 +190,7 @@ describe('workers/repository/init/inherited', () => {
       CONFIG_VALIDATION,
     );
     expect(logger.warn).toHaveBeenCalledWith(
-      {
-        errors: [
-          {
-            message: 'some error',
-            topic: 'Configuration Error',
-          },
-        ],
-      },
+      { errors: [{ message: 'some error', topic: 'Configuration Error' }] },
       'Found errors in presets inside the inherited configuration.',
     );
   });
@@ -254,10 +218,7 @@ describe('workers/repository/init/inherited', () => {
           automerge: true,
           binarySource: 'docker',
         },
-        filteredConfig: {
-          labels: ['test'],
-          automerge: true,
-        },
+        filteredConfig: { labels: ['test'], automerge: true },
       },
       'Removed global config from inherited config presets.',
     );

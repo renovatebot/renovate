@@ -45,19 +45,12 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();
-      hostRules.add({
-        hostType: 'gitlab',
-        matchHost,
-        token: 'abc',
-      });
+      hostRules.add({ hostType: 'gitlab', matchHost, token: 'abc' });
     });
 
     it('returns null if @types', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          currentVersion: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, currentVersion: undefined }),
       ).toBeNull();
     });
 
@@ -81,11 +74,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
     });
 
     it('works without GitLab', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
@@ -123,11 +112,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
@@ -158,11 +143,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
@@ -193,11 +174,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/releases?per_page=100')
         .reply(200, []);
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-        }),
-      ).toMatchSnapshot({
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot({
         hasReleaseNotes: false,
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
@@ -219,29 +196,18 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
 
     it('handles no sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: undefined,
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: undefined }),
       ).toBeNull();
     });
 
     it('handles invalid sourceUrl', async () => {
       expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'http://example.com',
-        }),
+        await getChangeLogJSON({ ...upgrade, sourceUrl: 'http://example.com' }),
       ).toBeNull();
     });
 
     it('handles no releases', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          releases: [],
-        }),
-      ).toBeNull();
+      expect(await getChangeLogJSON({ ...upgrade, releases: [] })).toBeNull();
     });
 
     it('handles not enough releases', async () => {

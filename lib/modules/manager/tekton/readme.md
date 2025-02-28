@@ -71,11 +71,7 @@ This is to avoid problems with unrelated YAML files since there is no well-estab
 As an example, the following config matches all the YAML files in a repository:
 
 ```json
-{
-  "tekton": {
-    "fileMatch": ["\\.yaml$", "\\.yml$"]
-  }
-}
+{ "tekton": { "fileMatch": ["\\.yaml$", "\\.yml$"] } }
 ```
 
 See our [versioning](../../versioning/index.md) documentation for details on the existing versioning rules and possible alterations.

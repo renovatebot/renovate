@@ -123,18 +123,14 @@ describe('util/git/url', () => {
     it('transforms an ssh git url to https for the purpose of finding hostRules', () => {
       getRemoteUrlWithToken('git@foo.bar:some/repo');
       expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'https://foo.bar/some/repo',
-        }),
+        expect.objectContaining({ url: 'https://foo.bar/some/repo' }),
       );
     });
 
     it('does not transform urls that are not parseable as git urls', () => {
       getRemoteUrlWithToken('abcdefg');
       expect(hostRules.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          url: 'abcdefg',
-        }),
+        expect.objectContaining({ url: 'abcdefg' }),
       );
     });
 
@@ -207,18 +203,14 @@ describe('util/git/url', () => {
     });
 
     it('returns https url with encoded gitlab token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.find.mockReturnValueOnce({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(
         'https://gitlab-ci-token:token@gitlab.com/some/repo.git',
       );
     });
 
     it('returns https url for ssh url with encoded github token', () => {
-      hostRules.find.mockReturnValueOnce({
-        token: 'token',
-      });
+      hostRules.find.mockReturnValueOnce({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://github.com/some/repo.git')).toBe(
         'https://x-access-token:token@github.com/some/repo.git',
       );

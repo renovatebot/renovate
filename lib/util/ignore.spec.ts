@@ -1,11 +1,7 @@
 import { logger } from '../logger';
 import { isSkipComment } from './ignore';
 
-vi.mock('../logger', () => ({
-  logger: {
-    debug: vi.fn(),
-  },
-}));
+vi.mock('../logger', () => ({ logger: { debug: vi.fn() } }));
 
 describe('util/ignore', () => {
   it('returns true for "renovate:ignore" comments', () => {

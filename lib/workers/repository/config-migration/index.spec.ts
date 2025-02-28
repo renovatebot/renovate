@@ -15,10 +15,7 @@ vi.mock('./branch/migrated-data');
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
 const branchName = 'renovate/config-migration';
-const config = {
-  ...getConfig(),
-  configMigration: true,
-};
+const config = { ...getConfig(), configMigration: true };
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
@@ -81,9 +78,7 @@ describe('workers/repository/config-migration/index', () => {
       result: 'migration-branch-modified',
     });
     mockedFunction(ensureConfigMigrationPr).mockResolvedValue(
-      partial<Pr>({
-        number: 1,
-      }),
+      partial<Pr>({ number: 1 }),
     );
     const res = await configMigration(config, branchList);
     expect(res).toMatchObject({ result: 'pr-modified', prNumber: 1 });

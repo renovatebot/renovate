@@ -131,9 +131,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     mockFiles({
       '/Pipfile.lock': JSON.stringify({
-        _meta: {
-          requires: { python_full_version: '3.7.6' },
-        },
+        _meta: { requires: { python_full_version: '3.7.6' } },
       } satisfies PipfileLock),
     });
     const execSnapshots = mockExecAll();
@@ -152,9 +150,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: join('/tmp/github/some/repo'),
-          env: {
-            PIPENV_CACHE_DIR: pipenvCacheDir,
-          },
+          env: { PIPENV_CACHE_DIR: pipenvCacheDir },
         },
       },
     ]);
@@ -179,9 +175,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile1'),
       '/Pipfile.lock': JSON.stringify({
-        _meta: {
-          requires: { python_full_version: '3.7.6' },
-        },
+        _meta: { requires: { python_full_version: '3.7.6' } },
       } satisfies PipfileLock),
     });
 
@@ -205,9 +199,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: join('/tmp/github/some/repo'),
-          env: {
-            PIPENV_CACHE_DIR: pipenvCacheDir,
-          },
+          env: { PIPENV_CACHE_DIR: pipenvCacheDir },
         },
       },
     ]);
@@ -232,9 +224,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile2'),
       '/Pipfile.lock': JSON.stringify({
-        _meta: {
-          requires: { python_full_version: '3.7.6' },
-        },
+        _meta: { requires: { python_full_version: '3.7.6' } },
       } satisfies PipfileLock),
     });
 
@@ -258,9 +248,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: join('/tmp/github/some/repo'),
-          env: {
-            PIPENV_CACHE_DIR: pipenvCacheDir,
-          },
+          env: { PIPENV_CACHE_DIR: pipenvCacheDir },
         },
       },
     ]);
@@ -282,10 +270,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
-    mockFiles({
-      '/Pipfile.lock': '{}',
-      '/.python-version': '3.7.6',
-    });
+    mockFiles({ '/Pipfile.lock': '{}', '/.python-version': '3.7.6' });
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
 
@@ -307,9 +292,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: join('/tmp/github/some/repo'),
-          env: {
-            PIPENV_CACHE_DIR: pipenvCacheDir,
-          },
+          env: { PIPENV_CACHE_DIR: pipenvCacheDir },
         },
       },
     ]);
@@ -334,10 +317,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
 
-    mockFiles({
-      '/Pipfile.lock': '{}',
-      '/.python-version': '3.8',
-    });
+    mockFiles({ '/Pipfile.lock': '{}', '/.python-version': '3.8' });
     const execSnapshots = mockExecAll();
 
     expect(
@@ -356,9 +336,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: join('/tmp/github/some/repo'),
-          env: {
-            PIPENV_CACHE_DIR: pipenvCacheDir,
-          },
+          env: { PIPENV_CACHE_DIR: pipenvCacheDir },
         },
       },
     ]);
@@ -381,9 +359,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
-    mockFiles({
-      '/Pipfile.lock': 'unparseable pipfile lock',
-    });
+    mockFiles({ '/Pipfile.lock': 'unparseable pipfile lock' });
 
     const execSnapshots = mockExecAll();
 
@@ -433,9 +409,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -488,9 +462,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.7' } },
     } satisfies PipfileLock);
-    mockFiles({
-      '/Pipfile.lock': [pipFileLock, pipFileLock, 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': [pipFileLock, pipFileLock, 'new lock'] });
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
 
@@ -500,9 +472,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -567,9 +537,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.6' } },
     } satisfies PipfileLock);
-    mockFiles({
-      '/Pipfile.lock': [pipFileLock, 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': [pipFileLock, 'new lock'] });
 
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
 
@@ -579,9 +547,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -628,9 +594,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fsExtra.stat.mockResolvedValueOnce({} as never);
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
 
-    mockFiles({
-      '/Pipfile.lock': ['{}', 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': ['{}', 'new lock'] });
 
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -638,9 +602,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -687,9 +649,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
-    mockFiles({
-      '/Pipfile.lock': 'Current Pipfile.lock',
-    });
+    mockFiles({ '/Pipfile.lock': 'Current Pipfile.lock' });
 
     fsExtra.outputFile.mockImplementationOnce((() => {
       throw new Error('not found');
@@ -721,9 +681,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -767,15 +725,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
     } satisfies PipfileLock);
-    mockFiles({
-      '/Pipfile.lock': [oldLock, oldLock, 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': [oldLock, oldLock, 'new lock'] });
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -842,15 +796,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     const oldLock = JSON.stringify({
       develop: { pipenv: { version: '==2020.8.13' } },
     } satisfies PipfileLock) as never;
-    mockFiles({
-      '/Pipfile.lock': [oldLock, oldLock, 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': [oldLock, oldLock, 'new lock'] });
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -916,15 +866,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
     } satisfies PipfileLock) as never;
-    mockFiles({
-      '/Pipfile.lock': [oldLock, 'new lock'],
-    });
+    mockFiles({ '/Pipfile.lock': [oldLock, 'new lock'] });
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     expect(
@@ -990,9 +936,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     find.mockReturnValueOnce({
@@ -1050,9 +994,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('warns about duplicate placeholders with different values', () => {
-    const extraEnv: Opt<ExtraEnv> = {
-      FOO: '1',
-    };
+    const extraEnv: Opt<ExtraEnv> = { FOO: '1' };
     addExtraEnvVariable(extraEnv, 'FOO', '2');
     expect(logger.warn).toHaveBeenCalledOnce();
   });
@@ -1067,9 +1009,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
-      partial<StatusResult>({
-        modified: ['Pipfile.lock'],
-      }),
+      partial<StatusResult>({ modified: ['Pipfile.lock'] }),
     );
 
     find.mockReturnValueOnce({

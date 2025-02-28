@@ -98,10 +98,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
   // abort if we have no matchString anymore
   if (regexes.length === index) {
     const result = createDependency(
-      {
-        groups: combinedGroups,
-        replaceString: content,
-      },
+      { groups: combinedGroups, replaceString: content },
       config,
     );
     return result ? [result] : /* istanbul ignore next: can this happen? */ [];

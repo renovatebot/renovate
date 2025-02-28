@@ -118,9 +118,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       await this.http.getJsonUnchecked<TerraformProvider>(backendURL)
     ).body;
     const dep: ReleaseResult = {
-      releases: res.versions.map((version) => ({
-        version,
-      })),
+      releases: res.versions.map((version) => ({ version })),
     };
     if (res.source) {
       dep.sourceUrl = res.source;
@@ -156,9 +154,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       await this.http.getJsonUnchecked<TerraformProviderVersions>(backendURL)
     ).body;
     const dep: ReleaseResult = {
-      releases: res.versions.map(({ version }) => ({
-        version,
-      })),
+      releases: res.versions.map(({ version }) => ({ version })),
     };
     return dep;
   }
@@ -181,9 +177,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     ).body;
 
     const dep: ReleaseResult = {
-      releases: Object.keys(res.versions).map((version) => ({
-        version,
-      })),
+      releases: Object.keys(res.versions).map((version) => ({ version })),
       sourceUrl: joinUrlParts(
         'https://github.com/terraform-providers',
         backendLookUpName,

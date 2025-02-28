@@ -32,9 +32,7 @@ describe('modules/manager/pep621/extract', () => {
       const result = await extractPackageFile(pdmPyProject, 'pyproject.toml');
 
       expect(result).toMatchObject({
-        extractedConstraints: {
-          python: '>=3.7',
-        },
+        extractedConstraints: { python: '>=3.7' },
       });
       const dependencies = result?.deps.filter(
         (dep) => dep.depType === 'project.dependencies',
@@ -353,9 +351,7 @@ describe('modules/manager/pep621/extract', () => {
       );
 
       expect(result?.deps).toMatchObject([
-        {
-          depName: 'dep1',
-        },
+        { depName: 'dep1' },
         {
           depName: 'dep2',
           depType: depTypes.uvSources,
@@ -379,9 +375,7 @@ describe('modules/manager/pep621/extract', () => {
           depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
         },
-        {
-          depName: 'dep6',
-        },
+        { depName: 'dep6' },
         {
           depName: 'dep-with_NORMALIZATION',
           depType: depTypes.uvSources,

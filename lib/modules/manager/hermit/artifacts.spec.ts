@@ -31,28 +31,15 @@ describe('modules/manager/hermit/artifacts', () => {
           deleted: ['bin/go-1.17'],
           modified: ['bin/go', 'bin/jq'],
           created: ['bin/jq-extra'],
-          renamed: [
-            {
-              from: 'bin/jq-1.5',
-              to: 'bin/jq-1.6',
-            },
-          ],
+          renamed: [{ from: 'bin/jq-1.5', to: 'bin/jq-1.6' }],
         }),
       );
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
           updatedDeps: [
-            {
-              depName: 'go',
-              currentVersion: '1.17',
-              newValue: '1.17.1',
-            },
-            {
-              depName: 'jq',
-              currentVersion: '1.5',
-              newValue: '1.6',
-            },
+            { depName: 'go', currentVersion: '1.17', newValue: '1.17.1' },
+            { depName: 'jq', currentVersion: '1.5', newValue: '1.6' },
           ],
           packageFileName: 'go/bin/hermit',
         }),
@@ -63,12 +50,7 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
 
       expect(res).toStrictEqual([
-        {
-          file: {
-            path: 'bin/jq-1.5',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/jq-1.5', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -78,12 +60,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/go',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/go', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -93,12 +70,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/jq',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/jq', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -126,12 +98,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/go-1.17',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/go-1.17', type: 'deletion' } },
       ]);
     });
 
@@ -148,10 +115,7 @@ describe('modules/manager/hermit/artifacts', () => {
           deleted: [],
           modified: ['bin/java', 'bin/javac', 'bin/jar'],
           renamed: [
-            {
-              from: 'bin/.openjdk-17.0.3',
-              to: 'bin/.openjdk-17.0.4.1_1',
-            },
+            { from: 'bin/.openjdk-17.0.3', to: 'bin/.openjdk-17.0.4.1_1' },
           ],
           created: [],
         }),
@@ -178,12 +142,7 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
 
       expect(res).toStrictEqual([
-        {
-          file: {
-            path: 'bin/.openjdk-17.0.3',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/.openjdk-17.0.3', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -193,12 +152,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/java',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/java', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -208,12 +162,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/javac',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/javac', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -223,12 +172,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/jar',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/jar', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -253,12 +197,7 @@ describe('modules/manager/hermit/artifacts', () => {
           not_added: [],
           deleted: [],
           modified: ['bin/go'],
-          renamed: [
-            {
-              from: 'bin/.go-1.19',
-              to: 'bin/.go-1.18',
-            },
-          ],
+          renamed: [{ from: 'bin/.go-1.19', to: 'bin/.go-1.18' }],
           created: [],
         }),
       );
@@ -283,12 +222,7 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
 
       expect(res).toStrictEqual([
-        {
-          file: {
-            path: 'bin/.go-1.19',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/.go-1.19', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -298,12 +232,7 @@ describe('modules/manager/hermit/artifacts', () => {
             type: 'addition',
           },
         },
-        {
-          file: {
-            path: 'bin/go',
-            type: 'deletion',
-          },
-        },
+        { file: { path: 'bin/go', type: 'deletion' } },
         {
           file: {
             contents: 'hermit',
@@ -327,9 +256,7 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit uninstall',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: { encoding: 'utf-8' },
         }),
       );
 
@@ -381,39 +308,22 @@ describe('modules/manager/hermit/artifacts', () => {
           deleted: [],
           modified: [],
           created: [],
-          renamed: [
-            {
-              from: 'bin/jq-1.5',
-              to: 'bin/jq-1.6',
-            },
-          ],
+          renamed: [{ from: 'bin/jq-1.5', to: 'bin/jq-1.6' }],
         }),
       );
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
           updatedDeps: [
-            {
-              depName: 'go',
-              currentVersion: '1.17',
-              newValue: '1.17.1',
-            },
-            {
-              depName: 'jq',
-              currentVersion: '1.5',
-              newValue: '1.6',
-            },
+            { depName: 'go', currentVersion: '1.17', newValue: '1.17.1' },
+            { depName: 'jq', currentVersion: '1.5', newValue: '1.6' },
           ],
           packageFileName: 'go/bin/hermit',
         }),
       );
 
       expect(res).toEqual([
-        {
-          artifactError: {
-            stderr: 'error getting content for bin/jq-1.6',
-          },
-        },
+        { artifactError: { stderr: 'error getting content for bin/jq-1.6' } },
       ]);
     });
 
@@ -423,25 +333,15 @@ describe('modules/manager/hermit/artifacts', () => {
           stdout: '',
           stderr: 'error executing hermit install',
           cmd: '',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: { encoding: 'utf-8' },
         }),
       );
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
           updatedDeps: [
-            {
-              depName: 'go',
-              currentVersion: '1.17',
-              newValue: '1.17.1',
-            },
-            {
-              depName: 'jq',
-              currentVersion: '1.5',
-              newValue: '1.6',
-            },
+            { depName: 'go', currentVersion: '1.17', newValue: '1.17.1' },
+            { depName: 'jq', currentVersion: '1.5', newValue: '1.6' },
           ],
           packageFileName: 'go/bin/hermit',
         }),
@@ -460,12 +360,7 @@ describe('modules/manager/hermit/artifacts', () => {
     it('should return error on invalid update information', async () => {
       let res = await updateArtifacts(
         partial<UpdateArtifact>({
-          updatedDeps: [
-            {
-              currentVersion: '1.17',
-              newValue: '1.17.1',
-            },
-          ],
+          updatedDeps: [{ currentVersion: '1.17', newValue: '1.17.1' }],
           packageFileName: 'go/bin/hermit',
         }),
       );
@@ -481,12 +376,7 @@ describe('modules/manager/hermit/artifacts', () => {
 
       res = await updateArtifacts(
         partial<UpdateArtifact>({
-          updatedDeps: [
-            {
-              depName: 'go',
-              newValue: '1.17.1',
-            },
-          ],
+          updatedDeps: [{ depName: 'go', newValue: '1.17.1' }],
           packageFileName: 'go/bin/hermit',
         }),
       );
@@ -502,12 +392,7 @@ describe('modules/manager/hermit/artifacts', () => {
 
       res = await updateArtifacts(
         partial<UpdateArtifact>({
-          updatedDeps: [
-            {
-              depName: 'go',
-              currentVersion: '1.17',
-            },
-          ],
+          updatedDeps: [{ depName: 'go', currentVersion: '1.17' }],
           packageFileName: 'go/bin/hermit',
         }),
       );

@@ -49,9 +49,7 @@ describe('modules/platform/azure/index', () => {
     git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.find.mockReturnValue({
-      token: 'token',
-    });
+    hostRules.find.mockReturnValue({ token: 'token' });
     await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
@@ -65,24 +63,11 @@ describe('modules/platform/azure/index', () => {
       () =>
         ({
           getRepositories: vi.fn(() => [
-            {
-              name: 'repo1',
-              project: {
-                name: 'prj1',
-              },
-            },
-            {
-              name: 'repo2',
-              project: {
-                name: 'prj1',
-              },
-              isDisabled: false,
-            },
+            { name: 'repo1', project: { name: 'prj1' } },
+            { name: 'repo2', project: { name: 'prj1' }, isDisabled: false },
             {
               name: 'repoDisabled',
-              project: {
-                name: 'prj1',
-              },
+              project: { name: 'prj1' },
               isDisabled: true,
             },
           ]),
@@ -100,9 +85,7 @@ describe('modules/platform/azure/index', () => {
     it('should throw if no token nor a username and password', () => {
       expect.assertions(1);
       expect(() =>
-        azure.initPlatform({
-          endpoint: 'https://dev.azure.com/renovate12345',
-        }),
+        azure.initPlatform({ endpoint: 'https://dev.azure.com/renovate12345' }),
       ).toThrow();
     });
 
@@ -157,62 +140,38 @@ describe('modules/platform/azure/index', () => {
             privateRepo: true,
             isFork: false,
             defaultBranch: 'defBr',
-            project: {
-              name: 'some',
-            },
+            project: { name: 'some' },
           },
-          {
-            name: 'repo2',
-            project: {
-              name: 'prj2',
-            },
-          },
-          {
-            name: 'repo3',
-            project: {
-              name: 'some',
-            },
-            isDisabled: true,
-          },
+          { name: 'repo2', project: { name: 'prj2' } },
+          { name: 'repo3', project: { name: 'some' }, isDisabled: true },
         ]),
       }),
     );
 
     if (is.string(args)) {
-      return azure.initRepo({
-        repository: args,
-      });
+      return azure.initRepo({ repository: args });
     }
 
-    return azure.initRepo({
-      repository: 'some/repo',
-      ...args,
-    });
+    return azure.initRepo({ repository: 'some/repo', ...args });
   }
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
-      const config = await initRepo({
-        repository: 'some/repo',
-      });
+      const config = await initRepo({ repository: 'some/repo' });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
     });
 
     it(`throws if repo is disabled`, async () => {
-      await expect(
-        initRepo({
-          repository: 'some/repo3',
-        }),
-      ).rejects.toThrow(REPOSITORY_ARCHIVED);
+      await expect(initRepo({ repository: 'some/repo3' })).rejects.toThrow(
+        REPOSITORY_ARCHIVED,
+      );
     });
 
     it(`throws if repo is not in repos list`, async () => {
-      await expect(
-        initRepo({
-          repository: 'some/missing',
-        }),
-      ).rejects.toThrow(REPOSITORY_NOT_FOUND);
+      await expect(initRepo({ repository: 'some/missing' })).rejects.toThrow(
+        REPOSITORY_NOT_FOUND,
+      );
     });
   });
 
@@ -493,10 +452,7 @@ describe('modules/platform/azure/index', () => {
   describe('getPrList()', () => {
     it('returns empty array', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi.fn(() => []),
-          }) as any,
+        () => ({ getPullRequests: vi.fn(() => []) }) as any,
       );
       expect(await azure.getPrList()).toEqual([]);
     });
@@ -687,12 +643,11 @@ describe('modules/platform/azure/index', () => {
           getBranch: vi
             .fn()
             .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
-          getStatuses: vi.fn().mockResolvedValue([
-            {
-              state: -1,
-              context: { genre: 'a-genre', name: 'a-name' },
-            },
-          ]),
+          getStatuses: vi
+            .fn()
+            .mockResolvedValue([
+              { state: -1, context: { genre: 'a-genre', name: 'a-name' } },
+            ]),
         }),
       );
       const res = await azure.getBranchStatusCheck(
@@ -810,10 +765,7 @@ describe('modules/platform/azure/index', () => {
     it('should return null if no PR is returned from azure', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi.fn(() => []),
-          }) as any,
+        () => ({ getPullRequests: vi.fn(() => []) }) as any,
       );
       const pr = await azure.getPr(1234);
       expect(pr).toBeNull();
@@ -827,21 +779,13 @@ describe('modules/platform/azure/index', () => {
             getPullRequests: vi
               .fn()
               .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1234,
-                },
-              ]),
+              .mockReturnValueOnce([{ pullRequestId: 1234 }]),
             getPullRequestLabels: vi
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
-            getPullRequestCommits: vi.fn().mockReturnValue([
-              {
-                author: {
-                  name: 'renovate',
-                },
-              },
-            ]),
+            getPullRequestCommits: vi
+              .fn()
+              .mockReturnValue([{ author: { name: 'renovate' } }]),
           }) as any,
       );
       const pr = await azure.getPr(1234);
@@ -855,9 +799,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            createPullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-            })),
+            createPullRequest: vi.fn(() => ({ pullRequestId: 456 })),
             createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
@@ -876,9 +818,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            createPullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-            })),
+            createPullRequest: vi.fn(() => ({ pullRequestId: 456 })),
             createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
@@ -898,15 +838,11 @@ describe('modules/platform/azure/index', () => {
         const prResult = {
           pullRequestId: 456,
           title: 'The Title',
-          createdBy: {
-            id: '123',
-          },
+          createdBy: { id: '123' },
         };
         const prUpdateResult = {
           ...prResult,
-          autoCompleteSetBy: {
-            id: prResult.createdBy.id,
-          },
+          autoCompleteSetBy: { id: prResult.createdBy.id },
           completionOptions: {
             mergeStrategy: GitPullRequestMergeStrategy.Squash,
             deleteSourceBranch: true,
@@ -936,27 +872,17 @@ describe('modules/platform/azure/index', () => {
       it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
         await initRepo({ repository: 'some/repo' });
         const prResult = [
-          {
-            pullRequestId: 456,
-            title: 'The Title',
-            createdBy: {
-              id: '123',
-            },
-          },
+          { pullRequestId: 456, title: 'The Title', createdBy: { id: '123' } },
           {
             pullRequestId: 457,
             title: 'The Second Title',
-            createdBy: {
-              id: '123',
-            },
+            createdBy: { id: '123' },
           },
         ];
         const prUpdateResults = [
           {
             ...prResult[0],
-            autoCompleteSetBy: {
-              id: prResult[0].createdBy.id,
-            },
+            autoCompleteSetBy: { id: prResult[0].createdBy.id },
             completionOptions: {
               mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
@@ -965,9 +891,7 @@ describe('modules/platform/azure/index', () => {
           },
           {
             ...prResult[1],
-            autoCompleteSetBy: {
-              id: prResult[1].createdBy.id,
-            },
+            autoCompleteSetBy: { id: prResult[1].createdBy.id },
             completionOptions: {
               mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
@@ -1029,15 +953,11 @@ describe('modules/platform/azure/index', () => {
           const prResult = {
             pullRequestId: 123,
             title: 'The Title',
-            createdBy: {
-              id: '123',
-            },
+            createdBy: { id: '123' },
           };
           const prUpdateResults = {
             ...prResult,
-            autoCompleteSetBy: {
-              id: prResult.createdBy.id,
-            },
+            autoCompleteSetBy: { id: prResult.createdBy.id },
             completionOptions: {
               mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
@@ -1082,15 +1002,11 @@ describe('modules/platform/azure/index', () => {
           const prResult = {
             pullRequestId: 456,
             title: 'The Title',
-            createdBy: {
-              id: '123',
-            },
+            createdBy: { id: '123' },
           };
           const prUpdateResult = {
             ...prResult,
-            autoCompleteSetBy: {
-              id: prResult.createdBy.id,
-            },
+            autoCompleteSetBy: { id: prResult.createdBy.id },
             completionOptions: {
               mergeStrategy: prMergeStrategy,
               deleteSourceBranch: true,
@@ -1133,10 +1049,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        createdBy: {
-          id: 123,
-          url: 'user-url',
-        },
+        createdBy: { id: 123, url: 'user-url' },
       };
       const prUpdateResult = {
         reviewerUrl: prResult.createdBy.url,
@@ -1173,10 +1086,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+        () => ({ updatePullRequest }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -1214,10 +1124,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(createdPr).toMatchObject({ number: 456, title: 'Title 1' });
       expect(await azure.getPrList()).toHaveLength(1);
-      await azure.updatePr({
-        number: 456,
-        prTitle: 'Title 2',
-      });
+      await azure.updatePr({ number: 456, prTitle: 'Title 2' });
       const prList = await azure.getPrList();
       expect(prList).toHaveLength(1);
       expect(prList[0]).toMatchObject({ number: 456, title: 'Title 2' });
@@ -1227,10 +1134,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+        () => ({ updatePullRequest }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -1243,10 +1147,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+        () => ({ updatePullRequest }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -1261,10 +1162,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+        () => ({ updatePullRequest }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -1279,10 +1177,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        createdBy: {
-          id: 123,
-          url: 'user-url',
-        },
+        createdBy: { id: 123, url: 'user-url' },
       };
       const prUpdateResult = {
         reviewerUrl: prResult.createdBy.url,
@@ -1318,12 +1213,11 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
         createThread: vi.fn(() => [{ id: 123 }]),
-        getThreads: vi.fn().mockReturnValue([
-          {
-            comments: [{ content: 'end-user comment', id: 1 }],
-            id: 2,
-          },
-        ]),
+        getThreads: vi
+          .fn()
+          .mockReturnValue([
+            { comments: [{ content: 'end-user comment', id: 1 }], id: 2 },
+          ]),
         updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
@@ -1341,10 +1235,7 @@ describe('modules/platform/azure/index', () => {
       const gitApiMock = {
         createThread: vi.fn(() => [{ id: 123 }]),
         getThreads: vi.fn().mockReturnValue([
-          {
-            comments: [{ content: 'end-user comment', id: 1 }],
-            id: 3,
-          },
+          { comments: [{ content: 'end-user comment', id: 1 }], id: 3 },
           {
             comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
             id: 4,
@@ -1367,10 +1258,7 @@ describe('modules/platform/azure/index', () => {
       const gitApiMock = {
         createThread: vi.fn(() => [{ id: 123 }]),
         getThreads: vi.fn().mockReturnValue([
-          {
-            comments: [{ content: 'end-user comment', id: 1 }],
-            id: 3,
-          },
+          { comments: [{ content: 'end-user comment', id: 1 }], id: 3 },
           {
             comments: [{ content: '### some-subject\n\nsome\ncontent', id: 2 }],
             id: 4,
@@ -1392,12 +1280,11 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
         createThread: vi.fn(() => [{ id: 123 }]),
-        getThreads: vi.fn().mockReturnValue([
-          {
-            comments: [{ content: 'some\ncontent', id: 2 }],
-            id: 4,
-          },
-        ]),
+        getThreads: vi
+          .fn()
+          .mockReturnValue([
+            { comments: [{ content: 'some\ncontent', id: 2 }], id: 4 },
+          ]),
         updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
@@ -1414,12 +1301,11 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
         createThread: vi.fn().mockResolvedValue([{ id: 123 }]),
-        getThreads: vi.fn().mockResolvedValue([
-          {
-            comments: [{ content: 'end-user comment', id: 1 }],
-            id: 2,
-          },
-        ]),
+        getThreads: vi
+          .fn()
+          .mockResolvedValue([
+            { comments: [{ content: 'end-user comment', id: 1 }], id: 2 },
+          ]),
         updateComment: vi.fn().mockResolvedValue({ id: 123 }),
       };
       azureApi.gitApi.mockResolvedValue(partial<IGitApi>(gitApiMock));
@@ -1448,14 +1334,8 @@ describe('modules/platform/azure/index', () => {
     beforeEach(() => {
       gitApiMock = {
         getThreads: vi.fn(() => [
-          {
-            comments: [{ content: '### some-subject\n\nblabla' }],
-            id: 123,
-          },
-          {
-            comments: [{ content: 'some-content\n' }],
-            id: 124,
-          },
+          { comments: [{ content: '### some-subject\n\nblabla' }], id: 123 },
+          { comments: [{ content: 'some-content\n' }], id: 124 },
         ]),
         updateThread: vi.fn(),
       };
@@ -1628,10 +1508,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(
         {
-          context: {
-            genre: undefined,
-            name: 'test',
-          },
+          context: { genre: undefined, name: 'test' },
           description: 'test',
           state: GitStatusState.Pending,
           targetUrl: 'test.com',
@@ -1660,10 +1537,7 @@ describe('modules/platform/azure/index', () => {
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(
         {
-          context: {
-            genre: 'renovate/artifact',
-            name: 'test',
-          },
+          context: { genre: 'renovate/artifact', name: 'test' },
           description: 'test',
           state: GitStatusState.Succeeded,
           targetUrl: 'test.com',
@@ -1680,9 +1554,7 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const updatePullRequestMock = vi.fn(() => ({
-        status: 3,
-      }));
+      const updatePullRequestMock = vi.fn(() => ({ status: 3 }));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1734,9 +1606,7 @@ describe('modules/platform/azure/index', () => {
         const pullRequestIdMock = 12345;
         const branchNameMock = 'test';
         const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-        const updatePullRequestMock = vi.fn(() => ({
-          status: 3,
-        }));
+        const updatePullRequestMock = vi.fn(() => ({ status: 3 }));
         azureApi.gitApi.mockImplementationOnce(
           () =>
             ({
@@ -1846,9 +1716,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
-            updatePullRequest: vi.fn(() => ({
-              status: 1,
-            })),
+            updatePullRequest: vi.fn(() => ({ status: 1 })),
           }) as any,
       );
       azureHelper.getMergeMethod = vi
@@ -1878,9 +1746,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
-            updatePullRequest: vi.fn(() => ({
-              status: 1,
-            })),
+            updatePullRequest: vi.fn(() => ({ status: 1 })),
           }) as any,
       );
       azureHelper.getMergeMethod = vi
@@ -1902,10 +1768,7 @@ describe('modules/platform/azure/index', () => {
     it('Should delete a label', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            deletePullRequestLabels: vi.fn(),
-          }) as any,
+        () => ({ deletePullRequestLabels: vi.fn() }) as any,
       );
       await azure.deleteLabel(1234, 'rebase');
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
@@ -1920,11 +1783,13 @@ describe('modules/platform/azure/index', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getItem: vi.fn(() =>
-            Promise.resolve({ content: JSON.stringify(data) }),
-          ),
-        })),
+        vi
+          .fn()
+          .mockImplementationOnce(() => ({
+            getItem: vi.fn(() =>
+              Promise.resolve({ content: JSON.stringify(data) }),
+            ),
+          })),
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1932,9 +1797,11 @@ describe('modules/platform/azure/index', () => {
 
     it('returns null when file not found', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getItem: vi.fn(() => Promise.resolve(null)),
-        })),
+        vi
+          .fn()
+          .mockImplementationOnce(() => ({
+            getItem: vi.fn(() => Promise.resolve(null)),
+          })),
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toBeNull();
@@ -1948,9 +1815,11 @@ describe('modules/platform/azure/index', () => {
         }
       `;
       azureApi.gitApi.mockImplementationOnce(
-        vi.fn().mockImplementationOnce(() => ({
-          getItem: vi.fn(() => Promise.resolve({ content: json5Data })),
-        })),
+        vi
+          .fn()
+          .mockImplementationOnce(() => ({
+            getItem: vi.fn(() => Promise.resolve({ content: json5Data })),
+          })),
       );
       const res = await azure.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -2011,9 +1880,7 @@ describe('modules/platform/azure/index', () => {
 
     it('returns null', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
-        partial<IGitApi>({
-          getRepositories: vi.fn(() => Promise.resolve([])),
-        }),
+        partial<IGitApi>({ getRepositories: vi.fn(() => Promise.resolve([])) }),
       );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toBeNull();

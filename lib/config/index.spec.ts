@@ -18,9 +18,7 @@ describe('config/index', () => {
       const childConfig = {
         foo: 'bar',
         rangeStrategy: 'replace',
-        lockFileMaintenance: {
-          schedule: ['on monday'],
-        },
+        lockFileMaintenance: { schedule: ['on monday'] },
       };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toBe('bar');
@@ -55,16 +53,9 @@ describe('config/index', () => {
     it('merges constraints', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
-        constraints: {
-          node: '>=12',
-          npm: '^6.0.0',
-        },
+        constraints: { node: '>=12', npm: '^6.0.0' },
       });
-      const childConfig = {
-        constraints: {
-          node: '<15',
-        },
-      };
+      const childConfig = { constraints: { node: '<15' } };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.constraints).toMatchSnapshot();
       expect(config.constraints.node).toBe('<15');
@@ -72,18 +63,8 @@ describe('config/index', () => {
 
     it('merges forced options', () => {
       const parentConfig = { ...defaultConfig };
-      Object.assign(parentConfig, {
-        force: {
-          schedule: 'at any time',
-        },
-      });
-      const childConfig = {
-        force: {
-          constraints: {
-            node: '<15',
-          },
-        },
-      };
+      Object.assign(parentConfig, { force: { schedule: 'at any time' } });
+      const childConfig = { force: { constraints: { node: '<15' } } };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.force.schedule).toBe('at any time');
       expect(config.force.constraints.node).toBe('<15');
@@ -91,12 +72,8 @@ describe('config/index', () => {
 
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };
-      Object.assign(parentConfig, {
-        packageRules: null,
-      });
-      const childConfig = {
-        packageRules: [{ a: 3 }, { a: 4 }],
-      };
+      Object.assign(parentConfig, { packageRules: null });
+      const childConfig = { packageRules: [{ a: 3 }, { a: 4 }] };
       const configParser = await import('./index');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
@@ -144,9 +121,7 @@ describe('config/index', () => {
         isVulnerabilityAlert: true,
         vulnerabilitySeverity: 'HIGH',
       });
-      const childConfig = {
-        vulnerabilitySeverity: 'CRITICAL',
-      };
+      const childConfig = { vulnerabilitySeverity: 'CRITICAL' };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.vulnerabilitySeverity).toBe('CRITICAL');
     });

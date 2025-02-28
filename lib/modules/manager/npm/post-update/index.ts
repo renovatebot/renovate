@@ -339,15 +339,8 @@ export async function updateYarnBinary(
 
     yarnrcYml = yarnrcYml.replace(oldYarnPath, newYarnPath);
     updatedArtifacts.push(
-      {
-        type: 'addition',
-        path: yarnrcYmlFilename,
-        contents: yarnrcYml,
-      },
-      {
-        type: 'deletion',
-        path: oldYarnFullPath,
-      },
+      { type: 'addition', path: yarnrcYmlFilename, contents: yarnrcYml },
+      { type: 'deletion', path: oldYarnFullPath },
       {
         type: 'addition',
         path: newYarnFullPath,
@@ -447,10 +440,7 @@ export async function getAdditionalFiles(
           }
         }
       }
-      artifactErrors.push({
-        lockFile: npmLock,
-        stderr: res.stderr,
-      });
+      artifactErrors.push({ lockFile: npmLock, stderr: res.stderr });
     } else if (res.lockFile) {
       const existingContent = await getFile(
         npmLock,

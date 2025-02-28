@@ -57,9 +57,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       .scope('https://api.bitbucket.org')
       .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
       .query(true)
-      .reply(200, {
-        values: [pr1],
-      });
+      .reply(200, { values: [pr1] });
 
     const res = await BitbucketPrCache.getPrs(
       http,
@@ -67,21 +65,14 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       'some-author',
     );
 
-    expect(res).toMatchObject([
-      {
-        number: 1,
-        title: 'title',
-      },
-    ]);
+    expect(res).toMatchObject([{ number: 1, title: 'title' }]);
     expect(cache).toEqual({
       httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
             author: 'some-author',
-            items: {
-              '1': prInfo(pr1),
-            },
+            items: { '1': prInfo(pr1) },
             updated_on: '2020-01-01T00:00:00.000Z',
           },
         },
@@ -93,9 +84,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     cache.platform = {
       bitbucket: {
         pullRequestsCache: {
-          items: {
-            '1': prInfo(pr1),
-          },
+          items: { '1': prInfo(pr1) },
           author: 'some-other-author',
           updated_on: '2020-01-01T00:00:00.000Z',
         },
@@ -106,9 +95,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       .scope('https://api.bitbucket.org')
       .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
       .query(true)
-      .reply(200, {
-        values: [pr1],
-      });
+      .reply(200, { values: [pr1] });
 
     const res = await BitbucketPrCache.getPrs(
       http,
@@ -116,21 +103,14 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       'some-author',
     );
 
-    expect(res).toMatchObject([
-      {
-        number: 1,
-        title: 'title',
-      },
-    ]);
+    expect(res).toMatchObject([{ number: 1, title: 'title' }]);
     expect(cache).toEqual({
       httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
             author: 'some-author',
-            items: {
-              '1': prInfo(pr1),
-            },
+            items: { '1': prInfo(pr1) },
             updated_on: '2020-01-01T00:00:00.000Z',
           },
         },
@@ -142,9 +122,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
     cache.platform = {
       bitbucket: {
         pullRequestsCache: {
-          items: {
-            '1': prInfo(pr1),
-          },
+          items: { '1': prInfo(pr1) },
           author: 'some-author',
           updated_on: '2020-01-01T00:00:00.000Z',
         },
@@ -155,9 +133,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       .scope('https://api.bitbucket.org')
       .get(`/2.0/repositories/some-workspace/some-repo/pullrequests`)
       .query(true)
-      .reply(200, {
-        values: [pr2],
-      });
+      .reply(200, { values: [pr2] });
 
     const res = await BitbucketPrCache.getPrs(
       http,
@@ -174,10 +150,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       platform: {
         bitbucket: {
           pullRequestsCache: {
-            items: {
-              '1': prInfo(pr1),
-              '2': prInfo(pr2),
-            },
+            items: { '1': prInfo(pr1), '2': prInfo(pr2) },
             author: 'some-author',
             updated_on: '2023-01-01T00:00:00.000Z',
           },

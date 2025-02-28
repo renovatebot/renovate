@@ -19,10 +19,7 @@ describe('modules/platform/pr-body', () => {
         ),
       ).toEqual({
         hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
-        debugData: {
-          createdInVer: '1.2.1',
-          updatedInVer: '1.2.3',
-        },
+        debugData: { createdInVer: '1.2.1', updatedInVer: '1.2.3' },
       });
     });
 
@@ -58,27 +55,19 @@ describe('modules/platform/pr-body', () => {
     it('returns rebaseRequested=true flag', () => {
       const input = '- [x] <!-- rebase-check -->';
       const hash = hashBody(input);
-      expect(getPrBodyStruct(input)).toEqual({
-        hash,
-        rebaseRequested: true,
-      });
+      expect(getPrBodyStruct(input)).toEqual({ hash, rebaseRequested: true });
     });
 
     it('returns rebaseRequested=false flag', () => {
       const input = '- [ ] <!-- rebase-check -->';
       const hash = hashBody(input);
-      expect(getPrBodyStruct(input)).toEqual({
-        hash,
-        rebaseRequested: false,
-      });
+      expect(getPrBodyStruct(input)).toEqual({ hash, rebaseRequested: false });
     });
 
     it('returns rebaseRequested=undefined flag', () => {
       const input = '-  <!-- rebase-check -->';
       const hash = hashBody(input);
-      expect(getPrBodyStruct(input)).toEqual({
-        hash,
-      });
+      expect(getPrBodyStruct(input)).toEqual({ hash });
     });
 
     it('returns raw config hash', () => {
@@ -86,10 +75,7 @@ describe('modules/platform/pr-body', () => {
       const rawConfigHash = toSha256(config);
       const input = `<!--renovate-config-hash:${rawConfigHash}-->`;
       const hash = hashBody(input);
-      expect(getPrBodyStruct(input)).toEqual({
-        hash,
-        rawConfigHash,
-      });
+      expect(getPrBodyStruct(input)).toEqual({ hash, rawConfigHash });
     });
 
     it('strips reviewable section', () => {

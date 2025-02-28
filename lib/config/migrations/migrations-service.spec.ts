@@ -8,9 +8,7 @@ import type { Migration } from './types';
 describe('config/migrations/migrations-service', () => {
   it('should remove deprecated properties', () => {
     for (const property of MigrationsService.removedProperties) {
-      const originalConfig: RenovateConfig = {
-        [property]: 'test',
-      };
+      const originalConfig: RenovateConfig = { [property]: 'test' };
 
       const migratedConfig = MigrationsService.run(originalConfig);
       expect(
@@ -25,17 +23,13 @@ describe('config/migrations/migrations-service', () => {
       oldPropertyName,
       newPropertyName,
     ] of MigrationsService.renamedProperties.entries()) {
-      const originalConfig: RenovateConfig = {
-        [oldPropertyName]: 'test',
-      };
+      const originalConfig: RenovateConfig = { [oldPropertyName]: 'test' };
 
       const migratedConfig = MigrationsService.run(originalConfig);
       expect(
         MigrationsService.isMigrated(originalConfig, migratedConfig),
       ).toBeTrue();
-      expect(migratedConfig).toEqual({
-        [newPropertyName]: 'test',
-      });
+      expect(migratedConfig).toEqual({ [newPropertyName]: 'test' });
     }
   });
 
@@ -59,9 +53,7 @@ describe('config/migrations/migrations-service', () => {
 
   it('should allow custom migrations by regexp', () => {
     let isMigrationDone = false;
-    const originalConfig: RenovateConfig = {
-      fooBar: 'one',
-    };
+    const originalConfig: RenovateConfig = { fooBar: 'one' };
     class CustomMigration extends AbstractMigration {
       override readonly deprecated = true;
       override readonly propertyName = /^foo/;

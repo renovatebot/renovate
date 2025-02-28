@@ -52,10 +52,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_TOKEN: 'abc',
-      };
+      const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
@@ -73,12 +70,7 @@ describe('workers/global/config/parse/index', () => {
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([
         ['token', 'abcdefg'],
-        [
-          'force',
-          {
-            schedule: null,
-          },
-        ],
+        ['force', { schedule: null }],
       ]);
     });
 
@@ -183,10 +175,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('massage onboardingNoDeps when autodiscover is false', async () => {
       vi.doMock('../../../../../config.js', () => ({
-        default: {
-          onboardingNoDeps: 'auto',
-          autodiscover: false,
-        },
+        default: { onboardingNoDeps: 'auto', autodiscover: false },
       }));
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);

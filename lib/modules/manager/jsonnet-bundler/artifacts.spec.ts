@@ -90,9 +90,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           {
             depName: 'github.com/foo/foo',
             packageName: 'ssh://git@github.com/foo/foo.git',
-            managerData: {
-              subdir: 'bar',
-            },
+            managerData: { subdir: 'bar' },
           },
         ],
         newPackageFileContent: 'Updated jsonnetfile.json',
@@ -127,12 +125,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           contents: 'New bar/main.jsonnet',
         },
       },
-      {
-        file: {
-          type: 'deletion',
-          path: 'vendor/baz/deleted.jsonnet',
-        },
-      },
+      { file: { type: 'deletion', path: 'vendor/baz/deleted.jsonnet' } },
     ]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -154,10 +147,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: {
-          ...config,
-          isLockFileMaintenance: true,
-        },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toMatchObject([
       {
@@ -191,10 +181,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         packageFileName: 'jsonnetfile.json',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: {
-          ...config,
-          isLockFileMaintenance: true,
-        },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toMatchObject([
       {

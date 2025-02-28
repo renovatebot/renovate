@@ -9,11 +9,7 @@ const YarnrcYmlSchema = Yaml.pipe(
   z.object({
     npmRegistryServer: z.string().optional(),
     npmScopes: z
-      .record(
-        z.object({
-          npmRegistryServer: z.string().optional(),
-        }),
-      )
+      .record(z.object({ npmRegistryServer: z.string().optional() }))
       .optional(),
   }),
 );

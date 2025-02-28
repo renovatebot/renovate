@@ -117,13 +117,9 @@ const image3: Image = {
   VirtualizationType: 'hvm',
 };
 
-const mock3Images: DescribeImagesResult = {
-  Images: [image3, image1, image2],
-};
+const mock3Images: DescribeImagesResult = { Images: [image3, image1, image2] };
 
-const mock1Image: DescribeImagesResult = {
-  Images: [image3],
-};
+const mock1Image: DescribeImagesResult = { Images: [image3] };
 
 const mockEmpty: DescribeImagesResult = {};
 
@@ -302,15 +298,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       const res = ec2DataSource.loadConfig(
         '[{"Name":"testname","Values":["testvalue"]}]',
       );
-      expect(res).toEqual([
-        [
-          {
-            Name: 'testname',
-            Values: ['testvalue'],
-          },
-        ],
-        {},
-      ]);
+      expect(res).toEqual([[{ Name: 'testname', Values: ['testvalue'] }], {}]);
     });
 
     it('loads filters with multiple aws configs', () => {
@@ -318,16 +306,8 @@ describe('modules/datasource/aws-machine-image/index', () => {
         '[{"Name":"testname","Values":["testvalue"]},{"region":"us-west-2"},{"profile":"test-profile"},{"region":"eu-central-1"}]',
       );
       expect(res).toEqual([
-        [
-          {
-            Name: 'testname',
-            Values: ['testvalue'],
-          },
-        ],
-        {
-          region: 'eu-central-1',
-          profile: 'test-profile',
-        },
+        [{ Name: 'testname', Values: ['testvalue'] }],
+        { region: 'eu-central-1', profile: 'test-profile' },
       ]);
     });
   });

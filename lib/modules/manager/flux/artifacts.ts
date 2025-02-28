@@ -28,10 +28,7 @@ export async function updateArtifacts({
       docker: {},
       userConfiguredEnv: config.env,
       toolConstraints: [
-        {
-          toolName: 'flux',
-          constraint: updatedDeps[0].newVersion,
-        },
+        { toolName: 'flux', constraint: updatedDeps[0].newVersion },
       ],
     };
     const result = await exec(cmd, execOptions);
@@ -40,12 +37,7 @@ export async function updateArtifacts({
     if (!newFileContent) {
       logger.debug('Cannot read new flux file content');
       return [
-        {
-          artifactError: {
-            lockFile: packageFileName,
-            stderr: result.stderr,
-          },
-        },
+        { artifactError: { lockFile: packageFileName, stderr: result.stderr } },
       ];
     }
     if (newFileContent === existingFileContent) {
@@ -65,12 +57,7 @@ export async function updateArtifacts({
   } catch (err) {
     logger.debug({ err }, 'Error generating new Flux system manifests');
     return [
-      {
-        artifactError: {
-          lockFile: packageFileName,
-          stderr: err.message,
-        },
-      },
+      { artifactError: { lockFile: packageFileName, stderr: err.message } },
     ];
   }
 }

@@ -27,9 +27,7 @@ Here are the examples of valid GitHub tags:
 If you want to automatically pin action digests add the `helpers:pinGitHubActionDigests` preset to the `extends` array:
 
 ```json
-{
-  "extends": ["helpers:pinGitHubActionDigests"]
-}
+{ "extends": ["helpers:pinGitHubActionDigests"] }
 ```
 
 Renovate ignores any GitHub runners which are configured in variables.

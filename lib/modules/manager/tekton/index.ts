@@ -8,8 +8,6 @@ export { extractPackageFile };
 export const url = 'https://tekton.dev/docs';
 export const categories: Category[] = ['ci', 'cd'];
 
-export const defaultConfig = {
-  fileMatch: [],
-};
+export const defaultConfig = { fileMatch: [] };
 
 export const supportedDatasources = [DockerDatasource.id, GitTagsDatasource.id];

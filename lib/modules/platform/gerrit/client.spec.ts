@@ -375,9 +375,7 @@ describe('modules/platform/gerrit/client', () => {
     it('add', async () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/assignee', {
-          assignee: 'username',
-        })
+        .put('/a/changes/123456/assignee', { assignee: 'username' })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addAssignee(123456, 'username')).toResolve();
     });
@@ -445,11 +443,7 @@ describe('modules/platform/gerrit/client', () => {
     it('not approved by anyone', () => {
       expect(
         client.wasApprovedBy(
-          partial<GerritChange>({
-            labels: {
-              'Code-Review': {},
-            },
-          }),
+          partial<GerritChange>({ labels: { 'Code-Review': {} } }),
           'user',
         ),
       ).toBeUndefined();
@@ -460,12 +454,7 @@ describe('modules/platform/gerrit/client', () => {
         client.wasApprovedBy(
           partial<GerritChange>({
             labels: {
-              'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'user',
-                },
-              },
+              'Code-Review': { approved: { _account_id: 1, username: 'user' } },
             },
           }),
           'user',
@@ -479,10 +468,7 @@ describe('modules/platform/gerrit/client', () => {
           partial<GerritChange>({
             labels: {
               'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'other',
-                },
+                approved: { _account_id: 1, username: 'other' },
               },
             },
           }),

@@ -55,11 +55,7 @@ export class OrbDatasource extends Datasource {
       query,
       variables: { packageName, maxVersions: MAX_VERSIONS },
     };
-    const res = (
-      await this.http.postJson<OrbResponse>(url, {
-        body,
-      })
-    ).body;
+    const res = (await this.http.postJson<OrbResponse>(url, { body })).body;
     if (!res?.data?.orb) {
       logger.debug({ res }, `Failed to look up orb ${packageName}`);
       return null;

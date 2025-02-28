@@ -6,11 +6,7 @@ import { rules } from './rules';
 
 const rule = q.alt<Ctx>(rules, extensionTags);
 
-const query = q.tree<Ctx>({
-  type: 'root-tree',
-  maxDepth: 16,
-  search: rule,
-});
+const query = q.tree<Ctx>({ type: 'root-tree', maxDepth: 16, search: rule });
 
 const starlarkLang = lang.createLang('starlark');
 

@@ -26,9 +26,7 @@ async function getComments(
   const comments = (
     await bitbucketHttp.getJsonUnchecked<PagedResult<Comment>>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
-      {
-        paginate: true,
-      },
+      { paginate: true },
     )
   ).body.values;
 
@@ -43,9 +41,7 @@ async function addComment(
 ): Promise<void> {
   await bitbucketHttp.postJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
-    {
-      body: { content: { raw } },
-    },
+    { body: { content: { raw } } },
   );
 }
 
@@ -57,9 +53,7 @@ async function editComment(
 ): Promise<void> {
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`,
-    {
-      body: { content: { raw } },
-    },
+    { body: { content: { raw } } },
   );
 }
 

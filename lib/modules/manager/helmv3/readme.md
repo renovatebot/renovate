@@ -6,11 +6,7 @@ Renovate supports updating Helm Chart references in:
 The `helmv3` manager defines this default registryAlias:
 
 ```json
-{
-  "registryAliases": {
-    "stable": "https://charts.helm.sh/stable"
-  }
-}
+{ "registryAliases": { "stable": "https://charts.helm.sh/stable" } }
 ```
 
 If you use repository aliases in your Helm charts then you must set an `registryAliases` object in your configuration file so Renovate knows where to find the repository.
@@ -75,7 +71,5 @@ To get updates for subchart archives put `helmUpdateSubChartArchives` in your `p
 Renovate now updates archives in the `/charts` folder.
 
 ```json
-{
-  "postUpdateOptions": ["helmUpdateSubChartArchives"]
-}
+{ "postUpdateOptions": ["helmUpdateSubChartArchives"] }
 ```

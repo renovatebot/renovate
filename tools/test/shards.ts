@@ -10,30 +10,14 @@ import type { ShardConfig } from './types';
  * using pre-installed `jq` utility.
  */
 export const testShards: Record<string, ShardConfig> = {
-  'datasources-1': {
-    matchPaths: ['lib/modules/datasource/[a-g]*'],
-  },
-  'datasources-2': {
-    matchPaths: ['lib/modules/datasource'],
-  },
-  'managers-1': {
-    matchPaths: ['lib/modules/manager/[a-c]*'],
-  },
-  'managers-2': {
-    matchPaths: ['lib/modules/manager/[d-h]*'],
-  },
-  'managers-3': {
-    matchPaths: ['lib/modules/manager/[i-n]*'],
-  },
-  'managers-4': {
-    matchPaths: ['lib/modules/manager'],
-  },
-  platform: {
-    matchPaths: ['lib/modules/platform'],
-  },
-  versioning: {
-    matchPaths: ['lib/modules/versioning'],
-  },
+  'datasources-1': { matchPaths: ['lib/modules/datasource/[a-g]*'] },
+  'datasources-2': { matchPaths: ['lib/modules/datasource'] },
+  'managers-1': { matchPaths: ['lib/modules/manager/[a-c]*'] },
+  'managers-2': { matchPaths: ['lib/modules/manager/[d-h]*'] },
+  'managers-3': { matchPaths: ['lib/modules/manager/[i-n]*'] },
+  'managers-4': { matchPaths: ['lib/modules/manager'] },
+  platform: { matchPaths: ['lib/modules/platform'] },
+  versioning: { matchPaths: ['lib/modules/versioning'] },
   'workers-1': {
     matchPaths: [
       'lib/workers/repository/changelog',
@@ -56,19 +40,9 @@ export const testShards: Record<string, ShardConfig> = {
       'lib/workers/repository/updates',
     ],
   },
-  'workers-4': {
-    matchPaths: ['lib/workers'],
-  },
-  'git-1': {
-    matchPaths: ['lib/util/git/index.spec.ts'],
-  },
-  'git-2': {
-    matchPaths: ['lib/util/git'],
-  },
-  util: {
-    matchPaths: ['lib/util'],
-  },
-  other: {
-    matchPaths: ['lib'],
-  },
+  'workers-4': { matchPaths: ['lib/workers'] },
+  'git-1': { matchPaths: ['lib/util/git/index.spec.ts'] },
+  'git-2': { matchPaths: ['lib/util/git'] },
+  util: { matchPaths: ['lib/util'] },
+  other: { matchPaths: ['lib'] },
 };

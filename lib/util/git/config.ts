@@ -19,10 +19,7 @@ export function getNoVerify(): GitNoVerifyOption[] {
 
 export function simpleGitConfig(): Partial<SimpleGitOptions> {
   const config: Partial<SimpleGitOptions> = {
-    completion: {
-      onClose: true,
-      onExit: false,
-    },
+    completion: { onClose: true, onExit: false },
     config: ['core.quotePath=false'],
   };
   // https://github.com/steveukx/git-js/pull/591

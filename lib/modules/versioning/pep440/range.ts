@@ -145,34 +145,19 @@ export function getNewValue({
     case 'auto':
     case 'replace':
       updatedRange = handleReplaceStrategy(
-        {
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        },
+        { currentValue, rangeStrategy, currentVersion, newVersion },
         ranges,
       );
       break;
     case 'widen':
       updatedRange = handleWidenStrategy(
-        {
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        },
+        { currentValue, rangeStrategy, currentVersion, newVersion },
         ranges,
       );
       break;
     case 'bump':
       updatedRange = handleBumpStrategy(
-        {
-          currentValue,
-          rangeStrategy,
-          currentVersion,
-          newVersion,
-        },
+        { currentValue, rangeStrategy, currentVersion, newVersion },
         ranges,
       );
       break;
@@ -398,10 +383,7 @@ function divideCompatibleReleaseRange(currentRange: Range): Range[] {
   currentVersionUpperBound[currentVersionUpperBound.length - 1] += 1;
   return [
     { operator: '>=', version: currentRange.version },
-    {
-      operator: '<',
-      version: currentVersionUpperBound.join('.'),
-    },
+    { operator: '<', version: currentVersionUpperBound.join('.') },
   ];
 }
 
@@ -449,12 +431,7 @@ function handleWidenStrategy(
     }
     // default
     return updateRangeValue(
-      {
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      },
+      { currentValue, rangeStrategy, currentVersion, newVersion },
       range,
     );
   });
@@ -508,12 +485,7 @@ function handleReplaceStrategy(
     }
     // default
     return updateRangeValue(
-      {
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      },
+      { currentValue, rangeStrategy, currentVersion, newVersion },
       range,
     );
   });
@@ -529,12 +501,7 @@ function handleBumpStrategy(
       return range.operator + newVersion;
     }
     return updateRangeValue(
-      {
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      },
+      { currentValue, rangeStrategy, currentVersion, newVersion },
       range,
     );
   });

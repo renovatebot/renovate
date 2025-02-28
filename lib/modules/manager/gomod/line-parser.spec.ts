@@ -88,9 +88,7 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'foo/foo',
       depType: 'require',
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'invalid-version',
     });
   });
@@ -137,9 +135,7 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'foo/foo',
       depType: 'require',
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'invalid-version',
     });
   });
@@ -166,9 +162,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'foo/foo',
       depType: 'indirect',
       enabled: false,
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'invalid-version',
     });
   });
@@ -191,9 +185,7 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'bar/bar',
       depType: 'replace',
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'unspecified-version',
     });
   });
@@ -216,9 +208,7 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'bar/bar',
       depType: 'replace',
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'unspecified-version',
     });
   });
@@ -271,9 +261,7 @@ describe('modules/manager/gomod/line-parser', () => {
       datasource: 'go',
       depName: 'bar/bar',
       depType: 'replace',
-      managerData: {
-        multiLine: true,
-      },
+      managerData: { multiLine: true },
       skipReason: 'invalid-version',
     });
   });

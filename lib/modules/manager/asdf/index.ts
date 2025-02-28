@@ -16,9 +16,7 @@ export { extractPackageFile } from './extract';
 export const displayName = 'asdf';
 export const url = 'https://asdf-vm.com';
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)\\.tool-versions$'],
-};
+export const defaultConfig = { fileMatch: ['(^|/)\\.tool-versions$'] };
 
 export const supportedDatasources = [
   DartVersionDatasource.id,

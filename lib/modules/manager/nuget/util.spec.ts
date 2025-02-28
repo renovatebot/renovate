@@ -126,10 +126,7 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries).toEqual([
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
+        { name: 'contoso.com', url: 'https://contoso.com/packages/' },
       ]);
     });
 
@@ -150,10 +147,7 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries).toEqual([
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
+        { name: 'contoso.com', url: 'https://contoso.com/packages/' },
       ]);
     });
 
@@ -173,14 +167,8 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries).toEqual([
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-        },
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
+        { name: 'nuget.org', url: 'https://api.nuget.org/v3/index.json' },
+        { name: 'contoso.com', url: 'https://contoso.com/packages/' },
       ]);
     });
 
@@ -202,14 +190,8 @@ describe('modules/manager/nuget/util', () => {
 
       const registries = await getConfiguredRegistries('NuGet.config');
       expect(registries).toEqual([
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-        },
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
+        { name: 'nuget.org', url: 'https://api.nuget.org/v3/index.json' },
+        { name: 'contoso.com', url: 'https://contoso.com/packages/' },
       ]);
     });
 
@@ -306,23 +288,12 @@ describe('modules/manager/nuget/util', () => {
 
     it('applies all registries to package name', () => {
       const registries: Registry[] = [
-        {
-          name: 'nuget.org',
-          url: 'https://api.nuget.org/v3/index.json',
-        },
-        {
-          name: 'contoso.com',
-          url: 'https://contoso.com/packages/',
-        },
+        { name: 'nuget.org', url: 'https://api.nuget.org/v3/index.json' },
+        { name: 'contoso.com', url: 'https://contoso.com/packages/' },
       ];
 
       expect(
-        applyRegistries(
-          {
-            depName: 'Newtonsoft.Json',
-          },
-          registries,
-        ),
+        applyRegistries({ depName: 'Newtonsoft.Json' }, registries),
       ).toEqual({
         depName: 'Newtonsoft.Json',
         registryUrls: [
@@ -334,15 +305,8 @@ describe('modules/manager/nuget/util', () => {
 
     it('applies nothing', () => {
       expect(
-        applyRegistries(
-          {
-            depName: 'Newtonsoft.Json',
-          },
-          undefined,
-        ),
-      ).toEqual({
-        depName: 'Newtonsoft.Json',
-      });
+        applyRegistries({ depName: 'Newtonsoft.Json' }, undefined),
+      ).toEqual({ depName: 'Newtonsoft.Json' });
     });
   });
 

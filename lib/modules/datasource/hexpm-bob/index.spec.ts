@@ -12,10 +12,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .get('/builds/elixir/builds.txt')
         .replyWithError('error');
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'elixir',
-        }),
+        getPkgReleases({ datasource, packageName: 'elixir' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -25,10 +22,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .get('/builds/elixir/builds.txt')
         .reply(404);
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'elixir',
-        }),
+        await getPkgReleases({ datasource, packageName: 'elixir' }),
       ).toBeNull();
     });
 
@@ -38,10 +32,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .get('/builds/elixir/builds.txt')
         .reply(200, '');
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'elixir',
-        }),
+        await getPkgReleases({ datasource, packageName: 'elixir' }),
       ).toBeNull();
     });
 
@@ -51,10 +42,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .get('/builds/elixir/builds.txt')
         .reply(200, '');
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'elixir',
-        }),
+        await getPkgReleases({ datasource, packageName: 'elixir' }),
       ).toBeNull();
     });
 
@@ -64,10 +52,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .get('/builds/elixir/builds.txt')
         .reply(502);
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'elixir',
-        }),
+        getPkgReleases({ datasource, packageName: 'elixir' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -76,10 +61,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
         .scope(defaultRegistryUrl)
         .get('/builds/elixir/builds.txt')
         .reply(200, Fixtures.get('elixir/builds.txt'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'elixir',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'elixir' });
       expect(res).toEqual({
         homepage: 'https://elixir-lang.org/',
         registryUrl: 'https://builds.hex.pm',
@@ -171,10 +153,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
 
     it('returns empty list for invalid package name', async () => {
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'invalid',
-        }),
+        await getPkgReleases({ datasource, packageName: 'invalid' }),
       ).toBeNull();
     });
   });

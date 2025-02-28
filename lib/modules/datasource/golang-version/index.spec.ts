@@ -21,10 +21,7 @@ describe('modules/datasource/golang-version/index', () => {
         .scope('https://raw.githubusercontent.com')
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesContent);
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'golang',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'golang' });
       expect(res?.releases).toHaveLength(132);
       expect(res?.releases[0]).toEqual({
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
@@ -38,9 +35,7 @@ describe('modules/datasource/golang-version/index', () => {
         .scope('https://custom-registry/website')
         .get('/HEAD/internal/history/release.go')
         .reply(200, golangReleasesContent);
-      const config = {
-        registryUrls: ['https://custom-registry/website'],
-      };
+      const config = { registryUrls: ['https://custom-registry/website'] };
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -59,10 +54,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent);
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'golang',
-        }),
+        getPkgReleases({ datasource, packageName: 'golang' }),
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -72,10 +64,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent2);
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'golang',
-        }),
+        getPkgReleases({ datasource, packageName: 'golang' }),
       ).rejects.toThrow(ExternalHostError);
     });
 

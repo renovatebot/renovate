@@ -762,11 +762,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
-        {
-          registryAliases: {
-            'ghcr.io': 'ghcr.proxy.test/some/path',
-          },
-        },
+        { registryAliases: { 'ghcr.io': 'ghcr.proxy.test/some/path' } },
       );
       expect(result).toEqual({
         deps: [

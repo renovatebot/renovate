@@ -25,10 +25,7 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
-      cwd: 'tools/mkdocs',
-      stdio: 'inherit',
-    });
+    const res = exec('pdm', args, { cwd: 'tools/mkdocs', stdio: 'inherit' });
     checkResult(res);
   });
 
@@ -45,10 +42,7 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = exec('pdm', args, {
-      cwd: 'tools/mkdocs',
-      stdio: 'inherit',
-    });
+    const res = exec('pdm', args, { cwd: 'tools/mkdocs', stdio: 'inherit' });
     checkResult(res);
   });
 

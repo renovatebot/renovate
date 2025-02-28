@@ -41,13 +41,7 @@ export class GiteaReleasesDatasource extends Datasource {
       registryUrl,
     )}repos/${repo}/releases?draft=false`;
     const tags = (
-      await this.http.getJson(
-        url,
-        {
-          paginate: true,
-        },
-        ReleasesSchema,
-      )
+      await this.http.getJson(url, { paginate: true }, ReleasesSchema)
     ).body;
 
     const dependency: ReleaseResult = {

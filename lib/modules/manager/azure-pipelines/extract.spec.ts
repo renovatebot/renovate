@@ -36,11 +36,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
     it('should extract repository information', () => {
       expect(
         extractRepository(
-          {
-            type: 'github',
-            name: 'user/repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'github', name: 'user/repo', ref: 'refs/tags/v1.0.0' },
           'user',
         ),
       ).toMatchObject({
@@ -52,11 +48,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
     it('should return null when repository type is not github', () => {
       expect(
         extractRepository(
-          {
-            type: 'bitbucket',
-            name: 'user/repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'bitbucket', name: 'user/repo', ref: 'refs/tags/v1.0.0' },
           'user/repo',
         ),
       ).toBeNull();
@@ -64,24 +56,14 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
     it('should return null when reference is not defined specified', () => {
       expect(
-        extractRepository(
-          {
-            type: 'github',
-            name: 'user/repo',
-          },
-          'user/repo',
-        ),
+        extractRepository({ type: 'github', name: 'user/repo' }, 'user/repo'),
       ).toBeNull();
     });
 
     it('should return null when reference is invalid tag format', () => {
       expect(
         extractRepository(
-          {
-            type: 'github',
-            name: 'user/repo',
-            ref: 'refs/head/master',
-          },
+          { type: 'github', name: 'user/repo', ref: 'refs/head/master' },
           'user/repo',
         ),
       ).toBeNull();
@@ -95,11 +77,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
       expect(
         extractRepository(
-          {
-            type: 'git',
-            name: 'project/repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'git', name: 'project/repo', ref: 'refs/tags/v1.0.0' },
           'otherProject/otherRepo',
         ),
       ).toMatchObject({
@@ -116,11 +94,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
       expect(
         extractRepository(
-          {
-            type: 'git',
-            name: 'repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'git', name: 'repo', ref: 'refs/tags/v1.0.0' },
           'project/otherrepo',
         ),
       ).toMatchObject({
@@ -137,11 +111,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
       expect(
         extractRepository(
-          {
-            type: 'git',
-            name: 'repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'git', name: 'repo', ref: 'refs/tags/v1.0.0' },
           '',
         ),
       ).toBeNull();
@@ -155,28 +125,18 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
       expect(
         extractRepository(
-          {
-            type: 'git',
-            name: 'repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'git', name: 'repo', ref: 'refs/tags/v1.0.0' },
           undefined,
         ),
       ).toBeNull();
     });
 
     it('should return null for git repo type if platform not Azure', () => {
-      GlobalConfig.set({
-        platform: 'github',
-      });
+      GlobalConfig.set({ platform: 'github' });
 
       expect(
         extractRepository(
-          {
-            type: 'git',
-            name: 'project/repo',
-            ref: 'refs/tags/v1.0.0',
-          },
+          { type: 'git', name: 'project/repo', ref: 'refs/tags/v1.0.0' },
           '',
         ),
       ).toBeNull();
@@ -185,11 +145,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
   describe('extractContainer()', () => {
     it('should extract container information', () => {
-      expect(
-        extractContainer({
-          image: 'ubuntu:16.04',
-        }),
-      ).toMatchObject({
+      expect(extractContainer({ image: 'ubuntu:16.04' })).toMatchObject({
         depName: 'ubuntu',
         currentValue: '16.04',
         datasource: 'docker',
@@ -228,16 +184,8 @@ describe('modules/manager/azure-pipelines/extract', () => {
           currentValue: 'v0.5.1',
           datasource: 'git-tags',
         },
-        {
-          depName: 'ubuntu',
-          currentValue: '16.04',
-          datasource: 'docker',
-        },
-        {
-          depName: 'python',
-          currentValue: '3.7',
-          datasource: 'docker',
-        },
+        { depName: 'ubuntu', currentValue: '16.04', datasource: 'docker' },
+        { depName: 'python', currentValue: '3.7', datasource: 'docker' },
       ]);
       expect(res?.deps).toHaveLength(3);
     });

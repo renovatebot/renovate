@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.set({
-      dryRun: null,
-    });
+    GlobalConfig.set({ dryRun: null });
 
     config = {
       ...getConfig(),
@@ -99,9 +97,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('Dry runs and does not update out of date PR', async () => {
-      GlobalConfig.set({
-        dryRun: 'full',
-      });
+      GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchPr.mockResolvedValueOnce(
         mock<Pr>({ bodyStruct: { hash: '' } }),
       );
@@ -118,9 +114,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     });
 
     it('Creates PR in dry run mode', async () => {
-      GlobalConfig.set({
-        dryRun: 'full',
-      });
+      GlobalConfig.set({ dryRun: 'full' });
       await ensureConfigMigrationPr(config, migratedData);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -147,11 +141,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     it('creates PR with empty footer and header', async () => {
       await ensureConfigMigrationPr(
-        {
-          ...config,
-          prHeader: '',
-          prFooter: '',
-        },
+        { ...config, prHeader: '', prFooter: '' },
         migratedData,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);

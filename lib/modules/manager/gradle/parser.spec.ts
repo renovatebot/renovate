@@ -96,22 +96,13 @@ describe('modules/manager/gradle/parser', () => {
             key: 'versions.spotbugs_annotations',
             value: '4.5.3',
           },
-          'versions.core': {
-            key: 'versions.core',
-            value: '1.7.0',
-          },
+          'versions.core': { key: 'versions.core', value: '1.7.0' },
           'libraries.guava': {
             key: 'libraries.guava',
             value: 'com.google.guava:guava:31.1-jre',
           },
-          'libraries.detekt': {
-            key: 'libraries.detekt',
-            value: '1.18.1',
-          },
-          'libraries.core2': {
-            key: 'versions.core',
-            value: '1.7.0',
-          },
+          'libraries.detekt': { key: 'libraries.detekt', value: '1.18.1' },
+          'libraries.core2': { key: 'versions.core', value: '1.7.0' },
         });
       });
 
@@ -140,10 +131,7 @@ describe('modules/manager/gradle/parser', () => {
             key: 'versions.android.buildTools',
             value: '30.0.3',
           },
-          'versions.kotlin': {
-            key: 'versions.kotlin',
-            value: '1.4.30',
-          },
+          'versions.kotlin': { key: 'versions.kotlin', value: '1.4.30' },
           'versions.androidx.paging': {
             key: 'versions.androidx.paging',
             value: '2.1.2',
@@ -156,10 +144,7 @@ describe('modules/manager/gradle/parser', () => {
             key: 'versions.androidx.kotlin.coroutines',
             value: '1.3.7',
           },
-          'versions.espresso': {
-            key: 'versions.espresso',
-            value: '3.2.0',
-          },
+          'versions.espresso': { key: 'versions.espresso', value: '3.2.0' },
         });
       });
 
@@ -258,18 +243,9 @@ describe('modules/manager/gradle/parser', () => {
 
         const { vars } = parseGradle(input);
         expect(vars).toMatchObject({
-          'versions.foo1': {
-            key: 'versions.foo1',
-            value: 'bar1',
-          },
-          'versions.foo2': {
-            key: 'versions.foo2',
-            value: 'bar2',
-          },
-          'versions.foo3': {
-            key: 'versions.foo3',
-            value: 'bar3',
-          },
+          'versions.foo1': { key: 'versions.foo1', value: 'bar1' },
+          'versions.foo2': { key: 'versions.foo2', value: 'bar2' },
+          'versions.foo3': { key: 'versions.foo3', value: 'bar3' },
         });
       });
 
@@ -707,29 +683,13 @@ describe('modules/manager/gradle/parser', () => {
 
       const { deps, urls } = parseGradle(input);
       expect(deps).toMatchObject([
-        {
-          depType: 'plugin',
-          depName: 'foo.bar',
-          currentValue: '1.2.3',
-        },
+        { depType: 'plugin', depName: 'foo.bar', currentValue: '1.2.3' },
       ]);
       expect(urls).toMatchObject([
-        {
-          registryUrl: 'https://foo.bar/plugins',
-          scope: 'plugin',
-        },
-        {
-          registryUrl: REGISTRY_URLS.gradlePluginPortal,
-          scope: 'plugin',
-        },
-        {
-          registryUrl: 'https://foo.bar/deps',
-          scope: 'dep',
-        },
-        {
-          registryUrl: REGISTRY_URLS.mavenCentral,
-          scope: 'dep',
-        },
+        { registryUrl: 'https://foo.bar/plugins', scope: 'plugin' },
+        { registryUrl: REGISTRY_URLS.gradlePluginPortal, scope: 'plugin' },
+        { registryUrl: 'https://foo.bar/deps', scope: 'dep' },
+        { registryUrl: REGISTRY_URLS.mavenCentral, scope: 'dep' },
       ]);
     });
 
@@ -971,10 +931,7 @@ describe('modules/manager/gradle/parser', () => {
           currentValue: '1.5.2.RELEASE',
           depName: 'org.springframework.boot:spring-boot-gradle-plugin',
           sharedVariableName: 'springBootVersion',
-          managerData: {
-            fileReplacePosition: 53,
-            packageFile: 'build.gradle',
-          },
+          managerData: { fileReplacePosition: 53, packageFile: 'build.gradle' },
         },
         {
           currentValue: '1.2.3',
@@ -1128,9 +1085,7 @@ describe('modules/manager/gradle/parser', () => {
       },
     };
 
-    const fileContents = {
-      'foo/bar.gradle': key + ' = "' + value + '"',
-    };
+    const fileContents = { 'foo/bar.gradle': key + ' = "' + value + '"' };
 
     it.each`
       def                        | input                                                     | output
@@ -1262,22 +1217,14 @@ describe('modules/manager/gradle/parser', () => {
 
       const res = parseKotlinSource(input);
       expect(res).toMatchObject({
-        vars: {
-          'Versions.baz': {
-            key: 'Versions.baz',
-            value: '1.2.3',
-          },
-        },
+        vars: { 'Versions.baz': { key: 'Versions.baz', value: '1.2.3' } },
         deps: [
           {
             depName: 'org.slf4j:slf4j-api',
             sharedVariableName: 'Versions.baz',
             currentValue: '1.2.3',
           },
-          {
-            depName: 'androidx.appcompat:appcompat',
-            currentValue: '4.5.6',
-          },
+          { depName: 'androidx.appcompat:appcompat', currentValue: '4.5.6' },
           {
             depName: 'androidx.core:core-ktx',
             sharedVariableName: 'Versions.baz',
@@ -1327,10 +1274,7 @@ describe('modules/manager/gradle/parser', () => {
       const res = parseKotlinSource(input);
       expect(res).toMatchObject({
         vars: {
-          'Deps.kotlinVersion': {
-            key: 'Deps.kotlinVersion',
-            value: '1.5.31',
-          },
+          'Deps.kotlinVersion': { key: 'Deps.kotlinVersion', value: '1.5.31' },
           'Deps.Test.version': {
             key: 'Deps.Test.version',
             value: '1.3.0-rc01',

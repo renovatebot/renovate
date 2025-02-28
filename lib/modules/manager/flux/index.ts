@@ -15,9 +15,7 @@ export { updateArtifacts } from './artifacts';
 export const url = 'https://fluxcd.io/flux';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
-export const defaultConfig = {
-  fileMatch: [systemManifestFileNameRegex],
-};
+export const defaultConfig = { fileMatch: [systemManifestFileNameRegex] };
 
 export const supportedDatasources = [
   GithubReleasesDatasource.id,

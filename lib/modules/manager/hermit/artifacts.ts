@@ -40,13 +40,7 @@ export async function updateArtifacts(
     logger.debug({ updateResult }, `update result for hermit`);
   } catch (err) {
     logger.debug({ err }, 'Error getting hermet update results');
-    return [
-      {
-        artifactError: {
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { stderr: err.message } }];
   }
 
   return updateResult;
@@ -67,10 +61,7 @@ async function getContent(file: string): Promise<ReadContentResult> {
     throw new Error(`error getting content for ${file}`);
   }
 
-  return {
-    isSymlink,
-    contents,
-  };
+  return { isSymlink, contents };
 }
 
 /**
@@ -95,12 +86,7 @@ function getAddResult(
  * getDeleteResult returns the UpdateArtifactsResult for deleted files
  */
 function getDeleteResult(path: string): UpdateArtifactsResult {
-  return {
-    file: {
-      type: 'deletion',
-      path,
-    },
-  };
+  return { file: { type: 'deletion', path } };
 }
 
 /**
@@ -247,10 +233,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(
-    {
-      packageFile: update.packageFileName,
-      packagesToInstall,
-    },
+    { packageFile: update.packageFileName, packagesToInstall },
     `performing updates`,
   );
 

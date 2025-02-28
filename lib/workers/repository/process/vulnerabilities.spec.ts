@@ -206,10 +206,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         ],
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([
-        {
-          id: 'GHSA-p6mc-m468-83gw',
-          modified: '',
-        },
+        { id: 'GHSA-p6mc-m468-83gw', modified: '' },
       ]);
 
       await vulnerabilities.appendVulnerabilityPackageRules(
@@ -231,10 +228,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         ],
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([
-        {
-          ...lodashVulnerability,
-          withdrawn: '2021-11-29T18:17:00Z',
-        },
+        { ...lodashVulnerability, withdrawn: '2021-11-29T18:17:00Z' },
       ]);
 
       await vulnerabilities.appendVulnerabilityPackageRules(
@@ -280,11 +274,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           {
             packageFile: 'some-file',
             deps: [
-              {
-                depName: 'lodash',
-                currentValue: '4.17.11',
-                datasource: 'npm',
-              },
+              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
           },
         ],
@@ -307,11 +297,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              {
-                depName: 'lodash',
-                currentValue: '4.17.11',
-                datasource: 'npm',
-              },
+              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
             packageFile: 'some-file',
           },
@@ -329,10 +315,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 purl: 'pkg:npm/lodash',
               },
               ranges: [
-                {
-                  type: 'SEMVER',
-                  events: [{ introduced: '0' }, event],
-                },
+                { type: 'SEMVER', events: [{ introduced: '0' }, event] },
               ],
             },
           ],
@@ -434,10 +417,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                   type: 'SEMVER',
                   events: [{ introduced: '0' }, { fixed: '1.1.0' }],
                 },
-                {
-                  type: 'SEMVER',
-                  events: [{ introduced: '1.3.0' }],
-                },
+                { type: 'SEMVER', events: [{ introduced: '1.3.0' }] },
               ],
               package: { name: 'fake', ecosystem: 'npm' },
             },
@@ -722,10 +702,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             },
           ],
           severity: [
-            {
-              type: 'CVSS_V2',
-              score: 'AV:N/AC:L/Au:N/C:P/I:P/A:N',
-            },
+            { type: 'CVSS_V2', score: 'AV:N/AC:L/Au:N/C:P/I:P/A:N' },
             {
               type: 'CVSS_V3',
               score: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N',
@@ -865,10 +842,7 @@ describe('workers/repository/process/vulnerabilities', () => {
           modified: '2023-06-13T09:03:52Z',
           affected: [
             {
-              package: {
-                ecosystem: 'Hackage',
-                name: 'aeson',
-              },
+              package: { ecosystem: 'Hackage', name: 'aeson' },
               ranges: [
                 {
                   type: 'ECOSYSTEM',
@@ -969,11 +943,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              {
-                depName: 'lodash',
-                currentValue: '4.17.15',
-                datasource: 'npm',
-              },
+              { depName: 'lodash', currentValue: '4.17.15', datasource: 'npm' },
             ],
             packageFile: 'some-file3',
           },
@@ -1225,12 +1195,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               package: { name: 'django-mfa2', ecosystem: 'PyPI' },
             },
           ],
-          severity: [
-            {
-              type: 'CVSS_V3',
-              score: 'some-invalid-score',
-            },
-          ],
+          severity: [{ type: 'CVSS_V3', score: 'some-invalid-score' }],
         },
       ]);
 
@@ -1291,12 +1256,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
 
       getVulnerabilitiesMock.mockResolvedValueOnce([
-        {
-          ...lodashVulnerability,
-          database_specific: {
-            severity: 'MODERATE',
-          },
-        },
+        { ...lodashVulnerability, database_specific: { severity: 'MODERATE' } },
       ]);
 
       await vulnerabilities.appendVulnerabilityPackageRules(

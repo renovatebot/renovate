@@ -2,11 +2,7 @@ To enable this manager, add the matching files to `cdnurl.fileMatch`.
 For example:
 
 ```json
-{
-  "cdnurl": {
-    "fileMatch": ["\\.html?$"]
-  }
-}
+{ "cdnurl": { "fileMatch": ["\\.html?$"] } }
 ```
 
 <!-- prettier-ignore -->

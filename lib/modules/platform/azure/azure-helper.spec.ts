@@ -22,10 +22,7 @@ describe('modules/platform/azure/azure-helper', () => {
   describe('getRef', () => {
     it('should get the ref with short ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: 132 }]),
-          }) as any,
+        () => ({ getRefs: vi.fn(() => [{ objectId: 132 }]) }) as any,
       );
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
@@ -33,10 +30,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
     it('should not get ref', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => []),
-          }) as any,
+        () => ({ getRefs: vi.fn(() => []) }) as any,
       );
       const res = await azureHelper.getRefs('123');
       expect(res).toHaveLength(0);
@@ -44,10 +38,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
     it('should get the ref with full ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: '132' }]),
-          }) as any,
+        () => ({ getRefs: vi.fn(() => [{ objectId: '132' }]) }) as any,
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
       expect(res).toMatchSnapshot();
@@ -57,10 +48,7 @@ describe('modules/platform/azure/azure-helper', () => {
   describe('getAzureBranchObj', () => {
     it('should get the branch object', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => [{ objectId: '132' }]),
-          }) as any,
+        () => ({ getRefs: vi.fn(() => [{ objectId: '132' }]) }) as any,
       );
       const res = await azureHelper.getAzureBranchObj(
         '123',
@@ -72,10 +60,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
     it('should get the branch object when ref missing', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getRefs: vi.fn(() => []),
-          }) as any,
+        () => ({ getRefs: vi.fn(() => []) }) as any,
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
       expect(res).toMatchSnapshot();
@@ -98,10 +83,7 @@ describe('modules/platform/azure/azure-helper', () => {
       });
 
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+        () => ({ getItemText: vi.fn(() => mockEventStream) }) as any,
       );
 
       const res = await azureHelper.getFile(
@@ -127,10 +109,7 @@ describe('modules/platform/azure/azure-helper', () => {
       });
 
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+        () => ({ getItemText: vi.fn(() => mockEventStream) }) as any,
       );
 
       const res = await azureHelper.getFile(
@@ -156,10 +135,7 @@ describe('modules/platform/azure/azure-helper', () => {
       });
 
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => mockEventStream),
-          }) as any,
+        () => ({ getItemText: vi.fn(() => mockEventStream) }) as any,
       );
 
       const res = await azureHelper.getFile(
@@ -172,12 +148,7 @@ describe('modules/platform/azure/azure-helper', () => {
 
     it('should return null because the file is not readable', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getItemText: vi.fn(() => ({
-              readable: false,
-            })),
-          }) as any,
+        () => ({ getItemText: vi.fn(() => ({ readable: false })) }) as any,
       );
 
       const res = await azureHelper.getFile(
@@ -192,12 +163,7 @@ describe('modules/platform/azure/azure-helper', () => {
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getCommit: vi.fn(() => ({
-              parents: ['123456'],
-            })),
-          }) as any,
+        () => ({ getCommit: vi.fn(() => ({ parents: ['123456'] })) }) as any,
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
@@ -207,10 +173,7 @@ describe('modules/platform/azure/azure-helper', () => {
   describe('getMergeMethod', () => {
     it('should default to NoFastForward', async () => {
       azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: vi.fn(() => []),
-          }) as any,
+        () => ({ getPolicyConfigurations: vi.fn(() => []) }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
         GitPullRequestMergeStrategy.NoFastForward,
@@ -223,17 +186,8 @@ describe('modules/platform/azure/azure-helper', () => {
           ({
             getPolicyConfigurations: vi.fn(() => [
               {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                settings: { allowSquash: true, scope: [{ repositoryId: '' }] },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
             ]),
           }) as any,
@@ -280,28 +234,16 @@ describe('modules/platform/azure/azure-helper', () => {
               {
                 settings: {
                   allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: 'doo-dee-doo-repository-id',
-                    },
-                  ],
+                  scope: [{ repositoryId: 'doo-dee-doo-repository-id' }],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
               {
                 settings: {
                   allowRebase: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
+                  scope: [{ matchKind: 'DefaultBranch' }],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
             ]),
           }) as any,
@@ -321,56 +263,29 @@ describe('modules/platform/azure/azure-helper', () => {
               {
                 settings: {
                   allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: 'doo-dee-doo-repository-id',
-                    },
-                  ],
+                  scope: [{ repositoryId: 'doo-dee-doo-repository-id' }],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
+              },
+              {
+                settings: { allowSquash: true, scope: [{ repositoryId: '' }] },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
               {
                 settings: {
                   allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
+                  scope: [{ matchKind: 'DefaultBranch' }],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
-              },
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
               {
                 settings: {
                   allowRebase: true,
                   scope: [
-                    {
-                      matchKind: 'Exact',
-                      refName: refMock,
-                      repositoryId: '',
-                    },
+                    { matchKind: 'Exact', refName: refMock, repositoryId: '' },
                   ],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
             ]),
           }) as any,
@@ -388,30 +303,15 @@ describe('modules/platform/azure/azure-helper', () => {
           ({
             getPolicyConfigurations: vi.fn(() => [
               {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      repositoryId: '',
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                settings: { allowSquash: true, scope: [{ repositoryId: '' }] },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
               {
                 settings: {
                   allowSquash: true,
-                  scope: [
-                    {
-                      matchKind: 'DefaultBranch',
-                    },
-                  ],
+                  scope: [{ matchKind: 'DefaultBranch' }],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
               {
                 settings: {
@@ -424,9 +324,7 @@ describe('modules/platform/azure/azure-helper', () => {
                     },
                   ],
                 },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
+                type: { id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' },
               },
             ]),
           }) as any,

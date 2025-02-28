@@ -76,10 +76,7 @@ export class GithubRunnersDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const releases = GithubRunnersDatasource.releases[packageName];
     const releaseResult: ReleaseResult | null = releases
-      ? {
-          releases,
-          sourceUrl: 'https://github.com/actions/runner-images',
-        }
+      ? { releases, sourceUrl: 'https://github.com/actions/runner-images' }
       : null;
     return Promise.resolve(releaseResult);
   }

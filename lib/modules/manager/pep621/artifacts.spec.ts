@@ -24,11 +24,7 @@ const adminConfig: RepoGlobalConfig = {
 describe('modules/manager/pep621/artifacts', () => {
   describe('updateArtifacts()', () => {
     it('return null if all processors returns are empty', async () => {
-      const updatedDeps = [
-        {
-          packageName: 'dep1',
-        },
-      ];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -39,11 +35,7 @@ describe('modules/manager/pep621/artifacts', () => {
     });
 
     it('return artifact error if newPackageFile content is not valid', async () => {
-      const updatedDeps = [
-        {
-          packageName: 'dep1',
-        },
-      ];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '--test string--',
@@ -104,15 +96,11 @@ requires-python = "<3.9"
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'docker pull ghcr.io/containerbase/sidecar',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: { encoding: 'utf-8' },
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
-          options: {
-            encoding: 'utf-8',
-          },
+          options: { encoding: 'utf-8' },
         },
         {
           cmd:
@@ -132,9 +120,7 @@ requires-python = "<3.9"
           options: {
             cwd: '/tmp/github/some/repo',
             encoding: 'utf-8',
-            env: {
-              CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-            },
+            env: { CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase' },
           },
         },
       ]);

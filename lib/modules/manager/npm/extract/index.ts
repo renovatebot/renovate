@@ -243,19 +243,13 @@ export async function extractAllPackageFiles(
           packageFile,
         );
         if (deps) {
-          npmFiles.push({
-            ...deps,
-            packageFile,
-          });
+          npmFiles.push({ ...deps, packageFile });
         }
       } else {
         logger.trace({ packageFile }, `Extracting as a package.json file`);
         const deps = await extractPackageFile(content, packageFile, config);
         if (deps) {
-          npmFiles.push({
-            ...deps,
-            packageFile,
-          });
+          npmFiles.push({ ...deps, packageFile });
         }
       }
     } else {

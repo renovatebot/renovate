@@ -119,20 +119,14 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
     expect(res).toStrictEqual([
       {
-        managerData: {
-          packageFile: 'versions.props',
-          fileReplacePosition: 91,
-        },
+        managerData: { packageFile: 'versions.props', fileReplacePosition: 91 },
         depName: 'org.apache.lucene:a.b',
         currentValue: '1',
         lockedVersion: '1',
         depType: 'dependencies',
       },
       {
-        managerData: {
-          packageFile: 'versions.props',
-          fileReplacePosition: 65,
-        },
+        managerData: { packageFile: 'versions.props', fileReplacePosition: 65 },
         depName: 'org.apache.lucene:a.c',
         currentValue: '2',
         lockedVersion: '1',
@@ -140,10 +134,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depType: 'dependencies',
       },
       {
-        managerData: {
-          packageFile: 'versions.props',
-          fileReplacePosition: 65,
-        },
+        managerData: { packageFile: 'versions.props', fileReplacePosition: 65 },
         depName: 'org.apache.lucene:a.d',
         currentValue: '2',
         lockedVersion: '1',
@@ -151,10 +142,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depType: 'dependencies',
       },
       {
-        managerData: {
-          packageFile: 'versions.props',
-          fileReplacePosition: 39,
-        },
+        managerData: { packageFile: 'versions.props', fileReplacePosition: 39 },
         depName: 'org.apache.lucene:d',
         currentValue: '3',
         lockedVersion: '1',
@@ -162,10 +150,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         depType: 'dependencies',
       },
       {
-        managerData: {
-          packageFile: 'versions.props',
-          fileReplacePosition: 39,
-        },
+        managerData: { packageFile: 'versions.props', fileReplacePosition: 39 },
         depName: 'org.apache.lucene:e.f',
         currentValue: '3',
         lockedVersion: '1',

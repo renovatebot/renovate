@@ -99,11 +99,7 @@ export async function getConfiguredRegistries(
             .map((packagePattern) => packagePattern.attr.pattern);
 
           logger.debug(
-            {
-              name: child.attr.key,
-              registryUrl,
-              sourceMappedPackagePatterns,
-            },
+            { name: child.attr.key, registryUrl, sourceMappedPackagePatterns },
             `Adding registry URL ${registryUrl}`,
           );
 

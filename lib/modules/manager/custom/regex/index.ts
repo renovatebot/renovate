@@ -12,9 +12,7 @@ import type { RegexManagerConfig, RegexManagerTemplates } from './types';
 
 export const categories: Category[] = ['custom'];
 
-export const defaultConfig = {
-  pinDigests: false,
-};
+export const defaultConfig = { pinDigests: false };
 export const supportedDatasources = ['*'];
 export const displayName = 'Regex';
 

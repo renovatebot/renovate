@@ -157,14 +157,8 @@ export async function updateArtifacts({
       docker: {},
       userConfiguredEnv: config.env,
       toolConstraints: [
-        {
-          toolName: 'python',
-          constraint: tagConstraint,
-        },
-        {
-          toolName: 'pipenv',
-          constraint: pipenvConstraint,
-        },
+        { toolName: 'python', constraint: tagConstraint },
+        { toolName: 'pipenv', constraint: pipenvConstraint },
       ],
     };
     await addCredentialsForSourceUrls(newPipfileContent, pipfileName, extraEnv);
@@ -192,13 +186,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Pipfile.lock');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 }

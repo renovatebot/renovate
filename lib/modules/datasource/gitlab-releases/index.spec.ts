@@ -5,14 +5,8 @@ import { GitlabReleasesDatasource } from '.';
 describe('modules/datasource/gitlab-releases/index', () => {
   describe('getReleases', () => {
     const body = [
-      {
-        tag_name: 'v1.0.0',
-        released_at: '2021-01-01T00:00:00.000Z',
-      },
-      {
-        tag_name: 'v1.1.0',
-        released_at: '2021-03-01T00:00:00.000Z',
-      },
+      { tag_name: 'v1.0.0', released_at: '2021-01-01T00:00:00.000Z' },
+      { tag_name: 'v1.1.0', released_at: '2021-03-01T00:00:00.000Z' },
     ];
 
     it('returns releases from custom registry', async () => {

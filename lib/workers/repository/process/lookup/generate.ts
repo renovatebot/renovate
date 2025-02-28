@@ -19,11 +19,7 @@ export async function generateUpdate(
   release: Release,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
-  const update: LookupUpdate = {
-    bucket,
-    newVersion,
-    newValue: null!,
-  };
+  const update: LookupUpdate = { bucket, newVersion, newValue: null! };
 
   // istanbul ignore if
   if (release.checksumUrl !== undefined) {

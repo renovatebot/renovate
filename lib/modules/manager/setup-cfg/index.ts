@@ -9,9 +9,6 @@ export const url =
   'https://setuptools.pypa.io/en/latest/userguide/declarative_config.html';
 export const categories: Category[] = ['python'];
 
-export const defaultConfig = {
-  fileMatch: ['(^|/)setup\\.cfg$'],
-  versioning,
-};
+export const defaultConfig = { fileMatch: ['(^|/)setup\\.cfg$'], versioning };
 
 export const supportedDatasources = [PypiDatasource.id];

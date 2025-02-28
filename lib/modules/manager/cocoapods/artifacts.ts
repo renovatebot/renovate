@@ -49,14 +49,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'Podfile could not be written');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return [{ artifactError: { lockFile: lockFileName, stderr: err.message } }];
   }
 
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -74,18 +67,11 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     userConfiguredEnv: config.env,
     cwdFile: packageFileName,
-    extraEnv: {
-      CP_HOME_DIR: await ensureCacheDir('cocoapods'),
-    },
+    extraEnv: { CP_HOME_DIR: await ensureCacheDir('cocoapods') },
     docker: {},
     toolConstraints: [
-      {
-        toolName: 'ruby',
-      },
-      {
-        toolName: 'cocoapods',
-        constraint: cocoapods,
-      },
+      { toolName: 'ruby' },
+      { toolName: 'cocoapods', constraint: cocoapods },
     ],
   };
 
@@ -114,11 +100,7 @@ export async function updateArtifacts({
   const lockFileContent = await readLocalFile(lockFileName);
   const res: UpdateArtifactsResult[] = [
     {
-      file: {
-        type: 'addition',
-        path: lockFileName,
-        contents: lockFileContent,
-      },
+      file: { type: 'addition', path: lockFileName, contents: lockFileContent },
     },
   ];
 
@@ -128,21 +110,12 @@ export async function updateArtifacts({
     for (const f of status.modified.concat(status.not_added)) {
       if (f.startsWith(podsDir)) {
         res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
+          file: { type: 'addition', path: f, contents: await readLocalFile(f) },
         });
       }
     }
     for (const f of coerceArray(status.deleted)) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
+      res.push({ file: { type: 'deletion', path: f } });
     }
   }
   return res;

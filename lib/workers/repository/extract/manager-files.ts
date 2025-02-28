@@ -62,10 +62,7 @@ export async function getManagerPackageFiles(
         config,
       );
       if (res) {
-        packageFiles.push({
-          ...res,
-          packageFile,
-        });
+        packageFiles.push({ ...res, packageFile });
       }
     } else {
       logger.debug(`${packageFile} has no content`);

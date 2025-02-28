@@ -25,12 +25,7 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      config = {
-        ...getConfig(),
-        errors: [],
-        warnings: [],
-        description: [],
-      };
+      config = { ...getConfig(), errors: [], warnings: [], description: [] };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
@@ -84,9 +79,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         branches,
       );
       expect(platform.createPr).toHaveBeenCalledWith(
-        expect.objectContaining({
-          prTitle: 'chore: Configure Renovate',
-        }),
+        expect.objectContaining({ prTitle: 'chore: Configure Renovate' }),
       );
     });
 
@@ -118,11 +111,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         await ensureOnboardingPr(
-          {
-            ...config,
-            prHeader: '',
-            prFooter: '',
-          },
+          { ...config, prHeader: '', prFooter: '' },
           packageFiles,
           branches,
         );
@@ -217,10 +206,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('ensures comment, when PR is conflicted', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        }),
+        partial<Pr>({ title: 'Configure Renovate', bodyStruct }),
       );
       scm.isBranchConflicted.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
@@ -232,10 +218,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        }),
+        partial<Pr>({ title: 'Configure Renovate', bodyStruct }),
       );
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -268,10 +251,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('dryrun of updates PR', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        }),
+        partial<Pr>({ title: 'Configure Renovate', bodyStruct }),
       );
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(

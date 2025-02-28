@@ -68,9 +68,7 @@ export function buildCodeCommitClient(): void {
 export async function deleteComment(
   commentId: string,
 ): Promise<DeleteCommentContentOutput> {
-  const input: DeleteCommentContentInput = {
-    commentId,
-  };
+  const input: DeleteCommentContentInput = { commentId };
   const cmd = new DeleteCommentContentCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -78,9 +76,7 @@ export async function deleteComment(
 export async function getPrComments(
   pullRequestId: string,
 ): Promise<GetCommentsForPullRequestOutput> {
-  const input: GetCommentsForPullRequestInput = {
-    pullRequestId,
-  };
+  const input: GetCommentsForPullRequestInput = { pullRequestId };
   const cmd = new GetCommentsForPullRequestCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -89,10 +85,7 @@ export async function updateComment(
   commentId: string,
   content: string,
 ): Promise<UpdateCommentOutput> {
-  const input: UpdateCommentInput = {
-    commentId,
-    content,
-  };
+  const input: UpdateCommentInput = { commentId, content };
   const cmd = new UpdateCommentCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -193,13 +186,7 @@ export async function createPr(
   const input: CreatePullRequestInput = {
     title,
     description,
-    targets: [
-      {
-        sourceReference,
-        destinationReference,
-        repositoryName,
-      },
-    ],
+    targets: [{ sourceReference, destinationReference, repositoryName }],
   };
   const cmd = new CreatePullRequestCommand(input);
   return await codeCommitClient.send(cmd);
@@ -210,11 +197,7 @@ export async function getFile(
   filePath: string,
   commitSpecifier: string | undefined,
 ): Promise<GetFileOutput> {
-  const input: GetFileInput = {
-    repositoryName,
-    filePath,
-    commitSpecifier,
-  };
+  const input: GetFileInput = { repositoryName, filePath, commitSpecifier };
   const cmd: GetFileCommand = new GetFileCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -234,9 +217,7 @@ export async function listPullRequests(
 export async function getRepositoryInfo(
   repository: string,
 ): Promise<GetRepositoryOutput> {
-  const input: GetRepositoryInput = {
-    repositoryName: `${repository}`,
-  };
+  const input: GetRepositoryInput = { repositoryName: `${repository}` };
   const cmd = new GetRepositoryCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -244,9 +225,7 @@ export async function getRepositoryInfo(
 export async function getPr(
   pullRequestId: string,
 ): Promise<GetPullRequestOutput | undefined> {
-  const input: GetPullRequestInput = {
-    pullRequestId,
-  };
+  const input: GetPullRequestInput = { pullRequestId };
   const cmd = new GetPullRequestCommand(input);
   let res;
   try {

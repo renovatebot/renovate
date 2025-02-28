@@ -110,11 +110,7 @@ describe('workers/repository/process/index', () => {
       GlobalConfig.set({ dryRun: 'extract' });
       const res = await extractDependencies(config);
       await updateRepo(config, res.branches);
-      expect(res).toEqual({
-        branchList: [],
-        branches: [],
-        packageFiles: {},
-      });
+      expect(res).toEqual({ branchList: [], branches: [], packageFiles: {} });
       expect(lookup).toHaveBeenCalledTimes(0);
     });
 

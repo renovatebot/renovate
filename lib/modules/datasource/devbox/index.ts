@@ -28,9 +28,7 @@ export class DevboxDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const res: ReleaseResult = {
-      releases: [],
-    };
+    const res: ReleaseResult = { releases: [] };
 
     logger.trace({ registryUrl, packageName }, 'fetching devbox release');
 

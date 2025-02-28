@@ -27,9 +27,7 @@ export function bootstrap(): void {
     is.nonEmptyString(process.env.HTTP_PROXY) ||
     is.nonEmptyString(process.env.HTTPS_PROXY)
   ) {
-    createGlobalProxyAgent({
-      environmentVariableNamespace: '',
-    });
+    createGlobalProxyAgent({ environmentVariableNamespace: '' });
     agent = true;
   } else {
     // for testing only, does not reset global agent

@@ -79,13 +79,7 @@ describe('util/stats', () => {
           medianMs: 1000,
           totalMs: 1000,
         },
-        npm: {
-          avgMs: 233,
-          count: 3,
-          maxMs: 400,
-          medianMs: 200,
-          totalMs: 700,
-        },
+        npm: { avgMs: 233, count: 3, maxMs: 400, medianMs: 200, totalMs: 700 },
       });
     });
 
@@ -97,13 +91,7 @@ describe('util/stats', () => {
 
       expect(res).toBe('foo');
       expect(LookupStats.getReport()).toEqual({
-        npm: {
-          avgMs: 100,
-          count: 1,
-          maxMs: 100,
-          medianMs: 100,
-          totalMs: 100,
-        },
+        npm: { avgMs: 100, count: 1, maxMs: 100, medianMs: 100, totalMs: 100 },
       });
     });
 
@@ -126,13 +114,7 @@ describe('util/stats', () => {
           medianMs: 1000,
           totalMs: 1000,
         },
-        npm: {
-          avgMs: 233,
-          count: 3,
-          maxMs: 400,
-          medianMs: 200,
-          totalMs: 700,
-        },
+        npm: { avgMs: 233, count: 3, maxMs: 400, medianMs: 200, totalMs: 700 },
       });
     });
   });
@@ -159,13 +141,7 @@ describe('util/stats', () => {
       const res = PackageCacheStats.getReport();
 
       expect(res).toEqual({
-        get: {
-          avgMs: 233,
-          count: 3,
-          maxMs: 400,
-          medianMs: 200,
-          totalMs: 700,
-        },
+        get: { avgMs: 233, count: 3, maxMs: 400, medianMs: 200, totalMs: 700 },
         set: {
           avgMs: 1000,
           count: 1,
@@ -213,13 +189,7 @@ describe('util/stats', () => {
       const [data, msg] = logger.logger.debug.mock.calls[0];
       expect(msg).toBe('Package cache statistics');
       expect(data).toEqual({
-        get: {
-          avgMs: 233,
-          count: 3,
-          maxMs: 400,
-          medianMs: 200,
-          totalMs: 700,
-        },
+        get: { avgMs: 233, count: 3, maxMs: 400, medianMs: 200, totalMs: 700 },
         set: {
           avgMs: 1000,
           count: 1,
@@ -242,18 +212,10 @@ describe('util/stats', () => {
 
       expect(report).toEqual({
         long: {
-          crate: {
-            'https://foo.example.com': { foo: { read: 'hit' } },
-          },
-          maven: {
-            'https://bar.example.com': { bar: { read: 'miss' } },
-          },
-          npm: {
-            'https://baz.example.com': { baz: { write: 'set' } },
-          },
-          rubygems: {
-            'https://qux.example.com': { qux: { write: 'skip' } },
-          },
+          crate: { 'https://foo.example.com': { foo: { read: 'hit' } } },
+          maven: { 'https://bar.example.com': { bar: { read: 'miss' } } },
+          npm: { 'https://baz.example.com': { baz: { write: 'set' } } },
+          rubygems: { 'https://qux.example.com': { qux: { write: 'skip' } } },
         },
         short: {
           crate: {
@@ -388,17 +350,8 @@ describe('util/stats', () => {
         ],
         requests: 5,
         urls: {
-          'https://example.com/bar': {
-            GET: {
-              '200': 1,
-            },
-          },
-          'https://example.com/foo': {
-            GET: {
-              '200': 2,
-              '404': 1,
-            },
-          },
+          'https://example.com/bar': { GET: { '200': 1 } },
+          'https://example.com/foo': { GET: { '200': 2, '404': 1 } },
         },
       });
     });
@@ -483,17 +436,8 @@ describe('util/stats', () => {
       expect(trace2Msg).toBe('HTTP URL statistics');
       expect(trace2Data).toEqual({
         urls: {
-          'https://example.com/bar': {
-            GET: {
-              '200': 1,
-            },
-          },
-          'https://example.com/foo': {
-            GET: {
-              '200': 2,
-              '404': 1,
-            },
-          },
+          'https://example.com/bar': { GET: { '200': 1 } },
+          'https://example.com/foo': { GET: { '200': 2, '404': 1 } },
         },
       });
 
@@ -539,11 +483,7 @@ describe('util/stats', () => {
       const res = HttpCacheStats.getData();
 
       expect(res).toEqual({
-        'https://example.com/bar': {
-          hit: 1,
-          miss: 1,
-          localMiss: 1,
-        },
+        'https://example.com/bar': { hit: 1, miss: 1, localMiss: 1 },
         'https://example.com/foo': {
           hit: 0,
           miss: 0,

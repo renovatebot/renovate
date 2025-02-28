@@ -124,14 +124,7 @@ describe('modules/manager/tflint-plugin/extract', () => {
 
       const res = extractPackageFile(noSource, 'tflint-no-source.hcl', {});
       expect(res).toEqual({
-        deps: [
-          {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
-          },
-        ],
+        deps: [{ skipReason: 'no-source' }, { skipReason: 'no-source' }],
       });
     });
 

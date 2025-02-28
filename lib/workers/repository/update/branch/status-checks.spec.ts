@@ -78,10 +78,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     it('skips status if statusCheckNames is undefined', async () => {
       config.stabilityStatus = 'green';
-      await setStability({
-        ...config,
-        statusCheckNames: undefined as never,
-      });
+      await setStability({ ...config, statusCheckNames: undefined as never });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );
@@ -164,10 +161,7 @@ describe('workers/repository/update/branch/status-checks', () => {
     it('skips status if statusCheckNames is undefined', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = 'green';
-      await setConfidence({
-        ...config,
-        statusCheckNames: undefined as never,
-      });
+      await setConfidence({ ...config, statusCheckNames: undefined as never });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
       );

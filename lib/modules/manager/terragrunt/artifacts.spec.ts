@@ -7,9 +7,7 @@ import { updateArtifacts } from './artifacts';
 
 vi.mock('../terraform/lockfile');
 
-const config = {
-  constraints: {},
-};
+const config = { constraints: {} };
 
 const adminConfig = {
   // `join` fixes Windows CI
@@ -54,10 +52,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
   it.each(updateTypes)(
     'does not call terraform updateArtifacts if the update type is %s',
     async (updateType) => {
-      const localConfig: UpdateArtifactsConfig = {
-        updateType,
-        ...config,
-      };
+      const localConfig: UpdateArtifactsConfig = { updateType, ...config };
 
       await updateArtifacts({
         packageFileName: '',

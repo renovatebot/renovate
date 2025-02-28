@@ -16,11 +16,7 @@ const datasource = GradleVersionDatasource.id;
 describe('modules/datasource/gradle-version/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
-      config = {
-        datasource,
-        versioning,
-        packageName: 'abc',
-      };
+      config = { datasource, versioning, packageName: 'abc' };
     });
 
     it('processes real data', async () => {
@@ -87,9 +83,7 @@ describe('modules/datasource/gradle-version/index', () => {
 
       await expect(
         gradleVersionDatasource.getReleases(
-          partial<GetReleasesConfig>({
-            registryUrl: 'http://baz.qux',
-          }),
+          partial<GetReleasesConfig>({ registryUrl: 'http://baz.qux' }),
         ),
       ).rejects.toThrow(ExternalHostError);
     });

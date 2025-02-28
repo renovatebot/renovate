@@ -18,9 +18,7 @@ describe('util/json-writer/editor-config', () => {
   beforeEach(async () => {
     tmpDir = await dir({ unsafeCleanup: true });
 
-    GlobalConfig.set({
-      localDir: tmpDir.path,
-    });
+    GlobalConfig.set({ localDir: tmpDir.path });
   });
 
   afterEach(async () => {

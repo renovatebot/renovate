@@ -66,11 +66,7 @@ export function extractPackageFile(
           );
           skipReason = 'invalid-version';
         }
-        const dep: PackageDependency = {
-          depName,
-          currentValue,
-          skipReason,
-        };
+        const dep: PackageDependency = { depName, currentValue, skipReason };
         if (repo) {
           dep.datasource = GithubTagsDatasource.id;
           dep.packageName = repo;

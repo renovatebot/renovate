@@ -123,13 +123,7 @@ export async function generateLockFile(
       throw err;
     }
     logger.debug(
-      {
-        commands,
-        err,
-        stdout,
-        stderr,
-        type: 'pnpm',
-      },
+      { commands, err, stdout, stderr, type: 'pnpm' },
       'lock file error',
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
@@ -202,21 +196,9 @@ const lockToPnpmVersionMapping: LockToPnpmVersionMapping[] = [
     lowerConstraint: '>=7.24.2',
     upperConstraint: '<9',
   },
-  {
-    lockfileVersion: 5.4,
-    lowerConstraint: '>=7',
-    upperConstraint: '<8',
-  },
-  {
-    lockfileVersion: 5.3,
-    lowerConstraint: '>=6',
-    upperConstraint: '<7',
-  },
-  {
-    lockfileVersion: 5.2,
-    lowerConstraint: '>=5.10.0',
-    upperConstraint: '<6',
-  },
+  { lockfileVersion: 5.4, lowerConstraint: '>=7', upperConstraint: '<8' },
+  { lockfileVersion: 5.3, lowerConstraint: '>=6', upperConstraint: '<7' },
+  { lockfileVersion: 5.2, lowerConstraint: '>=5.10.0', upperConstraint: '<6' },
   {
     lockfileVersion: 5.1,
     lowerConstraint: '>=3.5.0',

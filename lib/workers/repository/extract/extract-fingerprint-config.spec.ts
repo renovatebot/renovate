@@ -6,18 +6,14 @@ import { generateFingerprintConfig } from './extract-fingerprint-config';
 describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
     const config = mergeChildConfig(getConfig(), {
-      registryAliases: {
-        stable: 'http://some.link',
-      },
+      registryAliases: { stable: 'http://some.link' },
       ignorePaths: ['ignore-path-1'],
       includePaths: ['include-path-1'],
       npm: {
         fileMatch: ['hero.json'],
         ignorePaths: ['ignore-path-2'],
         includePaths: ['include-path-2'],
-        registryAliases: {
-          notStable: 'http://some.link.2',
-        },
+        registryAliases: { notStable: 'http://some.link.2' },
       },
       enabledManagers: ['npm', 'custom.regex'],
       customManagers: [
@@ -69,9 +65,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'regex',
       npmrc: null,
       npmrcMerge: false,
-      registryAliases: {
-        stable: 'http://some.link',
-      },
+      registryAliases: { stable: 'http://some.link' },
       skipInstalls: null,
     });
   });

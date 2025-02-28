@@ -19,9 +19,7 @@ describe('modules/manager/droneci/extract', () => {
 
   it('extracts image and replaces registry', () => {
     const res = extractPackageFile(droneciRegistryAlias, '', {
-      registryAliases: {
-        'quay.io': 'my-quay-mirror.registry.com',
-      },
+      registryAliases: { 'quay.io': 'my-quay-mirror.registry.com' },
     });
     expect(res).toEqual({
       deps: [
@@ -42,9 +40,7 @@ describe('modules/manager/droneci/extract', () => {
 
   it('extracts image but no replacement', () => {
     const res = extractPackageFile(droneciRegistryAlias, '', {
-      registryAliases: {
-        'index.docker.io': 'my-docker-mirror.registry.com',
-      },
+      registryAliases: { 'index.docker.io': 'my-docker-mirror.registry.com' },
     });
     expect(res).toEqual({
       deps: [

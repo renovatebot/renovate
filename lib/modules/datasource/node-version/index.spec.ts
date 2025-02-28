@@ -9,10 +9,7 @@ describe('modules/datasource/node-version/index', () => {
     it('throws for 500', async () => {
       httpMock.scope(defaultRegistryUrl).get('/index.json').reply(500);
       await expect(
-        getPkgReleases({
-          datasource,
-          packageName: 'node',
-        }),
+        getPkgReleases({ datasource, packageName: 'node' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -22,20 +19,14 @@ describe('modules/datasource/node-version/index', () => {
         .get('/index.json')
         .replyWithError('error');
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'node',
-        }),
+        await getPkgReleases({ datasource, packageName: 'node' }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('/index.json').reply(200, []);
       expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'node',
-        }),
+        await getPkgReleases({ datasource, packageName: 'node' }),
       ).toBeNull();
     });
 
@@ -44,10 +35,7 @@ describe('modules/datasource/node-version/index', () => {
         .scope(defaultRegistryUrl)
         .get('/index.json')
         .reply(200, Fixtures.get('index.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'node',
-      });
+      const res = await getPkgReleases({ datasource, packageName: 'node' });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(64);
     });

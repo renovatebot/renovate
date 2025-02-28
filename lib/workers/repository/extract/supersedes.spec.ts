@@ -38,14 +38,8 @@ describe('workers/repository/extract/supersedes', () => {
         {
           manager: 'bun',
           packageFiles: [
-            {
-              deps: [],
-              packageFile: 'package.json',
-            },
-            {
-              deps: [],
-              packageFile: 'frontend/package.json',
-            },
+            { deps: [], packageFile: 'package.json' },
+            { deps: [], packageFile: 'frontend/package.json' },
           ],
         },
         {

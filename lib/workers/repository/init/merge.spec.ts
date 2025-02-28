@@ -76,9 +76,7 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('returns cache config from onboarding cache - package.json', async () => {
-      const pJson = JSON.stringify({
-        schema: 'https://docs.renovate.com',
-      });
+      const pJson = JSON.stringify({ schema: 'https://docs.renovate.com' });
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'package.json',
@@ -101,9 +99,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       const pJson = JSON.stringify({
         name: 'something',
-        renovate: {
-          prHourlyLimit: 10,
-        },
+        renovate: { prHourlyLimit: 10 },
       });
       fs.readLocalFile.mockResolvedValueOnce(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
@@ -126,9 +122,7 @@ describe('workers/repository/init/merge', () => {
       );
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'renovate.json',
-        configFileParsed: {
-          schema: 'https://docs.renovate.com',
-        },
+        configFileParsed: { schema: 'https://docs.renovate.com' },
       });
     });
 
@@ -136,9 +130,7 @@ describe('workers/repository/init/merge', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       const pJson = JSON.stringify({
         name: 'something',
-        renovate: {
-          prHourlyLimit: 10,
-        },
+        renovate: { prHourlyLimit: 10 },
       });
       fs.readLocalFile.mockResolvedValue(pJson);
       platform.getRawFile.mockResolvedValueOnce(pJson);
@@ -240,9 +232,7 @@ describe('workers/repository/init/merge', () => {
       });
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json',
-        configFileParsed: {
-          something: 'new',
-        },
+        configFileParsed: { something: 'new' },
       });
     });
 
@@ -256,9 +246,7 @@ describe('workers/repository/init/merge', () => {
       });
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json5',
-        configFileParsed: {
-          something: 'new',
-        },
+        configFileParsed: { something: 'new' },
       });
     });
   });
@@ -320,11 +308,7 @@ describe('workers/repository/init/merge', () => {
         // We shouldn't see packageRules here (avoids #14827).
         // (someday the validation should probably be reworked to know about `sourceUrl` from the repo config, but that day isn't today)
         expect(c).not.toHaveProperty('packageRules');
-        return Promise.resolve({
-          ...c,
-          warnings: [],
-          errors: [],
-        });
+        return Promise.resolve({ ...c, warnings: [], errors: [] });
       });
       migrate.migrateConfig.mockImplementation((c) => ({
         isMigrated: true,
@@ -336,9 +320,7 @@ describe('workers/repository/init/merge', () => {
       expect(ret).toMatchObject({
         automerge: true,
         packageRules: [
-          {
-            matchSourceUrls: ['https://github.com/facebook/react'],
-          },
+          { matchSourceUrls: ['https://github.com/facebook/react'] },
         ],
       });
     });
@@ -407,9 +389,7 @@ describe('workers/repository/init/merge', () => {
         isMigrated: true,
         migratedConfig: c,
       }));
-      config.secrets = {
-        NPM_TOKEN: 'confidential',
-      };
+      config.secrets = { NPM_TOKEN: 'confidential' };
       const res = await mergeRenovateConfig(config);
       expect(res.npmrc).toBe('something_authToken=confidential');
     });
@@ -422,9 +402,7 @@ describe('workers/repository/init/merge', () => {
       migrateAndValidate.migrateAndValidate.mockResolvedValue({
         ...config,
         npmrc: 'something_authToken=${NPM_TOKEN}',
-        encrypted: {
-          npmToken: 'encrypted-token',
-        },
+        encrypted: { npmToken: 'encrypted-token' },
         warnings: [],
         errors: [],
       });
@@ -482,11 +460,7 @@ describe('workers/repository/init/merge', () => {
         migratedConfig: c,
       }));
       migrateAndValidate.migrateAndValidate.mockImplementationOnce((_, c) => {
-        return Promise.resolve({
-          ...c,
-          warnings: [],
-          errors: [],
-        });
+        return Promise.resolve({ ...c, warnings: [], errors: [] });
       });
     });
 
@@ -509,10 +483,7 @@ describe('workers/repository/init/merge', () => {
           name: 'it merges env with the current config',
           env: { [repoStaticConfigKey]: '{"dependencyDashboard":true}' },
           currentConfig: { repositories: ['some/repo'] },
-          want: {
-            dependencyDashboard: true,
-            repositories: ['some/repo'],
-          },
+          want: { dependencyDashboard: true, repositories: ['some/repo'] },
         },
         {
           name: 'it ignores env with other renovate specific configuration options',
@@ -553,17 +524,12 @@ describe('workers/repository/init/merge', () => {
           currentConfig: {},
           repoFileConfig: {},
           staticConfig: {},
-          wantConfig: {
-            renovateJsonPresent: true,
-            warnings: [],
-          },
+          wantConfig: { renovateJsonPresent: true, warnings: [] },
         },
         {
           name: 'it should resolve and use the repo file config when the static config is not set',
           currentConfig: {},
-          repoFileConfig: {
-            extends: ['group:socketio'],
-          },
+          repoFileConfig: { extends: ['group:socketio'] },
           staticConfig: {},
           wantConfig: {
             description: ['Group socket.io packages.'],

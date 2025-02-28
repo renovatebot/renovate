@@ -1,10 +1,9 @@
 import { logger } from '../../../../../../logger';
 import type { YarnLock, YarnLockEntrySummary } from './types';
 
-export function parseEntry(depNameConstraint: string): {
-  entryName: string;
-  constraint: string;
-} | null {
+export function parseEntry(
+  depNameConstraint: string,
+): { entryName: string; constraint: string } | null {
   let entryName: string;
   let constraint: string;
   const split = depNameConstraint.split('@');

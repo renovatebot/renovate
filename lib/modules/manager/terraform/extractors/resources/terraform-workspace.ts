@@ -24,10 +24,7 @@ export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
       if (is.nullOrUndefined(workspace.terraform_version)) {
         dep.skipReason = 'unspecified-version';
       }
-      dependencies.push({
-        ...dep,
-        depType: 'tfe_workspace',
-      });
+      dependencies.push({ ...dep, depType: 'tfe_workspace' });
     }
     return dependencies;
   }

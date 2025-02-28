@@ -49,10 +49,7 @@ describe('workers/repository/process/limits', () => {
       platform.getBranchPr.mockImplementation((branchName) =>
         branchName
           ? Promise.resolve(
-              partial<Pr>({
-                sourceBranch: branchName,
-                state: 'open',
-              }),
+              partial<Pr>({ sourceBranch: branchName, state: 'open' }),
             )
           : Promise.reject(new Error('some error')),
       );

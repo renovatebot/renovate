@@ -99,11 +99,7 @@ async function handleOnboardingPr(pr: Pr, issueMessage: string): Promise<void> {
   prBody += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;
 
   try {
-    await platform.updatePr({
-      number: pr.number,
-      prTitle: pr.title,
-      prBody,
-    });
+    await platform.updatePr({ number: pr.number, prTitle: pr.title, prBody });
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error updating onboarding PR');
   }

@@ -23,16 +23,12 @@ export class AwsMachineImageDatasource extends Datasource {
     // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
     commitMessageExtra: 'to {{{newVersion}}}',
     prBodyColumns: ['Change', 'Image'],
-    prBodyDefinitions: {
-      Image: '```{{{newDigest}}}```',
-    },
+    prBodyDefinitions: { Image: '```{{{newDigest}}}```' },
     digest: {
       // Because newDigestShort will allways be 'amazon-' we override to print the name of the AMI
       commitMessageExtra: 'to {{{newDigest}}}',
       prBodyColumns: ['Image'],
-      prBodyDefinitions: {
-        Image: '```{{{newDigest}}}```',
-      },
+      prBodyDefinitions: { Image: '```{{{newDigest}}}```' },
     },
   };
 
@@ -56,9 +52,7 @@ export class AwsMachineImageDatasource extends Datasource {
   }
 
   private getAmiFilterCommand(filter: Filter[]): DescribeImagesCommand {
-    return new DescribeImagesCommand({
-      Filters: filter,
-    });
+    return new DescribeImagesCommand({ Filters: filter });
   }
 
   loadConfig(serializedAmiFilter: string): [Filter[], AwsClientConfig] {

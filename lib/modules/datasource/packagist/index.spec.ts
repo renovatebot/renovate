@@ -41,9 +41,7 @@ describe('modules/datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(404);
-      config = {
-        registryUrls: ['https://composer.renovatebot.com'],
-      };
+      config = { registryUrls: ['https://composer.renovatebot.com'] };
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -249,10 +247,7 @@ describe('modules/datasource/packagist/index', () => {
       const fileJson = {
         packages: {
           'guzzlehttp/guzzle': {
-            '5.3.4': {
-              name: 'guzzlehttp/guzzle',
-              version: '5.3.4',
-            },
+            '5.3.4': { name: 'guzzlehttp/guzzle', version: '5.3.4' },
             '7.0.0-beta.1': {
               name: 'guzzlehttp/guzzle',
               version: '7.0.0-beta.1',
@@ -407,12 +402,8 @@ describe('modules/datasource/packagist/index', () => {
         packages: [],
         'providers-url': '/p/%package%.json',
         providers: {
-          'wpackagist-plugin/1337-rss-feed-made-for-sharing': {
-            sha256: null,
-          },
-          'wpackagist-plugin/1beyt': {
-            sha256: null,
-          },
+          'wpackagist-plugin/1337-rss-feed-made-for-sharing': { sha256: null },
+          'wpackagist-plugin/1beyt': { sha256: null },
         },
       };
       httpMock
@@ -511,18 +502,13 @@ describe('modules/datasource/packagist/index', () => {
       httpMock
         .scope('https://example.com')
         .get('/packages.json')
-        .reply(200, {
-          'metadata-url': 'https://example.com/p2/%package%.json',
-        })
+        .reply(200, { 'metadata-url': 'https://example.com/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
         .reply(200, {
           minified: 'composer/2.0',
           packages: {
             'drewm/mailchimp-api': [
-              {
-                name: 'drewm/mailchimp-api',
-                version: 'v2.5.4',
-              },
+              { name: 'drewm/mailchimp-api', version: 'v2.5.4' },
             ],
           },
         })
@@ -555,14 +541,7 @@ describe('modules/datasource/packagist/index', () => {
         .get('/p2/foo/bar.json')
         .reply(200, {
           minified: 'composer/2.0',
-          packages: {
-            'foo/bar': [
-              {
-                name: 'foo/bar',
-                version: 'v1.2.3',
-              },
-            ],
-          },
+          packages: { 'foo/bar': [{ name: 'foo/bar', version: 'v1.2.3' }] },
         })
         .get('/p2/foo/bar~dev.json')
         .reply(404);

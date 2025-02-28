@@ -52,11 +52,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
         `yarn.lock ${filePath} is has __metadata so is yarn 2+`,
       );
     }
-    return {
-      isYarn1,
-      lockfileVersion,
-      lockedVersions,
-    };
+    return { isYarn1, lockfileVersion, lockedVersions };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
     return { isYarn1: true, lockedVersions: {} };

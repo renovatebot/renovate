@@ -188,9 +188,7 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
           {
             "matchHost": "europe-maven.pkg.dev",
             "username": "_json_key_base64",
-            "encrypted": {
-              "password": "<encrypted base64 service account>"
-            }
+            "encrypted": { "password": "<encrypted base64 service account>" }
           }
         ]
       }

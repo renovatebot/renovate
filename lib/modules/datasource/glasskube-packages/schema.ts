@@ -7,11 +7,6 @@ export const GlasskubePackageVersions = z.object({
 
 export const GlasskubePackageManifest = z.object({
   references: z.optional(
-    z.array(
-      z.object({
-        label: z.string(),
-        url: z.string(),
-      }),
-    ),
+    z.array(z.object({ label: z.string(), url: z.string() })),
   ),
 });

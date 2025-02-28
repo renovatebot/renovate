@@ -15,11 +15,7 @@ export const ReleaseResultZodSchema = z.object({
         isStable: z.boolean().optional(),
       })
       .transform((input) => {
-        return {
-          ...input,
-          newDigest: input.digest,
-          digest: undefined,
-        };
+        return { ...input, newDigest: input.digest, digest: undefined };
       }),
   ),
   tags: z.record(z.string(), z.string()).optional(),

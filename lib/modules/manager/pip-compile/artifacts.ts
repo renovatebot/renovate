@@ -165,10 +165,7 @@ export async function updateArtifacts({
       }
       logger.debug({ err }, 'pip-compile: Failed to run command');
       result.push({
-        artifactError: {
-          lockFile: outputFileName,
-          stderr: err.message,
-        },
+        artifactError: { lockFile: outputFileName, stderr: err.message },
       });
     }
   }

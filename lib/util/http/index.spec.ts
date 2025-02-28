@@ -72,11 +72,7 @@ describe('util/http/index', () => {
 
   it('getJson', async () => {
     httpMock
-      .scope(baseUrl, {
-        reqheaders: {
-          accept: 'application/json',
-        },
-      })
+      .scope(baseUrl, { reqheaders: { accept: 'application/json' } })
       .get('/')
       .reply(200, '{ "test": true }', { etag: 'abc123' });
 
@@ -84,12 +80,8 @@ describe('util/http/index', () => {
 
     expect(res).toEqual({
       authorization: false,
-      body: {
-        test: true,
-      },
-      headers: {
-        etag: 'abc123',
-      },
+      body: { test: true },
+      headers: { etag: 'abc123' },
       statusCode: 200,
     });
   });
@@ -101,9 +93,7 @@ describe('util/http/index', () => {
     ).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
@@ -116,9 +106,7 @@ describe('util/http/index', () => {
     ).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
@@ -131,9 +119,7 @@ describe('util/http/index', () => {
     ).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
@@ -146,9 +132,7 @@ describe('util/http/index', () => {
     ).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
@@ -159,9 +143,7 @@ describe('util/http/index', () => {
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
       authorization: false,
       body: {},
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       statusCode: 200,
     });
     expect(httpMock.allUsed()).toBeTrue();
@@ -170,9 +152,7 @@ describe('util/http/index', () => {
   it('stream', async () => {
     httpMock.scope(baseUrl).get('/some').reply(200, {});
 
-    const stream = http.stream('/some', {
-      baseUrl,
-    });
+    const stream = http.stream('/some', { baseUrl });
     expect(stream).toBeDefined();
 
     let data = '';
@@ -320,9 +300,7 @@ describe('util/http/index', () => {
       expect(await http.head('http://renovate.com')).toEqual({
         authorization: false,
         body: '',
-        headers: {
-          'x-some-header': 'abc',
-        },
+        headers: { 'x-some-header': 'abc' },
         statusCode: 200,
       });
       expect(httpMock.allUsed()).toBeTrue();
@@ -344,9 +322,10 @@ describe('util/http/index', () => {
 
     describe('getPlain', () => {
       it('gets plain text with correct headers', async () => {
-        httpMock.scope(baseUrl).get('/').reply(200, 'plain text response', {
-          'content-type': 'text/plain',
-        });
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .reply(200, 'plain text response', { 'content-type': 'text/plain' });
 
         const res = await http.getPlain('http://renovate.com');
         expect(res.body).toBe('plain text response');
@@ -511,11 +490,7 @@ describe('util/http/index', () => {
     describe('getJson', () => {
       it('uses schema for response body', async () => {
         httpMock
-          .scope(baseUrl, {
-            reqheaders: {
-              accept: 'application/json',
-            },
-          })
+          .scope(baseUrl, { reqheaders: { accept: 'application/json' } })
           .get('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
@@ -531,11 +506,7 @@ describe('util/http/index', () => {
 
       it('throws on schema mismatch', async () => {
         httpMock
-          .scope(baseUrl, {
-            reqheaders: {
-              accept: 'application/json',
-            },
-          })
+          .scope(baseUrl, { reqheaders: { accept: 'application/json' } })
           .get('/')
           .reply(200, JSON.stringify({ foo: 'bar' }));
 

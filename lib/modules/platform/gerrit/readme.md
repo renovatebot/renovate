@@ -50,11 +50,7 @@ You can use the `statusCheckNames` configuration to map any of the available bra
 For example, if you want to use the [Merge Confidence](../../../merge-confidence.md) feature and map the result of the Merge Confidence check to your Gerrit label "Renovate-Merge-Confidence" you can configure:
 
 ```json
-{
-  "statusCheckNames": {
-    "mergeConfidence": "Renovate-Merge-Confidence"
-  }
-}
+{ "statusCheckNames": { "mergeConfidence": "Renovate-Merge-Confidence" } }
 ```
 
 ## Unsupported platform features/concepts

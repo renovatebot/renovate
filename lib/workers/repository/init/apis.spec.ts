@@ -38,10 +38,7 @@ describe('workers/repository/init/apis', () => {
       });
       platform.getJsonFile.mockResolvedValueOnce({ enabled: false });
       await expect(
-        initApis({
-          ...config,
-          optimizeForDisabled: true,
-        }),
+        initApis({ ...config, optimizeForDisabled: true }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -55,10 +52,7 @@ describe('workers/repository/init/apis', () => {
         forkProcessing: 'disabled',
       });
       await expect(
-        initApis({
-          ...config,
-          forkProcessing: 'disabled',
-        }),
+        initApis({ ...config, forkProcessing: 'disabled' }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
@@ -68,9 +62,7 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
-        includeForks: true,
-      });
+      platform.getJsonFile.mockResolvedValueOnce({ includeForks: true });
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
     });
@@ -81,9 +73,7 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
-        forkProcessing: 'enabled',
-      });
+      platform.getJsonFile.mockResolvedValueOnce({ forkProcessing: 'enabled' });
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
     });
@@ -113,10 +103,7 @@ describe('workers/repository/init/apis', () => {
       });
       platform.getJsonFile.mockRejectedValue(new Error());
       await expect(
-        initApis({
-          ...config,
-          forkProcessing: 'disabled',
-        }),
+        initApis({ ...config, forkProcessing: 'disabled' }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
@@ -186,9 +173,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({
-        enabled: true,
-      });
+      platform.getJsonFile.mockResolvedValueOnce({ enabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,

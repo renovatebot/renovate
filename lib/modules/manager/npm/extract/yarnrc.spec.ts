@@ -18,9 +18,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       const registryUrl = resolveRegistryUrl('@scope/a-package', {
         npmRegistryServer: 'https://private.example.com/npm',
         npmScopes: {
-          scope: {
-            npmRegistryServer: 'https://scope.example.com/npm',
-          },
+          scope: { npmRegistryServer: 'https://scope.example.com/npm' },
         },
       });
       expect(registryUrl).toBe('https://scope.example.com/npm');
@@ -40,9 +38,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
     it('ignores partial scope match', () => {
       const registryUrl = resolveRegistryUrl('@scope-2/a-package', {
         npmScopes: {
-          scope: {
-            npmRegistryServer: 'https://scope.example.com/npm',
-          },
+          scope: { npmRegistryServer: 'https://scope.example.com/npm' },
         },
       });
       expect(registryUrl).toBeNull();
@@ -50,9 +46,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
 
     it('ignores missing scope registryServer', () => {
       const registryUrl = resolveRegistryUrl('@scope/a-package', {
-        npmScopes: {
-          scope: {},
-        },
+        npmScopes: { scope: {} },
         npmRegistryServer: 'https://private.example.com/npm',
       });
       expect(registryUrl).toBeNull();
@@ -75,9 +69,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
         {
           npmRegistryServer: 'https://npm.example.com',
           npmScopes: {
-            foo: {
-              npmRegistryServer: 'https://npm-foo.example.com',
-            },
+            foo: { npmRegistryServer: 'https://npm-foo.example.com' },
           },
         },
       ],
@@ -120,9 +112,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
           # yarn lockfile v1
           registry "https://npm.example.com"
         `,
-        {
-          npmRegistryServer: 'https://npm.example.com',
-        },
+        { npmRegistryServer: 'https://npm.example.com' },
       ],
       [
         codeBlock`
@@ -130,9 +120,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
           registry https://npm.example.com
           sass_binary_site "https://node-sass.example.com"
         `,
-        {
-          npmRegistryServer: 'https://npm.example.com',
-        },
+        { npmRegistryServer: 'https://npm.example.com' },
       ],
       [
         codeBlock`
@@ -144,12 +132,8 @@ describe('modules/manager/npm/extract/yarnrc', () => {
         {
           npmRegistryServer: 'https://npm.example.com',
           npmScopes: {
-            foo: {
-              npmRegistryServer: 'https://npm-foo.example.com',
-            },
-            bar: {
-              npmRegistryServer: 'https://npm-bar.example.com',
-            },
+            foo: { npmRegistryServer: 'https://npm-foo.example.com' },
+            bar: { npmRegistryServer: 'https://npm-bar.example.com' },
           },
         },
       ],

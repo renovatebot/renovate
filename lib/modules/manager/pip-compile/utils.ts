@@ -85,11 +85,7 @@ export function inferCommandExecDir(
   commandExecDir = upath.normalizeTrim(commandExecDir);
   if (commandExecDir !== '.') {
     logger.debug(
-      {
-        commandExecDir,
-        outputFileArg,
-        outputFilePath,
-      },
+      { commandExecDir, outputFileArg, outputFilePath },
       `pip-compile: command was not executed in repository root`,
     );
   }

@@ -5,17 +5,13 @@ describe('modules/manager/helmv3/utils', () => {
   describe('.resolveAlias()', () => {
     it('return alias with "alias:"', () => {
       const repoUrl = 'https://charts.helm.sh/stable';
-      const repository = resolveAlias('alias:testRepo', {
-        testRepo: repoUrl,
-      });
+      const repository = resolveAlias('alias:testRepo', { testRepo: repoUrl });
       expect(repository).toBe(repoUrl);
     });
 
     it('return alias with "@"', () => {
       const repoUrl = 'https://charts.helm.sh/stable';
-      const repository = resolveAlias('@testRepo', {
-        testRepo: repoUrl,
-      });
+      const repository = resolveAlias('@testRepo', { testRepo: repoUrl });
       expect(repository).toBe(repoUrl);
     });
 

@@ -33,10 +33,7 @@ export type PipRequirement =
 
 export interface PipfileLock {
   _meta?: {
-    requires?: {
-      python_version?: string;
-      python_full_version?: string;
-    };
+    requires?: { python_version?: string; python_full_version?: string };
   };
   default?: Record<string, { version?: string }>;
   develop?: Record<string, { version?: string }>;

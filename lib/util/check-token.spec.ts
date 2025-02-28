@@ -68,12 +68,7 @@ describe('util/check-token', () => {
       checkGithubToken({
         npm: [
           {
-            deps: [
-              {
-                depName: 'foo/bar',
-                datasource: GithubTagsDatasource.id,
-              },
-            ],
+            deps: [{ depName: 'foo/bar', datasource: GithubTagsDatasource.id }],
           },
         ],
       });
@@ -86,10 +81,7 @@ describe('util/check-token', () => {
         npm: [
           {
             deps: [
-              {
-                depName: 'foo/bar',
-                datasource: GithubReleasesDatasource.id,
-              },
+              { depName: 'foo/bar', datasource: GithubReleasesDatasource.id },
             ],
           },
         ],
@@ -103,14 +95,8 @@ describe('util/check-token', () => {
         npm: [
           {
             deps: [
-              {
-                depName: 'foo/foo',
-                datasource: GithubTagsDatasource.id,
-              },
-              {
-                depName: 'bar/bar',
-                datasource: GithubReleasesDatasource.id,
-              },
+              { depName: 'foo/foo', datasource: GithubTagsDatasource.id },
+              { depName: 'bar/bar', datasource: GithubReleasesDatasource.id },
             ],
           },
         ],

@@ -4,10 +4,7 @@ import type { Release } from '../types';
 export const Homepage = z.string().optional().catch(undefined);
 
 export const Repository = z
-  .object({
-    type: z.literal('git'),
-    url: z.string(),
-  })
+  .object({ type: z.literal('git'), url: z.string() })
   .transform(({ url }) => url)
   .optional()
   .catch(undefined);
@@ -25,6 +22,4 @@ export const CdnjsAPIVersionResponseSchema = z.object({
   versions: Versions,
 });
 
-export const CdnjsAPISriResponseSchema = z.object({
-  sri: Sri,
-});
+export const CdnjsAPISriResponseSchema = z.object({ sri: Sri });

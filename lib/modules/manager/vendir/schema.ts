@@ -12,17 +12,12 @@ export const GitRef = z.object({
   depth: z.number().optional(),
 });
 
-export const GithubRelease = z.object({
-  slug: z.string(),
-  tag: z.string(),
-});
+export const GithubRelease = z.object({ slug: z.string(), tag: z.string() });
 
 export const HelmChart = z.object({
   name: z.string(),
   version: z.string(),
-  repository: z.object({
-    url: z.string().regex(/^(?:oci|https?):\/\/.+/),
-  }),
+  repository: z.object({ url: z.string().regex(/^(?:oci|https?):\/\/.+/) }),
 });
 
 export const HelmChartContent = z.object({
@@ -30,10 +25,7 @@ export const HelmChartContent = z.object({
   helmChart: HelmChart,
 });
 
-export const GitRefContent = z.object({
-  path: z.string(),
-  git: GitRef,
-});
+export const GitRefContent = z.object({ path: z.string(), git: GitRef });
 
 export const GithubReleaseContent = z.object({
   path: z.string(),
@@ -48,10 +40,7 @@ export const Contents = z.union([
 
 export const Vendir = VendirResource.extend({
   directories: z.array(
-    z.object({
-      path: z.string(),
-      contents: LooseArray(Contents),
-    }),
+    z.object({ path: z.string(), contents: LooseArray(Contents) }),
   ),
 });
 

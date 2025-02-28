@@ -33,10 +33,7 @@ describe('workers/repository/update/branch/check-existing', () => {
     it('returns true if first check hits', async () => {
       platform.findPr.mockResolvedValueOnce(partial<Pr>({ number: 12 }));
       platform.getPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 12,
-          state: 'closed',
-        }),
+        partial<Pr>({ number: 12, state: 'closed' }),
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(1);
@@ -47,10 +44,7 @@ describe('workers/repository/update/branch/check-existing', () => {
       platform.findPr.mockResolvedValueOnce(null);
       platform.findPr.mockResolvedValueOnce(partial<Pr>({ number: 12 }));
       platform.getPr.mockResolvedValueOnce(
-        partial<Pr>({
-          number: 12,
-          state: 'closed',
-        }),
+        partial<Pr>({ number: 12, state: 'closed' }),
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(2);

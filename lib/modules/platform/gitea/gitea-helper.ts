@@ -126,10 +126,7 @@ export async function createPR(
   options?: GiteaHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls`;
-  const res = await giteaHttp.postJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await giteaHttp.postJson<PR>(url, { ...options, body: params });
 
   return res.body;
 }
@@ -141,10 +138,7 @@ export async function updatePR(
   options?: GiteaHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}`;
-  const res = await giteaHttp.patchJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await giteaHttp.patchJson<PR>(url, { ...options, body: params });
 
   return res.body;
 }
@@ -154,10 +148,7 @@ export async function closePR(
   idx: number,
   options?: GiteaHttpOptions,
 ): Promise<void> {
-  await updatePR(repoPath, idx, {
-    ...options,
-    state: 'closed',
-  });
+  await updatePR(repoPath, idx, { ...options, state: 'closed' });
 }
 
 export async function mergePR(
@@ -167,10 +158,7 @@ export async function mergePR(
   options?: GiteaHttpOptions,
 ): Promise<void> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}/merge`;
-  await giteaHttp.postJson(url, {
-    ...options,
-    body: params,
-  });
+  await giteaHttp.postJson(url, { ...options, body: params });
 }
 
 export async function getPR(
@@ -190,10 +178,7 @@ export async function requestPrReviewers(
   options?: GiteaHttpOptions,
 ): Promise<void> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}/requested_reviewers`;
-  await giteaHttp.postJson(url, {
-    ...options,
-    body: params,
-  });
+  await giteaHttp.postJson(url, { ...options, body: params });
 }
 
 export async function createIssue(
@@ -245,10 +230,7 @@ export async function closeIssue(
   idx: number,
   options?: GiteaHttpOptions,
 ): Promise<void> {
-  await updateIssue(repoPath, idx, {
-    ...options,
-    state: 'closed',
-  });
+  await updateIssue(repoPath, idx, { ...options, state: 'closed' });
 }
 
 export async function searchIssues(
@@ -388,11 +370,7 @@ export const giteaToRenovateStatusMapping: Record<
 export const renovateToGiteaStatusMapping: Record<
   BranchStatus,
   CommitStatusType
-> = {
-  green: 'success',
-  yellow: 'pending',
-  red: 'failure',
-};
+> = { green: 'success', yellow: 'pending', red: 'failure' };
 
 function filterStatus(data: CommitStatus[]): CommitStatus[] {
   const ret: Record<string, CommitStatus> = {};
@@ -423,10 +401,7 @@ export async function getCombinedCommitStatus(
     worstState = Math.max(worstState, commitStatusStates.indexOf(cs.status));
   }
 
-  return {
-    worstStatus: commitStatusStates[worstState],
-    statuses,
-  };
+  return { worstStatus: commitStatusStates[worstState], statuses };
 }
 
 export async function getBranch(

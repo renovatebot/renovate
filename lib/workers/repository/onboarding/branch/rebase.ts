@@ -50,13 +50,7 @@ export async function rebaseOnboardingBranch(
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
-    files: [
-      {
-        type: 'addition',
-        path: configFile,
-        contents,
-      },
-    ],
+    files: [{ type: 'addition', path: configFile, contents }],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
   });

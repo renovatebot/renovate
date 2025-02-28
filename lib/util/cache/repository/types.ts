@@ -132,9 +132,7 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    gitea?: {
-      pullRequestsCache?: unknown;
-    };
+    gitea?: { pullRequestsCache?: unknown };
     github?: {
       /**
        * To avoid circular dependency problem, we use `unknown` type here.
@@ -143,9 +141,7 @@ export interface RepoCacheData {
       graphqlPageCache?: unknown;
       issuesCache?: Record<number, unknown>;
     };
-    bitbucket?: {
-      pullRequestsCache?: unknown;
-    };
+    bitbucket?: { pullRequestsCache?: unknown };
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;

@@ -382,11 +382,7 @@ export async function getReleaseNotesMd(
                   logger.warn({ body, err }, 'linkify error');
                 }
               }
-              return {
-                body,
-                url,
-                notesSourceUrl,
-              };
+              return { body, url, notesSourceUrl };
             }
           }
         } catch (err) /* istanbul ignore next */ {
@@ -467,10 +463,7 @@ export async function addReleaseNotes(
       releaseNotes,
       cacheMinutes,
     );
-    output.versions!.push({
-      ...v,
-      releaseNotes: releaseNotes!,
-    });
+    output.versions!.push({ ...v, releaseNotes: releaseNotes! });
 
     if (releaseNotes) {
       output.hasReleaseNotes = true;

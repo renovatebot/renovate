@@ -129,11 +129,7 @@ const options: RenovateOptions[] = [
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate.',
     type: 'object',
-    default: {
-      commands: [],
-      fileFilters: [],
-      executionMode: 'update',
-    },
+    default: { commands: [], fileFilters: [], executionMode: 'update' },
   },
   {
     name: 'commands',
@@ -246,10 +242,7 @@ const options: RenovateOptions[] = [
       help: 'https://github.com/renovatebot/renovate/discussions',
       homepage: 'https://github.com/renovatebot/renovate',
     },
-    additionalProperties: {
-      type: 'string',
-      format: 'uri',
-    },
+    additionalProperties: { type: 'string', format: 'uri' },
   },
   {
     name: 'secrets',
@@ -258,9 +251,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     mergeable: true,
     default: {},
-    additionalProperties: {
-      type: 'string',
-    },
+    additionalProperties: { type: 'string' },
   },
   {
     name: 'statusCheckNames',
@@ -301,9 +292,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     globalOnly: true,
     default: {},
-    additionalProperties: {
-      type: 'string',
-    },
+    additionalProperties: { type: 'string' },
   },
   {
     name: 'presetCachePersistence',
@@ -1130,9 +1119,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     type: 'object',
     default: {},
-    additionalProperties: {
-      type: 'string',
-    },
+    additionalProperties: { type: 'string' },
     supportedManagers: [
       'ansible',
       'bitbucket-pipelines',
@@ -1702,10 +1689,7 @@ const options: RenovateOptions[] = [
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
       commitMessageAction: 'Pin',
-      group: {
-        commitMessageTopic: 'dependencies',
-        commitMessageExtra: '',
-      },
+      group: { commitMessageTopic: 'dependencies', commitMessageExtra: '' },
     },
     cli: false,
     mergeable: true,
@@ -1734,10 +1718,7 @@ const options: RenovateOptions[] = [
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
       commitMessageAction: 'Pin',
-      group: {
-        commitMessageTopic: 'dependencies',
-        commitMessageExtra: '',
-      },
+      group: { commitMessageTopic: 'dependencies', commitMessageExtra: '' },
     },
     cli: false,
     mergeable: true,
@@ -1885,9 +1866,7 @@ const options: RenovateOptions[] = [
     default: {},
     globalOnly: true,
     stage: 'global',
-    additionalProperties: {
-      type: 'string',
-    },
+    additionalProperties: { type: 'string' },
   },
   {
     name: 'prCreation',
@@ -2214,9 +2193,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {},
     freeChoice: true,
-    additionalProperties: {
-      type: 'string',
-    },
+    additionalProperties: { type: 'string' },
   },
   {
     name: 'lockFileMaintenance',
@@ -2233,9 +2210,7 @@ const options: RenovateOptions[] = [
       commitMessageExtra: null,
       schedule: ['before 4am on monday'],
       groupName: null,
-      prBodyDefinitions: {
-        Change: 'All locks refreshed',
-      },
+      prBodyDefinitions: { Change: 'All locks refreshed' },
     },
     cli: false,
     mergeable: true,

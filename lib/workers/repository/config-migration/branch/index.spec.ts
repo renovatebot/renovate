@@ -30,9 +30,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.set({
-        dryRun: null,
-      });
+      GlobalConfig.set({ dryRun: null });
       config = getConfig();
       config.branchPrefix = 'some/';
     });
@@ -78,11 +76,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('does not create a branch if migration branch is modified', async () => {
-      platform.getBranchPr.mockResolvedValue(
-        mock<Pr>({
-          number: 1,
-        }),
-      );
+      platform.getBranchPr.mockResolvedValue(mock<Pr>({ number: 1 }));
       scm.isBranchModified.mockResolvedValueOnce(true);
       const res = await checkConfigMigrationBranch(
         {
@@ -108,11 +102,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('updates migration branch & refreshes pr when migration disabled but open pr exists', async () => {
-      platform.getBranchPr.mockResolvedValue(
-        mock<Pr>({
-          number: 1,
-        }),
-      );
+      platform.getBranchPr.mockResolvedValue(mock<Pr>({ number: 1 }));
       platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
@@ -189,9 +179,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('Dry runs update migration branch', async () => {
-      GlobalConfig.set({
-        dryRun: 'full',
-      });
+      GlobalConfig.set({ dryRun: 'full' });
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
@@ -214,9 +202,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('Dry runs create migration PR', async () => {
-      GlobalConfig.set({
-        dryRun: 'full',
-      });
+      GlobalConfig.set({ dryRun: 'full' });
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
         'committed',
       );
@@ -256,9 +242,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           },
           migratedData,
         );
-        expect(res).toMatchObject({
-          result: 'no-migration-branch',
-        });
+        expect(res).toMatchObject({ result: 'no-migration-branch' });
       });
 
       it('deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked', async () => {
@@ -300,15 +284,11 @@ describe('workers/repository/config-migration/branch/index', () => {
           },
           migratedData,
         );
-        expect(res).toMatchObject({
-          result: 'no-migration-branch',
-        });
+        expect(res).toMatchObject({ result: 'no-migration-branch' });
       });
 
       it('dry run:deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked', async () => {
-        GlobalConfig.set({
-          dryRun: 'full',
-        });
+        GlobalConfig.set({ dryRun: 'full' });
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
         scm.branchExists.mockResolvedValueOnce(true);

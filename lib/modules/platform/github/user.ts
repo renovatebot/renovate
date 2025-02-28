@@ -7,10 +7,7 @@ const githubApi = new githubHttp.GithubHttp();
 export async function getAppDetails(token: string): Promise<UserDetails> {
   try {
     const appData = await githubApi.requestGraphql<{
-      viewer: {
-        login: string;
-        databaseId: number;
-      };
+      viewer: { login: string; databaseId: number };
     }>('query { viewer { login databaseId }}', { token });
     if (!appData?.data) {
       throw new Error("Init: Can't get App details");
@@ -36,15 +33,9 @@ export async function getUserDetails(
         login: string;
         name: string;
         id: number;
-      }>(endpoint + 'user', {
-        token,
-      })
+      }>(endpoint + 'user', { token })
     ).body;
-    return {
-      username: userData.login,
-      name: userData.name,
-      id: userData.id,
-    };
+    return { username: userData.login, name: userData.name, id: userData.id };
   } catch (err) {
     logger.debug({ err }, 'Error authenticating with GitHub');
     throw new Error('Init: Authentication failure');
@@ -59,9 +50,7 @@ export async function getUserEmail(
     const emails = (
       await githubApi.getJsonUnchecked<{ email: string }[]>(
         endpoint + 'user/emails',
-        {
-          token,
-        },
+        { token },
       )
     ).body;
     return emails?.[0].email ?? null;

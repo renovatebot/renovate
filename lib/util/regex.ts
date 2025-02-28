@@ -6,10 +6,7 @@ const cache = new Map<string, RegExp>();
 
 type RegExpEngineStatus =
   | { type: 'available' }
-  | {
-      type: 'unavailable';
-      err: Error;
-    }
+  | { type: 'unavailable'; err: Error }
   | { type: 'ignored' };
 
 let status: RegExpEngineStatus;

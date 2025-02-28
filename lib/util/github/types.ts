@@ -52,10 +52,7 @@ export interface GithubGraphqlRepoResponse<T = unknown> {
   repository: {
     payload: {
       nodes: T[];
-      pageInfo: {
-        hasNextPage: boolean;
-        endCursor: string;
-      };
+      pageInfo: { hasNextPage: boolean; endCursor: string };
     };
   };
 }
@@ -80,19 +77,11 @@ export interface GithubGraphqlRelease {
 export interface GithubGraphqlTag {
   version: string;
   target:
-    | {
-        type: 'Commit';
-        hash: string;
-        releaseTimestamp: string;
-      }
+    | { type: 'Commit'; hash: string; releaseTimestamp: string }
     | {
         type: 'Tag';
-        target: {
-          hash: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
+        target: { hash: string };
+        tagger: { releaseTimestamp: string };
       };
 }
 
