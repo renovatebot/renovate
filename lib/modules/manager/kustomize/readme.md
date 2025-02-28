@@ -27,6 +27,21 @@ Renovate will inflate helm charts referenced in a kustomization if any of the fo
 1. The version Renovate is upgrading from was inflated, OR
 1. The `kustomizeInflateHelmArchives` option in `postUpdateOptions` is enabled
 
+**Note:** To prevent Renovate from updating dependencies in the expanded charts, you'll need to manually exclude the folders from Helm managers.
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["**/charts/**"],
+      "matchManagers": ["helmv3", "helm-values"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### Limitations
 
 - Using HTTPS to fetch the repositories is not tested
