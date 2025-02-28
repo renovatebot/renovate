@@ -397,7 +397,7 @@ describe('util/http/github', () => {
             EXTERNAL_HOST_ERROR,
           );
         }
-      }, 10000);
+      });
 
       it('should throw platform failure for 500', async () => {
         await expect(fail(500)).rejects.toThrow(EXTERNAL_HOST_ERROR);
