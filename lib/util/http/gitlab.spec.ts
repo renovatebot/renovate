@@ -138,7 +138,7 @@ describe('util/http/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/some-url')
-        .replyWithError({ code: 'EAI_AGAIN' });
+        .replyWithError(httpMock.error({ code: 'EAI_AGAIN' }));
       await expect(gitlabApi.get('some-url')).rejects.toThrow(
         EXTERNAL_HOST_ERROR,
       );

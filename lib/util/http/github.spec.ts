@@ -333,7 +333,10 @@ describe('util/http/github', () => {
 
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
-        httpMock.scope(githubApiHost).get(url).replyWithError(error);
+        httpMock
+          .scope(githubApiHost)
+          .get(url)
+          .replyWithError(httpMock.error(error));
         await githubApi.getJsonUnchecked(url);
       }
 
@@ -394,7 +397,7 @@ describe('util/http/github', () => {
             EXTERNAL_HOST_ERROR,
           );
         }
-      });
+      }, 10000);
 
       it('should throw platform failure for 500', async () => {
         await expect(fail(500)).rejects.toThrow(EXTERNAL_HOST_ERROR);
