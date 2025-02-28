@@ -1,10 +1,14 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
+  Options,
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
   OptionsOfTextResponseBody,
+  RequestError,
 } from 'got';
+import type { ZodError } from 'zod';
 import type { HttpCacheProvider } from './cache/types';
+import type { EmptyResultError } from './errors';
 
 export type GotContextOptions = {
   authType?: string;
@@ -16,6 +20,8 @@ export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
 export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
 
+export type GotStreamOptions = Options & GotExtraOptions;
+
 export interface GotExtraOptions {
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
@@ -25,14 +31,6 @@ export interface GotExtraOptions {
   memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
-}
-
-export interface RequestStats {
-  method: string;
-  url: string;
-  duration: number;
-  queueDuration: number;
-  statusCode: number;
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
@@ -95,3 +93,5 @@ export interface ConcurrencyLimitRule {
   matchHost: string;
   concurrency: number;
 }
+
+export type SafeJsonError = RequestError | ZodError | EmptyResultError;

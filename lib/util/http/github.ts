@@ -15,7 +15,11 @@ import { range } from '../range';
 import { regEx } from '../regex';
 import { joinUrlParts, parseLinkHeader } from '../url';
 import { findMatchingRule } from './host-rules';
-import type { InternalHttpOptions, InternalJsonUnsafeOptions } from './http';
+import {
+  HttpBase,
+  type InternalHttpOptions,
+  type InternalJsonUnsafeOptions,
+} from './http';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
@@ -23,7 +27,6 @@ import type {
   HttpOptions,
   HttpResponse,
 } from './types';
-import { Http } from '.';
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
@@ -31,11 +34,14 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-export interface GithubHttpOptions extends HttpOptions {
+export interface GithubBaseHttpOptions extends HttpOptions {
+  repository?: string;
+}
+
+export interface GithubHttpOptions extends GithubBaseHttpOptions {
   paginate?: boolean | string;
   paginationField?: string;
   pageLimit?: number;
-  repository?: string;
 }
 
 interface GithubGraphqlRepoData<T = unknown> {
@@ -58,7 +64,7 @@ export type GithubGraphqlResponse<T = unknown> =
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
-  opts: GithubHttpOptions,
+  opts: GithubBaseHttpOptions,
 ): Error {
   const path = url.toString();
   let message = err.message || '';
@@ -267,18 +273,18 @@ function replaceUrlBase(url: URL, baseUrl: string): URL {
   return new URL(relativeUrl, baseUrl);
 }
 
-export class GithubHttp extends Http<GithubHttpOptions> {
+export class GithubHttp extends HttpBase<GithubHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
   }
 
-  constructor(hostType = 'github', options?: GithubHttpOptions) {
+  constructor(hostType = 'github', options?: HttpOptions) {
     super(hostType, options);
   }
 
   protected override processOptions(
     url: URL,
-    opts: InternalHttpOptions & GithubHttpOptions,
+    opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
       const authUrl = new URL(url);
@@ -415,7 +421,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     }
     const body = variables ? { query, variables } : { query };
 
-    const opts: GithubHttpOptions = {
+    const opts: GithubBaseHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
@@ -524,9 +530,9 @@ export class GithubHttp extends Http<GithubHttpOptions> {
    */
   public async getRawTextFile(
     url: string,
-    options: InternalHttpOptions & GithubHttpOptions = {},
+    options: InternalHttpOptions & GithubBaseHttpOptions = {},
   ): Promise<HttpResponse> {
-    const newOptions: InternalHttpOptions & GithubHttpOptions = {
+    const newOptions: InternalHttpOptions & GithubBaseHttpOptions = {
       ...options,
       headers: {
         accept: 'application/vnd.github.raw+json',
