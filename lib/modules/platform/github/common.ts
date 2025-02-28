@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { GithubHttp } from '../../../util/http/github';
 import { getPrBodyStruct } from '../pr-body';
+import type { MergePRConfig } from '../types';
 import type { GhPr, GhRestPr } from './types';
-import { MergePRConfig } from '../types';
-import { logger } from '../../../logger';
 
 export const githubApi = new GithubHttp();
 
