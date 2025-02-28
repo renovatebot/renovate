@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
-import type { InternalJsonUnsafeOptions } from './http';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
-import { Http } from '.';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
@@ -24,7 +23,7 @@ function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
   return null;
 }
 
-export class GiteaHttp extends Http<GiteaHttpOptions> {
+export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
   }

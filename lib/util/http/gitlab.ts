@@ -3,9 +3,8 @@ import { RequestError, type RetryObject } from 'got';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
-import type { InternalJsonUnsafeOptions } from './http';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
-import { Http } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
 export const setBaseUrl = (url: string): void => {
@@ -16,7 +15,7 @@ export interface GitlabHttpOptions extends HttpOptions {
   paginate?: boolean;
 }
 
-export class GitlabHttp extends Http<GitlabHttpOptions> {
+export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
   }

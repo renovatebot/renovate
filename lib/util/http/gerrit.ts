@@ -1,9 +1,8 @@
 import { parseJson } from '../common';
 import { regEx } from '../regex';
 import { isHttpUrl } from '../url';
-import type { InternalHttpOptions } from './http';
+import { HttpBase, type InternalHttpOptions } from './http';
 import type { HttpOptions } from './types';
-import { Http } from '.';
 
 let baseUrl: string;
 export function setBaseUrl(url: string): void {
@@ -14,7 +13,7 @@ export function setBaseUrl(url: string): void {
  * Access Gerrit REST-API and strip-of the "magic prefix" from responses.
  * @see https://gerrit-review.googlesource.com/Documentation/rest-api.html
  */
-export class GerritHttp extends Http {
+export class GerritHttp extends HttpBase {
   private static magicPrefix = regEx(/^\)]}'\n/g);
 
   protected override get baseUrl(): string | undefined {

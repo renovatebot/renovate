@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
-import type { InternalJsonUnsafeOptions } from './http';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
-import { Http } from '.';
 
 const MAX_LIMIT = 100;
 
@@ -20,7 +19,7 @@ interface PagedResult<T = unknown> {
   values: T[];
 }
 
-export class BitbucketServerHttp extends Http<BitbucketServerHttpOptions> {
+export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
   }
