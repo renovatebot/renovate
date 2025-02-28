@@ -64,8 +64,62 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{ manager: 'devbox', lockFiles: ['devbox.lock'] }],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'devbox.lock',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'devbox update nodejs --no-install',
+          options: {
+            cwd: '.',
+            encoding: 'utf-8',
+            env: {},
+            maxBuffer: 10485760,
+            timeout: 900000,
+          },
+        },
+      ]);
+    });
+
+    it('calls install instead of update --no-install if an older version of devbox is constrained', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const execSnapshots = mockExecAll();
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
+          config: {
+            constraints: {
+              devbox: '0.13.0',
+            },
+          },
         }),
       ).toEqual([
         {
@@ -90,6 +144,94 @@ describe('modules/manager/devbox/artifacts', () => {
       ]);
     });
 
+    it('returns installed devbox.lock with multiple updated deps', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const execSnapshots = mockExecAll();
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'ruby',
+            },
+          ],
+          config: {},
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'devbox.lock',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'devbox update nodejs --no-install; devbox update ruby --no-install',
+          options: {
+            cwd: '.',
+            encoding: 'utf-8',
+            env: {},
+            maxBuffer: 10485760,
+            timeout: 900000,
+          },
+        },
+      ]);
+    });
+
+    it('returns null if no updatedDeps are passed', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null if no updatedDeps have depNames', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const oldLockFileContent = Buffer.from('Old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+            },
+          ],
+          config: {},
+        }),
+      ).toBeNull();
+    });
+
     it('returns updated devbox.lock', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
@@ -110,6 +252,54 @@ describe('modules/manager/devbox/artifacts', () => {
           updatedDeps: [{}],
           config: {
             isLockFileMaintenance: true,
+          },
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'devbox.lock',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'devbox update --no-install',
+          options: {
+            cwd: '.',
+            encoding: 'utf-8',
+            env: {},
+            maxBuffer: 10485760,
+            timeout: 900000,
+          },
+        },
+      ]);
+    });
+
+    it('calls update without --no-install flag if an older version of devbox is being used', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['devbox.lock'],
+        }),
+      );
+      const oldLockFileContent = Buffer.from('old devbox.lock');
+      const newLockFileContent = Buffer.from('New devbox.lock');
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      expect(
+        await updateArtifacts({
+          packageFileName: 'devbox.json',
+          newPackageFileContent: devboxJson,
+          updatedDeps: [{}],
+          config: {
+            isLockFileMaintenance: true,
+            constraints: {
+              devbox: '< 0.14.0',
+            },
           },
         }),
       ).toEqual([
@@ -169,7 +359,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -189,7 +385,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -211,7 +413,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toBeNull();
@@ -227,7 +435,13 @@ describe('modules/manager/devbox/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
-          updatedDeps: [{}],
+          updatedDeps: [
+            {
+              manager: 'devbox',
+              lockFiles: ['devbox.lock'],
+              depName: 'nodejs',
+            },
+          ],
           config: {},
         }),
       ).toEqual([

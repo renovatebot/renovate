@@ -1,42 +1,58 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-export async function updateArtifacts(
-  updateConfig: UpdateArtifact,
-): Promise<UpdateArtifactsResult[] | null> {
-  const lockFileName = getSiblingFileName(
-    updateConfig.packageFileName,
-    'devbox.lock',
-  );
+export async function updateArtifacts({
+  config: { constraints, env, isLockFileMaintenance, updateType },
+  packageFileName,
+  updatedDeps,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+  const lockFileName = getSiblingFileName(packageFileName, 'devbox.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No devbox.lock found');
     return null;
   }
+
+  const supportsNoInstall = constraints?.devbox
+    ? semver.satisfies(constraints.devbox, '>=0.14.0')
+    : true;
+
   const execOptions: ExecOptions = {
-    cwdFile: updateConfig.packageFileName,
+    cwdFile: packageFileName,
     toolConstraints: [
       {
         toolName: 'devbox',
-        constraint: updateConfig.config.constraints?.devbox,
+        constraint: constraints?.devbox,
       },
     ],
     docker: {},
-    userConfiguredEnv: updateConfig.config.env,
+    userConfiguredEnv: env,
   };
 
   let cmd = '';
-  if (
-    updateConfig.config.isLockFileMaintenance ||
-    updateConfig.config.updateType === 'lockFileMaintenance'
-  ) {
-    cmd += 'devbox update';
-  } else if (is.nonEmptyArray(updateConfig.updatedDeps)) {
-    cmd += 'devbox install';
+  if (isLockFileMaintenance || updateType === 'lockFileMaintenance') {
+    cmd += supportsNoInstall ? 'devbox update --no-install' : 'devbox update';
+  } else if (is.nonEmptyArray(updatedDeps)) {
+    if (supportsNoInstall) {
+      const updateCommands = updatedDeps
+        .map(
+          (dep) => dep.depName && `devbox update ${dep.depName} --no-install`,
+        )
+        .filter((dep) => dep);
+      if (updateCommands.length) {
+        cmd += updateCommands.join('; ');
+      } else {
+        logger.trace('No updated devbox packages - returning null');
+        return null;
+      }
+    } else {
+      cmd += 'devbox install';
+    }
   } else {
     logger.trace('No updated devbox packages - returning null');
     return null;
