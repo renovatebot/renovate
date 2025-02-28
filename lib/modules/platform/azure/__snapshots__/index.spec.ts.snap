@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/azure/index createPr() should create and return a PR object 1`] = `
+exports[`modules/platform/azure/index > createPr() > should create and return a PR object 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -15,7 +15,7 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 }
 `;
 
-exports[`modules/platform/azure/index createPr() should create and return a PR object from base branch 1`] = `
+exports[`modules/platform/azure/index > createPr() > should create and return a PR object from base branch 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -30,7 +30,7 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 }
 `;
 
-exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
+exports[`modules/platform/azure/index > createPr() > should create and return an approved PR object 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -49,7 +49,7 @@ exports[`modules/platform/azure/index createPr() should create and return an app
 }
 `;
 
-exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
+exports[`modules/platform/azure/index > createPr() > when usePlatformAutomerge is set > should create and return a PR object with auto-complete set 1`] = `
 {
   "autoCompleteSetBy": {
     "id": "123",
@@ -76,14 +76,14 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
 }
 `;
 
-exports[`modules/platform/azure/index deleteLabel() Should delete a label 1`] = `
+exports[`modules/platform/azure/index > deleteLabel() > Should delete a label 1`] = `
 [
   [],
   [],
 ]
 `;
 
-exports[`modules/platform/azure/index ensureComment adds comment if missing 1`] = `
+exports[`modules/platform/azure/index > ensureComment > adds comment if missing 1`] = `
 [
   [
     {
@@ -105,19 +105,19 @@ content",
 ]
 `;
 
-exports[`modules/platform/azure/index ensureComment adds comment if missing 2`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > adds comment if missing 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 1`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > does nothing if comment exists and is the same 1`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same 2`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > does nothing if comment exists and is the same 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 1`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > does nothing if comment exists and is the same when there is no topic 1`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment does nothing if comment exists and is the same when there is no topic 2`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > does nothing if comment exists and is the same when there is no topic 2`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment updates comment if missing 1`] = `[]`;
+exports[`modules/platform/azure/index > ensureComment > updates comment if missing 1`] = `[]`;
 
-exports[`modules/platform/azure/index ensureComment updates comment if missing 2`] = `
+exports[`modules/platform/azure/index > ensureComment > updates comment if missing 2`] = `
 [
   [
     {
@@ -135,7 +135,7 @@ content",
 ]
 `;
 
-exports[`modules/platform/azure/index getJsonFile() supports fetch from another repo 1`] = `
+exports[`modules/platform/azure/index > getJsonFile() > supports fetch from another repo 1`] = `
 [
   [
     "123456",
@@ -152,7 +152,7 @@ exports[`modules/platform/azure/index getJsonFile() supports fetch from another 
 ]
 `;
 
-exports[`modules/platform/azure/index getPr(prNo) should return a pr in the right format 1`] = `
+exports[`modules/platform/azure/index > getPr(prNo) > should return a pr in the right format 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -170,32 +170,32 @@ exports[`modules/platform/azure/index getPr(prNo) should return a pr in the righ
 }
 `;
 
-exports[`modules/platform/azure/index getRepos() should return an array of repos 1`] = `
+exports[`modules/platform/azure/index > getRepos() > should return an array of repos 1`] = `
 [
   [],
 ]
 `;
 
-exports[`modules/platform/azure/index getRepos() should return an array of repos 2`] = `
+exports[`modules/platform/azure/index > getRepos() > should return an array of repos 2`] = `
 [
   "prj1/repo1",
   "prj1/repo2",
 ]
 `;
 
-exports[`modules/platform/azure/index initPlatform() should init 1`] = `
+exports[`modules/platform/azure/index > initPlatform() > should init 1`] = `
 {
   "endpoint": "https://dev.azure.com/renovate12345/",
 }
 `;
 
-exports[`modules/platform/azure/index initRepo should initialise the config for a repo 1`] = `
+exports[`modules/platform/azure/index > initRepo > should initialise the config for a repo 1`] = `
 [
   [],
 ]
 `;
 
-exports[`modules/platform/azure/index initRepo should initialise the config for a repo 2`] = `
+exports[`modules/platform/azure/index > initRepo > should initialise the config for a repo 2`] = `
 {
   "defaultBranch": "defBr",
   "isFork": false,
@@ -203,7 +203,7 @@ exports[`modules/platform/azure/index initRepo should initialise the config for 
 }
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should close the PR 1`] = `
+exports[`modules/platform/azure/index > updatePr(prNo, title, body, platformPrOptions) > should close the PR 1`] = `
 [
   [
     {
@@ -217,9 +217,9 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOpti
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should re-approve the PR 1`] = `undefined`;
+exports[`modules/platform/azure/index > updatePr(prNo, title, body, platformPrOptions) > should re-approve the PR 1`] = `undefined`;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should reopen the PR 1`] = `
+exports[`modules/platform/azure/index > updatePr(prNo, title, body, platformPrOptions) > should reopen the PR 1`] = `
 [
   [
     {
@@ -239,7 +239,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOpti
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should update the PR 1`] = `
+exports[`modules/platform/azure/index > updatePr(prNo, title, body, platformPrOptions) > should update the PR 1`] = `
 [
   [
     {
@@ -253,7 +253,7 @@ exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOpti
 ]
 `;
 
-exports[`modules/platform/azure/index updatePr(prNo, title, body, platformPrOptions) should update the PR without description 1`] = `
+exports[`modules/platform/azure/index > updatePr(prNo, title, body, platformPrOptions) > should update the PR without description 1`] = `
 [
   [
     {

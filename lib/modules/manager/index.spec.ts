@@ -5,7 +5,7 @@ import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
-jest.mock('../../util/fs');
+vi.mock('../../util/fs');
 
 const datasources = getDatasourceList();
 
@@ -47,7 +47,7 @@ describe('modules/manager/index', () => {
     });
   });
 
-  it('validates', () => {
+  it('validates', async () => {
     function validate(module: ManagerApi, moduleName: string): boolean {
       // no need to validate custom as it is a wrapper and not an actual manager
       if (moduleName === 'custom') {
@@ -76,10 +76,10 @@ describe('modules/manager/index', () => {
     const customMgrs = customManager.getCustomManagers();
 
     const loadedMgr = {
-      ...loadModules(__dirname, validate), // validate built-in managers
-      ...loadModules(join(__dirname, 'custom'), validate), // validate custom managers
+      ...(await loadModules(__dirname, validate)), // validate built-in managers
+      ...(await loadModules(join(__dirname, 'custom'), validate)), // validate custom managers
     };
-    delete loadedMgr['custom'];
+    delete loadedMgr.custom;
 
     expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
       Object.keys(loadedMgr).sort(),
@@ -170,7 +170,7 @@ describe('modules/manager/index', () => {
   });
 
   describe('getRangeStrategy', () => {
-    it('returns null for a unknown manager', () => {
+    it('returns null', () => {
       manager.getManagers().set('dummy', {
         defaultConfig: {},
         supportedDatasources: [],
@@ -178,37 +178,6 @@ describe('modules/manager/index', () => {
       expect(
         manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
       ).toBeNull();
-    });
-
-    it('returns null for a undefined manager', () => {
-      manager.getManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
-      expect(manager.getRangeStrategy({ rangeStrategy: 'auto' })).toBeNull();
-    });
-
-    it('returns non-null for a custom manager', () => {
-      customManager.getCustomManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-      });
-      expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
-      ).not.toBeNull();
-    });
-
-    it('handles custom managers', () => {
-      customManager.getCustomManagers().set('dummy', {
-        defaultConfig: {},
-        supportedDatasources: [],
-        // For completeness. Custom managers are configured in json and can not
-        // provide a range strategy (yet) but the interface allows for it.
-        getRangeStrategy: () => 'bump',
-      });
-      expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
-      ).toBe('bump');
     });
 
     it('returns non-null', () => {

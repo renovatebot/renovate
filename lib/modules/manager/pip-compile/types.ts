@@ -12,6 +12,7 @@ export interface PipCompileArgs {
   command: string;
   commandType: CommandType;
   constraintsFiles?: string[];
+  pythonVersion?: string;
   extra?: string[];
   allExtras?: boolean;
   extraIndexUrl?: string[];

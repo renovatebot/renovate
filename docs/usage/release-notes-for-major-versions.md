@@ -91,6 +91,7 @@ Specific:
 - **git:** check _all_ commits on the branch to decide if the branch was modified ([#28225](https://github.com/renovatebot/renovate/pull/28225))
 - **gitea:** use "bearer auth" instead of "token auth" to authenticate to the Gitea platform
 - **github:** if you run Renovate as a GitHub app then `platformCommit` is automatically enabled
+- **gomod:** the value of `GOSUMDB` was previously set to `off`, meaning the Go toolchain would not validate signatures for modules. This has now been corrected, which may result in errors updating Go modules. In particular, if you are using Renovate with private Go modules, you will need to set `GOPRIVATE`. For more details, see [Go's official documentation for working with private Go modules](https://golang.org/ref/mod#private-modules).
 - **http:** remove `dnsCache`
 - **logging:** you must set file logging via env, not in `config.js`
 - **manager/pep621:** change `depName` for `pep621` dependencies. This causes the branch name for `pep621` updates to change, which in turn means Renovate may autoclose and re-open some `pep621` PRs. Also, Renovate may start grouping dependencies into a single PR.

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
+exports[`config/validation > validateConfig(config) > catches invalid allowedVersions regex 1`] = `
 [
   {
     "message": "Invalid regExp for packageRules[1].allowedVersions: \`/***$}{]][/\`",
@@ -13,7 +13,7 @@ exports[`config/validation validateConfig(config) catches invalid allowedVersion
 ]
 `;
 
-exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
+exports[`config/validation > validateConfig(config) > catches invalid matchCurrentVersion regex 1`] = `
 [
   {
     "message": "Invalid regExp for packageRules[1].matchCurrentVersion: \`/***$}{]][/\`",
@@ -26,7 +26,7 @@ exports[`config/validation validateConfig(config) catches invalid matchCurrentVe
 ]
 `;
 
-exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
+exports[`config/validation > validateConfig(config) > catches invalid templates 1`] = `
 [
   {
     "message": "Invalid template in config path: commitMessage",
@@ -35,7 +35,7 @@ exports[`config/validation validateConfig(config) catches invalid templates 1`] 
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors for all types 1`] = `
+exports[`config/validation > validateConfig(config) > errors for all types 1`] = `
 [
   {
     "message": "Configuration option \`azureWorkItemId\` should be an integer. Found: false (boolean).",
@@ -88,7 +88,7 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors for unsafe fileMatches 1`] = `
+exports[`config/validation > validateConfig(config) > errors for unsafe fileMatches 1`] = `
 [
   {
     "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
@@ -101,7 +101,7 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if customManager fields are missing 1`] = `
+exports[`config/validation > validateConfig(config) > errors if customManager fields are missing 1`] = `
 [
   {
     "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
@@ -110,7 +110,7 @@ exports[`config/validation validateConfig(config) errors if customManager fields
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
+exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 1`] = `
 [
   {
     "message": ""fileMatch" may not be defined at the top level of a config and must instead be within a manager block",
@@ -119,7 +119,7 @@ exports[`config/validation validateConfig(config) errors if fileMatch has wrong 
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
+exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 2`] = `
 [
   {
     "message": ""fileMatch" must be configured in a manager block and not here: npm.minor",
@@ -128,7 +128,7 @@ exports[`config/validation validateConfig(config) errors if fileMatch has wrong 
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if included not supported enabled managers for combined supported and not supported managers 1`] = `
+exports[`config/validation > validateConfig(config) > errors if included not supported enabled managers for combined supported and not supported managers 1`] = `
 [
   {
     "message": "The following managers configured in enabledManagers are not supported: "foo"",
@@ -137,7 +137,7 @@ exports[`config/validation validateConfig(config) errors if included not support
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if included not supported enabled managers for multiple not supported managers 1`] = `
+exports[`config/validation > validateConfig(config) > errors if included not supported enabled managers for multiple not supported managers 1`] = `
 [
   {
     "message": "The following managers configured in enabledManagers are not supported: "foo, bar"",
@@ -146,7 +146,7 @@ exports[`config/validation validateConfig(config) errors if included not support
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if included not supported enabled managers for single not supported manager 1`] = `
+exports[`config/validation > validateConfig(config) > errors if included not supported enabled managers for single not supported manager 1`] = `
 [
   {
     "message": "The following managers configured in enabledManagers are not supported: "foo"",
@@ -155,7 +155,7 @@ exports[`config/validation validateConfig(config) errors if included not support
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if invalid combinations in packageRules 1`] = `
+exports[`config/validation > validateConfig(config) > errors if invalid combinations in packageRules 1`] = `
 [
   {
     "message": "packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {"matchUpdateTypes":["major"],"registryUrls":["https://registry.npmjs.org"]}",
@@ -164,7 +164,7 @@ exports[`config/validation validateConfig(config) errors if invalid combinations
 ]
 `;
 
-exports[`config/validation validateConfig(config) errors if manager objects are nested 1`] = `
+exports[`config/validation > validateConfig(config) > errors if manager objects are nested 1`] = `
 [
   {
     "message": "The "gradle" object can only be configured at the top level of a config but was found inside "maven"",
@@ -173,9 +173,9 @@ exports[`config/validation validateConfig(config) errors if manager objects are 
 ]
 `;
 
-exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `[]`;
+exports[`config/validation > validateConfig(config) > ignore packageRule nesting validation for presets 1`] = `[]`;
 
-exports[`config/validation validateConfig(config) included managers of the wrong type 1`] = `
+exports[`config/validation > validateConfig(config) > included managers of the wrong type 1`] = `
 [
   {
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
@@ -188,7 +188,7 @@ exports[`config/validation validateConfig(config) included managers of the wrong
 ]
 `;
 
-exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
+exports[`config/validation > validateConfig(config) > returns deprecation warnings 1`] = `
 [
   {
     "message": "Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.",
@@ -197,7 +197,7 @@ exports[`config/validation validateConfig(config) returns deprecation warnings 1
 ]
 `;
 
-exports[`config/validation validateConfig(config) returns nested errors 1`] = `
+exports[`config/validation > validateConfig(config) > returns nested errors 1`] = `
 [
   {
     "message": "Invalid configuration option: foo",
@@ -218,7 +218,7 @@ exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 ]
 `;
 
-exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
+exports[`config/validation > validateConfig(config) > selectors outside packageRules array trigger errors 1`] = `
 [
   {
     "message": "ansible.minor.matchDepNames: matchDepNames should be inside a \`packageRule\` only",
@@ -239,7 +239,7 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 ]
 `;
 
-exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
+exports[`config/validation > validateConfig(config) > validates regEx for each fileMatch 1`] = `
 [
   {
     "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
@@ -248,7 +248,7 @@ exports[`config/validation validateConfig(config) validates regEx for each fileM
 ]
 `;
 
-exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
+exports[`config/validation > validateConfig(config) > warns if hostType has the wrong parent 1`] = `
 [
   {
     "message": "hostType should only be configured within one of "hostRules" objects. Was found in .",
@@ -257,7 +257,7 @@ exports[`config/validation validateConfig(config) warns if hostType has the wron
 ]
 `;
 
-exports[`config/validation validateConfig(config) warns if only selectors in packageRules 1`] = `
+exports[`config/validation > validateConfig(config) > warns if only selectors in packageRules 1`] = `
 [
   {
     "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"matchPackageNames":["bar"]}",

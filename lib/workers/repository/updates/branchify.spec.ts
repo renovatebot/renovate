@@ -8,8 +8,8 @@ import * as _flatten from './flatten';
 const flattenUpdates = mocked(_flatten).flattenUpdates;
 const embedChangelogs = mocked(_changelog).embedChangelogs;
 
-jest.mock('./flatten');
-jest.mock('../changelog');
+vi.mock('./flatten');
+vi.mock('../changelog');
 
 let config: RenovateConfig;
 

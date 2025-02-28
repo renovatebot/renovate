@@ -212,7 +212,7 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
-  calculateLibYears(packageFiles);
+  calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,

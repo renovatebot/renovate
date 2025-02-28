@@ -2,7 +2,7 @@ import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -13,10 +13,10 @@ import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 
 const hostRules = mocked(_hostRules);
-const googleAuth = mocked(_googleAuth);
+const googleAuth = vi.mocked(_googleAuth, true);
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
@@ -391,8 +391,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -423,8 +423,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -456,8 +456,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -487,8 +487,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -553,8 +553,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getDigest(
@@ -574,8 +574,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockRejectedValue('some-error'),
         })),
       );
       const res = await getDigest(
@@ -1933,6 +1933,56 @@ describe('modules/datasource/docker/index', () => {
           releaseTimestamp: '2021-01-01T00:00:00.000Z',
         },
       ]);
+    });
+
+    it('Uses custom page limit for Docker hub repository tags', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=3&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 4,
+              last_updated: '2020-01-01T00:00:00.000Z',
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.9.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
