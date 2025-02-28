@@ -57,7 +57,7 @@ export function constructPipCompileCmd(
   compileArgs: PipCompileArgs,
   upgradePackages: Upgrade[] = [],
 ): string {
-  if (compileArgs.isCustomCommand) {
+  if (compileArgs.commandType === 'custom') {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
@@ -68,6 +68,7 @@ export function constructPipCompileCmd(
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
+    compileArgs.commandType === 'pip-compile' &&
     !compileArgs.noEmitIndexUrl &&
     !compileArgs.emitIndexUrl &&
     haveCredentialsInPipEnvironmentVariables()
@@ -114,10 +115,12 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
-      const pythonVersion = extractPythonVersion(
-        existingOutput,
-        outputFileName,
-      );
+      let pythonVersion: string | undefined;
+      if (compileArgs.commandType === 'uv') {
+        pythonVersion = compileArgs.pythonVersion;
+      } else {
+        pythonVersion = extractPythonVersion(existingOutput, outputFileName);
+      }
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFiles: PackageFileContent[] = [];
@@ -137,6 +140,7 @@ export async function updateArtifacts({
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
+        compileArgs.commandType,
         cwd,
         getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,

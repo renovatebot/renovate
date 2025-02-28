@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import type { PathLike, Stats } from 'node:fs';
 import callsite from 'callsite';
 import type { DirectoryJSON } from 'memfs';
@@ -6,7 +5,8 @@ import { fs as memfs, vol } from 'memfs';
 import type { TDataOut } from 'memfs/lib/encoding';
 import upath from 'upath';
 
-const realFs = fs; //jest.requireActual<typeof fs>('fs');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const realFs: typeof import('node:fs') = require('node:fs'); // used to bypass vitest mock
 
 /**
  * Class to work with in-memory file-system
@@ -95,14 +95,15 @@ export class Fixtures {
    */
   static reset(): void {
     vol.reset();
-    fsExtraMock.pathExists.mockImplementation(pathExists);
-    fsExtraMock.remove.mockImplementation(memfs.promises.rm);
-    fsExtraMock.removeSync.mockImplementation(memfs.rmSync);
-    fsExtraMock.readFile.mockImplementation(readFile);
-    fsExtraMock.writeFile.mockImplementation(memfs.promises.writeFile);
-    fsExtraMock.outputFile.mockImplementation(outputFile);
-    fsExtraMock.stat.mockImplementation(stat);
-    fsExtraMock.chmod.mockImplementation(memfs.promises.chmod);
+    fsExtraMock.pathExists.mockReset();
+    fsExtraMock.remove.mockReset();
+    fsExtraMock.removeSync.mockReset();
+    fsExtraMock.readFile.mockReset();
+    fsExtraMock.writeFile.mockReset();
+    fsExtraMock.outputFile.mockReset();
+    fsExtraMock.stat.mockReset();
+    fsExtraMock.chmod.mockReset();
+    fsExtraMock.ensureDir.mockReset();
   }
 
   private static getPathToFixtures(fixturesRoot = '.'): string {
@@ -113,27 +114,32 @@ export class Fixtures {
 }
 
 const fsExtraMock = {
-  pathExists: jest.fn(),
-  remove: jest.fn(),
-  removeSync: jest.fn(),
-  readFile: jest.fn(),
-  writeFile: jest.fn(),
-  outputFile: jest.fn(),
-  stat: jest.fn(),
-  chmod: jest.fn(),
+  pathExists: vi.fn(pathExists),
+  remove: vi.fn(memfs.promises.rm),
+  removeSync: vi.fn(memfs.rmSync),
+  readFile: vi.fn(readFile),
+  writeFile: vi.fn(memfs.promises.writeFile),
+  outputFile: vi.fn(outputFile),
+  stat: vi.fn(stat),
+  chmod: vi.fn(memfs.promises.chmod),
+  // See fs-extra
+  ensureDir: vi.fn((path) =>
+    memfs.promises.mkdir(path, { recursive: true, mode: 0o777 }),
+  ),
 };
 
 // Temporary solution, when all tests will be rewritten to Fixtures mocks can be moved into __mocks__ folder
 export function fsExtra(): any {
-  return {
+  const fs = {
     ...memfs,
     ...fsExtraMock,
   };
+  return { ...fs, default: fs };
 }
 
 export function readFile(fileName: string, options: any): Promise<TDataOut> {
   if (fileName.endsWith('.wasm') || fileName.endsWith('.wasm.gz')) {
-    return fs.promises.readFile(fileName, options);
+    return realFs.promises.readFile(fileName, options);
   }
 
   return memfs.promises.readFile(fileName, options);

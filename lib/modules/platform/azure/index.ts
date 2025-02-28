@@ -193,6 +193,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -240,6 +241,7 @@ export async function initRepo({
     url,
     extraCloneOpts: getStorageExtraCloneOpts(opts),
     cloneSubmodules,
+    cloneSubmodulesFilter,
   });
   const repoConfig: RepoResult = {
     defaultBranch,
@@ -259,7 +261,11 @@ export async function getPrList(): Promise<AzurePr[]> {
     do {
       fetchedPrs = await azureApiGit.getPullRequests(
         config.repoId,
-        { status: 4 },
+        {
+          status: 4,
+          // fetch only prs directly created on the repo and not by forks
+          sourceRepositoryId: config.project,
+        },
         config.project,
         0,
         skip,
@@ -538,7 +544,12 @@ export async function createPr({
       ),
     ),
   );
-  return getRenovatePRFormat(pr);
+
+  const result = getRenovatePRFormat(pr);
+  if (config.prList) {
+    config.prList.push(result);
+  }
+  return result;
 }
 
 export async function updatePr({
@@ -591,7 +602,27 @@ export async function updatePr({
     );
   }
 
-  await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
+  const updatedPr = await azureApiGit.updatePullRequest(
+    objToUpdate,
+    config.repoId,
+    prNo,
+  );
+  if (config.prList) {
+    const prToCache = getRenovatePRFormat(updatedPr);
+    // We need to update the cached entry for this PR
+    const existingIndex = config.prList.findIndex(
+      (item) => item.number === prNo,
+    );
+    // istanbul ignore if: should not happen
+    if (existingIndex === -1) {
+      logger.warn({ prNo }, 'PR not found in cache');
+      // Add to cache
+      config.prList.push(prToCache);
+    } else {
+      // overwrite existing PR in cache
+      config.prList[existingIndex] = prToCache;
+    }
+  }
 }
 
 export async function ensureComment({
@@ -795,11 +826,13 @@ export async function mergePr({
 
     if (!isClosed) {
       logger.warn(
-        { pullRequestId, status: pr.status },
-        `Expected PR to have status ${
-          PullRequestStatus[PullRequestStatus.Completed]
-          // TODO #22198
-        }. However, it is ${PullRequestStatus[pr.status!]}.`,
+        {
+          pullRequestId,
+          status: pr.status,
+          expectedPRStatus: PullRequestStatus[PullRequestStatus.Completed],
+          actualPRStatus: PullRequestStatus[pr.status!],
+        },
+        'Expected PR to have completed status. However, the PR has a different status',
       );
     }
     return true;
@@ -858,7 +891,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const repo = repos.find((c) => c.id === config.repoId)!;
   const requiredReviewerPrefix = 'required:';
   const validReviewers = new Set<string>();
 

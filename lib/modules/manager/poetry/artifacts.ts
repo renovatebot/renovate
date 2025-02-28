@@ -16,8 +16,11 @@ import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
+import { stripTemplates } from '../../../util/string';
 import { parse as parseToml } from '../../../util/toml';
+import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
+import { getGoogleAuthHostRule } from '../../datasource/util';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
 import type { PoetryFile, PoetrySource } from './types';
@@ -58,7 +61,7 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = firstLine.match(/by Poetry ([\d\\.]+)/);
+  const poetryVersionMatch = /by Poetry ([\d\\.]+)/.exec(firstLine);
   if (poetryVersionMatch?.[1]) {
     const poetryVersion = poetryVersionMatch[1];
     logger.debug(
@@ -95,13 +98,13 @@ export function getPoetryRequirement(
 function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   let pyprojectFile: PoetryFile;
   try {
-    pyprojectFile = parseToml(content) as PoetryFile;
+    pyprojectFile = parseToml(stripTemplates(content)) as PoetryFile;
   } catch (err) {
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return [];
   }
   if (!pyprojectFile.tool?.poetry) {
-    logger.debug(`{$fileName} contains no poetry section`);
+    logger.debug(`${fileName} contains no poetry section`);
     return [];
   }
 
@@ -115,20 +118,39 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   return sourceArray;
 }
 
-function getMatchingHostRule(url: string | undefined): HostRule {
+async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
-  return is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  const hostRule = is.nonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  if (hostRule && Object.keys(hostRule).length !== 0) {
+    return hostRule;
+  }
+
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
+    logger.once.debug(`Failed to parse URL ${url}`);
+    return {};
+  }
+
+  if (parsedUrl.hostname.endsWith('.pkg.dev')) {
+    const hostRule = await getGoogleAuthHostRule();
+    if (hostRule && Object.keys(hostRule).length !== 0) {
+      return hostRule;
+    }
+    logger.once.debug(`Could not get Google access token (url=${url})`);
+  }
+
+  return {};
 }
 
-function getSourceCredentialVars(
+async function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string,
-): NodeJS.ProcessEnv {
+): Promise<NodeJS.ProcessEnv> {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
   const envVars: NodeJS.ProcessEnv = {};
 
   for (const source of poetrySources) {
-    const matchingHostRule = getMatchingHostRule(source.url);
+    const matchingHostRule = await getMatchingHostRule(source.url);
     const formattedSourceName = source.name
       .replace(regEx(/(\.|-)+/g), '_')
       .toUpperCase();
@@ -151,7 +173,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated poetry deps - returning null');
@@ -192,7 +214,10 @@ export async function updateArtifacts({
       config.constraints?.poetry ??
       getPoetryRequirement(newPackageFileContent, existingLockFileContent);
     const extraEnv = {
-      ...getSourceCredentialVars(newPackageFileContent, packageFileName),
+      ...(await getSourceCredentialVars(
+        newPackageFileContent,
+        packageFileName,
+      )),
       ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };

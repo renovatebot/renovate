@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../../../test/util';
 import { partial, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -9,8 +9,6 @@ import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config';
-
-jest.mock('../../modules/platform');
 
 let config: RenovateConfig;
 

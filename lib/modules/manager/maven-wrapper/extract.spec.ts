@@ -49,6 +49,20 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
+    it('extracts version for property file with only a wrapper version', () => {
+      const res = extractPackageFile('wrapperVersion=3.3.1');
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.3.1',
+          replaceString: '3.3.1',
+          datasource: 'maven',
+          depName: 'maven-wrapper',
+          packageName: 'org.apache.maven.wrapper:maven-wrapper',
+          versioning: 'maven',
+        },
+      ]);
+    });
+
     it('extracts version for property file with only a maven url', () => {
       const res = extractPackageFile(onlyMavenProperties);
       expect(res?.deps).toEqual([
@@ -64,7 +78,7 @@ describe('modules/manager/maven-wrapper/extract', () => {
       ]);
     });
 
-    it('it should return null when there is no string matching the maven properties regex', () => {
+    it('should return null when there is no string matching the maven properties regex', () => {
       const res = extractPackageFile('nowrapper');
       expect(res).toBeNull();
     });

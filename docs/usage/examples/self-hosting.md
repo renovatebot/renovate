@@ -24,9 +24,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:38
-docker run --rm renovate/renovate:38.93
-docker run --rm renovate/renovate:38.93.2
+docker run --rm renovate/renovate:39
+docker run --rm renovate/renovate:39.177
+docker run --rm renovate/renovate:39.178.1
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:38.93.2
+              image: renovate/renovate:39.178.1
               args:
                 - user/repo
               # Environment Variables
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:38.93.2
+            - image: renovate/renovate:39.178.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -367,7 +367,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:38.93.2
+              image: renovate/renovate:39.178.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -436,7 +436,7 @@ COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # Change back to the Ubuntu user
-USER 1000
+USER 12021
 
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

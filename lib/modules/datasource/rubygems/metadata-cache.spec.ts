@@ -4,11 +4,11 @@ import * as _packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
 import { MetadataCache } from './metadata-cache';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
-  const packageCacheMock: Map<string, unknown> = new Map();
+  const packageCacheMock = new Map<string, unknown>();
 
   beforeEach(() => {
     packageCacheMock.clear();
@@ -78,19 +78,19 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
       releases: [
         {
           version: '1.0.0',
-          releaseTimestamp: '2021-01-01',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
           changelogUrl: 'https://v1.example.com/changelog',
           sourceUrl: 'https://v1.example.com/source',
         },
         {
           version: '2.0.0',
-          releaseTimestamp: '2022-01-01',
+          releaseTimestamp: '2022-01-01T00:00:00.000Z',
           changelogUrl: 'https://v2.example.com/changelog',
           sourceUrl: 'https://v2.example.com/source',
         },
         {
           version: '3.0.0',
-          releaseTimestamp: '2023-01-01',
+          releaseTimestamp: '2023-01-01T00:00:00.000Z',
           changelogUrl: 'https://v3.example.com/changelog',
           sourceUrl: 'https://v3.example.com/source',
         },

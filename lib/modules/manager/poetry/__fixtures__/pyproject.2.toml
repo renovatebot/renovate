@@ -10,11 +10,21 @@ dep2 = { version = "^0.6.0" }
 dep3 = { path = "/some/path/", version = '^0.33.6' }
 dep4 = { path = "/some/path/" }
 dep5 = {}
+extra_dep1 = {version = "^0.8.3", optional = true}
+extra_dep2 = {version = "^0.9.4", optional = true}
+extra_dep3 = {version = "^0.4.0", optional = true}
 
 [tool.poetry.extras]
-extra_dep1 = "^0.8.3"
-extra_dep2 = "^0.9.4"
-extra_dep3 = '^0.4.0'
+extra1 = ["extra_dep1", "extra_dep2"]
+extra2 = ["extra_dep3"]
+
+[tool.poetry.dev-dependencies]
+required_dev_dep = {version = "^3.0", optional = false}
+optional_dev_dep = {version = "^3.0", optional = true} # NOTE: `optional = true` is meaningless here
+
+[tool.poetry.group.group1.dependencies]
+required_group_dep = {version = "^3.0", optional = false}
+optional_group_dep = {version = "^3.0", optional = true} # NOTE: `optional = true` is meaningless here
 
 [build-system]
 requires = ["poetry>=1.0", "wheel"]

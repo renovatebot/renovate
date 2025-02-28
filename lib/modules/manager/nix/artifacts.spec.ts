@@ -1,6 +1,6 @@
-import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   envMock,
   mockExecAll,
@@ -14,10 +14,10 @@ import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -36,17 +36,14 @@ process.env.CONTAINERBASE = 'true';
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateInputCmd = `nix \
-    --extra-experimental-features nix-command \
-    --extra-experimental-features flakes \
+--extra-experimental-features 'nix-command flakes' \
 flake lock --update-input nixpkgs`;
 const updateInputTokenCmd = `nix \
-    --extra-experimental-features nix-command \
-    --extra-experimental-features flakes \
+--extra-experimental-features 'nix-command flakes' \
 --extra-access-tokens github.com=token \
 flake lock --update-input nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
-    --extra-experimental-features nix-command \
-    --extra-experimental-features flakes \
+--extra-experimental-features 'nix-command flakes' \
 flake update`;
 
 describe('modules/manager/nix/artifacts', () => {

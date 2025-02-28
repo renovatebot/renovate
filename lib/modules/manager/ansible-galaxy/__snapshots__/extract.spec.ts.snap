@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file 1`] = `
+exports[`modules/manager/ansible-galaxy/extract > extractPackageFile() > check collection style requirements file 1`] = `
 [
   {
     "currentValue": "0.9.3",
@@ -104,7 +104,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
 ]
 `;
 
-exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file in reverse order and missing empty line 1`] = `
+exports[`modules/manager/ansible-galaxy/extract > extractPackageFile() > check collection style requirements file in reverse order and missing empty line 1`] = `
 [
   {
     "currentValue": "0.9.3",
@@ -138,7 +138,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
 ]
 `;
 
-exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galaxy definition file 1`] = `
+exports[`modules/manager/ansible-galaxy/extract > extractPackageFile() > check galaxy definition file 1`] = `
 [
   {
     "currentValue": "1.5.4",
@@ -203,7 +203,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galax
 ]
 `;
 
-exports[`modules/manager/ansible-galaxy/extract extractPackageFile() extracts dependencies from a not beautified requirements file 1`] = `
+exports[`modules/manager/ansible-galaxy/extract > extractPackageFile() > extracts dependencies from a not beautified requirements file 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -222,7 +222,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() extracts de
 ]
 `;
 
-exports[`modules/manager/ansible-galaxy/extract extractPackageFile() extracts multiple dependencies from requirements.yml 1`] = `
+exports[`modules/manager/ansible-galaxy/extract > extractPackageFile() > extracts multiple dependencies from requirements.yml 1`] = `
 [
   {
     "currentValue": "0.1.0",

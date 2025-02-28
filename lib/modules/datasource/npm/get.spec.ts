@@ -7,7 +7,7 @@ import { Http } from '../../../util/http';
 import { CACHE_REVISION, getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 
 const packageCache = mocked(_packageCache);
 
@@ -366,6 +366,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]
@@ -512,6 +513,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]
@@ -552,6 +554,7 @@ describe('modules/datasource/npm/get', () => {
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]

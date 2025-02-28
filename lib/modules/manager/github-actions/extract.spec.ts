@@ -285,6 +285,59 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
+    it('maintains spaces between hash and comment', () => {
+      const yamlContent = `
+      jobs:
+        build:
+          steps:
+            # One space
+            - name: "test1"
+              uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
+            - name: "test2"
+              uses: 'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1
+            - name: "test3"
+              uses: "actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1
+
+            # Two space
+            - name: "test1"
+              uses: actions/setup-node@56337c425554a6be30cdef71bf441f15be286854  # tag=v3.1.1
+            - name: "test2"
+              uses: 'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561'  # tag=v3.1.1
+            - name: "test3"
+              uses: "actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561"  # tag=v2.5.1
+"`;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res).toMatchObject({
+        deps: [
+          {
+            replaceString:
+              'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
+          },
+          {
+            replaceString:
+              "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
+          },
+          {
+            replaceString:
+              '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
+          },
+          {
+            replaceString:
+              'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854  # tag=v3.1.1',
+          },
+          {
+            replaceString:
+              "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561'  # tag=v3.1.1",
+          },
+          {
+            replaceString:
+              '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561"  # tag=v2.5.1',
+          },
+        ],
+      });
+    });
+
     it('extracts tags in different formats', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_4.yml'),
@@ -414,7 +467,7 @@ describe('modules/manager/github-actions/extract', () => {
           build:
             steps:
               - name: "test1"
-                uses: https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
+                uses: https://github.com/actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # tag=v4.2.0
               - name: "test2"
                 uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
               - name: "test3"
@@ -426,14 +479,18 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res).toMatchObject({
         deps: [
           {
-            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
-            currentValue: 'v3.1.1',
+            depName: 'https://github.com/actions/cache',
+            packageName: 'actions/cache',
+            currentDigest: '1bd1e32a3bdc45362d1e726936510720a7c30a57',
+            currentValue: 'v4.2.0',
             replaceString:
-              'https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
+              'https://github.com/actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # tag=v4.2.0',
             datasource: 'github-tags',
             registryUrls: ['https://github.com/'],
           },
           {
+            depName: 'https://code.forgejo.org/actions/setup-node',
+            packageName: 'actions/setup-node',
             currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
             currentValue: 'v3.1.1',
             replaceString:

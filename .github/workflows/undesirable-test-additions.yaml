@@ -1,0 +1,106 @@
+name: Check for Undesirable Code
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check_undesirable_code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0 # Fetch all history for comparison
+          sparse-checkout: true
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Check for undesirable code
+        run: |
+          #!/bin/bash
+          set -e
+
+          BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+          echo "Base branch is: $BASE_BRANCH"
+          BASE_BRANCH_REF=${{ github.event.pull_request.base.sha }}
+          echo "Base branch ref for this PR is: $BASE_BRANCH_REF"
+
+          echo "### Calculating diff for '*.spec.ts' files..."
+          git diff $BASE_BRANCH_REF -- '*.spec.ts' > diff_spec_ts.txt
+
+          echo "### Counting additions and deletions of snapshots..."
+          ADDED=$(grep '^+' diff_spec_ts.txt | grep -v '^+++' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
+          DELETED=$(grep '^-' diff_spec_ts.txt | grep -v '^---' | grep -E '\.toMatch(Snapshot|InlineSnapshot)\(' | wc -l || true)
+
+          if [ "$ADDED" -gt "$DELETED" ]; then
+              echo "❌ Error: Snapshots have been added in this PR. Use toMatch instead."
+              exit 1
+          else
+              echo "✅ Snapshot code check passed."
+          fi
+
+          echo "### Calculating file changes in '__fixtures__' directories..."
+          git diff --name-status $BASE_BRANCH_REF > diff_name_status.txt
+
+          echo "### Processing added files in '__fixtures__' directories..."
+          ADDED_FIXTURES=$(grep '^A' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
+          NUM_ADDED_FIXTURES=$(echo "$ADDED_FIXTURES" | grep -c . || true)
+          echo "Added files in '__fixtures__':"
+          echo "$ADDED_FIXTURES"
+          echo "Total number of added files in '__fixtures__': $NUM_ADDED_FIXTURES"
+
+          echo "### Processing deleted files in '__fixtures__' directories..."
+          DELETED_FIXTURES=$(grep '^D' diff_name_status.txt | awk '{print $2}' | grep '/__fixtures__/' || true)
+          NUM_DELETED_FIXTURES=$(echo "$DELETED_FIXTURES" | grep -c . || true)
+          echo "Deleted files in '__fixtures__':"
+          echo "$DELETED_FIXTURES"
+          echo "Total number of deleted files in '__fixtures__': $NUM_DELETED_FIXTURES"
+
+          echo "### Processing renamed files involving '__fixtures__' directories..."
+          RENAME_ENTRIES=$(grep '^R' diff_name_status.txt || true)
+          echo "$RENAME_ENTRIES"
+
+          while read -r line; do
+              if [ -z "$line" ]; then
+                  continue
+              fi
+              STATUS=$(echo "$line" | awk '{print $1}')
+              OLD_PATH=$(echo "$line" | awk '{print $2}')
+              NEW_PATH=$(echo "$line" | awk '{print $3}')
+
+              echo "Processing rename: $OLD_PATH -> $NEW_PATH"
+
+              OLD_IN_FIXTURES=0
+              NEW_IN_FIXTURES=0
+
+              if echo "$OLD_PATH" | grep -q '/__fixtures__/'; then
+                  OLD_IN_FIXTURES=1
+              fi
+
+              if echo "$NEW_PATH" | grep -q '/__fixtures__/'; then
+                  NEW_IN_FIXTURES=1
+              fi
+
+              if [ "$OLD_IN_FIXTURES" -eq 1 ] && [ "$NEW_IN_FIXTURES" -eq 0 ]; then
+                  NUM_DELETED_FIXTURES=$((NUM_DELETED_FIXTURES + 1))
+                  echo "File moved out of '__fixtures__': $OLD_PATH -> $NEW_PATH"
+              elif [ "$OLD_IN_FIXTURES" -eq 0 ] && [ "$NEW_IN_FIXTURES" -eq 1 ]; then
+                  NUM_ADDED_FIXTURES=$((NUM_ADDED_FIXTURES + 1))
+                  echo "File moved into '__fixtures__': $OLD_PATH -> $NEW_PATH"
+              else
+                  echo "File renamed within the same directory: $OLD_PATH -> $NEW_PATH"
+              fi
+          done <<< "$RENAME_ENTRIES"
+
+          echo "Updated total number of added files in '__fixtures__': $NUM_ADDED_FIXTURES"
+          echo "Updated total number of deleted files in '__fixtures__': $NUM_DELETED_FIXTURES"
+
+          if [ "$NUM_ADDED_FIXTURES" -gt "$NUM_DELETED_FIXTURES" ]; then
+              echo "❌ Error: More files have been added to '__fixtures__' directories than deleted."
+              exit 1
+          else
+              echo "✅ Fixtures files check passed."
+          fi
+
+          echo "🎉 All checks passed successfully."

@@ -9,17 +9,14 @@ import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/git');
 
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting',
-  );
+  const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
   beforeEach(() => {
     GlobalConfig.set({
@@ -48,15 +45,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         baseBranch: 'dev',
         defaultBranch: 'master',
       };
-    });
-
-    it('does not rebase modified branch', async () => {
-      scm.isBranchModified.mockResolvedValueOnce(true);
-
-      await rebaseMigrationBranch(config, migratedConfigData);
-
-      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     it.each([

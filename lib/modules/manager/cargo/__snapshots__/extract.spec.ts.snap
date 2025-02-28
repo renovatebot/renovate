@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple dependencies advanced 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multiple dependencies advanced 1`] = `
 [
   {
     "currentValue": "0.2.0",
@@ -242,7 +242,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple dependencies simple 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multiple dependencies simple 1`] = `
 [
   {
     "currentValue": "=0.2.43",
@@ -391,7 +391,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts multiple de
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts original package name of renamed dependencies 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts original package name of renamed dependencies 1`] = `
 [
   {
     "currentValue": "0.4.0",
@@ -406,7 +406,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts original pa
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts platform specific dependencies 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts platform specific dependencies 1`] = `
 [
   {
     "currentValue": "0.2.37",
@@ -452,7 +452,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts platform sp
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config (legacy path) 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts registry urls from .cargo/config (legacy path) 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -461,6 +461,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "private-crates",
     },
     "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
@@ -473,6 +474,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "mcorbin",
     },
     "registryUrls": [
       "https://github.com/mcorbin/testregistry",
@@ -490,7 +492,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from .cargo/config.toml 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > extracts registry urls from .cargo/config.toml 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -499,6 +501,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "private-crates",
     },
     "registryUrls": [
       "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
@@ -511,6 +514,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "mcorbin",
     },
     "registryUrls": [
       "https://github.com/mcorbin/testregistry",
@@ -528,7 +532,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > fails to parse cargo config with invalid TOML 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -537,6 +541,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "private-crates",
     },
     "skipReason": "unknown-registry",
   },
@@ -547,6 +552,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "mcorbin",
     },
     "skipReason": "unknown-registry",
   },
@@ -562,7 +568,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() handles inline tables 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > handles inline tables 1`] = `
 [
   {
     "currentValue": "0.1",
@@ -644,7 +650,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles inline table
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() handles standard tables 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > handles standard tables 1`] = `
 [
   {
     "currentValue": "1.2",
@@ -709,7 +715,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() handles standard tab
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config registries with missing index 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > ignore cargo config registries with missing index 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -718,6 +724,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "private-crates",
     },
     "skipReason": "unknown-registry",
   },
@@ -728,6 +735,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "mcorbin",
     },
     "skipReason": "unknown-registry",
   },
@@ -743,7 +751,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() ignore cargo config 
 ]
 `;
 
-exports[`modules/manager/cargo/extract extractPackageFile() skips unknown registries 1`] = `
+exports[`modules/manager/cargo/extract > extractPackageFile() > skips unknown registries 1`] = `
 [
   {
     "currentValue": "0.1.0",
@@ -752,6 +760,7 @@ exports[`modules/manager/cargo/extract extractPackageFile() skips unknown regist
     "depType": "dependencies",
     "managerData": {
       "nestedVersion": true,
+      "registryName": "not-listed",
     },
     "skipReason": "unknown-registry",
   },

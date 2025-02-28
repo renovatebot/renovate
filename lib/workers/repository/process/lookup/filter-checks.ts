@@ -24,7 +24,7 @@ export interface InternalChecksResult {
 
 export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
   bucket: string,
   sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
@@ -43,7 +43,7 @@ export async function filterInternalChecks(
       // calculate updateType and then apply it
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
-        versioning,
+        versioningApi,
         // TODO #22198
         currentVersion!,
         candidateRelease.version,
@@ -53,7 +53,7 @@ export async function filterInternalChecks(
         releaseConfig[releaseConfig.updateType]!,
       );
       // Apply packageRules in case any apply to updateType
-      releaseConfig = applyPackageRules(releaseConfig, 'update-type');
+      releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
       const updatedCandidateRelease = await postprocessRelease(
         releaseConfig,
@@ -65,16 +65,14 @@ export async function filterInternalChecks(
       candidateRelease = updatedCandidateRelease;
 
       // Now check for a minimumReleaseAge config
-      const {
-        minimumConfidence,
-        minimumReleaseAge,
-        releaseTimestamp,
-        version: newVersion,
-        updateType,
-      } = releaseConfig;
-      if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
+      const { minimumConfidence, minimumReleaseAge, updateType } =
+        releaseConfig;
+      if (
+        is.nonEmptyString(minimumReleaseAge) &&
+        candidateRelease.releaseTimestamp
+      ) {
         if (
-          getElapsedMs(releaseTimestamp) <
+          getElapsedMs(candidateRelease.releaseTimestamp) <
           coerceNumber(toMs(minimumReleaseAge), 0)
         ) {
           // Skip it if it doesn't pass checks
@@ -94,7 +92,7 @@ export async function filterInternalChecks(
             datasource!,
             depName!,
             currentVersion!,
-            newVersion,
+            candidateRelease.version,
             updateType!,
           )) ?? 'neutral';
         // TODO #22198

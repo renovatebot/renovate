@@ -57,7 +57,7 @@ describe('modules/manager/nuget/extract', () => {
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(23);
     });
 
     it('extracts msbuild sdk from the Sdk attr of Project element', async () => {
@@ -157,7 +157,7 @@ describe('modules/manager/nuget/extract', () => {
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(22);
     });
 
     it('extracts ContainerBaseImage', async () => {
@@ -175,6 +175,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',
@@ -200,6 +201,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',

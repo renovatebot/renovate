@@ -5,11 +5,11 @@ import type { Pr } from '../../../../modules/platform/types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
-    const isScheduledSpy = jest.spyOn(schedule, 'isScheduledNow');
+    const isScheduledSpy = vi.spyOn(schedule, 'isScheduledNow');
     let config: RenovateConfig;
 
     beforeEach(() => {

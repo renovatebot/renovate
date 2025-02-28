@@ -191,7 +191,7 @@ describe('modules/datasource/conan/index', () => {
           packageName: 'poco/1.2@_/_',
         }),
       ).toEqual({
-        registryUrl: 'https://center.conan.io',
+        registryUrl: 'https://center2.conan.io',
         releases: [
           {
             version: '1.8.1',
@@ -244,7 +244,7 @@ describe('modules/datasource/conan/index', () => {
       ).toBeNull();
     });
 
-    it('it handles mismatched userAndChannel versioned data', async () => {
+    it('handles mismatched userAndChannel versioned data', async () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')
@@ -360,6 +360,7 @@ describe('modules/datasource/conan/index', () => {
             version: '1.1.1',
           },
         ],
+        sourceUrl: 'https://fake.conan.url.com',
       });
     });
 

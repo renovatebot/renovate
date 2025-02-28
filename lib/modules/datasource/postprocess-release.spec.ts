@@ -1,4 +1,5 @@
 import { mocked } from '../../../test/util';
+import type { Timestamp } from '../../util/timestamp';
 import * as _datasourceCommon from './common';
 import { Datasource } from './datasource';
 import { postprocessRelease } from './postprocess-release';
@@ -10,7 +11,7 @@ import type {
   ReleaseResult,
 } from './types';
 
-jest.mock('./common');
+vi.mock('./common');
 const { getDatasourceFor } = mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
@@ -86,7 +87,7 @@ describe('modules/datasource/postprocess-release', () => {
         _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<PostprocessReleaseResult> {
-        release.releaseTimestamp = '2024-09-05';
+        release.releaseTimestamp = '2024-09-05' as Timestamp;
         return Promise.resolve(release);
       }
     }
