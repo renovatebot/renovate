@@ -46,6 +46,26 @@ describe('modules/versioning/semver/index', () => {
   );
 
   it.each`
+    currentVersion     | version            | expected
+    ${'1.0.0'}         | ${'1.0.0-alpha.1'} | ${true}
+    ${'1.0.0-alpha.2'} | ${'1.0.0-alpha.1'} | ${true}
+    ${'2.0.0-alpha.1'} | ${'1.0.0'}         | ${true}
+    ${'0.0.1'}         | ${'0.0.2'}         | ${true}
+    ${'0.0.1'}         | ${'0.2.0'}         | ${true}
+    ${'0.0.1'}         | ${'1.0.0'}         | ${true}
+    ${'1.0.0'}         | ${'1.0.0'}         | ${false}
+    ${'1.0.0'}         | ${'2.0.0'}         | ${true}
+    ${'2.0.0'}         | ${'1.0.0'}         | ${true}
+    ${'2.0.0'}         | ${'2.0.1'}         | ${false}
+    ${'2.0.0'}         | ${'2.1.0'}         | ${false}
+  `(
+    'isBreaking("$currentVersion", "$version") === $expected',
+    ({ currentVersion, version, expected }) => {
+      expect(semver.isBreaking!(currentVersion, version)).toBe(expected);
+    },
+  );
+
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {
