@@ -11,6 +11,10 @@ export interface HelmChart {
   version: string;
 }
 
+export interface HelmGlobals {
+  chartHome?: string;
+}
+
 export interface Kustomize {
   kind?: string;
   bases?: string[]; // deprecated since kustomize v2.1.0
@@ -18,4 +22,5 @@ export interface Kustomize {
   components?: string[];
   images?: Image[];
   helmCharts?: HelmChart[];
+  helmGlobals?: HelmGlobals;
 }
