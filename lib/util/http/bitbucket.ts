@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
-import type { InternalJsonUnsafeOptions } from './http';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
-import { Http } from '.';
 
 const MAX_PAGES = 100;
 const MAX_PAGELEN = 100;
@@ -18,7 +17,7 @@ export interface BitbucketHttpOptions extends HttpOptions {
   pagelen?: number;
 }
 
-export class BitbucketHttp extends Http<BitbucketHttpOptions> {
+export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
   }
@@ -63,12 +62,11 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
+      /* v8 ignore start: hard to test all branches */
       resultBody.size =
-        page <= MAX_PAGES
-          ? resultBody.values.length
-          : /* v8 ignore next */ undefined;
-      resultBody.next =
-        page <= MAX_PAGES ? nextURL : /* v8 ignore next */ undefined;
+        page <= MAX_PAGES ? resultBody.values.length : undefined;
+      resultBody.next = page <= MAX_PAGES ? nextURL : undefined;
+      /* v8 ignore stop */
     }
 
     return result as HttpResponse<T>;
