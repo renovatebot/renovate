@@ -50,7 +50,7 @@ export class ArtifactoryDatasource extends Datasource {
       releases: [],
     };
     try {
-      const response = await this.http.get(url);
+      const response = await this.http.getText(url);
       const body = parse(response.body, {
         blockTextElements: {
           script: true,
