@@ -32,7 +32,7 @@ This is the new method that you should start using:
   "hostRules": [
     {
       "matchHost": "github.com",
-      "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+      "token": "{{ secrets.RENOVATE_GITHUB_COM_TOKEN }}"
     }
   ]
 }
