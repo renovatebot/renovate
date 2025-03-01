@@ -191,7 +191,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+    config.constraints?.go ?? getGoConstraints(massagedGoMod);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -444,23 +444,16 @@ export async function updateArtifacts({
   }
 }
 
-async function getGoConstraints(
-  goModFileName: string,
-): Promise<string | undefined> {
-  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
-  if (!content) {
-    return undefined;
-  }
-
+function getGoConstraints(goModContent: string): string | undefined {
   // prefer toolchain directive when go.mod has one
   const toolchain = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m);
-  const toolchainMatch = toolchain.exec(content);
+  const toolchainMatch = toolchain.exec(goModContent);
   if (toolchainMatch?.groups?.gover) {
     return toolchainMatch.groups.gover;
   }
 
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
-  const match = re.exec(content);
+  const match = re.exec(goModContent);
   if (!match?.groups?.gover) {
     return undefined;
   }
