@@ -451,6 +451,14 @@ async function getGoConstraints(
   if (!content) {
     return undefined;
   }
+
+  // prefer toolchain directive when go.mod has one
+  const toolchain = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m);
+  const toolchainMatch = toolchain.exec(content);
+  if (toolchainMatch?.groups?.gover) {
+    return toolchainMatch.groups.gover;
+  }
+
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
   const match = re.exec(content);
   if (!match?.groups?.gover) {
