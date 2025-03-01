@@ -11,9 +11,9 @@ import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifactsConfig } from '../types';
 import * as kustomize from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
