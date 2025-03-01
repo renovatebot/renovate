@@ -60,7 +60,7 @@ export class GolangVersionDatasource extends Datasource {
       '/HEAD/internal/history/release.go',
     );
 
-    const response = await this.http.get(golangVersionsUrl);
+    const response = await this.http.getText(golangVersionsUrl);
 
     const lines = response.body.split(lineTerminationRegex);
 
