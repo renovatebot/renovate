@@ -118,11 +118,11 @@ describe('modules/manager/pixi/extract', () => {
       expect(
         await extractPackageFile(
           codeBlock`
-          [tool.project]
+          [tool.pixi.project]
           channels = ['conda-forge']
           platforms = ["osx-arm64"]
 
-          [tool.project.dependencies]
+          [tool.pixi.dependencies]
           requests = '*'
           `,
           'not-sure-what-file-this-is.toml',
