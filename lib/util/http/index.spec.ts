@@ -28,7 +28,7 @@ describe('util/http/index', () => {
 
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    expect(await http.get('http://renovate.com/test')).toEqual({
+    expect(await http.getText('http://renovate.com/test')).toEqual({
       authorization: false,
       body: '',
       headers: {},
@@ -155,10 +155,12 @@ describe('util/http/index', () => {
   });
 
   it('headJson', async () => {
-    httpMock.scope(baseUrl).head('/').reply(200, {});
+    httpMock.scope(baseUrl).head('/').reply(200, undefined, {
+      'content-type': 'application/json',
+    });
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
       authorization: false,
-      body: {},
+      body: '',
       headers: {
         'content-type': 'application/json',
       },

@@ -81,7 +81,7 @@ describe('modules/datasource/packagist/index', () => {
       httpMock
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
-        .replyWithError({ code: 'ETIMEDOUT' });
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
       httpMock
         .scope(baseUrl)
         .get('/packages.json')
