@@ -212,11 +212,11 @@ describe('modules/manager/devbox/artifacts', () => {
 
     it('returns null if no updatedDeps have depNames', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('devbox.lock');
-      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{}`);
+      fs.readLocalFile.mockResolvedValueOnce('{}');
       const oldLockFileContent = Buffer.from('Old devbox.lock');
       const newLockFileContent = Buffer.from('New devbox.lock');
-      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
-      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',

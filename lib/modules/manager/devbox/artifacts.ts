@@ -19,7 +19,7 @@ export async function updateArtifacts({
   }
 
   const supportsNoInstall = constraints?.devbox
-    ? semver.satisfies(constraints.devbox, '>=0.14.0')
+    ? semver.intersects(constraints.devbox, '>=0.14.0')
     : true;
 
   const execOptions: ExecOptions = {
@@ -34,24 +34,24 @@ export async function updateArtifacts({
     userConfiguredEnv: env,
   };
 
-  let cmd = '';
-  if (isLockFileMaintenance || updateType === 'lockFileMaintenance') {
-    cmd += supportsNoInstall ? 'devbox update --no-install' : 'devbox update';
+  const cmd = [];
+  if (isLockFileMaintenance) {
+    cmd.push(supportsNoInstall ? 'devbox update --no-install' : 'devbox update');
   } else if (is.nonEmptyArray(updatedDeps)) {
     if (supportsNoInstall) {
       const updateCommands = updatedDeps
         .map(
-          (dep) => dep.depName && `devbox update ${dep.depName} --no-install`,
+          (dep) => dep.depName && `devbox update ${quote(dep.depName)} --no-install`,
         )
         .filter((dep) => dep);
       if (updateCommands.length) {
-        cmd += updateCommands.join('; ');
+        cmd.push(...updateCommands);
       } else {
         logger.trace('No updated devbox packages - returning null');
         return null;
       }
     } else {
-      cmd += 'devbox install';
+      cmd.push( 'devbox install');
     }
   } else {
     logger.trace('No updated devbox packages - returning null');
