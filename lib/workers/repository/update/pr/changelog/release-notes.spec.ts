@@ -103,7 +103,7 @@ const bitbucketProject = partial<ChangeLogProject>({
 const bitbucketServerProject = partial<ChangeLogProject>({
   type: 'bitbucket-server',
   apiBaseUrl: 'https://bitbucket.domain.org/rest/api/1.0/',
-  baseUrl: 'https://bitbucket.domain.org/',
+  baseUrl: 'https://bitbucket\\.domain.org/',
 });
 
 const githubProject = partial<ChangeLogProject>({
