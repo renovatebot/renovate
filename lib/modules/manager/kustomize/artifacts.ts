@@ -4,10 +4,7 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type {
-  ExecOptions,
-  ToolConstraint,
-} from '../../../util/exec/types';
+import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -17,12 +14,9 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsResult,
-} from '../types';
-import { parseKustomize } from './extract';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { generateHelmEnvs } from './common';
+import { parseKustomize } from './extract';
 
 async function localExistingChartPath(
   chartHome: string,
@@ -132,7 +126,7 @@ export async function updateArtifacts({
 
   const chartHome = getSiblingFileName(
     packageFileName,
-    project?.helmGlobals?.chartHome as string,
+    project.helmGlobals?.chartHome as string, // eslint-disable-line @typescript-eslint/non-nullable-type-assertion-style
   );
 
   try {

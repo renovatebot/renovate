@@ -22,9 +22,12 @@ describe('modules/manager/kustomize/common', () => {
       };
       const envs = generateHelmEnvs(config);
       expect(envs).toEqual({
-        HELM_REGISTRY_CONFIG: '/tmp/cache/__renovate-private-cache/registry.json',
-        HELM_REPOSITORY_CONFIG: '/tmp/cache/__renovate-private-cache/repositories.yaml',
-        HELM_REPOSITORY_CACHE: '/tmp/cache/__renovate-private-cache/repositories',
+        HELM_REGISTRY_CONFIG:
+          '/tmp/cache/__renovate-private-cache/registry.json',
+        HELM_REPOSITORY_CONFIG:
+          '/tmp/cache/__renovate-private-cache/repositories.yaml',
+        HELM_REPOSITORY_CACHE:
+          '/tmp/cache/__renovate-private-cache/repositories',
       });
     });
 
@@ -35,9 +38,12 @@ describe('modules/manager/kustomize/common', () => {
       };
       const envs = generateHelmEnvs(config);
       expect(envs).toEqual({
-        HELM_REGISTRY_CONFIG: '/tmp/cache/__renovate-private-cache/registry.json',
-        HELM_REPOSITORY_CONFIG: '/tmp/cache/__renovate-private-cache/repositories.yaml',
-        HELM_REPOSITORY_CACHE: '/tmp/cache/__renovate-private-cache/repositories',
+        HELM_REGISTRY_CONFIG:
+          '/tmp/cache/__renovate-private-cache/registry.json',
+        HELM_REPOSITORY_CONFIG:
+          '/tmp/cache/__renovate-private-cache/repositories.yaml',
+        HELM_REPOSITORY_CACHE:
+          '/tmp/cache/__renovate-private-cache/repositories',
         HELM_EXPERIMENTAL_OCI: '1',
       });
     });
