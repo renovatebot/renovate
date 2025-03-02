@@ -46,6 +46,7 @@ export interface OnboardingBranchCache {
 export interface ReconfigureBranchCache {
   reconfigureBranchSha: string;
   isConfigValid: boolean;
+  extractResult?: unknown;
 }
 
 export interface PrCache {

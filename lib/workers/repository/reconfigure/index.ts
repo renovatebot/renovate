@@ -1,13 +1,25 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
-import type { RenovateConfig } from '../../../config/types';
+import type { AllConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { scm } from '../../../modules/platform/scm';
-import { deleteReconfigureBranchCache } from './reconfigure-cache';
-import { getReconfigureBranchName } from './utils';
+import { getCache } from '../../../util/cache/repository';
+import { readLocalFile } from '../../../util/fs';
+import { getBranchCommit } from '../../../util/git';
+import { mergeInheritedConfig } from '../init/inherited';
+import { detectConfigFile, mergeRenovateConfig } from '../init/merge';
+import { extractDependencies } from '../process';
+import {
+  deleteReconfigureBranchCache,
+  setReconfigureBranchCache,
+} from './reconfigure-cache';
+import { getReconfigureBranchName, setBranchStatus } from './utils';
 import { validateReconfigureBranch } from './validate';
+import JSON5 from 'json5';
 
 export async function checkReconfigureBranch(
   config: RenovateConfig,
+  repoConfig: AllConfig,
 ): Promise<void> {
   logger.debug('checkReconfigureBranch()');
   if (GlobalConfig.get('platform') === 'local') {
@@ -17,6 +29,7 @@ export async function checkReconfigureBranch(
     return;
   }
 
+  const context = config.statusCheckNames?.configValidation;
   const reconfigureBranch = getReconfigureBranchName(config.branchPrefix!);
   const branchExists = await scm.branchExists(reconfigureBranch);
 
@@ -27,5 +40,102 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  await validateReconfigureBranch(config);
+  // look for config file
+  // 1. check reconfigure branch cache and use the configFileName if it exists
+  // 2. checkout reconfigure branch and look for the config file, don't assume default configFileName
+  const branchSha = getBranchCommit(reconfigureBranch)!;
+  const cache = getCache();
+  const reconfigureCache = cache.reconfigureBranchCache;
+  // only use valid cached information
+  if (
+    reconfigureCache?.reconfigureBranchSha === branchSha &&
+    reconfigureCache?.extractResult
+  ) {
+    logger.debug('Skipping validation check as branch sha is unchanged');
+    return;
+  }
+
+  const {
+    config: reconfigureConfig,
+    errMessage,
+    configFileName,
+  } = await getReconfigureConfig(reconfigureBranch);
+
+  if (!reconfigureConfig) {
+    await setBranchStatus(reconfigureBranch, errMessage, 'red', context);
+    setReconfigureBranchCache(branchSha, false);
+    await scm.checkoutBranch(config.defaultBranch!);
+    return;
+  }
+
+  const isValidConfig = await validateReconfigureBranch(
+    config,
+    reconfigureConfig,
+    configFileName!,
+  );
+
+  if (!isValidConfig) {
+    return;
+  }
+
+  let newConfig = GlobalConfig.set(repoConfig); // file config with only non global options
+  newConfig.baseBranch = config.defaultBranch;
+  newConfig.repoIsOnboarded = true;
+  newConfig.errors = [];
+  newConfig.warnings = [];
+  newConfig = await mergeInheritedConfig(newConfig);
+  await scm.checkoutBranch(reconfigureBranch);
+  newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
+
+  await scm.checkoutBranch(config.defaultBranch!);
+  const extractResult = await extractDependencies(newConfig, false);
+  logger.debug(
+    { branchList: extractResult.branchList },
+    'Reconfigure extraction',
+  );
+  await scm.checkoutBranch(config.defaultBranch!);
+}
+
+async function getReconfigureConfig(branchName: string): Promise<{
+  config: RenovateConfig | null;
+  errMessage: string;
+  configFileName?: string;
+}> {
+  let errMessage = '';
+  await scm.checkoutBranch(branchName);
+  const configFileName = await detectConfigFile();
+
+  if (!is.nonEmptyString(configFileName)) {
+    logger.warn('No config file found in reconfigure branch');
+    errMessage = 'Validation Failed - No config file found';
+    return { config: null, errMessage };
+  }
+
+  let configFileRaw: string | null = null;
+  try {
+    configFileRaw = await readLocalFile(configFileName, 'utf8');
+  } catch (err) {
+    logger.error({ err }, 'Error while reading config file');
+  }
+
+  if (!is.nonEmptyString(configFileRaw)) {
+    logger.warn('Empty or invalid config file');
+    errMessage = 'Validation Failed - Empty/Invalid config file';
+    return { config: null, errMessage, configFileName };
+  }
+
+  let configFileParsed: any;
+  try {
+    configFileParsed = JSON5.parse(configFileRaw);
+    // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
+    if (configFileName === 'package.json') {
+      configFileParsed = configFileParsed.renovate;
+    }
+  } catch (err) {
+    logger.error({ err }, 'Error while parsing config file');
+    errMessage = 'Validation Failed - Unparsable config file';
+    return { config: null, errMessage, configFileName };
+  }
+
+  return { config: configFileParsed, errMessage, configFileName };
 }
