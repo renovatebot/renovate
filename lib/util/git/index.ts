@@ -22,6 +22,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
@@ -481,7 +482,11 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  config.currentBranch =
+    config.currentBranch ??
+    config.defaultBranch ??
+    (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
   // istanbul ignore if
   if (config.upstreamUrl) {
     logger.debug(`Resetting ${config.currentBranch} to upstream`);
