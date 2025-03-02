@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { quote } from 'shlex';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
@@ -36,14 +37,17 @@ export async function updateArtifacts({
 
   const cmd = [];
   if (isLockFileMaintenance) {
-    cmd.push(supportsNoInstall ? 'devbox update --no-install' : 'devbox update');
+    cmd.push(
+      supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
+    );
   } else if (is.nonEmptyArray(updatedDeps)) {
     if (supportsNoInstall) {
-      const updateCommands = updatedDeps
+      const updateCommands: string[] = updatedDeps
         .map(
-          (dep) => dep.depName && `devbox update ${quote(dep.depName)} --no-install`,
+          (dep) =>
+            dep.depName && `devbox update ${quote(dep.depName)} --no-install`,
         )
-        .filter((dep) => dep);
+        .filter((dep): dep is string => Boolean(dep));
       if (updateCommands.length) {
         cmd.push(...updateCommands);
       } else {
@@ -51,7 +55,7 @@ export async function updateArtifacts({
         return null;
       }
     } else {
-      cmd.push( 'devbox install');
+      cmd.push('devbox install');
     }
   } else {
     logger.trace('No updated devbox packages - returning null');
