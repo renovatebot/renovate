@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, partial } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -31,9 +31,9 @@ vi.mock('./artifacts-extra', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = vi.mocked(_datasource);
-const hostRules = vi.mocked(_hostRules);
-const artifactsExtra = vi.mocked(_artifactsExtra);
+const datasource = mocked(_datasource);
+const hostRules = mocked(_hostRules);
+const artifactsExtra = mocked(_artifactsExtra);
 
 const gomod1 = codeBlock`
   module github.com/renovate-tests/gomod1
