@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -7,14 +6,12 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type {
   ExecOptions,
-  ExtraEnv,
   ToolConstraint,
 } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   getSiblingFileName,
   localPathExists,
-  privateCacheDir,
   readLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
@@ -22,25 +19,10 @@ import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
   UpdateArtifact,
-  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 import { parseKustomize } from './extract';
-
-function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
-  const cacheDir = privateCacheDir();
-  const enableExperimentalOci =
-    config.constraints?.helm &&
-    semver.satisfies(config.constraints.helm, '<3.8.0');
-
-  return {
-    HELM_EXPERIMENTAL_OCI: enableExperimentalOci ? '1' : '0',
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-    HELM_REGISTRY_CONFIG: upath.join(cacheDir, 'registry.json'),
-    HELM_REPOSITORY_CONFIG: upath.join(cacheDir, 'repositories.yaml'),
-    HELM_REPOSITORY_CACHE: upath.join(cacheDir, 'repositories'),
-  };
-}
+import { generateHelmEnvs } from './common';
 
 async function localExistingChartPath(
   chartHome: string,
@@ -64,7 +46,7 @@ function helmRepositoryArgs(
       return `--repo ${quote(repository)} ${depName}`;
     case DockerDatasource.id:
       return quote(`oci://${repository}`);
-    // istanbul ignore next: should never happen
+    /* v8 ignore next 2: should never happen */
     default:
       throw new Error(`Unknown datasource: ${datasource}`);
   }
@@ -245,7 +227,7 @@ export async function updateArtifacts({
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore next 3: not easily testable */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
