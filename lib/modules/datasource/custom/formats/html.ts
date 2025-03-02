@@ -30,7 +30,7 @@ function extractLinks(content: string): ReleaseResult {
 
 export class HtmlFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {
-    const response = await http.get(registryURL, {
+    const response = await http.getText(registryURL, {
       headers: {
         Accept: 'text/html',
       },
