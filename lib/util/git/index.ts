@@ -494,7 +494,7 @@ export async function syncGit(): Promise<void> {
       logger.debug("Adding remote 'upstream'");
       await git.addRemote('upstream', config.upstreamUrl);
     }
-    await syncForkBranch(config.currentBranch);
+    await syncForkWithUpstream(config.currentBranch);
     await fetchBranchCommits(false);
   }
   config.currentBranchSha = (
@@ -1466,9 +1466,13 @@ export async function localBranchExists(branchName: string): Promise<boolean> {
  * @param {string} branchName - The name of the branch to synchronize.
  * @returns {Promise<LongCommitSha>} - A promise that resolves to  if the synchronization is successful, or `false` if an error occurs.
  */
-export async function syncForkBranch(
+export async function syncForkWithUpstream(
   branchName: string,
 ): Promise<LongCommitSha> {
+  const remotes = await getRemotes();
+  if (!remotes.some((r) => r === 'upstream')) {
+    throw new Error('No remote named "upstream" exists, cannot sync fork');
+  }
   try {
     await git.fetch(['upstream']);
     if (await localBranchExists(branchName)) {
@@ -1480,7 +1484,13 @@ export async function syncForkBranch(
     await forcePushToRemote(branchName, 'origin');
     // Get long git sha
     return (await git.revparse([branchName])) as LongCommitSha;
-  } catch {
+  } catch (err) {
+    logger.error({ err }, 'Error synchronizing fork');
     throw new Error(UNKNOWN_ERROR);
   }
+}
+
+export async function getRemotes(): Promise<string[]> {
+  const remotes = await git.getRemotes();
+  return remotes.map((remote) => remote.name);
 }

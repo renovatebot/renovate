@@ -49,7 +49,12 @@ export class DefaultGitScm implements PlatformScm {
     return git.mergeToLocal(branchName);
   }
 
-  async syncForkBranch(branchName: string): Promise<LongCommitSha> {
-    return await git.syncForkBranch(branchName);
+  async syncForkWithUpstream(branchName: string): Promise<LongCommitSha> {
+    return await git.syncForkWithUpstream(branchName);
+  }
+
+  async hasUpstream(): Promise<boolean> {
+    const remotes = await git.getRemotes();
+    return remotes.includes('upstream');
   }
 }

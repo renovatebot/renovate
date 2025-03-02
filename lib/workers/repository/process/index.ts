@@ -131,12 +131,9 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
 
-      // TODO: initialize these two variables
-      const isForkMode = true;
-      const isGitHub = true;
-
-      if (isForkMode && isGitHub) {
-        await scm.syncForkBranch(baseBranch);
+      // If we are in forking mode, sync the baseBranch with upstream remote
+      if (await scm.hasUpstream()) {
+        await scm.syncForkWithUpstream(baseBranch);
         logger.info(`Synced base branch ${baseBranch} of fork with upstream`);
       }
 

@@ -297,5 +297,6 @@ export interface PlatformScm {
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
-  syncForkBranch(baseBranch: string): Promise<LongCommitSha>;
+  syncForkWithUpstream(baseBranch: string): Promise<LongCommitSha>;
+  hasUpstream(): Promise<boolean>;
 }
