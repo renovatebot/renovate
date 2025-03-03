@@ -2,7 +2,7 @@ import { openpgp } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 
-let pgp: ReturnType<typeof openpgp> | null | undefined = undefined;
+let pgp: typeof import('better-sqlite3') | null | undefined = undefined;
 
 export async function tryDecryptOpenPgp(
   privateKey: string,
