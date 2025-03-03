@@ -8,9 +8,9 @@ import customConfig from './__fixtures__/config';
 import * as file from './file';
 
 describe('workers/global/config/parse/file', () => {
-  const processExitSpy = jest.spyOn(process, 'exit');
-  const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
-  const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
+  const processExitSpy = vi.spyOn(process, 'exit');
+  const fsPathExistsSpy = vi.spyOn(fsExtra, 'pathExists');
+  const fsRemoveSpy = vi.spyOn(fsExtra, 'remove');
 
   let tmp: DirectoryResult;
 

@@ -1,6 +1,6 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import type { RenovateConfig } from '../../../../../test/util';
 import { partial, platform, scm } from '../../../../../test/util';

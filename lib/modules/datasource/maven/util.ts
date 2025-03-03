@@ -74,7 +74,7 @@ export async function downloadHttpProtocol(
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.get(url, opts),
+    http.getText(url, opts),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };

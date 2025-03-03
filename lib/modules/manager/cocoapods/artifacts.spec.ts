@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -32,7 +32,7 @@ const adminConfig: RepoGlobalConfig = {
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    jest.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
+    vi.spyOn(docker, 'removeDockerContainer').mockResolvedValue();
     // can't be mocked
     docker.resetPrefetchedImages();
 
