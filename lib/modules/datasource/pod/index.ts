@@ -109,7 +109,7 @@ export class PodDatasource extends Datasource {
     packageName: string,
   ): Promise<string | null> {
     try {
-      const resp = await this.http.get(url);
+      const resp = await this.http.getText(url);
       if (resp?.body) {
         return resp.body;
       }
