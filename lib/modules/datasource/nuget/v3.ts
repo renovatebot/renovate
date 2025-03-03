@@ -209,7 +209,7 @@ export class NugetV3Api {
           // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.get(nuspecUrl);
+        const metaresult = await http.getText(nuspecUrl);
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {

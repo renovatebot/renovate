@@ -66,7 +66,7 @@ Because `pip-compile` will update source files with their associated manager you
 
 ### Configuration of Python version
 
-By default Renovate extracts Python version from the header.
+By default Renovate extracts Python version from the header for `pip-compile`, and from the `--python-version` option for `uv`.
 To get Renovate to use another version of Python, add a constraints` rule to the Renovate config:
 
 ```json

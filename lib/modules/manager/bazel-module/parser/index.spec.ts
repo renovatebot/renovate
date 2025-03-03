@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import * as fragments from '../fragments';
+import * as fragments from './fragments';
 import { parse } from '.';
 
 describe('modules/manager/bazel-module/parser/index', () => {
@@ -197,6 +197,7 @@ describe('modules/manager/bazel-module/parser/index', () => {
           'maven',
           'maven',
           'artifact',
+          0,
           {
             group: fragments.string('org.clojure'),
             artifact: fragments.string('core.specs.alpha'),
@@ -212,17 +213,33 @@ describe('modules/manager/bazel-module/parser/index', () => {
               true,
             ),
           },
+          codeBlock`
+            maven.artifact(
+                artifact = "core.specs.alpha",
+                exclusions = ["org.clojure:clojure"],
+                group = "org.clojure",
+                version = "0.2.56",
+            )
+          `,
           true,
         ),
         fragments.extensionTag(
           'maven',
           'maven_1',
           'artifact',
+          147,
           {
             group: fragments.string('org.clojure1'),
             artifact: fragments.string('core.specs.alpha1'),
             version: fragments.string('0.2.561'),
           },
+          codeBlock`
+            maven_1.artifact(
+                artifact = "core.specs.alpha1",
+                group = "org.clojure1",
+                version = "0.2.561",
+            )
+          `,
           true,
         ),
       ]);
@@ -252,6 +269,7 @@ describe('modules/manager/bazel-module/parser/index', () => {
           'maven',
           'maven',
           'install',
+          0,
           {
             artifacts: fragments.array(
               [
@@ -279,17 +297,36 @@ describe('modules/manager/bazel-module/parser/index', () => {
               true,
             ),
           },
+          codeBlock`
+            maven.install(
+                artifacts = [
+                    "junit:junit:4.13.2",
+                    "com.google.guava:guava:31.1-jre",
+                ],
+                repositories = [
+                    "https://repo1.maven.org/maven2/"
+                ]
+            )
+          `,
           true,
         ),
         fragments.extensionTag(
           'maven',
           'maven',
           'artifact',
+          185,
           {
             group: fragments.string('org.clojure'),
             artifact: fragments.string('core.specs.alpha'),
             version: fragments.string('0.2.56'),
           },
+          codeBlock`
+            maven.artifact(
+                artifact = "core.specs.alpha",
+                group = "org.clojure",
+                version = "0.2.56",
+            )
+          `,
           true,
         ),
       ]);
@@ -312,6 +349,7 @@ describe('modules/manager/bazel-module/parser/index', () => {
           'oci',
           'oci',
           'pull',
+          0,
           {
             name: fragments.string('nginx_image'),
             digest: fragments.string(
@@ -321,6 +359,15 @@ describe('modules/manager/bazel-module/parser/index', () => {
             platforms: fragments.array([fragments.string('linux/amd64')], true),
             tag: fragments.string('1.27.1'),
           },
+          codeBlock`
+            oci.pull(
+              name = "nginx_image",
+              digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+              image = "index.docker.io/library/nginx",
+              platforms = ["linux/amd64"],
+              tag = "1.27.1",
+            )
+          `,
           true,
         ),
       ]);

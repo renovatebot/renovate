@@ -304,7 +304,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
     let rawHashData: string;
     try {
-      rawHashData = (await this.http.get(zipHashUrl)).body;
+      rawHashData = (await this.http.getText(zipHashUrl)).body;
     } catch (err) {
       /* istanbul ignore next */
       if (err instanceof ExternalHostError) {

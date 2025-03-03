@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed versioning types 1`] = `
+exports[`modules/manager/poetry/extract > extractPackageFile() > extracts mixed versioning types 1`] = `
 {
   "deps": [
     {
@@ -349,7 +349,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts mixed vers
 }
 `;
 
-exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
+exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
 {
   "deps": [
     {
@@ -474,7 +474,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
 }
 `;
 
-exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple dependencies 1`] = `
+exports[`modules/manager/poetry/extract > extractPackageFile() > extracts multiple dependencies 1`] = `
 [
   {
     "currentValue": "0.0.0",
@@ -555,7 +555,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
 ]
 `;
 
-exports[`modules/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
+exports[`modules/manager/poetry/extract > extractPackageFile() > handles multiple constraint dependencies 1`] = `
 {
   "deps": [
     {
@@ -570,7 +570,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() handles multiple co
 }
 `;
 
-exports[`modules/manager/poetry/extract extractPackageFile() resolves lockedVersions from the lockfile 1`] = `
+exports[`modules/manager/poetry/extract > extractPackageFile() > resolves lockedVersions from the lockfile 1`] = `
 {
   "deps": [
     {

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
+import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import type { PackageDependency } from '../../types';
 
 const githubUrlRegex = regEx(
@@ -44,8 +45,12 @@ export const GitTarget = z
 
     const githubPackage = githubPackageName(remote);
     if (githubPackage) {
-      dep.datasource = GithubReleasesDatasource.id;
       dep.packageName = githubPackage;
+      if (dep.currentValue) {
+        dep.datasource = GithubReleasesDatasource.id;
+      } else {
+        dep.datasource = GithubTagsDatasource.id;
+      }
     }
 
     if (!dep.datasource) {

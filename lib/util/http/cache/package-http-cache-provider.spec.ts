@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime, Settings } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import { Http } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -7,7 +7,7 @@ import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
 
-jest.mock('../../../util/cache/package', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 const packageCache = mocked(_packageCache);
 
 const http = new Http('test');
@@ -18,7 +18,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {
@@ -37,8 +37,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
     Settings.now = () => value;
   };
 
-  beforeAll(() => {});
-
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
@@ -54,7 +52,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
     httpMock.scope(url).get('').reply(200, 'new response');
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('new response');
   });
@@ -71,7 +69,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       namespace: '_test-namespace',
     });
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
     expect(packageCache.set).not.toHaveBeenCalled();
@@ -79,7 +77,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     mockTime('2024-06-15T00:15:00.000Z');
     httpMock.scope(url).get('').reply(200, 'new response', { etag: 'foobar' });
 
-    const res2 = await http.get(url, { cacheProvider });
+    const res2 = await http.getText(url, { cacheProvider });
     expect(res2.body).toBe('new response');
     expect(packageCache.set).toHaveBeenCalled();
   });
@@ -93,7 +91,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       .get('')
       .reply(200, 'fetched response', { etag: 'foobar' });
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('fetched response');
     expect(cache).toEqual({
@@ -123,7 +121,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
     httpMock.scope(url).get('').reply(500);
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
     expect(packageCache.set).not.toHaveBeenCalled();

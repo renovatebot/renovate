@@ -1,5 +1,5 @@
 import type { S3Client } from '@aws-sdk/client-s3';
-import { mockDeep } from 'jest-mock-extended';
+import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '../../test/s3';
 import { fs, logger } from '../../test/util';
 import type { RenovateConfig } from '../config/types';
@@ -16,9 +16,9 @@ import {
 } from './reporting';
 import type { Report } from './types';
 
-jest.mock('../util/fs', () => mockDeep());
-jest.mock('../util/s3', () => mockDeep());
-jest.mock('../logger', () => mockDeep());
+vi.mock('../util/fs', () => mockDeep());
+vi.mock('../util/s3', () => mockDeep());
+vi.mock('../logger', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
   beforeEach(() => {
@@ -133,9 +133,8 @@ describe('instrumentation/reporting', () => {
   });
 
   it('send report to an S3 bucket if reportType is s3', async () => {
-    const mockClient = mockDeep<S3Client>();
+    const mockClient = mock<S3Client>();
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
-    // @ts-expect-error TS2589
     s3.getS3Client.mockReturnValue(mockClient);
 
     const config: RenovateConfig = {

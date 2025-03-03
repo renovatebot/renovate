@@ -13,6 +13,9 @@ variable "RENOVATE_MAJOR_VERSION" {
 variable "RENOVATE_MAJOR_MINOR_VERSION" {
   default = ""
 }
+variable "CHANNEL" {
+  default = ""
+}
 
 variable "APT_HTTP_PROXY" {
   default = ""
@@ -57,13 +60,17 @@ target "settings" {
 }
 
 target "slim" {
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-  ]
+  # cache-from = [
+  #   "type=registry,ref=ghcr.io/${OWNER}/${FILE}",
+  #   "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
+  # ]
   tags = [
-    "ghcr.io/${OWNER}/${FILE}",
-    "${FILE}/${FILE}",
+    notequal("", CHANNEL)
+      ? "ghcr.io/${OWNER}/${FILE}:${CHANNEL}"
+      : "ghcr.io/${OWNER}/${FILE}",
+    notequal("", CHANNEL)
+      ? "${FILE}/${FILE}:${CHANNEL}"
+      : "${FILE}/${FILE}",
 
     // GitHub versioned tags
     notequal("", RENOVATE_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}": "",
@@ -81,13 +88,13 @@ target "full" {
   args = {
     BASE_IMAGE_TYPE = "full"
   }
-  cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/${FILE}:full",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
-  ]
+  # cache-from = [
+  #   "type=registry,ref=ghcr.io/${OWNER}/${FILE}:full",
+  #   "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
+  # ]
   tags = [
-    "ghcr.io/${OWNER}/${FILE}:full",
-    "${FILE}/${FILE}:full",
+    notequal("", CHANNEL) ? "ghcr.io/${OWNER}/${FILE}:${CHANNEL}-full" : "ghcr.io/${OWNER}/${FILE}:full",
+    notequal("", CHANNEL) ? "${FILE}/${FILE}:${CHANNEL}-full" : "${FILE}/${FILE}:full",
 
     // GitHub versioned tags
     notequal("", RENOVATE_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full": "",
@@ -113,7 +120,9 @@ target "push-slim" {
   inherits = ["build-slim"]
   output   = ["type=registry"]
   cache-to = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE},mode=max,image-manifest=true,ignore-error=true",
+    notequal("", CHANNEL)
+      ? "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${CHANNEL},mode=max,image-manifest=true,ignore-error=true"
+      : "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE},mode=max,image-manifest=true,ignore-error=true",
   ]
 }
 
@@ -121,6 +130,8 @@ target "push-full" {
   inherits = ["build-full"]
   output   = ["type=registry"]
   cache-to = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full,mode=max,image-manifest=true,ignore-error=true",
+    notequal("", CHANNEL)
+      ? "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${CHANNEL}-full,mode=max,image-manifest=true,ignore-error=true"
+      : "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full,mode=max,image-manifest=true,ignore-error=true",
   ]
 }

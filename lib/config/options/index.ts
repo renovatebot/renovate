@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.7.2',
+    default: 'ghcr.io/containerbase/sidecar:13.8.3',
     globalOnly: true,
   },
   {
@@ -2010,7 +2010,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',
@@ -2766,7 +2766,7 @@ const options: RenovateOptions[] = [
     description:
       'It specifies the syntax of the package file being managed by the custom JSONata manager.',
     type: 'string',
-    allowedValues: ['json', 'yaml'],
+    allowedValues: ['json', 'toml', 'yaml'],
     parents: ['customManagers'],
     cli: false,
     env: false,

@@ -188,7 +188,7 @@ With Renovate's scheduling features you can "limit the noise" from frequently up
 Important tips for the `"schedule"` property:
 
 - Always use the array syntax `[]`, even if you only set a single schedule
-- Separate entries with a comma, like this: `["cron for schedule 1", "cron for schedule 2]"`
+- Separate entries with a comma, like this: `["cron for schedule 1", "cron for schedule 2"]`
 - Multiple entries in the `"schedule"` array are interpreted with the Boolean OR logic
 
 Read the [schedule config option](../configuration-options.md#schedule) documentation to learn more.

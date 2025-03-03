@@ -1,6 +1,6 @@
 import * as starlark from './starlark';
 
-describe('modules/manager/bazel-module/starlark', () => {
+describe('modules/manager/bazel-module/parser/starlark', () => {
   it.each`
     a          | exp
     ${'True'}  | ${true}

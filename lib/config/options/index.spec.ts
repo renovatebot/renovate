@@ -2,12 +2,12 @@ import * as manager from '../../modules/manager';
 import * as platform from '../../modules/platform';
 import { getOptions } from '.';
 
-jest.unmock('../../modules/platform');
+vi.unmock('../../modules/platform');
 
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
-    jest.doMock('../../modules/manager', () => ({
-      getManagers: jest.fn(() => new Map().set('testManager', {})),
+    vi.doMock('../../modules/manager', () => ({
+      getManagers: vi.fn(() => new Map().set('testManager', {})),
     }));
 
     const opts = getOptions();

@@ -112,6 +112,7 @@ interface DatasourceCacheDataPoint {
   action: 'hit' | 'miss' | 'set' | 'skip';
 }
 
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 export interface DatasourceCacheReport {
   long: {
     [datasource in string]: {
@@ -134,6 +135,7 @@ export interface DatasourceCacheReport {
     };
   };
 }
+/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {
