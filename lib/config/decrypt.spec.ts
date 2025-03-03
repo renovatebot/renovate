@@ -239,7 +239,7 @@ describe('config/decrypt', () => {
       expect(getAzureCollection()).toBeUndefined();
     });
 
-    it('no pathname and no slash at end of URL ', () => {
+    it('no pathname and no slash at end of URL', () => {
       GlobalConfig.set({
         platform: 'azure',
         endpoint: 'https://dev.azure.com',
