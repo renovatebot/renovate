@@ -2,7 +2,7 @@ import { openpgp } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 
-let pgp: typeof import('openpgp') | null | undefined = undefined;
+let pgp: ReturnType<typeof openpgp> | null | undefined = undefined;
 
 export async function tryDecryptOpenPgp(
   privateKey: string,
