@@ -120,7 +120,7 @@ describe('modules/versioning/index', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = (await import(`./${supportedScheme}/index.js`)).api;
+        const apiOrCtor = (await import(`./${supportedScheme}/index.ts`)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }

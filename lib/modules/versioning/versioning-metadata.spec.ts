@@ -37,7 +37,7 @@ describe('modules/versioning/versioning-metadata', () => {
     });
 
     it('contains mandatory fields', async () => {
-      const versioningObj = await import(`./${versioning}/index.js`);
+      const versioningObj = await import(`./${versioning}/index.ts`);
       expect(versioningObj.id).toEqual(versioning);
       expect(versioningObj.displayName).toBeDefined();
       expect(versioningObj.urls).toBeArray();
