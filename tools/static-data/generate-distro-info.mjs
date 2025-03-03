@@ -51,7 +51,6 @@ function csvToJson(raw) {
  * @param {string} file File path to update
  */
 async function update(url, file) {
-  // TODO: will be fixed with got upgrade
   const res = await fetch(url);
   if (!res.ok) {
     console.error(`Failed to fetch ${url}`, res);
