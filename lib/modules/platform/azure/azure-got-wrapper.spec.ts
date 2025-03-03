@@ -7,8 +7,8 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    hostRules = await import('../../../util/host-rules');
-    azure = await import('./azure-got-wrapper');
+    hostRules = await vi.importActual('../../../util/host-rules');
+    azure = await vi.importActual('./azure-got-wrapper');
   });
 
   describe('gitApi', () => {
