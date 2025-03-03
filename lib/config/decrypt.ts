@@ -254,5 +254,9 @@ export function getAzureCollection(): string | undefined {
     return undefined;
   }
 
+  if (azureCollection.startsWith('tfs/')) {
+    // Azure DevOps Server
+    return azureCollection.substring(4);
+  }
   return azureCollection;
 }

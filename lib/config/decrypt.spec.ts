@@ -124,6 +124,42 @@ describe('config/decrypt', () => {
         );
       });
 
+      describe('tests self hosted - ignore "tfs/" before collection name', () => {
+        it.each`
+          str                                                    | repo         | expected
+          ${'{"o":"any",           "r":"",     "v":"wrong-123#'} | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any",           "r":"",     "v":""}'}         | ${'fgh/rp1'} | ${null}
+          ${'{"o":"",              "r":"",     "v":"any"}'}      | ${'fgh/rp1'} | ${null}
+          ${'{"o":"fgh",           "r":"rp1",  "v":"zv-1"}'}     | ${'fgh/rp1'} | ${'zv-1'}
+          ${'{"o":"fgh",           "r":"",     "v":"zv-2"}'}     | ${'fgh/rp1'} | ${'zv-2'}
+          ${'{"o":"az123/fgh",     "r":"rp1",  "v":"zv-3"}'}     | ${'fgh/rp1'} | ${'zv-3'}
+          ${'{"o":"az123/fgh",     "r":"",     "v":"zv-4"}'}     | ${'fgh/rp1'} | ${'zv-4'}
+          ${'{"o":"az123/*",       "r":"",     "v":"zv-5"}'}     | ${'fgh/rp1'} | ${'zv-5'}
+          ${'{"o":"az123/",        "r":"",     "v":"zv-6"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123",         "r":"",     "v":"zv-7"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az1",           "r":"",     "v":"zv-8"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"rp1",  "v":"zv-9"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"",     "v":"zv-10"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*",         "r":"",     "v":"zv-11"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/*,any/*", "r":"",     "v":"zv-12"}'}    | ${'fgh/rp1'} | ${'zv-12'}
+          ${'{"o":"fgh,any/*",     "r":"",     "v":"zv-13"}'}    | ${'fgh/rp1'} | ${'zv-13'}
+          ${'{"o":"az123/,any/*",  "r":"",     "v":"zv-14"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,fgh/",    "r":"",     "v":"zv-15"}'}    | ${'fgh/rp1'} | ${'zv-15'}
+          ${'{"o":"any/*,az123",   "r":"",     "v":"zv-16"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,az12",    "r":"",     "v":"zv-17"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az12,any/*",    "r":"",     "v":"zv-18"}'}    | ${'fgh/rp1'} | ${null}
+        `(
+          'equals("$str", "$repo") === $expected',
+          ({ str, repo, expected }) => {
+            GlobalConfig.set({
+              platform: 'azure',
+              endpoint: 'http://your-server-name:8080/tfs/az123',
+            });
+            expect(validateDecryptedValue(str, repo)).toBe(expected);
+          },
+        );
+      });
+
       it('endpoint URL invalid', () => {
         GlobalConfig.set({
           platform: 'azure',
