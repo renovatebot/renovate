@@ -42,10 +42,12 @@ describe('modules/platform/azure/index', () => {
     // reset module
     vi.resetModules();
     hostRules = await vi.importMock('../../../util/host-rules');
-    azure = await import('.');
+    azure = await vi.importActual('.');
     azureApi = await vi.importMock('./azure-got-wrapper');
     azureHelper = await vi.importMock('./azure-helper');
-    logger = vi.mocked(await import('../../../logger'), true).logger;
+    logger = (
+      await vi.importMock<typeof import('../../../logger')>('../../../logger')
+    ).logger;
     git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
