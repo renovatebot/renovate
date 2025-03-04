@@ -10,7 +10,7 @@ export const url = 'https://fleet.rancher.io';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)fleet\\.ya?ml'],
+  filePatterns: ['/(^|/)fleet\\.ya?ml/'],
 };
 
 export const supportedDatasources = [

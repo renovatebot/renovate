@@ -12,7 +12,7 @@ export const url = 'https://go.dev/ref/mod';
 export const categories: Category[] = ['golang'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)go\\.mod$'],
+  filePatterns: ['/(^|/)go\\.mod$/'],
   pinDigests: false,
 };
 

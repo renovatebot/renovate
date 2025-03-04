@@ -14,7 +14,7 @@ export const url = 'https://dart.dev/tools/pub/packages';
 export const categories: Category[] = ['dart'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)pubspec\\.ya?ml$'],
+  filePatterns: ['/(^|/)pubspec\\.ya?ml$/'],
   versioning: npmVersioning.id,
 };
 

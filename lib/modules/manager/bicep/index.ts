@@ -8,7 +8,7 @@ export const url =
 export const categories: Category[] = ['iac'];
 
 export const defaultConfig = {
-  fileMatch: ['\\.bicep$'],
+  filePatterns: ['/\\.bicep$/'],
 };
 
 export const supportedDatasources = [AzureBicepResourceDatasource.id];

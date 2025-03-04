@@ -16,7 +16,7 @@ export const url = 'https://fluxcd.io/flux';
 export const categories: Category[] = ['cd', 'kubernetes'];
 
 export const defaultConfig = {
-  fileMatch: [systemManifestFileNameRegex],
+  filePatterns: [`/${systemManifestFileNameRegex}/`],
 };
 
 export const supportedDatasources = [

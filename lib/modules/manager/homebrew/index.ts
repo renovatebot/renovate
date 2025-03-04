@@ -6,7 +6,7 @@ export const url = 'https://brew.sh';
 
 export const defaultConfig = {
   commitMessageTopic: 'Homebrew Formula {{depName}}',
-  fileMatch: ['^Formula/[^/]+[.]rb$'],
+  filePatterns: ['/^Formula/[^/]+[.]rb$/'],
 };
 
 export const supportedDatasources = [GithubTagsDatasource.id];

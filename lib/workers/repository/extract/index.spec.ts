@@ -62,7 +62,7 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       config.customManagers = [
-        { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
+        { customType: 'regex', filePatterns: ['README'], matchStrings: [''] },
       ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');

@@ -17,7 +17,7 @@ export const displayName = 'asdf';
 export const url = 'https://asdf-vm.com';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.tool-versions$'],
+  filePatterns: ['/(^|/)\\.tool-versions$/'],
 };
 
 export const supportedDatasources = [

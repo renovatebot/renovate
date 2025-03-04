@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { regexMatches } from '../../../../test/util';
 import { extractPackageFile } from '../../../modules/manager';
+import { matchRegexOrGlobList } from '../../../util/string-match';
 import { presets } from './custom-managers';
 
 describe('config/presets/internal/custom-managers', () => {
@@ -39,7 +39,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'foo/biome.jsonc'} | ${true}
         ${'biome.yml'}       | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -161,7 +163,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'foo/bar/bitbucket-pipelines.yaml'} | ${true}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -262,7 +266,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'foo/Dockerfile-foo'} | ${true}
         ${'foo-Dockerfile'}     | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -377,7 +383,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'.github/workflows/foo.json'}     | ${false}
         ${'.github/workflows/foo.yamlo'}    | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -453,7 +461,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'.gitlab/ci.yml'}         | ${false}
         ${'includes/gitlab-ci.yml'} | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -514,7 +524,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'Chart.yamlo'}        | ${false}
         ${'Charto.yaml'}        | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
@@ -588,7 +600,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'Dockerfile'}           | ${false}
         ${'MakefileGenerator.ts'} | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(matchRegexOrGlobList(path, customManager!.filePatterns)).toBe(
+          expected,
+        );
       });
     });
   });
