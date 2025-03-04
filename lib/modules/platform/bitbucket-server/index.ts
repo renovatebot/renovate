@@ -15,7 +15,7 @@ import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import {
   BitbucketServerHttp,
-  BitbucketServerHttpOptions,
+  type BitbucketServerHttpOptions,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';

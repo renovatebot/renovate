@@ -15,6 +15,7 @@ import { type AsyncResult, Result } from '../result';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { memCacheProvider } from './cache/memory-http-cache-provider';
 import { fetch, stream } from './got';
 import { applyHostRule, findMatchingRule } from './host-rules';
 
@@ -31,7 +32,6 @@ import type {
   SafeJsonError,
 } from './types';
 import { copyResponse } from './util';
-import { memCacheProvider } from './cache/memory-http-cache-provider';
 
 export interface InternalJsonUnsafeOptions<
   Opts extends HttpOptions = HttpOptions,
