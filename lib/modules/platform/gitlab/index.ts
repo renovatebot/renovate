@@ -1118,10 +1118,12 @@ export async function getIssue(
   useCache = true,
 ): Promise<Issue | null> {
   try {
-    // istanbul ignore next
-    const opts: GitlabHttpOptions = useCache
-      ? { cacheProvider: memCacheProvider }
-      : { memCache: false };
+    const opts: GitlabHttpOptions = { memCache: false };
+    /* v8 ignore next: temporary code */
+    if (useCache) {
+      opts.cacheProvider = memCacheProvider;
+      delete opts.memCache;
+    }
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
