@@ -556,6 +556,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.2.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/opa',
+            depName: 'opa',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.0',
             datasource: 'github-releases',
             packageName: 'opentofu/opentofu',
