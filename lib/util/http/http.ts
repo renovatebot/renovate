@@ -160,7 +160,7 @@ export abstract class HttpBase<
     let { cacheProvider } = options;
 
     const memCacheKey =
-      options.cacheProvider !== memCacheProvider &&
+      !options.cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
