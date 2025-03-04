@@ -74,6 +74,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
+      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
@@ -122,6 +123,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
+      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
@@ -168,6 +170,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       { number: 1, title: 'title' },
     ]);
     expect(cache).toEqual({
+      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         bitbucket: {
           pullRequestsCache: {
