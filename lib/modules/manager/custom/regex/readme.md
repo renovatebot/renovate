@@ -15,9 +15,9 @@ Also read the documentation for the [`customManagers` config option](../../../co
 
 ### Required Fields
 
-The first two required fields are `fileMatch` and `matchStrings`:
+The first two required fields are `filePatterns` and `matchStrings`:
 
-- `fileMatch` works the same as any manager
+- `filePatterns` works the same as any manager
 - `matchStrings` is a `regex` custom manager concept and is used for configuring a regular expression with named capture groups
 
 #### Information that Renovate needs about the dependency
@@ -69,7 +69,7 @@ To update a version string multiple times in a line: use multiple `matchStrings`
   customManagers: [
     {
       customType: 'regex',
-      fileMatch: ['file-you-want-to-match'],
+      filePatterns: ['file-you-want-to-match'],
       matchStrings: [
         // for the version on the left part, ignoring the right
         '# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s\\S+?:(?<currentValue>\\S+)\\s+\\S+:.+',
@@ -111,7 +111,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "filePatterns": ["/^Dockerfile$/"],
       "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
       "depNameTemplate": "yarn",
       "datasourceTemplate": "npm"
@@ -147,7 +147,7 @@ You could configure Renovate to update the `Dockerfile` like this:
     {
       "customType": "regex",
       "description": "Update _VERSION variables in Dockerfiles",
-      "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
+      "filePatterns": ["/(^|/|\\.)Dockerfile$/", "/(^|/)Dockerfile\\.[^/]*$/"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s"
       ]
@@ -190,7 +190,7 @@ Using the `customManagers` below, Renovate looks for available Docker tags of th
     {
       "customType": "regex",
       "datasourceTemplate": "docker",
-      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "filePatterns": ["/(^|/)Chart\\.yaml$/"],
       "matchStrings": [
         "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
       ]
@@ -214,7 +214,7 @@ For example:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [".*y[a]?ml$"],
+      "filePatterns": ["/.*y[a]?ml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",

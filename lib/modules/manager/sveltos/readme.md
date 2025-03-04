@@ -8,12 +8,12 @@ The `sveltos` manager has no default `fileMatch` pattern.
 This is because there is are no common filename or directory name conventions for Sveltos YAML files.
 You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files are Sveltos definitions.
 
-#### `fileMatch` pattern examples
+#### `filePatterns` pattern examples
 
 ```json title="If most .yaml files in your repository are for Sveltos"
 {
   "sveltos": {
-    "fileMatch": ["\\.yaml$"]
+    "filePatterns": ["/\\.yaml$/"]
   }
 }
 ```
@@ -21,7 +21,7 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 ```json title="Sveltos YAML files are in a sveltos/ directory"
 {
   "sveltos": {
-    "fileMatch": ["sveltos/.+\\.yaml$"]
+    "filePatterns": ["/sveltos/.+\\.yaml$/"]
   }
 }
 ```
@@ -29,7 +29,7 @@ You must set your own `fileMatch` rules, so Renovate knows which `*.yaml` files 
 ```json title="One Sveltos file in a directory"
 {
   "sveltos": {
-    "fileMatch": ["^config/sveltos\\.yaml$"]
+    "filePatterns": ["/^config/sveltos\\.yaml$/"]
   }
 }
 ```

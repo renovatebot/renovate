@@ -18,38 +18,38 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 
 ### File Matching
 
-Most managers have a default `fileMatch` array.
-The `fileMatch` array has regular expression strings that match against the repository file list.
+Most managers have a default `filePatterns` array.
+The `filePatterns` array has regular expression or glob pattern that matches against the repository file list.
 
-#### Managers with no default fileMatch
+#### Managers with no default filePatterns
 
-Some managers have no default `fileMatch` regular expression, because they have no filename convention that would let Renovate intelligently filter them.
-In such a case, the manager will be disabled until you create a `fileMatch` regular expression, e.g. like the following:
+Some managers have no default `filePatterns`, because they have no filename convention that would let Renovate intelligently filter them.
+In such a case, the manager will be disabled until you create a `filePatterns` regular expression, e.g. like the following:
 
 ```json
 {
   "kubernetes": {
-    "fileMatch": ["^config/.*\\.yaml$"]
+    "filePatterns": ["/^config/.*\\.yaml$/"]
   }
 }
 ```
 
-#### Extending a manager's default fileMatch
+#### Extending a manager's default filePatterns
 
-If the default `fileMatch` regular expression for a manager does not match against one of your relevant files, you can _extend_ the existing regular expression(s) by configuring a manager's `fileMatch` like in this example:
+If the default `filePatterns` for a manager does not match against one of your relevant files, you can _extend_ the existing pattern(s) by configuring a manager's `filePatterns` like in this example:
 
 ```json
 {
   "dockerfile": {
-    "fileMatch": ["does-not-look-like-a-docker-file"]
+    "filePatterns": ["does-not-look-like-a-docker-file"]
   }
 }
 ```
 
-#### Ignoring files that match the default fileMatch
+#### Ignoring files that match the default filePatterns
 
-Renovate will _extend_ the existing [`fileMatch`](../../configuration-options.md#filematch), meaning you don't need to include the default regular expressions like `Dockerfile` in your own array.
-In other words, the regular expression are "additive".
+Renovate will _extend_ the existing [`filePatterns`](../../configuration-options.md#filepatterns), meaning you don't need to include the default patterns like `Dockerfile` in your own array.
+In other words, the patterns are "additive".
 If a manager matches a file that you _don't_ want it to, ignore it using the [`ignorePaths`](../../configuration-options.md#ignorepaths) configuration option.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
 The `config:recommended` preset ignores common test and example directory names, for example.
