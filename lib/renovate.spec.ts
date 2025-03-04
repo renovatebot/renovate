@@ -4,7 +4,7 @@ Object.defineProperty(renovateWorker, 'start', { value: vi.fn() });
 
 describe('renovate', () => {
   it('starts', async () => {
-    await import('./renovate');
+    await vi.importActual('./renovate');
     expect(renovateWorker.start).toHaveBeenCalledTimes(1);
   });
 });
