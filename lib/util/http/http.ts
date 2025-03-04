@@ -187,10 +187,11 @@ export abstract class HttpBase<
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
 
-      /* v8 ignore next: temporary code */
+      /* v8 ignore start: temporary code */
       if (resPromise && options.cacheProvider !== memCacheProvider) {
         logger.debug({ url }, 'Cache hit on the obsolete memCache option');
       }
+      /* v8 ignore stop: temporary code */
     }
 
     if (!resPromise) {
