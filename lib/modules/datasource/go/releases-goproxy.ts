@@ -134,7 +134,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       'list',
     );
-    const { body } = await this.http.get(url);
+    const { body } = await this.http.getText(url);
     return filterMap(body.split(newlineRegex), (str) => {
       if (!is.nonEmptyStringAndNotWhitespace(str)) {
         return null;

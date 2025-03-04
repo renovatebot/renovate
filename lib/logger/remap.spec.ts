@@ -23,7 +23,7 @@ describe('logger/remap', () => {
 
   it('performs global remaps', () => {
     setGlobalLogLevelRemaps([{ matchMessage: '*foo*', newLogLevel: 'error' }]);
-    setRepositoryLogLevelRemaps(undefined);
+    setRepositoryLogLevelRemaps([]);
 
     const res = getRemappedLevel('foo');
 

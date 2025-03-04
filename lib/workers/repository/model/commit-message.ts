@@ -37,7 +37,7 @@ export abstract class CommitMessage {
   }
 
   toString(): string {
-    const parts: ReadonlyArray<string | undefined> = [
+    const parts: readonly (string | undefined)[] = [
       this.title,
       this._body,
       this._footer,

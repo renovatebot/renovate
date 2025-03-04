@@ -155,7 +155,9 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      type Response = { crate: CrateMetadata };
+      interface Response {
+        crate: CrateMetadata;
+      }
       const response = await this.http.getJsonUnchecked<Response>(crateUrl);
       return response.body.crate;
     } catch (err) {
@@ -191,7 +193,7 @@ export class CrateDatasource extends Datasource {
       );
       const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
-        return (await this.http.get(crateUrl)).body;
+        return (await this.http.getText(crateUrl)).body;
       } catch (err) {
         this.handleGenericErrors(err);
       }

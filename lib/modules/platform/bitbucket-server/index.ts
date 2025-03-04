@@ -15,6 +15,7 @@ import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import {
   BitbucketServerHttp,
+  BitbucketServerHttpOptions,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
@@ -41,6 +42,11 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import type {
+  Comment,
+  PullRequestActivity,
+  PullRequestCommentActivity,
+} from './schema';
 import { UserSchema } from './schema';
 import type {
   BbsConfig,
@@ -175,13 +181,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Server repositories');
   try {
-    const repos = await utils.accumulateValues(
-      `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`,
-    );
-    const result = repos.map(
-      (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key}/${r.slug}`,
-    );
+    const repos = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestRepo[]>(
+        `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`,
+        { paginate: true },
+      )
+    ).body;
+
+    const result = repos.map((repo) => `${repo.project.key}/${repo.slug}`);
     logger.debug({ result }, 'result of getRepos()');
     return result;
   } catch (err) /* istanbul ignore next */ {
@@ -381,9 +388,12 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
       searchParams['username.1'] = config.username;
     }
     const query = getQueryString(searchParams);
-    const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-    );
+    const values = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+        { paginate: true },
+      )
+    ).body;
 
     config.prList = values.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
@@ -409,16 +419,19 @@ export async function findPr({
     const searchParams: Record<string, string> = {
       state: 'OPEN',
     };
-    searchParams['direction'] = 'outgoing';
-    searchParams['at'] = `refs/heads/${branchName}`;
+    searchParams.direction = 'outgoing';
+    searchParams.at = `refs/heads/${branchName}`;
 
     const query = getQueryString(searchParams);
-    const prs = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-      'get',
-      {},
-      1, // only fetch the latest pr
-    );
+    const prs = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+        {
+          paginate: true,
+          limit: 1, // only fetch the latest pr
+        },
+      )
+    ).body;
 
     if (!prs.length) {
       logger.debug(`No PR found for branch ${branchName}`);
@@ -504,20 +517,23 @@ export async function getBranchStatus(
   }
 }
 
-function getStatusCheck(
+async function getStatusCheck(
   branchName: string,
   memCache = true,
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
-  const opts: HttpOptions = memCache ? { cacheProvider: memCacheProvider } : {};
+  const opts: BitbucketServerHttpOptions = { paginate: true };
+  if (memCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
 
-  return utils.accumulateValues(
-    // TODO: types (#22198)
-    `./rest/build-status/1.0/commits/${branchCommit!}`,
-    'get',
-    opts,
-  );
+  return (
+    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
+      `./rest/build-status/1.0/commits/${branchCommit!}`,
+      opts,
+    )
+  ).body;
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
@@ -750,20 +766,22 @@ export function deleteLabel(issueNo: number, label: string): Promise<void> {
   return Promise.resolve();
 }
 
-type Comment = { text: string; id: number };
-
 async function getComments(prNo: number): Promise<Comment[]> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/activities
-  let comments = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`,
-  );
-
-  comments = comments
-    .filter(
-      (a: { action: string; commentAction: string }) =>
-        a.action === 'COMMENTED' && a.commentAction === 'ADDED',
+  const activities = (
+    await bitbucketServerHttp.getJsonUnchecked<PullRequestActivity[]>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`,
+      { paginate: true },
     )
-    .map((a: { comment: Comment }) => a.comment);
+  ).body;
+
+  const comments = activities
+    .filter(
+      (a): a is PullRequestCommentActivity =>
+        a.action === 'COMMENTED' && 'comment' in a && 'commentAction' in a,
+    )
+    .filter((a) => a.commentAction === 'ADDED')
+    .map((a) => a.comment);
 
   logger.debug(`Found ${comments.length} comments`);
 
@@ -996,7 +1014,7 @@ export async function updatePr({
   bitbucketInvalidReviewers,
   targetBranch,
 }: UpdatePrConfig & {
-  bitbucketInvalidReviewers: string[] | undefined;
+  bitbucketInvalidReviewers?: string[] | undefined;
 }): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);

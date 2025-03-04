@@ -118,7 +118,7 @@ export class RubygemsDatasource extends Datasource {
     packageName: string,
   ): AsyncResult<ReleaseResult, Error | ZodError> {
     const url = joinUrlParts(registryUrl, '/info', packageName);
-    return Result.wrap(this.http.get(url))
+    return Result.wrap(this.http.getText(url))
       .transform(({ body }) => body)
       .parse(GemInfo);
   }

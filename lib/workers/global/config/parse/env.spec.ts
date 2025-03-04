@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest';
 import type { RequiredConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as env from './env';
@@ -292,12 +293,12 @@ describe('workers/global/config/parse/env', () => {
     });
 
     describe('RENOVATE_CONFIG tests', () => {
-      let processExit: jest.SpyInstance<never, [code?: number]>;
+      let processExit: MockInstance<(code?: number | string | null) => never>;
 
       beforeAll(() => {
-        processExit = jest
+        processExit = vi
           .spyOn(process, 'exit')
-          .mockImplementation((async () => {}) as never);
+          .mockImplementation((() => void 0) as never);
       });
 
       afterAll(() => {

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/orb/index getReleases processes homeUrl 1`] = `
+exports[`modules/datasource/orb/index > getReleases > processes homeUrl 1`] = `
 {
   "homepage": "https://google.com",
   "isPrivate": false,
@@ -49,7 +49,7 @@ exports[`modules/datasource/orb/index getReleases processes homeUrl 1`] = `
 }
 `;
 
-exports[`modules/datasource/orb/index getReleases processes real data 1`] = `
+exports[`modules/datasource/orb/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows",
   "isPrivate": false,

@@ -260,7 +260,7 @@ export function extractPackageFile(
   let lookForEscapeChar = true;
   let lookForSyntaxDirective = true;
 
-  const lineFeed = sanitizedContent.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
     const lineNumberInstrStart = lineNumber;
@@ -329,10 +329,7 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        argMatchValue.charAt(0) === '"' &&
-        argMatchValue.charAt(argMatchValue.length - 1) === '"'
-      ) {
+      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 

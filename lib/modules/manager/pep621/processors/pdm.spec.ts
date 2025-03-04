@@ -10,8 +10,8 @@ import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -279,7 +279,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
@@ -329,7 +329,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },

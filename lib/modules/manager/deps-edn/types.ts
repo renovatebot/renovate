@@ -7,6 +7,8 @@ export type TokenTypes<T> = keyof UnionToIntersection<T[keyof T]>;
 
 export type ParsedEdnPrimitive = string | null;
 export type ParsedEdnArray = ParsedEdnData[];
+// Interface not possible due to circular reference
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ParsedEdnRecord = { [k: string]: ParsedEdnData };
 export type ParsedEdnData =
   | ParsedEdnPrimitive

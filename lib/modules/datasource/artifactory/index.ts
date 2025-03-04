@@ -50,7 +50,7 @@ export class ArtifactoryDatasource extends Datasource {
       releases: [],
     };
     try {
-      const response = await this.http.get(url);
+      const response = await this.http.getText(url);
       const body = parse(response.body, {
         blockTextElements: {
           script: true,
@@ -68,10 +68,9 @@ export class ArtifactoryDatasource extends Datasource {
         .forEach(
           // extract version and published time for each node
           (node) => {
-            const version: string =
-              node.innerHTML.slice(-1) === '/'
-                ? node.innerHTML.slice(0, -1)
-                : node.innerHTML;
+            const version: string = node.innerHTML.endsWith('/')
+              ? node.innerHTML.slice(0, -1)
+              : node.innerHTML;
 
             const releaseTimestamp = asTimestamp(
               node.nextSibling?.text?.trimStart()?.split(regEx(/\s{2,}/))?.[0],

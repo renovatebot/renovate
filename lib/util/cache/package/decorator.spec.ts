@@ -4,15 +4,15 @@ import { cache } from './decorator';
 import * as file from './file';
 import * as packageCache from '.';
 
-jest.mock('./file');
+vi.mock('./file');
 
 describe('util/cache/package/decorator', () => {
   const setCache = file.set;
-  const getValue = jest.fn();
+  const getValue = vi.fn();
   let count = 1;
 
   beforeEach(async () => {
-    jest.useRealTimers();
+    vi.useRealTimers();
     GlobalConfig.reset();
     memCache.init();
     await packageCache.init({ cacheDir: 'some-dir' });
@@ -132,10 +132,10 @@ describe('util/cache/package/decorator', () => {
   });
 
   it('computes cache namespace and key from arguments', async () => {
-    type Arg = {
+    interface Arg {
       foo: 'namespace';
       bar: 'key';
-    };
+    }
 
     class Class {
       @cache({
@@ -198,7 +198,7 @@ describe('util/cache/package/decorator', () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       GlobalConfig.set({ cacheHardTtlMinutes: 2 });
     });
 
@@ -208,7 +208,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(60 * 1000 - 1);
+      vi.advanceTimersByTime(60 * 1000 - 1);
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
@@ -218,7 +218,7 @@ describe('util/cache/package/decorator', () => {
         2,
       );
 
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       expect(await obj.getReleases()).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
@@ -245,12 +245,12 @@ describe('util/cache/package/decorator', () => {
         3,
       );
 
-      jest.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
+      vi.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       expect(await obj.getReleases()).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
@@ -273,7 +273,7 @@ describe('util/cache/package/decorator', () => {
         2,
       );
 
-      jest.advanceTimersByTime(60 * 1000);
+      vi.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(2);
@@ -292,11 +292,11 @@ describe('util/cache/package/decorator', () => {
         2,
       );
 
-      jest.advanceTimersByTime(2 * 60 * 1000 - 1);
+      vi.advanceTimersByTime(2 * 60 * 1000 - 1);
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(await obj.getReleases()).toBe('111');
 
-      jest.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1);
       getValue.mockRejectedValueOnce(new Error('test'));
       await expect(obj.getReleases()).rejects.toThrow('test');
     });

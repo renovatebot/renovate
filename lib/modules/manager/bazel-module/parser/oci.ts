@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DockerDatasource } from '../../../datasource/docker';
 import type { PackageDependency } from '../../types';
-import { ExtensionTagFragmentSchema, StringFragmentSchema } from '../fragments';
+import { ExtensionTagFragmentSchema, StringFragmentSchema } from './fragments';
 
 export const ociExtensionPrefix = 'oci';
 
@@ -19,12 +19,18 @@ export const RuleToDockerPackageDep = ExtensionTagFragmentSchema.extend({
     digest: StringFragmentSchema.optional(),
   }),
 }).transform(
-  ({ children: { name, image, tag, digest } }): PackageDependency => ({
+  ({
+    rawString,
+    children: { name, image, tag, digest },
+  }): PackageDependency => ({
     datasource: DockerDatasource.id,
     depType: 'oci_pull',
     depName: name.value,
     packageName: image.value,
     currentValue: tag?.value,
     currentDigest: digest?.value,
+    // Provide a replace string so the auto replacer can replace both the tag
+    // and digest if applicable.
+    replaceString: rawString,
   }),
 );

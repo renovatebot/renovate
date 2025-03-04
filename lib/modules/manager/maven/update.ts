@@ -171,9 +171,7 @@ export function bumpPackageVersion(
   return { bumpedContent };
 }
 
-function isSnapshot(
-  prerelease: ReadonlyArray<string | number> | null,
-): boolean {
+function isSnapshot(prerelease: readonly (string | number)[] | null): boolean {
   const lastPart = prerelease?.at(-1);
   return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
 }

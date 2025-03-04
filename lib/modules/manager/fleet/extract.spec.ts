@@ -14,7 +14,7 @@ const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
 describe('modules/manager/fleet/extract', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('extractPackageFile()', () => {
