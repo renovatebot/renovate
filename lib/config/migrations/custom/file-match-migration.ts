@@ -6,7 +6,7 @@ export class FileMatchMigration extends AbstractMigration {
   override readonly propertyName = 'fileMatch';
 
   override run(value: unknown): void {
-    if (is.string(value) || is.array<string>(value)) {
+    if (is.string(value) || is.array(value, is.string)) {
       const fileMatch = is.array(value) ? value : [value];
 
       let filePatterns = this.get('filePatterns') ?? [];
