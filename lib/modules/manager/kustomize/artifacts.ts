@@ -126,7 +126,7 @@ export async function updateArtifacts({
 
   const chartHome = getSiblingFileName(
     packageFileName,
-    project.helmGlobals?.chartHome as string, // eslint-disable-line @typescript-eslint/non-nullable-type-assertion-style
+    project.helmGlobals!.chartHome!
   );
 
   try {
