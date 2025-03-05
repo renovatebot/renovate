@@ -455,8 +455,10 @@ async function getGoConstraints(
   // prefer toolchain directive when go.mod has one
   const toolchain = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m);
   const toolchainMatch = toolchain.exec(content);
-  if (toolchainMatch?.groups?.gover) {
-    return toolchainMatch.groups.gover;
+  const toolchainVer = toolchainMatch?.groups?.gover;
+  if (toolchainVer) {
+    logger.debug(`Using go version ${toolchainVer) found in toolchain directive`);
+    return toolchainVer;
   }
 
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
