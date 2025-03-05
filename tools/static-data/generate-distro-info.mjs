@@ -1,4 +1,3 @@
-import got from 'got';
 import { updateJsonFile } from './utils.mjs';
 
 const ubuntuUrl = 'https://debian.pages.debian.net/distro-info-data/ubuntu.csv';
@@ -52,8 +51,12 @@ function csvToJson(raw) {
  * @param {string} file File path to update
  */
 async function update(url, file) {
-  const res = await got(url);
-  const csv = res.body;
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.error(`Failed to fetch ${url}`, res);
+    process.exit(1);
+  }
+  const csv = await res.text();
   const json = csvToJson(csv);
   await updateJsonFile(file, json);
 }

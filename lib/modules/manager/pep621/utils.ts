@@ -1,8 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { stripTemplates } from '../../../util/string';
-import { parse as parseToml } from '../../../util/toml';
+import { massage as massageToml, parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency } from '../types';
@@ -137,7 +136,7 @@ export function parsePyProject(
   content: string,
 ): PyProject | null {
   try {
-    const jsonMap = parseToml(stripTemplates(content));
+    const jsonMap = parseToml(massageToml(content));
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(
