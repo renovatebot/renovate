@@ -1469,7 +1469,7 @@ export async function localBranchExists(branchName: string): Promise<boolean> {
  * 5. Force push the updated branch to the origin repository.
  *
  * @param {string} branchName - The name of the branch to synchronize.
- * @returns {Promise<LongCommitSha>} - A promise that resolves to  if the synchronization is successful, or `false` if an error occurs.
+ * @returns {Promise<LongCommitSha>} - A promise that resolves to True if the synchronization is successful, or `false` if an error occurs.
  */
 export async function syncForkWithUpstream(
   branchName: string,
