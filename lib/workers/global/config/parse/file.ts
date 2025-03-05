@@ -24,13 +24,13 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         file,
       ) as RenovateConfig;
     case '.cjs':
+    case '.mjs':
     case '.js': {
       const tmpConfig = await import(
         upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
       );
-      let config = tmpConfig.default
-        ? tmpConfig.default
-        : /* istanbul ignore next: hard to test */ tmpConfig;
+      /* v8 ignore next: not testable */
+      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
       // Allow the config to be a function
       if (is.function_(config)) {
         config = config();
@@ -45,7 +45,8 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
 
-  if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
+  const configFileExists = await fs.pathExists(configFile);
+  if (env.RENOVATE_CONFIG_FILE && !configFileExists) {
     logger.fatal(
       { configFile },
       `Custom config file specified in RENOVATE_CONFIG_FILE must exist`,
@@ -53,8 +54,14 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     process.exit(1);
   }
 
-  logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
+
+  if (!configFileExists) {
+    logger.debug('No config file found on disk - skipping');
+    return config;
+  }
+
+  logger.debug('Checking for config file in ' + configFile);
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
@@ -74,8 +81,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal('Error parsing config file');
       process.exit(1);
     }
-    // istanbul ignore next: we can ignore this
-    logger.debug('No config file found on disk - skipping');
+    logger.debug('Error reading or parsing file - skipping');
   }
 
   if (is.nonEmptyObject(config.processEnv)) {
