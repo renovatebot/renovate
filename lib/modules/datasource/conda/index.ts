@@ -50,13 +50,13 @@ export class CondaDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#22198)
-      `2:${registryUrl}:${packageName}`,
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.debug({ registryUrl, packageName }, 'fetching conda package');
+    logger.trace({ registryUrl, packageName }, 'fetching conda package');
 
     if (!registryUrl) {
       return null;
