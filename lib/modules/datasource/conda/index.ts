@@ -155,14 +155,6 @@ export class CondaDatasource extends Datasource {
 
       result.releases.push(...res.versions.page);
 
-      if (res.versions.page.length < prefixDevPageLimit) {
-        break;
-      }
-
-      if (result.releases.length >= res.versions.totalCount) {
-        break;
-      }
-
       if (page >= res.versions.pages) {
         break;
       }
