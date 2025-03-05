@@ -112,5 +112,75 @@ describe('modules/datasource/conda/index', () => {
         sourceUrl: 'https://github.com/pytest-dev/pytest',
       });
     });
+
+    it('supports channel from prefix.dev with null response', async () => {
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .reply(200, { data: { package: null } });
+
+      const config = {
+        packageName: 'pytest',
+        registryUrls: ['https://prefix.dev/conda-forge'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+      });
+      expect(res).toBe(null);
+    });
+
+    it('supports channel from prefix.dev with multiple page responses', async () => {
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .once()
+        .reply(200, {
+          data: {
+            package: {
+              versions: {
+                page: Array.from({ length: 500 }).map((_, index) => ({
+                  version: `0.0.${index}`,
+                })),
+                pages: 2,
+                totalCount: 550,
+              },
+            },
+          },
+        });
+
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .once()
+        .reply(200, {
+          data: {
+            package: {
+              versions: {
+                page: Array.from({ length: 50 }).map((_, index) => ({
+                  version: `0.0.${index + 500}`,
+                })),
+                pages: 2,
+                totalCount: 500,
+              },
+            },
+          },
+        });
+
+      const config = {
+        packageName: 'pytest',
+        registryUrls: ['https://prefix.dev/conda-forge'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+      });
+      expect(res).toMatchObject({
+        registryUrl: 'https://prefix.dev/conda-forge',
+        releases: Array.from({ length: 550 }).map((_, index) => {
+          return { version: `0.0.${index}` };
+        }),
+      });
+    });
   });
 });
