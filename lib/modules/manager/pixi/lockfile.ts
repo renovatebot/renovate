@@ -8,7 +8,7 @@ export const commandLock = 'pixi lock --no-progress --color=never --quiet';
  *
  */
 const pixiGenerateLockFileVersion: Config[] = [
-  { lockVersion: 6, range: '>=0.39.2, <=0.41.4', cmd: commandLock },
+  { lockVersion: 6, range: '>=0.39.2, <0.43.0', cmd: commandLock },
 ] as const;
 
 interface Config {
