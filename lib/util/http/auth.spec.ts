@@ -221,6 +221,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
 
       removeAuthorization(opts);
@@ -229,6 +230,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
     });
 

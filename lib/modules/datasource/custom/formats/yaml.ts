@@ -5,7 +5,7 @@ import type { CustomDatasourceFetcher } from './types';
 
 export class YamlFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {
-    const response = await http.get(registryURL);
+    const response = await http.getText(registryURL);
 
     return parseSingleYaml(response.body);
   }

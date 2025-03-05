@@ -651,14 +651,20 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('should throw error for 429', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 429 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should throw error for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 504 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
