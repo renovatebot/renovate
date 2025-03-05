@@ -72,9 +72,9 @@ describe('modules/versioning/conda/index', () => {
     ${'3.0.0'}              | ${'==3.0.0'}  | ${true}
     ${'1.6.2'}              | ${'<2.2.1.0'} | ${true}
     ${'3.8'}                | ${'>=3.9'}    | ${false}
-    ${'not-pep440-version'} | ${'*'}        | ${true}
-    ${'not/pep440/version'} | ${'*'}        | ${true}
-    ${'not/pep440/version'} | ${''}         | ${true}
+    ${'not-pep440-version'} | ${'*'}        | ${false}
+    ${'not/pep440/version'} | ${'*'}        | ${false}
+    ${'not/pep440/version'} | ${''}         | ${false}
   `('matches("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.matches(a, b)).toBe(expected);
   });
