@@ -566,4 +566,65 @@ describe('modules/manager/pixi/extract', () => {
       lockFiles: [],
     });
   });
+
+  it('skip package without channels', async () => {
+    await expect(
+      extractPackageFile(
+        codeBlock`
+            [project]
+            name = "pixi"
+            authors = []
+            channels = []
+
+            [tasks]
+
+            [dependencies]
+            scipy = { version = "==1.15.1" }
+            `,
+        'pixi.toml',
+      ),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          datasource: 'conda',
+          depName: 'scipy',
+          depType: 'dependencies',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
+  });
+
+  it('extract package from with workspace', async () => {
+    await expect(
+      extractPackageFile(
+        codeBlock`
+            [workspace]
+            channels = ["conda-forge"]
+
+
+            [tasks]
+
+            [dependencies]
+            scipy = { version = "==1.15.1" }
+            `,
+        'pixi.toml',
+      ),
+    ).resolves.toMatchObject({
+      deps: [
+        {
+          currentValue: '==1.15.1',
+          datasource: 'conda',
+          depName: 'scipy',
+          depType: 'dependencies',
+          registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
+  });
 });
