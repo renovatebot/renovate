@@ -491,7 +491,7 @@ export async function syncGit(): Promise<void> {
   // istanbul ignore if
   if (config.upstreamUrl) {
     logger.debug(
-      `Bringing default branch up to date with upstream to get latest config`,
+      `Bringing default branch up-to-date with upstream, to get latest config`,
     );
     // Add remote if it does not exist
     const remotes = await git.getRemotes(true);
