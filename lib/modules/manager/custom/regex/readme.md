@@ -100,7 +100,7 @@ The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which 
 
 The `regex` manager matches are done _per-file_, not per-line!
 This means the `^` and `$` regex assertions only match the beginning and end of the entire file.
-You can use `(?:^|\r\n|\r|\n|$)` if you need to match line boundaries.
+If you need to match line boundaries you can use `(?:^|\r\n|\r|\n|$)`.
 
 ### Configuration templates
 
