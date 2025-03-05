@@ -1487,7 +1487,7 @@ export async function syncForkWithUpstream(
     }
     await resetHardFromRemote(`upstream/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
-    // Get long git sha
+    // Get long Git SHA
     return (await git.revparse([branchName])) as LongCommitSha;
   } catch (err) {
     logger.error({ err }, 'Error synchronizing fork');
