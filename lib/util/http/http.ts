@@ -282,7 +282,10 @@ export abstract class HttpBase<
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !isHttpUrl(parsedUrl)) {
-      logger.error({ url: requestUrl }, 'Request Error: cannot parse url');
+      logger.error(
+        { url: requestUrl, baseUrl, resolvedUrl: url },
+        'Request Error: cannot parse url',
+      );
       throw new Error('Invalid URL');
     }
     return parsedUrl;

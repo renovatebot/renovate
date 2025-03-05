@@ -142,7 +142,7 @@
   },
   "volta": {
     "node": "22.14.0",
-    "pnpm": "10.5.0"
+    "pnpm": "10.5.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.738.0",
@@ -310,7 +310,7 @@
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
     "@vitest/coverage-v8": "3.0.7",
-    "@vitest/eslint-plugin": "1.1.33",
+    "@vitest/eslint-plugin": "1.1.35",
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
@@ -348,7 +348,7 @@
     "vitest": "3.0.7",
     "vitest-mock-extended": "3.0.1"
   },
-  "packageManager": "pnpm@10.5.0",
+  "packageManager": "pnpm@10.5.1",
   "files": [
     "dist",
     "renovate-schema.json"
