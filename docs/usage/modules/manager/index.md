@@ -18,13 +18,15 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 
 ### File Matching
 
-Most managers have a default `filePatterns` array.
-The `filePatterns` array has regular expression or glob pattern that matches against the repository file list.
+Most Renovate managers have a default `filePatterns` array.
+The `filePatterns` array has a regular expression, or glob pattern, that matches against the repository file list.
 
 #### Managers with no default filePatterns
 
 Some managers have no default `filePatterns`, because they have no filename convention that would let Renovate intelligently filter them.
-In such a case, the manager will be disabled until you create a `filePatterns` regular expression, e.g. like the following:
+If there is no default `filePattern`, the manager is disabled.
+For the manager to work, you must create a `filePatterns` regular expression, or glob pattern.
+For example:
 
 ```json
 {
@@ -36,7 +38,9 @@ In such a case, the manager will be disabled until you create a `filePatterns` r
 
 #### Extending a manager's default filePatterns
 
-If the default `filePatterns` for a manager does not match against one of your relevant files, you can _extend_ the existing pattern(s) by configuring a manager's `filePatterns` like in this example:
+If the default `filePatterns` for a manager does not match your file(s), you can _extend_ the pattern.
+You extend the pattern by configuring the manager's `filePatterns`.
+For example:
 
 ```json
 {

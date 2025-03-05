@@ -709,7 +709,7 @@ Renovate has two custom managers:
 | `regex`        | Regular Expression, with named capture groups. |
 | `jsonata`      | JSONata query.                                 |
 
-To use a custom manager, you need give some information:
+To use a custom manager, you must give Renovate this information:
 
 1. `filePatterns`: regex/glob pattern of the file to extract deps from
 1. `matchStrings`: `regex` patterns or `jsonata` queries used to process the file
@@ -1494,21 +1494,26 @@ If you are running on any platform except `github.com`, you need to [configure a
 
 ## filePatterns
 
-`filePatterns` is used by Renovate to know which files in a repository to parse and extract.
-`filePatterns` patterns in the user config are added to the default values and do not replace them.
-The default `filePatterns` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
+`filePatterns` tells Renovate which repository files to parse and extract.
+`filePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
+
+The default `filePatterns` patterns can not be removed.
+If you need to include, or exclude, specific paths then use the `ignorePaths` or `includePaths` configuration options.
 
 Some `filePatterns` patterns are short, like Renovate's default Go Modules `filePatterns` for example.
 Here Renovate looks for _any_ `go.mod` file.
 In this case you can probably keep using that default `filePatterns`.
 
 At other times, the possible files is too vague for Renovate to have any default.
-For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `filePatterns` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
+For example, Kubernetes manifests can exist in any `*.yaml` file.
+We do not want Renovate to parse every YAML file in every repository, just in case _some_ of them have a Kubernetes manifest.
+Therefore Renovate's default `filePatterns` for the `kubernetes` manager is an empty array (`[]`).
+Because the array is empty, you as user must tell Renovate which directories/files to check.
 
 Finally, there are cases where Renovate's default `filePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess about.
 For example, Renovate's default `filePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
-Because `filePatterns` is mergeable, you don't need to duplicate the defaults and could add the missing file like this:
+Because `filePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
 
 ```json
 {
@@ -1518,8 +1523,9 @@ Because `filePatterns` is mergeable, you don't need to duplicate the defaults an
 }
 ```
 
-If you configure `filePatterns` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
+You must configure `filePatterns` _inside_ a manager object.
+In the example above, the manager object is the `dockerfile`.
+For reference, here is a [list of supported managers](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
