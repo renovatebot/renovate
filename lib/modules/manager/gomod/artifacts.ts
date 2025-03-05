@@ -457,7 +457,7 @@ async function getGoConstraints(
   const toolchainMatch = toolchain.exec(content);
   const toolchainVer = toolchainMatch?.groups?.gover;
   if (toolchainVer) {
-    logger.debug(`Using go version ${toolchainVer) found in toolchain directive`);
+    logger.debug(`Using go version ${toolchainVer} found in toolchain directive`);
     return toolchainVer;
   }
 
