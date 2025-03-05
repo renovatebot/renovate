@@ -191,6 +191,7 @@ describe('modules/versioning/composer/index', () => {
     ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
     ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${true}
     ${'^7.0.0'}           | ${'<8.0-DEV'}         | ${true}
+    ${'^7.0.0'}           | ${'less than 8'}      | ${false}
   `('intersects("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.intersects!(a, b)).toBe(expected);
   });
