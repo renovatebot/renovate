@@ -650,7 +650,7 @@ describe('modules/manager/pixi/extract', () => {
       'pixi.toml',
     );
 
-    await expect(result).toMatchObject({
+    expect(result).toMatchObject({
       deps: [
         {
           currentValue: '==1.15.1',
