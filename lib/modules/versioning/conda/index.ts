@@ -61,14 +61,39 @@ function isSingleVersion(input: string): boolean {
 }
 
 function getNewValue(config: NewValueConfig): string | null {
-  return pep440.api.getNewValue(config);
+  if (config.currentValue === '*') {
+    if (config.rangeStrategy === 'pin') {
+      return '==' + config.newVersion;
+    }
+    if (config.rangeStrategy === 'bump') {
+      return '>=' + config.newVersion;
+    }
+
+    return null;
+  }
+
+  try {
+    return pep440.api.getNewValue(config);
+  } catch {
+    return null;
+  }
 }
 
 function sortVersions(version: string, other: string): number {
   return new Version(version).compare(new Version(other));
 }
 
+function equals(version: string, other: string): boolean {
+  const v2 = parse(other);
+  if (!v2) {
+    return false;
+  }
+
+  return parse(version)?.equals(v2) ?? false;
+}
+
 export const api = {
+  equals,
   isValid,
   isVersion: isValidVersion,
   isSingleVersion,
@@ -99,14 +124,7 @@ export const api = {
       return null;
     }
   },
-  equals(version: string, other: string): boolean {
-    const v2 = parse(other);
-    if (!v2) {
-      return false;
-    }
 
-    return parse(version)?.equals(v2) ?? false;
-  },
   isGreaterThan(version: string, other: string): boolean {
     return sortVersions(version, other) > 0;
   },

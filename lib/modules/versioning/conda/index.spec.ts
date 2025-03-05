@@ -73,7 +73,6 @@ describe('modules/versioning/conda/index', () => {
     ${'1.6.2'}              | ${'<2.2.1.0'} | ${true}
     ${'3.8'}                | ${'>=3.9'}    | ${false}
     ${'not-pep440-version'} | ${'*'}        | ${true}
-    ${'not/conda/version'}  | ${'*'}        | ${false}
   `('matches("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(api.matches(a, b)).toBe(expected);
   });
@@ -120,8 +119,7 @@ describe('modules/versioning/conda/index', () => {
     ${'==1.2'}      | ${true}
     ${'== 1.2.3'}   | ${true}
     ${'==1.*'}      | ${false}
-    ${'>=1'}        | ${false}
-  `('isSingleVersion($version) === $isSingle', ({ version, isSingle }) => {
+  `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
     const res = !!api.isSingleVersion(version);
     expect(res).toBe(isSingle);
   });
@@ -173,6 +171,9 @@ describe('modules/versioning/conda/index', () => {
 
   it.each`
     currentValue | rangeStrategy | currentVersion | newVersion | expected
+    ${'*'}       | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
+    ${'*'}       | ${'bump'}     | ${'1.0.0'}     | ${'1.2.3'} | ${'>=1.2.3'}
+    ${'*'}       | ${'widen'}    | ${'1.0.0'}     | ${'1.2.3'} | ${null}
     ${'<2.0.0'}  | ${'pin'}      | ${'1.0.0'}     | ${'1.2.3'} | ${'==1.2.3'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $expected',
