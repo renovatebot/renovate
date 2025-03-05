@@ -22,5 +22,16 @@ export function getGitlabDep(
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }
-  return getDep(imageName, true, registryAliases);
+
+  const dep = getDep(imageName, true, registryAliases);
+
+  // Resolve registry aliases to their real value in depName
+  for (const [name, value] of Object.entries(registryAliases ?? {})) {
+    if (dep.depName?.startsWith(`${name}/`)) {
+      if (dep.depName?.startsWith(name)) {
+        dep.depName = `${value}/${dep.depName.substring(name.length + 1)}`;
+      }
+    }
+  }
+  return dep;
 }

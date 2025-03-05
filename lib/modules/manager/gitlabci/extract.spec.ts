@@ -231,7 +231,7 @@ describe('modules/manager/gitlabci/extract', () => {
       ]);
     });
 
-    it('extract images via registry aliases', () => {
+    it('extract images via registry aliases and replaces aliases with their real value in the depName', () => {
       const registryAliases = {
         $CI_REGISTRY: 'registry.com',
         $BUILD_IMAGES: 'registry.com/build-images',
@@ -260,7 +260,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '31.65.1-slim',
           datasource: 'docker',
-          depName: '$CI_REGISTRY/renovate/renovate',
+          depName: 'registry.com/renovate/renovate',
           packageName: 'registry.com/renovate/renovate',
           depType: 'image-name',
           replaceString: '$CI_REGISTRY/renovate/renovate:31.65.1-slim',
@@ -271,7 +271,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '10.4.11',
           datasource: 'docker',
-          depName: 'foo/mariadb',
+          depName: 'foo.registry.com/mariadb',
           packageName: 'foo.registry.com/mariadb',
           depType: 'service-image',
           replaceString: 'foo/mariadb:10.4.11',
@@ -282,7 +282,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '1.0.0',
           datasource: 'docker',
-          depName: '$CI_REGISTRY/other/image1',
+          depName: 'registry.com/other/image1',
           packageName: 'registry.com/other/image1',
           depType: 'service-image',
           replaceString: '$CI_REGISTRY/other/image1:1.0.0',
@@ -293,7 +293,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '1.0.0',
           datasource: 'docker',
-          depName: '$BUILD_IMAGES/image2',
+          depName: 'registry.com/build-images/image2',
           packageName: 'registry.com/build-images/image2',
           depType: 'service-image',
           replaceString: '$BUILD_IMAGES/image2:1.0.0',
