@@ -341,7 +341,7 @@ export function findLatestStable(tags: string[]): string | null {
   return stable;
 }
 
-const chartRepo = regEx(/charts?|helm|helm-charts/i);
+const chartRepo = regEx(/charts?|helm|helm-charts?/i);
 
 function isPossibleChartRepo(url: string): boolean {
   if (detectPlatform(url) === null) {
