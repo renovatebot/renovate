@@ -50,7 +50,9 @@ describe('workers/global/config/parse/file', () => {
 
     it('migrates', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
-      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      // for coverage
+      const relativePath = upath.relative(process.cwd(), configFile);
+      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
     });
