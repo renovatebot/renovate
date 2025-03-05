@@ -98,7 +98,7 @@ You can use the Code Generator in the sidebar and copy the regex in the generate
 
 The `regex` manager uses [RE2](https://github.com/google/re2/wiki/WhyRE2) which **does not support** [backreferences and lookahead assertions](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
 
-The `regex` manager matches are done per-file and not per-line!
+The `regex` manager matches are done _per-file_, not per-line!
 This means the `^` and `$` regex assertions only match the beginning and end of the entire file.
 You can use `(?:^|\r\n|\r|\n|$)` if you need to match line boundaries.
 
