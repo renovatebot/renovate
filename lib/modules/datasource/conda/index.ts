@@ -64,6 +64,7 @@ export class CondaDatasource extends Datasource {
 
     if (registryUrl.startsWith('https://prefix.dev/')) {
       const channel = ensureTrailingSlash(registryUrl).split('/').at(-2);
+      /* v8 ignore next 8: manager extract conda packages with unexpected registryUrl */
       if (is.undefined(channel)) {
         logger.error(
           { registryUrl, packageName },
