@@ -61,10 +61,10 @@ export function parseYaml<ResT = unknown>(
   content: string,
   options?: YamlOptionsMultiple<ResT>,
 ): ResT[] {
-  const massagedContent = massageContent(content, options);
+  const messagedContent = messageContent(content, options);
 
   const rawDocuments = parseAllDocuments(
-    massagedContent,
+    messagedContent,
     prepareParseOption(options),
   );
 
@@ -149,9 +149,9 @@ export function parseSingleYamlDocument(
   content: string,
   options?: YamlParseDocumentOptions,
 ): Document {
-  const massagedContent = massageContent(content, options);
+  const messagedContent = messageContent(content, options);
   const rawDocument = parseDocument(
-    massagedContent,
+    messagedContent,
     prepareParseOption(options),
   );
 
@@ -166,9 +166,9 @@ export function dump(obj: any, opts?: DumpOptions): string {
   return stringify(obj, opts);
 }
 
-function massageContent(content: string, options?: YamlOptions): string {
+function messageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
-    return stripTemplates(content.replace(regEx(/\s+{{.+?}}:.+/gs), ''));
+    return stripTemplates(content.replace(regEx(/^\s+{{.+?}}:.+/gs), ''));
   }
 
   return content;
