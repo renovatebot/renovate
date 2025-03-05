@@ -375,7 +375,7 @@ describe('modules/manager/pixi/extract', () => {
           },
           {
             channel: 'channel of scipy',
-            channels: ['conda-forge', 'conda-not-forge'],
+            channels: ['cuda', 'anaconda', 'conda-forge', 'conda-not-forge'],
             currentValue: '==1.15.1',
             datasource: 'conda',
             depName: 'scipy',
@@ -386,12 +386,14 @@ describe('modules/manager/pixi/extract', () => {
             versioning: 'conda',
           },
           {
-            channels: ['conda-forge', 'conda-not-forge'],
+            channels: ['cuda', 'anaconda', 'conda-forge', 'conda-not-forge'],
             currentValue: '==3.10.0',
             datasource: 'conda',
             depName: 'matplotlib',
             depType: 'dependencies',
             registryUrls: [
+              'https://api.anaconda.org/package/cuda/',
+              'https://api.anaconda.org/package/anaconda/',
               'https://api.anaconda.org/package/conda-forge/',
               'https://api.anaconda.org/package/conda-not-forge/',
             ],
@@ -621,6 +623,58 @@ describe('modules/manager/pixi/extract', () => {
           depName: 'scipy',
           depType: 'dependencies',
           registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
+  });
+
+  it(`extract package with channel priority`, async () => {
+    const result = await extractPackageFile(
+      codeBlock`
+        [project]
+        authors = ["Trim21 <trim21.me@gmail.com>"]
+        channels = ["conda-forge", 'conda-not-forge']
+        name = "pixi"
+        platforms = ["win-64"]
+        version = "0.1.0"
+
+        [feature.scipy]
+        channels = ["anaconda", {channel = 'cuda', priority = 1},  {channel = 'cuda2', priority = 1}]
+        dependencies = { scipy = "==1.15.1" }
+
+        [feature.numpy]
+        dependencies = { numpy = "==1.15.1" }
+        `,
+      'pixi.toml',
+    );
+
+    await expect(result).toMatchObject({
+      deps: [
+        {
+          currentValue: '==1.15.1',
+          datasource: 'conda',
+          depName: 'scipy',
+          depType: 'dependencies',
+          registryUrls: [
+            'https://api.anaconda.org/package/cuda/',
+            'https://api.anaconda.org/package/cuda2/',
+            'https://api.anaconda.org/package/anaconda/',
+            'https://api.anaconda.org/package/conda-forge/',
+            'https://api.anaconda.org/package/conda-not-forge/',
+          ],
+          versioning: 'conda',
+        },
+        {
+          currentValue: '==1.15.1',
+          datasource: 'conda',
+          depName: 'numpy',
+          depType: 'dependencies',
+          registryUrls: [
+            'https://api.anaconda.org/package/conda-forge/',
+            'https://api.anaconda.org/package/conda-not-forge/',
+          ],
           versioning: 'conda',
         },
       ],

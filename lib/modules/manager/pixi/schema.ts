@@ -176,7 +176,14 @@ export const PixiConfigSchema = z
           const conda: PixiPackageDependency[] = [];
 
           for (const feature of Object.values(features)) {
-            conda.push(...feature.conda);
+            conda.push(
+              ...feature.conda.map((item) => {
+                return {
+                  ...item,
+                  channels: feature.channels,
+                };
+              }),
+            );
 
             pypi.push(...feature.pypi);
           }
