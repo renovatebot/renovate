@@ -63,7 +63,7 @@ For example:
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/\\.yaml$/"],
+      "filePatterns": ["**.yaml"],
       "matchStrings": [
         ".*rdsFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
       ],
