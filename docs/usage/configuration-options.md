@@ -479,6 +479,24 @@ It must contain a named capture group `version` to capture the version string.
 }
 ```
 
+To only bump the version conditionally, you can use [`packageRules`](#packagerules) to select specific upgrades.
+The following example will only bump the version if there has been an upgrade in the `charts/` directory.
+
+```json title="renovate.json with bumpVersions wrapped in a packageRule"
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["charts/**"],
+      "bumpVersions": {
+        "fileMatch": "{{packageFileDir}}\/Chart.ya?ml",
+        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}",
+        "matchStrings": ["version:\\s(?<version>[^\\s]+)"]
+      }
+    }
+  ]
+}
+```
+
 ### bumpType
 
 The `bumpType` field can be one of:

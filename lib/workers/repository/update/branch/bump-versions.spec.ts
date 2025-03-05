@@ -12,10 +12,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       vi.resetAllMocks();
     });
 
-    afterEach(() => {
-      vi.spyOn(templates, 'compile').mockRestore();
-    });
-
     it('should be noop if bumpVersions is undefined', async () => {
       const config = {} as BranchConfig;
       await bumpVersions(config);
