@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
@@ -26,9 +27,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.cjs':
     case '.mjs':
     case '.js': {
-      const tmpConfig = await import(
-        upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
-      );
+      const absoluteFilePath = upath.isAbsolute(file)
+        ? file
+        : `${process.cwd()}/${file}`;
+      // use file url paths to avoid issues with windows paths
+      // typescript does not support file URL for import
+      const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
       /* v8 ignore next: not testable */
       let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
       // Allow the config to be a function
