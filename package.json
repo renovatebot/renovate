@@ -151,6 +151,7 @@
     "@aws-sdk/client-rds": "3.740.0",
     "@aws-sdk/client-s3": "3.740.0",
     "@aws-sdk/credential-providers": "3.738.0",
+    "@trim21/rattler": "0.1.8",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.20.11",
     "@opentelemetry/api": "1.9.0",
