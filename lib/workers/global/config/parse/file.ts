@@ -24,13 +24,12 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         file,
       ) as RenovateConfig;
     case '.cjs':
+    case '.mjs':
     case '.js': {
       const tmpConfig = await import(
         upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
       );
-      let config = tmpConfig.default
-        ? tmpConfig.default
-        : /* istanbul ignore next: hard to test */ tmpConfig;
+      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
       // Allow the config to be a function
       if (is.function_(config)) {
         config = config();
@@ -55,6 +54,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
+
+  if (!(await fs.pathExists(configFile))) {
+    logger.debug('No config file found on disk - skipping');
+    return config;
+  }
+
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
@@ -74,8 +79,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal('Error parsing config file');
       process.exit(1);
     }
-    // istanbul ignore next: we can ignore this
-    logger.debug('No config file found on disk - skipping');
+    logger.debug('Error reading or parsing file - skipping');
   }
 
   if (is.nonEmptyObject(config.processEnv)) {
