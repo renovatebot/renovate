@@ -522,4 +522,25 @@ describe('modules/manager/mix/artifacts', () => {
       },
     ]);
   });
+
+  it("handles updates and doesn't try to create mix.lock file if it doesn't exist", async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(false);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+
+    const execSnapshots = mockExecAll();
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: 'New mix.exs',
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toHaveLength(0);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('mix.exs', 'New mix.exs');
+  });
 });
