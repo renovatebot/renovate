@@ -9,7 +9,6 @@ import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
-import is from '@sindresorhus/is';
 
 export { composerVersioningId };
 
