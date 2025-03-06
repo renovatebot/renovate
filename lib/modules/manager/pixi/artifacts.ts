@@ -70,7 +70,6 @@ export async function updateArtifacts({
       logger.debug(`${lockFileName} is unchanged`);
       return null;
     }
-    logger.debug(`Returning updated ${lockFileName}`);
     return [
       {
         file: {
