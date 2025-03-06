@@ -797,7 +797,16 @@ const staticGroups = {
       {
         groupName: 'symfony packages',
         groupSlug: 'symfony',
-        matchPackageNames: ['symfony/**'],
+        matchDatasources: ['packagist'],
+        matchPackageNames: [
+          'symfony/*',
+          '!symfony/*contracts',
+          '!symfony/flex',
+          '!symfony/maker-bundle',
+          '!symfony/monolog-bundle',
+          '!symfony/polyfill*',
+          '!symfony/ux*',
+        ],
       },
     ],
   },
