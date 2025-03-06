@@ -230,48 +230,34 @@ function extractWithYAMLParser(
 
     deps.push(...extractRunners(job?.['runs-on']));
 
-    interface SupportedAction {
-      fieldName: string;
-      dependencyTemplate: PackageDependency;
-    }
-
-    const withActions: Record<string, SupportedAction> = {
-      'actions/setup-go': {
-        fieldName: 'go-version',
-        dependencyTemplate: {
-          datasource: GithubReleasesDatasource.id,
-          depName: 'actions/go-versions',
-          versioning: npmVersioning.id,
-        },
+    const actionsWithVersions: Record<string, Partial<PackageDependency>> = {
+      go: {
+        versioning: npmVersioning.id,
       },
-      'actions/setup-node': {
-        fieldName: 'node-version',
-        dependencyTemplate: {
-          datasource: GithubReleasesDatasource.id,
-          depName: 'actions/node-versions',
-          versioning: nodeVersioning.id,
-        },
+      node: {
+        versioning: nodeVersioning.id,
       },
-      'actions/setup-python': {
-        fieldName: 'python-version',
-        dependencyTemplate: {
-          datasource: GithubReleasesDatasource.id,
-          depName: 'actions/python-versions',
-          versioning: npmVersioning.id,
-        },
+      python: {
+        versioning: npmVersioning.id,
       },
     };
 
     for (const step of job?.steps ?? []) {
-      for (const [actionName, actionData] of Object.entries(withActions)) {
+      for (const [langName, actionData] of Object.entries(
+        actionsWithVersions,
+      )) {
+        const actionName = `actions/setup-${langName}`;
         if (
           step.uses === actionName ||
           step.uses?.startsWith(`${actionName}@`)
         ) {
-          const currentValue = step.with?.[actionData.fieldName];
+          const fieldName = `${langName}-version`;
+          const currentValue = step.with?.[fieldName];
           if (currentValue) {
             deps.push({
-              ...actionData.dependencyTemplate,
+              datasource: GithubReleasesDatasource.id,
+              depName: `actions/${langName}-versions`,
+              ...actionData,
               currentValue,
               depType: 'uses-with',
             });
