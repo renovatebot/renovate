@@ -1,4 +1,4 @@
-import { Version, VersionSpec } from '@trim21/rattler';
+import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
 import type { RangeStrategy } from '../../../types/versioning';
