@@ -38,7 +38,7 @@ function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PyProjectToml.transform((p) => p.tool?.pixi), PixiToml]),
+    z.union([PixiToml, PyProjectToml.transform((p) => p.tool?.pixi)]),
   ).unwrap();
 
   if (err) {

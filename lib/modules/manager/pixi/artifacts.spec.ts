@@ -182,6 +182,7 @@ describe('modules/manager/pixi/artifacts', () => {
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e PIXI_CACHE_DIR ' +
+            '-e RATTLER_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
