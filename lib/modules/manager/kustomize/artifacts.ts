@@ -126,7 +126,7 @@ export async function updateArtifacts({
 
   const chartHome = getSiblingFileName(
     packageFileName,
-    project.helmGlobals.chartHome ?? 'charts',
+    project.helmGlobals?.chartHome ?? 'charts',
   );
 
   try {
