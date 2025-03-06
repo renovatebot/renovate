@@ -168,7 +168,7 @@ export function dump(obj: any, opts?: DumpOptions): string {
 
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
-    return stripTemplates(content.replace(regEx(/^\s+{{.+?}}:.+/gs), ''));
+    return stripTemplates(content);
   }
 
   return content;
