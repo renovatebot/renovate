@@ -178,7 +178,7 @@ export async function updateArtifacts({
   try {
     await exec(command, execOptions);
   } catch (err) {
-    // istanbul ignore if
+    /* v8 ignore next 3 */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

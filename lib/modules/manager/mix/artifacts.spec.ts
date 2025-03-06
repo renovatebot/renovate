@@ -92,6 +92,26 @@ describe('modules/manager/mix/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('returns null when trying to use lockFileMaintenance with no mix.lock file', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.localPathExists.mockResolvedValueOnce(false);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+
+    fs.writeLocalFile.mockClear(); // Clear the mock to ensure we can check if it's called
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, isLockFileMaintenance: true },
+      }),
+    ).toBeNull();
+
+    expect(fs.writeLocalFile).not.toHaveBeenCalled();
+  });
+
   it('returns null if no updatedDeps and no lockFileMaintenance', async () => {
     expect(
       await updateArtifacts({
