@@ -18,3 +18,4 @@ export const defaultConfig = {
   ],
 };
 
+export const supportedDatasources = [PypiDatasource.id, CondaDatasource.id];

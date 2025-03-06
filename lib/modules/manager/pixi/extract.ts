@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
@@ -12,7 +13,10 @@ function getUserPixiConfig(
   content: string,
   packageFile: string,
 ): null | PixiConfig {
-  if (packageFile === 'pyproject.toml' || packageFile.endsWith('/pyproject.toml')) {
+  if (
+    packageFile === 'pyproject.toml' ||
+    packageFile.endsWith('/pyproject.toml')
+  ) {
     const { val, err } = Result.parse(content, PyProjectToml).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
@@ -34,7 +38,7 @@ function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PyProjectToml.transform(p => p.tool?.pixi),PixiToml])
+    z.union([PyProjectToml.transform((p) => p.tool?.pixi), PixiToml]),
   ).unwrap();
 
   if (err) {

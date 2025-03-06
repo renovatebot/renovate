@@ -10,7 +10,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { pickConfig } from './lockfile';
