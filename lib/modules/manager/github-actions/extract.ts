@@ -11,6 +11,7 @@ import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -229,19 +230,49 @@ function extractWithYAMLParser(
 
     deps.push(...extractRunners(job?.['runs-on']));
 
-    if (job?.steps) {
-      for (const step of job.steps) {
+    interface SupportedAction {
+      fieldName: string;
+      dependencyTemplate: PackageDependency;
+    }
+
+    const withActions: Record<string, SupportedAction> = {
+      'actions/setup-go': {
+        fieldName: 'go-version',
+        dependencyTemplate: {
+          datasource: GithubReleasesDatasource.id,
+          depName: 'actions/go-versions',
+          versioning: npmVersioning.id,
+        },
+      },
+      'actions/setup-node': {
+        fieldName: 'node-version',
+        dependencyTemplate: {
+          datasource: GithubReleasesDatasource.id,
+          depName: 'actions/node-versions',
+          versioning: nodeVersioning.id,
+        },
+      },
+      'actions/setup-python': {
+        fieldName: 'python-version',
+        dependencyTemplate: {
+          datasource: GithubReleasesDatasource.id,
+          depName: 'actions/python-versions',
+          versioning: npmVersioning.id,
+        },
+      },
+    };
+
+    for (const step of job?.steps ?? []) {
+      for (const [actionName, actionData] of Object.entries(withActions)) {
         if (
-          step.uses === 'actions/setup-node' ||
-          step.uses?.startsWith('actions/setup-node@')
+          step.uses === actionName ||
+          step.uses?.startsWith(`${actionName}@`)
         ) {
-          const nodeVersion = step.with?.['node-version'];
-          if (nodeVersion) {
+          const currentValue = step.with?.[actionData.fieldName];
+          if (currentValue) {
             deps.push({
-              depName: 'actions/node-versions',
-              currentValue: nodeVersion,
-              datasource: GithubReleasesDatasource.id,
-              versioning: nodeVersioning.id,
+              ...actionData.dependencyTemplate,
+              currentValue,
               depType: 'uses-with',
             });
           }

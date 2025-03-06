@@ -588,14 +588,14 @@ describe('modules/manager/github-actions/extract', () => {
               uses: actions/setup-node@v3
               with:
                 node-version: '20.0.0'
-            - name: "Setup Node.js with multiple versions"
-              uses: actions/setup-node@v3
+            - name: "Setup Go"
+              uses: actions/setup-go@v5
               with:
-                node-version: '12.x, 14.x'
-            - name: "Setup Node.js with range"
-              uses: actions/setup-node@v3
+                go-version: '1.23'
+            - name: "Setup Python with range"
+              uses: actions/setup-python@v3
               with:
-                node-version: '>=14.0.0 <15.0.0'
+                python-version: '>=3.8.0 <3.10.0'
             - name: "Setup Node.js with latest"
               uses: actions/setup-node@v3
               with:
@@ -629,11 +629,11 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate:
             '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
           commitMessageTopic: '{{{depName}}} action',
-          currentValue: 'v3',
+          currentValue: 'v5',
           datasource: 'github-tags',
-          depName: 'actions/setup-node',
+          depName: 'actions/setup-go',
           depType: 'action',
-          replaceString: 'actions/setup-node@v3',
+          replaceString: 'actions/setup-go@v5',
           versioning: 'docker',
         },
         {
@@ -642,9 +642,9 @@ describe('modules/manager/github-actions/extract', () => {
           commitMessageTopic: '{{{depName}}} action',
           currentValue: 'v3',
           datasource: 'github-tags',
-          depName: 'actions/setup-node',
+          depName: 'actions/setup-python',
           depType: 'action',
-          replaceString: 'actions/setup-node@v3',
+          replaceString: 'actions/setup-python@v3',
           versioning: 'docker',
         },
         {
@@ -673,17 +673,17 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
         },
         {
-          depName: 'actions/node-versions',
-          currentValue: '12.x, 14.x',
+          depName: 'actions/go-versions',
+          currentValue: '1.23',
           datasource: 'github-releases',
-          versioning: 'node',
+          versioning: 'npm',
           depType: 'uses-with',
         },
         {
-          depName: 'actions/node-versions',
-          currentValue: '>=14.0.0 <15.0.0',
+          depName: 'actions/python-versions',
+          currentValue: '>=3.8.0 <3.10.0',
           datasource: 'github-releases',
-          versioning: 'node',
+          versioning: 'npm',
           depType: 'uses-with',
         },
         {

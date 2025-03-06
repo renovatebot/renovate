@@ -19,7 +19,7 @@ export interface Job {
   container?: string | Container;
   services?: Record<string, string | Container>;
   'runs-on'?: string | string[];
-  steps?: { uses?: string; with?: { 'node-version'?: string } }[];
+  steps?: { uses?: string; with?: Record<string, string> }[];
 }
 
 /**
