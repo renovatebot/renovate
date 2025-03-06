@@ -16,7 +16,6 @@ import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
-import { memCacheProvider } from './cache/memory-http-cache-provider';
 import { fetch, stream } from './got';
 import { applyHostRule, findMatchingRule } from './host-rules';
 
@@ -158,10 +157,10 @@ export abstract class HttpBase<
     options = applyAuthorization(options);
     options.timeout ??= 60000;
 
-    let { cacheProvider } = options;
+    const { cacheProvider } = options;
 
     const memCacheKey =
-      !options.cacheProvider &&
+      !cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
@@ -172,10 +171,6 @@ export abstract class HttpBase<
             })}`,
           )
         : null;
-
-    if (memCacheKey) {
-      cacheProvider = undefined;
-    }
 
     const cachedResponse = await cacheProvider?.bypassServer<unknown>(url);
     if (cachedResponse) {
@@ -189,7 +184,7 @@ export abstract class HttpBase<
       resPromise = memCache.get(memCacheKey);
 
       /* v8 ignore start: temporary code */
-      if (resPromise && options.cacheProvider !== memCacheProvider) {
+      if (resPromise && !cacheProvider) {
         ObsoleteCacheHitLogger.write(url);
       }
       /* v8 ignore stop: temporary code */
