@@ -98,7 +98,6 @@ export class CondaDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
     } catch (err) {
-      /* v8 ignore next 5: not testable with nock*/
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);

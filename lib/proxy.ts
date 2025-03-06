@@ -8,7 +8,7 @@ let agent = false;
 
 export function bootstrap(): void {
   envVars.forEach((envVar) => {
-    /* v8 ignore start: env is case-insensitive on windows */
+    /* v8 ignore start -- env is case-insensitive on windows */
     if (
       typeof process.env[envVar] === 'undefined' &&
       typeof process.env[envVar.toLowerCase()] !== 'undefined'

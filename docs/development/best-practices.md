@@ -36,7 +36,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts
-/* v8 ignore next: can never happen */
+/* v8 ignore next -- can never happen */
 ```
 
 ### Functions
