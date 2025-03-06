@@ -166,5 +166,3 @@ export const api = {
   matches,
   sortVersions,
 } satisfies VersioningApi;
-
-export default api;
