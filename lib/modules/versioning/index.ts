@@ -1,3 +1,5 @@
+import { registry } from '../../util/registry';
+import type { Release } from '../datasource/types';
 import versionings from './api';
 import { Versioning } from './schema';
 import * as semverCoerced from './semver-coerced';
@@ -30,4 +32,51 @@ export function get(versioning: string | null | undefined): VersioningApi {
   }
 
   return res.data;
+}
+
+interface GetNewValueConfig {
+  currentValue: string;
+  rangeStrategy: string;
+  currentVersion: string;
+  config: {
+    versioning: string;
+    constraints?: {
+      allowedVersions?: string;
+      offset?: number;
+      ignorePrerelease?: boolean;
+    };
+  };
+}
+
+export async function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  config,
+}: GetNewValueConfig): Promise<string> {
+  const versioning = get(config.versioning);
+  const versions = await registry.getPkgReleases();
+
+  if (!versions.releases?.length) {
+    return currentValue;
+  }
+
+  const sortedVersions = versions.releases
+    .map((release: Release) => release.version)
+    .filter((version: string) => versioning.isValid(version))
+    .sort((a: string, b: string) => versioning.sortVersions(a, b));
+
+  if (!sortedVersions.length) {
+    return currentValue;
+  }
+
+  const latestVersion = sortedVersions[sortedVersions.length - 1];
+  const offset = config.constraints?.offset ?? 0;
+  const targetIndex = sortedVersions.length - 1 + offset;
+
+  if (targetIndex < 0 || targetIndex >= sortedVersions.length) {
+    return currentValue;
+  }
+
+  return sortedVersions[targetIndex];
 }

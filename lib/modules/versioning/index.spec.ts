@@ -1,5 +1,9 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
+import { registry } from '../../util/registry';
+import { asTimestamp } from '../../util/timestamp';
+import type { ReleaseResult } from '../datasource/types';
 import { isVersioningApiConstructor } from './common';
 import type { GenericVersion } from './generic';
 import { GenericVersioningApi } from './generic';
@@ -7,6 +11,7 @@ import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
+import { getNewValue } from './index';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning',
@@ -150,6 +155,129 @@ describe('modules/versioning/index', () => {
         .sort();
 
       expect(schemeKeys).toEqual(npmApi);
+    });
+  });
+
+  describe('version selection', () => {
+    // Mock the package registry response
+    const mockVersions: ReleaseResult = {
+      releases: [
+        {
+          version: '1.0.0',
+          releaseTimestamp: asTimestamp('2021-01-01T00:00:00.000Z')!,
+        },
+        {
+          version: '2.0.0',
+          releaseTimestamp: asTimestamp('2021-06-01T00:00:00.000Z')!,
+        },
+        {
+          version: '3.0.0',
+          releaseTimestamp: asTimestamp('2022-01-01T00:00:00.000Z')!,
+        },
+        {
+          version: '4.0.0',
+          releaseTimestamp: asTimestamp('2022-06-01T00:00:00.000Z')!,
+        },
+      ],
+      sourceUrl: '',
+      homepage: '',
+      registryUrl: '',
+    };
+
+    beforeEach(() => {
+      // Mock the registry lookup using Vitest's vi
+      vi.spyOn(registry, 'getPkgReleases').mockResolvedValue(mockVersions);
+    });
+
+    it('should select n-1 version relative to latest', async () => {
+      const config = {
+        versioning: 'semver',
+        constraints: {
+          allowedVersions: '<=${latestVersion}',
+          offset: -1,
+        },
+      };
+
+      const result = await getNewValue({
+        currentValue: '2.0.0',
+        rangeStrategy: 'replace',
+        currentVersion: '2.0.0',
+        config,
+      });
+
+      expect(result).toBe('3.0.0');
+    });
+
+    it('should handle n-1 when new versions are published', async () => {
+      // Simulate a new version being published
+      mockVersions.releases.push({
+        version: '5.0.0',
+        releaseTimestamp: asTimestamp('2023-01-01T00:00:00.000Z')!,
+      });
+
+      const config = {
+        versioning: 'semver',
+        constraints: {
+          allowedVersions: '<=${latestVersion}',
+          offset: -1,
+        },
+      };
+
+      const result = await getNewValue({
+        currentValue: '3.0.0',
+        rangeStrategy: 'replace',
+        currentVersion: '3.0.0',
+        config,
+      });
+
+      // Should select version 4.0.0 since it's n-1 from new latest (5.0.0)
+      expect(result).toBe('4.0.0');
+    });
+
+    it('should handle multiple version offsets', async () => {
+      const config = {
+        versioning: 'semver',
+        constraints: {
+          allowedVersions: '<=${latestVersion}',
+          offset: -2, // Test n-2 scenario
+        },
+      };
+
+      const result = await getNewValue({
+        currentValue: '2.0.0',
+        rangeStrategy: 'replace',
+        currentVersion: '2.0.0',
+        config,
+      });
+
+      // Should select version 2.0.0 since it's n-2 from latest (4.0.0)
+      expect(result).toBe('2.0.0');
+    });
+
+    it('should handle pre-release versions correctly', async () => {
+      mockVersions.releases.push({
+        version: '4.1.0-beta.1',
+        releaseTimestamp: asTimestamp('2023-02-01T00:00:00.000Z')!,
+      });
+
+      const config = {
+        versioning: 'semver',
+        constraints: {
+          allowedVersions: '<=${latestVersion}',
+          offset: -1,
+          ignorePrerelease: true, // Should ignore pre-release when calculating n-1
+        },
+      };
+
+      const result = await getNewValue({
+        currentValue: '3.0.0',
+        rangeStrategy: 'replace',
+        currentVersion: '3.0.0',
+        config,
+      });
+
+      // Should still select 3.0.0 since 4.1.0-beta.1 is a pre-release
+      expect(result).toBe('3.0.0');
     });
   });
 });
