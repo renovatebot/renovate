@@ -575,7 +575,7 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(7);
     });
 
-    it('extracts node-version from actions/setup-node', () => {
+    it('extracts x-version from actions/setup-x', () => {
       const yamlContent = `
       jobs:
         build:
@@ -659,35 +659,40 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'docker',
         },
         {
-          depName: 'actions/node-versions',
+          depName: 'node',
+          packageName: 'actions/node-versions',
           currentValue: '16.x',
           datasource: 'github-releases',
           versioning: 'node',
           depType: 'uses-with',
         },
         {
-          depName: 'actions/node-versions',
+          depName: 'node',
+          packageName: 'actions/node-versions',
           currentValue: '20.0.0',
           datasource: 'github-releases',
           versioning: 'node',
           depType: 'uses-with',
         },
         {
-          depName: 'actions/go-versions',
+          depName: 'go',
+          packageName: 'actions/go-versions',
           currentValue: '1.23',
           datasource: 'github-releases',
           versioning: 'npm',
           depType: 'uses-with',
         },
         {
-          depName: 'actions/python-versions',
+          depName: 'python',
+          packageName: 'actions/python-versions',
           currentValue: '>=3.8.0 <3.10.0',
           datasource: 'github-releases',
           versioning: 'npm',
           depType: 'uses-with',
         },
         {
-          depName: 'actions/node-versions',
+          depName: 'node',
+          packageName: 'actions/node-versions',
           currentValue: 'latest',
           datasource: 'github-releases',
           versioning: 'node',

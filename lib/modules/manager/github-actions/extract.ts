@@ -240,23 +240,25 @@ function extractWithYAMLParser(
       python: {
         versioning: npmVersioning.id,
       },
+      // Not covered yet because they use different datasources/packageNames:
+      // - dotnet
+      // - java
     };
 
     for (const step of job?.steps ?? []) {
-      for (const [langName, actionData] of Object.entries(
-        actionsWithVersions,
-      )) {
-        const actionName = `actions/setup-${langName}`;
+      for (const [action, actionData] of Object.entries(actionsWithVersions)) {
+        const actionName = `actions/setup-${action}`;
         if (
           step.uses === actionName ||
           step.uses?.startsWith(`${actionName}@`)
         ) {
-          const fieldName = `${langName}-version`;
+          const fieldName = `${action}-version`;
           const currentValue = step.with?.[fieldName];
           if (currentValue) {
             deps.push({
               datasource: GithubReleasesDatasource.id,
-              depName: `actions/${langName}-versions`,
+              depName: action,
+              packageName: `actions/${action}-versions`,
               ...actionData,
               currentValue,
               depType: 'uses-with',
