@@ -10,6 +10,7 @@ import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 
 const pixiToml = `
 [project]
@@ -117,6 +118,24 @@ describe('modules/manager/pixi/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('handle TEMPORARY_ERROR', async () => {
+      fs.ensureCacheDir.mockResolvedValueOnce(
+        '/tmp/renovate/cache/others/pixi',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.writeLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: { ...config, isLockFileMaintenance: true },
+        }),
+      ).toReject();
     });
 
     it('returns updated pixi.lock using docker', async () => {

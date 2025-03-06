@@ -51,10 +51,11 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
     }
 
+    // https://pixi.sh/latest/features/environment/#caching-packages
+    const PIXI_CACHE_DIR = await ensureCacheDir('pixi');
     const extraEnv = {
-      ...getGitEnvironmentVariables(['pypi']),
-      // https://pixi.sh/latest/features/environment/#caching-packages
-      PIXI_CACHE_DIR: await ensureCacheDir('pixi'),
+      PIXI_CACHE_DIR,
+      RATTLER_CACHE_DIR: PIXI_CACHE_DIR,
     };
 
     const execOptions: ExecOptions = {
@@ -80,11 +81,9 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
-    /* v8 ignore start */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    /* v8 ignore end */
 
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
     return [
