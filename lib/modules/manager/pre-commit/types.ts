@@ -4,11 +4,11 @@ export interface PreCommitConfig {
 
 export interface PreCommitHook {
   language?: string;
-  additional_dependencies?: Array<string>;
+  additional_dependencies?: string[];
 }
 
 export interface PreCommitDependency {
   repo: string;
-  hooks?: Array<PreCommitHook>;
+  hooks?: PreCommitHook[];
   rev: string;
 }

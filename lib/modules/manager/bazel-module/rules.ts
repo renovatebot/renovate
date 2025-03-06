@@ -8,7 +8,7 @@ import { regEx } from '../../../util/regex';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
-import { RuleFragmentSchema, StringFragmentSchema } from './fragments';
+import { RuleFragmentSchema, StringFragmentSchema } from './parser/fragments';
 
 // Rule Schemas
 

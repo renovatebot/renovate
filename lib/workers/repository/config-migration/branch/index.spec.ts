@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
 import type { RenovateConfig } from '../../../../../test/util';
 import {
@@ -17,11 +17,11 @@ import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
 
-jest.mock('./migrated-data');
-jest.mock('./rebase');
-jest.mock('./create');
-jest.mock('../../../../util/git');
-jest.mock('../../update/branch/handle-existing');
+vi.mock('./migrated-data');
+vi.mock('./rebase');
+vi.mock('./create');
+vi.mock('../../../../util/git');
+vi.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
 
@@ -113,7 +113,7 @@ describe('workers/repository/config-migration/branch/index', () => {
           number: 1,
         }),
       );
-      platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
@@ -164,7 +164,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('updates migration branch & refresh PR when migration enabled and open pr exists', async () => {
       platform.getBranchPr.mockResolvedValue(mock<Pr>());
-      platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {

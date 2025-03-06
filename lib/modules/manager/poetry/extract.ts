@@ -7,6 +7,7 @@ import {
   readLocalFile,
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
+import { massage as massageToml } from '../../../util/toml';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageFileContent } from '../types';
 import { Lockfile, PoetrySchemaToml } from './schema';
@@ -17,7 +18,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
-    content,
+    massageToml(content),
     PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {

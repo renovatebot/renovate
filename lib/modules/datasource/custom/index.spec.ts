@@ -6,7 +6,7 @@ import { fs } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { CustomDatasource } from './index';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {

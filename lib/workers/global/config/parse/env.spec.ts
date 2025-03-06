@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest';
 import type { RequiredConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as env from './env';
@@ -178,6 +179,41 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
+    it('supports RENOVATE_ prefixed github com token', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
+        RENOVATE_TOKEN: 'a github.com token',
+      };
+      expect(await env.getConfig(envParam)).toEqual({
+        token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
+      });
+    });
+
+    it('GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
+        RENOVATE_GITHUB_COM_TOKEN: 'github_pat_YYYYYY',
+        RENOVATE_TOKEN: 'a github.com token',
+      };
+      expect(await env.getConfig(envParam)).toEqual({
+        token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
+      });
+    });
+
     it('supports GitHub custom endpoint and gitlab.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
@@ -292,12 +328,12 @@ describe('workers/global/config/parse/env', () => {
     });
 
     describe('RENOVATE_CONFIG tests', () => {
-      let processExit: jest.SpyInstance<never, [code?: number]>;
+      let processExit: MockInstance<(code?: number | string | null) => never>;
 
       beforeAll(() => {
-        processExit = jest
+        processExit = vi
           .spyOn(process, 'exit')
-          .mockImplementation((async () => {}) as never);
+          .mockImplementation((() => void 0) as never);
       });
 
       afterAll(() => {

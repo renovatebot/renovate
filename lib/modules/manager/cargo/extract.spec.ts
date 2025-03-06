@@ -4,7 +4,7 @@ import { fs } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {

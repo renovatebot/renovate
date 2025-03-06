@@ -9,7 +9,7 @@ import * as hostRules from '../../../../../../util/host-rules';
 import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../../modules/datasource/npm');
+vi.mock('../../../../../../modules/datasource/npm');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -313,7 +313,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      const githubTagsMock = vi.spyOn(githubGraphql, 'queryTags');
       githubTagsMock.mockResolvedValue(
         partial<GithubTagItem>([
           { version: 'v1.0.1' },
