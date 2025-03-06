@@ -41,21 +41,23 @@ export async function updateArtifacts({
 
   let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
-    const lockFileError = await lockFileReadError(lockFileName);
+    const lockFileError = await checkLockFileReadError(lockFileName);
     if (lockFileError) {
       return lockFileError;
     }
 
-    const parentLockFileName =
-      (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ??
-      'mix.lock';
-    existingLockFileContent = await readLocalFile(parentLockFileName, 'utf8');
+    const parentLockFileName = await findLocalSiblingOrParent(
+      packageFileName,
+      'mix.lock',
+    );
+    existingLockFileContent =
+      parentLockFileName && (await readLocalFile(parentLockFileName, 'utf8'));
 
-    if (existingLockFileContent) {
+    if (parentLockFileName && existingLockFileContent) {
       lockFileName = parentLockFileName;
       isUmbrella = true;
-    } else {
-      const lockFileError = await lockFileReadError(parentLockFileName);
+    } else if (parentLockFileName) {
+      const lockFileError = await checkLockFileReadError(parentLockFileName);
       if (lockFileError) {
         return lockFileError;
       }
@@ -65,6 +67,13 @@ export async function updateArtifacts({
   if (isLockFileMaintenance && isUmbrella) {
     logger.debug(
       'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+    );
+    return null;
+  }
+
+  if (isLockFileMaintenance && !existingLockFileContent) {
+    logger.debug(
+      'Cannot use lockFileMaintenance when no mix.lock file is present',
     );
     return null;
   }
@@ -206,7 +215,7 @@ export async function updateArtifacts({
   ];
 }
 
-async function lockFileReadError(
+async function checkLockFileReadError(
   lockFileName: string,
 ): Promise<UpdateArtifactsResult[] | null> {
   if (await localPathExists(lockFileName)) {
