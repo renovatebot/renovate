@@ -32,17 +32,16 @@ function getUserPixiConfig(
     return val;
   }
 
-  const { val: maybePyprojectConfig } = Result.parse(
+  const { val, err } = Result.parse(
     content,
-    PyProjectToml,
+    z.union([PyProjectToml.transform(p => p.tool?.pixi),PixiToml])
   ).unwrap();
 
-  if (maybePyprojectConfig?.tool?.pixi) {
-    return maybePyprojectConfig.tool.pixi;
+  if (err) {
+    logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
+    return null;
   }
-
-  const { val: maybePixiConfig } = Result.parse(content, PixiToml).unwrap();
-  return maybePixiConfig ?? null;
+  return val ?? null;
 }
 
 export async function extractPackageFile(
