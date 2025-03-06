@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
@@ -12,7 +13,10 @@ function getUserPixiConfig(
   content: string,
   packageFile: string,
 ): null | PixiConfig {
-  if (packageFile.endsWith('pyproject.toml')) {
+  if (
+    packageFile === 'pyproject.toml' ||
+    packageFile.endsWith('/pyproject.toml')
+  ) {
     const { val, err } = Result.parse(content, PyProjectToml).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
@@ -22,7 +26,7 @@ function getUserPixiConfig(
     return val.tool?.pixi ?? null;
   }
 
-  if (packageFile.endsWith('pixi.toml')) {
+  if (packageFile === 'pixi.toml' || packageFile.endsWith('/pixi.toml')) {
     const { val, err } = Result.parse(content, PixiToml).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
@@ -32,24 +36,23 @@ function getUserPixiConfig(
     return val;
   }
 
-  const { val: maybePyprojectConfig } = Result.parse(
+  const { val, err } = Result.parse(
     content,
-    PyProjectToml,
+    z.union([PixiToml, PyProjectToml.transform((p) => p.tool?.pixi)]),
   ).unwrap();
 
-  if (maybePyprojectConfig?.tool?.pixi) {
-    return maybePyprojectConfig.tool.pixi;
+  if (err) {
+    logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
+    return null;
   }
-
-  const { val: maybePixiConfig } = Result.parse(content, PixiToml).unwrap();
-  return maybePixiConfig ?? null;
+  return val ?? null;
 }
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
-  logger.info(`pixi.extractPackageFile(${packageFile})`);
+  logger.trace(`pixi.extractPackageFile(${packageFile})`);
 
   const config = getUserPixiConfig(content, packageFile);
   if (!config) {

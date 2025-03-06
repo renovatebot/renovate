@@ -1,5 +1,3 @@
-export const commandLock = 'pixi lock --no-progress --color=never --quiet';
-
 /**
  * There is no way to know which version we should pick based on `pixi.toml` and `pixi.lock`
  * so we need to maintain a mapping from pixi version and it's generated lock file version.
@@ -8,13 +6,12 @@ export const commandLock = 'pixi lock --no-progress --color=never --quiet';
  *
  */
 const pixiGenerateLockFileVersion: Config[] = [
-  { lockVersion: 6, range: '>=0.39.2, <0.43.0', cmd: commandLock },
+  { lockVersion: 6, range: '>=0.39.2, <0.43.0' },
 ] as const;
 
 interface Config {
   lockVersion: number;
   range: string;
-  cmd: string;
 }
 
 export function pickConfig(lockVersion?: number): Config | null {

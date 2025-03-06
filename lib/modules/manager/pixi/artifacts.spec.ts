@@ -5,8 +5,8 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
@@ -43,17 +43,16 @@ iris = ">=3.11.1,<4"
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
 const datasource = vi.mocked(_datasource);
-const hostRules = vi.mocked(_hostRules);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -62,7 +61,6 @@ describe('modules/manager/pixi/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      hostRules.getAll.mockReturnValue([]);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();
     });
@@ -119,11 +117,28 @@ describe('modules/manager/pixi/artifacts', () => {
       ]);
     });
 
+    it('handle TEMPORARY_ERROR', async () => {
+      fs.ensureCacheDir.mockResolvedValueOnce(
+        '/tmp/renovate/cache/others/pixi',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.writeLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: { ...config, isLockFileMaintenance: true },
+        }),
+      ).rejects.toThrow(new Error(TEMPORARY_ERROR));
+    });
+
     it('returns updated pixi.lock using docker', async () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce(

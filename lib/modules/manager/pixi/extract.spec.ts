@@ -302,7 +302,7 @@ describe('modules/manager/pixi/extract', () => {
 
     it('returns parse pixi section from pyproject.toml', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.localPathExists.mockReturnValueOnce(Promise.resolve(true));
+      fs.localPathExists.mockResolvedValueOnce(true);
 
       expect(
         await extractPackageFile(pyprojectToml, 'pyproject.toml'),
@@ -680,5 +680,9 @@ describe('modules/manager/pixi/extract', () => {
       ],
       lockFiles: [],
     });
+  });
+
+  it('returns null for non-known config file', async () => {
+    expect(await extractPackageFile(`{}`, 'unexpected.json')).toBe(null);
   });
 });
