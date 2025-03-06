@@ -126,13 +126,13 @@ export class GoDirectDatasource extends Datasource {
         res = await this.bitbucket.getReleases(source);
         break;
       }
-      /* istanbul ignore next: can never happen, makes lint happy */
+      /* v8 ignore next 3 -- should never happen */
       default: {
         return null;
       }
     }
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (!res) {
       return null;
     }
