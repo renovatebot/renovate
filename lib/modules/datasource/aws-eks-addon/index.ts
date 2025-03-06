@@ -47,19 +47,20 @@ export class AwsEKSAddonDataSource extends Datasource {
       maxResults: 1,
     });
     const response = await this.getClient(filter).send(cmd);
-    const addons: AddonInfo[] = response.addons ?? [];
+    const addons = response.addons ?? [];
     return {
       releases: addons
         .flatMap((addon) => {
           return addon.addonVersions;
         })
+        .filter(is.nonEmptyObject)
         .map((versionInfo) => ({
-          version: versionInfo?.addonVersion ?? '',
+          version: versionInfo.addonVersion ?? '',
           default:
-            versionInfo?.compatibilities?.some(
+            versionInfo.compatibilities?.some(
               (comp: Compatibility): boolean | undefined => comp.defaultVersion,
             ) ?? false,
-          compatibleWith: versionInfo?.compatibilities?.flatMap(
+          compatibleWith: versionInfo.compatibilities?.flatMap(
             (comp: Compatibility): string | undefined => comp.clusterVersion,
           ),
         }))
