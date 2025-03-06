@@ -57,7 +57,7 @@ export function getComposerUpdateArguments(
 
   if (
     is.string(toolConstraint.constraint) &&
-    api.intersects!(toolConstraint.constraint, '^2.7')
+    api.intersects!(toolConstraint.constraint, '>=2.7')
   ) {
     args += ' --minimal-changes';
   }
