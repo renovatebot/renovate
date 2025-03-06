@@ -3,6 +3,7 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
@@ -535,6 +536,39 @@ describe('modules/manager/kustomize/artifacts', () => {
         },
       }),
     ).toEqual([{ artifactError: { stderr: 'not found' } }]);
+    expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    expect(execSnapshots).toMatchObject([]);
+  });
+
+  it('throws on TEMPORARY_ERROR', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockImplementationOnce(() => {
+      throw new Error(TEMPORARY_ERROR);
+    });
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: undefined,
+        currentVersion: '1.0.0',
+        registryUrls: ['https://github.com.com/example/example'],
+        datasource: HelmDatasource.id,
+      },
+    ];
+
+    await expect(() =>
+      kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config: {
+          ...config,
+          postUpdateOptions: [],
+        },
+      }),
+    ).rejects.toThrowError(TEMPORARY_ERROR);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toMatchObject([]);
   });

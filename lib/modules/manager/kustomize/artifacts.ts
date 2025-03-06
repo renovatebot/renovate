@@ -221,7 +221,6 @@ export async function updateArtifacts({
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
-    /* v8 ignore next 3: not easily testable */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
