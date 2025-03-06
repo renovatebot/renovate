@@ -12,6 +12,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -189,7 +190,7 @@ export abstract class HttpBase<
 
       /* v8 ignore start: temporary code */
       if (resPromise && options.cacheProvider !== memCacheProvider) {
-        logger.debug({ url }, 'Cache hit on the obsolete memCache option');
+        ObsoleteCacheHitLogger.write(url);
       }
       /* v8 ignore stop: temporary code */
     }
