@@ -22,7 +22,7 @@ function getUserPixiConfig(
     return val.tool?.pixi ?? null;
   }
 
-  if (packageFile.endsWith('pixi.toml')) {
+  if (packageFile === 'pixi.toml' || packageFile.endsWith('/pixi.toml')) {
     const { val, err } = Result.parse(content, PixiToml).unwrap();
     if (err) {
       logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
