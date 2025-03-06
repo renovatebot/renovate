@@ -16,7 +16,7 @@ export function generateHelmEnvs(config: UpdateArtifactsConfig): ExtraEnv {
 
   if (
     config.constraints?.helm &&
-    semver.intersects(config.constraints.helm, '<3.8.0')
+    !semver.intersects(config.constraints.helm, '>=3.8.0')
   ) {
     envs.HELM_EXPERIMENTAL_OCI = '1';
   }

@@ -33,7 +33,7 @@ describe('modules/manager/kustomize/common', () => {
 
     it('generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI', () => {
       const config = {
-        constraints: { helm: '>= 3.8.0' },
+        constraints: { helm: '>=3.7.0' },
       };
       const envs = generateHelmEnvs(config);
       expect(envs).toEqual({
@@ -65,7 +65,7 @@ describe('modules/manager/kustomize/common', () => {
 
     it('generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI', () => {
       const config = {
-        constraints: { helm: '>=3.7.0' },
+        constraints: { helm: '<3.8.0' },
         postUpdateOptions: ['kustomizeInflateHelmCharts'],
       };
       const envs = generateHelmEnvs(config);
