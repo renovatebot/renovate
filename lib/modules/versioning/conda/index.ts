@@ -72,12 +72,7 @@ function getNewValue(config: NewValueConfig): string | null {
     return null;
   }
 
-  try {
-    return pep440.api.getNewValue(config);
-  } catch {
-    /* v8 ignore next */
-    return null;
-  }
+  return pep440.api.getNewValue(config);
 }
 
 function sortVersions(version: string, other: string): number {
