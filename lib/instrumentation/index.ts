@@ -74,7 +74,7 @@ export function init(): void {
 
   instrumentations = [
     new HttpInstrumentation({
-      /* v8 ignore start: not easily testable */
+      /* v8 ignore start -- not easily testable */
       applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
         if (
@@ -95,7 +95,7 @@ export function init(): void {
   });
 }
 
-/* v8 ignore start: not easily testable */
+/* v8 ignore start -- not easily testable */
 // https://github.com/open-telemetry/opentelemetry-js-api/issues/34
 export async function shutdown(): Promise<void> {
   const traceProvider = getTracerProvider();
