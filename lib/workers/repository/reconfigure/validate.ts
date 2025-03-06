@@ -5,7 +5,6 @@ import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
-import { scm } from '../../../modules/platform/scm';
 import { getBranchCommit } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { setReconfigureBranchCache } from './reconfigure-cache';
@@ -20,10 +19,6 @@ export async function validateReconfigureBranch(
 
   const context = config.statusCheckNames?.configValidation;
   const branchName = getReconfigureBranchName(config.branchPrefix!);
-
-  // look for config file
-  // 1. check reconfigure branch cache and use the configFileName if it exists
-  // 2. checkout reconfigure branch and look for the config file, don't assume default configFileName
   const branchSha = getBranchCommit(branchName)!;
 
   if (context) {
@@ -43,6 +38,7 @@ export async function validateReconfigureBranch(
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
     );
+    return true;
   }
 
   // perform validation and provide a passing or failing check based on result
@@ -80,14 +76,10 @@ export async function validateReconfigureBranch(
 
     await setBranchStatus(branchName, 'Validation Failed', 'red', context);
     setReconfigureBranchCache(branchSha, false);
-    await scm.checkoutBranch(config.baseBranch!);
     return false;
   }
 
   // passing check
   await setBranchStatus(branchName, 'Validation Successful', 'green', context);
-
-  setReconfigureBranchCache(branchSha, true);
-  await scm.checkoutBranch(config.baseBranch!);
   return true;
 }

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import JSON5 from 'json5';
 import { GlobalConfig } from '../../../config/global';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -9,13 +10,14 @@ import { getBranchCommit } from '../../../util/git';
 import { mergeInheritedConfig } from '../init/inherited';
 import { detectConfigFile, mergeRenovateConfig } from '../init/merge';
 import { extractDependencies } from '../process';
+import type { ExtractResult } from '../process/extract-update';
+import { ensureReconfigurePrComment } from './pr-comment';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 import { getReconfigureBranchName, setBranchStatus } from './utils';
 import { validateReconfigureBranch } from './validate';
-import JSON5 from 'json5';
 
 export async function checkReconfigureBranch(
   config: RenovateConfig,
@@ -75,25 +77,55 @@ export async function checkReconfigureBranch(
   );
 
   if (!isValidConfig) {
+    await scm.checkoutBranch(config.defaultBranch!);
     return;
   }
 
+  let extractResult: ExtractResult;
   let newConfig = GlobalConfig.set(repoConfig); // file config with only non global options
   newConfig.baseBranch = config.defaultBranch;
   newConfig.repoIsOnboarded = true;
   newConfig.errors = [];
   newConfig.warnings = [];
-  newConfig = await mergeInheritedConfig(newConfig);
-  await scm.checkoutBranch(reconfigureBranch);
-  newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
 
-  await scm.checkoutBranch(config.defaultBranch!);
-  const extractResult = await extractDependencies(newConfig, false);
-  logger.debug(
-    { branchList: extractResult.branchList },
-    'Reconfigure extraction',
+  try {
+    newConfig = await mergeInheritedConfig(newConfig);
+    newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
+    await scm.checkoutBranch(config.defaultBranch!);
+    extractResult = await extractDependencies(newConfig, false);
+    logger.debug(
+      { branchList: extractResult.branchList },
+      'Reconfigure extraction',
+    );
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error while extracting dependencies using the reconfigure config',
+    );
+    setReconfigureBranchCache(branchSha, true);
+    await scm.checkoutBranch(config.defaultBranch!); // being cautious
+    return;
+  }
+
+  if (extractResult) {
+    // take the extract result and
+    // add a comment to the reconfigure pr (if recon pr is not existing, create it and add the comment)
+    await ensureReconfigurePrComment(
+      newConfig,
+      extractResult.packageFiles,
+      extractResult.branches,
+      reconfigureBranch,
+    );
+  }
+
+  await setBranchStatus(
+    reconfigureBranch,
+    'Validation Successful',
+    'green',
+    context,
   );
-  await scm.checkoutBranch(config.defaultBranch!);
+  setReconfigureBranchCache(branchSha, true, extractResult);
+  await scm.checkoutBranch(config.defaultBranch!); //being cautious
 }
 
 async function getReconfigureConfig(branchName: string): Promise<{
@@ -102,6 +134,7 @@ async function getReconfigureConfig(branchName: string): Promise<{
   configFileName?: string;
 }> {
   let errMessage = '';
+
   await scm.checkoutBranch(branchName);
   const configFileName = await detectConfigFile();
 
@@ -115,7 +148,7 @@ async function getReconfigureConfig(branchName: string): Promise<{
   try {
     configFileRaw = await readLocalFile(configFileName, 'utf8');
   } catch (err) {
-    logger.error({ err }, 'Error while reading config file');
+    logger.debug({ err }, 'Error while reading config file');
   }
 
   if (!is.nonEmptyString(configFileRaw)) {
@@ -132,7 +165,7 @@ async function getReconfigureConfig(branchName: string): Promise<{
       configFileParsed = configFileParsed.renovate;
     }
   } catch (err) {
-    logger.error({ err }, 'Error while parsing config file');
+    logger.debug({ err }, 'Error while parsing config file');
     errMessage = 'Validation Failed - Unparsable config file';
     return { config: null, errMessage, configFileName };
   }
