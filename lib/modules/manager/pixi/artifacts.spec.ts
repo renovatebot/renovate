@@ -5,12 +5,12 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import * as docker from '../../../util/exec/docker';
 import * as _hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 
 const pixiToml = `
 [project]
