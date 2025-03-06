@@ -8,7 +8,9 @@ import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import * as dockerVersioning from '../../versioning/docker';
+import * as nodeVersioning from '../../versioning/node';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -226,6 +228,26 @@ function extractWithYAMLParser(
     }
 
     deps.push(...extractRunners(job?.['runs-on']));
+
+    if (job?.steps) {
+      for (const step of job.steps) {
+        if (
+          step.uses === 'actions/setup-node' ||
+          step.uses?.startsWith('actions/setup-node@')
+        ) {
+          const nodeVersion = step.with?.['node-version'];
+          if (nodeVersion) {
+            deps.push({
+              depName: 'actions/node-versions',
+              currentValue: nodeVersion,
+              datasource: GithubReleasesDatasource.id,
+              versioning: nodeVersioning.id,
+              depType: 'node-version',
+            });
+          }
+        }
+      }
+    }
   }
 
   return deps;

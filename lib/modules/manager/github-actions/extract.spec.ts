@@ -574,5 +574,71 @@ describe('modules/manager/github-actions/extract', () => {
         res?.deps.filter((d) => d.datasource === 'github-runners'),
       ).toHaveLength(7);
     });
+
+    it('extracts node-version from actions/setup-node', () => {
+      const yamlContent = `
+      jobs:
+        build:
+          steps:
+            - name: "Setup Node.js"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '16.x'
+            - name: "Setup Node.js with different version"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '14.x'
+            - name: "Setup Node.js with multiple versions"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '12.x, 14.x'
+            - name: "Setup Node.js with range"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '>=14.0.0 <15.0.0'
+            - name: "Setup Node.js with latest"
+              uses: actions/setup-node@v3
+              with:
+                node-version: 'latest'`;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/node-versions',
+          currentValue: '16.x',
+          datasource: 'github-releases',
+          versioning: 'node',
+          depType: 'node-version',
+        },
+        {
+          depName: 'actions/node-versions',
+          currentValue: '14.x',
+          datasource: 'github-releases',
+          versioning: 'node',
+          depType: 'node-version',
+        },
+        {
+          depName: 'actions/node-versions',
+          currentValue: '12.x, 14.x',
+          datasource: 'github-releases',
+          versioning: 'node',
+          depType: 'node-version',
+        },
+        {
+          depName: 'actions/node-versions',
+          currentValue: '>=14.0.0 <15.0.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          depType: 'node-version',
+        },
+        {
+          depName: 'actions/node-versions',
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          versioning: 'node',
+          depType: 'node-version',
+        },
+      ]);
+    });
   });
 });
