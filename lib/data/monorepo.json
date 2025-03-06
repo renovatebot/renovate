@@ -623,7 +623,8 @@
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
-    "swc": "https://github.com/swc-project/"
+    "swc": "https://github.com/swc-project/",
+    "twig": "https://github.com/twigphp/"
   },
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],

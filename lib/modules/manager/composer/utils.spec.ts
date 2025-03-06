@@ -175,6 +175,19 @@ describe('modules/manager/composer/utils', () => {
       );
     });
 
+    it('disables only extension and library platform requirements with ^2.1', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.1' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
     it('disables only extension and library platform requirements with 2.2.0', () => {
       expect(
         getComposerArguments(
@@ -195,6 +208,32 @@ describe('modules/manager/composer/utils', () => {
             composerIgnorePlatformReqs: [],
           },
           { toolName: 'composer', constraint: '^2.2' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
+    it('disables only extension and library platform requirements with 2.3.0', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '2.3.0' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
+    it('disables only extension and library platform requirements with ^2.3', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.3' },
         ),
       ).toBe(
         " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
