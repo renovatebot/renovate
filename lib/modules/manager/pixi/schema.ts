@@ -233,7 +233,7 @@ export const PixiConfigSchema = z
           ),
         )
         .map((item) => {
-          const channels = item.channels ? orderChannels(item.channels) : [];
+          const channels = orderChannels(item.channels);
           if (item.channel) {
             return {
               ...item,
@@ -273,7 +273,7 @@ function channelToRegistryUrl(channel: string): string {
   return defaultCondaRegistryAPi + channel + '/';
 }
 
-function orderChannels(channels: Channels): string[] {
+function orderChannels(channels: Channels = []): string[] {
   return channels
     .map((channel, index) => {
       if (is.string(channel)) {
