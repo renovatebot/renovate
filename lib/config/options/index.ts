@@ -2010,7 +2010,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',

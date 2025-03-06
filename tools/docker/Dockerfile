@@ -19,13 +19,9 @@ ENV RENOVATE_BINARY_SOURCE=global
 # --------------------------------------
 FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:10.0.0-next.8@sha256:848dfc55ba3abc7b3bb08e9a933e92bed7831d03d15dbd6554ff995ff40beae3 AS build
 
-# We want a specific node version here
-# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 22.14.0
-
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.4.1
+RUN install-tool pnpm 10.5.2
 
 WORKDIR /usr/local/renovate
 
