@@ -37,7 +37,7 @@ export async function updateArtifacts({
     logger.debug(`No lock file found`);
     return null;
   }
-  logger.debug(`Updating ${lockFileName}`);
+  logger.trace(`Updating ${lockFileName}`);
 
   const cmd: string[] = [commandLock];
 
