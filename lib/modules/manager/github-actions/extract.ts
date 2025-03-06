@@ -242,7 +242,7 @@ function extractWithYAMLParser(
               currentValue: nodeVersion,
               datasource: GithubReleasesDatasource.id,
               versioning: nodeVersioning.id,
-              depType: 'node-version',
+              depType: 'uses-with',
             });
           }
         }

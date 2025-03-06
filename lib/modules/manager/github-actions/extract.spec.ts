@@ -584,10 +584,10 @@ describe('modules/manager/github-actions/extract', () => {
               uses: actions/setup-node@v3
               with:
                 node-version: '16.x'
-            - name: "Setup Node.js with different version"
+            - name: "Setup Node.js with exact version"
               uses: actions/setup-node@v3
               with:
-                node-version: '14.x'
+                node-version: '20.0.0'
             - name: "Setup Node.js with multiple versions"
               uses: actions/setup-node@v3
               with:
@@ -604,39 +604,94 @@ describe('modules/manager/github-actions/extract', () => {
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
           depName: 'actions/node-versions',
           currentValue: '16.x',
           datasource: 'github-releases',
           versioning: 'node',
-          depType: 'node-version',
+          depType: 'uses-with',
         },
         {
           depName: 'actions/node-versions',
-          currentValue: '14.x',
+          currentValue: '20.0.0',
           datasource: 'github-releases',
           versioning: 'node',
-          depType: 'node-version',
+          depType: 'uses-with',
         },
         {
           depName: 'actions/node-versions',
           currentValue: '12.x, 14.x',
           datasource: 'github-releases',
           versioning: 'node',
-          depType: 'node-version',
+          depType: 'uses-with',
         },
         {
           depName: 'actions/node-versions',
           currentValue: '>=14.0.0 <15.0.0',
           datasource: 'github-releases',
           versioning: 'node',
-          depType: 'node-version',
+          depType: 'uses-with',
         },
         {
           depName: 'actions/node-versions',
           currentValue: 'latest',
           datasource: 'github-releases',
           versioning: 'node',
-          depType: 'node-version',
+          depType: 'uses-with',
         },
       ]);
     });
