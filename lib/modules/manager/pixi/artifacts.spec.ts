@@ -135,7 +135,7 @@ describe('modules/manager/pixi/artifacts', () => {
           newPackageFileContent: '',
           config: { ...config, isLockFileMaintenance: true },
         }),
-      ).toReject();
+      ).rejects.toThrow(new Error(TEMPORARY_ERROR));
     });
 
     it('returns updated pixi.lock using docker', async () => {
