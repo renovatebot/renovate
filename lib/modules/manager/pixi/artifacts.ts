@@ -13,8 +13,10 @@ import {
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { commandLock, pickConfig } from './lockfile';
+import { pickConfig } from './lockfile';
 import { LockfileYaml } from './schema';
+
+export const commandLock = 'pixi lock --no-progress --color=never --quiet';
 
 export async function updateArtifacts({
   packageFileName,
@@ -30,8 +32,6 @@ export async function updateArtifacts({
     return null;
   }
 
-  const cmd: string[] = [];
-
   const lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
@@ -40,10 +40,10 @@ export async function updateArtifacts({
   }
   logger.debug(`Updating ${lockFileName}`);
 
-  const { val } = Result.parse(existingLockFileContent, LockfileYaml).unwrap();
-  const cfg = pickConfig(val?.version);
-  const constraint = cfg?.range;
-  cmd.push(cfg?.cmd ?? commandLock);
+  const cmd: string[] = [commandLock];
+
+  const constraint =
+    config.constraints?.pixi ?? getPixiConstraint(existingLockFileContent);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -96,4 +96,13 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+function getPixiConstraint(
+  existingLockFileContent: string,
+): string | undefined {
+  const { val } = Result.parse(existingLockFileContent, LockfileYaml).unwrap();
+  const cfg = pickConfig(val?.version);
+
+  return cfg?.range ?? undefined;
 }
