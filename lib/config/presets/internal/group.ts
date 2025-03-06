@@ -801,6 +801,7 @@ const staticGroups = {
         matchPackageNames: [
           'symfony/*',
           '!symfony/*contracts',
+          '!symfony/*pack',
           '!symfony/flex',
           '!symfony/maker-bundle',
           '!symfony/monolog-bundle',
