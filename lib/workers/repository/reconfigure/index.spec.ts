@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import * as _validate from './validate';
 import { checkReconfigureBranch } from '.';
 
-jest.mock('./validate');
+vi.mock('./validate');
 
 const validate = mocked(_validate);
 

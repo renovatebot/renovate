@@ -9,12 +9,12 @@ import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
-jest.mock('../../../../config/migration');
-jest.mock('../../../../util/git');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/json-writer');
-jest.mock('../../init/merge');
-jest.mock('detect-indent');
+vi.mock('../../../../config/migration');
+vi.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/json-writer');
+vi.mock('../../init/merge');
+vi.mock('detect-indent');
 
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');

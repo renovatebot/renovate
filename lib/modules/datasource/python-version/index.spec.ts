@@ -32,7 +32,7 @@ describe('modules/datasource/python-version/index', () => {
         .get('/api/python.json')
         .reply(200, Fixtures.get('eol.json'));
 
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           url: 'https://example.com',

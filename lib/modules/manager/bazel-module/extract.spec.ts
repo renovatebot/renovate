@@ -18,7 +18,7 @@ describe('modules/manager/bazel-module/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set(adminConfig);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('returns null if fails to parse', async () => {
@@ -30,7 +30,7 @@ describe('modules/manager/bazel-module/extract', () => {
     });
 
     it('returns null if something throws an error', async () => {
-      jest.spyOn(parser, 'parse').mockImplementationOnce(() => {
+      vi.spyOn(parser, 'parse').mockImplementationOnce(() => {
         throw new Error('Test error');
       });
       const result = await extractPackageFile('content', 'MODULE.bazel');

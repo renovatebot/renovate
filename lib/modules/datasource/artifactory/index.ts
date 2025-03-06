@@ -50,7 +50,7 @@ export class ArtifactoryDatasource extends Datasource {
       releases: [],
     };
     try {
-      const response = await this.http.get(url);
+      const response = await this.http.getText(url);
       const body = parse(response.body, {
         blockTextElements: {
           script: true,
@@ -97,7 +97,6 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           logger.warn(

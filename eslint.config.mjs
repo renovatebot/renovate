@@ -2,7 +2,7 @@ import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginImport from 'eslint-plugin-import';
-import jest from 'eslint-plugin-jest';
+import vitest from '@vitest/eslint-plugin';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -40,7 +40,6 @@ export default tseslint.config(
   eslintPluginImport.flatConfigs.warnings,
   eslintPluginImport.flatConfigs.recommended,
   eslintPluginImport.flatConfigs.typescript,
-  jest.configs['flat/recommended'],
   eslintPluginPromise.configs['flat/recommended'],
   eslintContainerbase.configs.all,
   {
@@ -88,7 +87,12 @@ export default tseslint.config(
       'import/no-extraneous-dependencies': [
         'error',
         {
-          devDependencies: ['eslint.config.mjs', 'test/**/*', '**/*.spec.ts'],
+          devDependencies: [
+            '*.config.mjs',
+            '*.config.ts',
+            'test/**/*',
+            '**/*.spec.ts',
+          ],
         },
       ],
 
@@ -227,13 +231,22 @@ export default tseslint.config(
   {
     files: ['**/*.spec.ts', 'test/**'],
 
+    plugins: { vitest },
+
     languageOptions: {
       globals: {
-        ...globals.jest,
+        ...globals.vitest,
+      },
+    },
+
+    settings: {
+      vitest: {
+        typecheck: true,
       },
     },
 
     rules: {
+      ...vitest.configs.recommended.rules,
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
@@ -243,14 +256,6 @@ export default tseslint.config(
       '@typescript-eslint/no-object-literal-type-assertion': 0,
       '@typescript-eslint/explicit-function-return-type': 0,
       '@typescript-eslint/unbound-method': 0,
-
-      'jest/valid-title': [
-        0,
-        {
-          ignoreTypeOfDescribeName: true,
-        },
-      ],
-
       'max-classes-per-file': 0,
       'class-methods-use-this': 0,
     },
@@ -304,7 +309,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...Object.fromEntries(
-          Object.entries(globals.jest).map(([key]) => [key, 'off']),
+          Object.entries(globals.vitest).map(([key]) => [key, 'off']),
         ),
       },
     },

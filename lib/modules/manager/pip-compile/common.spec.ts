@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { hostRules } from '../../../../test/util';
 import { logger } from '../../../logger';
 import {
@@ -10,7 +10,7 @@ import {
 } from './common';
 import { inferCommandExecDir } from './utils';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#

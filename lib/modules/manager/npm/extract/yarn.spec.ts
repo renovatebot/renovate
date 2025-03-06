@@ -2,7 +2,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { getYarnLock, getYarnVersionFromLock } from './yarn';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {

@@ -5,7 +5,7 @@ import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const railsGemfile = Fixtures.get('Gemfile.rails');
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');

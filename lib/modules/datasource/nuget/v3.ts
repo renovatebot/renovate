@@ -40,7 +40,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -51,7 +51,6 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
-      // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
         servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
           .body;
@@ -209,7 +208,7 @@ export class NugetV3Api {
           // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.get(nuspecUrl);
+        const metaresult = await http.getText(nuspecUrl);
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
@@ -247,7 +246,6 @@ export class NugetV3Api {
       }
     }
 
-    // istanbul ignore else: not easy testable
     if (homepage) {
       // only assign if not assigned
       dep.sourceUrl ??= homepage;

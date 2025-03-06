@@ -57,6 +57,11 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: Config = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  renovateUserUuid = null;
+}
+
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
@@ -164,7 +169,7 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url, {
+  const res = await bitbucketHttp.getText(url, {
     cacheProvider: repoCacheProvider,
     memCache: true,
   });

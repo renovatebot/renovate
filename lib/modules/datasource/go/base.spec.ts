@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -9,7 +9,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
@@ -120,7 +120,6 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
-      // eslint-disable-next-line jest/no-disabled-tests
       it.skip('supports Go submodules in GitLab repo', async () => {
         httpMock
           .scope('https://gitlab.com')
@@ -503,7 +502,7 @@ describe('modules/datasource/go/base', () => {
         expect(res).toBeNull();
       });
 
-      it('it correctly splits a URL where the endpoint is contained', async () => {
+      it('correctly splits a URL where the endpoint is contained', async () => {
         hostRules.hostType.mockReturnValue('gitlab');
 
         GlobalConfig.set({ endpoint: 'https://example.com/gitlab/api/v4/' });

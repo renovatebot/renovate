@@ -3,7 +3,7 @@ import { mocked } from '../../../../test/util';
 import * as _fs from '../../../util/fs';
 import * as gleamManager from '.';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const fs = mocked(_fs);
 

@@ -113,7 +113,7 @@ describe('modules/versioning/ruby/index', () => {
   it.each`
     versions                                     | expected
     ${['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3']} | ${['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
-  `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
+  `('$versions -> sortVersions -> $expected', ({ versions, expected }) => {
     expect(versions.sort(semverRuby.sortVersions)).toEqual(expected);
   });
 

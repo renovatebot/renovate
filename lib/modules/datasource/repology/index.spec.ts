@@ -24,7 +24,7 @@ const mockApiCall = (name: string, response: ResponseMock) => {
   if (response.status) {
     interceptor.reply(response.status, response.body);
   } else {
-    interceptor.replyWithError({ code: response.code });
+    interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
 };
 
@@ -49,7 +49,7 @@ const mockResolverCall = (
   if (response.status) {
     interceptor.reply(response.status, response.body);
   } else {
-    interceptor.replyWithError({ code: response.code });
+    interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
 };
 
