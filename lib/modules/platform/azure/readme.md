@@ -108,7 +108,7 @@ module.exports = {
     },
     {
       matchHost: 'github.com',
-      token: process.env.GITHUB_COM_TOKEN,
+      token: process.env.RENOVATE_GITHUB_COM_TOKEN,
     },
   ],
   repositories: ['YOUR-PROJECT/YOUR-REPO'],

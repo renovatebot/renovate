@@ -130,8 +130,8 @@ describe('config/decrypt/openpgp', () => {
           throw new Error('openpgp error');
         },
       }));
-      const pgp = await import('./openpgp');
-      const { logger } = await import('../../logger');
+      const pgp = await import('./openpgp.js');
+      const { logger } = await import('../../logger/index.js');
       expect(
         await pgp.tryDecryptOpenPgp(
           '',

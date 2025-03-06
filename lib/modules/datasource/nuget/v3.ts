@@ -40,7 +40,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -51,7 +51,6 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
-      // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
         servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
           .body;
@@ -247,7 +246,6 @@ export class NugetV3Api {
       }
     }
 
-    // istanbul ignore else: not easy testable
     if (homepage) {
       // only assign if not assigned
       dep.sourceUrl ??= homepage;

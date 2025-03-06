@@ -355,7 +355,7 @@ export class SbtPackageDatasource extends MavenDatasource {
     config: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!config.registryUrl) {
       return release;
     }

@@ -191,7 +191,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+    config.constraints?.go ?? getGoConstraints(newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -208,9 +208,8 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints)
-          ? '-modcacherw'
-          : /* istanbul ignore next: hard to test */ null,
+        /* v8 ignore next -- TODO: add test */
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -444,17 +443,11 @@ export async function updateArtifacts({
   }
 }
 
-async function getGoConstraints(
-  goModFileName: string,
-): Promise<string | undefined> {
-  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
-  if (!content) {
-    return undefined;
-  }
+function getGoConstraints(content: string): string | undefined {
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
   const match = re.exec(content);
   if (!match?.groups?.gover) {
     return undefined;
   }
-  return '^' + match.groups.gover;
+  return `^${match.groups.gover}`;
 }

@@ -17,7 +17,7 @@ describe('workers/global/config/parse/index', () => {
     let defaultEnv: NodeJS.ProcessEnv;
 
     beforeEach(async () => {
-      configParser = await import('./index');
+      configParser = await vi.importActual('./index');
       defaultArgv = getArgv();
       defaultEnv = {
         RENOVATE_CONFIG_FILE: upath.resolve(

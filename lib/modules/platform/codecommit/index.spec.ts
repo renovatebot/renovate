@@ -36,7 +36,7 @@ describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
 
   beforeAll(async () => {
-    codeCommit = await import('.');
+    codeCommit = await vi.importActual('.');
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',

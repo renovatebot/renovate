@@ -5,7 +5,6 @@
     "sourceMap": true,
     "inlineSources": true,
     "importHelpers": true,
-    "moduleResolution": "node10",
     "types": ["node"],
     "paths": {} // no paths for production
   },

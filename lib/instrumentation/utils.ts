@@ -19,5 +19,5 @@ export function massageThrowable(e: unknown): string | undefined {
   if (e instanceof Error) {
     return e.message;
   }
-  return String(e);
+  return String(e); // eslint-disable-line @typescript-eslint/no-base-to-string
 }

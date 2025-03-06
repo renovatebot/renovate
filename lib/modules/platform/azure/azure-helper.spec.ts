@@ -15,7 +15,7 @@ describe('modules/platform/azure/azure-helper', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    azureHelper = await import('./azure-helper');
+    azureHelper = await vi.importActual('./azure-helper');
     azureApi = await vi.importMock('./azure-got-wrapper');
   });
 

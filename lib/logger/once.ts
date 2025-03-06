@@ -26,7 +26,7 @@ function getCallSite(omitFn: OmitFn): string | null {
     if (callsite) {
       result = callsite.toString();
     }
-    /* v8 ignore next 2: should not happen */
+    /* v8 ignore next 2 -- should not happen */
   } catch {
     // no-op
   } finally {
@@ -42,7 +42,7 @@ const keys = new Set<string>();
 export function once(callback: () => void, omitFn: OmitFn = once): void {
   const key = getCallSite(omitFn);
 
-  /* v8 ignore next 3: should not happen */
+  /* v8 ignore next 3 -- should not happen */
   if (!key) {
     return;
   }

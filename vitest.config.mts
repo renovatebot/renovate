@@ -6,11 +6,11 @@ import {
   defineConfig,
   mergeConfig,
 } from 'vitest/config';
-import { testShards } from './tools/test/shards';
+import { testShards } from './tools/test/shards.js';
 import {
   getCoverageIgnorePatterns,
   normalizePattern,
-} from './tools/test/utils';
+} from './tools/test/utils.js';
 
 const ci = !!process.env.CI;
 

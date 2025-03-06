@@ -48,7 +48,6 @@ export abstract class Datasource implements DatasourceApi {
   }
 
   protected handleGenericErrors(err: Error): never {
-    // istanbul ignore if: not easy testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }

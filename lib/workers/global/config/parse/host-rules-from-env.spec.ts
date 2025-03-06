@@ -52,6 +52,28 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     ]);
   });
 
+  it('support RENOVATE_ prefixed host rules', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
+    };
+
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      { matchHost: 'github.com', token: 'some-token' },
+    ]);
+  });
+
+  it('supports renovate in the env variable', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      PYPI_MY_RENOVATE_HOST_PASSWORD: 'some-password',
+      RENOVATE_DOCKER_MY_RENOVATE_HOST_PASSWORD: 'docker-password',
+    };
+
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      { matchHost: 'my.renovate.host', password: 'some-password' },
+      { matchHost: 'my.renovate.host', password: 'docker-password' },
+    ]);
+  });
+
   it('support https authentication options', () => {
     const envParam: NodeJS.ProcessEnv = {
       GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY: 'private-key',

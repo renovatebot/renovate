@@ -15,7 +15,7 @@ markdown.enable(['fence']);
 /**
  *
  * @param {string} file
- * @param {import('markdown-it').Token} token
+ * @param {import('markdown-it/lib/token.mjs').default} token
  */
 function checkValidJson(file, token) {
   const start = token.map ? token.map[0] + 1 : 0;
