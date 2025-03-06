@@ -806,6 +806,7 @@ const staticGroups = {
           '!symfony/maker-bundle',
           '!symfony/monolog-bundle',
           '!symfony/polyfill*',
+          '!symfony/thanks',
           '!symfony/ux*',
         ],
       },
