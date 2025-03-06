@@ -66,7 +66,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         timestamp,
       });
 
-      /* v8 ignore next 4: should never happen */
+      /* v8 ignore next 4 -- should never happen */
       if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
         return resp;
