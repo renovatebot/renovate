@@ -457,10 +457,13 @@ function getGoConstraints(content: string): string | undefined {
   }
 
   // If go.mod doesn't have toolchain directive and has a full go version spec,
-  // for example `go 1.23.6`, pick this version
+  // for example `go 1.23.6`, pick this version, this doesn't match major.minor version spec.
   //
   // This is because when go.mod have same version defined in go directive and toolchain directive,
-  // go will remove toolchain directive from go.mod
+  // go will remove toolchain directive from go.mod.
+  //
+  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5` by default,
+  // in this case, the go directive is the toolchain directive.
   const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
     ?.groups?.gover;
   if (goFullVersion) {
