@@ -320,7 +320,10 @@ describe('modules/manager/composer/utils', () => {
   describe('getComposerUpdateArguments', () => {
     it('does not request an update with minimal changes with 2.6.0', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.6.0' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '2.6.0' },
+        ),
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
       );
@@ -328,41 +331,56 @@ describe('modules/manager/composer/utils', () => {
 
     it('requests an update with minimal changes with 2.7.0', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.7.0' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '2.7.0' },
+        ),
       ).toBe(
-        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
       );
     });
 
     it('requests an update with minimal changes with 2.8.0', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '2.8.0' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '2.8.0' },
+        ),
       ).toBe(
-        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
       );
     });
 
     it('requests an update with minimal changes with ^2.6', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.6' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '^2.6' },
+        ),
       ).toBe(
-        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
       );
     });
 
     it('requests an update with minimal changes with ^2.7', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.7' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '^2.7' },
+        ),
       ).toBe(
-        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
       );
     });
 
     it('requests an update with minimal changes with ^2.8', () => {
       expect(
-        getComposerUpdateArguments({}, { toolName: 'composer', constraint: '^2.8' }),
+        getComposerUpdateArguments(
+          {},
+          { toolName: 'composer', constraint: '^2.8' },
+        ),
       ).toBe(
-        " --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes",
+        ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
       );
     });
   });
