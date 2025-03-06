@@ -65,14 +65,14 @@ export function cache<T>({
     let finalNamespace: PackageCacheNamespace | undefined;
     if (is.string(namespace)) {
       finalNamespace = namespace;
-    } else if (is.function_(namespace)) {
+    } else if (is.function(namespace)) {
       finalNamespace = namespace.apply(instance, args);
     }
 
     let finalKey: string | undefined;
     if (is.string(key)) {
       finalKey = key;
-    } else if (is.function_(key)) {
+    } else if (is.function(key)) {
       finalKey = key.apply(instance, args);
     }
 
