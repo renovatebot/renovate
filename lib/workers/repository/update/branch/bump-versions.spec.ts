@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { fs, logger, scm } from '../../../../../test/util';
+import { fs, logger, partial, scm } from '../../../../../test/util';
 import * as templates from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { bumpVersions } from './bump-versions';
@@ -8,10 +8,6 @@ vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
-    beforeEach(() => {
-      vi.resetAllMocks();
-    });
-
     it('should be noop if bumpVersions is undefined', async () => {
       const config = {} as BranchConfig;
       await bumpVersions(config);
@@ -20,9 +16,9 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should be noop if bumpVersions is empty array', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [],
-      } as unknown as BranchConfig;
+      });
       await bumpVersions(config);
 
       expect(config).toEqual({
@@ -31,7 +27,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should be noop if no packageFiles or artifacts have been updated', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['\\.release-version'],
@@ -41,7 +37,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
         updatedPackageFiles: [],
         updatedArtifacts: [],
-      } as unknown as BranchConfig;
+      });
       await bumpVersions(config);
 
       expect(config).toMatchObject({
@@ -54,7 +50,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
       vi.spyOn(templates, 'compile').mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
       });
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['\\^'],
@@ -64,12 +60,13 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
         updatedPackageFiles: [
           {
+            type: 'addition',
             path: 'foo',
             contents: 'bar',
           },
         ],
         updatedArtifacts: [],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
 
       await bumpVersions(config);
@@ -90,7 +87,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
       compile.mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
       });
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -100,12 +97,13 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
         updatedPackageFiles: [
           {
+            type: 'addition',
             path: 'foo',
             contents: 'bar',
           },
         ],
         updatedArtifacts: [],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
 
       await bumpVersions(config);
@@ -127,7 +125,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
       compile.mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
       });
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -143,7 +141,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
           },
         ],
         updatedArtifacts: [],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
 
       await bumpVersions(config);
@@ -159,7 +157,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should bump version in a non edited file and add to updatedArtifacts', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['\\.release-version'],
@@ -169,11 +167,12 @@ describe('workers/repository/update/branch/bump-versions', () => {
         ],
         updatedPackageFiles: [
           {
+            type: 'addition',
             path: 'foo',
             contents: 'bar',
           },
         ],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
       fs.readLocalFile.mockResolvedValueOnce('1.0.0');
       await bumpVersions(config);
@@ -190,7 +189,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should bump version in an already changed packageFiles', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -208,7 +207,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             `,
           },
         ],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
       await bumpVersions(config);
 
@@ -227,7 +226,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should bump version in an already changed artifact file', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -245,7 +244,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             `,
           },
         ],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
       await bumpVersions(config);
 
@@ -264,7 +263,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should log if file is not readable', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -282,7 +281,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             `,
           },
         ],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo-bar']);
 
       await bumpVersions(config);
@@ -306,7 +305,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
     });
 
     it('should ignore not matched strings', async () => {
-      const config = {
+      const config = partial<BranchConfig>({
         bumpVersions: [
           {
             fileMatch: ['foo'],
@@ -328,7 +327,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             `,
           },
         ],
-      } as unknown as BranchConfig;
+      });
       scm.getFileList.mockResolvedValueOnce(['foo']);
 
       await bumpVersions(config);
