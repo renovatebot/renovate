@@ -43,7 +43,6 @@ iris = ">=3.11.1,<4"
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
-vi.mock('../../../util/host-rules', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
