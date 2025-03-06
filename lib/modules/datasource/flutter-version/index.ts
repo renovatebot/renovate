@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -43,7 +44,7 @@ export class FlutterVersionDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJson<FlutterResponse>(
+        await this.http.getJsonUnchecked<FlutterResponse>(
           `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
         )
       ).body;
@@ -58,7 +59,7 @@ export class FlutterVersionDatasource extends Datasource {
         })
         .map(({ version, release_date, channel }) => ({
           version,
-          releaseTimestamp: release_date,
+          releaseTimestamp: asTimestamp(release_date),
           isStable: channel === 'stable',
         }));
       return result.releases.length ? result : null;

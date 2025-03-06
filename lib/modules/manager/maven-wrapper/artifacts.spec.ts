@@ -1,8 +1,8 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -10,14 +10,14 @@ import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(

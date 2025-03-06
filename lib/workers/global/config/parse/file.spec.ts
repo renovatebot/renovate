@@ -8,9 +8,9 @@ import customConfig from './__fixtures__/config';
 import * as file from './file';
 
 describe('workers/global/config/parse/file', () => {
-  const processExitSpy = jest.spyOn(process, 'exit');
-  const fsPathExistsSpy = jest.spyOn(fsExtra, 'pathExists');
-  const fsRemoveSpy = jest.spyOn(fsExtra, 'remove');
+  const processExitSpy = vi.spyOn(process, 'exit');
+  const fsPathExistsSpy = vi.spyOn(fsExtra, 'pathExists');
+  const fsRemoveSpy = vi.spyOn(fsExtra, 'remove');
 
   let tmp: DirectoryResult;
 
@@ -26,6 +26,7 @@ describe('workers/global/config/parse/file', () => {
     it.each([
       ['custom js config file', 'config.js'],
       ['custom js config file', 'config.cjs'],
+      ['custom js config file', 'config.mjs'],
       ['custom js config file exporting a Promise', 'config-promise.js'],
       ['custom js config file exporting a function', 'config-function.js'],
       // The next two are different syntactic ways of expressing the same thing
@@ -40,7 +41,7 @@ describe('workers/global/config/parse/file', () => {
       ['.renovaterc', '.renovaterc'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
-    ])('parses %s', async (_fileType, filePath) => {
+    ])('parses %s > %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
@@ -49,7 +50,9 @@ describe('workers/global/config/parse/file', () => {
 
     it('migrates', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
-      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      // for coverage
+      const relativePath = upath.relative(process.cwd(), configFile);
+      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
     });
@@ -72,7 +75,7 @@ describe('workers/global/config/parse/file', () => {
 
     it.each([
       [
-        'config.js',
+        'config.invalid.js',
         `module.exports = {
         "platform": "github",
         "token":"abcdef",
@@ -84,8 +87,8 @@ describe('workers/global/config/parse/file', () => {
         "repositories": [ "test/test" ],
       };`,
       ],
-      ['config.json5', `"invalid":`],
-      ['config.yaml', `invalid: -`],
+      ['config.invalid.json5', `"invalid":`],
+      ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
     ])(
       'fatal error and exit if error in parsing %s',
       async (fileName, fileContent) => {
@@ -141,6 +144,57 @@ describe('workers/global/config/parse/file', () => {
       expect(processExitSpy).toHaveBeenCalledWith(1);
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       fs.unlinkSync(configFile);
+    });
+
+    it('exports env variables to environment from processEnv object', async () => {
+      const configFile = upath.resolve(tmp.path, 'config2.js');
+      const fileContent1 = `module.exports = {
+        "processEnv": {
+        "SOME_KEY": "SOME_VALUE"
+        },
+        "labels": ["renovate"]
+      }`;
+      fs.writeFileSync(configFile, fileContent1, {
+        encoding: 'utf8',
+      });
+      const fileConfig = await file.getConfig({
+        RENOVATE_CONFIG_FILE: configFile,
+      });
+      expect(fileConfig).toMatchObject({
+        labels: ['renovate'],
+      });
+      expect(fileConfig.processEnv).toBeUndefined();
+      expect(process.env.SOME_KEY).toBe('SOME_VALUE');
+      fs.unlinkSync(configFile);
+      delete process.env.SOME_KEY;
+    });
+
+    it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
+      const configFile = upath.resolve(tmp.path, 'config3.js');
+      const fileContent1 = `module.exports = {
+        "processEnv": {
+        "SOME_KEY": "SOME_VALUE",
+        "SOME_OTHER_KEY": true,
+        "valid_Key": "true",
+        },
+        "labels": ["renovate"]
+      }`;
+      fs.writeFileSync(configFile, fileContent1, {
+        encoding: 'utf8',
+      });
+      const fileConfig = await file.getConfig({
+        RENOVATE_CONFIG_FILE: configFile,
+      });
+      expect(fileConfig).toMatchObject({
+        labels: ['renovate'],
+      });
+      expect(fileConfig.processEnv).toBeUndefined();
+      expect(process.env.SOME_KEY).toBe('SOME_VALUE');
+      expect(process.env.valid_Key).toBe('true');
+      expect(process.env.SOME_OTHER_KEY).toBeUndefined();
+      fs.unlinkSync(configFile);
+      delete process.env.SOME_KEY;
+      delete process.env.valid_Key;
     });
   });
 

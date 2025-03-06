@@ -3,12 +3,12 @@ import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import { GithubScm } from './scm';
 import * as _github from '.';
 
-jest.mock('.');
+vi.mock('.');
 const github = mocked(_github);
 
 describe('modules/platform/github/scm', () => {
   beforeEach(() => {
-    jest.spyOn(git, 'commitFiles').mockResolvedValue('sha' as LongCommitSha);
+    vi.spyOn(git, 'commitFiles').mockResolvedValue('sha' as LongCommitSha);
   });
 
   const githubScm = new GithubScm();

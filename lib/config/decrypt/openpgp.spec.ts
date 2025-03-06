@@ -16,7 +16,7 @@ describe('config/decrypt/openpgp', () => {
     });
 
     beforeEach(() => {
-      jest.resetModules();
+      vi.resetModules();
       config = {};
       GlobalConfig.reset();
     });
@@ -125,13 +125,13 @@ describe('config/decrypt/openpgp', () => {
     });
 
     it('fails to load openpgp', async () => {
-      jest.doMock('../../expose.cjs', () => ({
+      vi.doMock('../../expose.cjs', () => ({
         openpgp: () => {
           throw new Error('openpgp error');
         },
       }));
-      const pgp = await import('./openpgp');
-      const { logger } = await import('../../logger');
+      const pgp = await import('./openpgp.js');
+      const { logger } = await import('../../logger/index.js');
       expect(
         await pgp.tryDecryptOpenPgp(
           '',

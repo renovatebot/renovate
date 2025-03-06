@@ -6,9 +6,8 @@ export { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
 
 export const displayName = 'Swift Package Manager';
-export const url = 'https://www.swift.org/package-manager/';
-
-export const supportedDatasources = [GitTagsDatasource.id];
+export const url = 'https://www.swift.org/package-manager';
+export const categories: Category[] = ['swift'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Package\\.swift'],
@@ -16,4 +15,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories: Category[] = ['swift'];
+export const supportedDatasources = [GitTagsDatasource.id];

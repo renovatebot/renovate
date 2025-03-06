@@ -12,7 +12,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
-  if (packageFile.match(/vendor\//)) {
+  if (packageFile.includes('vendor/')) {
     return null;
   }
 

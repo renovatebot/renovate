@@ -25,7 +25,7 @@ export async function getReleaseNotesMd(
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
   const tree = (
-    await http.getJson<GitlabTreeNode[]>(
+    await http.getJsonUnchecked<GitlabTreeNode[]>(
       `${apiPrefix}tree?per_page=100${
         sourceDirectory ? `&path=${sourceDirectory}` : ''
       }`,
@@ -54,7 +54,7 @@ export async function getReleaseNotesMd(
   }
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#raw-blob-content
-  const fileRes = await http.get(`${apiPrefix}blobs/${id}/raw`);
+  const fileRes = await http.getText(`${apiPrefix}blobs/${id}/raw`);
   const changelogMd = fileRes.body + '\n#\n##';
   return { changelogFile, changelogMd };
 }
@@ -69,9 +69,12 @@ export async function getReleaseList(
   const urlEncodedRepo = encodeURIComponent(repository);
   const apiUrl = `${apiBaseUrl}projects/${urlEncodedRepo}/releases`;
 
-  const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
-    paginate: true,
-  });
+  const res = await http.getJsonUnchecked<GitlabRelease[]>(
+    `${apiUrl}?per_page=100`,
+    {
+      paginate: true,
+    },
+  );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,
     notesSourceUrl: apiUrl,

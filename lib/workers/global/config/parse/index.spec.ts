@@ -4,9 +4,9 @@ import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
-jest.mock('../../../../modules/datasource/npm');
-jest.mock('../../../../util/fs');
-jest.mock('./host-rules-from-env');
+vi.mock('../../../../modules/datasource/npm');
+vi.mock('../../../../util/fs');
+vi.mock('./host-rules-from-env');
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
@@ -17,7 +17,7 @@ describe('workers/global/config/parse/index', () => {
     let defaultEnv: NodeJS.ProcessEnv;
 
     beforeEach(async () => {
-      configParser = await import('./index');
+      configParser = await vi.importActual('./index');
       defaultArgv = getArgv();
       defaultEnv = {
         RENOVATE_CONFIG_FILE: upath.resolve(
@@ -174,9 +174,7 @@ describe('workers/global/config/parse/index', () => {
     });
 
     it('only initializes the file when the env var LOG_FILE is properly set', async () => {
-      jest.doMock('../../../../../config.js', () => ({}), {
-        virtual: true,
-      });
+      vi.doMock('../../../../../config.js', () => ({ default: {} }));
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
@@ -184,13 +182,12 @@ describe('workers/global/config/parse/index', () => {
     });
 
     it('massage onboardingNoDeps when autodiscover is false', async () => {
-      jest.doMock(
-        '../../../../../config.js',
-        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
-        {
-          virtual: true,
+      vi.doMock('../../../../../config.js', () => ({
+        default: {
+          onboardingNoDeps: 'auto',
+          autodiscover: false,
         },
-      );
+      }));
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);

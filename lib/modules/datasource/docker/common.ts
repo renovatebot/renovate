@@ -63,7 +63,7 @@ export async function getAuthHeaders(
       ? await http.get(apiCheckUrl, options)
       : // use json request, as this will be cached for tags, so it returns json
         // TODO: add cache test
-        await http.getJson(apiCheckUrl, options);
+        await http.getJsonUnchecked(apiCheckUrl, options);
 
     if (apiCheckResponse.statusCode === 200) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
@@ -193,7 +193,7 @@ export async function getAuthHeaders(
     );
     opts.noAuth = true;
     const authResponse = (
-      await http.getJson<{ token?: string; access_token?: string }>(
+      await http.getJsonUnchecked<{ token?: string; access_token?: string }>(
         authUrl.href,
         opts,
       )
@@ -341,7 +341,7 @@ export function findLatestStable(tags: string[]): string | null {
   return stable;
 }
 
-const chartRepo = regEx(/charts?|helm|helm-charts/i);
+const chartRepo = regEx(/charts?|helm|helm-charts?/i);
 
 function isPossibleChartRepo(url: string): boolean {
   if (detectPlatform(url) === null) {

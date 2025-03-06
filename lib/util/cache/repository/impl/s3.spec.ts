@@ -18,7 +18,7 @@ import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
 
-jest.mock('../../../fs');
+vi.mock('../../../fs');
 
 function createGetObjectCommandInput(
   repository: string,
@@ -129,7 +129,8 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
-      "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead",
+      { returnType: 'undefined' },
+      'RepoCacheS3.read() - failure - got unexpected return type',
     );
   });
 

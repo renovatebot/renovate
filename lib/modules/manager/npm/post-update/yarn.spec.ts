@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '../../../../../test/exec-util';
 import {
   envMock,
@@ -16,16 +16,16 @@ import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
 
-jest.mock('fs-extra', () =>
-  jest
-    .requireActual<
-      typeof import('../../../../../test/fixtures')
-    >('../../../../../test/fixtures')
-    .fsExtra(),
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('../../../../../test/fixtures')>(
+      '../../../../../test/fixtures',
+    )
+  ).fsExtra(),
 );
-jest.mock('../../../../util/exec/env');
-jest.mock('./node-version');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/exec/env');
+vi.mock('./node-version');
+vi.mock('../../../datasource', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
@@ -42,7 +42,7 @@ const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
-  const removeDockerContainer = jest.spyOn(docker, 'removeDockerContainer');
+  const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
 
   beforeEach(() => {
     delete process.env.BUILDPACK;

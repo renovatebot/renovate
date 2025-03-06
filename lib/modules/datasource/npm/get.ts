@@ -12,6 +12,7 @@ import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { HttpCacheStats } from '../../../util/stats';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
@@ -144,7 +145,7 @@ export async function getDependency(
       });
     }
 
-    const raw = await http.getJson<NpmResponse>(packageUrl, options);
+    const raw = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
       logger.trace(`Cached npm result for ${packageName} is revalidated`);
       HttpCacheStats.incRemoteHits(packageUrl);
@@ -199,8 +200,9 @@ export async function getDependency(
         dependencies: res.versions?.[version].dependencies,
         devDependencies: res.versions?.[version].devDependencies,
       };
-      if (res.time?.[version]) {
-        release.releaseTimestamp = res.time[version];
+      const releaseTimestamp = asTimestamp(res.time?.[version]);
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
       }
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;

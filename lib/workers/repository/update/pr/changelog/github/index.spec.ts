@@ -6,9 +6,10 @@ import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../../util/github/graphql';
 import type { GithubTagItem } from '../../../../../../util/github/graphql/types';
 import * as hostRules from '../../../../../../util/host-rules';
+import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 
-jest.mock('../../../../../../modules/datasource/npm');
+vi.mock('../../../../../../modules/datasource/npm');
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -25,10 +26,13 @@ const upgrade = partial<BranchUpgradeConfig>({
     {
       version: '2.3.0',
       gitRef: 'npm_2.3.0',
-      releaseTimestamp: '2017-10-24T03:20:46.238Z',
+      releaseTimestamp: '2017-10-24T03:20:46.238Z' as Timestamp,
     },
     { version: '2.2.2', gitRef: 'npm_2.2.2' },
-    { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
+    {
+      version: '2.4.2',
+      releaseTimestamp: '2017-12-24T03:20:46.238Z' as Timestamp,
+    },
     { version: '2.5.2' },
   ],
 });
@@ -309,7 +313,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      const githubTagsMock = vi.spyOn(githubGraphql, 'queryTags');
       githubTagsMock.mockResolvedValue(
         partial<GithubTagItem>([
           { version: 'v1.0.1' },

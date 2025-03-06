@@ -14,7 +14,7 @@ async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string,
 ): Promise<string> {
-  const res = await gitlabApi.getJson<GitlabProject>(
+  const res = await gitlabApi.getJsonUnchecked<GitlabProject>(
     `${endpoint}projects/${urlEncodedPkgName}`,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
@@ -43,7 +43,7 @@ export async function fetchJSONFile(
     }
     url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
     logger.trace({ url }, `Preset URL`);
-    res = await gitlabApi.get(url);
+    res = await gitlabApi.getText(url);
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;

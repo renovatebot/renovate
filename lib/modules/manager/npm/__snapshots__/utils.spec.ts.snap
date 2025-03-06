@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/utils composeLockFile composes lockfile string out of an object 1`] = `
+exports[`modules/manager/npm/utils > composeLockFile > composes lockfile string out of an object 1`] = `
 "{
   "lockfileVersion": 2,
   "name": "lockfile-parsing",

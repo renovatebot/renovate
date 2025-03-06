@@ -34,7 +34,7 @@ describe('modules/versioning/index', () => {
     ]);
   });
 
-  it('validates', () => {
+  it('validates', async () => {
     function validate(
       module: VersioningApi | VersioningApiConstructor,
       name: string,
@@ -50,7 +50,7 @@ describe('modules/versioning/index', () => {
     }
     const vers = allVersioning.getVersionings();
 
-    const loadedVers = loadModules(__dirname);
+    const loadedVers = await loadModules(__dirname);
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {
@@ -86,6 +86,7 @@ describe('modules/versioning/index', () => {
       'toString',
       'valueOf',
       'subset',
+      'intersects',
       'isSame',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
@@ -108,6 +109,7 @@ describe('modules/versioning/index', () => {
     }
 
     for (const supportedScheme of supportedSchemes ?? []) {
+      // eslint-disable-next-line vitest/valid-title
       it(supportedScheme, async () => {
         const schemeKeys = getAllPropertyNames(
           allVersioning.get(supportedScheme),
@@ -119,7 +121,7 @@ describe('modules/versioning/index', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = (await import(`./${supportedScheme}`)).api;
+        const apiOrCtor = (await import(`./${supportedScheme}/index.ts`)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }

@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -15,27 +15,25 @@ import * as gomod from '.';
 
 type FS = typeof import('../../../util/fs');
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs', () => {
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs', async () => {
   // restore
-  return {
-    __esModules: true,
-    ...jest.createMockFromModule<FS>('../../../util/fs'),
-    isValidLocalPath:
-      jest.requireActual<FS>('../../../util/fs').isValidLocalPath,
-  };
+  return mockDeep({
+    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
+      .isValidLocalPath,
+  });
 });
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('./artifacts-extra', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('./artifacts-extra', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = mocked(_datasource);
-const hostRules = mocked(_hostRules);
-const artifactsExtra = mocked(_artifactsExtra);
+const datasource = vi.mocked(_datasource);
+const hostRules = vi.mocked(_hostRules);
+const artifactsExtra = vi.mocked(_artifactsExtra);
 
 const gomod1 = codeBlock`
   module github.com/renovate-tests/gomod1
@@ -185,6 +183,112 @@ describe('modules/manager/gomod/artifacts', () => {
             GOPROXY: 'proxy.example.com',
           },
         },
+      },
+    ]);
+  });
+
+  it('runs go mod vendor with gomodVendor', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodVendor'],
+      },
+    });
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'New go.mod',
+          path: 'go.mod',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod vendor',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('runs go work vendor with gomodVendor and go.work', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('go.work');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodVendor'],
+      },
+    });
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'New go.mod',
+          path: 'go.mod',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go work vendor',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go work sync',
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -443,7 +547,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -480,7 +584,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           '"',
@@ -505,7 +609,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -524,7 +628,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool golang 1.14.0' },
+      { cmd: 'install-tool golang 1.23.3' },
       {
         cmd: 'go get -d -t ./...',
         options: {
@@ -595,7 +699,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -645,7 +749,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           '"',
@@ -704,7 +808,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -772,7 +876,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -837,7 +941,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -911,7 +1015,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -984,7 +1088,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1065,7 +1169,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1120,7 +1224,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1155,7 +1259,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +
@@ -1184,7 +1288,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1219,7 +1323,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +
@@ -1248,7 +1352,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1283,7 +1387,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +
@@ -1312,7 +1416,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     expect(
       await gomod.updateArtifacts({
@@ -1347,7 +1451,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +
@@ -1716,7 +1820,6 @@ describe('modules/manager/gomod/artifacts', () => {
   it('updates import paths with specific tool version from constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -1775,7 +1878,6 @@ describe('modules/manager/gomod/artifacts', () => {
   it('updates import paths with latest tool version on invalid version constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -1893,7 +1995,6 @@ describe('modules/manager/gomod/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -1905,7 +2006,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
@@ -1924,7 +2025,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool golang 1.14.0' },
+      { cmd: 'install-tool golang 1.23.3' },
       {
         cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1952,7 +2053,6 @@ describe('modules/manager/gomod/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -1964,14 +2064,14 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
-      newPackageFileContent: gomod1,
+      newPackageFileContent: `someText\n\ngo 1.17\n\n${gomod1}`,
       config: {
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
@@ -2004,7 +2104,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.17.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +
@@ -2026,7 +2126,6 @@ describe('modules/manager/gomod/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
     mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
@@ -2038,7 +2137,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
@@ -2077,7 +2176,7 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+      releases: [{ version: '1.17.0' }, { version: '1.23.3' }],
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
@@ -2119,7 +2218,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.14.0' +
+          'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
           ' && ' +

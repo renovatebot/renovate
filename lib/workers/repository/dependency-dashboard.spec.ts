@@ -1,6 +1,8 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
+import type { MockedObject } from 'vitest';
+import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import type { RenovateConfig } from '../../../test/util';
 import { logger, mockedFunction, platform } from '../../../test/util';
@@ -19,8 +21,8 @@ import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
-const createVulnerabilitiesMock = jest.fn();
-jest.mock('./process/vulnerabilities', () => {
+const createVulnerabilitiesMock = vi.fn();
+vi.mock('./process/vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -73,7 +75,7 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.MockedObject<Platform>,
+  platform: MockedObject<Platform>,
   ensureIssueClosingCalls: number,
   ensureIssueCalls: number,
 ) {
@@ -1509,7 +1511,7 @@ None detected
     });
 
     it('return no data section if summary is set to all and no vulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1528,7 +1530,7 @@ None detected
     });
 
     it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1595,7 +1597,7 @@ None detected
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
