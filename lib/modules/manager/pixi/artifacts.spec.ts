@@ -62,7 +62,6 @@ describe('modules/manager/pixi/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      hostRules.getAll.mockReturnValue([]);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();
     });
