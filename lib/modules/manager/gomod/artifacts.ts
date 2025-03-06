@@ -191,7 +191,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? getGoConstraints(massagedGoMod);
+    config.constraints?.go ?? getGoConstraints(newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -208,9 +208,8 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints)
-          ? '-modcacherw'
-          : /* istanbul ignore next: hard to test */ null,
+        /* v8 ignore next -- TODO: add test */
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -444,10 +443,10 @@ export async function updateArtifacts({
   }
 }
 
-function getGoConstraints(goModContent: string): string | undefined {
+function getGoConstraints(content: string): string | undefined {
   // prefer toolchain directive when go.mod has one
   const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
-    goModContent,
+    content,
   );
   const toolchainVer = toolchainMatch?.groups?.gover;
   if (toolchainVer) {
@@ -460,7 +459,7 @@ function getGoConstraints(goModContent: string): string | undefined {
   // If go.mod doesn't have toolchain directive and has a full go version spec,
   // for example `go 1.23.6`, pick this version
   const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(
-    goModContent,
+    content,
   );
   if (goFullVersion?.groups?.gover) {
     return goFullVersion?.groups?.gover;
@@ -471,5 +470,5 @@ function getGoConstraints(goModContent: string): string | undefined {
   if (!match?.groups?.gover) {
     return undefined;
   }
-  return '^' + match.groups.gover;
+  return `^${match.groups.gover}`;
 }
