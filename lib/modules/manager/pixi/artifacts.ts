@@ -39,7 +39,7 @@ export async function updateArtifacts({
   }
   logger.trace(`Updating ${lockFileName}`);
 
-  const cmd: string[] = [commandLock];
+  const cmd = [commandLock];
 
   const constraint =
     config.constraints?.pixi ?? getPixiConstraint(existingLockFileContent);
