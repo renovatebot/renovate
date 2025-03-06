@@ -458,9 +458,13 @@ function getGoConstraints(content: string): string | undefined {
 
   // If go.mod doesn't have toolchain directive and has a full go version spec,
   // for example `go 1.23.6`, pick this version
-  const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content);
-  if (goFullVersion?.groups?.gover) {
-    return goFullVersion?.groups?.gover;
+  //
+  // This is because when go.mod have same version defined in go directive and toolchain directive,
+  // go will remove toolchain directive from go.mod
+  const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
+    ?.groups?.gover;
+  if (goFullVersion) {
+    return goFullVersion;
   }
 
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
