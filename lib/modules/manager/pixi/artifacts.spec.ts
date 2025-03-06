@@ -55,6 +55,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
   containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -142,7 +143,6 @@ describe('modules/manager/pixi/artifacts', () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
       });
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce(

@@ -151,5 +151,9 @@ describe('modules/manager/pixi/extract', () => {
         lockFiles: [],
       });
     });
+
+    it('returns null for non-known config file', async () => {
+      expect(await extractPackageFile(`{}`, 'unexpected.json')).toBe(null);
+    });
   });
 });
