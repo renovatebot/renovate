@@ -10,8 +10,8 @@ import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
+import * as prefixDevSchema from './schema/prefix-dev';
 import type { CondaPackage } from './types';
-import * as prefixSchema from './schema/prefix';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 10;
 
@@ -129,7 +129,7 @@ export class CondaDatasource extends Datasource {
   }
   `,
       { channel, package: packageName },
-      prefixSchema.Version,
+      prefixDevSchema.Version,
     );
 
     if (versions.length === 0) {
@@ -152,7 +152,7 @@ export class CondaDatasource extends Datasource {
   }
   `,
       { channel, package: packageName },
-      prefixSchema.File,
+      prefixDevSchema.File,
     );
 
     const releaseDate = new Map<string, Timestamp>();
