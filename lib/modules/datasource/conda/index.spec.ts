@@ -293,10 +293,7 @@ describe('modules/datasource/conda/index', () => {
     });
 
     it('processes real data', async () => {
-      httpMock
-        .scope(defaultRegistryUrl)
-        .get(depUrl)
-        .reply(200, anacondaApiRes);
+      httpMock.scope(defaultRegistryUrl).get(depUrl).reply(200, anacondaApiRes);
       const res = await getPkgReleases({
         datasource,
         packageName,
