@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.22.3 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.22.4 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -487,10 +487,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 97 \
-            --functions 98 \
-            --lines 97 \
-            --statements 97
+            --branches 97.5 \
+            --functions 98.98 \
+            --lines 97.84 \
+            --statements 97.84
 
   # Catch-all required check for test matrix and coverage
   test-success:
