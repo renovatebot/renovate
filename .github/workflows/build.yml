@@ -264,7 +264,7 @@ jobs:
         uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/prettier
-          key: prettier-main-${{ github.run_id }}-${{ github.run_attempt }}
+          key: prettier-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
