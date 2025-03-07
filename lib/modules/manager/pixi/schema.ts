@@ -145,7 +145,7 @@ const DependencieSchemaMixin = z
   );
 
 /**
- * config of `pixi.toml` of `tool.pixi` of `pyproject.toml`
+ * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
 export const PixiConfigSchema = z
   .object({
@@ -283,7 +283,7 @@ function orderChannels(channels: Channels = []): string[] {
       return { ...channel, index: 0 };
     })
     .toSorted((a, b) => {
-      // frist based on priority then based on index
+      // first based on priority then based on index
       if (a.priority !== b.priority) {
         return b.priority - a.priority;
       }
