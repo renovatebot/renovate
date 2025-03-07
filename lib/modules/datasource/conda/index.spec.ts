@@ -296,7 +296,7 @@ describe('modules/datasource/conda/index', () => {
       httpMock
         .scope(defaultRegistryUrl)
         .get(depUrl)
-        .reply(200, JSON.parse(anacondaApiRes));
+        .reply(200, anacondaApiRes);
       const res = await getPkgReleases({
         datasource,
         packageName,
