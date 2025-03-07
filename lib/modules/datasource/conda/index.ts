@@ -5,8 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
-import { Timestamp } from '../../../util/timestamp';
-import { MaybeTimestamp } from '../../../util/timestamp';
+import { MaybeTimestamp, Timestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -51,9 +50,7 @@ export class CondaDatasource extends Datasource {
     if (registryUrl.startsWith('https://prefix.dev/')) {
       // the registryUrl here will at least contains 3 `/` ,
       // therefore channel won't be undefined in any case.
-      const channel = ensureTrailingSlash(registryUrl)
-        .split('/')
-        .at(-2) as string;
+      const channel = ensureTrailingSlash(registryUrl).split('/').at(-2)!;
 
       return await this.getReleasesFromPrefixDev(channel, packageName);
     }
