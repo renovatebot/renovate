@@ -328,7 +328,7 @@ export function getJsonFile(
   branchOrTag?: string,
 ): Promise<any> {
   logger.debug('Not implemented getJsonFile');
-  return Promise.resolve(undefined);
+  return Promise.resolve(null);
 }
 
 export function maxBodyLength(): number {

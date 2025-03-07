@@ -1,5 +1,5 @@
 import { mapPrFromScmToRenovate } from './mapper';
-import type { PullRequest } from './types';
+import type { PullRequest } from './schema';
 
 describe('modules/platform/scm-manager/mapper', () => {
   it('should correctly map the scm-manager type of a PR to the Renovate PR type', () => {

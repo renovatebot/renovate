@@ -3,7 +3,8 @@ import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
 import * as util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
-import type { PrFilterByState, PullRequest, Repo, User } from './types';
+import type { PullRequest, Repo, User } from './schema';
+import type { PrFilterByState } from './types';
 import {
   addAssignees,
   addReviewers,
@@ -648,7 +649,7 @@ describe('modules/platform/scm-manager/index', () => {
   describe(getJsonFile, () => {
     it('should Not implemented and return undefined', async () => {
       const result = await getJsonFile('package.json');
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
     });
   });
 

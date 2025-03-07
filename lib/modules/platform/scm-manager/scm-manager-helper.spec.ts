@@ -10,13 +10,8 @@ import {
   setToken,
   updateScmPr,
 } from './scm-manager-helper';
-import type {
-  PullRequest,
-  PullRequestCreateParams,
-  PullRequestUpdateParams,
-  Repo,
-  User,
-} from './types';
+import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
+import type { PullRequest, Repo, User } from './schema';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/platform/scm-manager/scm-manager-helper', () => {

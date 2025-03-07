@@ -1,7 +1,8 @@
 import type { MergeStrategy } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { GitUrlOption, Pr } from '../types';
-import type { PrFilterByState, Repo } from './types';
+import type { PrFilterByState } from './types';
+import type { Repo } from './schema';
 import { getMergeMethod, getRepoUrl, matchPrState, smartLinks } from './utils';
 import { invalidatePrCache } from './index';
 
