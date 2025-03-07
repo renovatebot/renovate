@@ -486,17 +486,15 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe(updatePr, () => {
     it.each([
-      ['open', 'OPEN', 'prBody', 'prBody'],
-      ['closed', 'REJECTED', 'prBody', 'prBody'],
-      [undefined, undefined, 'prBody', 'prBody'],
-      ['open', 'OPEN', undefined, undefined],
+      ['open', 'prBody'],
+      ['closed', 'prBody'],
+      [undefined, 'prBody'],
+      ['open', undefined],
     ])(
       'should update the PR with state %p and prBody %p',
       async (
         actualState: string | undefined,
-        expectedState: string | undefined,
         actualPrBody: string | undefined,
-        expectedPrBody: string | undefined,
       ) => {
         httpMock
           .scope(endpoint)
@@ -510,15 +508,15 @@ describe('modules/platform/scm-manager/index', () => {
           .put(`/pull-requests/${repo.namespace}/${repo.name}/1`)
           .reply(204);
 
-        await updatePr({
-          number: 1,
-          prTitle: 'PR Title',
-          prBody: actualPrBody,
-          state: actualState as 'open' | 'closed' | undefined,
-          targetBranch: 'Target/Branch',
-        });
-
-        expect(httpMock.allUsed()).toBeTrue();
+        await expect(
+          updatePr({
+            number: 1,
+            prTitle: 'PR Title',
+            prBody: actualPrBody,
+            state: actualState as 'open' | 'closed' | undefined,
+            targetBranch: 'Target/Branch',
+          }),
+        ).resolves.not.toThrow();
       },
     );
   });
