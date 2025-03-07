@@ -61,16 +61,28 @@ export async function getNewValue({
     return currentValue;
   }
 
-  const sortedVersions = versions.releases
+  // Filter out invalid versions
+  let filteredVersions = versions.releases
     .map((release: Release) => release.version)
-    .filter((version: string) => versioning.isValid(version))
-    .sort((a: string, b: string) => versioning.sortVersions(a, b));
+    .filter((version: string) => versioning.isValid(version));
+
+  // Filter out prerelease versions if ignorePrerelease is true or not specified
+  const ignorePrerelease = config.constraints?.ignorePrerelease !== false;
+  if (ignorePrerelease) {
+    filteredVersions = filteredVersions.filter((version: string) =>
+      versioning.isStable(version),
+    );
+  }
+
+  // Sort the filtered versions
+  const sortedVersions = filteredVersions.sort((a: string, b: string) =>
+    versioning.sortVersions(a, b),
+  );
 
   if (!sortedVersions.length) {
     return currentValue;
   }
 
-  const latestVersion = sortedVersions[sortedVersions.length - 1];
   const offset = config.constraints?.offset ?? 0;
   const targetIndex = sortedVersions.length - 1 + offset;
 
