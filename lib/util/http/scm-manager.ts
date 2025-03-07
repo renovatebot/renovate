@@ -13,7 +13,7 @@ export interface ScmManagerHttpOptions extends HttpOptions {
 
 export class ScmManagerHttp extends HttpBase<ScmManagerHttpOptions> {
   constructor() {
-    super('scm-manager', { throwHttpErrors: true });
+    super('scm-manager');
   }
 
   protected override get baseUrl(): string | undefined {

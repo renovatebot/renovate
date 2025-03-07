@@ -31,6 +31,7 @@ import {
   getDefaultBranch,
   getRepo,
   getRepoPr,
+  setToken,
   updateScmPr,
 } from './scm-manager-helper';
 import { getRepoUrl, mapPrState, matchPrState, smartLinks } from './utils';
@@ -58,6 +59,7 @@ export async function initPlatform({
   }
 
   setBaseUrl(endpoint);
+  setToken(token);
 
   try {
     const me = await getCurrentUser();
