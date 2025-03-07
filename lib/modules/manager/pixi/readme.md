@@ -4,7 +4,7 @@ Currently support channels from anaconda and prefix.dev, other channels are not 
 
 Whenever the pixi config in `pyproject.toml` or `pixi.toml` file is updated, `pixi.lock` file will be checked for updates as well.
 
-Renovatebot will pick pixi based on known lock file version and pixi version mapping to avoid upgrade to version of lock file,
+Renovatebot will pick pixi based on known lock file version and pixi version mapping to avoid upgrade the version of lock file,
 optionally you can set `constraints.pixi` in your config to override this.
 
 The minimal support version of pixi is `0.40.0` (`pixi lock` has only been introduced with that version).
