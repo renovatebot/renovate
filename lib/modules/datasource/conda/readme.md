@@ -19,7 +19,7 @@ Look up numpy in conda-forge channel from prefix.dev using API `https://prefix.d
 }
 ```
 
-### Multiple channels support.
+### Multiple channels support
 
 ```
 {
