@@ -9,7 +9,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
 
     it('returns null for invalid file', () => {
       expect(
-        extractPackageFile('this-is-not-json', 'renovate.json'),
+        extractPackageFile('this-is-not-json-object', 'renovate.json'),
       ).toBeNull();
     });
 
