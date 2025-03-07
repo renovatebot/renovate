@@ -57,12 +57,12 @@ describe('modules/manager/npm/update/package-version/index', () => {
     });
 
     it('returns content if bumping errors', async () => {
-      jest.doMock('semver', () => ({
+      vi.doMock('semver', () => ({
         inc: () => {
           throw new Error('semver inc');
         },
       }));
-      const npmUpdater1 = await import('.');
+      const npmUpdater1 = await import('./index.js');
       const { bumpedContent } = npmUpdater1.bumpPackageVersion(
         content,
         '0.0.2',

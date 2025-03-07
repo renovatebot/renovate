@@ -1,4 +1,4 @@
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../../../../../test/util';
 import { fs, git, mocked, platform, scm } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';

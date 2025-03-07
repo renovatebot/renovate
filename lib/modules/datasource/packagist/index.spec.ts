@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -25,8 +25,8 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
 
     beforeEach(() => {
-      hostRules.find = jest.fn((input: HostRule) => input);
-      hostRules.hosts = jest.fn(() => []);
+      hostRules.find = vi.fn((input: HostRule) => input);
+      hostRules.hosts = vi.fn(() => []);
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
@@ -81,7 +81,7 @@ describe('modules/datasource/packagist/index', () => {
       httpMock
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
-        .replyWithError({ code: 'ETIMEDOUT' });
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
       httpMock
         .scope(baseUrl)
         .get('/packages.json')

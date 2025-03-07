@@ -1,6 +1,6 @@
 import { RequestError } from 'got';
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -1156,7 +1156,7 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const pr = await github.tryReuseAutoclosedPr({
         number: 91,
@@ -1180,7 +1180,7 @@ describe('modules/platform/github/index', () => {
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
 
@@ -3640,6 +3640,7 @@ describe('modules/platform/github/index', () => {
         await github.mergePr({
           branchName: '',
           id: pr.number,
+          strategy: 'merge-commit', // for coverage - has no effect on this test
         }),
       ).toBeFalse();
     });
@@ -3661,8 +3662,51 @@ describe('modules/platform/github/index', () => {
         await github.mergePr({
           branchName: '',
           id: pr.number,
+          strategy: 'auto', // for coverage -- has not effect on this test
         }),
       ).toBeFalse();
+    });
+
+    it('should warn if automergeStrategy is not supported', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'fast-forward',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+    });
+
+    it('should use configured automergeStrategy', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'rebase',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          options: {
+            body: { merge_method: 'rebase' },
+          },
+          url: 'repos/some/repo/pulls/1234/merge',
+        },
+        'mergePr',
+      );
     });
   });
 
@@ -4130,7 +4174,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4159,7 +4203,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4190,7 +4234,7 @@ describe('modules/platform/github/index', () => {
         .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4219,7 +4263,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',

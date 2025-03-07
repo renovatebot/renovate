@@ -330,11 +330,11 @@ describe('util/exec/common', () => {
   });
 
   describe('handle gpid', () => {
-    const killSpy = jest.spyOn(process, 'kill');
+    const killSpy = vi.spyOn(process, 'kill');
 
     afterEach(() => {
       delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {

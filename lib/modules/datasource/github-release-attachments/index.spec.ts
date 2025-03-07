@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
@@ -22,7 +22,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
 
   describe('getReleases', () => {
     it('returns releases', async () => {
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           url: 'https://example.com',

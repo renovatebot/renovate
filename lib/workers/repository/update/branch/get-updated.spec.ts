@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
@@ -52,7 +52,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
       } satisfies BranchConfig;
-      npm.updateDependency = jest.fn();
+      npm.updateDependency = vi.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 

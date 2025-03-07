@@ -142,11 +142,11 @@ describe('workers/repository/update/branch/schedule', () => {
     let config: RenovateConfig;
 
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
+      vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
       config = {};
     });
@@ -247,7 +247,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('supports cron syntax on Sundays', () => {
       beforeEach(() => {
-        jest.setSystemTime(new Date('2023-01-08T10:50:00.000')); // Locally Sunday 8 January 2023 10:50am
+        vi.setSystemTime(new Date('2023-01-08T10:50:00.000')); // Locally Sunday 8 January 2023 10:50am
       });
 
       it('approves if the weekday is *', () => {
@@ -271,7 +271,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('supports L syntax in cron schedules', () => {
       beforeEach(() => {
-        jest.setSystemTime(new Date('2024-10-31T10:50:00.000'));
+        vi.setSystemTime(new Date('2024-10-31T10:50:00.000'));
       });
 
       it('supports last day of month', () => {
@@ -291,7 +291,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('supports # syntax in cron schedules', () => {
       it('supports first Monday of month', () => {
-        jest.setSystemTime(new Date('2024-10-07T10:50:00.000'));
+        vi.setSystemTime(new Date('2024-10-07T10:50:00.000'));
         config.schedule = ['* * * * 1#1'];
         expect(schedule.isScheduledNow(config)).toBeTrue();
         config.schedule = ['* * * * 1#2'];
@@ -310,7 +310,7 @@ describe('workers/repository/update/branch/schedule', () => {
         ${'2017-06-29T04:01:00.000'} | ${false}
       `('$sched, $tz, $datetime', ({ datetime, expected }) => {
         config.schedule = ['* 0-5 1-7,15-22 * 4'];
-        jest.setSystemTime(new Date(datetime));
+        vi.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
@@ -329,7 +329,7 @@ describe('workers/repository/update/branch/schedule', () => {
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
-        jest.setSystemTime(new Date(datetime));
+        vi.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });
@@ -402,63 +402,63 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
-      jest.setSystemTime(new Date('2017-10-01T05:26:06.000')); // Locally Sunday, 1 October 2017 05:26:06
+      vi.setSystemTime(new Date('2017-10-01T05:26:06.000')); // Locally Sunday, 1 October 2017 05:26:06
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('approves valid weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am (first Monday of the year)
+      vi.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am (first Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      jest.setSystemTime(new Date('2017-01-09T06:00:00.000')); // Locally Monday, 2 January 2017 6am (second Monday of the year)
+      vi.setSystemTime(new Date('2017-01-09T06:00:00.000')); // Locally Monday, 2 January 2017 6am (second Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves on months of year', () => {
       config.schedule = ['of January'];
-      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am
+      vi.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on months of year', () => {
       config.schedule = ['of January'];
-      jest.setSystemTime(new Date('2017-02-02T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-02T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month', () => {
       config.schedule = ['every 3 months'];
-      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
+      vi.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month', () => {
       config.schedule = ['every 6 months'];
-      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
+      vi.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
@@ -473,7 +473,7 @@ describe('workers/repository/update/branch/schedule', () => {
       ];
 
       cases.forEach(([datetime, expected]) => {
-        jest.setSystemTime(new Date(datetime));
+        vi.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });

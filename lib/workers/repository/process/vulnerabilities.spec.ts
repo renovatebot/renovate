@@ -1,6 +1,6 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
-import { mockFn } from 'jest-mock-extended';
+import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../../../../test/util';
 import { logger } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
@@ -9,7 +9,7 @@ import { Vulnerabilities } from './vulnerabilities';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
-const createMock = jest.fn();
+const createMock = vi.fn();
 
 vi.mock('@renovatebot/osv-offline', () => {
   return {

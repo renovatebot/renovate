@@ -171,6 +171,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'pnpm',
     versioning: npmVersioningId,
   },
+  pixi: {
+    datasource: 'github-releases',
+    packageName: 'prefix-dev/pixi',
+    versioning: pep440VersioningId,
+  },
   poetry: {
     datasource: 'pypi',
     packageName: 'poetry',
@@ -230,7 +235,7 @@ async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
   if (_getPkgReleases === null) {
-    _getPkgReleases = import('../../modules/datasource');
+    _getPkgReleases = import('../../modules/datasource/index.js');
   }
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);

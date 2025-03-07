@@ -1,4 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { hostRules } from '../../../../test/util';
 import { logger } from '../../../logger';
 import {

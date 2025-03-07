@@ -1,6 +1,6 @@
 // TODO fix mocks
 import _timers from 'timers/promises';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { git, hostRules, logger, mocked } from '../../../../test/util';
@@ -1554,7 +1554,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
-        .reply(304, [])
+        .reply(200, [])
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')

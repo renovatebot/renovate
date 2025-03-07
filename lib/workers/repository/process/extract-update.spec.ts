@@ -14,7 +14,7 @@ import {
   update,
 } from './extract-update';
 
-const createVulnerabilitiesMock = jest.fn();
+const createVulnerabilitiesMock = vi.fn();
 
 vi.mock('./write');
 vi.mock('./sort');
@@ -122,7 +122,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       };
-      const appendVulnerabilityPackageRulesMock = jest.fn();
+      const appendVulnerabilityPackageRulesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });

@@ -2,7 +2,7 @@ import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
@@ -391,8 +391,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -423,8 +423,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -456,8 +456,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -487,8 +487,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -553,8 +553,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getDigest(
@@ -574,8 +574,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockRejectedValue('some-error'),
         })),
       );
       const res = await getDigest(
@@ -651,14 +651,20 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('should throw error for 429', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 429 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should throw error for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 504 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);

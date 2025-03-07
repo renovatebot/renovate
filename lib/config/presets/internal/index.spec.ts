@@ -8,7 +8,7 @@ import * as internal from '.';
 vi.mock('../npm');
 vi.mock('../../../modules/datasource/npm');
 
-jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
+vi.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
@@ -54,5 +54,9 @@ describe('config/presets/internal/index', () => {
       )
       .flat()
       .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
+  });
+
+  it('returns undefined for unknown preset', () => {
+    expect(internal.getPreset({ repo: 'some/repo' })).toBeUndefined();
   });
 });

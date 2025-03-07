@@ -356,7 +356,7 @@ describe('modules/platform/gitea/index', () => {
           uid: 1,
           archived: false,
         })
-        .replyWithError(new Error('searchRepos()'));
+        .replyWithError(httpMock.error('searchRepos()'));
       await initFakePlatform(scope);
 
       await expect(gitea.getRepos()).rejects.toThrow('searchRepos()');
@@ -464,7 +464,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
-        .replyWithError(new Error('getRepo()'));
+        .replyWithError(httpMock.error('getRepo()'));
       await initFakePlatform(scope);
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow('getRepo()');
     });
@@ -1474,7 +1474,7 @@ describe('modules/platform/gitea/index', () => {
 
   describe('createPr', () => {
     beforeEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
       memCache.set('gitea-pr-cache-synced', true);
     });
 
@@ -1662,7 +1662,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should use platform automerge', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1688,7 +1688,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not use platform automerge on forgejo v7', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1712,7 +1712,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should not use platform automerge on forgejo v7 LTS', async () => {
-      const mergePR = jest.spyOn(helper, 'mergePR');
+      const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
