@@ -1,34 +1,33 @@
-This datasource returns releases for package from anaconda registry. Third-party repo is not supported currently.
+This datasource returns releases for package from anaconda registry and prefix.dev. Other repositories are not supported currently.
 
 This datasource support following cases:
 
-Default registry url with channel prefixed `packageName`:
+Looks numpy in conda-forge channel on anaconda.
 
-```js
+```
 {
   packageName: 'conda-forge/numpy',
 }
 ```
 
-```js
-{
-  packageName: 'conda-forge/numpy',
-  registryUrls: [
-    "https://api.anaconda.org/package/",
-  ]
-}
+Looks numpy in conda-forge channel from https://prefix.dev/api/graphql.
+
 ```
-
-Canonical `packageName` with registryUrls including channels info to support multiple channels conda package:
-
-```js
 {
   packageName: 'numpy',
-  registryUrls: [
-    "https://api.anaconda.org/package/cuda/",
-    "https://api.anaconda.org/package/conda-forge/",
-  ]
+  registryUrls: ["https://prefix.dev/conda-forge/"]
 }
 ```
 
-<!-- see https://github.com/renovatebot/renovate/issues/2213#issuecomment-2687645736 for future plan -->
+Multiple channel support.
+Will go to api.anaconda.org first, if datasource can't find this package on anaconda/conda-forge, it will fallback to https://prefix.dev/api/graphql.
+
+```
+{
+  packageName: 'some-package',
+  registryUrls: [
+    "https://api.anaconda.org/package/conda-forge/",
+    "https://prefix.dev/conda-forge/",
+  ]
+}
+```
