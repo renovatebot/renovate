@@ -1,8 +1,8 @@
 ### Pixi package manager
 
-Whenever the pixi config in `pyproject.toml` or `pixi.toml` file is updated, the `pixi.lock` file will be checked for updates as well.
-
 Currently support channels from anaconda and prefix.dev, other channels are not supported yet.
+
+Whenever the pixi config in `pyproject.toml` or `pixi.toml` file is updated, `pixi.lock` file will be checked for updates as well.
 
 Renovatebot will pick pixi based on known lock file version and pixi version mapping,
 optionally you can set `constraints.pixi` in your config to override this.
