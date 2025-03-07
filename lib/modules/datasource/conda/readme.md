@@ -10,7 +10,7 @@ Look up numpy in conda-forge channel on anaconda.
 }
 ```
 
-Look up numpy in conda-forge channel from https://prefix.dev/api/graphql.
+Look up numpy in conda-forge channel from prefix.dev using API `https://prefix.dev/api/graphql`.
 
 ```
 {
