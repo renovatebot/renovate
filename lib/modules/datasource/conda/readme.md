@@ -1,4 +1,4 @@
-This datasource returns releases for package from anaconda registry. Third-part repo is not supported currently.
+This datasource returns releases for package from anaconda registry. Third-party repo is not supported currently.
 
 This datasource support following cases:
 
