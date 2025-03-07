@@ -372,7 +372,7 @@ describe('modules/datasource/conda/index', () => {
       httpMock
         .scope('https://prefix.dev/api/graphql')
         .post('')
-        .reply(200, { data: { package: null } });
+        .reply(200, { data: { data: { data: null } } });
 
       const config = {
         packageName: 'pytest',
