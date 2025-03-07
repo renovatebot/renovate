@@ -224,7 +224,6 @@ describe('modules/datasource/conda/index', () => {
         releases: Array.from({ length: 550 }).map((_, index) => {
           return {
             version: `0.0.${index}`,
-            isDeprecated: index % 10 === 0,
           };
         }),
       });

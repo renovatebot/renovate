@@ -159,7 +159,7 @@ export class CondaDatasource extends Datasource {
       { channel, package: packageName },
       z.object({
         version: z.string(),
-        createdAt: z.string(),
+        createdAt: z.string().nullable(),
         yankedReason: z.string().nullable(),
       }),
     );

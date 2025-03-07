@@ -6,291 +6,225 @@ exports[`modules/datasource/conda/index > getReleases > processes real data 1`] 
   "registryUrl": "https://api.anaconda.org/package",
   "releases": [
     {
-      "releaseTimestamp": "2020-02-29T01:40:19.360Z",
+      "releaseTimestamp": "2020-02-28T11:46:06.449Z",
       "version": "3.2.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:20.840Z",
+      "releaseTimestamp": "2020-02-28T11:46:07.344Z",
       "version": "3.2.5",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:23.124Z",
+      "releaseTimestamp": "2020-02-28T11:46:08.898Z",
       "version": "3.3.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:24.059Z",
       "version": "3.3.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:25.977Z",
       "version": "3.4.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:27.999Z",
       "version": "3.4.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:29.900Z",
       "version": "3.4.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:30.577Z",
       "version": "3.5.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:32.651Z",
       "version": "3.5.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:34.792Z",
       "version": "3.6.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:37.313Z",
       "version": "3.6.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:39.280Z",
       "version": "3.6.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:41.435Z",
       "version": "3.6.3",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:43.755Z",
       "version": "3.6.4",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:45.807Z",
       "version": "3.7.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:48.023Z",
+      "releaseTimestamp": "2020-02-28T11:46:33.924Z",
       "version": "3.7.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:50.295Z",
       "version": "3.7.3",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:52.440Z",
       "version": "3.7.4",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:54.673Z",
       "version": "3.8.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:56.878Z",
       "version": "3.8.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:57.132Z",
       "version": "3.8.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:59.328Z",
       "version": "3.9.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:01.435Z",
       "version": "3.9.3",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:16.165Z",
+      "releaseTimestamp": "2020-02-28T11:46:02.914Z",
       "version": "3.10.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:40:17.518Z",
+      "releaseTimestamp": "2020-02-28T11:46:04.313Z",
       "version": "3.10.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:03.640Z",
       "version": "4.0.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:03.922Z",
       "version": "4.0.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:06.206Z",
       "version": "4.0.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:08.348Z",
       "version": "4.1.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:10.562Z",
       "version": "4.1.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:10.892Z",
       "version": "4.2.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:12.728Z",
       "version": "4.2.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:13.174Z",
       "version": "4.3.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:15.253Z",
       "version": "4.3.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:17.332Z",
       "version": "4.4.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:19.276Z",
       "version": "4.4.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:19.829Z",
       "version": "4.4.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:21.995Z",
       "version": "4.5.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:24.077Z",
       "version": "4.6.2",
     },
     {
-      "releaseTimestamp": "2020-07-09T19:20:58.559Z",
       "version": "4.6.11",
     },
     {
-      "releaseTimestamp": "2020-07-09T19:20:59.750Z",
       "version": "5.0.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:26.379Z",
       "version": "5.0.1",
     },
     {
-      "releaseTimestamp": "2020-02-28T23:14:04.556Z",
       "version": "5.1.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:26.470Z",
       "version": "5.1.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:28.562Z",
       "version": "5.2.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:30.109Z",
       "version": "5.2.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:30.740Z",
       "version": "5.2.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:32.958Z",
       "version": "5.2.4",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:34.928Z",
       "version": "5.3.0",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:35.527Z",
       "version": "5.3.1",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:37.693Z",
       "version": "5.3.2",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:39.990Z",
       "version": "5.3.4",
     },
     {
-      "releaseTimestamp": "2020-02-29T01:41:41.843Z",
       "version": "5.3.5",
     },
     {
-      "releaseTimestamp": "2020-03-17T20:17:00.742Z",
       "version": "5.4.1",
     },
     {
-      "releaseTimestamp": "2020-05-15T18:30:14.709Z",
       "version": "5.4.2",
     },
     {
-      "releaseTimestamp": "2020-11-13T22:44:32.178Z",
       "version": "5.4.3",
     },
     {
-      "releaseTimestamp": "2020-08-08T20:01:27.346Z",
       "version": "6.0.1",
     },
     {
-      "releaseTimestamp": "2020-09-17T09:29:36.630Z",
       "version": "6.0.2",
     },
     {
-      "releaseTimestamp": "2020-10-02T22:18:54.989Z",
       "version": "6.1.0",
     },
     {
-      "releaseTimestamp": "2020-12-03T22:59:11.589Z",
       "version": "6.1.1",
     },
     {
-      "releaseTimestamp": "2020-12-03T22:59:13.502Z",
       "version": "6.1.2",
     },
     {
-      "releaseTimestamp": "2020-12-14T23:01:03.349Z",
       "version": "6.2.0",
     },
     {
-      "releaseTimestamp": "2022-05-02T20:03:08.190Z",
       "version": "6.2.1",
     },
     {
-      "releaseTimestamp": "2022-05-02T20:03:09.887Z",
       "version": "6.2.2",
     },
     {
-      "releaseTimestamp": "2022-05-02T20:31:30.480Z",
       "version": "6.2.3",
     },
     {
-      "releaseTimestamp": "2022-05-02T20:31:32.688Z",
       "version": "6.2.4",
     },
     {
-      "releaseTimestamp": "2024-10-17T19:57:23.708Z",
       "version": "6.2.5",
     },
     {
-      "releaseTimestamp": "2022-05-02T20:31:36.174Z",
       "version": "7.1.1",
     },
     {
-      "releaseTimestamp": "2023-03-16T14:11:38.926Z",
       "version": "7.1.2",
     },
     {
-      "releaseTimestamp": "2023-05-24T15:27:51.487Z",
       "version": "7.3.1",
     },
     {
-      "releaseTimestamp": "2023-11-22T20:55:30.773Z",
       "version": "7.4.0",
     },
     {
-      "releaseTimestamp": "2024-10-17T19:57:23.988Z",
       "version": "7.4.4",
     },
     {
