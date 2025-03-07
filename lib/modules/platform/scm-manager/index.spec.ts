@@ -613,7 +613,7 @@ describe('modules/platform/scm-manager/index', () => {
     });
   });
 
-  describe(ensureCommentRemoval, () => {
+  describe(ensureComment, () => {
     it('should Not implemented', async () => {
       expect(
         await ensureComment({
