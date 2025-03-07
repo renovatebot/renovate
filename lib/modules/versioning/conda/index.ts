@@ -61,18 +61,21 @@ function isSingleVersion(input: string): boolean {
 }
 
 function getNewValue(config: NewValueConfig): string | null {
-  if (config.currentValue === '*') {
-    if (config.rangeStrategy === 'pin') {
-      return '==' + config.newVersion;
-    }
-    if (config.rangeStrategy === 'bump') {
-      return '>=' + config.newVersion;
-    }
+  const { currentValue, rangeStrategy, isReplacement, newVersion } = config;
 
-    return null;
+  if (currentValue.includes('*')) {
+    return pep440.api.getNewValue(config);
   }
 
-  return pep440.api.getNewValue(config);
+  if (rangeStrategy === 'pin' && !isReplacement) {
+    return '==' + newVersion;
+  }
+
+  if (rangeStrategy === 'bump') {
+    return '>=' + config.newVersion;
+  }
+
+  return null;
 }
 
 function sortVersions(version: string, other: string): number {
