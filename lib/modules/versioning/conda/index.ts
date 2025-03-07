@@ -19,8 +19,12 @@ export const urls = [
   'https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] =
-  pep440.supportedRangeStrategies;
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'pin',
+  'replace',
+];
 
 function isValidVersion(s: string): boolean {
   try {
@@ -60,22 +64,46 @@ function isSingleVersion(input: string): boolean {
   return isValidVersion(input.replace(/^==/, '').trimStart());
 }
 
-function getNewValue(config: NewValueConfig): string | null {
-  const { currentValue, rangeStrategy, isReplacement, newVersion } = config;
-
-  if (currentValue.includes('*')) {
-    return pep440.api.getNewValue(config);
-  }
-
-  if (rangeStrategy === 'pin' && !isReplacement) {
+function getNewValue({
+  currentValue,
+  rangeStrategy,
+  currentVersion,
+  newVersion,
+  isReplacement,
+}: NewValueConfig): string | null {
+  if (rangeStrategy === 'pin') {
     return '==' + newVersion;
   }
 
-  if (rangeStrategy === 'bump') {
-    return '>=' + config.newVersion;
+  if (currentValue === '*') {
+    if (rangeStrategy === 'bump') {
+      return '>=' + newVersion;
+    }
+
+    // don't think you can widen or replace `*`
+    return null;
   }
 
-  return null;
+  // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
+  if (/^(\d+\.)+\*$/.test(currentValue)) {
+    const newValue = pep440.api.getNewValue({
+      currentValue: '==' + currentValue,
+      rangeStrategy,
+      currentVersion,
+      newVersion,
+      isReplacement,
+    });
+
+    return newValue?.replace(/^==/, '') ?? null;
+  }
+
+  return pep440.api.getNewValue({
+    currentValue,
+    rangeStrategy,
+    currentVersion,
+    newVersion,
+    isReplacement,
+  });
 }
 
 function sortVersions(version: string, other: string): number {
