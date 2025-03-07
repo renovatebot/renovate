@@ -115,9 +115,8 @@ export class CondaDatasource extends Datasource {
       'lookup package from prefix.dev graphql API',
     );
 
-    const versions = z.array(prefixDevSchema.Version).parse(
-      await this.getPrefixPagedResponse(
-        `
+    const versions = await this.getPrefixPagedResponse(
+      `
   query search($channel: String!, $package: String!, $page: Int = 0) {
     data: package(channelName: $channel, name: $package) {
       data: versions(limit: 500, page: $page) {
@@ -129,17 +128,16 @@ export class CondaDatasource extends Datasource {
     }
   }
   `,
-        { channel, package: packageName },
-      ),
+      { channel, package: packageName },
+      prefixDevSchema.Version,
     );
 
     if (versions.length === 0) {
       return null;
     }
 
-    const files = z.array(prefixDevSchema.File).parse(
-      await this.getPrefixPagedResponse(
-        `
+    const files = await this.getPrefixPagedResponse(
+      `
   query search($channel: String!, $package: String!, $page: Int = 0) {
     data: package(channelName: $channel, name: $package) {
       data: variants(limit: 500, page: $page) {
@@ -153,8 +151,8 @@ export class CondaDatasource extends Datasource {
     }
   }
   `,
-        { channel, package: packageName },
-      ),
+      { channel, package: packageName },
+      prefixDevSchema.File,
     );
 
     const releaseDate = new Map<string, Timestamp>();
@@ -195,10 +193,11 @@ export class CondaDatasource extends Datasource {
     };
   }
 
-  private async getPrefixPagedResponse(
+  private async getPrefixPagedResponse<T extends z.Schema>(
     query: string,
     data: any,
-  ): Promise<unknown[]> {
+    schema: T,
+  ): Promise<z.infer<T>[]> {
     const result: unknown[] = [];
 
     for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
@@ -219,7 +218,7 @@ export class CondaDatasource extends Datasource {
 
       const currentPage = res.body.data.data?.data;
       if (!currentPage) {
-        return result;
+        break;
       }
 
       result.push(...currentPage.page);
@@ -229,6 +228,6 @@ export class CondaDatasource extends Datasource {
       }
     }
 
-    return result;
+    return z.array(schema).parse(result);
   }
 }
