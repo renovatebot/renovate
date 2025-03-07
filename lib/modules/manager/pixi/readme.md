@@ -10,4 +10,4 @@ optionally you can set `constraints.pixi` in your config to override this.
 The minimal support version of pixi is `0.40.0` (`pixi lock` has only been introduced with that version).
 Therefore when you are setting `constraints.pixi` in your config, please be careful to pick a supported pixi version.
 
-Therefore, if you have lock file version `<6`, renovatebot can't generate lock file with same version.
+This also means if you have a lock file with version `<6`, renovatebot can't generate lock file with same version, it will upgrade lock file to latest version.
