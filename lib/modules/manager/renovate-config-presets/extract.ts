@@ -1,12 +1,11 @@
 import is from '@sindresorhus/is';
 import { parsePreset } from '../../../config/presets/parse';
-import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { parseJson } from '../../../util/common';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
+import { RenovateJsonSchema } from './schema';
 
 const supportedPresetSources: {
   source: string;
@@ -31,21 +30,15 @@ export function extractPackageFile(
   packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
-  let config: RenovateConfig | null;
-  try {
-    config = parseJson(content, packageFile) as RenovateConfig | null;
-  } catch {
-    logger.debug({ packageFile }, 'Invalid JSON5');
-    return null;
-  }
-
-  if (is.nullOrUndefined(config)) {
+  const config = RenovateJsonSchema.safeParse(content);
+  if (!config.success) {
+    logger.debug({ packageFile }, 'Invalid Renovate Config');
     return null;
   }
 
   const deps: PackageDependency[] = [];
 
-  for (const preset of config.extends ?? []) {
+  for (const preset of config.data.extends ?? []) {
     const parsedPreset = parsePreset(preset);
     const datasource = supportedPresetSources.find(
       (source) => source.source === parsedPreset.presetSource,
