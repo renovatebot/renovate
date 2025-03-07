@@ -433,9 +433,12 @@ describe('modules/datasource/conda/index', () => {
               data: {
                 page: Array.from({ length: 50 }).map((_, index) => ({
                   version: `0.0.${index}`,
-                  createdAt: DateTime.fromISO('2020-02-29T01:40:20.840Z')
-                    .minus({ seconds: index })
-                    .toString(),
+                  createdAt:
+                    index % 10 === 0
+                      ? null
+                      : DateTime.fromISO('2020-02-29T01:40:20.840Z')
+                          .minus({ seconds: index })
+                          .toString(),
                   yankedReason: index % 10 === 0 ? 'removed' : null,
                 })),
                 pages: 2,
