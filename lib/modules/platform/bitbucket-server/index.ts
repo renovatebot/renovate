@@ -161,6 +161,10 @@ export async function initPlatform({
         )
       ).body;
 
+      if (!emailAddress.length) {
+        throw new Error(`No email address configured for username ${username}`);
+      }
+
       platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
 
       logger.debug(`Detected gitAuthor: ${platformConfig.gitAuthor}`);
