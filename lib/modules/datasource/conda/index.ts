@@ -11,6 +11,9 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { CondaPackage } from './types';
+import * as prefixSchema from './schema/prefix';
+
+const MAX_PREFIX_DEV_GRAPHQL_PAGE = 10;
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -71,18 +74,18 @@ export class CondaDatasource extends Datasource {
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
 
-      response.body.files.forEach((file) => {
+      for (const file of response.body.files ?? []) {
         const dt = Timestamp.parse(file.upload_time);
         const currentDt = releaseDate.get(file.version);
         if (is.nullOrUndefined(currentDt)) {
           releaseDate.set(file.version, dt);
-          return;
+          continue;
         }
 
         if (currentDt.localeCompare(dt) < 0) {
           releaseDate.set(file.version, dt);
         }
-      });
+      }
 
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
@@ -126,7 +129,7 @@ export class CondaDatasource extends Datasource {
   }
   `,
       { channel, package: packageName },
-      z.object({ version: z.string() }),
+      prefixSchema.Version,
     );
 
     if (versions.length === 0) {
@@ -149,11 +152,7 @@ export class CondaDatasource extends Datasource {
   }
   `,
       { channel, package: packageName },
-      z.object({
-        version: z.string(),
-        createdAt: z.string().nullable(),
-        yankedReason: z.string().nullable(),
-      }),
+      prefixSchema.File,
     );
 
     const releaseDate = new Map<string, Timestamp>();
@@ -213,8 +212,7 @@ export class CondaDatasource extends Datasource {
     });
     const result: z.infer<T>[] = [];
 
-    let page = 0;
-    while (true) {
+    for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
       const res = await this.http.postJson(
         'https://prefix.dev/api/graphql',
         {
@@ -229,8 +227,6 @@ export class CondaDatasource extends Datasource {
         },
         scheme,
       );
-
-      page++;
 
       const currentPage = res.body.data.data?.data;
       if (!currentPage) {
