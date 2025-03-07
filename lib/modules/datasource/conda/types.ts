@@ -74,18 +74,18 @@ export interface CondaFile {
   type: string;
   attrs: {
     build_number: number;
-    name?: string;
+    name: string;
     license: string;
-    timestamp?: number;
-    source_url?: string;
+    timestamp: number;
+    source_url: string;
     platform: string;
     depends: string[];
-    version?: CondaVersion;
+    version: CondaVersion;
     subdir: string;
     build: string;
-    sha256?: string;
+    sha256: string;
     arch: string;
-    md5?: string;
-    size?: number;
+    md5: string;
+    size: number;
   };
 }

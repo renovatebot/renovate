@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -64,7 +63,7 @@ describe('modules/datasource/conda/index', () => {
         packageName,
       });
       expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(73);
+      expect(res?.releases).toHaveLength(94);
     });
 
     it('returns null without registryUrl', async () => {
@@ -89,7 +88,6 @@ describe('modules/datasource/conda/index', () => {
           html_url: 'http://anaconda.org/anaconda/pytest',
           dev_url: 'https://github.com/pytest-dev/pytest/',
           versions: ['2.7.0', '2.5.1', '2.6.0'],
-          files: [],
         });
       const config = {
         registryUrls: [
@@ -112,120 +110,6 @@ describe('modules/datasource/conda/index', () => {
           { version: '2.7.0' },
         ],
         sourceUrl: 'https://github.com/pytest-dev/pytest',
-      });
-    });
-
-    it('supports channel from prefix.dev with null response', async () => {
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .reply(200, { data: { package: null } });
-
-      const config = {
-        packageName: 'pytest',
-        registryUrls: ['https://prefix.dev/conda-forge'],
-      };
-      const res = await getPkgReleases({
-        ...config,
-        datasource,
-      });
-      expect(res).toBe(null);
-    });
-
-    it('supports channel from prefix.dev with multiple page responses', async () => {
-      // mock versions
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                page: Array.from({ length: 500 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                })),
-                pages: 2,
-              },
-            },
-          },
-        });
-
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index + 500}`,
-                })),
-                pages: 2,
-              },
-            },
-          },
-        });
-
-      // mock files
-
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                  createdAt: DateTime.fromISO('2020-02-29T01:40:20.840Z')
-                    .minus({ seconds: index })
-                    .toString(),
-                  yankedReason: index % 10 === 0 ? 'removed' : null,
-                })),
-                pages: 2,
-              },
-            },
-          },
-        });
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                  createdAt: DateTime.fromISO('2020-02-29T01:40:20.840Z')
-                    .plus({ seconds: index })
-                    .toString(),
-                  yankedReason: index % 10 === 0 ? 'removed' : null,
-                })),
-                pages: 2,
-              },
-            },
-          },
-        });
-
-      const config = {
-        packageName: 'pytest',
-        registryUrls: ['https://prefix.dev/conda-forge'],
-      };
-      const res = await getPkgReleases({
-        ...config,
-        datasource,
-      });
-      expect(res).toMatchObject({
-        registryUrl: 'https://prefix.dev/conda-forge',
-        releases: Array.from({ length: 550 }).map((_, index) => {
-          return {
-            version: `0.0.${index}`,
-          };
-        }),
       });
     });
   });
