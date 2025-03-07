@@ -395,10 +395,13 @@ describe('modules/datasource/conda/index', () => {
           data: {
             data: {
               data: {
-                page: Array.from({ length: 500 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                })),
                 pages: 2,
+                page: [
+                  { version: '0.0.1' },
+                  { version: '0.0.2' },
+                  { version: '0.0.3' },
+                  { version: '0.0.4' },
+                ],
               },
             },
           },
@@ -412,10 +415,13 @@ describe('modules/datasource/conda/index', () => {
           data: {
             data: {
               data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index + 500}`,
-                })),
                 pages: 2,
+                page: [
+                  { version: '0.0.5' },
+                  { version: '0.0.6' },
+                  { version: '0.0.7' },
+                  { version: '0.0.8' },
+                ],
               },
             },
           },
@@ -431,17 +437,35 @@ describe('modules/datasource/conda/index', () => {
           data: {
             data: {
               data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                  createdAt:
-                    index % 10 === 0
-                      ? null
-                      : DateTime.fromISO('2020-02-29T01:40:20.840Z')
-                          .minus({ seconds: index })
-                          .toString(),
-                  yankedReason: index % 10 === 0 ? 'removed' : null,
-                })),
                 pages: 2,
+                page: [
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:21Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:20.840Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:23Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.56',
+                    createdAt: null,
+                    yankedReason: null,
+                  },
+                ],
               },
             },
           },
@@ -454,14 +478,35 @@ describe('modules/datasource/conda/index', () => {
           data: {
             data: {
               data: {
-                page: Array.from({ length: 50 }).map((_, index) => ({
-                  version: `0.0.${index}`,
-                  createdAt: DateTime.fromISO('2020-02-29T01:40:20.840Z')
-                    .plus({ seconds: index })
-                    .toString(),
-                  yankedReason: index % 10 === 0 ? 'removed' : null,
-                })),
                 pages: 2,
+                page: [
+                  {
+                    version: '0.0.7',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:21Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.8',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:20.840Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.10',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:23Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.560',
+                    createdAt: null,
+                    yankedReason: null,
+                  },
+                ],
               },
             },
           },
@@ -475,14 +520,53 @@ describe('modules/datasource/conda/index', () => {
         ...config,
         datasource,
       });
-      expect(res).toMatchObject({
-        registryUrl: 'https://prefix.dev/conda-forge',
-        releases: Array.from({ length: 550 }).map((_, index) => {
-          return {
-            version: `0.0.${index}`,
-          };
-        }),
-      });
+      expect(res).toMatchInlineSnapshot(`
+        {
+          "registryUrl": "https://prefix.dev/conda-forge",
+          "releases": [
+            {
+              "isDeprecated": undefined,
+              "releaseDate": undefined,
+              "version": "0.0.1",
+            },
+            {
+              "isDeprecated": undefined,
+              "releaseDate": undefined,
+              "version": "0.0.2",
+            },
+            {
+              "isDeprecated": undefined,
+              "releaseDate": undefined,
+              "version": "0.0.3",
+            },
+            {
+              "isDeprecated": undefined,
+              "releaseDate": undefined,
+              "version": "0.0.4",
+            },
+            {
+              "isDeprecated": false,
+              "releaseDate": "2020-02-29T01:40:23.000Z",
+              "version": "0.0.5",
+            },
+            {
+              "isDeprecated": undefined,
+              "releaseDate": undefined,
+              "version": "0.0.6",
+            },
+            {
+              "isDeprecated": false,
+              "releaseDate": "2020-02-29T01:40:21.000Z",
+              "version": "0.0.7",
+            },
+            {
+              "isDeprecated": false,
+              "releaseDate": "2020-02-29T01:40:20.840Z",
+              "version": "0.0.8",
+            },
+          ],
+        }
+      `);
     });
   });
 });

@@ -158,7 +158,7 @@ export class CondaDatasource extends Datasource {
     const releaseDate = new Map<string, Timestamp>();
     const yanked = new Map<string, boolean>();
 
-    files.forEach((file) => {
+    for (const file of files) {
       yanked.set(
         file.version,
         Boolean(
@@ -168,19 +168,19 @@ export class CondaDatasource extends Datasource {
 
       const dt = MaybeTimestamp.parse(file.createdAt);
       if (is.nullOrUndefined(dt)) {
-        return;
+        continue;
       }
 
       const currentDt = releaseDate.get(file.version);
       if (is.nullOrUndefined(currentDt)) {
         releaseDate.set(file.version, dt);
-        return;
+        continue;
       }
 
       if (currentDt.localeCompare(dt) < 0) {
         releaseDate.set(file.version, dt);
       }
-    });
+    }
 
     return {
       releases: versions.map(({ version }) => {
@@ -235,7 +235,7 @@ export class CondaDatasource extends Datasource {
 
       result.push(...currentPage.page);
 
-      if (page >= currentPage.pages) {
+      if (page >= currentPage.pages - 1) {
         break;
       }
     }
