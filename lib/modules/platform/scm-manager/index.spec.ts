@@ -1,8 +1,7 @@
 import * as httpMock from '../../../../test/http-mock';
-import { git, mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
-import * as _util from '../util';
+import * as util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
 import type { PrFilterByState, PullRequest, Repo, User } from './types';
 import {
@@ -10,6 +9,7 @@ import {
   addReviewers,
   createPr,
   deleteLabel,
+  ensureComment,
   ensureCommentRemoval,
   ensureIssue,
   ensureIssueClosing,
@@ -34,10 +34,10 @@ import {
   setBranchStatus,
   updatePr,
 } from './index';
+import { git } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../util');
-const util: jest.Mocked<typeof _util> = mocked(_util);
+vi.mock('../util');
+vi.mock('../../../util/git');
 
 const endpoint = 'https://localhost:8080/scm/api/v2';
 const token = 'TEST_TOKEN';
@@ -93,7 +93,7 @@ const renovatePr: Pr = mapPrFromScmToRenovate(pullRequest);
 
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
     invalidatePrCache();
   });
@@ -143,7 +143,7 @@ describe('modules/platform/scm-manager/index', () => {
         .get(`/config/git/${repository}/default-branch`)
         .reply(200, { defaultBranch: expectedDefaultBranch });
 
-      util.repoFingerprint.mockReturnValueOnce(expectedFingerprint);
+      vi.mocked(util.repoFingerprint).mockReturnValueOnce(expectedFingerprint);
 
       expect(
         await initRepo({ repository: `${repo.namespace}/${repo.name}` }),
@@ -283,7 +283,7 @@ describe('modules/platform/scm-manager/index', () => {
       ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'!open'}  | ${null}
       ${[pullRequest]}     | ${pullRequest.source}   | ${pullRequest.title} | ${'closed'} | ${null}
     `(
-      'search within available pull requests for branch name "$branchName", pr title "$prTitle" and state "$state" with result $result ',
+      'search within available pull requests for branch name "$branchName", pr title "$prTitle" and state "$state" with result $result',
       async ({
         availablePullRequest,
         branchName,
@@ -425,7 +425,7 @@ describe('modules/platform/scm-manager/index', () => {
       [false, 'OPEN', false],
       [true, 'DRAFT', true],
     ])(
-      'it should create the PR with isDraft %p and state %p',
+      'should create the PR with isDraft %p and state %p',
       async (
         draftPR: boolean | undefined,
         expectedState: string,
@@ -491,7 +491,7 @@ describe('modules/platform/scm-manager/index', () => {
       [undefined, undefined, 'prBody', 'prBody'],
       ['open', 'OPEN', undefined, undefined],
     ])(
-      'it should update the PR with state %p and prBody %p',
+      'should update the PR with state %p and prBody %p',
       async (
         actualState: string | undefined,
         expectedState: string | undefined,
@@ -611,6 +611,18 @@ describe('modules/platform/scm-manager/index', () => {
           content: 'content',
         }),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe(ensureCommentRemoval, () => {
+    it('should Not implemented', async () => {
+      expect(
+        await ensureComment({
+          number: 1,
+          topic: 'comment',
+          content: 'content',
+        }),
+      ).toBeFalse();
     });
   });
 

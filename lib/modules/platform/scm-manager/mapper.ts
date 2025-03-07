@@ -6,7 +6,7 @@ export function mapPrFromScmToRenovate(pr: SCMPullRequest): RenovatePr {
     sourceBranch: pr.source,
     targetBranch: pr.target,
     createdAt: pr.creationDate,
-    closedAt: pr.closeDate ? pr.closeDate : undefined,
+    closedAt: pr.closeDate ?? undefined,
     hasAssignees:
       pr.reviewer !== undefined &&
       pr.reviewer !== null &&
