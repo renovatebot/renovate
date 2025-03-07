@@ -7,7 +7,7 @@ import * as prAutomerge from './automerge';
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
-    const spy = jest.spyOn(schedule, 'isScheduledNow');
+    const spy = vi.spyOn(schedule, 'isScheduledNow');
     let config: BranchConfig;
     let pr: Pr;
 

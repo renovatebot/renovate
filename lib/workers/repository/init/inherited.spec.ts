@@ -10,7 +10,7 @@ import {
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
 
-jest.mock('../../../config/presets');
+vi.mock('../../../config/presets');
 
 const presets = mocked(presets_);
 
@@ -25,6 +25,7 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
     };
+    hostRules.clear();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
@@ -112,6 +113,30 @@ describe('workers/repository/init/inherited', () => {
     expect(res.hostRules).toBeUndefined();
   });
 
+  it('should apply secrets to inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      `{
+        "hostRules": [
+          {
+            "matchHost": "some-host-url",
+            "token": "{{ secrets.SECRET_TOKEN }}"
+          }
+        ]
+      }`,
+    );
+    const res = await mergeInheritedConfig({
+      ...config,
+      secrets: { SECRET_TOKEN: 'some-secret-token' },
+    });
+    expect(hostRules.getAll()).toMatchObject([
+      {
+        matchHost: 'some-host-url',
+        token: 'some-secret-token',
+      },
+    ]);
+    expect(res.hostRules).toBeUndefined();
+  });
+
   it('should resolve presets found in inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
@@ -134,8 +159,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -173,8 +197,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -212,7 +235,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest.spyOn(validation, 'validateConfig').mockResolvedValue({
+    vi.spyOn(validation, 'validateConfig').mockResolvedValue({
       warnings: [],
       errors: [],
     });

@@ -414,7 +414,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(`/api/mc/availability`)
-          .replyWithError({ code: 'ECONNRESET' });
+          .replyWithError(httpMock.error({ code: 'ECONNRESET' }));
 
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),

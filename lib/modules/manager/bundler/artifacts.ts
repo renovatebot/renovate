@@ -85,7 +85,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  const updatedDepNames = updatedDeps
+  const updatedDepNames: string[] = updatedDeps
     .map(({ depName }) => depName)
     .filter(is.nonEmptyStringAndNotWhitespace);
 
@@ -105,8 +105,8 @@ export async function updateArtifacts(
       }
 
       const updateTypes = {
-        patch: '--patch --strict ',
-        minor: '--minor --strict ',
+        patch: '--patch ',
+        minor: '--minor ',
         major: '',
       };
       for (const [updateType, updateArg] of Object.entries(updateTypes)) {
@@ -120,12 +120,9 @@ export async function updateArtifacts(
           additionalArgs = '--conservative ';
         }
         if (deps.length) {
-          let cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
+          const cmd = `bundler lock ${updateArg}${additionalArgs}--update ${deps
             .map(quote)
             .join(' ')}`;
-          if (cmd.includes(' --conservative ')) {
-            cmd = cmd.replace(' --strict', '');
-          }
           commands.push(cmd);
         }
       }
@@ -225,29 +222,6 @@ export async function updateArtifacts(
       // Do not generate these PRs because we don't yet support Bundler authentication
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
-    }
-    if (
-      recursionLimit > 0 &&
-      (output.includes('version solving has failed') ||
-        output.includes('Could not find gem'))
-    ) {
-      logger.debug('Failed to lock strictly, retrying non-strict');
-      const newConfig = {
-        ...config,
-        postUpdateOptions: [
-          ...(config.postUpdateOptions ?? []),
-          'bundlerConservative',
-        ],
-      };
-      return updateArtifacts(
-        {
-          packageFileName,
-          updatedDeps,
-          newPackageFileContent,
-          config: newConfig,
-        },
-        recursionLimit - 1,
-      );
     }
     const resolveMatches: string[] = getResolvedPackages(output).filter(
       (depName) => !updatedDepNames.includes(depName),

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles @types specially (reversed) 1`] = `
 {
   "addLabels": [],
   "automerge": false,
@@ -83,13 +83,18 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles @types specially 1`] = `
 {
   "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitBodyTable": true,
-  "commitMessage": "\\n\\n| datasource | package         | from  | to    |\\n| ---------- | --------------- | ----- | ----- |\\n| npm        | @types/some-dep | 0.5.7 | 0.5.8 |\\n",
+  "commitMessage": "
+
+| datasource | package         | from  | to    |
+| ---------- | --------------- | ----- | ----- |
+| npm        | @types/some-dep | 0.5.7 | 0.5.8 |
+",
   "constraints": {},
   "datasource": "npm",
   "depName": "some-dep",
@@ -166,7 +171,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileMaintenance 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles lockFileMaintenance 1`] = `
 {
   "addLabels": [],
   "automerge": false,
@@ -204,7 +209,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileUpdate 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles lockFileUpdate 1`] = `
 {
   "addLabels": [],
   "automerge": false,

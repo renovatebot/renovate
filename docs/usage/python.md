@@ -26,7 +26,7 @@ Legacy versions with the `===` prefix are ignored.
 ## Package name matching
 
 Your `matchPackageName` or `matchPackagePattern` rules will be matching against normalized names.
-So if you have specified package `some.package` or `ANOTHER_DEP` in your package files (`requirements.txt`, `pyproject.toml`), they will be treated as `some-package` and `another-dep` respecitvely.
+So if you have specified package `some.package` or `ANOTHER_DEP` in your package files (`requirements.txt`, `pyproject.toml`), they will be treated as `some-package` and `another-dep` respectively.
 Not only they will be case insensitive but will replace any amount `._-` to a single `-`.
 [Consult Python packaging documentation for the specification](https://packaging.python.org/en/latest/specifications/name-normalization/).
 

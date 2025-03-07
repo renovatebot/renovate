@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   envMock,
   mockExecAll,
@@ -23,12 +23,12 @@ import { updateArtifacts } from '.';
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('./host-rules');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -676,71 +676,6 @@ describe('modules/manager/bundler/artifacts', () => {
         expect(execSnapshots).toMatchObject([
           { cmd: 'bundler lock --update foo' },
           { cmd: 'bundler lock --update foo bar' },
-        ]);
-      });
-
-      it('handles failure of strict updating for version solving', async () => {
-        const execError = new ExecError('Exec error', {
-          cmd: '',
-          stdout: '',
-          stderr: 'version solving has failed',
-          options: { encoding: 'utf8' },
-        });
-        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
-        const execSnapshots = mockExecSequence([
-          execError,
-          { stdout: '', stderr: '' },
-        ]);
-        git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({
-            modified: ['Gemfile.lock'],
-          }),
-        );
-
-        const res = await updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [{ depName: 'foo', updateType: 'minor' }],
-          newPackageFileContent: '{}',
-          config,
-        });
-
-        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
-        expect(execSnapshots).toMatchObject([
-          { cmd: 'bundler lock --minor --strict --update foo' },
-          { cmd: 'bundler lock --minor --conservative --update foo' },
-        ]);
-      });
-
-      it('handles failure of strict updating for missing gem', async () => {
-        // See https://github.com/rubygems/rubygems/issues/7369
-        const execError = new ExecError('Exec error', {
-          cmd: '',
-          stdout: '',
-          stderr: "Could not find gems matching 'foo ",
-          options: { encoding: 'utf8' },
-        });
-        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
-        const execSnapshots = mockExecSequence([
-          execError,
-          { stdout: '', stderr: '' },
-        ]);
-        git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({
-            modified: ['Gemfile.lock'],
-          }),
-        );
-
-        const res = await updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [{ depName: 'foo', updateType: 'minor' }],
-          newPackageFileContent: '{}',
-          config,
-        });
-
-        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
-        expect(execSnapshots).toMatchObject([
-          { cmd: 'bundler lock --minor --strict --update foo' },
-          { cmd: 'bundler lock --minor --conservative --update foo' },
         ]);
       });
 

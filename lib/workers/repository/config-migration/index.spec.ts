@@ -8,9 +8,9 @@ import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
 import { configMigration } from './index';
 
-jest.mock('./pr');
-jest.mock('./branch');
-jest.mock('./branch/migrated-data');
+vi.mock('./pr');
+vi.mock('./branch');
+vi.mock('./branch/migrated-data');
 
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
@@ -40,19 +40,6 @@ describe('workers/repository/config-migration/index', () => {
   it('skips pr creation when migration is not needed', async () => {
     const branchList: string[] = [];
     mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue(null);
-    const res = await configMigration(config, branchList);
-    expect(res).toMatchObject({ result: 'no-migration' });
-    expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
-    expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
-  });
-
-  it('skips pr creation if config found in package.json', async () => {
-    const branchList: string[] = [];
-    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
-      content,
-      indent: partial<Indent>(),
-      filename: 'package.json',
-    });
     const res = await configMigration(config, branchList);
     expect(res).toMatchObject({ result: 'no-migration' });
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);

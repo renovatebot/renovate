@@ -17,12 +17,13 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substring(1);
 
-function sanitizeDepName(depName: string): string {
+export function sanitizeDepName(depName: string): string {
   return depName
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
     .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/:/g), '-')
     .replace(regEx(/-+/), '-')
     .toLowerCase();
 }
@@ -87,7 +88,6 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
-      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }

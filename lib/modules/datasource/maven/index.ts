@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
 import * as mavenVersioning from '../../versioning/maven';
@@ -29,7 +30,7 @@ import {
 } from './util';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -88,7 +89,7 @@ export class MavenDatasource extends Datasource {
       cacheNamespace,
       cacheKey,
     );
-    /* istanbul ignore if */
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedVersions) {
       return cachedVersions;
     }
@@ -117,7 +118,7 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -198,7 +199,7 @@ export class MavenDatasource extends Datasource {
     }
 
     if (is.date(res)) {
-      release.releaseTimestamp = res.toISOString();
+      release.releaseTimestamp = asTimestamp(res.toISOString());
     }
 
     return release;

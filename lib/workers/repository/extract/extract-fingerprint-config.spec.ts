@@ -39,7 +39,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     ).toEqual({
       enabled: true,
       fileList: [],
-      fileMatch: ['(^|/)package\\.json$', 'hero.json'],
+      fileMatch: [
+        '(^|/)package\\.json$',
+        '(^|/)pnpm-workspace\\.yaml$',
+        'hero.json',
+      ],
       ignorePaths: ['ignore-path-2'],
       includePaths: ['include-path-2'],
       manager: 'npm',
@@ -85,7 +89,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     ).toEqual({
       enabled: true,
       fileList: [],
-      fileMatch: ['(^|/)package\\.json$', 'hero.json'],
+      fileMatch: [
+        '(^|/)package\\.json$',
+        '(^|/)pnpm-workspace\\.yaml$',
+        'hero.json',
+      ],
       ignorePaths: ['**/node_modules/**', '**/bower_components/**'],
       includePaths: [],
       manager: 'npm',

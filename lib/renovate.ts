@@ -7,7 +7,7 @@ import { logger } from './logger';
 import { bootstrap } from './proxy';
 import { start } from './workers/global';
 
-// istanbul ignore next
+/* v8 ignore next 3 -- not easily testable */
 process.on('unhandledRejection', (err) => {
   logger.error({ err }, 'unhandledRejection');
 });
@@ -19,7 +19,7 @@ bootstrap();
   process.exitCode = await instrument('run', () => start());
   await telemetryShutdown(); //gracefully shutdown OpenTelemetry
 
-  // istanbul ignore if
+  /* v8 ignore next 3 -- no test required */
   if (process.env.RENOVATE_X_HARD_EXIT) {
     process.exit(process.exitCode);
   }

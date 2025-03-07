@@ -78,7 +78,7 @@ export class VersionPart extends Array<Identifier> {
   /**
    * Creates a {@link VersionPart} populated with the provided identifiers.
    */
-  static create(...items: Array<Identifier | string>): VersionPart {
+  static create(...items: (Identifier | string)[]): VersionPart {
     const idents = items.map((item) => {
       if (typeof item === 'string') {
         return new Identifier(item);

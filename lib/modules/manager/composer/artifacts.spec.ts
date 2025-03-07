@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -13,10 +13,10 @@ import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/git');
 
 process.env.CONTAINERBASE = 'true';
 

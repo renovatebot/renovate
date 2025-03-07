@@ -1,5 +1,6 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -54,7 +55,7 @@ export class GitlabPackagesDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -85,7 +86,7 @@ export class GitlabPackagesDatasource extends Datasource {
         .filter((r) => r.name === packagePart)
         .map(({ version, created_at }) => ({
           version,
-          releaseTimestamp: created_at,
+          releaseTimestamp: asTimestamp(created_at),
         }));
     } catch (err) {
       this.handleGenericErrors(err);

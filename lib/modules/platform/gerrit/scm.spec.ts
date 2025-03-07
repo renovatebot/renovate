@@ -8,8 +8,8 @@ import type {
   GerritRevisionInfo,
 } from './types';
 
-jest.mock('../../../util/git');
-jest.mock('./client');
+vi.mock('../../../util/git');
+vi.mock('./client');
 const clientMock = mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
@@ -36,7 +36,7 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('open change found for branchname, rebase action is available -> isBehind == true ', async () => {
+    it('open change found for branchname, rebase action is available -> isBehind == true', async () => {
       const change = partial<GerritChange>({
         current_revision: 'currentRevSha',
         revisions: {
@@ -55,7 +55,7 @@ describe('modules/platform/gerrit/scm', () => {
       ).resolves.toBeTrue();
     });
 
-    it('open change found for branch name, but rebase action is not available -> isBehind == false ', async () => {
+    it('open change found for branch name, but rebase action is not available -> isBehind == false', async () => {
       const change = partial<GerritChange>({
         current_revision: 'currentRevSha',
         revisions: {

@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { parse as parseToml } from './toml';
+import { massage, parse as parseToml } from './toml';
 
 describe('util/toml', () => {
   it('works', () => {
@@ -27,5 +27,21 @@ describe('util/toml', () => {
     `;
 
     expect(() => parseToml(input)).toThrow(SyntaxError);
+  });
+
+  it('handles templates', () => {
+    const input = codeBlock`
+      [tool.poetry]
+      name = "{{ name }}"
+      {# comment #}
+      [tool.poetry.dependencies]
+      python = "^3.9"
+      {{ foo }} = "{{ bar }}"
+      {% if foo %}
+      dep1 = "^1.0.0"
+      {% endif %}
+    `;
+
+    expect(() => parseToml(massage(input))).not.toThrow(SyntaxError);
   });
 });

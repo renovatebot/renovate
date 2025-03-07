@@ -6,13 +6,12 @@ export const presets: Record<string, Preset> = {
   biomeVersions: {
     customManagers: [
       {
-        customType: 'regex',
+        customType: 'jsonata',
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
+        fileFormat: 'json',
         fileMatch: ['(^|/)biome.jsonc?$'],
-        matchStrings: [
-          '"https://biomejs.dev/schemas/(?<currentValue>[^"]+)/schema.json"',
-        ],
+        matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
     description:
@@ -24,7 +23,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         fileMatch: ['(^|/)bitbucket-pipelines\\.ya?ml$'],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -39,7 +38,7 @@ export const presets: Record<string, Preset> = {
           '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -54,7 +53,7 @@ export const presets: Record<string, Preset> = {
           '(^|/)action\\.ya?ml$',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -67,7 +66,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -98,7 +97,7 @@ export const presets: Record<string, Preset> = {
           '\\.mk$',
         ],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
@@ -112,7 +111,7 @@ export const presets: Record<string, Preset> = {
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
         fileMatch: ['(^|/)pom\\.xml$'],
         matchStrings: [
-          '<!--\\s?renovate:( datasource=(?<datasource>[a-z-.]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
+          '<!--\\s?renovate:( datasource=(?<datasource>[a-zA-Z0-9-._]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
         ],
         versioningTemplate: '{{#if versioning}}{{{versioning}}}{{/if}}',
       },

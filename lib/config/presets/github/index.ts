@@ -26,7 +26,6 @@ export async function fetchJSONFile(
   try {
     res = await http.getJsonUnchecked(url);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }

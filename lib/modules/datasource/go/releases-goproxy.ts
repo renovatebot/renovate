@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -7,6 +6,7 @@ import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import goVersioning from '../../versioning/go-mod-directive';
 import { Datasource } from '../datasource';
@@ -33,9 +33,7 @@ export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
   }
 
   const { digest: newDigest, timestamp } = match;
-  const releaseTimestamp = DateTime.fromFormat(timestamp, 'yyyyMMddHHmmss', {
-    zone: 'UTC',
-  }).toISO({ suppressMilliseconds: true });
+  const releaseTimestamp = asTimestamp(timestamp);
 
   return {
     version: pseudoVersion,
@@ -136,15 +134,16 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       'list',
     );
-    const { body } = await this.http.get(url);
+    const { body } = await this.http.getText(url);
     return filterMap(body.split(newlineRegex), (str) => {
       if (!is.nonEmptyStringAndNotWhitespace(str)) {
         return null;
       }
 
-      const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
+      const [version, timestamp] = str.trim().split(regEx(/\s+/));
       const release: Release = pseudoVersionToRelease(version) ?? { version };
 
+      const releaseTimestamp = asTimestamp(timestamp);
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
@@ -170,8 +169,9 @@ export class GoProxyDatasource extends Datasource {
       version: res.body.Version,
     };
 
-    if (res.body.Time) {
-      result.releaseTimestamp = res.body.Time;
+    const releaseTimestamp = asTimestamp(res.body.Time);
+    if (releaseTimestamp) {
+      result.releaseTimestamp = releaseTimestamp;
     }
 
     return result;

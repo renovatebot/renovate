@@ -5,6 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
@@ -61,7 +62,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -128,9 +129,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version,
     );
-    // istanbul ignore else
     if (latestVersion) {
-      latestVersion.releaseTimestamp = res.published_at;
+      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
     }
     dep.homepage = `${registryUrl}/providers/${repository}`;
     return dep;
@@ -303,7 +303,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     // The hashes are formatted as the result of sha256sum in plain text, each line: <hash>\t<filename>
     let rawHashData: string;
     try {
-      rawHashData = (await this.http.get(zipHashUrl)).body;
+      rawHashData = (await this.http.getText(zipHashUrl)).body;
     } catch (err) {
       /* istanbul ignore next */
       if (err instanceof ExternalHostError) {
