@@ -50,7 +50,11 @@ export class CondaDatasource extends Datasource {
       return null;
     }
 
-    if (registryUrl.startsWith('https://prefix.dev/')) {
+    // fast.prefix.dev is a alias, deprecated, but still running.
+    if (
+      registryUrl.startsWith('https://prefix.dev/') ||
+      registryUrl.startsWith('https://fast.prefix.dev/')
+    ) {
       // the registryUrl here will at least contains 3 `/` ,
       // therefore channel won't be undefined in any case.
       const channel = ensureTrailingSlash(registryUrl).split('/').at(-2)!;
