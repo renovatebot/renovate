@@ -2,7 +2,7 @@ This datasource returns releases for package from anaconda registry and prefix.d
 
 This datasource support following cases:
 
-Looks numpy in conda-forge channel on anaconda.
+Look up numpy in conda-forge channel on anaconda.
 
 ```
 {
@@ -10,7 +10,7 @@ Looks numpy in conda-forge channel on anaconda.
 }
 ```
 
-Looks numpy in conda-forge channel from https://prefix.dev/api/graphql.
+Look up numpy in conda-forge channel from https://prefix.dev/api/graphql.
 
 ```
 {
@@ -19,8 +19,7 @@ Looks numpy in conda-forge channel from https://prefix.dev/api/graphql.
 }
 ```
 
-Multiple channel support.
-Will go to api.anaconda.org first, if datasource can't find this package on anaconda/conda-forge, it will fallback to https://prefix.dev/api/graphql.
+### Multiple channels support.
 
 ```
 {
@@ -31,3 +30,5 @@ Will go to api.anaconda.org first, if datasource can't find this package on anac
   ]
 }
 ```
+
+Will lookup in anaconda first, if we can't find this package on anaconda/conda-forge, it will fallback to conda-forge on prefix.dev.
