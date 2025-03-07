@@ -9,6 +9,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { CondaPackage } from './types';
+import { MaybeTimestamp, Timestamp } from '../../../util/timestamp';
 
 const prefixDevPageLimit = 500;
 
@@ -83,6 +84,8 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
+    const releaseDate: Map<string, Timestamp> = new Map();
+
     let response: { body: CondaPackage };
 
     try {
@@ -91,9 +94,27 @@ export class CondaDatasource extends Datasource {
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
 
+      response.body.files.forEach((file) => {
+        const dt = MaybeTimestamp.parse(file.upload_time);
+        if (is.nullOrUndefined(dt)) {
+          return;
+        }
+
+        const currentDt = releaseDate.get(file.version);
+        if (is.nullOrUndefined(currentDt)) {
+          releaseDate.set(file.version, dt);
+          return;
+        }
+
+        if (currentDt.localeCompare(dt) < 0) {
+          releaseDate.set(file.version, dt);
+        }
+      });
+
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
           version,
+          releaseTimestamp: releaseDate.get(version),
         };
         result.releases.push(thisRelease);
       });

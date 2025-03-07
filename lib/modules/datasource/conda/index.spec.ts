@@ -63,7 +63,7 @@ describe('modules/datasource/conda/index', () => {
         packageName,
       });
       expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(94);
+      expect(res?.releases).toHaveLength(73);
     });
 
     it('returns null without registryUrl', async () => {
@@ -88,6 +88,7 @@ describe('modules/datasource/conda/index', () => {
           html_url: 'http://anaconda.org/anaconda/pytest',
           dev_url: 'https://github.com/pytest-dev/pytest/',
           versions: ['2.7.0', '2.5.1', '2.6.0'],
+          files: [],
         });
       const config = {
         registryUrls: [
