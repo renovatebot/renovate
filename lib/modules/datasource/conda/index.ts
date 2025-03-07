@@ -2,31 +2,16 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { isNotNullOrUndefined } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import type { Timestamp } from '../../../util/timestamp';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { CondaPackage } from './types';
-import { MaybeTimestamp, Timestamp } from '../../../util/timestamp';
-
-const prefixDevPageLimit = 500;
-
-const prefixDevQuery = `
-query search($channel: String!, $package: String!, $page: Int = 0) {
-  package(channelName: $channel, name: $package) {
-    versions(limit: ${prefixDevPageLimit}, page: $page) {
-      totalCount
-      pages
-      current
-      page {
-        version
-      }
-    }
-  }
-}
-  `;
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -84,7 +69,7 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
-    const releaseDate: Map<string, Timestamp> = new Map();
+    const releaseDate = new Map<string, Timestamp>();
 
     let response: { body: CondaPackage };
 
@@ -134,49 +119,135 @@ export class CondaDatasource extends Datasource {
     channel: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    // TODO: get yanked version
     logger.debug(
       { channel, packageName },
       'lookup package from prefix.dev graphql API',
     );
 
-    const result: ReleaseResult = {
-      releases: [],
+    const versions = await this.getPrefixPagedResponse(
+      `
+  query search($channel: String!, $package: String!, $page: Int = 0) {
+    data: package(channelName: $channel, name: $package) {
+      data: versions(limit: 500, page: $page) {
+        pages
+        page {
+          version
+        }
+      }
+    }
+  }
+  `,
+      { channel, package: packageName },
+      z.object({ version: z.string() }),
+    );
+
+    const files = await this.getPrefixPagedResponse(
+      `
+  query search($channel: String!, $package: String!, $page: Int = 0) {
+    data: package(channelName: $channel, name: $package) {
+      data: variants(limit: 500, page: $page) {
+        pages
+        page {
+          version
+          createdAt
+          yankedReason
+        }
+      }
+    }
+  }
+  `,
+      { channel, package: packageName },
+      z.object({
+        version: z.string(),
+        createdAt: z.string(),
+        yankedReason: z.string().nullable(),
+      }),
+    );
+
+    const releaseDate = new Map<string, Timestamp>();
+    const yanked = new Map<string, boolean>();
+
+    files.forEach((file) => {
+      yanked.set(
+        file.version,
+        Boolean(
+          isNotNullOrUndefined(file.yankedReason) || yanked.get(file.version),
+        ),
+      );
+
+      const dt = MaybeTimestamp.parse(file.createdAt);
+      if (is.nullOrUndefined(dt)) {
+        return;
+      }
+
+      const currentDt = releaseDate.get(file.version);
+      if (is.nullOrUndefined(currentDt)) {
+        releaseDate.set(file.version, dt);
+        return;
+      }
+
+      if (currentDt.localeCompare(dt) < 0) {
+        releaseDate.set(file.version, dt);
+      }
+    });
+
+    return {
+      releases: versions.map(({ version }) => {
+        return {
+          version,
+          releaseDate: releaseDate.get(version),
+          isDeprecated: yanked.get(version),
+        };
+      }),
     };
+  }
+
+  private async getPrefixPagedResponse<T extends z.Schema>(
+    query: string,
+    data: any,
+    responseItem: T,
+  ): Promise<z.infer<T>[]> {
+    const scheme = z.object({
+      data: z.object({
+        data: z.object({
+          data: z
+            .object({
+              pages: z.number(),
+              page: z.array(responseItem),
+            })
+            .nullable(),
+        }),
+      }),
+    });
+    const result: z.infer<T>[] = [];
 
     let page = 0;
     while (true) {
-      logger.debug(
-        { channel, packageName, page },
-        'lookup package from prefix.dev graphql API',
-      );
-
-      const data = await this.http.postJson(
+      const res = await this.http.postJson(
         'https://prefix.dev/api/graphql',
         {
           body: {
             operationName: 'search',
-            query: prefixDevQuery,
+            query,
             variables: {
-              channel,
-              package: packageName,
+              ...data,
               page,
             },
           },
         },
-        PrefixDevResponse,
+        scheme,
       );
 
       page++;
 
-      const res = data.body.data.package;
-      if (!res) {
-        return null;
+      const currentPage = res.body.data.data.data;
+      if (!currentPage) {
+        return result;
       }
 
-      result.releases.push(...res.versions.page);
+      result.push(...currentPage.page);
 
-      if (page >= res.versions.pages) {
+      if (page >= currentPage.pages) {
         break;
       }
     }
@@ -184,17 +255,3 @@ export class CondaDatasource extends Datasource {
     return result;
   }
 }
-
-const PrefixDevResponse = z.object({
-  data: z.object({
-    package: z
-      .object({
-        versions: z.object({
-          totalCount: z.number(),
-          pages: z.number(),
-          page: z.array(z.object({ version: z.string() })),
-        }),
-      })
-      .nullable(),
-  }),
-});
