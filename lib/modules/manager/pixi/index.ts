@@ -12,9 +12,9 @@ export const url = 'https://github.com/prefix-dev/pixi/';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/)pyproject\\.toml$', // `tool.pixi` section
-    '(^|/)pixi\\.toml$', // root object
+  filePatterns: [
+    '/(^|/)pyproject\\.toml$/', // `tool.pixi` section
+    '/(^|/)pixi\\.toml$/', // root object
   ],
 };
 

@@ -125,9 +125,9 @@ export async function generateManagers(
       } else {
         md += `By default, Renovate will check any files matching `;
         if (filePatterns.length === 1) {
-          md += `the following regular expression: \`${filePatterns[0]}\`.\n\n`;
+          md += `the following glob or regular expression: \`${filePatterns[0]}\`.\n\n`;
         } else {
-          md += `any of the following regular expressions:\n\n`;
+          md += `any of the following glob or regular expressions:\n\n`;
           md += '```\n';
           md += filePatterns.join('\n');
           md += '\n```\n\n';
