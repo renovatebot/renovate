@@ -115,8 +115,9 @@ export class CondaDatasource extends Datasource {
       'lookup package from prefix.dev graphql API',
     );
 
-    const versions = await this.getPrefixPagedResponse(
-      `
+    const versions = z.array(prefixDevSchema.Version).parse(
+      await this.getPrefixPagedResponse(
+        `
   query search($channel: String!, $package: String!, $page: Int = 0) {
     data: package(channelName: $channel, name: $package) {
       data: versions(limit: 500, page: $page) {
@@ -128,16 +129,17 @@ export class CondaDatasource extends Datasource {
     }
   }
   `,
-      { channel, package: packageName },
-      prefixDevSchema.Version,
+        { channel, package: packageName },
+      ),
     );
 
     if (versions.length === 0) {
       return null;
     }
 
-    const files = await this.getPrefixPagedResponse(
-      `
+    const files = z.array(prefixDevSchema.File).parse(
+      await this.getPrefixPagedResponse(
+        `
   query search($channel: String!, $package: String!, $page: Int = 0) {
     data: package(channelName: $channel, name: $package) {
       data: variants(limit: 500, page: $page) {
@@ -151,8 +153,8 @@ export class CondaDatasource extends Datasource {
     }
   }
   `,
-      { channel, package: packageName },
-      prefixDevSchema.File,
+        { channel, package: packageName },
+      ),
     );
 
     const releaseDate = new Map<string, Timestamp>();
@@ -193,24 +195,11 @@ export class CondaDatasource extends Datasource {
     };
   }
 
-  private async getPrefixPagedResponse<T extends z.Schema>(
+  private async getPrefixPagedResponse(
     query: string,
     data: any,
-    responseItem: T,
-  ): Promise<z.infer<T>[]> {
-    const scheme = z.object({
-      data: z.object({
-        data: z.object({
-          data: z
-            .object({
-              pages: z.number(),
-              page: z.array(responseItem),
-            })
-            .nullable(),
-        }),
-      }),
-    });
-    const result: z.infer<T>[] = [];
+  ): Promise<unknown[]> {
+    const result: unknown[] = [];
 
     for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
       const res = await this.http.postJson(
@@ -225,7 +214,7 @@ export class CondaDatasource extends Datasource {
             },
           },
         },
-        scheme,
+        prefixDevSchema.PagedResponseSchema,
       );
 
       const currentPage = res.body.data.data?.data;

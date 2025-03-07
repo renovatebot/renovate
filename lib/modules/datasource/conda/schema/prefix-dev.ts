@@ -9,3 +9,16 @@ export const File = z.object({
 export const Version = z.object({
   version: z.string(),
 });
+
+export const PagedResponseSchema = z.object({
+  data: z.object({
+    data: z.object({
+      data: z
+        .object({
+          pages: z.number(),
+          page: z.array(z.unknown()),
+        })
+        .nullable(),
+    }),
+  }),
+});
