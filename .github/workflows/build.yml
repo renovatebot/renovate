@@ -215,26 +215,18 @@ jobs:
         uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          key: eslint-cache
+          restore-keys: eslint-cache-
 
       - name: Lint
         run: pnpm eslint-ci
-
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache ||
-            echo "Cache not found"
 
       - name: Save eslint cache
         if: github.event_name == 'push'
         uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          key: eslint-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
@@ -261,7 +253,8 @@ jobs:
         uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          key: prettier-cache
+          restore-keys: prettier-cache-
 
       - name: Lint
         run: |
@@ -272,21 +265,12 @@ jobs:
             exit 1
           }
 
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache ||
-            echo "Cache not found"
-
       - name: Save prettier cache
         if: github.event_name == 'push'
         uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          key: prettier-main-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
