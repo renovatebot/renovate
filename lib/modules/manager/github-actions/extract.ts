@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
