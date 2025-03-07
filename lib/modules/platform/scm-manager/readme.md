@@ -1,6 +1,7 @@
 # SCM-Manager
 
 Renovate supports the [SCM-Manager](https://scm-manager.org) platform.
+This platform is considered experimental.
 
 ## Authentication
 
