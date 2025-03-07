@@ -66,7 +66,7 @@ export async function initPlatform({
     const gitAuthor = `${me.displayName} <${me.mail}>`;
     const result = { endpoint, gitAuthor };
 
-    logger.info(`Plattform initialized ${JSON.stringify(result)}`);
+    logger.debug({ result }, 'Plattform result');
 
     return result;
   } catch (err) {
