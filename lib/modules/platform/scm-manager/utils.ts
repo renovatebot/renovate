@@ -4,7 +4,8 @@ import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import type { GitUrlOption, Pr } from '../types';
-import type { PrFilterByState, PrMergeMethod, Repo } from './types';
+import type { PrMergeMethod, Repo } from './schema';
+import type { PrFilterByState } from './types';
 
 export function mapPrState(
   state: 'open' | 'closed' | undefined,

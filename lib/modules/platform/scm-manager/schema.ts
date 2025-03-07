@@ -5,6 +5,7 @@ export const UserSchema = z.object({
   displayName: z.string(),
   name: z.string(),
 });
+export type User = z.infer<typeof UserSchema>;
 
 export const DefaultBranchSchema = z.object({
   defaultBranch: z.string(),
@@ -20,8 +21,11 @@ export const LinksSchema = z.record(
   z.string(),
   z.union([LinkSchema, z.array(LinkSchema)]),
 );
+export type Link = z.infer<typeof LinkSchema>;
+export type Links = z.infer<typeof LinksSchema>;
 
 export const PrStateSchema = z.enum(['DRAFT', 'OPEN', 'REJECTED', 'MERGED']);
+export type PrState = z.infer<typeof PrStateSchema>;
 
 export const PrMergeMethodSchema = z.enum([
   'MERGE_COMMIT',
@@ -29,6 +33,7 @@ export const PrMergeMethodSchema = z.enum([
   'FAST_FORWARD_IF_POSSIBLE',
   'SQUASH',
 ]);
+export type PrMergeMethod = z.infer<typeof PrMergeMethodSchema>;
 
 export const PullRequestSchema = z.object({
   id: z.string(),
@@ -79,6 +84,7 @@ export const PullRequestSchema = z.object({
     }),
   }),
 });
+export type PullRequest = z.infer<typeof PullRequestSchema>;
 
 const RepoTypeSchema = z.enum(['git', 'svn', 'hg']);
 
@@ -95,6 +101,7 @@ export const RepoSchema = z.object({
   healthCheckRunning: z.boolean(),
   _links: LinksSchema,
 });
+export type Repo = z.infer<typeof RepoSchema>;
 
 const PagedSchema = z.object({
   page: z.number(),

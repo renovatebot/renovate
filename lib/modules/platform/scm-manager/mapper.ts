@@ -1,7 +1,7 @@
 import type { Pr as RenovatePr } from '../types';
-import type { PullRequest as SCMPullRequest } from './types';
+import type { PullRequest } from './schema';
 
-export function mapPrFromScmToRenovate(pr: SCMPullRequest): RenovatePr {
+export function mapPrFromScmToRenovate(pr: PullRequest): RenovatePr {
   return {
     sourceBranch: pr.source,
     targetBranch: pr.target,
