@@ -38,7 +38,7 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
 
-  for (const preset of config.data.extends ?? []) {
+  for (const preset of config.data.extends) {
     const parsedPreset = parsePreset(preset);
     const datasource = supportedPresetSources.find(
       (source) => source.source === parsedPreset.presetSource,
