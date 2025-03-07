@@ -123,11 +123,19 @@ describe('modules/manager/gradle/parser', () => {
               buildTools: '30.0.3'
             ],
             kotlin: '1.4.30',
+            'spring-boot': '2.7.3',
             androidx: [
               paging: '2.1.2',
               kotlin: [
                 stdlib: '1.4.20',
                 coroutines: '1.3.7',
+              ],
+            ],
+            'androidx': [
+              'paging': '2.1.2',
+              'kotlin': [
+                'stdlib': '1.4.20',
+                'coroutines': '1.3.7',
               ],
             ],
             espresso: '3.2.0'
