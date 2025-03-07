@@ -89,7 +89,7 @@ const pullRequest: PullRequest = {
   },
 };
 
-const renovatePr: Pr = mapPrFromScmToRenovate(pullRequest);
+const renovatePr = mapPrFromScmToRenovate(pullRequest);
 
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
