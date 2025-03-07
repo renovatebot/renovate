@@ -139,8 +139,8 @@ export async function createScmPr(
   );
 
   const getCreatedPrResponse = await scmManagerHttp.getJson(
-    createPrResponse.headers.location ??
-      '' /* istanbul ignore next: Just to please the compiler, location would never be undefined */,
+    /* istanbul ignore next: Just to please the compiler, location would never be undefined */
+    createPrResponse.headers.location ?? '',
     {
       scmmContentType: CONTENT_TYPES.PULLREQUEST,
       token,
