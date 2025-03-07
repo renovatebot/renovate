@@ -18,11 +18,11 @@ import {
   writeUpdatedPackageFiles,
 } from './';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./npm');
-jest.mock('./yarn');
-jest.mock('./pnpm');
+vi.mock('../../../../util/fs');
+vi.mock('../../../../util/git');
+vi.mock('./npm');
+vi.mock('./yarn');
+vi.mock('./pnpm');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -374,10 +374,10 @@ describe('modules/manager/npm/post-update/index', () => {
   });
 
   describe('getAdditionalFiles()', () => {
-    const spyNpm = jest.spyOn(npm, 'generateLockFile');
-    const spyYarn = jest.spyOn(yarn, 'generateLockFile');
-    const spyPnpm = jest.spyOn(pnpm, 'generateLockFile');
-    const spyProcessHostRules = jest.spyOn(rules, 'processHostRules');
+    const spyNpm = vi.spyOn(npm, 'generateLockFile');
+    const spyYarn = vi.spyOn(yarn, 'generateLockFile');
+    const spyPnpm = vi.spyOn(pnpm, 'generateLockFile');
+    const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
 
     beforeEach(() => {
       spyNpm.mockResolvedValue({});
@@ -403,8 +403,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('works for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-      // TODO: fix types, jest is using wrong overload (#22198)
-      fs.readLocalFile.mockImplementation((f): Promise<any> => {
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
         if (f === '.npmrc') {
           return Promise.resolve('# dummy');
         }
@@ -587,7 +586,7 @@ describe('modules/manager/npm/post-update/index', () => {
             ...baseConfig,
             upgrades: [{ isLockfileUpdate: false }],
             reuseExistingBranch: true,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
             updateLockFiles: true,
           },
           additionalFiles,
@@ -666,7 +665,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
 
       it('should fuzzy merge the yarnrc Files', async () => {
-        (yarn.fuzzyMatchAdditionalYarnrcYml as jest.Mock).mockReturnValue({
+        vi.mocked(yarn.fuzzyMatchAdditionalYarnrcYml).mockReturnValue({
           npmRegistries: {
             'https://my-private-registry': { npmAuthToken: 'xxxxxx' },
           },
@@ -719,14 +718,16 @@ describe('modules/manager/npm/post-update/index', () => {
 
         spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
 
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        ).catch(() => {});
+        await expect(
+          getAdditionalFiles(
+            {
+              ...updateConfig,
+              updateLockFiles: true,
+              reuseExistingBranch: true,
+            },
+            additionalFiles,
+          ),
+        ).rejects.toThrow();
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),

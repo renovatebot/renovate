@@ -205,10 +205,6 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
 
 <!-- prettier-ignore -->
-!!! warning "Negative reviews on GitHub block Renovate automerge"
-    Renovate won't automerge on GitHub if a PR has a negative review.
-
-<!-- prettier-ignore -->
 !!! note
     On Azure there can be a delay between a PR being set as completed by Renovate, and Azure merging the PR / finishing its tasks.
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
@@ -849,7 +845,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` and `yaml` format is supported.
+Only the `json`, `toml` and `yaml` formats are supported.
 `yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
@@ -860,7 +856,7 @@ Only the `json` and `yaml` format is supported.
       "fileFormat": "json",
       "fileMatch": [".renovaterc"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
@@ -875,7 +871,22 @@ Only the `json` and `yaml` format is supported.
       "fileFormat": "yaml",
       "fileMatch": ["file.yml"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
+      ]
+    }
+  ]
+}
+```
+
+```json title="Parsing a TOML file with a custom manager"
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "toml",
+      "fileMatch": ["file.toml"],
+      "matchStrings": [
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
@@ -2559,14 +2570,14 @@ Here is an example if you want to group together all packages starting with `esl
 
 Note how the above uses `matchPackageNames` with a prefix pattern.
 
-Here's an example config to limit the "noisy" `aws-sdk` package to weekly updates:
+Here's an example config to limit the "noisy" AWS SDK packages to weekly updates:
 
 ```json
 {
   "packageRules": [
     {
-      "description": "Schedule aws-sdk updates on Sunday nights (9 PM - 12 AM)",
-      "matchPackageNames": ["aws-sdk"],
+      "description": "Schedule AWS SDK updates on Sunday nights (9 PM - 12 AM)",
+      "matchPackageNames": ["@aws-sdk/*"],
       "schedule": ["* 21-23 * * 0"]
     }
   ]
@@ -3848,6 +3859,16 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
+
+## replacementApproach
+
+For `npm` manager when `replacementApproach=alias` then instead of replacing `"foo": "1.2.3"` with `"@my/foo": "1.2.4"` we would instead replace it with `"foo": "npm:@my/foo@1.2.4"`.
+
+```json
+{
+  "replacementApproach": "alias"
+}
+```
 
 ## respectLatest
 

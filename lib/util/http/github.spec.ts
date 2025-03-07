@@ -1,4 +1,3 @@
-import { Buffer } from 'node:buffer';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
@@ -17,7 +16,7 @@ import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 import type { GraphqlPageCache } from './github';
 
-jest.mock('../cache/repository');
+vi.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
@@ -333,7 +332,10 @@ describe('util/http/github', () => {
 
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
-        httpMock.scope(githubApiHost).get(url).replyWithError(error);
+        httpMock
+          .scope(githubApiHost)
+          .get(url)
+          .replyWithError(httpMock.error(error));
         await githubApi.getJsonUnchecked(url);
       }
 
@@ -389,8 +391,7 @@ describe('util/http/github', () => {
 
       it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
         const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
-        for (let idx = 0; idx < codes.length; idx += 1) {
-          const code = codes[idx];
+        for (const code of codes) {
           await expect(failWithError({ code })).rejects.toThrow(
             EXTERNAL_HOST_ERROR,
           );
@@ -564,7 +565,7 @@ describe('util/http/github', () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.requestGraphql(graphqlQuery);
+      await githubApi.requestGraphql(graphqlQuery, { token: 'abc' });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
@@ -706,10 +707,9 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(25);
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem?.pageSize).toBe(25);
     });
 
     it('expands items count on timeout', async () => {
@@ -735,10 +735,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']?.pageSize).toBe(84);
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem?.pageSize).toBe(84);
     });
 
     it('continues to iterate with a lower page size on error 502', async () => {
@@ -780,10 +779,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github?.[
-        'graphqlPageCache'
-      ] as GraphqlPageCache;
-      expect(graphqlPageCache?.['testItem']).toBeUndefined();
+      const graphqlPageCache = repoCache?.platform?.github
+        ?.graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache?.testItem).toBeUndefined();
     });
 
     it('throws on 50x if count < 10', async () => {
@@ -939,22 +937,6 @@ describe('util/http/github', () => {
       ).resolves.toMatchObject({
         body: 'test',
       });
-    });
-
-    it('throw error if a ', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/foo/bar/contents/lore/ipsum.bin')
-        .matchHeader(
-          'accept',
-          'application/vnd.github.raw+json, application/vnd.github.v3+json',
-        )
-        .reply(200, Buffer.from('foo', 'binary'));
-      await expect(
-        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.bin`, {
-          responseType: 'buffer',
-        }),
-      ).rejects.toThrow();
     });
   });
 });

@@ -366,7 +366,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     ]);
   });
 
-  it('it does not add any ziphashes when the shasums endpoint fails`', async () => {
+  it('does not add any ziphashes when the shasums endpoint fails`', async () => {
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );

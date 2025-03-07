@@ -175,6 +175,28 @@ describe('modules/versioning/composer/index', () => {
   });
 
   it.each`
+    a                     | b                     | expected
+    ${'1.0.0'}            | ${'1.0.0'}            | ${true}
+    ${'1.0.0'}            | ${'>=1.0.0'}          | ${true}
+    ${'1.1.0'}            | ${'^1.0.0'}           | ${true}
+    ${'>=1.0.0'}          | ${'>=1.0.0'}          | ${true}
+    ${'~1.0.0'}           | ${'~1.0.0'}           | ${true}
+    ${'^1.0.0'}           | ${'^1.0.0'}           | ${true}
+    ${'>=1.0.0'}          | ${'>=1.1.0'}          | ${true}
+    ${'~1.0.0'}           | ${'~1.1.0'}           | ${false}
+    ${'^1.0.0'}           | ${'^1.1.0'}           | ${true}
+    ${'>=1.0.0'}          | ${'<1.0.0'}           | ${false}
+    ${'~1.0.0'}           | ${'~0.9.0'}           | ${false}
+    ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
+    ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
+    ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${true}
+    ${'^7.0.0'}           | ${'<8.0-DEV'}         | ${true}
+    ${'^7.0.0'}           | ${'less than 8'}      | ${false}
+  `('intersects("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(semver.intersects!(a, b)).toBe(expected);
+  });
+
+  it.each`
     currentValue              | rangeStrategy        | currentVersion    | newVersion       | expected
     ${'~1.0'}                 | ${'pin'}             | ${'1.0'}          | ${'V1.1'}        | ${'V1.1'}
     ${'^1.0'}                 | ${'pin'}             | ${'1.0'}          | ${'V1.1'}        | ${'V1.1'}
@@ -239,7 +261,7 @@ describe('modules/versioning/composer/index', () => {
     ${['1.2.3-p1', '1.2.3-p2', '1.2.3']}                                          | ${['1.2.3', '1.2.3-p1', '1.2.3-p2']}
     ${['1.2.3-p1', '1.2.2']}                                                      | ${['1.2.2', '1.2.3-p1']}
     ${['1.0-p1', '1']}                                                            | ${['1', '1.0-p1']}
-  `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
+  `('$versions -> sortVersions -> $expected', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });
 

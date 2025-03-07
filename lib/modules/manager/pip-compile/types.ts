@@ -5,11 +5,14 @@ export type SupportedManagers =
   | 'setup-cfg'
   | 'pep621';
 
+export type CommandType = 'pip-compile' | 'uv' | 'custom';
+
 export interface PipCompileArgs {
   argv: string[]; // all arguments as a list
   command: string;
-  isCustomCommand: boolean;
+  commandType: CommandType;
   constraintsFiles?: string[];
+  pythonVersion?: string;
   extra?: string[];
   allExtras?: boolean;
   extraIndexUrl?: string[];

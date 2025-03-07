@@ -8,7 +8,9 @@ describe('util/uniq', () => {
   });
 
   it('should use the provided equality function to compare elements', () => {
-    type T = { id: number };
+    interface T {
+      id: number;
+    }
     const input: T[] = [{ id: 1 }, { id: 2 }, { id: 1 }];
     const expectedOutput = [{ id: 1 }, { id: 2 }];
     const eql = (x: T, y: T) => x.id === y.id;

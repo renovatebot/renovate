@@ -23,6 +23,6 @@ jobs:
           show-progress: false
 
       - name: Build and run dev container task
-        uses: devcontainers/ci@a56d055efecd725e8cfe370543b6071b79989cc8 # v0.3.1900000349
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
         with:
           runCmd: pnpm build
