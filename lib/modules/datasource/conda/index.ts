@@ -5,7 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
-import type { Timestamp } from '../../../util/timestamp';
+import { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
@@ -75,11 +75,7 @@ export class CondaDatasource extends Datasource {
       result.sourceUrl = response.body.dev_url;
 
       response.body.files.forEach((file) => {
-        const dt = MaybeTimestamp.parse(file.upload_time);
-        if (is.nullOrUndefined(dt)) {
-          return;
-        }
-
+        const dt = Timestamp.parse(file.upload_time);
         const currentDt = releaseDate.get(file.version);
         if (is.nullOrUndefined(currentDt)) {
           releaseDate.set(file.version, dt);
