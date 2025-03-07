@@ -132,6 +132,10 @@ export class CondaDatasource extends Datasource {
       z.object({ version: z.string() }),
     );
 
+    if (versions.length === 0) {
+      return null;
+    }
+
     const files = await this.getPrefixPagedResponse(
       `
   query search($channel: String!, $package: String!, $page: Int = 0) {
@@ -231,7 +235,7 @@ export class CondaDatasource extends Datasource {
 
       page++;
 
-      const currentPage = res.body.data.data.data;
+      const currentPage = res.body.data.data?.data;
       if (!currentPage) {
         return result;
       }
