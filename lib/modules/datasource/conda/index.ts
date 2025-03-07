@@ -113,6 +113,7 @@ export class CondaDatasource extends Datasource {
     channel: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
+    // TODO: get yanked version
     logger.debug(
       { channel, packageName },
       'lookup package from prefix.dev graphql API',
