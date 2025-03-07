@@ -245,7 +245,7 @@ function extractWithYAMLParser(
       // - java
     };
 
-    for (const step of job?.steps ?? []) {
+    for (const step of coerceArray(job?.steps)) {
       for (const [action, actionData] of Object.entries(actionsWithVersions)) {
         const actionName = `actions/setup-${action}`;
         if (
