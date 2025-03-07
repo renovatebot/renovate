@@ -563,6 +563,36 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Upload dist
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: renovate-dist
+          path: dist/
+
+  build-docker:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: false
+
+      - name: Download dist
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: renovate-dist
+          path: dist/
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
+
       - name: Build docker
         run: pnpm build:docker build --tries=3 --args '--load'
         env:
@@ -576,15 +606,6 @@ jobs:
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pack
-        run: pnpm test-e2e:pack
-
-      - name: Upload
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
-        with:
-          name: renovate-package
-          path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
     needs:
@@ -646,20 +667,20 @@ jobs:
         with:
           show-progress: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          standalone: true
-
       - name: Setup Node.js
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
 
-      - name: Download package
+      - name: Download dist
         uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
-          name: renovate-package
+          name: renovate-dist
+          path: dist/
+
+      - name: Pack
+        run: pnpm test-e2e:pack
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -670,6 +691,7 @@ jobs:
   release:
     needs:
       - setup-build
+      - build-docker
       - lint-eslint
       - lint-prettier
       - lint-docs
