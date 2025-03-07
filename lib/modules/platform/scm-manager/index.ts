@@ -112,7 +112,6 @@ export async function initRepo({
 export async function getRepos(): Promise<string[]> {
   const repos = (await getAllRepos()).filter((repo) => repo.type === 'git');
   const result = repos.map((repo) => `${repo.namespace}/${repo.name}`);
-  logger.debug(`Discovered ${repos.length} repos`);
 
   return result;
 }
