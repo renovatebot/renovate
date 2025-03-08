@@ -3,6 +3,7 @@ import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
+import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { getBranchCommit } from '../../../util/git';
@@ -14,6 +15,7 @@ export async function validateReconfigureBranch(
   config: RenovateConfig,
   reconfigureConfig: RenovateConfig,
   configFileName: string,
+  reconfigurePr: Pr | null,
 ): Promise<boolean> {
   logger.debug('validateReconfigureBranch()');
 
@@ -38,7 +40,6 @@ export async function validateReconfigureBranch(
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
     );
-    return true;
   }
 
   // perform validation and provide a passing or failing check based on result
@@ -51,12 +52,6 @@ export async function validateReconfigureBranch(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
       'Validation Errors',
     );
-
-    const reconfigurePr = await platform.findPr({
-      branchName,
-      state: 'open',
-      includeOtherAuthors: true,
-    });
 
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {
