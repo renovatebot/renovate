@@ -6,9 +6,31 @@ import type { Http } from '../../../util/http';
 import type { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { ReleaseResult } from '../types';
-import * as prefixDevSchema from './schema/prefix-dev';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 10;
+
+const File = z.object({
+  version: z.string(),
+  createdAt: z.string().nullable(),
+  yankedReason: z.string().nullable(),
+});
+
+const Version = z.object({
+  version: z.string(),
+});
+
+const PagedResponseSchema = z.object({
+  data: z.object({
+    data: z.object({
+      data: z
+        .object({
+          pages: z.number(),
+          page: z.array(z.unknown()),
+        })
+        .nullable(),
+    }),
+  }),
+});
 
 export async function getReleases(
   http: Http,
@@ -35,7 +57,7 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
 }
 `,
     { channel, package: packageName },
-    prefixDevSchema.Version,
+    Version,
   );
 
   if (versions.length === 0) {
@@ -59,7 +81,7 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
 }
 `,
     { channel, package: packageName },
-    prefixDevSchema.File,
+    File,
   );
 
   const releaseDate: Record<string, Timestamp> = {};
@@ -118,7 +140,7 @@ async function getPagedResponse<T extends z.Schema>(
           },
         },
       },
-      prefixDevSchema.PagedResponseSchema,
+      PagedResponseSchema,
     );
 
     const currentPage = res.body.data.data?.data;
