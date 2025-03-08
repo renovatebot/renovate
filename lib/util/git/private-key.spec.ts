@@ -123,7 +123,7 @@ some-private-key
       const privateKeyFileMode = (await fs.stat(privateKeyFile)).mode;
       expect((privateKeyFileMode & 0o777).toString(8)).toBe('600');
       expect((await fs.readFile(privateKeyFile)).toString()).toEqual(
-        privateKey + "\n",
+        privateKey + '\n',
       );
       expect((await fs.readFile(publicKeyFile)).toString()).toEqual(publicKey);
       expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
