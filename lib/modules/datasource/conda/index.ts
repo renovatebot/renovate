@@ -1,19 +1,16 @@
 import is from '@sindresorhus/is';
-import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
+import { coerceArray } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
-import { MaybeTimestamp, Timestamp } from '../../../util/timestamp';
+import { Timestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
-import * as prefixDevSchema from './schema/prefix-dev';
+import * as prefixDev from './prefix-dev';
 import type { CondaPackage } from './types';
-
-const MAX_PREFIX_DEV_GRAPHQL_PAGE = 10;
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -51,16 +48,16 @@ export class CondaDatasource extends Datasource {
     }
 
     // fast.prefix.dev is a alias, deprecated, but still running.
+    // We expect registryUrl to be `https://prefix.dev/${channel}` here.
     if (
       registryUrl.startsWith('https://prefix.dev/') ||
       registryUrl.startsWith('https://fast.prefix.dev/')
     ) {
-      // we expect registryUrl to be `https://prefix.dev/${channel}` here.
-      // and since the registryUrl contains at least 3 `/` ,
+      // Since the registryUrl contains at least 3 `/` ,
       // the channel varitable won't be undefined in any case.
       const channel = ensureTrailingSlash(registryUrl).split('/').at(-2)!;
 
-      return await this.getReleasesFromPrefixDev(channel, packageName);
+      return await prefixDev.getReleases(this.http, channel, packageName);
     }
 
     const url = joinUrlParts(registryUrl, packageName);
@@ -109,127 +106,5 @@ export class CondaDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
-  }
-
-  private async getReleasesFromPrefixDev(
-    channel: string,
-    packageName: string,
-  ): Promise<ReleaseResult | null> {
-    logger.debug(
-      { channel, packageName },
-      'lookup package from prefix.dev graphql API',
-    );
-
-    const versions = await this.getPrefixPagedResponse(
-      `
-  query search($channel: String!, $package: String!, $page: Int = 0) {
-    data: package(channelName: $channel, name: $package) {
-      data: versions(limit: 500, page: $page) {
-        pages
-        page {
-          version
-        }
-      }
-    }
-  }
-  `,
-      { channel, package: packageName },
-      prefixDevSchema.Version,
-    );
-
-    if (versions.length === 0) {
-      return null;
-    }
-
-    const files = await this.getPrefixPagedResponse(
-      `
-  query search($channel: String!, $package: String!, $page: Int = 0) {
-    data: package(channelName: $channel, name: $package) {
-      data: variants(limit: 500, page: $page) {
-        pages
-        page {
-          version
-          createdAt
-          yankedReason
-        }
-      }
-    }
-  }
-  `,
-      { channel, package: packageName },
-      prefixDevSchema.File,
-    );
-
-    const releaseDate: Record<string, Timestamp> = {};
-    const yanked: Record<string, boolean> = {};
-
-    for (const file of files) {
-      yanked[file.version] = Boolean(
-        isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
-      );
-
-      const dt = MaybeTimestamp.parse(file.createdAt);
-      if (is.nullOrUndefined(dt)) {
-        continue;
-      }
-
-      const currentDt = releaseDate[file.version];
-      if (is.nullOrUndefined(currentDt)) {
-        releaseDate[file.version] = dt;
-        continue;
-      }
-
-      if (currentDt.localeCompare(dt) < 0) {
-        releaseDate[file.version] = dt;
-      }
-    }
-
-    return {
-      releases: versions.map(({ version }) => {
-        return {
-          version,
-          releaseDate: releaseDate[version],
-          isDeprecated: yanked[version],
-        };
-      }),
-    };
-  }
-
-  private async getPrefixPagedResponse<T extends z.Schema>(
-    query: string,
-    data: any,
-    schema: T,
-  ): Promise<z.infer<T>[]> {
-    const result: unknown[] = [];
-
-    for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
-      const res = await this.http.postJson(
-        'https://prefix.dev/api/graphql',
-        {
-          body: {
-            operationName: 'search',
-            query,
-            variables: {
-              ...data,
-              page,
-            },
-          },
-        },
-        prefixDevSchema.PagedResponseSchema,
-      );
-
-      const currentPage = res.body.data.data?.data;
-      if (!currentPage) {
-        break;
-      }
-
-      result.push(...currentPage.page);
-
-      if (page >= currentPage.pages - 1) {
-        break;
-      }
-    }
-
-    return z.array(schema).parse(result);
   }
 }
