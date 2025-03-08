@@ -112,7 +112,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/^Dockerfile$/"],
+      "filePatterns": ["Dockerfile"],
       "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
       "depNameTemplate": "yarn",
       "datasourceTemplate": "npm"
@@ -191,7 +191,7 @@ Using the `customManagers` below, Renovate looks for available Docker tags of th
     {
       "customType": "regex",
       "datasourceTemplate": "docker",
-      "filePatterns": ["/(^|/)Chart\\.yaml$/"],
+      "filePatterns": ["**/Chart.yaml"],
       "matchStrings": [
         "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
       ]

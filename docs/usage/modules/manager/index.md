@@ -54,7 +54,7 @@ For example:
 
 Renovate will _extend_ the existing [`filePatterns`](../../configuration-options.md#filepatterns), meaning you don't need to include the default patterns like `Dockerfile` in your own array.
 In other words, the patterns are "additive".
-If a manager matches a file that you _don't_ want it to, ignore it using the [`ignorePaths`](../../configuration-options.md#ignorepaths) configuration option.
+If a manager matches a file that you _don't_ want it to, ignore it using a negative match, e.g. `"filePatterns": ["!not-this-file.txt"]`.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
 The `config:recommended` preset ignores common test and example directory names, for example.
 

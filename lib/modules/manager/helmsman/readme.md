@@ -10,7 +10,7 @@ To enable the `helmsman` manager, provide a valid `filePatterns` yourself, for e
 ```json
 {
   "helmsman": {
-    "filePatterns": ["/(^|/)desired_state\\.yaml$/"]
+    "filePatterns": ["**/desired_state.yaml"]
   }
 }
 ```

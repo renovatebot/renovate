@@ -21,7 +21,7 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/^Dockerfile$/"],
+      "filePatterns": ["Dockerfile"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
       ],

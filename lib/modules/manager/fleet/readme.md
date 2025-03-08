@@ -5,6 +5,6 @@ To enable GitRepo updates you have to extend your [`filePatterns`](../../../conf
 
 ```json
 {
-  "filePatterns": ["/(^|/)fleet.ya?ml/", "/myGitRepoManifests\\.yaml/"]
+  "filePatterns": ["**/fleet.{yaml,yml}", "**myGitRepoManifests.yaml"]
 }
 ```

@@ -14,7 +14,7 @@ You can "activate" the manager by specifying a `filePatterns` pattern such as:
 ```json
 {
   "pip-compile": {
-    "filePatterns": ["/(^|/)requirements\\.txt$/"]
+    "filePatterns": ["**/requirements\\.txt"]
   }
 }
 ```

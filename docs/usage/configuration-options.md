@@ -753,7 +753,7 @@ image: my.old.registry/aRepository/andImage:1.18-alpine
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/values.yaml$/"],
+      "filePatterns": ["**values.yaml"],
       "matchStrings": [
         "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
@@ -792,7 +792,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/values.yaml$/"],
+      "filePatterns": ["**values.yaml"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -807,7 +807,7 @@ Example:
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "filePatterns": ["/file.json/"],
+      "filePatterns": ["file.json"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -854,7 +854,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "filePatterns": ["/.renovaterc/"],
+      "filePatterns": [".renovaterc"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -869,7 +869,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "filePatterns": ["/file.yml/"],
+      "filePatterns": ["file.yml"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -884,7 +884,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "toml",
-      "filePatterns": ["/file.toml/"],
+      "filePatterns": ["some/file.toml"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -943,7 +943,7 @@ As example the following configuration will update all three lines in the Docker
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/^Dockerfile$/"],
+      "filePatterns": ["Dockerfile"],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
@@ -981,7 +981,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/^example.json$/"],
+      "filePatterns": ["example.json"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"backup\":\\s*{[^}]*}",
@@ -991,7 +991,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
-      "filePatterns": ["/^example.json$/"],
+      "filePatterns": ["example.json"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"test\":\\s*\\{[^}]*}",
@@ -1037,7 +1037,7 @@ Matched group values will be merged to form a single dependency.
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/^main.yml$/"],
+      "filePatterns": ["main.yml"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1046,7 +1046,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
-      "filePatterns": ["/^main.yml$/"],
+      "filePatterns": ["main.yml"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1518,7 +1518,7 @@ Because `filePatterns` is "mergeable", you can add the missing file to the `file
 ```json
 {
   "dockerfile": {
-    "filePatterns": ["/^ACTUALLY_A_DOCKERFILE\\.template$/"]
+    "filePatterns": ["ACTUALLY_A_DOCKERFILE.template"]
   }
 }
 ```

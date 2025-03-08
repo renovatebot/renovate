@@ -46,7 +46,7 @@ I can create a `renovate.json` configuration with the following custom manager c
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": ["/(^|/)PKGBUILD$/"],
+      "filePatterns": ["**/PKGBUILD"],
       "matchStrings": [
         "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
       ],

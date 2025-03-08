@@ -658,7 +658,7 @@ describe('config/migration', () => {
           '(^|/)debian_packages/private/third_party/requirements\\.in$',
           '(^|/).*?requirements.*?\\.in$',
         ],
-        filePatterns: ['requirements.in'],
+        filePatterns: ['**/requirements.in'],
       },
     };
     const { isMigrated, migratedConfig } =
@@ -668,7 +668,7 @@ describe('config/migration', () => {
       'pip-compile': {
         enabled: true,
         filePatterns: [
-          'requirements.txt',
+          '**/requirements.txt',
           '/(^|/)requirements\\.txt$/',
           '/(^|/)requirements-fmt\\.txt$/',
           '/(^|/)requirements-lint\\.txt$/',
