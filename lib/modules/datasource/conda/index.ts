@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { isNotNullOrUndefined } from '../../../util/array';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import { MaybeTimestamp, Timestamp } from '../../../util/timestamp';
@@ -55,8 +55,9 @@ export class CondaDatasource extends Datasource {
       registryUrl.startsWith('https://prefix.dev/') ||
       registryUrl.startsWith('https://fast.prefix.dev/')
     ) {
-      // the registryUrl here will at least contains 3 `/` ,
-      // therefore channel won't be undefined in any case.
+      // we expect registryUrl to be `https://prefix.dev/${channel}` here.
+      // and since the registryUrl contains at least 3 `/` ,
+      // the channel varitable won't be undefined in any case.
       const channel = ensureTrailingSlash(registryUrl).split('/').at(-2)!;
 
       return await this.getReleasesFromPrefixDev(channel, packageName);
@@ -68,7 +69,7 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
-    const releaseDate = new Map<string, Timestamp>();
+    const releaseDate: Record<string, Timestamp> = {};
 
     let response: { body: CondaPackage };
 
@@ -78,23 +79,23 @@ export class CondaDatasource extends Datasource {
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
 
-      for (const file of response.body.files ?? []) {
+      for (const file of coerceArray(response.body.files)) {
         const dt = Timestamp.parse(file.upload_time);
-        const currentDt = releaseDate.get(file.version);
+        const currentDt = releaseDate[file.version];
         if (is.nullOrUndefined(currentDt)) {
-          releaseDate.set(file.version, dt);
+          releaseDate[file.version] = dt;
           continue;
         }
 
         if (currentDt.localeCompare(dt) < 0) {
-          releaseDate.set(file.version, dt);
+          releaseDate[file.version] = dt;
         }
       }
 
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
           version,
-          releaseTimestamp: releaseDate.get(version),
+          releaseTimestamp: releaseDate[version],
         };
         result.releases.push(thisRelease);
       });
@@ -159,15 +160,12 @@ export class CondaDatasource extends Datasource {
       prefixDevSchema.File,
     );
 
-    const releaseDate = new Map<string, Timestamp>();
-    const yanked = new Map<string, boolean>();
+    const releaseDate: Record<string, Timestamp> = {};
+    const yanked: Record<string, boolean> = {};
 
     for (const file of files) {
-      yanked.set(
-        file.version,
-        Boolean(
-          isNotNullOrUndefined(file.yankedReason) || yanked.get(file.version),
-        ),
+      yanked[file.version] = Boolean(
+        isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
       );
 
       const dt = MaybeTimestamp.parse(file.createdAt);
@@ -175,14 +173,14 @@ export class CondaDatasource extends Datasource {
         continue;
       }
 
-      const currentDt = releaseDate.get(file.version);
+      const currentDt = releaseDate[file.version];
       if (is.nullOrUndefined(currentDt)) {
-        releaseDate.set(file.version, dt);
+        releaseDate[file.version] = dt;
         continue;
       }
 
       if (currentDt.localeCompare(dt) < 0) {
-        releaseDate.set(file.version, dt);
+        releaseDate[file.version] = dt;
       }
     }
 
@@ -190,8 +188,8 @@ export class CondaDatasource extends Datasource {
       releases: versions.map(({ version }) => {
         return {
           version,
-          releaseDate: releaseDate.get(version),
-          isDeprecated: yanked.get(version),
+          releaseDate: releaseDate[version],
+          isDeprecated: yanked[version],
         };
       }),
     };
