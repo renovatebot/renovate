@@ -543,22 +543,23 @@ export async function extractAllPackageFiles(
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
   const homeDir = process.env.HOME || process.env.USERPROFILE;
-  const homeSettingsPath = path.join(homeDir, '.m2', 'settings.xml');
-
+  const homeSettingsPath = upath.join(homeDir, '.m2', 'settings.xml');
   try {
     const homeSettingsContent = await readLocalFile(homeSettingsPath, 'utf8');
-    const homeRegistries = extractRegistries(homeSettingsContent);
-    if (homeRegistries) {
-      logger.debug(
-        { homeRegistries, homeSettingsPath },
-        'Found registryUrls in $HOME/.m2/settings.xml',
-      );
-      additionalRegistryUrls.push(...homeRegistries);
+    if (homeSettingsContent) {
+      const homeRegistries = extractRegistries(homeSettingsContent);
+      if (homeRegistries) {
+        logger.debug(
+          { homeRegistries, homeSettingsPath },
+          'Found registryUrls in $HOME/.m2/settings.xml',
+        );
+        additionalRegistryUrls.push(...homeRegistries);
+      }
     }
   } catch (err) {
     logger.debug(
       { homeSettingsPath, err },
-      'No settings.xml found in $HOME/.m2 or error reading file'
+      'No settings.xml found in $HOME/.m2 or error reading file',
     );
   }
 
