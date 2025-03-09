@@ -192,7 +192,7 @@ If using negations, all repositories except those who match the regex are added 
 
 ```json
 {
-  "autodiscoverFilter": ["/project/.*/", "!/project/old-/]
+  "autodiscoverFilter": ["/project/.*/", "!/project/old-/"]
 }
 ```
 
