@@ -1,4 +1,5 @@
 import { setBaseUrl } from '../../../util/http/scm-manager';
+import type { PullRequest, Repo, User } from './schema';
 import {
   createScmPr,
   getAllRepoPrs,
@@ -11,7 +12,6 @@ import {
   updateScmPr,
 } from './scm-manager-helper';
 import type { PullRequestCreateParams, PullRequestUpdateParams } from './types';
-import type { PullRequest, Repo, User } from './schema';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/platform/scm-manager/scm-manager-helper', () => {
@@ -82,13 +82,17 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       expect(await getCurrentUser()).toEqual(expectedUser);
     });
 
-    it.each([[401, 500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get('/me')
-          .reply(response);
+          .reply(expectedResponse);
         await expect(getCurrentUser()).rejects.toThrow();
       },
     );
@@ -104,13 +108,19 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       expect(await getRepo(`${repo.namespace}/${repo.name}`)).toEqual(repo);
     });
 
-    it.each([[401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get(`/repositories/${repo.namespace}/${repo.name}`)
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(
           getRepo(`${repo.namespace}/${repo.name}`),
@@ -133,13 +143,18 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       expect(await getAllRepos()).toEqual([repo]);
     });
 
-    it.each([[401], [403], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get('/repositories?pageSize=1000000')
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(getAllRepos()).rejects.toThrow();
       },
@@ -158,13 +173,19 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       expect(await getDefaultBranch(repo)).toBe('develop');
     });
 
-    it.each([[401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get('/config/git/default/repo/default-branch')
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(getDefaultBranch(repo)).rejects.toThrow();
       },
@@ -191,15 +212,21 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       ]);
     });
 
-    it.each([[401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
           )
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(
           getAllRepoPrs(`${repo.namespace}/${repo.name}`),
@@ -220,15 +247,21 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       );
     });
 
-    it.each([[401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .get(
             `/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`,
           )
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(
           getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
@@ -269,13 +302,19 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       ).toEqual(pullRequest);
     });
 
-    it.each([[400], [401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .post(`/pull-requests/${repo.namespace}/${repo.name}`)
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(
           createScmPr(`${repo.namespace}/${repo.name}`, {
@@ -320,9 +359,15 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       ).resolves.not.toThrow();
     });
 
-    it.each([[400], [401], [403], [404], [500]])(
-      'should throw %p response',
-      async (response: number) => {
+    it.each`
+      expectedResponse
+      ${401}
+      ${403}
+      ${404}
+      ${500}
+    `(
+      'should throw expected response $expectedResponse',
+      async ({ expectedResponse }: { expectedResponse: number }) => {
         const expectedPrId = 1337;
 
         httpMock
@@ -333,7 +378,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
         httpMock
           .scope(endpoint, expectingAuthHeader)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/${expectedPrId}`)
-          .reply(response);
+          .reply(expectedResponse);
 
         await expect(
           updateScmPr(`${repo.namespace}/${repo.name}`, expectedPrId, {

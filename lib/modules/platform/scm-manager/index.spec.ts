@@ -421,17 +421,22 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(createPr, () => {
-    it.each([
-      [undefined, 'OPEN', false],
-      [false, 'OPEN', false],
-      [true, 'DRAFT', true],
-    ])(
-      'should create the PR with isDraft %p and state %p',
-      async (
-        draftPR: boolean | undefined,
-        expectedState: string,
-        expectedIsDraft: boolean,
-      ) => {
+    it.each`
+      draftPr      | expectedState | expectedIsDraft
+      ${undefined} | ${'OPEN'}     | ${false}
+      ${false}     | ${'OPEN'}     | ${false}
+      ${true}      | ${'DRAFT'}    | ${true}
+    `(
+      'should create PR with $draftPR and state $expectedState',
+      async ({
+        draftPr,
+        expectedState,
+        expectedIsDraft,
+      }: {
+        draftPr: boolean | undefined;
+        expectedState: string;
+        expectedIsDraft: boolean;
+      }) => {
         httpMock
           .scope(endpoint)
           .post(`/pull-requests/${repo.namespace}/${repo.name}`)
@@ -449,7 +454,7 @@ describe('modules/platform/scm-manager/index', () => {
             title: 'PR Title',
             description: 'PR Body',
             creationDate: '2023-01-01T13:37:00.000Z',
-            status: draftPR ? 'DRAFT' : 'OPEN',
+            status: draftPr ? 'DRAFT' : 'OPEN',
             labels: [],
             tasks: { todo: 0, done: 0 },
             _links: {},
@@ -467,7 +472,7 @@ describe('modules/platform/scm-manager/index', () => {
             targetBranch: 'develop',
             prTitle: 'PR Title',
             prBody: 'PR Body',
-            draftPR,
+            draftPR: draftPr,
           }),
         ).toEqual({
           sourceBranch: 'feature/test',
@@ -486,17 +491,21 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(updatePr, () => {
-    it.each([
-      ['open', 'prBody'],
-      ['closed', 'prBody'],
-      [undefined, 'prBody'],
-      ['open', undefined],
-    ])(
-      'should update the PR with state %p and prBody %p',
-      async (
-        actualState: string | undefined,
-        actualPrBody: string | undefined,
-      ) => {
+    it.each`
+      state        | body
+      ${'open'}    | ${'prBody'}
+      ${'closed'}  | ${'prBody'}
+      ${undefined} | ${'prBody'}
+      ${'open'}    | ${undefined}
+    `(
+      'should update PR with state $state and bdoy $body',
+      async ({
+        state,
+        body,
+      }: {
+        state: string | undefined;
+        body: string | undefined;
+      }) => {
         httpMock
           .scope(endpoint)
           .get(
@@ -513,8 +522,8 @@ describe('modules/platform/scm-manager/index', () => {
           updatePr({
             number: 1,
             prTitle: 'PR Title',
-            prBody: actualPrBody,
-            state: actualState as 'open' | 'closed' | undefined,
+            prBody: body,
+            state: state as 'open' | 'closed' | undefined,
             targetBranch: 'Target/Branch',
           }),
         ).resolves.not.toThrow();

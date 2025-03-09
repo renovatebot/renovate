@@ -1,35 +1,46 @@
 import type { MergeStrategy } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { GitUrlOption, Pr } from '../types';
-import type { PrFilterByState } from './types';
 import type { Repo } from './schema';
+import type { PrFilterByState } from './types';
 import { getMergeMethod, getRepoUrl, matchPrState, smartLinks } from './utils';
 import { invalidatePrCache } from './index';
 
 describe('modules/platform/scm-manager/utils', () => {
   describe(getMergeMethod, () => {
-    it.each([
-      [undefined, null],
-      ['auto', null],
-      ['fast-forward', 'FAST_FORWARD_IF_POSSIBLE'],
-      ['merge-commit', 'MERGE_COMMIT'],
-      ['rebase', 'REBASE'],
-      ['squash', 'SQUASH'],
-    ])(
-      'map merge strategy %p on PR merge method %p',
-      (strategy: string | undefined, method: string | null) => {
+    it.each`
+      strategy          | method
+      ${undefined}      | ${null}
+      ${'auto'}         | ${null}
+      ${'fast-forward'} | ${'FAST_FORWARD_IF_POSSIBLE'}
+      ${'merge-commit'} | ${'MERGE_COMMIT'}
+      ${'rebase'}       | ${'REBASE'}
+      ${'squash'}       | ${'SQUASH'}
+    `(
+      'map merge strategy $strategy on PR merge method $method',
+      ({
+        strategy,
+        method,
+      }: {
+        strategy: string | undefined;
+        method: string | null;
+      }) => {
         expect(getMergeMethod(strategy as MergeStrategy)).toEqual(method);
       },
     );
   });
 
   describe(smartLinks, () => {
-    it.each([
-      ['', ''],
-      ['](../pull/', '](pulls/'],
-    ])('adjust %p to smart link %p', (body: string, result: string) => {
-      expect(smartLinks(body)).toEqual(result);
-    });
+    it.each`
+      body            | result
+      ${''}           | ${''}
+      ${'](../pull/'} | ${'](pulls/'}
+    `(
+      'adjust $body to smart link $result',
+      ({ body, result }: { body: string; result: string }) => {
+        expect(smartLinks(body)).toEqual(result);
+      },
+    );
   });
 
   describe(matchPrState, () => {
@@ -42,27 +53,38 @@ describe('modules/platform/scm-manager/utils', () => {
       isDraft: false,
     };
 
-    it.each([
-      [{ ...defaultPr, state: 'OPEN' }, 'all', true],
-      [{ ...defaultPr, state: 'DRAFT' }, 'all', true],
-      [{ ...defaultPr, state: 'MERGED' }, 'all', true],
-      [{ ...defaultPr, state: 'REJECTED' }, 'all', true],
-      [{ ...defaultPr, state: 'OPEN' }, 'open', true],
-      [{ ...defaultPr, state: 'DRAFT' }, 'open', true],
-      [{ ...defaultPr, state: 'MERGED' }, 'open', false],
-      [{ ...defaultPr, state: 'REJECTED' }, 'open', false],
-      [{ ...defaultPr, state: 'OPEN' }, '!open', false],
-      [{ ...defaultPr, state: 'DRAFT' }, '!open', false],
-      [{ ...defaultPr, state: 'MERGED' }, '!open', true],
-      [{ ...defaultPr, state: 'REJECTED' }, '!open', true],
-      [{ ...defaultPr, state: 'OPEN' }, 'closed', false],
-      [{ ...defaultPr, state: 'DRAFT' }, 'closed', false],
-      [{ ...defaultPr, state: 'MERGED' }, 'closed', true],
-      [{ ...defaultPr, state: 'REJECTED' }, 'closed', true],
-    ])(
-      'match scm pr %p state to pr filter by state %p',
-      (pr: Pr, state: string, result: boolean) => {
-        expect(matchPrState(pr, state as PrFilterByState)).toEqual(result);
+    it.each`
+      pr                                     | state       | expectedResult
+      ${{ ...defaultPr, state: 'OPEN' }}     | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'MERGED' }}   | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'REJECTED' }} | ${'all'}    | ${true}
+      ${{ ...defaultPr, state: 'OPEN' }}     | ${'open'}   | ${true}
+      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'open'}   | ${true}
+      ${{ ...defaultPr, state: 'MERGED' }}   | ${'open'}   | ${false}
+      ${{ ...defaultPr, state: 'REJECTED' }} | ${'open'}   | ${false}
+      ${{ ...defaultPr, state: 'OPEN' }}     | ${'!open'}  | ${false}
+      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'!open'}  | ${false}
+      ${{ ...defaultPr, state: 'MERGED' }}   | ${'!open'}  | ${true}
+      ${{ ...defaultPr, state: 'REJECTED' }} | ${'!open'}  | ${true}
+      ${{ ...defaultPr, state: 'OPEN' }}     | ${'closed'} | ${false}
+      ${{ ...defaultPr, state: 'DRAFT' }}    | ${'closed'} | ${false}
+      ${{ ...defaultPr, state: 'MERGED' }}   | ${'closed'} | ${true}
+      ${{ ...defaultPr, state: 'REJECTED' }} | ${'closed'} | ${true}
+    `(
+      'match scm pr state $pr.state to renovate pr state $state',
+      ({
+        pr,
+        state,
+        expectedResult,
+      }: {
+        pr: Pr;
+        state: string;
+        expectedResult: boolean;
+      }) => {
+        expect(matchPrState(pr, state as PrFilterByState)).toEqual(
+          expectedResult,
+        );
       },
     );
   });
@@ -91,9 +113,15 @@ describe('modules/platform/scm-manager/utils', () => {
       invalidatePrCache();
     });
 
-    it.each([['ssh'], ['default'], ['endpoint'], [undefined]])(
-      'should throw error for option %p, because protocol links are missing',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'ssh'}
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should throw error for option $gitUrl, because protocol links are missing',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         expect(() =>
           getRepoUrl(repo, gitUrl as GitUrlOption, endpoint),
         ).toThrow('Missing protocol links.');
@@ -139,9 +167,14 @@ describe('modules/platform/scm-manager/utils', () => {
       ).toEqual(gitSshEndpoint);
     });
 
-    it.each([['endpoint'], ['default'], [undefined]])(
-      'should throw error because of missing HTTP link, for option %p',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should throw error because of missing HTTP link for option $gitUrl',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         expect(() =>
           getRepoUrl(
             {
@@ -155,9 +188,14 @@ describe('modules/platform/scm-manager/utils', () => {
       },
     );
 
-    it.each([['endpoint'], ['default'], [undefined]])(
-      'should throw error because of malformed HTTP link, with option %p',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should throw error because of malformed HTTP link with option $gitUrl',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         expect(() =>
           getRepoUrl(
             {
@@ -171,9 +209,14 @@ describe('modules/platform/scm-manager/utils', () => {
       },
     );
 
-    it.each([['endpoint'], ['default'], [undefined]])(
-      'should use empty string, because username was not provided. With option %p',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should use empty string, because username was not provided with option $gitUrl',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         hostRules.clear();
         expect(
           getRepoUrl(
@@ -188,9 +231,14 @@ describe('modules/platform/scm-manager/utils', () => {
       },
     );
 
-    it.each([['endpoint'], ['default'], [undefined]])(
-      'should use empty string, because token was not provided. With option %p',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should use empty string, because token was not provided. With option $gitUrl',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         hostRules.clear();
         hostRules.add({ username: 'tzerr' });
         expect(
@@ -206,9 +254,14 @@ describe('modules/platform/scm-manager/utils', () => {
       },
     );
 
-    it.each([['endpoint'], ['default'], [undefined]])(
-      'should provide the http link with username, for option %p',
-      (gitUrl: string | undefined) => {
+    it.each`
+      gitUrl
+      ${'default'}
+      ${'endpoint'}
+      ${undefined}
+    `(
+      'should provide the http link with username, for option $gitUrl',
+      ({ gitUrl }: { gitUrl: string | undefined }) => {
         expect(
           getRepoUrl(
             {
