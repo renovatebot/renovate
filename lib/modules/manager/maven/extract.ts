@@ -1,9 +1,10 @@
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, readSystemFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -542,10 +543,10 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
-  const homeDir = process.env.HOME || process.env.USERPROFILE;
-  const homeSettingsPath = upath.join(homeDir, '.m2', 'settings.xml');
+  const homedir = os.homedir();
+  const homeSettingsPath = upath.join(homedir, '.m2', 'settings.xml');
   try {
-    const homeSettingsContent = await readLocalFile(homeSettingsPath, 'utf8');
+    const homeSettingsContent = await readSystemFile(homeSettingsPath, 'utf8');
     if (homeSettingsContent) {
       const homeRegistries = extractRegistries(homeSettingsContent);
       if (homeRegistries) {
