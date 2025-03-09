@@ -327,10 +327,7 @@ describe('modules/manager/composer/utils', () => {
       'does not request an update with minimal changes with $constraint',
       ({ constraint }) => {
         expect(
-          getComposerUpdateArguments(
-            {},
-            { toolName: 'composer', constraint },
-          ),
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         );
@@ -354,10 +351,7 @@ describe('modules/manager/composer/utils', () => {
       'requests an update with minimal changes with $constraint',
       ({ constraint }) => {
         expect(
-          getComposerUpdateArguments(
-            {},
-            { toolName: 'composer', constraint },
-          ),
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
         );
