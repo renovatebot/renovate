@@ -90,6 +90,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -132,6 +133,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -167,6 +169,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -202,6 +205,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
