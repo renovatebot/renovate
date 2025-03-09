@@ -287,8 +287,7 @@ function matchesState(state: string, desiredState: string): boolean {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
-}
-/* v8 ignore stop */
+} /* v8 ignore stop */
 
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');

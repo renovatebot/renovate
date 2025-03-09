@@ -1422,8 +1422,8 @@ async function tryAddMilestone(
     );
     GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
-    const actualError =
-      err.response?.body || /* v8 ignore start */ err; /* v8 ignore stop */
+    /* v8 ignore next */
+    const actualError = err.response?.body || err;
     logger.warn(
       {
         milestone: milestoneNo,
@@ -1858,8 +1858,7 @@ export async function mergePr({
   /* v8 ignore start */
   if (config.forkToken) {
     options.token = config.forkToken;
-  }
-  /* v8 ignore stop */
+  } /* v8 ignore stop */
   let automerged = false;
   let automergeResult: HttpResponse<unknown>;
   const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
@@ -2012,6 +2011,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       );
       for (const alert of vulnerabilityAlerts) {
         if (alert.security_vulnerability === null) {
+          // As described in the documentation, there are cases in which
+          // GitHub API responds with `"securityVulnerability": null`.
+          // But it's may be faulty, so skip processing it here.
           continue;
         }
         const {

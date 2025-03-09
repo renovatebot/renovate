@@ -366,12 +366,16 @@ function matchesState(state: string, desiredState: string): boolean {
 
 // TODO: coverage (#9624)
 /* v8 ignore start */
-const isRelevantPr =
-  (branchName: string, prTitle: string | null | undefined, state: string) =>
-  (p: Pr): boolean =>
+function isRelevantPr(
+  branchName: string,
+  prTitle: string | null | undefined,
+  state: string,
+) {
+  return (p: Pr): boolean =>
     p.sourceBranch === branchName &&
     (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-    matchesState(p.state, state); /* v8 ignore stop */
+    matchesState(p.state, state);
+} /* v8 ignore stop */
 
 // TODO: coverage (#9624)
 /* v8 ignore start */
