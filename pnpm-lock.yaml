@@ -95,11 +95,11 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@yarnpkg/core':
-        specifier: 4.2.0
-        version: 4.2.0(typanion@3.14.0)
+        specifier: 4.2.1
+        version: 4.2.1(typanion@3.14.0)
       '@yarnpkg/parsers':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.3
+        version: 3.0.3
       agentkeepalive:
         specifier: 4.6.0
         version: 4.6.0
@@ -2474,26 +2474,26 @@ packages:
   '@vitest/utils@3.0.7':
     resolution: {integrity: sha512-xePVpCRfooFX3rANQjwoditoXgWb1MaFbzmGuPP59MK6i13mrnDw/yEIyJudLeW6/38mCNcwCiJIGmpDPibAIg==}
 
-  '@yarnpkg/core@4.2.0':
-    resolution: {integrity: sha512-h+cjnATkpO0ya6I5U4RYvOet/IsswOje3eBq9CsFM4XJZ2nS4WBBeFwYe0tqLD87IwKsoyuIdUwZjPHcn2DM8g==}
+  '@yarnpkg/core@4.2.1':
+    resolution: {integrity: sha512-+nXgfe/SE1lGedYuLNvgFGT5DNTb2pc6XJQCok1zoGGxbhqdTfslcFcPQrarSOjbhYK+Vl/PfWP9o6j/YIcuDw==}
     engines: {node: '>=18.12.0'}
 
-  '@yarnpkg/fslib@3.1.1':
-    resolution: {integrity: sha512-NpeecISQEuDnmipElGa0cOC7DnlPf3+FXnuwwJTciJgt+S/BDb8VFBvXSE5UirGmsFWlf4mfZuuAC7e8Pmhh4g==}
+  '@yarnpkg/fslib@3.1.2':
+    resolution: {integrity: sha512-FpB2F1Lrm43F94klS9UN0ceOpe/PHZSpJB7bIkvReF/ba890bSdu1NokSKr998yaFee7yqeD9Wkid5ye7azF3A==}
     engines: {node: '>=18.12.0'}
 
-  '@yarnpkg/libzip@3.1.0':
-    resolution: {integrity: sha512-x66/F8wEOUL8Hi4NZFVVKCFNITN0keQt0ZNlY5V9dRb+judyO8aJv4hazO3WyblnGhClvuBPbx+a2X4LNS5ziA==}
+  '@yarnpkg/libzip@3.1.1':
+    resolution: {integrity: sha512-KNgpRq0w/az6nOLQDbRhX24m18Jk7YNieN8gw1FP9hSmW7141U8dhY7e8nfwvnu7P0XHvwj2MpAPVGfeaKTE+A==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
-      '@yarnpkg/fslib': ^3.1.0
+      '@yarnpkg/fslib': ^3.1.2
 
-  '@yarnpkg/parsers@3.0.2':
-    resolution: {integrity: sha512-/HcYgtUSiJiot/XWGLOlGxPYUG65+/31V8oqk17vZLW1xlCoR4PampyePljOxY2n8/3jz9+tIFzICsyGujJZoA==}
+  '@yarnpkg/parsers@3.0.3':
+    resolution: {integrity: sha512-mQZgUSgFurUtA07ceMjxrWkYz8QtDuYkvPlu0ZqncgjopQ0t6CNEo/OSealkmnagSUx8ZD5ewvezUwUuMqutQg==}
     engines: {node: '>=18.12.0'}
 
-  '@yarnpkg/shell@4.1.1':
-    resolution: {integrity: sha512-0aS71iJrNQ4cezU5BJ5JpBTXkFQPKkzOEpDtMQm8E2H3g9PLxUe/5VdA60bZq/4N/qazLLYEOngcFZ6QRpraVQ==}
+  '@yarnpkg/shell@4.1.2':
+    resolution: {integrity: sha512-1ET4cNNd7//2tXHnLiHGzBbry5mlEmoKL8f32E5EKnn8Ke/gAcILeFdbX2G9C9w/7uBmFyWeSs530ib0SofVPQ==}
     engines: {node: '>=18.12.0'}
     hasBin: true
 
@@ -9557,15 +9557,15 @@ snapshots:
       loupe: 3.1.3
       tinyrainbow: 2.0.0
 
-  '@yarnpkg/core@4.2.0(typanion@3.14.0)':
+  '@yarnpkg/core@4.2.1(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.5.8
       '@types/treeify': 1.0.3
-      '@yarnpkg/fslib': 3.1.1
-      '@yarnpkg/libzip': 3.1.0(@yarnpkg/fslib@3.1.1)
-      '@yarnpkg/parsers': 3.0.2
-      '@yarnpkg/shell': 4.1.1(typanion@3.14.0)
+      '@yarnpkg/fslib': 3.1.2
+      '@yarnpkg/libzip': 3.1.1(@yarnpkg/fslib@3.1.2)
+      '@yarnpkg/parsers': 3.0.3
+      '@yarnpkg/shell': 4.1.2(typanion@3.14.0)
       camelcase: 5.3.1
       chalk: 3.0.0
       ci-info: 4.1.0
@@ -9588,25 +9588,25 @@ snapshots:
     transitivePeerDependencies:
       - typanion
 
-  '@yarnpkg/fslib@3.1.1':
+  '@yarnpkg/fslib@3.1.2':
     dependencies:
       tslib: 2.8.1
 
-  '@yarnpkg/libzip@3.1.0(@yarnpkg/fslib@3.1.1)':
+  '@yarnpkg/libzip@3.1.1(@yarnpkg/fslib@3.1.2)':
     dependencies:
       '@types/emscripten': 1.40.0
-      '@yarnpkg/fslib': 3.1.1
+      '@yarnpkg/fslib': 3.1.2
       tslib: 2.8.1
 
-  '@yarnpkg/parsers@3.0.2':
+  '@yarnpkg/parsers@3.0.3':
     dependencies:
       js-yaml: 3.14.1
       tslib: 2.8.1
 
-  '@yarnpkg/shell@4.1.1(typanion@3.14.0)':
+  '@yarnpkg/shell@4.1.2(typanion@3.14.0)':
     dependencies:
-      '@yarnpkg/fslib': 3.1.1
-      '@yarnpkg/parsers': 3.0.2
+      '@yarnpkg/fslib': 3.1.2
+      '@yarnpkg/parsers': 3.0.3
       chalk: 3.0.0
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       cross-spawn: 7.0.6
