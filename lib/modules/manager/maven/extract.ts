@@ -1,9 +1,10 @@
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, readSystemFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -542,6 +543,26 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
+  const homedir = os.homedir();
+  const homeSettingsPath = upath.join(homedir, '.m2', 'settings.xml');
+  try {
+    const homeSettingsContent = await readSystemFile(homeSettingsPath, 'utf8');
+    if (homeSettingsContent) {
+      const homeRegistries = extractRegistries(homeSettingsContent);
+      if (homeRegistries) {
+        logger.debug(
+          { homeRegistries, homeSettingsPath },
+          'Found registryUrls in $HOME/.m2/settings.xml',
+        );
+        additionalRegistryUrls.push(...homeRegistries);
+      }
+    }
+  } catch (err) {
+    logger.debug(
+      { homeSettingsPath, err },
+      'No settings.xml found in $HOME/.m2 or error reading file',
+    );
+  }
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
