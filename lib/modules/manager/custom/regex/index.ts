@@ -9,6 +9,7 @@ import type {
 import { validMatchFields } from '../utils';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
+import { logger } from '../../../../logger';
 
 export const categories: Category[] = ['custom'];
 
@@ -68,6 +69,10 @@ export function extractPackageFile(
     }
     return res;
   }
+  logger.debug(
+    { packageFile },
+    'No dependencies found in file for custom regex manager',
+  );
 
   return null;
 }
