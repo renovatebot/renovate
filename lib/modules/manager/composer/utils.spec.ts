@@ -329,7 +329,7 @@ describe('modules/manager/composer/utils', () => {
         expect(
           getComposerUpdateArguments(
             {},
-            { toolName: 'composer', constraint: constraint },
+            { toolName: 'composer', constraint },
           ),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
@@ -356,7 +356,7 @@ describe('modules/manager/composer/utils', () => {
         expect(
           getComposerUpdateArguments(
             {},
-            { toolName: 'composer', constraint: constraint },
+            { toolName: 'composer', constraint },
           ),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
