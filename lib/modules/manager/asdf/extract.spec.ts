@@ -480,7 +480,6 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'johanhaleby/kubetail',
             depName: 'kubetail',
-            extractVersion: '^(?<version>\\S+)',
           },
           {
             currentValue: '4.5.7',
@@ -703,7 +702,6 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'GoogleCloudPlatform/terraformer',
             depName: 'terraformer',
-            extractVersion: '^(?<version>\\S+)',
           },
           {
             currentValue: '0.43.2',

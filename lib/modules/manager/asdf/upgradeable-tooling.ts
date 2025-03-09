@@ -466,7 +466,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'johanhaleby/kubetail',
-      extractVersion: '^(?<version>\\S+)',
     },
   },
   kustomize: {
@@ -753,7 +752,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'GoogleCloudPlatform/terraformer',
-      extractVersion: '^(?<version>\\S+)',
     },
   },
   terragrunt: {
