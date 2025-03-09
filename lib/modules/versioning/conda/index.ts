@@ -119,6 +119,76 @@ function equals(version: string, other: string): boolean {
   return parse(version)?.equals(v2) ?? false;
 }
 
+function isStable(version: string): boolean {
+  return !(parse(version)?.isDev ?? true);
+}
+
+function isCompatible(version: string, current?: string): boolean {
+  return true;
+}
+
+function getMajor(version: string | SemVer): null | number {
+  return parse(version as string)?.asMajorMinor?.()?.[0] ?? null;
+}
+function getMinor(version: string | SemVer): null | number {
+  return parse(version as string)?.asMajorMinor?.()?.[1] ?? null;
+}
+
+function getPatch(version: string | SemVer): null | number {
+  try {
+    return pep440.api.getPatch(version);
+  } catch {
+    return null;
+  }
+}
+
+function isGreaterThan(version: string, other: string): boolean {
+  return sortVersions(version, other) > 0;
+}
+function getSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const spec = new VersionSpec(range);
+
+  const satisfiedVersions = versions
+    .map((v) => {
+      return [new Version(v), v] as const;
+    })
+    .filter(([v, raw]) => spec.matches(v))
+    .sort((a, b) => {
+      return a[0].compare(b[0]);
+    });
+
+  if (satisfiedVersions.length === 0) {
+    return null;
+  }
+
+  return satisfiedVersions[satisfiedVersions.length - 1][1];
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const spec = new VersionSpec(range);
+
+  const satisfiedVersions = versions
+    .map((v) => {
+      return [new Version(v), v] as const;
+    })
+    .filter(([v, raw]) => spec.matches(v))
+    .sort((a, b) => {
+      return a[0].compare(b[0]);
+    });
+
+  if (satisfiedVersions.length === 0) {
+    return null;
+  }
+
+  return satisfiedVersions[0][1];
+}
+
 export const api = {
   equals,
   isValid,
@@ -127,71 +197,21 @@ export const api = {
 
   // conda doesn't have stable version and non-stable version
   // for example, tzdata has version 2024a but it's stable
-  isStable(version: string): boolean {
-    return !(parse(version)?.isDev ?? true);
-  },
+  isStable,
 
   // conda use version are always compatible with each other.
-  isCompatible(version: string, current?: string): boolean {
-    return true;
-  },
+  isCompatible,
 
-  getMajor(version: string | SemVer): null | number {
-    return parse(version as string)?.asMajorMinor?.()?.[0] ?? null;
-  },
-  getMinor(version: string | SemVer): null | number {
-    return parse(version as string)?.asMajorMinor?.()?.[1] ?? null;
-  },
+  getMajor,
+  getMinor,
   // sadly conda version doesn't have a concept of patch version
   // so we try to use pep440 get a patch version.
-  getPatch(version: string | SemVer): null | number {
-    try {
-      return pep440.api.getPatch(version);
-    } catch {
-      return null;
-    }
-  },
+  getPatch,
 
-  isGreaterThan(version: string, other: string): boolean {
-    return sortVersions(version, other) > 0;
-  },
-  getSatisfyingVersion(versions: string[], range: string): string | null {
-    const spec = new VersionSpec(range);
+  isGreaterThan,
+  getSatisfyingVersion,
 
-    const satisfiedVersions = versions
-      .map((v) => {
-        return [new Version(v), v] as const;
-      })
-      .filter(([v, raw]) => spec.matches(v))
-      .sort((a, b) => {
-        return a[0].compare(b[0]);
-      });
-
-    if (satisfiedVersions.length === 0) {
-      return null;
-    }
-
-    return satisfiedVersions[satisfiedVersions.length - 1][1];
-  },
-
-  minSatisfyingVersion(versions: string[], range: string): string | null {
-    const spec = new VersionSpec(range);
-
-    const satisfiedVersions = versions
-      .map((v) => {
-        return [new Version(v), v] as const;
-      })
-      .filter(([v, raw]) => spec.matches(v))
-      .sort((a, b) => {
-        return a[0].compare(b[0]);
-      });
-
-    if (satisfiedVersions.length === 0) {
-      return null;
-    }
-
-    return satisfiedVersions[0][1];
-  },
+  minSatisfyingVersion,
   getNewValue,
 
   matches,
