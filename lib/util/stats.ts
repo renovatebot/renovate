@@ -542,7 +542,10 @@ export class ObsoleteCacheHitLogger {
 
   static report(): void {
     const hits = this.getData();
-    logger.debug({ count: Object.keys(hits).length, hits }, 'Cache fallback URLs');
+    logger.debug(
+      { count: Object.keys(hits).length, hits },
+      'Cache fallback URLs',
+    );
   }
 }
 /* v8 ignore stop: temporary code */
