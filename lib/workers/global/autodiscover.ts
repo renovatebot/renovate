@@ -2,8 +2,7 @@ import is from '@sindresorhus/is';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { minimatchFilter } from '../../util/minimatch';
-import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
+import { matchRegexOrGlobList } from '../../util/string-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -103,22 +102,5 @@ export async function autodiscoverRepositories(
 }
 
 export function applyFilters(repos: string[], filters: string[]): string[] {
-  const matched = new Set<string>();
-
-  for (const filter of filters) {
-    let res: string[];
-    if (isRegexMatch(filter)) {
-      const autodiscoveryPred = getRegexPredicate(filter);
-      if (!autodiscoveryPred) {
-        throw new Error(`Failed to parse regex pattern "${filter}"`);
-      }
-      res = repos.filter(autodiscoveryPred);
-    } else {
-      res = repos.filter(minimatchFilter(filter, { dot: true, nocase: true }));
-    }
-    for (const repository of res) {
-      matched.add(repository);
-    }
-  }
-  return repos.filter((repository) => matched.has(repository));
+  return repos.filter((repo) => matchRegexOrGlobList(repo, filters));
 }

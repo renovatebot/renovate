@@ -122,13 +122,17 @@ describe('workers/global/autodiscover', () => {
 
   it('filters autodiscovered github repos with regex negation', async () => {
     config.autodiscover = true;
-    config.autodiscoverFilter = ['!/project/re*./'];
+    config.autodiscoverFilter = ['!/project/re*./', '!project/yet*'];
     config.platform = 'github';
     hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
     ghApi.getRepos.mockImplementation(() =>
-      Promise.resolve(['project/repo', 'project/another-repo']),
+      Promise.resolve([
+        'project/repo',
+        'project/another-repo',
+        'project/yet-another-repo',
+      ]),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/another-repo']);
@@ -158,7 +162,8 @@ describe('workers/global/autodiscover', () => {
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
-    await expect(autodiscoverRepositories(config)).rejects.toThrow();
+    const res = await autodiscoverRepositories(config);
+    expect(res).toEqual(config);
   });
 
   it('filters autodiscovered github repos with multiple values', async () => {
