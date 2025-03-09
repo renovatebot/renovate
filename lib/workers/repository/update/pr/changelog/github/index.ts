@@ -6,6 +6,7 @@ import type {
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
 import { queryReleases } from '../../../../../../util/github/graphql';
+import { memCacheProvider } from '../../../../../../util/http/cache/memory-http-cache-provider';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
@@ -36,6 +37,7 @@ export async function getReleaseNotesMd(
     `${apiPrefix}/git/trees/${defaultBranch}${
       sourceDirectory ? '?recursive=1' : ''
     }`,
+    { cacheProvider: memCacheProvider },
   );
 
   // istanbul ignore if
