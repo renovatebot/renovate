@@ -1,9 +1,4 @@
-Renovate can update the [mise](https://mise.jdx.dev/configuration.html#mise-toml) `.mise.toml` file.
-
-Renovate's `mise` manager can version these tools:
-
-<!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
+Renovate can update the [mise](https://mise.jdx.dev/configuration.html#mise-toml) `mise.toml` file.
 
 ### Renovate only updates primary versions
 
@@ -30,16 +25,11 @@ To maintain consistency and reliability, Renovate opts to only manage the _first
 
 This follows the same workflow that Renovate's `asdf` manager uses.
 
-### Plugin/tool support
+### Short names support
 
-Renovate uses:
+Renovate uses [mise registry](https://mise.jdx.dev/registry.html) to understand tools short names.
 
-- [mise's plugins](https://github.com/jdx/mise/tree/main/src/plugins/core)
-- [asdf's plugins](https://mise.jdx.dev/registry.html)
-
-to understand and manage tool versioning.
-
-Support for new tools/plugins needs to be _manually_ added to Renovate's logic.
+Support for new tool short names needs to be _manually_ added to Renovate's logic.
 
 #### Adding new tool support
 
@@ -48,8 +38,63 @@ There are 2 ways to integrate versioning for a new tool:
 - Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
 - Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
 
-If `mise` adds support for more tools via its own [core plugins](https://mise.jdx.dev/plugins.html#core-plugins), you can create a PR to extend Renovate's `mise` manager to add support for the new tooling.
+If `mise` adds support for more tools via its own [core tools](https://mise.jdx.dev/core-tools.html), you can create a PR to extend Renovate's `mise` manager to add support for the new core tools.
 
-You may be able to add support for new tooling upstream in the core plugins - create an issue and see if the community agrees whether it belongs there, or if it would be better as an `asdf-` plugin.
+If you are wanting to add support for an other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
 
-If you are wanting to add support for an existing `asdf-x` plugin to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
+Note that some tools in the registry are not using the `asdf` backend. We are currently not supporting those tool short names.
+
+TODO: Change the registry lookup.
+
+### Backends support
+
+Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev/dev-tools/backends/):
+
+- [`core`](https://mise.jdx.dev/core-tools.html)
+- [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
+- [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
+- [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
+- [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
+- [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
+- [`spm`](https://mise.jdx.dev/dev-tools/backends/spm.html)
+- [`ubi`](https://mise.jdx.dev/dev-tools/backends/ubi.html)
+- [`vfox`](https://mise.jdx.dev/dev-tools/backends/vfox.html)
+
+#### Limitations
+
+Renovate's `mise` manager does not support the following tool syntax:
+
+- `asdf` and `vfox` plugins
+  e.g. `asdf:asdf:mise-plugins/asdf-yarn` or `vfox:vfox:version-fox/vfox-elixir`
+  Short names with backends like `asdf:yarn` or `vfox:elixir` are supported if the short names are supported.
+
+- `aqua` packages with `http` [package type](https://aquaproj.github.io/docs/reference/registry-config/#package-types).
+  However if the short name using `aqua` backend is supported by Renovate, it will be updated.
+  e.g. [`aqua:helm/helm`](https://github.com/aquaproj/aqua-registry/blob/main/pkgs/helm/helm/registry.yaml) is not supported, but `helm` or `aqua:helm` is supported.
+
+- `aqua` packages with [`version_filter`](https://aquaproj.github.io/docs/reference/registry-config/version-prefix).
+  We don't read the aqua registry itself, so we can't support this feature.
+  If some packages using `version_filter` like [`aqua:biomejs/biome`](https://github.com/aquaproj/aqua-registry/blob/main/pkgs/biomejs/biome/registry.yaml) are not updated or updated incorrectly, set `extractVersion` in the Renovate config manually like below.
+
+  ```json
+  {
+    "packageRules": [
+      {
+        "depNames": ["aqua:biomejs/biome"],
+        "extractVersion": "cli/(?<version>.+)"
+      }
+    ]
+  }
+  ```
+
+- `ubi` backend tools with [`tag_regex`](https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions) option.
+  The `tag_regex` option is used as `extractVersion`, but the regex engines are not the same between mise and Renovate.
+  If the version is not updated or updated incorrectly, override `extractVersion` manually in the renovate config.
+
+### Supported default registry tool short names
+
+Renovate's `mise` manager can only version these tool short names:
+
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
+<!-- Autogenerate end -->
