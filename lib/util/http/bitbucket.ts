@@ -31,7 +31,10 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     options: InternalJsonUnsafeOptions<BitbucketHttpOptions>,
   ): Promise<HttpResponse<T>> {
     const resolvedUrl = this.resolveUrl(options.url, options.httpOptions);
-    const opts = { ...options, url: resolvedUrl };
+    const opts: InternalJsonUnsafeOptions<BitbucketHttpOptions> = {
+      ...options,
+      url: resolvedUrl,
+    };
     const paginate = opts.httpOptions?.paginate;
 
     if (paginate && !hasPagelen(resolvedUrl)) {
@@ -47,10 +50,10 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
     if (paginate && isPagedResult(result.body)) {
       const resultBody = result.body;
       let nextURL = result.body.next;
-      let page = 2;
+      let page = 1;
 
       for (; nextURL && page <= MAX_PAGES; page++) {
-        resolvedUrl.searchParams.set('page', page.toString());
+        opts.url = nextURL;
         const nextResult = await super.requestJsonUnsafe<PagedResult<T>>(
           method,
           opts,
@@ -62,7 +65,7 @@ export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      /* v8 ignore start: hard to test all branches */
+      /* v8 ignore start -- hard to test all branches */
       resultBody.size =
         page <= MAX_PAGES ? resultBody.values.length : undefined;
       resultBody.next = page <= MAX_PAGES ? nextURL : undefined;

@@ -260,7 +260,7 @@
 
 
     ```ts
-    /* v8 ignore next: typescript strict null check */
+    /* v8 ignore next -- typescript strict null check */
     if (!url) {
       return null;
     }
@@ -652,6 +652,22 @@
 
 
     If you're the type of person who's busy and not got time to figure things out yourself or spend much time trying, or you consider your time too valuable, then you should be investigating an Enterprise support contract or hiring a consultant - such options are easily available.
+
+
+    Thanks, the Renovate team
+
+'auto:custom-config-help':
+  comment: >
+    Hi there,
+
+
+    Custom manager and/or datasource questions are often complex to resolve, and unfortunately the maintainers do not have the time to debug each one raised. As always, if we can spot the problem quickly and help you, we will. Additionally, if your use case seems like one which could benefit a lot of users, we might still choose to work on it, even if it takes a long time.
+
+
+    However, we generally don't have time to assist in-depth with each custom manager or datasource config question. Doing so would be like the maintainers of PostgreSQL debugging every SQL statement anyone has.
+
+
+    Your discussion can remain open indefinitely, but please be patient and do not nudge or bump this discussion just to get attention. Please also read [Getting more help](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) in our Code of Conduct.
 
 
     Thanks, the Renovate team
