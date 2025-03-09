@@ -99,7 +99,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
-  it('performs lock file updates for workspace', async () => {
+  it('performs lock file updates for workspace with --recursive', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
