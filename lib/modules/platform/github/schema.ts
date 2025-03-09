@@ -45,12 +45,14 @@ export const VulnerabilityAlertSchema = LooseArray(
     }),
   }),
   {
-    onError: /* istanbul ignore next */ ({ error }) => {
+    /* v8 ignore start */
+    onError: ({ error }) => {
       logger.debug(
         { error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
+    /* v8 ignore stop */
   },
 );
 
