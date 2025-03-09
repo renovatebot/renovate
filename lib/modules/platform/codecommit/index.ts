@@ -438,7 +438,7 @@ export async function updatePr({
 }
 
 // Auto-Merge not supported currently.
-/* istanbul ignore next */
+/* v8 ignore start */
 export async function mergePr({
   branchName,
   id: prNo,
@@ -448,17 +448,17 @@ export async function mergePr({
   await client.getPr(`${prNo}`);
   return Promise.resolve(false);
   //
-  // // istanbul ignore if
+  // /* v8 ignore start */
   // if (!prOut) {
   //   return false;
-  // }
+  // } /* v8 ignore stop */
   // const pReq = prOut.pullRequest;
   // const targets = pReq?.pullRequestTargets;
   //
-  // // istanbul ignore if
+  // /* v8 ignore start */
   // if (!targets) {
   //   return false;
-  // }
+  // } /* v8 ignore stop */
   //
   // if (strategy === 'rebase') {
   //   logger.warn('CodeCommit does not support a "rebase" strategy.');
@@ -513,7 +513,7 @@ export async function mergePr({
   //   logger.debug({ err }, 'Failed to set the PR as Closed.');
   //   return false;
   // }
-}
+} /* v8 ignore stop */
 
 export async function addReviewers(
   prNo: number,
@@ -533,54 +533,54 @@ export async function addReviewers(
   }
 }
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   // CodeCommit does not support adding reviewers
   return Promise.resolve();
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function findIssue(title: string): Promise<Issue | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   // CodeCommit does not have issues
   return Promise.resolve(null);
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function getIssueList(): Promise<Issue[]> {
   // CodeCommit does not have issues
   return Promise.resolve([]);
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function ensureIssueClosing(title: string): Promise<void> {
   // CodeCommit does not have issues
   return Promise.resolve();
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
-}
+} /* v8 ignore stop */
 
 // Returns the combined status for a branch.
-/* istanbul ignore next */
+/* v8 ignore start */
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet',
   );
   return Promise.resolve('yellow');
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function getBranchStatusCheck(
   branchName: string,
   context: string,
@@ -590,9 +590,9 @@ export function getBranchStatusCheck(
     'returning null, because getBranchStatusCheck is not supported on aws yet',
   );
   return Promise.resolve(null);
-}
+} /* v8 ignore stop */
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function setBranchStatus({
   branchName,
   context,
@@ -601,7 +601,7 @@ export function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   return Promise.resolve();
-}
+} /* v8 ignore stop */
 
 export async function ensureComment({
   number,
