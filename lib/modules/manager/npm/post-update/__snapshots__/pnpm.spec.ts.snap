@@ -3,7 +3,7 @@
 exports[`modules/manager/npm/post-update/pnpm > catches errors 1`] = `
 [
   {
-    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -26,7 +26,7 @@ exports[`modules/manager/npm/post-update/pnpm > catches errors 1`] = `
 exports[`modules/manager/npm/post-update/pnpm > finds pnpm globally 1`] = `
 [
   {
-    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -49,7 +49,7 @@ exports[`modules/manager/npm/post-update/pnpm > finds pnpm globally 1`] = `
 exports[`modules/manager/npm/post-update/pnpm > generates lock files 1`] = `
 [
   {
-    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -72,7 +72,7 @@ exports[`modules/manager/npm/post-update/pnpm > generates lock files 1`] = `
 exports[`modules/manager/npm/post-update/pnpm > performs lock file maintenance 1`] = `
 [
   {
-    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -95,7 +95,7 @@ exports[`modules/manager/npm/post-update/pnpm > performs lock file maintenance 1
 exports[`modules/manager/npm/post-update/pnpm > uses the new version if packageManager is updated 1`] = `
 [
   {
-    "cmd": "pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile",
+    "cmd": "pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile",
     "options": {
       "cwd": "some-dir",
       "encoding": "utf-8",
