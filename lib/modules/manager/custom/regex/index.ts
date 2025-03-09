@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
+import { logger } from '../../../../logger';
 import type {
   ExtractConfig,
   MaybePromise,
@@ -9,7 +10,6 @@ import type {
 import { validMatchFields } from '../utils';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
 import type { RegexManagerConfig, RegexManagerTemplates } from './types';
-import { logger } from '../../../../logger';
 
 export const categories: Category[] = ['custom'];
 
