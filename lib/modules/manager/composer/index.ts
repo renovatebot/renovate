@@ -21,7 +21,7 @@ export const url = 'https://getcomposer.org/doc';
 export const categories: Category[] = ['php'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)([\\w-]*)composer\\.json$'],
+  filePatterns: ['/(^|/)([\\w-]*)composer\\.json$/'],
   versioning: composerVersioningId,
 };
 

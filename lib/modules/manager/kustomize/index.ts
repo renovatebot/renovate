@@ -9,7 +9,7 @@ export const url = 'https://kubectl.docs.kubernetes.io/references/kustomize';
 export const categories: Category[] = ['kubernetes'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)kustomization\\.ya?ml$'],
+  filePatterns: ['/(^|/)kustomization\\.ya?ml$/'],
   pinDigests: false,
 };
 
