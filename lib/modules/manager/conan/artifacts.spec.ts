@@ -1,5 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -11,11 +11,11 @@ import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as conan from '.';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/git');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
 const hostRules = mocked(_hostRules);

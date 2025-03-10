@@ -259,7 +259,7 @@ export class PypiDatasource extends Datasource {
     );
     const dependency: ReleaseResult = { releases: [] };
     const headers = await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.get(lookupUrl, { headers });
+    const response = await this.http.getText(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');

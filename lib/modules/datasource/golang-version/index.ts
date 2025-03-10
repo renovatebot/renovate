@@ -44,7 +44,7 @@ export class GolangVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -60,7 +60,7 @@ export class GolangVersionDatasource extends Datasource {
       '/HEAD/internal/history/release.go',
     );
 
-    const response = await this.http.get(golangVersionsUrl);
+    const response = await this.http.getText(golangVersionsUrl);
 
     const lines = response.body.split(lineTerminationRegex);
 

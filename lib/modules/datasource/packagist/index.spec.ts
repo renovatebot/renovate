@@ -17,7 +17,7 @@ const beytJson = Fixtures.getJson('1beyt.json');
 const mailchimpJson = Fixtures.getJson('mailchimp-api.json');
 const mailchimpDevJson = Fixtures.getJson('mailchimp-api~dev.json');
 
-const baseUrl = 'https://packagist.org';
+const baseUrl = 'https://repo.packagist.org';
 const datasource = PackagistDatasource.id;
 
 describe('modules/datasource/packagist/index', () => {
@@ -31,7 +31,7 @@ describe('modules/datasource/packagist/index', () => {
         versioning: composerVersioning.id,
         registryUrls: [
           'https://composer.renovatebot.com',
-          'https://packagist.org',
+          'https://repo.packagist.org',
         ],
       };
     });
@@ -81,7 +81,7 @@ describe('modules/datasource/packagist/index', () => {
       httpMock
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
-        .replyWithError({ code: 'ETIMEDOUT' });
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
       httpMock
         .scope(baseUrl)
         .get('/packages.json')
@@ -476,7 +476,7 @@ describe('modules/datasource/packagist/index', () => {
         .reply(200, mailchimpJson)
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
-      config.registryUrls = ['https://packagist.org'];
+      config.registryUrls = ['https://repo.packagist.org'];
       expect(
         await getPkgReleases({
           ...config,
