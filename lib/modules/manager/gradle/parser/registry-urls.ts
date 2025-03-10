@@ -1,4 +1,4 @@
-import type { parser } from 'good-enough-parser';
+import type { lexer, parser } from 'good-enough-parser';
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
@@ -14,11 +14,7 @@ import {
   storeInTokenMap,
   storeVarToken,
 } from './common';
-import {
-  handleCustomRegistryUrl,
-  handlePredefinedRegistryUrl,
-  handleRegistryContent,
-} from './handlers';
+import { handleRegistryContent, handleRegistryUrl } from './handlers';
 import { qPlugins } from './plugins';
 
 const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
@@ -96,7 +92,18 @@ const qUri = q
 // mavenCentral()
 // mavenCentral { ... }
 const qPredefinedRegistries = q
-  .sym(regEx(`^(?:${Object.keys(REGISTRY_URLS).join('|')})$`), storeVarToken)
+  .sym(
+    regEx(`^(?:${Object.keys(REGISTRY_URLS).join('|')})$`),
+    (ctx: Ctx, node: lexer.Token) => {
+      const nodeTransformed: lexer.Token = {
+        ...node,
+        type: 'string-value',
+        value: REGISTRY_URLS[node.value as keyof typeof REGISTRY_URLS],
+      };
+      storeVarToken(ctx, nodeTransformed);
+      return ctx;
+    },
+  )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'))
   .alt(
     q
@@ -114,7 +121,7 @@ const qPredefinedRegistries = q
       search: q.opt(qRegistryContent),
     }),
   )
-  .handler(handlePredefinedRegistryUrl)
+  .handler(handleRegistryUrl)
   .handler(cleanupTmpContentSpec)
   .handler(cleanupTempVars);
 
@@ -158,7 +165,7 @@ const qCustomRegistryUrl = q
       .opt(qMavenArtifactRegistry),
     qMavenArtifactRegistry,
   )
-  .handler(handleCustomRegistryUrl)
+  .handler(handleRegistryUrl)
   .handler(cleanupTmpContentSpec)
   .handler(cleanupTempVars);
 
