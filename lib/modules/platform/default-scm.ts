@@ -55,9 +55,4 @@ export class DefaultGitScm implements PlatformScm {
       return await git.syncForkWithUpstream(branchName);
     }
   }
-
-  async hasUpstream(): Promise<boolean> {
-    const remotes = await git.getRemotes();
-    return remotes.includes('upstream');
-  }
 }
