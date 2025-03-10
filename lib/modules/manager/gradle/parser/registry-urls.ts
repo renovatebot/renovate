@@ -9,6 +9,7 @@ import {
   cleanupTempVars,
   qArtifactId,
   qGroupId,
+  qUri,
   qValueMatcher,
   qVersion,
   storeInTokenMap,
@@ -83,15 +84,7 @@ const qRegistryContent = q.sym<Ctx>('content').tree({
 
 // uri("https://foo.bar/baz")
 // "https://foo.bar/baz"
-const qUri = q
-  .alt(
-    q.sym<Ctx>('uri').tree({
-      maxDepth: 1,
-      search: qValueMatcher,
-    }),
-    qValueMatcher,
-  )
-  .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
+const qRegistryUrl = qUri.handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
 
 // mavenCentral()
 // mavenCentral { ... }
@@ -130,12 +123,12 @@ const qMavenArtifactRegistry = q.tree({
       .opt(q.op('='))
       .join(qValueMatcher)
       .handler((ctx) => storeInTokenMap(ctx, 'name')),
-    q.sym<Ctx>('url').opt(q.op('=')).join(qUri),
+    q.sym<Ctx>('url').opt(q.op('=')).join(qRegistryUrl),
     q.sym<Ctx>('setUrl').tree({
       maxDepth: 1,
       startsWith: '(',
       endsWith: ')',
-      search: q.begin<Ctx>().join(qUri).end(),
+      search: q.begin<Ctx>().join(qRegistryUrl).end(),
     }),
     qRegistryContent,
   ),
@@ -153,7 +146,11 @@ const qCustomRegistryUrl = q
         maxDepth: 1,
         startsWith: '(',
         endsWith: ')',
-        search: q.begin<Ctx>().opt(q.sym<Ctx>('url').op('=')).join(qUri).end(),
+        search: q
+          .begin<Ctx>()
+          .opt(q.sym<Ctx>('url').op('='))
+          .join(qRegistryUrl)
+          .end(),
       })
       .opt(qMavenArtifactRegistry),
     qMavenArtifactRegistry,
