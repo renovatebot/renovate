@@ -1461,7 +1461,7 @@ export async function localBranchExists(branchName: string): Promise<boolean> {
  * Synchronize a forked branch with its upstream counterpart.
  *
  * syncForkWithUpstream updates the fork's branch, to match the corresponding branch in the upstream repository.
-* The steps are:
+ * The steps are:
  * 1. Check if the branch exists locally.
  * 2. If the branch exists locally: checkout the local branch.
  * 3. If the branch does _not_ exist locally: checkout the upstream branch.
