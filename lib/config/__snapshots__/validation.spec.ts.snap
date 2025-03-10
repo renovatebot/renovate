@@ -88,14 +88,14 @@ exports[`config/validation > validateConfig(config) > errors for all types 1`] =
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors for unsafe fileMatches 1`] = `
+exports[`config/validation > validateConfig(config) > errors for unsafe filePatterns 1`] = `
 [
   {
-    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
+    "message": "Failed to parse regex pattern for dockerfile.filePatterns: /x?+/",
     "topic": "Configuration Error",
   },
   {
-    "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Failed to parse regex pattern for npm.filePatterns: /abc ([a-z]+) ([a-z]+))/",
     "topic": "Configuration Error",
   },
 ]
@@ -110,19 +110,19 @@ exports[`config/validation > validateConfig(config) > errors if customManager fi
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 1`] = `
+exports[`config/validation > validateConfig(config) > errors if filePatterns has wrong parent 1`] = `
 [
   {
-    "message": ""fileMatch" may not be defined at the top level of a config and must instead be within a manager block",
+    "message": ""filePatterns" may not be defined at the top level of a config and must instead be within a manager block",
     "topic": "Config error",
   },
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 2`] = `
+exports[`config/validation > validateConfig(config) > errors if filePatterns has wrong parent 2`] = `
 [
   {
-    "message": ""fileMatch" must be configured in a manager block and not here: npm.minor",
+    "message": ""filePatterns" must be configured in a manager block and not here: npm.minor",
     "topic": "Config warning",
   },
 ]
@@ -239,10 +239,10 @@ exports[`config/validation > validateConfig(config) > selectors outside packageR
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > validates regEx for each fileMatch 1`] = `
+exports[`config/validation > validateConfig(config) > validates regEx for each filePatterns of format regex 1`] = `
 [
   {
-    "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
+    "message": "Failed to parse regex pattern for customManagers[0].filePatterns: /***$}{]][/",
     "topic": "Configuration Error",
   },
 ]

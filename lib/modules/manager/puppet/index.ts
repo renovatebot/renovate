@@ -9,7 +9,7 @@ export const url = 'https://www.puppet.com/docs/index.html';
 export const categories: Category[] = ['iac', 'ruby'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)Puppetfile$'],
+  filePatterns: ['/(^|/)Puppetfile$/'],
 };
 
 export const supportedDatasources = [

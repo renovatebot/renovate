@@ -11,7 +11,7 @@ export const url = 'https://bazel.build/external/module';
 export const categories: Category[] = ['bazel'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/|\\.)MODULE\\.bazel$'],
+  filePatterns: ['/(^|/|\\.)MODULE\\.bazel$/'],
 };
 
 export const supportedDatasources = [
