@@ -260,7 +260,7 @@ describe('modules/platform/scm-manager/utils', () => {
       ${'endpoint'}
       ${undefined}
     `(
-      'should provide the http link with username, for option $gitUrl',
+      'should provide the HTTP link with username, for option $gitUrl',
       ({ gitUrl }: { gitUrl: string | undefined }) => {
         expect(
           getRepoUrl(
