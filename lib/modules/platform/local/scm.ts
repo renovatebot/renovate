@@ -60,8 +60,8 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve();
   }
 
-  syncForkWithUpstream(baseBranch: string): Promise<LongCommitSha> {
-    throw new Error('Cannot sync fork in local mode');
+  syncForkWithUpstream(baseBranch: string): Promise<void> {
+    return Promise.resolve();
   }
 
   hasUpstream(): Promise<boolean> {
