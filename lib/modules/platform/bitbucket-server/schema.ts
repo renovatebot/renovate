@@ -5,6 +5,8 @@ export const UserSchema = z.object({
   emailAddress: z.string(),
 });
 
+export const Files = z.array(z.string());
+
 export const Comment = z.object({
   text: z.string(),
   id: z.number(),

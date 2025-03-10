@@ -109,4 +109,25 @@ describe('util/http/bitbucket-server', () => {
     });
     expect(res.body).toEqual([...valuesPageOne, ...valuesPageTwo]);
   });
+
+  it('pagination: fetch only one entry with limit 1 and maxPages 1', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url?foo=bar&limit=1')
+      .reply(200, {
+        values: [1],
+        size: 1,
+        isLastPage: false,
+        limit: 1,
+        start: 0,
+        nextPageStart: 1,
+      });
+
+    const res = await api.getJsonUnchecked('/some-url?foo=bar', {
+      paginate: true,
+      limit: 1,
+      maxPages: 1,
+    });
+    expect(res.body).toEqual([1]);
+  });
 });
