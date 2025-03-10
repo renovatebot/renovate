@@ -1,11 +1,15 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { coerceArray } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
-import { joinUrlParts } from '../../../util/url';
+import { Timestamp } from '../../../util/timestamp';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
+import * as prefixDev from './prefix-dev';
 import type { CondaPackage } from './types';
 
 export class CondaDatasource extends Datasource {
@@ -43,11 +47,26 @@ export class CondaDatasource extends Datasource {
       return null;
     }
 
+    // fast.prefix.dev is a alias, deprecated, but still running.
+    // We expect registryUrl to be `https://prefix.dev/${channel}` here.
+    if (
+      registryUrl.startsWith('https://prefix.dev/') ||
+      registryUrl.startsWith('https://fast.prefix.dev/')
+    ) {
+      // Since the registryUrl contains at least 3 `/` ,
+      // the channel varitable won't be undefined in any case.
+      const channel = ensureTrailingSlash(registryUrl).split('/').at(-2)!;
+
+      return await prefixDev.getReleases(this.http, channel, packageName);
+    }
+
     const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
       releases: [],
     };
+
+    const releaseDate: Record<string, Timestamp> = {};
 
     let response: { body: CondaPackage };
 
@@ -57,9 +76,23 @@ export class CondaDatasource extends Datasource {
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
 
+      for (const file of coerceArray(response.body.files)) {
+        const dt = Timestamp.parse(file.upload_time);
+        const currentDt = releaseDate[file.version];
+        if (is.nullOrUndefined(currentDt)) {
+          releaseDate[file.version] = dt;
+          continue;
+        }
+
+        if (currentDt.localeCompare(dt) < 0) {
+          releaseDate[file.version] = dt;
+        }
+      }
+
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
           version,
+          releaseTimestamp: releaseDate[version],
         };
         result.releases.push(thisRelease);
       });
