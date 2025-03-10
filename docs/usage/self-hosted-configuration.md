@@ -494,8 +494,8 @@ The purpose of this config option is to allow you (as a bot admin) to configure 
 
 This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
 
-Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
-If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
+Currently this config option is supported for the `npm` and `maven` managers only - specifically the `~/.npmrc` and `~/.m2/settings.xml` files.
+If found, it will be imported into `config.npmrc` and `config.mavenSettings` with `config.npmrcMerge` and `config.mavenSettingsMerge` set to `true`.
 
 ## detectHostRulesFromEnv
 

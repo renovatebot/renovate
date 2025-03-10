@@ -930,6 +930,20 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'mavenSettings',
+    description:
+      'String copy of `.m2/settings.xml` file. Use `\\n` instead of line breaks.',
+    stage: 'branch',
+    type: 'string',
+  },
+  {
+    name: 'mavenSettingsMerge',
+    description:
+      'Whether to merge `config.mavenSettings` with repo `settings.xml` content if both are found.',
+    stage: 'branch',
+    type: 'string',
+  },
+  {
     name: 'npmrc',
     description:
       'String copy of `.npmrc` file. Use `\\n` instead of line breaks.',

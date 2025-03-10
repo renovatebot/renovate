@@ -1,10 +1,9 @@
-import os from 'node:os';
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
-import { readLocalFile, readSystemFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -543,25 +542,16 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
-  const homedir = os.homedir();
-  const homeSettingsPath = upath.join(homedir, '.m2', 'settings.xml');
-  try {
-    const homeSettingsContent = await readSystemFile(homeSettingsPath, 'utf8');
-    if (homeSettingsContent) {
-      const homeRegistries = extractRegistries(homeSettingsContent);
-      if (homeRegistries) {
-        logger.debug(
-          { homeRegistries, homeSettingsPath },
-          'Found registryUrls in $HOME/.m2/settings.xml',
-        );
-        additionalRegistryUrls.push(...homeRegistries);
-      }
+
+  if (is.string(_config.mavenSettings)) {
+    const homeRegistries = extractRegistries(_config.mavenSettings);
+    if (homeRegistries) {
+      logger.debug(
+        { homeRegistries },
+        'Found registryUrls in $HOME/.m2/settings.xml',
+      );
+      additionalRegistryUrls.push(...homeRegistries);
     }
-  } catch (err) {
-    logger.debug(
-      { homeSettingsPath, err },
-      'No settings.xml found in $HOME/.m2 or error reading file',
-    );
   }
 
   for (const packageFile of packageFiles) {
@@ -571,13 +561,20 @@ export async function extractAllPackageFiles(
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {
-      const registries = extractRegistries(content);
-      if (registries) {
+      if (is.string(_config.mavenSettings) && !_config.mavenSettingsMerge) {
         logger.debug(
-          { registries, packageFile },
-          'Found registryUrls in settings.xml',
+          { packageFile },
+          'Repo settings.xml file is ignored due to config.mavenSettings with config.mavenSettingsMerge=false',
         );
-        additionalRegistryUrls.push(...registries);
+      } else {
+        const registries = extractRegistries(content);
+        if (registries) {
+          logger.debug(
+            { registries, packageFile },
+            'Found registryUrls in settings.xml',
+          );
+          additionalRegistryUrls.push(...registries);
+        }
       }
     } else if (packageFile.endsWith('.mvn/extensions.xml')) {
       const extensions = extractExtensions(content, packageFile);

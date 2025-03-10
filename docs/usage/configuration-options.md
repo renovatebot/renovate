@@ -2500,6 +2500,17 @@ When in `silent` mode Renovate will:
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
+## mavenSettings
+
+Add a single line `settings.xml` to add (`mavenSettingsMerge=true`) or override the existing settings.xml files in the repo (`mavenSettingsMerge=false`).
+The value must be a single-line xml `settings.xml` file.
+
+## mavenSettingsMerge
+
+This option exists to provide flexibility about whether `mavenSettings` strings in config should override `settings.xml` files in the repo, or be merged with them.
+In some situations you need the ability to force override `settings.xml` contents in a repo (`mavenSettingsMerge=false`) while in others you might want to simply supplement the settings already in the `settings.xml` (`mavenSettingsMerge=true`).
+A use case for the latter is if you are a Renovate bot admin and wish to provide a default config for ci mirrors that aren't available to developers without removing any other `settings.xml` settings which individual repositories have configured.
+
 ## npmToken
 
 See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.

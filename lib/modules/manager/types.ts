@@ -25,6 +25,8 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
+  mavenSettings?: string;
+  mavenSettingsMerge?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
@@ -252,6 +254,8 @@ export interface UpdateLockedResult {
 }
 
 export interface GlobalManagerConfig {
+  mavenSettings?: string;
+  mavenSettingsMerge?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
 }
