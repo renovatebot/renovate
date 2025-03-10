@@ -2,6 +2,7 @@ import type { Category } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as mavenVersioning from '../../versioning/maven';
 
+export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';
 export { bumpPackageVersion, updateDependency } from './update';
 

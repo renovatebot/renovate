@@ -543,6 +543,17 @@ export async function extractAllPackageFiles(
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
 
+  if (is.string(_config.mavenSettings)) {
+    const homeRegistries = extractRegistries(_config.mavenSettings);
+    if (homeRegistries) {
+      logger.debug(
+        { homeRegistries },
+        'Found registryUrls in $HOME/.m2/settings.xml',
+      );
+      additionalRegistryUrls.push(...homeRegistries);
+    }
+  }
+
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
@@ -550,13 +561,20 @@ export async function extractAllPackageFiles(
       continue;
     }
     if (packageFile.endsWith('settings.xml')) {
-      const registries = extractRegistries(content);
-      if (registries) {
+      if (is.string(_config.mavenSettings) && !_config.mavenSettingsMerge) {
         logger.debug(
-          { registries, packageFile },
-          'Found registryUrls in settings.xml',
+          { packageFile },
+          'Repo settings.xml file is ignored due to config.mavenSettings with config.mavenSettingsMerge=false',
         );
-        additionalRegistryUrls.push(...registries);
+      } else {
+        const registries = extractRegistries(content);
+        if (registries) {
+          logger.debug(
+            { registries, packageFile },
+            'Found registryUrls in settings.xml',
+          );
+          additionalRegistryUrls.push(...registries);
+        }
       }
     } else if (packageFile.endsWith('.mvn/extensions.xml')) {
       const extensions = extractExtensions(content, packageFile);

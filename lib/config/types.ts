@@ -70,6 +70,8 @@ export interface RenovateSharedConfig {
   labels?: string[];
   manager?: string;
   milestone?: number;
+  mavenSettings?: string;
+  mavenSettingsMerge?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   platformCommit?: PlatformCommitOptions;
