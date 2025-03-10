@@ -13,7 +13,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function conanLockUpdate(
   conanFilePath: string,
-  isLockFileMaintenance: boolean,
+  isLockFileMaintenance: boolean | undefined,
 ): Promise<void> {
   const command =
     `conan lock create ${quote(conanFilePath)}` +
@@ -35,9 +35,7 @@ export async function updateArtifacts(
 
   logger.trace(`conan.updateArtifacts(${packageFileName})`);
 
-  const isLockFileMaintenance =
-    config.updateType === 'lockFileMaintenance' ||
-    config.isLockFileMaintenance === true;
+  const { isLockFileMaintenance } = config;
 
   if (updatedDeps.length === 0 && !isLockFileMaintenance) {
     logger.trace('No conan.lock dependencies to update');
@@ -55,28 +53,28 @@ export async function updateArtifacts(
 
   const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
-    logger.debug(lockFileName + ' read operation failed');
+    logger.debug(`${lockFileName} read operation failed`);
     return null;
   }
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    logger.trace('Updating ' + lockFileName);
+    logger.trace(`Updating ${lockFileName}`);
     await conanLockUpdate(packageFileName, isLockFileMaintenance);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (!newLockFileContent) {
-      logger.debug('New ' + lockFileName + ' read operation failed');
+      logger.debug(`New ${lockFileName} read operation failed`);
       return null;
     }
 
     if (existingLockFileContent === newLockFileContent) {
-      logger.trace(lockFileName + ' is unchanged');
+      logger.trace(`${lockFileName} is unchanged`);
       return null;
     }
 
-    logger.trace('Returning updated' + lockFileName);
+    logger.trace(`Returning updated ${lockFileName}`);
     return [
       {
         file: {
@@ -91,7 +89,10 @@ export async function updateArtifacts(
       throw err;
     }
 
-    logger.debug({ err }, 'Failed to update ' + lockFileName);
+    logger.debug(
+      { err, packageFileName, lockFileName },
+      'Lockfile update failed',
+    );
 
     return [
       {

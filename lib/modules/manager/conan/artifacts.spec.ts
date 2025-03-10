@@ -233,38 +233,6 @@ describe('modules/manager/conan/artifacts', () => {
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
   });
 
-  it('returns updated conan.lock when updateType are empty, but updateType is lockFileMaintenance', async () => {
-    const expectedInSnapshot = [
-      {
-        cmd: 'conan lock create conanfile.py --lockfile=""',
-      },
-    ];
-
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
-    fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('Updated conan.lock');
-
-    expect(
-      await conan.updateArtifacts({
-        packageFileName: 'conanfile.py',
-        updatedDeps: [],
-        newPackageFileContent: '',
-        config: { ...config, updateType: 'lockFileMaintenance' },
-      }),
-    ).toEqual([
-      {
-        file: {
-          contents: 'Updated conan.lock',
-          path: 'conan.lock',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject(expectedInSnapshot);
-  });
-
   it('returns updated conan.lock when updateType are empty, but isLockFileMaintenance is true', async () => {
     const expectedInSnapshot = [
       {
