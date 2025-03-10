@@ -100,6 +100,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -125,6 +126,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -151,6 +153,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: '@renovate/no',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -177,6 +180,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -264,6 +268,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -297,6 +302,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -350,6 +356,7 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           type: 'github',
           repository: 'chalk/chalk',
           sourceUrl: 'https://github.com/chalk/chalk',
