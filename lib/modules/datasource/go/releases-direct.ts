@@ -139,8 +139,10 @@ export class GoDirectDatasource extends Datasource {
 
     const sourceUrl = getSourceUrl(source) ?? null;
 
-    res.releases = filterByPrefix(packageName, res.releases);
-
-    return { ...res, sourceUrl };
+    return {
+      ...res,
+      releases: filterByPrefix(packageName, res.releases),
+      sourceUrl,
+    };
   }
 }
