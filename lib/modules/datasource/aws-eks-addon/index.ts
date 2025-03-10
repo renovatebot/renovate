@@ -1,5 +1,4 @@
 import {
-  type AddonInfo,
   type Compatibility,
   DescribeAddonVersionsCommand,
   EKSClient,
@@ -43,7 +42,7 @@ export class AwsEKSAddonDataSource extends Datasource {
 
     const cmd = new DescribeAddonVersionsCommand({
       kubernetesVersion: filter?.kubernetesVersion,
-      addonName: filter?.addonName,
+      addonName: filter.addonName,
       maxResults: 1,
     });
     const response = await this.getClient(filter).send(cmd);
@@ -53,14 +52,13 @@ export class AwsEKSAddonDataSource extends Datasource {
         .flatMap((addon) => {
           return addon.addonVersions;
         })
-        .filter(is.nonEmptyObject)
         .map((versionInfo) => ({
-          version: versionInfo.addonVersion ?? '',
+          version: versionInfo?.addonVersion ?? '',
           default:
-            versionInfo.compatibilities?.some(
+            versionInfo?.compatibilities?.some(
               (comp: Compatibility): boolean | undefined => comp.defaultVersion,
             ) ?? false,
-          compatibleWith: versionInfo.compatibilities?.flatMap(
+          compatibleWith: versionInfo?.compatibilities?.flatMap(
             (comp: Compatibility): string | undefined => comp.clusterVersion,
           ),
         }))
