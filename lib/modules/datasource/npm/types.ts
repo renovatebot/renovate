@@ -1,6 +1,5 @@
 import type { PackageRule } from '../../../config/types';
 import type { HostRule } from '../../../types';
-import type { ReleaseResult } from '../types';
 
 export interface NpmrcRules {
   hostRules: HostRule[];
@@ -31,14 +30,6 @@ export interface NpmResponse {
   homepage?: string;
   time?: Record<string, string>;
   'dist-tags'?: Record<string, string>;
-}
-
-export interface CachedReleaseResult extends ReleaseResult {
-  cacheData?: {
-    revision?: number;
-    etag: string | undefined;
-    softExpireAt: string;
-  };
 }
 
 export type Npmrc = Record<string, any>;
