@@ -301,6 +301,16 @@ export const qValueMatcher = qConcatExpr(
   qVariableAccessIdentifier,
 );
 
+// uri("https://foo.bar/baz")
+// "https://foo.bar/baz"
+export const qUri = q.alt(
+  q.sym<Ctx>('uri').tree({
+    maxDepth: 1,
+    search: qValueMatcher,
+  }),
+  qValueMatcher,
+);
+
 // import foo.bar
 // runtimeOnly("some:foo:${bar.bazVersion}")
 export const qKotlinImport = q
