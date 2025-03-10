@@ -63,8 +63,4 @@ export class LocalFs implements PlatformScm {
   syncForkWithUpstream(baseBranch: string): Promise<void> {
     return Promise.resolve();
   }
-
-  hasUpstream(): Promise<boolean> {
-    return Promise.resolve(false);
-  }
 }
