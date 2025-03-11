@@ -1,4 +1,3 @@
-import type { parser } from 'good-enough-parser';
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
@@ -7,80 +6,20 @@ import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
-  qArtifactId,
-  qGroupId,
   qUri,
   qValueMatcher,
-  qVersion,
   storeInTokenMap,
   storeVarToken,
 } from './common';
 import {
   handleCustomRegistryUrl,
   handlePredefinedRegistryUrl,
-  handleRegistryContent,
 } from './handlers';
 import { qPlugins } from './plugins';
-
-const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
-  ctx.tmpRegistryContent = [];
-  return ctx;
-};
-
-const qContentDescriptorSpec = (
-  methodName: RegExp,
-  matcher: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> => {
-  return q
-    .sym<Ctx>(methodName, storeVarToken)
-    .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
-    .alt(
-      // includeGroup "foo.bar"
-      matcher,
-      // includeGroup("foo.bar")
-      q.tree({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '(',
-        endsWith: ')',
-        search: q.begin<Ctx>().join(matcher).end(),
-      }),
-    );
-};
-
-// includeModule('foo')
-// excludeModuleByRegex('bar')
-const qContentDescriptor = (
-  mode: 'include' | 'exclude',
-): q.QueryBuilder<Ctx, parser.Node> => {
-  return q
-    .alt<Ctx>(
-      qContentDescriptorSpec(
-        regEx(
-          `^(?:${mode}Group|${mode}GroupByRegex|${mode}GroupAndSubgroups)$`,
-        ),
-        qGroupId,
-      ),
-      qContentDescriptorSpec(
-        regEx(`^(?:${mode}Module|${mode}ModuleByRegex)$`),
-        q.join(qGroupId, q.op(','), qArtifactId),
-      ),
-      qContentDescriptorSpec(
-        regEx(`^(?:${mode}Version|${mode}VersionByRegex)$`),
-        q.join(qGroupId, q.op(','), qArtifactId, q.op(','), qVersion),
-      ),
-    )
-    .handler(handleRegistryContent);
-};
-
-// content { includeModule('foo'); excludeModule('bar') }
-const qRegistryContent = q.sym<Ctx>('content').tree({
-  type: 'wrapped-tree',
-  maxDepth: 1,
-  startsWith: '{',
-  endsWith: '}',
-  search: q.alt(qContentDescriptor('include'), qContentDescriptor('exclude')),
-});
+import {
+  cleanupTmpRegistryContent,
+  qRegistryContent,
+} from './registry/content';
 
 // uri("https://foo.bar/baz")
 // "https://foo.bar/baz"
@@ -108,7 +47,7 @@ const qPredefinedRegistries = q
     }),
   )
   .handler(handlePredefinedRegistryUrl)
-  .handler(cleanupTmpContentSpec)
+  .handler(cleanupTmpRegistryContent)
   .handler(cleanupTempVars);
 
 // { url = "https://some.repo"; content { ... } }
@@ -156,7 +95,7 @@ const qCustomRegistryUrl = q
     qMavenArtifactRegistry,
   )
   .handler(handleCustomRegistryUrl)
-  .handler(cleanupTmpContentSpec)
+  .handler(cleanupTmpRegistryContent)
   .handler(cleanupTempVars);
 
 const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
