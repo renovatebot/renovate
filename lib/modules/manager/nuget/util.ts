@@ -197,6 +197,7 @@ export function applyRegistries(
  * Sorts patterns by specificity:
  * 1. Exact match patterns
  * 2. Wildcard match patterns
+ * The longest pattern has precedence.
  */
 function sortPatterns(
   a: [string, Registry[]],
@@ -210,7 +211,14 @@ function sortPatterns(
     return -1;
   }
 
-  return a[0].localeCompare(b[0]) * -1;
+  const aPathLength = (a[0].match(/\./g) ?? []).length;
+  const bPathLength = (b[0].match(/\./g) ?? []).length;
+
+  if (aPathLength === bPathLength) {
+    return a[0].localeCompare(b[0]) * -1;
+  }
+
+  return aPathLength < bPathLength ? 1 : -1;
 }
 
 export async function findGlobalJson(
