@@ -11,7 +11,7 @@ export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://nix.dev';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)flake\\.(nix|lock)$'],
+  fileMatch: ['(^|/)flake\\.nix$'],
   commitMessageTopic: 'nix',
   commitMessageExtra: 'to {{newValue}}',
   enabled: false,
