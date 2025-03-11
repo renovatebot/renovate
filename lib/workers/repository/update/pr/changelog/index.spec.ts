@@ -122,6 +122,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -157,6 +158,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -216,6 +218,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -304,6 +307,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
