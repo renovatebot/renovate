@@ -406,7 +406,7 @@ describe('modules/versioning/debian/index', () => {
     ${'12'}           | ${'oldoldstable'} | ${2}
     ${'11'}           | ${'oldstable'}    | ${0}
     ${'10'}           | ${'stable'}       | ${-2}
-  `('debian.sortVersions($a, $b) === $expected ', ({ a, b, expected }) => {
+  `('debian.sortVersions($a, $b) === $expected', ({ a, b, expected }) => {
     expect(debian.sortVersions(a, b)).toEqual(expected);
   });
 

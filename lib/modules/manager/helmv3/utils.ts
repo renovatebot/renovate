@@ -50,7 +50,9 @@ export function resolveAlias(
     return repository;
   }
 
-  const repoWithPrefixRemoved = repository.slice(repository[0] === '@' ? 1 : 6);
+  const repoWithPrefixRemoved = repository.slice(
+    repository.startsWith('@') ? 1 : 6,
+  );
   const alias = registryAliases[repoWithPrefixRemoved];
   if (alias) {
     return alias;
@@ -89,12 +91,14 @@ export function isAlias(repository: string): boolean {
 export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
-  return Object.entries(registryAliases).map(([alias, url]) => {
-    return {
-      name: alias,
-      repository: url,
-    };
-  });
+  return Object.entries(registryAliases)
+    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .map(([alias, url]) => {
+      return {
+        name: alias,
+        repository: url,
+      };
+    });
 }
 
 export function isFileInDir(dir: string, file: string): boolean {

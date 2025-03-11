@@ -44,31 +44,31 @@ Use these commands to help run your tests:
 - To run a single test folder, specify the path
 
   ```bash
-  pnpm jest platform/gitlab
+  pnpm vitest platform/gitlab
   ```
 
 - To run against a single test file, specify down to the filename (suffix is not necessary)
 
   ```bash
-  pnpm jest platform/gitlab/index
+  pnpm vitest platform/gitlab/index
   ```
 
 - To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
 
   ```bash
-  pnpm jest platform/gitlab/index -t "getJsonFile"
+  pnpm vitest platform/gitlab/index -t "getJsonFile"
   ```
 
 - To run a single test, the `-t` value must be part of the `it` value of the test batch
 
   ```bash
-  pnpm jest platform/gitlab/index -t "returns file content from given repo"
+  pnpm vitest platform/gitlab/index -t "returns file content from given repo"
   ```
 
 And some options:
 
 - `--verbose=false` to avoid the test list
-- `--collectCoverage=false` to avoid collecting coverage, faster for the part you need the test to pass
+- `--coverage=false` to avoid collecting coverage, faster for the part you need the test to pass
 
 ## Do not force push to your pull request branch
 

@@ -7,7 +7,7 @@ import { Http } from '../../../util/http';
 import { CACHE_REVISION, getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 
 const packageCache = mocked(_packageCache);
 
@@ -362,6 +362,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
@@ -509,6 +510,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
@@ -550,6 +552,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },

@@ -166,7 +166,7 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    // istanbul ignore if
+    /* v8 ignore next 7 -- TODO: add test */
     if (key === '__proto__') {
       errors.push({
         topic: 'Config security error',
@@ -677,7 +677,7 @@ export async function validateConfig(
                   });
                 }
                 if (
-                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                  !(is.string(statusCheckValue) || null === statusCheckValue)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -818,11 +818,9 @@ export async function validateConfig(
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
-    // istanbul ignore else: currently never happen
     if (a.topic === b.topic) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next: currently never happen
     return a.topic > b.topic ? 1 : -1;
   }
 
@@ -843,7 +841,7 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
-  // istanbul ignore if
+  /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
     warnings.push({
       topic: 'Deprecation Warning',

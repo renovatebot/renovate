@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/helmv3/artifacts alias name is picked, when repository is as alias and dependency defined 1`] = `
+exports[`modules/manager/helmv3/artifacts > alias name is picked, when repository is as alias and dependency defined 1`] = `
 [
   {
     "cmd": "helm repo add repo1 https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret",
@@ -49,7 +49,7 @@ exports[`modules/manager/helmv3/artifacts alias name is picked, when repository 
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 1`] = `
+exports[`modules/manager/helmv3/artifacts > do not add registryAliases to repository list 1`] = `
 [
   {
     "cmd": "helm repo add jetstack https://charts.jetstack.io --force-update",
@@ -120,7 +120,7 @@ exports[`modules/manager/helmv3/artifacts do not add registryAliases to reposito
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories NOT defined in registryAliases 1`] = `
+exports[`modules/manager/helmv3/artifacts > log into private registries and repositories NOT defined in registryAliases 1`] = `
 [
   {
     "cmd": "helm registry login --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
@@ -191,7 +191,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts log into private registries and repositories already defined in registryAliases 1`] = `
+exports[`modules/manager/helmv3/artifacts > log into private registries and repositories already defined in registryAliases 1`] = `
 [
   {
     "cmd": "helm registry login --username test --password aPassword registry.example.com/organization",
@@ -216,7 +216,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
     },
   },
   {
-    "cmd": "helm repo add stable the_stable_url --force-update",
+    "cmd": "helm repo add stable http://the_stable_url --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -306,7 +306,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts returns null if unchanged 1`] = `
+exports[`modules/manager/helmv3/artifacts > returns null if unchanged 1`] = `
 [
   {
     "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
@@ -355,7 +355,7 @@ exports[`modules/manager/helmv3/artifacts returns null if unchanged 1`] = `
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 1`] = `
+exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock 1`] = `
 [
   {
     "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
@@ -404,7 +404,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 1`] = `
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 1`] = `
+exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock for lockfile maintenance 1`] = `
 [
   {
     "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
@@ -453,7 +453,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock for lockfil
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker 1`] = `
+exports[`modules/manager/helmv3/artifacts > returns updated Chart.lock with docker 1`] = `
 [
   {
     "cmd": "docker pull ghcr.io/containerbase/sidecar",
@@ -493,10 +493,10 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 1`] = `
+exports[`modules/manager/helmv3/artifacts > sets repositories from registryAliases ignoring not well formed URI 1`] = `
 [
   {
-    "cmd": "helm repo add stable 'the stable_url' --force-update",
+    "cmd": "helm repo add stable http://the_stable_url --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -518,7 +518,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "helm repo add repo1 the_repo1_url --force-update",
+    "cmd": "helm repo add repo1 https://the_repo1_url --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -586,7 +586,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
 ]
 `;
 
-exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases with docker 1`] = `
+exports[`modules/manager/helmv3/artifacts > sets repositories from registryAliases with docker 1`] = `
 [
   {
     "cmd": "docker pull ghcr.io/containerbase/sidecar",
@@ -601,7 +601,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable the_stable_url --force-update && helm repo add repo1 the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update ''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable http://the_stable_url --force-update && helm repo add repo1 https://the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update ''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

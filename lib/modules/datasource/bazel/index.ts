@@ -52,7 +52,7 @@ export class BazelDatasource extends Datasource {
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => {
           const release: Release = { version: bv.original };
-          if (is.truthy(metadata.yanked_versions[bv.original])) {
+          if (is.truthy(metadata.yanked_versions?.[bv.original])) {
             release.isDeprecated = true;
           }
           return release;
@@ -61,7 +61,6 @@ export class BazelDatasource extends Datasource {
         result.homepage = metadata.homepage;
       }
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           return null;

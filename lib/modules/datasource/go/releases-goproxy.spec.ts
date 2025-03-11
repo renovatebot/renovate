@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -9,20 +9,17 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
 
 const hostRules = mocked(_hostRules);
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const datasource = new GoProxyDatasource();
 
 describe('modules/datasource/go/releases-goproxy', () => {
-  const githubGetReleases = jest.spyOn(
+  const githubGetReleases = vi.spyOn(
     GithubReleasesDatasource.prototype,
     'getReleases',
   );
 
-  const githubGetTags = jest.spyOn(
-    GithubTagsDatasource.prototype,
-    'getReleases',
-  );
+  const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
@@ -205,13 +202,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it.each<{ abortOnError: boolean }>`
+    it.each`
       abortOnError
       ${true}
       ${false}
     `(
       'handles pipe fallback when abortOnError is $abortOnError',
-      async ({ abortOnError }) => {
+      async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = `https://example.com|${baseUrl}`;
         hostRules.find.mockReturnValue({ abortOnError });
 
@@ -424,13 +421,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it.each<{ abortOnError: boolean }>`
+    it.each`
       abortOnError
       ${true}
       ${false}
     `(
       'handles major releases with abortOnError is $abortOnError',
-      async ({ abortOnError }) => {
+      async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = baseUrl;
         hostRules.find.mockReturnValue({ abortOnError });
 

@@ -181,7 +181,7 @@ class GerritClient {
     branch: string,
     fileName: string,
   ): Promise<string> {
-    const base64Content = await this.gerritHttp.get(
+    const base64Content = await this.gerritHttp.getText(
       `a/projects/${encodeURIComponent(
         repo,
       )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,

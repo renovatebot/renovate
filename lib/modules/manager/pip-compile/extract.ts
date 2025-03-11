@@ -168,7 +168,7 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) => lockedDep.packageName! === dep.packageName!,
+            (lockedDep) => lockedDep.packageName === dep.packageName,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -248,7 +248,7 @@ function extendWithIndirectDeps(
   for (const lockedDep of lockedDeps) {
     if (
       !packageFileContent.deps.find(
-        (dep) => lockedDep.packageName! === dep.packageName!,
+        (dep) => lockedDep.packageName === dep.packageName,
       )
     ) {
       packageFileContent.deps.push(indirectDep(lockedDep));

@@ -14,12 +14,9 @@ const config: PostUpdateConfig = {
 
 const hostRules = mocked(_hostRules);
 
-jest.mock('../../../../../util/git');
-jest.mock('../../../../../util/fs');
-
-hostRules.find = jest.fn((_) => ({
-  token: 'abc',
-}));
+vi.mock('../../../../../util/git');
+vi.mock('../../../../../util/fs');
+vi.mock('../../../../../util/host-rules');
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
@@ -29,6 +26,9 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
+      hostRules.find.mockImplementation((_) => ({
+        token: 'abc',
+      }));
     });
 
     it('returns if no updated packageFiles', async () => {
@@ -79,16 +79,16 @@ describe('workers/repository/update/branch/lock-files/index', () => {
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');
-      jest.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(lockFiles, 'determineLockFileDirs');
+      vi.spyOn(lockFiles, 'determineLockFileDirs');
     });
 
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {

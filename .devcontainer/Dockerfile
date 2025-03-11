@@ -1,5 +1,5 @@
-FROM ghcr.io/containerbase/devcontainer:13.7.7
+FROM ghcr.io/containerbase/devcontainer:13.8.5
 
 # https://github.com/pnpm/pnpm/issues/8971
 # renovate: datasource=npm
-RUN install-tool pnpm 9.15.4
+RUN install-tool pnpm 10.5.2

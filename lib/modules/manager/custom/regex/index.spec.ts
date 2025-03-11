@@ -513,7 +513,7 @@ describe('modules/manager/custom/regex/index', () => {
     expect(res?.deps).toHaveLength(2);
   });
 
-  it('extracts with recursive strategy and multiple layers ', async () => {
+  it('extracts with recursive strategy and multiple layers', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
         '"backup":\\s*{[^}]*}',

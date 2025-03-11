@@ -187,7 +187,7 @@ export class DebDatasource extends Datasource {
    */
   private async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
     const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
-    const response = await this.http.get(inReleaseUrl);
+    const response = await this.http.getText(inReleaseUrl);
     return response.body;
   }
 
@@ -307,7 +307,7 @@ export class DebDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

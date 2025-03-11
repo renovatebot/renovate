@@ -87,7 +87,7 @@ describe('modules/manager/gradle/parser/common', () => {
   });
 
   it('cleanupTempVars', () => {
-    ctx.tokenMap['some'] = [token];
+    ctx.tokenMap.some = [token];
     ctx.varTokens.push(token);
 
     cleanupTempVars(ctx);
@@ -140,7 +140,7 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['test.foo']);
 
     ctx.tmpNestingDepth = [];
-    expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['foo']);
+    expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars.foo);
 
     ctx.tmpKotlinImportStore = [[token, token]];
     expect(findVariable('test.foo3', ctx)).toStrictEqual(

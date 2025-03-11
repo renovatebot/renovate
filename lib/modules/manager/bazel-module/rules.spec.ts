@@ -1,8 +1,9 @@
+import { codeBlock } from 'common-tags';
 import deepmerge from 'deepmerge';
 import { BazelDatasource } from '../../datasource/bazel';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency } from '../types';
-import * as fragments from './fragments';
+import { parse } from './parser';
 import type {
   BasePackageDep,
   BazelModulePackageDep,
@@ -96,48 +97,50 @@ const gitRepositoryForUnsupportedPkgDep: BasePackageDep = {
 
 describe('modules/manager/bazel-module/rules', () => {
   describe('RuleToBazelModulePackageDep', () => {
-    const bazelDepWithoutDevDep = fragments.record({
-      rule: fragments.string('bazel_dep'),
-      name: fragments.string('rules_foo'),
-      version: fragments.string('1.2.3'),
-    });
-    const bazelDepWithoutDevDepNoVersion = fragments.record({
-      rule: fragments.string('bazel_dep'),
-      name: fragments.string('rules_foo'),
-    });
-    const gitOverrideWithGihubHost = fragments.record({
-      rule: fragments.string('git_override'),
-      module_name: fragments.string('rules_foo'),
-      remote: fragments.string('https://github.com/example/rules_foo.git'),
-      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
-    });
-    const gitOverrideWithUnsupportedHost = fragments.record({
-      rule: fragments.string('git_override'),
-      module_name: fragments.string('rules_foo'),
-      remote: fragments.string('https://nobuenos.com/example/rules_foo.git'),
-      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
-    });
-    const archiveOverride = fragments.record({
-      rule: fragments.string('archive_override'),
-      module_name: fragments.string('rules_foo'),
-      urls: fragments.string('https://example.com/rules_foo.tar.gz'),
-    });
-    const localPathOverride = fragments.record({
-      rule: fragments.string('local_path_override'),
-      module_name: fragments.string('rules_foo'),
-      path: fragments.string('/path/to/module'),
-    });
-    const singleVersionOverride = fragments.record({
-      rule: fragments.string('single_version_override'),
-      module_name: fragments.string('rules_foo'),
-      version: fragments.string('1.2.3'),
-      registry: fragments.string(customRegistryUrl),
-    });
-    const singleVersionOverrideWithRegistry = fragments.record({
-      rule: fragments.string('single_version_override'),
-      module_name: fragments.string('rules_foo'),
-      registry: fragments.string(customRegistryUrl),
-    });
+    const bazelDepWithoutDevDep = codeBlock`
+      bazel_dep(name = "rules_foo", version = "1.2.3")`;
+
+    const bazelDepWithoutDevDepNoVersion = codeBlock`
+      bazel_dep(name = "rules_foo")`;
+
+    const gitOverrideWithGihubHost = codeBlock`
+      git_override(
+        module_name = "rules_foo",
+        remote = "https://github.com/example/rules_foo.git",
+        commit = "850cb49c8649e463b80ef7984e7c744279746170",
+      )`;
+
+    const gitOverrideWithUnsupportedHost = codeBlock`
+      git_override(
+        module_name = "rules_foo",
+        remote = "https://nobuenos.com/example/rules_foo.git",
+        commit = "850cb49c8649e463b80ef7984e7c744279746170",
+      )`;
+
+    const archiveOverride = codeBlock`
+      archive_override(
+        module_name = "rules_foo",
+        urls = "https://example.com/rules_foo.tar.gz",
+      )`;
+
+    const localPathOverride = codeBlock`
+      local_path_override(
+        module_name = "rules_foo",
+        path = "/path/to/module",
+      )`;
+
+    const singleVersionOverride = codeBlock`
+      single_version_override(
+        module_name = "rules_foo",
+        version = "1.2.3",
+        registry = "${customRegistryUrl}",
+      )`;
+
+    const singleVersionOverrideWithRegistry = codeBlock`
+      single_version_override(
+        module_name = "rules_foo",
+        registry = "${customRegistryUrl}",
+      )`;
 
     it.each`
       msg                                                    | a                                    | exp
@@ -150,31 +153,32 @@ describe('modules/manager/bazel-module/rules', () => {
       ${'single_version_override with version and registry'} | ${singleVersionOverride}             | ${singleVersionOverridePkgDep}
       ${'single_version_override with registry'}             | ${singleVersionOverrideWithRegistry} | ${singleVersionOverrideWithRegistryPkgDep}
     `('.parse() with $msg', ({ a, exp }) => {
-      const pkgDep = RuleToBazelModulePackageDep.parse(a);
+      const pkgDep = RuleToBazelModulePackageDep.parse(parse(a)[0]);
       expect(pkgDep).toEqual(exp);
     });
   });
 
   describe('GitRepositoryToPackageDep', () => {
-    const gitRepositoryWithGihubHost = fragments.record({
-      rule: fragments.string('git_repository'),
-      name: fragments.string('rules_foo'),
-      remote: fragments.string('https://github.com/example/rules_foo.git'),
-      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
-    });
-    const gitRepositoryWithUnsupportedHost = fragments.record({
-      rule: fragments.string('git_repository'),
-      name: fragments.string('rules_foo'),
-      remote: fragments.string('https://nobuenos.com/example/rules_foo.git'),
-      commit: fragments.string('850cb49c8649e463b80ef7984e7c744279746170'),
-    });
+    const gitRepositoryWithGihubHost = codeBlock`
+      git_repository(
+        name = "rules_foo",
+        remote = "https://github.com/example/rules_foo.git",
+        commit = "850cb49c8649e463b80ef7984e7c744279746170",
+      )`;
+
+    const gitRepositoryWithUnsupportedHost = codeBlock`
+      git_repository(
+        name = "rules_foo",
+        remote = "https://nobuenos.com/example/rules_foo.git",
+        commit = "850cb49c8649e463b80ef7984e7c744279746170",
+      )`;
 
     it.each`
       msg                                   | a                                   | exp
       ${'git_repository, GitHub host'}      | ${gitRepositoryWithGihubHost}       | ${gitRepositoryForGithubPkgDep}
       ${'git_repository, unsupported host'} | ${gitRepositoryWithUnsupportedHost} | ${gitRepositoryForUnsupportedPkgDep}
     `('.parse() with $msg', ({ a, exp }) => {
-      const pkgDep = GitRepositoryToPackageDep.parse(a);
+      const pkgDep = GitRepositoryToPackageDep.parse(parse(a)[0]);
       expect(pkgDep).toEqual(exp);
     });
   });
