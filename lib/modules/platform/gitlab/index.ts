@@ -5,7 +5,6 @@ import pMap from 'p-map';
 import semver from 'semver';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
-  PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -62,6 +61,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
+import { GitlabPrCache } from './pr-cache';
 import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
@@ -84,6 +84,7 @@ let config: {
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  author: string | null;
 } = {} as any;
 
 export function resetPlatform(): void {
@@ -136,6 +137,7 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
+      config.author = user.name;
     }
     // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
@@ -548,36 +550,14 @@ export async function getBranchStatus(
 
 // Pull Request
 
-async function fetchPrList(): Promise<Pr[]> {
-  const searchParams = {
-    per_page: '100',
-  } as any;
-  // istanbul ignore if
-  if (!config.ignorePrAuthor) {
-    searchParams.scope = 'created_by_me';
-  }
-  const query = getQueryString(searchParams);
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
-      urlString,
-      {
-        paginate: true,
-      },
-    );
-    return res.body.map((pr) => prInfo(pr));
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  }
-}
-
 export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
-    config.prList = await fetchPrList();
+    config.prList = await GitlabPrCache.getPrs(
+      gitlabApi,
+      config.repository,
+      config.author,
+      !!config.ignorePrAuthor,
+    );
   }
   return config.prList;
 }
@@ -773,6 +753,13 @@ export async function createPr({
   if (config.prList) {
     config.prList.push(pr);
   }
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    config.author,
+    pr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
     await approvePr(pr.number);
@@ -837,6 +824,13 @@ export async function updatePr({
 
   const updatedPr = prInfo(updatedPrInfo);
 
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    config.author,
+    updatedPr,
+    !!config.ignorePrAuthor,
+  );
   if (config.prList) {
     const existingIndex = config.prList.findIndex(
       (pr) => pr.number === updatedPr.number,
