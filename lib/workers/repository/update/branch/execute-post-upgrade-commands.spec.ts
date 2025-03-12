@@ -167,5 +167,53 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'Post-upgrade file did not match any file filters',
       );
     });
+
+    it('handles previously-deleted files which are re-added', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'unchanged.txt', contents: 'changed' },
+          { type: 'deletion', path: 'was-deleted.txt' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+    });
   });
 });
