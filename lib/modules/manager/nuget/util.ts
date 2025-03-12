@@ -211,8 +211,8 @@ function sortPatterns(
     return -1;
   }
 
-  const aTrim = a[0].replace(/\*$/, '');
-  const bTrim = b[0].replace(/\*$/, '');
+  const aTrim = a[0].slice(0, -1);
+  const bTrim = b[0].slice(0, -1);
 
   return aTrim.localeCompare(bTrim) * -1;
 }
