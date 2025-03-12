@@ -92,6 +92,7 @@ just 1.7.0
 k3s 1.31.2+k3s1
 kind 0.19.0
 kotlin 1.7.20
+kubebuilder 3.10.0
 kubectl 1.26.3
 kubetail 1.6.19
 kustomize 4.5.7
@@ -467,6 +468,13 @@ dummy 1.2.3
             packageName: 'JetBrains/kotlin',
             depName: 'kotlin',
             extractVersion: '^(Kotlin |v)(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.10.0',
+            datasource: 'github-tags',
+            packageName: 'kubernetes-sigs/kubebuilder',
+            depName: 'kubebuilder',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '1.26.3',

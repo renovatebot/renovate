@@ -453,6 +453,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^(Kotlin |v)(?<version>\\S+)',
     },
   },
+  kubebuilder: {
+    asdfPluginUrl: 'https://github.com/virtualstaticvoid/asdf-kubebuilder.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'kubernetes-sigs/kubebuilder',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   kubectl: {
     asdfPluginUrl: 'https://github.com/Banno/asdf-kubectl.git',
     config: {
