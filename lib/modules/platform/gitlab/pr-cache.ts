@@ -16,7 +16,7 @@ export class GitlabPrCache {
 
   private constructor(
     private repo: string,
-    private author: string | null,
+    author: string | null,
     private ignorePrAuthor: boolean,
   ) {
     const repoCache = getCache();
