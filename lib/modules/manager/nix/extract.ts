@@ -99,7 +99,8 @@ export async function extractPackageFile(
       continue;
     }
 
-    let isLockableTarball = lockableChannelOriginalUrl.test(flakeOriginal.url);
+    const isLockableTarball =
+      flakeOriginal.url && lockableChannelOriginalUrl.test(flakeOriginal.url);
 
     // if no rev is being tracked, we cannot update this input
     if (flakeLocked.rev === undefined && !isLockableTarball) {
@@ -145,11 +146,14 @@ export async function extractPackageFile(
         break;
       case 'tarball':
         if (isLockableTarball) {
-          let branch = flakeOriginal.url.replace(
+          const branch = flakeOriginal.url!.replace(
             lockableChannelOriginalUrl,
             '$<channel>',
           );
-          let rev = flakeLocked.url.replace(lockableChannelLockedUrl, '$<ref>');
+          const rev = flakeLocked.url!.replace(
+            lockableChannelLockedUrl,
+            '$<ref>',
+          );
           deps.push({
             depName,
             currentValue: branch,
