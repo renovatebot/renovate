@@ -1056,6 +1056,7 @@ export async function getBranchStatus(
       },
       paginate: true,
       paginationField: 'check_runs',
+      cacheProvider: memCacheProvider,
     };
     const checkRunsRaw = (
       await githubApi.getJsonUnchecked<{

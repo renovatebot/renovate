@@ -29,7 +29,9 @@ export async function getReleaseNotesMd(
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
-    await http.getJsonUnchecked<{ default_branch: string }>(apiPrefix)
+    await http.getJsonUnchecked<{ default_branch: string }>(apiPrefix, {
+      cacheProvider: memCacheProvider,
+    })
   ).body;
 
   // https://docs.github.com/en/rest/reference/git#get-a-tree
@@ -77,6 +79,7 @@ export async function getReleaseNotesMd(
   // https://docs.github.com/en/rest/reference/git#get-a-blob
   const fileRes = await http.getJsonUnchecked<GithubGitBlob>(
     `${apiPrefix}/git/blobs/${sha}`,
+    { cacheProvider: memCacheProvider },
   );
 
   const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
