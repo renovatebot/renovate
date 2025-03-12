@@ -25,7 +25,7 @@ await (async () => {
     // The only Runtime where support is not either `true` or a Date as a string is `0.10.x`, which we don't need
     .filter((lambda) => lambda.support !== false)
     .reduce((schedule, lambda) => {
-      const versionMatch = lambda.cycle.match(/^nodejs([0-9]+)\.x$/);
+      const versionMatch = /^nodejs([0-9]+)\.x$/.exec(lambda.cycle);
 
       if (!versionMatch?.[1]) {
         return schedule;

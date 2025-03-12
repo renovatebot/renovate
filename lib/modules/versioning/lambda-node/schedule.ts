@@ -19,7 +19,7 @@ const lambdaSchedule: LambdaData = JSON.parse(
 export function findLambdaScheduleForVersion(
   version: string,
 ): LambdaSchedule | null {
-  const majorVersionMatch = version.match(/^v?([0-9]+)\./);
+  const majorVersionMatch = /^v?([0-9]+)\./.exec(version);
 
   if (!majorVersionMatch?.[1]) {
     return null;
