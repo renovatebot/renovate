@@ -403,7 +403,7 @@ describe('modules/datasource/conda/index', () => {
                       '2020-02-29T01:40:21Z',
                     ).toString(),
                     yankedReason: null,
-                    urls: [{ url: 'dev url', kind: 'DEV' }],
+                    urls: [{ url: 'https://dev/url', kind: 'DEV' }],
                   },
                   {
                     version: '0.0.5',
@@ -411,7 +411,7 @@ describe('modules/datasource/conda/index', () => {
                       '2020-02-29T01:40:20.840Z',
                     ).toString(),
                     yankedReason: null,
-                    urls: [{ url: 'home url', kind: 'HOME' }],
+                    urls: [{ url: 'https://home/url', kind: 'HOME' }],
                   },
                   {
                     version: '0.0.5',
@@ -482,6 +482,8 @@ describe('modules/datasource/conda/index', () => {
       });
       expect(res).toMatchObject({
         registryUrl: 'https://prefix.dev/conda-forge',
+        homepage: 'https://home/url',
+        sourceUrl: 'https://dev/url',
         releases: [
           {
             isDeprecated: false,
