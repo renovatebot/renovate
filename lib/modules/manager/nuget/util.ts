@@ -211,14 +211,10 @@ function sortPatterns(
     return -1;
   }
 
-  const aPathLength = (a[0].match(/\./g) ?? []).length;
-  const bPathLength = (b[0].match(/\./g) ?? []).length;
+  const aTrim = a[0].replace(/\*$/, '');
+  const bTrim = b[0].replace(/\*$/, '');
 
-  if (aPathLength === bPathLength) {
-    return a[0].localeCompare(b[0]) * -1;
-  }
-
-  return aPathLength < bPathLength ? 1 : -1;
+  return aTrim.localeCompare(bTrim) * -1;
 }
 
 export async function findGlobalJson(
