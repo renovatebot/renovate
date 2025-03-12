@@ -118,7 +118,7 @@ export async function getReleases(
   };
 }
 
-async function getPagedResponse<T extends z.Schema>(
+async function getPagedResponse(
   http: Http,
   query: string,
   data: any,
