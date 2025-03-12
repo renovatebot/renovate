@@ -260,6 +260,7 @@ function extractWithYAMLParser(
               depName: action,
               packageName: `actions/${action}-versions`,
               ...actionData,
+              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
               currentValue,
               depType: 'uses-with',
             });

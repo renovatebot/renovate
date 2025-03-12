@@ -46,7 +46,9 @@ export async function postUpgradeCommandsExecutor(
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
+      const previouslyModifiedFiles =
+        config.updatedPackageFiles!.concat(updatedArtifacts);
+      for (const file of previouslyModifiedFiles) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
@@ -121,6 +123,25 @@ export async function postUpgradeCommandsExecutor(
       logger.debug(
         `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
       );
+
+      // Check for files which were previously deleted but have been re-added without modification
+      const previouslyDeletedFiles = updatedArtifacts.filter(
+        (ua) => ua.type === 'deletion',
+      );
+      for (const previouslyDeletedFile of previouslyDeletedFiles) {
+        if (!addedOrModifiedFiles.includes(previouslyDeletedFile.path)) {
+          logger.debug(
+            { file: previouslyDeletedFile.path },
+            'Previously deleted file has been restored without modification',
+          );
+          updatedArtifacts = updatedArtifacts.filter(
+            (ua) =>
+              !(
+                ua.type === 'deletion' && ua.path === previouslyDeletedFile.path
+              ),
+          );
+        }
+      }
 
       for (const relativePath of addedOrModifiedFiles) {
         let fileMatched = false;
