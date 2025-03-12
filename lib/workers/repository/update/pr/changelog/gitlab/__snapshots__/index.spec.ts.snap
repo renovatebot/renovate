@@ -1,11 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON handles empty GitLab tags response 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > handles empty GitLab tags response 1`] = `
 {
   "hasReleaseNotes": false,
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -49,12 +50,13 @@ exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON ha
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON supports gitlab enterprise and gitlab enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > supports gitlab enterprise and gitlab enterprise changelog 1`] = `
 {
   "hasReleaseNotes": false,
   "project": {
     "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
     "baseUrl": "https://gitlab-enterprise.example.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -98,12 +100,13 @@ exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON su
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON supports self-hosted gitlab changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > supports self-hosted gitlab changelog 1`] = `
 {
   "hasReleaseNotes": false,
   "project": {
     "apiBaseUrl": "https://git.test.com/api/v4/",
     "baseUrl": "https://git.test.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -147,12 +150,13 @@ exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON su
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON uses GitLab tags 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > uses GitLab tags 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -216,12 +220,13 @@ exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON us
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON uses GitLab tags with error 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > uses GitLab tags with error 1`] = `
 {
   "hasReleaseNotes": false,
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -265,12 +270,13 @@ exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON us
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/gitlab/index getChangeLogJSON works without GitLab 1`] = `
+exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON > works without GitLab 1`] = `
 {
   "hasReleaseNotes": false,
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,

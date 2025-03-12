@@ -4,7 +4,7 @@ import type { DockerHubCacheData } from './dockerhub-cache';
 import { DockerHubCache } from './dockerhub-cache';
 import type { DockerHubTag } from './schema';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 function oldCacheData(): DockerHubCacheData {
@@ -60,7 +60,7 @@ function newCacheData(): DockerHubCacheData {
 
 describe('modules/datasource/docker/dockerhub-cache', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   const dockerRepository = 'foo/bar';

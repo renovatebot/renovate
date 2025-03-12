@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/homebrew/update returns unchanged content if both got requests fail 1`] = `
+exports[`modules/manager/homebrew/update > returns unchanged content if both got requests fail 1`] = `
 "=begin
   url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
   sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
@@ -63,7 +63,7 @@ end
 "
 `;
 
-exports[`modules/manager/homebrew/update updates "archive" github dependency 1`] = `
+exports[`modules/manager/homebrew/update > updates "archive" github dependency 1`] = `
 "# Copyright 2018 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -114,7 +114,7 @@ end
 "
 `;
 
-exports[`modules/manager/homebrew/update updates "archive" github dependency from old url format 1`] = `
+exports[`modules/manager/homebrew/update > updates "archive" github dependency from old url format 1`] = `
 "# Copyright 2018 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -165,7 +165,7 @@ end
 "
 `;
 
-exports[`modules/manager/homebrew/update updates "releases" github dependency 1`] = `
+exports[`modules/manager/homebrew/update > updates "releases" github dependency 1`] = `
 "=begin
   url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
   sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"

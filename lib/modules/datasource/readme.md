@@ -8,7 +8,7 @@ New datasources _must_ follow the class-based programming style.
 Use the `java-version` datasource as a reference.
 
 Add the datasource to the API in [`api.ts`](api.ts) so that the new datasource is usable.
-If you find `Unused HTTP mocks` errors in the Jest tests _and_ your mocked URLs are correct, make sure the datasource is correctly registered.
+If you find `Unused HTTP mocks` errors in the Vitest tests _and_ your mocked URLs are correct, make sure the datasource is correctly registered.
 
 ## getReleases
 

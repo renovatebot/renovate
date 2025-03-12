@@ -6,7 +6,7 @@ import {
   ExtensionTagFragmentSchema,
   StringArrayFragmentSchema,
   StringFragmentSchema,
-} from '../fragments';
+} from './fragments';
 
 const artifactTag = 'artifact';
 const installTag = 'install';

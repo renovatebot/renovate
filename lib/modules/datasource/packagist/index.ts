@@ -26,7 +26,7 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://packagist.org'];
+  override readonly defaultRegistryUrls = ['https://repo.packagist.org'];
 
   override readonly defaultVersioning = composerVersioning.id;
 
@@ -190,7 +190,7 @@ export class PackagistDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

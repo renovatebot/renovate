@@ -10,7 +10,7 @@ import { MAVEN_REPO } from '../maven/common';
 import { extractPageLinks } from './util';
 import { SbtPackageDatasource } from '.';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 const packageCache = mocked(_packageCache);
 
 describe('modules/datasource/sbt-package/index', () => {

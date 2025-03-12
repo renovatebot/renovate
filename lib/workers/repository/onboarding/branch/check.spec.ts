@@ -7,8 +7,8 @@ import * as _cache from '../../../../util/cache/repository';
 import type { LongCommitSha } from '../../../../util/git/types';
 import { isOnboarded } from './check';
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/git');
 
 const cache = mocked(_cache);
 

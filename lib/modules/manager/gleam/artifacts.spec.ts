@@ -8,8 +8,8 @@ import * as _fs from '../../../util/fs';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
 
-jest.mock('../../../util/exec');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec');
+vi.mock('../../../util/fs');
 
 const exec = mocked(_exec);
 const fs = mocked(_fs);
@@ -81,7 +81,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
@@ -98,7 +98,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('returns null if lockfile content unchanged', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');

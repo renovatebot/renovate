@@ -9,13 +9,15 @@ import type { BranchConfig } from '../../../../types';
 import * as releases from './releases';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../../../modules/datasource/npm');
+vi.mock('../../../../../modules/datasource/npm');
+vi.mock('../../../../../util/github/graphql');
+vi.mock('./releases', { spy: true });
 
 const githubApiHost = 'https://api.github.com';
 
-const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
-const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
-const getInRangeReleasesMock = jest.spyOn(releases, 'getInRangeReleases');
+const githubTagsMock = vi.mocked(githubGraphql).queryTags;
+const githubReleasesMock = vi.mocked(githubGraphql).queryReleases;
+const getInRangeReleasesMock = vi.mocked(releases).getInRangeReleases;
 
 const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -120,6 +122,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -155,6 +158,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -214,6 +218,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
@@ -302,6 +307,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,

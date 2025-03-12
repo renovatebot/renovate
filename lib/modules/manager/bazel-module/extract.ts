@@ -4,8 +4,8 @@ import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import * as bazelrc from './bazelrc';
-import type { ResultFragment } from './fragments';
 import { parse } from './parser';
+import type { ResultFragment } from './parser/fragments';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
 import { RuleToDockerPackageDep } from './parser/oci';
 import {

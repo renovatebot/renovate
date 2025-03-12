@@ -132,6 +132,15 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'container-structure-test': {
+    asdfPluginUrl:
+      'https://github.com/FeryET/asdf-container-structure-test.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'GoogleContainerTools/container-structure-test',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   cookiecutter: {
     asdfPluginUrl: 'https://github.com/shawon-crosen/asdf-cookiecutter',
     config: {
@@ -325,6 +334,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'helm-docs': {
+    asdfPluginUrl: 'https://github.com/sudermanjr/asdf-helm-docs.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'norwoodj/helm-docs',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   helmfile: {
     asdfPluginUrl: 'https://github.com/feniix/asdf-helmfile',
     config: {
@@ -353,8 +370,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   java: {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
-      const adoptOpenJdkMatches = version.match(
-        /^adoptopenjdk-(?<version>\d\S+)/,
+      const adoptOpenJdkMatches = /^adoptopenjdk-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (adoptOpenJdkMatches) {
         return {
@@ -363,8 +380,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJdkMatches.version,
         };
       }
-      const adoptOpenJreMatches = version.match(
-        /^adoptopenjdk-jre-(?<version>\d\S+)/,
+      const adoptOpenJreMatches = /^adoptopenjdk-jre-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (adoptOpenJreMatches) {
         return {
@@ -373,8 +390,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(
-        /^temurin-(?<version>\d\S+)/,
+      const temurinJdkMatches = /^temurin-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (temurinJdkMatches) {
         return {
@@ -383,8 +400,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(
-        /^temurin-jre-(?<version>\d\S+)/,
+      const temurinJreMatches = /^temurin-jre-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (temurinJreMatches) {
         return {
@@ -442,6 +459,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'kubernetes/kubernetes',
       extractVersion: '^v(?<version>.+)',
+    },
+  },
+  kubetail: {
+    asdfPluginUrl: 'https://github.com/janpieper/asdf-kubetail.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'johanhaleby/kubetail',
     },
   },
   kustomize: {
@@ -667,6 +691,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  skaffold: {
+    asdfPluginUrl: 'https://github.com/nklmilojevic/asdf-skaffold',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'GoogleContainerTools/skaffold',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   sops: {
     asdfPluginUrl: 'https://github.com/feniix/asdf-sops',
     config: {
@@ -680,6 +712,22 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'turbot/steampipe',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  talhelper: {
+    asdfPluginUrl: 'https://github.com/bjw-s/asdf-talhelper',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'budimanjojo/talhelper',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  talosctl: {
+    asdfPluginUrl: 'https://github.com/bjw-s/asdf-talosctl',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'siderolabs/talos',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -697,6 +745,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'terraform-docs/terraform-docs',
       extractVersion: '^v(?<version>.+)',
+    },
+  },
+  terraformer: {
+    asdfPluginUrl: 'https://github.com/grimoh/asdf-terraformer',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'GoogleCloudPlatform/terraformer',
     },
   },
   terragrunt: {

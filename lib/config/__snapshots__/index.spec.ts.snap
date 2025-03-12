@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
+exports[`config/index > mergeChildConfig(parentConfig, childConfig) > merges 1`] = `
 {
   "branchTopic": "lock-file-maintenance",
   "commitMessageAction": "Lock file maintenance",
@@ -19,7 +19,7 @@ exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 }
 `;
 
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges constraints 1`] = `
+exports[`config/index > mergeChildConfig(parentConfig, childConfig) > merges constraints 1`] = `
 {
   "node": "<15",
   "npm": "^6.0.0",

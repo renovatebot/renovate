@@ -377,7 +377,7 @@ export async function getAdditionalFiles(
   }
   logger.debug('Getting updated lock files');
   if (
-    config.updateType === 'lockFileMaintenance' &&
+    config.isLockFileMaintenance &&
     config.reuseExistingBranch &&
     (await scm.branchExists(config.branchName))
   ) {

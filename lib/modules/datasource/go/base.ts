@@ -135,7 +135,7 @@ export class BaseGoDatasource {
   ): Promise<DataSource | null> {
     const goModuleUrl = goModule.replace(/\.git(\/[a-z0-9/]*)?$/, '');
     const pkgUrl = `https://${goModuleUrl}?go-get=1`;
-    const { body: html } = await BaseGoDatasource.http.get(pkgUrl);
+    const { body: html } = await BaseGoDatasource.http.getText(pkgUrl);
 
     const goSourceHeader = BaseGoDatasource.goSourceHeader(html, goModule);
     if (goSourceHeader) {
