@@ -131,16 +131,37 @@ export function matchesContentDescriptor(
   return true;
 }
 
+function findMatching(
+  packageRegistries: PackageRegistry[],
+  type: string,
+  scope: string,
+  dep: PackageDependency<GradleManagerData>,
+): string[] {
+  return packageRegistries
+    .filter((item) => item.type === type)
+    .filter((item) => item.scope === scope)
+    .filter((item) => matchesContentDescriptor(dep, item.content))
+    .map((item) => item.registryUrl);
+}
+
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
   dep: PackageDependency<GradleManagerData>,
 ): string[] {
   const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
 
-  const registryUrls = packageRegistries
-    .filter((item) => item.scope === scope)
-    .filter((item) => matchesContentDescriptor(dep, item.content))
-    .map((item) => item.registryUrl);
+  const exclusiveRegistryUrls = findMatching(
+    packageRegistries,
+    'exclusive',
+    scope,
+    dep,
+  );
+
+  if (exclusiveRegistryUrls.length) {
+    return [...new Set(exclusiveRegistryUrls)];
+  }
+
+  const registryUrls = findMatching(packageRegistries, 'regular', scope, dep);
 
   if (!registryUrls.length && scope === 'plugin') {
     registryUrls.push(REGISTRY_URLS.gradlePluginPortal);

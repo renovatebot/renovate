@@ -343,13 +343,14 @@ export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   ctx.registryUrls.push({
     registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
     scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+    type: 'regular',
     content: ctx.tmpRegistryContent,
   });
 
   return ctx;
 }
 
-export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
+function parseCustomRegistryUrl(ctx: Ctx): string | null {
   let localVariables = ctx.globalVars;
 
   if (ctx.tokenMap.name) {
@@ -376,17 +377,53 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     try {
       const { host, protocol } = URL.parse(registryUrl);
       if (host && protocol) {
-        ctx.registryUrls.push({
-          registryUrl,
-          scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
-          content: ctx.tmpRegistryContent,
-        });
+        return registryUrl;
       }
     } catch {
       // no-op
     }
   }
 
+  return null;
+}
+
+export function handleCustomRegistryUrlTmp(ctx: Ctx): Ctx {
+  const registryUrl = parseCustomRegistryUrl(ctx);
+
+  if (registryUrl) {
+    ctx.tmpExclusiveRegistryUrls.push({
+      registryUrl,
+      type: 'exclusive',
+      scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+      content: ctx.tmpRegistryContent,
+    });
+  }
+
+  return ctx;
+}
+
+export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
+  const registryUrl = parseCustomRegistryUrl(ctx);
+
+  if (registryUrl) {
+    ctx.registryUrls.push({
+      registryUrl,
+      type: 'regular',
+      scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+      content: ctx.tmpRegistryContent,
+    });
+  }
+
+  return ctx;
+}
+
+export function handleExclusiveContentRegistryUrls(ctx: Ctx): Ctx {
+  ctx.tmpExclusiveRegistryUrls.forEach((registryUrl) => {
+    ctx.registryUrls.push({
+      ...registryUrl,
+      content: ctx.tmpRegistryContent,
+    });
+  });
   return ctx;
 }
 

@@ -33,7 +33,7 @@ const qContentDescriptorSpec = (
 
 // includeModule('foo')
 // excludeModuleByRegex('bar')
-const qContentDescriptor = (
+export const qContentDescriptor = (
   mode: 'include' | 'exclude',
 ): q.QueryBuilder<Ctx, parser.Node> => {
   return q

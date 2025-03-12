@@ -635,6 +635,14 @@ describe('modules/manager/gradle/extract', () => {
                   includeVersion("com.google.protobuf", "protobuf-java", "2.17.+")
                 }
               }
+              exclusiveContent {
+                forRepository {
+                  maven("https://foo.bar/exclusive")
+                }
+                filter {
+                  includeGroup("com.exclusive")
+                }
+              }
             }
 
             plugins {
@@ -646,6 +654,7 @@ describe('modules/manager/gradle/extract', () => {
               implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21"
               implementation "foo.bar:protobuf-java:2.17.0"
               implementation "foo.bar.group:simple.module:2.17.0"
+              implementation "com.exclusive:simple.module:1.0.0"
             }
           `,
         };
@@ -699,6 +708,11 @@ describe('modules/manager/gradle/extract', () => {
                   'https://repo.maven.apache.org/maven2',
                   'https://foo.bar/some',
                 ],
+              },
+              {
+                depName: 'com.exclusive:simple.module',
+                currentValue: '1.0.0',
+                registryUrls: ['https://foo.bar/exclusive'],
               },
             ],
           },

@@ -9,6 +9,7 @@ import { setParseGradleFunc } from './parser/handlers';
 import { qToolchainVersion } from './parser/language-version';
 import { qKotlinMultiObjectVarAssignment } from './parser/objects';
 import { qPlugins } from './parser/plugins';
+import { qExclusiveContent } from './parser/registry/exclusive-content';
 import { qRegistryUrls } from './parser/registry-urls';
 import { qVersionCatalogs } from './parser/version-catalogs';
 import type {
@@ -33,6 +34,7 @@ const ctx: Ctx = {
   varTokens: [],
   tmpKotlinImportStore: [],
   tmpNestingDepth: [],
+  tmpExclusiveRegistryUrls: [],
   tmpRegistryContent: [],
   tmpTokenStore: {},
   tokenMap: {},
@@ -58,6 +60,7 @@ export function parseGradle(
       qAssignments,
       qDependencies,
       qPlugins,
+      qExclusiveContent,
       qRegistryUrls,
       qVersionCatalogs,
       qLongFormDep,

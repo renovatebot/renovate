@@ -796,6 +796,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             registryUrl: 'https://foo.bar/baz',
             scope: 'dep',
+            type: 'regular',
             content: [
               { mode: 'exclude', matcher: 'simple', groupId: 'baz.qux' },
             ],
@@ -803,6 +804,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             registryUrl: REGISTRY_URLS.mavenCentral,
             scope: 'dep',
+            type: 'regular',
             content: [
               { mode: 'include', matcher: 'simple', groupId: 'foo.bar' },
             ],
@@ -810,6 +812,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             registryUrl: 'https://foo.bar/deps',
             scope: 'dep',
+            type: 'regular',
             content: [
               { mode: 'include', matcher: 'subgroup', groupId: 'foo.bar' },
             ],
@@ -817,6 +820,7 @@ describe('modules/manager/gradle/parser', () => {
           {
             registryUrl: 'https://some.foo',
             scope: 'dep',
+            type: 'regular',
             content: [
               {
                 mode: 'include',

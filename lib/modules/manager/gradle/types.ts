@@ -81,6 +81,7 @@ export interface ContentDescriptorSpec {
 export interface PackageRegistry {
   registryUrl: string;
   scope: 'dep' | 'plugin';
+  type: 'exclusive' | 'regular';
   content?: ContentDescriptorSpec[];
 }
 
@@ -97,6 +98,7 @@ export interface Ctx {
   varTokens: lexer.Token[];
   tmpKotlinImportStore: lexer.Token[][];
   tmpNestingDepth: lexer.Token[];
+  tmpExclusiveRegistryUrls: PackageRegistry[];
   tmpRegistryContent: ContentDescriptorSpec[];
   tmpTokenStore: Record<string, lexer.Token[]>;
   tokenMap: Record<string, lexer.Token[]>;
