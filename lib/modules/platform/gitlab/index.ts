@@ -239,7 +239,9 @@ export async function getRawFile(
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag ?? `HEAD`);
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url);
+  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+    cacheProvider: memCacheProvider,
+  });
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
   return str;
