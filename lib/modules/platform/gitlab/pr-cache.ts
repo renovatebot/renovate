@@ -4,7 +4,6 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { GitlabHttp } from '../../../util/http/gitlab';
 import { getQueryString } from '../../../util/url';
 import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
@@ -142,7 +141,6 @@ export class GitlabPrCache {
 
     const res = await http.getJsonUnchecked<GitLabMergeRequest[]>(url, {
       paginate: true,
-      cacheProvider: repoCacheProvider,
     });
 
     const items = res.body;

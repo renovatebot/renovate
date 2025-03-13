@@ -71,7 +71,6 @@ describe('modules/platform/gitlab/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
-      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         gitlab: {
           pullRequestsCache: {
@@ -118,7 +117,6 @@ describe('modules/platform/gitlab/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
-      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         gitlab: {
           pullRequestsCache: {
@@ -163,7 +161,6 @@ describe('modules/platform/gitlab/pr-cache', () => {
       { number: 1, title: 'title' },
     ]);
     expect(cache).toEqual({
-      httpCache: expect.toBeNonEmptyObject(),
       platform: {
         gitlab: {
           pullRequestsCache: {
