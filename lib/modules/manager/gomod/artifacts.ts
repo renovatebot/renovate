@@ -197,7 +197,7 @@ export async function updateArtifacts({
 
   const flags: string[] = [];
 
-  if (semver.satisfies(goMod.go, '^1.21.0')) {
+  if (semver.satisfies(goMod.go, '>=1.21.0')) {
     flags.push(`toolchain@${goMod.toolchain ?? 'none'}`);
   }
 
