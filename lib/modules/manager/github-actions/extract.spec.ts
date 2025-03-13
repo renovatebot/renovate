@@ -711,6 +711,10 @@ describe('modules/manager/github-actions/extract', () => {
         jobs:
           build:
             steps:
+              - name: Pinning a minor version of uv
+                uses: astral-sh/setup-uv@v5
+                with:
+                  version: "latest"
               - name: Install gotestsum
                 uses: jaxxstorm/action-install-gh-release@v1.10.0
                 with:
