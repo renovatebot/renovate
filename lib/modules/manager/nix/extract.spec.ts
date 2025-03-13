@@ -1,7 +1,7 @@
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import { extractPackageFile } from '.';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

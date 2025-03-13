@@ -1,13 +1,13 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-const googleAuth = mocked(_googleAuth);
 vi.mock('google-auth-library');
+
+const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const htmlResponse = Fixtures.get('versions-html.html');

@@ -1,6 +1,4 @@
 import { mock } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../../../../../test/util';
-import { fs, git, mocked, platform, scm } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
@@ -20,6 +18,8 @@ import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
+import { fs, git, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 const configModule: any = _config;
 
@@ -29,9 +29,9 @@ vi.mock('./config');
 vi.mock('./rebase');
 vi.mock('./onboarding-branch-cache');
 
-const cache = mocked(_cache);
-const rebase = mocked(_rebase);
-const onboardingCache = mocked(_onboardingCache);
+const cache = vi.mocked(_cache);
+const rebase = vi.mocked(_rebase);
+const onboardingCache = vi.mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {

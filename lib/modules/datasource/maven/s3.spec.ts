@@ -3,11 +3,11 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
 import type { ReleaseResult } from '..';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const datasource = MavenDatasource.id;
 

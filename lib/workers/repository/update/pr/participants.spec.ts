@@ -1,16 +1,16 @@
-import { mocked, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
 import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
+import { partial, platform } from '~test/util';
 
 vi.mock('../../../../util/sample');
-const util = mocked(_util);
+const util = vi.mocked(_util);
 
 vi.mock('./code-owners');
-const codeOwners = mocked(_codeOwners);
+const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
   const config: RenovateConfig = {
