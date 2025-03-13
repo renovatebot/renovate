@@ -7,11 +7,6 @@ settings:
 overrides:
   esbuild: 0.25.0
 
-patchedDependencies:
-  re2:
-    hash: 018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1
-    path: patches/re2.patch
-
 importers:
 
   .:
@@ -611,7 +606,7 @@ importers:
         version: 6.1.0
       re2:
         specifier: 1.21.4
-        version: 1.21.4(patch_hash=018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1)
+        version: 1.21.4
 
 packages:
 
@@ -13310,7 +13305,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.21.4(patch_hash=018babd22b7ce951bcd10d6246f1e541a7ac7ba212f7fa8985e774ece67d08e1):
+  re2@1.21.4:
     dependencies:
       install-artifact-from-github: 1.3.5
       nan: 2.22.1
