@@ -192,8 +192,7 @@ export async function updateArtifacts({
   }
 
   const goMod = getGoConfig(newGoModContent);
-  const goConstraints =
-    config.constraints?.go ?? goMod.toolchain ?? goMod.constraints;
+  const goConstraints = config.constraints?.go ?? `${goMod.minialGoVersion}`;
 
   const getFlags = ['-t'];
   if (!semver.satisfies(goMod.minialGoVersion, '>=1.17.0')) {
@@ -461,7 +460,6 @@ function getGoConfig(content: string): {
   toolchain?: string;
   minialGoVersion: string;
   go: string;
-  constraints: string;
 } {
   const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
     content,
@@ -483,6 +481,5 @@ function getGoConfig(content: string): {
     toolchain: toolchainVer,
     minialGoVersion: goVersion,
     go: goDirective,
-    constraints: `^${goVersion}`,
   };
 }
