@@ -15,9 +15,13 @@ export function calculateLatestReleaseTimestamp(
       continue;
     }
 
-    if (versioningApi.isGreaterThan(release.version, latestVersion)) {
-      latestVersion = release.version;
-      latestReleaseTimestamp = asTimestamp(release.releaseTimestamp);
+    try {
+      if (versioningApi.isGreaterThan(release.version, latestVersion)) {
+        latestVersion = release.version;
+        latestReleaseTimestamp = asTimestamp(release.releaseTimestamp);
+      }
+    } catch {
+      // no-op
     }
   }
 
