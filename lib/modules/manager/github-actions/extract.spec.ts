@@ -723,9 +723,7 @@ describe('modules/manager/github-actions/extract', () => {
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(
-        res?.deps.filter(
-          (pkg) => pkg.datasource === GithubReleasesDatasource.id,
-        ),
+        res?.deps.filter((pkg) => pkg.depType === 'uses-with'),
       ).toMatchObject([
         {
           currentValue: 'v1.12.1',

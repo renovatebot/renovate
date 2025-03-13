@@ -1,15 +1,18 @@
 import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as looseVersioning from '../../versioning/loose';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
 import * as looseVersioning from '../../versioning/loose';
