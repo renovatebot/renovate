@@ -3,8 +3,11 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
 import * as exec_ from '../exec';
-import { configSigningKey, writePrivateKey } from './private-key';
-import { setPrivateKey } from '.';
+import {
+  configSigningKey,
+  setPrivateKey,
+  writePrivateKey,
+} from './private-key';
 import { Fixtures } from '~test/fixtures';
 import { mockedExtended } from '~test/util';
 
@@ -14,7 +17,6 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 vi.mock('../exec', () => ({ exec: mockFn() }));
-vi.unmock('.');
 
 const exec = mockedExtended(exec_);
 
@@ -26,6 +28,7 @@ describe('util/git/private-key', () => {
     });
 
     it('returns if no private key', async () => {
+      setPrivateKey(undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });

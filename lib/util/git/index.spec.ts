@@ -97,6 +97,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
     await repo.checkout(defaultBranch);
+
+    expect(git.getBranchList()).toBeEmptyArray();
   });
 
   let tmpDir: tmp.DirectoryResult;
@@ -274,6 +276,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
+      expect(git.isCloned()).toBeFalse();
       await git.syncGit();
       expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toEqual([
