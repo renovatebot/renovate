@@ -1,4 +1,3 @@
-import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
 import {
   DatasourceCacheStats,
@@ -8,6 +7,7 @@ import {
   PackageCacheStats,
   makeTimingReport,
 } from './stats';
+import { logger } from '~test/util';
 
 describe('util/stats', () => {
   beforeEach(() => {

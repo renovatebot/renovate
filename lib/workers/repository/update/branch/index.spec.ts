@@ -1,12 +1,4 @@
 import { codeBlock } from 'common-tags';
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -50,6 +42,7 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { fs, git, partial, platform, scm } from '~test/util';
 
 vi.mock('./get-updated');
 vi.mock('./schedule');
@@ -65,24 +58,23 @@ vi.mock('../../../../util/exec');
 vi.mock('../../../../util/merge-confidence');
 vi.mock('../../../../util/sanitize');
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('../../../global/limits');
 vi.mock('../../../../util/cache/repository');
 
-const getUpdated = mocked(_getUpdated);
-const schedule = mocked(_schedule);
-const checkExisting = mocked(_checkExisting);
-const reuse = mocked(_reuse);
-const npmPostExtract = mocked(_npmPostExtract);
-const automerge = mocked(_automerge);
-const commit = mocked(_commit);
-const mergeConfidence = mocked(_mergeConfidence);
-const prAutomerge = mocked(_prAutomerge);
-const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
-const sanitize = mocked(_sanitize);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const getUpdated = vi.mocked(_getUpdated);
+const schedule = vi.mocked(_schedule);
+const checkExisting = vi.mocked(_checkExisting);
+const reuse = vi.mocked(_reuse);
+const npmPostExtract = vi.mocked(_npmPostExtract);
+const automerge = vi.mocked(_automerge);
+const commit = vi.mocked(_commit);
+const mergeConfidence = vi.mocked(_mergeConfidence);
+const prAutomerge = vi.mocked(_prAutomerge);
+const prWorker = vi.mocked(_prWorker);
+const exec = vi.mocked(_exec);
+const sanitize = vi.mocked(_sanitize);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 

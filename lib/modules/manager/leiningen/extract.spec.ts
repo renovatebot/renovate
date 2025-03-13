@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
 import { extractFromVectors, extractVariables, trimAtKey } from './extract';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
 

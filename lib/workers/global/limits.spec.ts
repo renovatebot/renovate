@@ -1,4 +1,3 @@
-import { partial } from '../../../test/util';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import {
   calcLimit,
@@ -10,6 +9,7 @@ import {
   setCount,
   setMaxLimit,
 } from './limits';
+import { partial } from '~test/util';
 
 describe('workers/global/limits', () => {
   beforeEach(() => {
