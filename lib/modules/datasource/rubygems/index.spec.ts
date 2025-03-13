@@ -1,11 +1,11 @@
 import * as marshal from '@hyrious/marshal';
 import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as rubyVersioning from '../../versioning/ruby';
 import { memCache } from './versions-endpoint-cache';
 import { RubygemsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const rubygemsOrgVersions = codeBlock`
   created_at: 2023-01-01T00:00:00.000Z

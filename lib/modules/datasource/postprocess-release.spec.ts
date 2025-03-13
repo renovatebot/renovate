@@ -1,4 +1,3 @@
-import { mocked } from '../../../test/util';
 import type { Timestamp } from '../../util/timestamp';
 import * as _datasourceCommon from './common';
 import { Datasource } from './datasource';
@@ -12,7 +11,7 @@ import type {
 } from './types';
 
 vi.mock('./common');
-const { getDatasourceFor } = mocked(_datasourceCommon);
+const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
   constructor() {

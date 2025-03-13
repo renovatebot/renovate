@@ -1,5 +1,3 @@
-import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
-import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -14,6 +12,8 @@ import {
   resetPrefetchedImages,
   sideCarImage,
 } from '.';
+import { mockExecAll, mockExecSequence } from '~test/exec-util';
+import { partial } from '~test/util';
 
 vi.mock('../../../modules/datasource', () => ({ getPkgReleases: vi.fn() }));
 

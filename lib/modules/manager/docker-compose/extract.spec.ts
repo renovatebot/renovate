@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const yamlFile1 = Fixtures.get('docker-compose.1.yml');
 const yamlFile3 = Fixtures.get('docker-compose.3.yml');

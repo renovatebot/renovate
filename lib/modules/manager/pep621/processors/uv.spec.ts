@@ -1,12 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import {
-  fs,
-  hostRules,
-  mocked,
-  mockedFunction,
-} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -18,13 +11,15 @@ import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
+import { mockExecAll } from '~test/exec-util';
+import { fs, hostRules } from '~test/util';
 
 vi.mock('google-auth-library');
 vi.mock('../../../../util/fs');
 vi.mock('../../../datasource');
 
-const googleAuth = mocked(_googleAuth);
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const googleAuth = vi.mocked(_googleAuth);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {

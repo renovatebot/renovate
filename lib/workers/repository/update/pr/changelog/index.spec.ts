@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../../../test/http-mock';
-import { partial } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
@@ -8,6 +6,8 @@ import type { Timestamp } from '../../../../../util/timestamp';
 import type { BranchConfig } from '../../../../types';
 import * as releases from './releases';
 import { getChangeLogJSON } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 vi.mock('../../../../../modules/datasource/npm');
 vi.mock('../../../../../util/github/graphql');

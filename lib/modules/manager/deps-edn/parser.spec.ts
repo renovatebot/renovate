@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { Fixtures } from '../../../../test/fixtures';
 import { parseDepsEdnFile } from './parser';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/deps-edn/parser', () => {
   describe('parseEdnFile', () => {

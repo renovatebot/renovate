@@ -1,13 +1,13 @@
 import { satisfies } from '@renovatebot/pep440';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { Timestamp } from '../../../util/timestamp';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
 import { datasource, defaultRegistryUrl } from './common';
 import { PythonVersionDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/python-version/index', () => {
   describe('dependent datasources', () => {

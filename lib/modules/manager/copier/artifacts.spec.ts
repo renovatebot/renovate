@@ -1,7 +1,5 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, git, hostRules, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -9,10 +7,11 @@ import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { fs, git, hostRules, partial } from '~test/util';
 
 const datasource = vi.mocked(_datasource);
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
 

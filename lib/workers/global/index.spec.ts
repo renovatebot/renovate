@@ -1,7 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
-import type { RenovateConfig } from '../../../test/util';
-import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import * as _presets from '../../config/presets';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
@@ -12,6 +10,8 @@ import * as repositoryWorker from '../repository';
 import * as configParser from './config/parse';
 import * as limits from './limits';
 import * as globalWorker from '.';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../repository');
 vi.mock('../../util/fs');
@@ -35,8 +35,11 @@ vi.mock('fs-extra', async () => {
   };
 });
 
+// TODO: why do we need git here?
+vi.unmock('../../util/git');
+
 // imports are readonly
-const presets = mocked(_presets);
+const presets = vi.mocked(_presets);
 
 const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
