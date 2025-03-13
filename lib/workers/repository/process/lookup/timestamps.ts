@@ -20,9 +20,9 @@ export function calculateLatestReleaseTimestamp(
         latestVersion = release.version;
         latestReleaseTimestamp = asTimestamp(release.releaseTimestamp);
       }
-    } catch {
+    } catch /* v8 ignore start */ {
       // no-op
-    }
+    } /* v8 ignore stop */
   }
 
   if (latestReleaseTimestamp) {
