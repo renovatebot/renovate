@@ -214,6 +214,7 @@ const communityActions = [
       }),
   },
   {
+    // https://github.com/astral-sh/setup-uv
     use: /^astral-sh\/setup-uv@.*$/,
     schema: z
       .object({ with: z.object({ version: z.string() }) })
