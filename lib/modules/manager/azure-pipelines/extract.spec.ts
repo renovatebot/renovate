@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import {
@@ -9,6 +8,7 @@ import {
   parseAzurePipelines,
 } from './extract';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const azurePipelinesFilename = 'azure-pipelines.yaml';
 

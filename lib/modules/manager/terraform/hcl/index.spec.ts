@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../../test/fixtures';
 import { parseHCL, parseJSON } from './index';
+import { Fixtures } from '~test/fixtures';
 
 const modulesTF = Fixtures.get('modules.tf');
 const resourcesTF = Fixtures.get('resources.tf');

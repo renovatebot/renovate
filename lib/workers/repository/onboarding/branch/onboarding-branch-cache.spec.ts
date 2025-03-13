@@ -1,4 +1,3 @@
-import { git, mocked, partial, scm } from '../../../../../test/util';
 import * as _cache from '../../../../util/cache/repository';
 import type {
   OnboardingBranchCache,
@@ -15,10 +14,10 @@ import {
   setOnboardingCache,
   setOnboardingConfigDetails,
 } from './onboarding-branch-cache';
+import { git, partial, scm } from '~test/util';
 
 vi.mock('../../../../util/cache/repository');
-vi.mock('../../../../util/git');
-const cache = mocked(_cache);
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
   describe('setOnboardingCache', () => {

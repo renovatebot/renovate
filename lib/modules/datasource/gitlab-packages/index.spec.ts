@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource } from './common';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/gitlab-packages/index', () => {
   describe('getReleases', () => {

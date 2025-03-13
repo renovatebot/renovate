@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { range } from '../../../util/range';
 import { datasource, defaultRegistryUrl, pageSize } from './common';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&page=${page}`;

@@ -2,10 +2,10 @@ import fs from 'node:fs/promises';
 import editorconfig from 'editorconfig';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
+import { Fixtures } from '~test/fixtures';
 
 // We can't use memfs, because `node:*` modules are not easily mockable
 vi.mock('editorconfig', { spy: true });

@@ -2,17 +2,18 @@ import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import { mockedExtended } from '../../../test/util';
 import * as exec_ from '../exec';
-import { configSigningKey, writePrivateKey } from './private-key';
-import { setPrivateKey } from '.';
+import {
+  configSigningKey,
+  setPrivateKey,
+  writePrivateKey,
+} from './private-key';
+import { Fixtures } from '~test/fixtures';
+import { mockedExtended } from '~test/util';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('../../../test/fixtures')>(
-      '../../../test/fixtures',
-    )
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
   ).fsExtra(),
 );
 vi.mock('../exec', () => ({ exec: mockFn() }));
@@ -27,6 +28,7 @@ describe('util/git/private-key', () => {
     });
 
     it('returns if no private key', async () => {
+      setPrivateKey(undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
