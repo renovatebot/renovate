@@ -746,7 +746,6 @@ describe('modules/manager/github-actions/extract', () => {
             depName: 'gotestyourself/gotestsum',
             depType: 'uses-with',
             packageName: 'gotestyourself/gotestsum',
-            versioning: 'loose',
           },
           {
             currentValue: '0.4.x',

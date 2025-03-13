@@ -13,7 +13,6 @@ import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as dockerVersioning from '../../versioning/docker';
-import * as looseVersioning from '../../versioning/loose';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
@@ -207,7 +206,6 @@ const communityActions = [
         return {
           datasource: GithubReleasesDatasource.id,
           depName: val.repo,
-          versioning: looseVersioning.id,
           packageName: val.repo,
           currentValue: val.tag,
           depType: 'uses-with',
