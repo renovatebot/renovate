@@ -201,7 +201,7 @@ export async function updateArtifacts({
     flags.push(`toolchain@${goMod.toolchain ?? 'none'}`);
   }
 
-  if (!semver.satisfies(goMod.go, '^1.17.0')) {
+  if (!semver.satisfies(goMod.go, '>=1.17.0')) {
     flags.push('-d');
   }
 
