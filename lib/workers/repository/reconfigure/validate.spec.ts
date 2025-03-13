@@ -11,7 +11,6 @@ import { validateReconfigureBranch } from './validate';
 
 vi.mock('../../../util/cache/repository');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../init/merge');
 
 const cache = mocked(_cache);

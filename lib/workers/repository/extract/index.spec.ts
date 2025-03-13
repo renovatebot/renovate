@@ -7,7 +7,6 @@ import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
 
 vi.mock('./manager-files');
-vi.mock('../../../util/git');
 
 const managerFiles = mocked(_managerFiles);
 

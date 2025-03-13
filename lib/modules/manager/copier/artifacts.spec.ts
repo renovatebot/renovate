@@ -12,7 +12,6 @@ import { updateArtifacts } from '.';
 
 const datasource = vi.mocked(_datasource);
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
 

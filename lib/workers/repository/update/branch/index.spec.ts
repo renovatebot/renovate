@@ -65,7 +65,6 @@ vi.mock('../../../../util/exec');
 vi.mock('../../../../util/merge-confidence');
 vi.mock('../../../../util/sanitize');
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('../../../global/limits');
 vi.mock('../../../../util/cache/repository');
 

@@ -12,7 +12,6 @@ vi.mock('fs-extra', async () =>
     )
   ).fsExtra(),
 );
-vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('/tmp/repo'),

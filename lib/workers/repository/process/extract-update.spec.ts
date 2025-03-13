@@ -32,7 +32,6 @@ vi.mock('./vulnerabilities', () => {
 vi.mock('../updates/branchify');
 vi.mock('../extract');
 vi.mock('../../../util/cache/repository');
-vi.mock('../../../util/git');
 
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);

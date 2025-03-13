@@ -23,7 +23,6 @@ import {
   writeUpdates,
 } from './write';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/cache/repository');
 vi.mock('./limits');
 vi.mock('../update/branch');

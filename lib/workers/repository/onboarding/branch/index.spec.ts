@@ -25,7 +25,6 @@ const configModule: any = _config;
 
 vi.mock('../../../../util/cache/repository');
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('./config');
 vi.mock('./rebase');
 vi.mock('./onboarding-branch-cache');

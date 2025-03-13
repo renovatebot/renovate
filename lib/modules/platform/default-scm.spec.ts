@@ -2,8 +2,6 @@ import { git, partial } from '../../../test/util';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import { DefaultGitScm } from './default-scm';
 
-vi.mock('../../util/git');
-
 describe('modules/platform/default-scm', () => {
   const defaultGitScm = new DefaultGitScm();
 

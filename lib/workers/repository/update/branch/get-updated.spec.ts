@@ -38,7 +38,6 @@ vi.mock('../../../../modules/manager/batect-wrapper');
 vi.mock('../../../../modules/manager/pep621');
 vi.mock('../../../../modules/manager/pip-compile');
 vi.mock('../../../../modules/manager/poetry');
-vi.mock('../../../../util/git');
 vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {

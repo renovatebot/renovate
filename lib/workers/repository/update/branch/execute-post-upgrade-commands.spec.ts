@@ -5,7 +5,6 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {

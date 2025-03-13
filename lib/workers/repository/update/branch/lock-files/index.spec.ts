@@ -14,7 +14,6 @@ const config: PostUpdateConfig = {
 
 const hostRules = mocked(_hostRules);
 
-vi.mock('../../../../../util/git');
 vi.mock('../../../../../util/fs');
 vi.mock('../../../../../util/host-rules');
 

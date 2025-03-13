@@ -5,7 +5,6 @@ import type { Pr } from '../../../../modules/platform';
 import { codeOwnersForPr } from './code-owners';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {

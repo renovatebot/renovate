@@ -23,7 +23,6 @@ const datasource = mocked(_datasource);
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http');
 vi.mock('../../datasource', () => mockDeep());

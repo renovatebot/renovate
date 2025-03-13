@@ -8,7 +8,6 @@ import type {
   GerritRevisionInfo,
 } from './types';
 
-vi.mock('../../../util/git');
 vi.mock('./client');
 const clientMock = mocked(_client);
 

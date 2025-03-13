@@ -6,7 +6,6 @@ import type { PlatformResult, RepoParams } from '../types';
 import type { PrTask } from './schema';
 import * as bitbucket from '.';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://api.bitbucket.org';

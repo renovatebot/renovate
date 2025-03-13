@@ -31,7 +31,6 @@ const codeReviewLabel: GerritLabelTypeInfo = {
 };
 
 vi.mock('../../../util/host-rules');
-vi.mock('../../../util/git');
 vi.mock('./client');
 const clientMock = mocked(_client);
 const hostRules = mocked(_hostRules);

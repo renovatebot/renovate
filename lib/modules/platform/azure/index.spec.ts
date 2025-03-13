@@ -23,7 +23,6 @@ import { AzurePrVote } from './types';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 vi.mock('./azure-helper', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/sanitize', () =>
   mockDeep({ sanitize: (s: string) => s }),

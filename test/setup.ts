@@ -23,6 +23,8 @@ vi.mock('../lib/logger', () => {
   });
 });
 
+vi.mock('../lib/util/git', () => mockDeep());
+
 Object.defineProperty(global, 'fixtures', { value: _fixtures });
 declare global {
   const fixtures: typeof _fixtures;

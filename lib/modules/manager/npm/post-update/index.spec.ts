@@ -19,7 +19,6 @@ import {
 } from './';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('./npm');
 vi.mock('./yarn');
 vi.mock('./pnpm');

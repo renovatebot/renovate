@@ -12,7 +12,6 @@ import * as pub from '.';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/http');
 vi.mock('../../datasource', () => mockDeep());
 

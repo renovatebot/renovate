@@ -38,7 +38,6 @@ vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http/queue');
 const hostRules = vi.mocked(_hostRules);
 
-vi.mock('../../../util/git');
 const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
