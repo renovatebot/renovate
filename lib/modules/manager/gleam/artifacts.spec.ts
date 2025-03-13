@@ -1,10 +1,10 @@
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+import { exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
-import { exec } from '~test/exec-util';
 import { fs } from '~test/util';
 
 vi.mock('../../../util/exec');
@@ -111,7 +111,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
-      exec.mockRejectedValueOnce(execError);
+      vi.mocked(exec).mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
       );
@@ -138,7 +138,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock.toString());
-      exec.mockRejectedValueOnce(execError);
+      vi.mocked(exec).mockRejectedValueOnce(execError);
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {

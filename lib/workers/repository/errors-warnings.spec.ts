@@ -87,7 +87,7 @@ describe('workers/repository/errors-warnings', () => {
         ---
 
         > ⚠️ **Warning**
-        >
+        > 
         > Some dependencies could not be looked up. Check the Dependency Dashboard for more information.
 
         "
@@ -135,7 +135,7 @@ describe('workers/repository/errors-warnings', () => {
         ---
 
         > ⚠️ **Warning**
-        >
+        > 
         > Some dependencies could not be looked up. Check the warning logs for more information.
 
         "
@@ -199,9 +199,9 @@ describe('workers/repository/errors-warnings', () => {
         ---
 
         > ⚠️ **Warning**
-        >
+        > 
         > Renovate failed to look up the following dependencies: \`dependency-1\`, \`dependency-2\`.
-        >
+        > 
         > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         ---
@@ -305,14 +305,14 @@ describe('workers/repository/errors-warnings', () => {
       expect(res).toMatchInlineSnapshot(`
         "
         ---
-        >
+        > 
         > ⚠️ **Warning**
-        >
+        > 
         > Please correct - or verify that you can safely ignore - these dependency lookup failures before you merge this PR.
-        >
+        > 
         > -   \`Warning 1\`
         > -   \`Warning 2\`
-        >
+        > 
         > Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
 
         "

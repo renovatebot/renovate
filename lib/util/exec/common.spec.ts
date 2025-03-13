@@ -6,6 +6,8 @@ import type { DataListener, RawExecOptions } from './types';
 import { partial } from '~test/util';
 
 vi.mock('node:child_process');
+vi.unmock('./common');
+
 const spawn = vi.mocked(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
