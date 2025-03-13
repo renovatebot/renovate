@@ -1,21 +1,20 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, scm } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/git');
 vi.mock('./util');
 
-const { getDefaultRegistries, findGlobalJson } = mocked(util);
+const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 

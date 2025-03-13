@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const packageFile = 'setup.py';
 

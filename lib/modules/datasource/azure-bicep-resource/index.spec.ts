@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import * as httpMock from '../../../../test/http-mock';
 import { AzureBicepResourceDatasource } from './index';
+import * as httpMock from '~test/http-mock';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const indexPath = '/Azure/bicep-types-az/main/generated/index.json';

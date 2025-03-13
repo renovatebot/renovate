@@ -1,6 +1,6 @@
 import { parseSyml } from '@yarnpkg/parsers';
-import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
+import { Fixtures } from '~test/fixtures';
 
 const yarnLock1 = parseSyml(Fixtures.get('express.yarn.lock'));
 const yarnLock3 = parseSyml(Fixtures.get('3.yarn.lock'));

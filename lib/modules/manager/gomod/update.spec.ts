@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateType } from '../../../config/types';
 import { updateDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');

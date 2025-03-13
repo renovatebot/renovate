@@ -5,14 +5,14 @@ import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
-import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
 vi.mock('../../../util/host-rules', () => mockDeep());

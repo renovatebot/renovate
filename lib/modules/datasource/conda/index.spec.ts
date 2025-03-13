@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 import { CondaDatasource } from './index';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const packageName = 'main/pytest';
 const depUrl = `/${packageName}`;

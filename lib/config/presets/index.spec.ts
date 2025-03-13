@@ -1,5 +1,4 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
 import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
@@ -16,17 +15,18 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
-import { logger, mocked } from '~test/util';
+import { Fixtures } from '~test/fixtures';
+import { logger } from '~test/util';
 
 vi.mock('./npm');
 vi.mock('./github');
 vi.mock('./local');
 vi.mock('../../util/cache/package', () => mockDeep());
 
-const npm = mocked(_npm);
-const local = mocked(_local);
-const gitHub = mocked(_github);
-const packageCache = mocked(_packageCache);
+const npm = vi.mocked(_npm);
+const local = vi.mocked(_local);
+const gitHub = vi.mocked(_github);
+const packageCache = vi.mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 

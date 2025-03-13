@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../../../../test/fixtures';
 import { findDepConstraints } from './dep-constraints';
+import { Fixtures } from '~test/fixtures';
 
 vi.mock('../../../../../../util/fs');
 

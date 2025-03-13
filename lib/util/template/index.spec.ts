@@ -1,11 +1,10 @@
-import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
 import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
 vi.mock('../exec/utils');
 
-const execUtils = mocked(_execUtils);
+const execUtils = vi.mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {

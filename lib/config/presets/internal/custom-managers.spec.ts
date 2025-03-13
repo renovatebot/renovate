@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { regexMatches } from '../../../../test/util';
 import { extractPackageFile } from '../../../modules/manager';
 import { presets } from './custom-managers';
+import { regexMatches } from '~test/util';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `$schema` version in biome.json', () => {

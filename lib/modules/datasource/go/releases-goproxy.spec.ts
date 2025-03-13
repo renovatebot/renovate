@@ -1,14 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubReleasesDatasource } from '../github-releases';
 import { GithubTagsDatasource } from '../github-tags';
 import { GoProxyDatasource } from './releases-goproxy';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 vi.mock('../../../util/host-rules', () => mockDeep());
 
 const datasource = new GoProxyDatasource();

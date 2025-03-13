@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const validContents = Fixtures.get('valid-contents.yaml');
 const invalidContents = Fixtures.get('invalid-contents.yaml');
