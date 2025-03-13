@@ -1,6 +1,6 @@
-import type { RenovateConfig } from '../../../test/util';
-import { partial } from '../../../test/util';
 import { checkIfConfigured } from './configured';
+import type { RenovateConfig } from '~test/util';
+import { partial } from '~test/util';
 
 let config: RenovateConfig;
 

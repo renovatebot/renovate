@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
 import * as hostRules from '../../../../../lib/util/host-rules';
-import { Fixtures } from '../../../../../test/fixtures';
-import * as httpMock from '../../../../../test/http-mock';
-import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
 import type { AllConfig } from '../../../../config/types';
@@ -34,6 +31,9 @@ import { Result } from '../../../../util/result';
 import type { Timestamp } from '../../../../util/timestamp';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),

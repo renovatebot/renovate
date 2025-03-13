@@ -1,6 +1,4 @@
 // TODO #22198
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
   extractAllPackageFiles,
@@ -8,6 +6,8 @@ import {
   resolveParents,
 } from './extract';
 import { updateDependency } from './update';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

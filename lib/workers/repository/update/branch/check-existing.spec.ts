@@ -1,8 +1,8 @@
-import { partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import { prAlreadyExisted } from './check-existing';
+import { partial, platform } from '~test/util';
 
 describe('workers/repository/update/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {

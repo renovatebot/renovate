@@ -1,4 +1,3 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -11,6 +10,7 @@ import {
   parseKustomize,
 } from './extract';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const kustomizeGitSSHBase = Fixtures.get('gitSshBase.yaml');
 const kustomizeEmpty = Fixtures.get('kustomizeEmpty.yaml');

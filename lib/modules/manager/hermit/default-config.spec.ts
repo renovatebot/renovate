@@ -1,6 +1,6 @@
-import { regexMatches } from '../../../../test/util';
 import { minimatch } from '../../../util/minimatch';
 import { defaultConfig } from './default-config';
+import { regexMatches } from '~test/util';
 
 describe('modules/manager/hermit/default-config', () => {
   describe('excludeCommitPaths', () => {
