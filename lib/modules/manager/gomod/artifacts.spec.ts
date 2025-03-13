@@ -123,7 +123,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -169,7 +169,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -227,7 +227,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -278,7 +278,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -359,7 +359,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -425,7 +425,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -507,7 +507,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -585,7 +585,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -629,7 +629,7 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool golang 1.23.3' },
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {},
@@ -668,7 +668,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -750,7 +750,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           '"',
         options: {
           cwd: '/tmp/github/some/repo',
@@ -1260,7 +1260,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           ' && ' +
           'go mod tidy' +
           ' && ' +
@@ -1324,7 +1324,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           ' && ' +
           'go mod tidy -compat=1.17' +
           ' && ' +
@@ -1388,7 +1388,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           ' && ' +
           'go mod tidy -compat=1.17 -e' +
           ' && ' +
@@ -1452,7 +1452,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           ' && ' +
           'go mod tidy -e' +
           ' && ' +
@@ -1522,7 +1522,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1578,7 +1578,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1635,7 +1635,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1680,7 +1680,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1729,7 +1729,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1774,7 +1774,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1810,7 +1810,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1852,7 +1852,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1910,7 +1910,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -1964,7 +1964,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -2026,7 +2026,7 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool golang 1.23.3' },
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -2161,7 +2161,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.23.6',
       },
       {
-        cmd: 'go get -t -d ./...',
+        cmd: 'go get -d -t ./...',
       },
     ]);
   });
@@ -2357,7 +2357,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -t -d ./...' +
+          'go get -d -t ./...' +
           ' && ' +
           'go install github.com/marwan-at-work/mod/cmd/mod@latest' +
           ' && ' +
@@ -2395,7 +2395,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: "go get -t -d . foo .bar/... '&&' cat",
+        cmd: "go get -d -t . foo .bar/... '&&' cat",
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -2435,7 +2435,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -t -d .',
+        cmd: 'go get -d -t .',
         options: {
           cwd: '/tmp/github/some/repo',
         },

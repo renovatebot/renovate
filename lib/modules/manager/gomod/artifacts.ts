@@ -196,7 +196,7 @@ export async function updateArtifacts({
 
   const getFlags = ['-t'];
   if (!semver.satisfies(goMod.minialGoVersion, '>=1.17.0')) {
-    getFlags.push('-d');
+    getFlags.unshift('-d');
   }
 
   const extraGetArguments: string[] = [];
