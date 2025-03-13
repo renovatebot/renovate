@@ -1,9 +1,9 @@
-import { Fixtures } from '../../../test/fixtures';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig } from '../decrypt';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
 import { tryDecryptKbPgp } from './kbpgp';
+import { Fixtures } from '~test/fixtures';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const repository = 'abc/def';

@@ -1,5 +1,4 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import type { Timestamp } from '../../../util/timestamp';
 import * as versioning from '../../versioning/docker';
 import type {
@@ -7,6 +6,7 @@ import type {
   JenkinsPluginsVersionsResponse,
 } from './types';
 import { JenkinsPluginsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const jenkinsPluginsInfo: JenkinsPluginsInfoResponse = {
   plugins: {

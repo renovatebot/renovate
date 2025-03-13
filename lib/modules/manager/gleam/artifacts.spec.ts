@@ -1,18 +1,14 @@
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec as _exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
-import * as _fs from '../../../util/fs';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import { exec } from '~test/exec-util';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/exec');
 vi.mock('../../../util/fs');
-
-const exec = mocked(_exec);
-const fs = mocked(_fs);
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',

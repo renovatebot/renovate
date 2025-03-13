@@ -1,8 +1,8 @@
-import { fs, git, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as postUpgradeCommands from './execute-post-upgrade-commands';
+import { fs, git, logger, partial } from '~test/util';
 
 vi.mock('../../../../util/fs');
 

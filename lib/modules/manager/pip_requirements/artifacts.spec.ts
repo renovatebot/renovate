@@ -1,14 +1,14 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/exec/common');
 vi.mock('../../../util/fs');
