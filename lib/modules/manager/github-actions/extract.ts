@@ -12,6 +12,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
+import * as looseVersioning from '../../versioning/loose';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -19,6 +20,8 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Workflow } from './types';
+import { Result } from '../../../util/result';
+import z from 'zod';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -193,6 +196,25 @@ function extractRunners(runner: unknown): PackageDependency[] {
   return runners.map(extractRunner).filter(isNotNullOrUndefined);
 }
 
+const communityActions = [
+  {
+    // https://github.com/jaxxstorm/action-install-gh-release
+    use: /^jaxxstorm\/action-install-gh-release@.*$/,
+    schema: z
+      .object({ with: z.object({ repo: z.string(), tag: z.string() }) })
+      .transform(({ with: val }) => {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          depName: val.repo,
+          versioning: looseVersioning.id,
+          packageName: val.repo,
+          currentValue: val.tag,
+          depType: 'uses-with',
+        };
+      }),
+  },
+];
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
@@ -246,6 +268,17 @@ function extractWithYAMLParser(
     };
 
     for (const step of coerceArray(job?.steps)) {
+      if (step.uses) {
+        for (const action of communityActions) {
+          if (action.use.test(step.uses)) {
+            const val = Result.parse(step, action.schema).unwrapOrNull();
+            if (val) {
+              deps.push(val);
+            }
+          }
+        }
+      }
+
       for (const [action, actionData] of Object.entries(actionsWithVersions)) {
         const actionName = `actions/setup-${action}`;
         if (

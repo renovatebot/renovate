@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 
 const runnerTestWorkflow = `
 jobs:
@@ -702,6 +703,37 @@ describe('modules/manager/github-actions/extract', () => {
           versioning: 'node',
           extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
           depType: 'uses-with',
+        },
+      ]);
+    });
+
+    it('extracts package from community actions', () => {
+      const yamlContent = `
+        jobs:
+          build:
+            steps:
+              - name: Install gotestsum
+                uses: jaxxstorm/action-install-gh-release@v1.10.0
+                with:
+                  repo: gotestyourself/gotestsum
+                  tag: v1.12.1
+                  platform: linux
+                  arch: amd64
+              `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(
+        res?.deps.filter(
+          (pkg) => pkg.datasource === GithubReleasesDatasource.id,
+        ),
+      ).toMatchObject([
+        {
+          currentValue: 'v1.12.1',
+          datasource: 'github-releases',
+          depName: 'gotestyourself/gotestsum',
+          depType: 'uses-with',
+          packageName: 'gotestyourself/gotestsum',
+          versioning: 'loose',
         },
       ]);
     });
