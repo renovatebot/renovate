@@ -192,7 +192,7 @@ export async function updateArtifacts({
   }
 
   const goMod = getGoConfig(newGoModContent);
-  const goConstraints = config.constraints?.go ?? `${goMod.minialGoVersion}`;
+  const goConstraints = config.constraints?.go ?? `^${goMod.minialGoVersion}`;
 
   const getFlags = ['-t'];
   if (!semver.satisfies(goMod.minialGoVersion, '>=1.17.0')) {

@@ -2134,6 +2134,14 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
 
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.17.0' },
+        { version: '1.23.3' },
+        { version: '1.23.6' },
+      ],
+    });
+
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
@@ -2156,8 +2164,6 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'go get -t -d ./...',
       },
     ]);
-
-    expect(datasource.getPkgReleases).toBeCalledTimes(0);
   });
 
   it('go.mod file contains full go version without toolchain', async () => {
