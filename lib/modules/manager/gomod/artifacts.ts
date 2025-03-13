@@ -195,14 +195,14 @@ export async function updateArtifacts({
   const goConstraints =
     config.constraints?.go ?? goMod.toolchain ?? goMod.constraints;
 
-  const flags: string[] = [];
-
-  if (semver.satisfies(goMod.go, '>=1.21.0')) {
-    flags.push(`toolchain@${goMod.toolchain ?? 'none'}`);
-  }
-
+  const flags = ['-t'];
   if (!semver.satisfies(goMod.go, '>=1.17.0')) {
     flags.push('-d');
+  }
+
+  const extraGetOptions: string[] = [];
+  if (semver.satisfies(goMod.go, '>=1.21.0')) {
+    extraGetOptions.push(`toolchain@${goMod.toolchain ?? 'none'}`);
   }
 
   try {
@@ -254,7 +254,8 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get -t ${goGetDirs ?? './...'} ${flags.join(' ')}`.trimEnd();
+    let args =
+      `get ${flags.join(' ')} ${goGetDirs ?? './...'} ${extraGetOptions.join(' ')}`.trimEnd();
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
