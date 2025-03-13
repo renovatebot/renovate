@@ -2,7 +2,6 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
 
 const runnerTestWorkflow = `
 jobs:
@@ -723,7 +722,7 @@ describe('modules/manager/github-actions/extract', () => {
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(
-        res?.deps.filter((pkg) => pkg.depType === 'uses-with'),
+        res?.deps.filter((pkg) => pkg.depType !== 'actions'),
       ).toMatchObject([
         {
           currentValue: 'v1.12.1',

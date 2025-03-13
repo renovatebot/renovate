@@ -13,9 +13,9 @@ import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import * as looseVersioning from '../../versioning/loose';
+import * as looseVersioning from '../../versioning/loose';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
-import * as looseVersioning from '../../versioning/loose';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -23,8 +23,6 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Workflow } from './types';
-import { Result } from '../../../util/result';
-import z from 'zod';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
