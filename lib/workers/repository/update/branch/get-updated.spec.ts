@@ -1,5 +1,4 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
@@ -15,18 +14,19 @@ import type { PackageFile } from '../../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
+import { git } from '~test/util';
 
-const bundler = mocked(_bundler);
-const composer = mocked(_composer);
-const gitSubmodules = mocked(_gitSubmodules);
-const gomod = mocked(_gomod);
-const helmv3 = mocked(_helmv3);
-const npm = mocked(_npm);
-const batectWrapper = mocked(_batectWrapper);
-const autoReplace = mocked(_autoReplace);
-const pep621 = mocked(_pep621);
-const pipCompile = mocked(_pipCompile);
-const poetry = mocked(_poetry);
+const bundler = vi.mocked(_bundler);
+const composer = vi.mocked(_composer);
+const gitSubmodules = vi.mocked(_gitSubmodules);
+const gomod = vi.mocked(_gomod);
+const helmv3 = vi.mocked(_helmv3);
+const npm = vi.mocked(_npm);
+const batectWrapper = vi.mocked(_batectWrapper);
+const autoReplace = vi.mocked(_autoReplace);
+const pep621 = vi.mocked(_pep621);
+const pipCompile = vi.mocked(_pipCompile);
+const poetry = vi.mocked(_poetry);
 
 vi.mock('../../../../modules/manager/bundler');
 vi.mock('../../../../modules/manager/composer');
@@ -38,7 +38,6 @@ vi.mock('../../../../modules/manager/batect-wrapper');
 vi.mock('../../../../modules/manager/pep621');
 vi.mock('../../../../modules/manager/pip-compile');
 vi.mock('../../../../modules/manager/poetry');
-vi.mock('../../../../util/git');
 vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {

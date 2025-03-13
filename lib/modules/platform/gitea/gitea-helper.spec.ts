@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
@@ -46,6 +44,8 @@ import type {
   RepoContents,
   User,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';

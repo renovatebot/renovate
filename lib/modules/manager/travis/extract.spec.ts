@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const invalidYAML = Fixtures.get('invalid.yml');
 const matrixYAMLwithNodeSyntaxString = Fixtures.get('matrix_jobs.yml');
