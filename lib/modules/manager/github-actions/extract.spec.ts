@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { dump } from '../../../util/yaml';
 
 const runnerTestWorkflow = `
 jobs:
@@ -707,35 +708,62 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts package from community actions', () => {
-      const yamlContent = codeBlock`
-        jobs:
-          build:
-            steps:
-              - name: Pinning a minor version of uv
-                uses: astral-sh/setup-uv@v5
-                with:
-                  version: "latest"
-              - uses: pnpm/action-setup@v4
-                with:
-                  version: "latest"
-              - name: Install gotestsum
-                uses: jaxxstorm/action-install-gh-release@v1.10.0
-                with:
-                  repo: gotestyourself/gotestsum
-                  tag: v1.12.1
-                  platform: linux
-                  arch: amd64
-              - name: Pinning a minor version of uv
-                uses: astral-sh/setup-uv@v5
-                with:
-                  version: "0.4.x"
-              - uses: pnpm/action-setup@v4
-                with:
-                  version: 10
-              - uses: pnpm/action-setup@v4
-                with:
-                  version: 10.x
-              `;
+      const yamlContent = dump({
+        jobs: {
+          build: {
+            steps: [
+              {
+                name: 'Pinning a minor version of uv',
+                uses: 'astral-sh/setup-uv@v5',
+                with: {
+                  version: 'latest',
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: 'latest',
+                },
+              },
+              {
+                name: 'Install gotestsum',
+                uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
+                with: {
+                  repo: 'gotestyourself/gotestsum',
+                  tag: 'v1.12.1',
+                  platform: 'linux',
+                  arch: 'amd64',
+                },
+              },
+              {
+                name: 'Pinning a minor version of uv',
+                uses: 'astral-sh/setup-uv@v5',
+                with: {
+                  version: '0.4.x',
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: 10,
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: '10.x',
+                },
+              },
+              {
+                uses: 'pdm-project/setup-pdm@v4.2',
+                with: {
+                  version: '1.2.3',
+                },
+              },
+            ],
+          },
+        },
+      });
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
@@ -770,6 +798,14 @@ describe('modules/manager/github-actions/extract', () => {
             depType: 'uses-with',
             packageName: 'pnpm',
             versioning: 'npm',
+          },
+          {
+            currentValue: '1.2.3',
+            datasource: 'pypi',
+            depName: 'pdm',
+            depType: 'uses-with',
+            packageName: 'pdm',
+            versioning: 'pep440',
           },
         ],
       );

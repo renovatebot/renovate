@@ -12,9 +12,11 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
+import { PypiDatasource } from '../../datasource/pypi';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
+import * as pep440versioning from '../../versioning/pep440';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -254,6 +256,24 @@ const communityActions = [
           depName: 'pnpm',
           versioning: npmVersioning.id,
           packageName: 'pnpm',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
+  {
+    // https://github.com/astral-sh/setup-uv
+    use: /^pdm-project\/setup-pdm@.*$/,
+    schema: z
+      .object({
+        with: z.object({ version: z.string().refine((s) => s !== 'head') }),
+      })
+      .transform(({ with: val }): PackageDependency | undefined => {
+        return {
+          datasource: PypiDatasource.id,
+          depName: 'pdm',
+          versioning: pep440versioning.id,
+          packageName: 'pdm',
           currentValue: val.version,
           depType: 'uses-with',
         };
