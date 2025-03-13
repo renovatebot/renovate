@@ -202,7 +202,7 @@ const communityActions = [
     use: /^jaxxstorm\/action-install-gh-release@.*$/,
     schema: z
       .object({ with: z.object({ repo: z.string(), tag: z.string() }) })
-      .transform(({ with: val }) => {
+      .transform(({ with: val }): PackageDependency => {
         return {
           datasource: GithubReleasesDatasource.id,
           depName: val.repo,
@@ -218,7 +218,7 @@ const communityActions = [
     use: /^astral-sh\/setup-uv@.*$/,
     schema: z
       .object({ with: z.object({ version: z.string() }) })
-      .transform(({ with: val }) => {
+      .transform(({ with: val }): PackageDependency | undefined => {
         if (val.version === 'latest') {
           return;
         }
