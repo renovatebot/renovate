@@ -43,14 +43,16 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
 
 const PagedResponseSchema = z.object({
   data: z.object({
-    package: z.object({
-      variants: z
-        .object({
-          pages: z.number(),
-          page: z.array(File),
-        })
-        .nullable(),
-    }),
+    package: z
+      .object({
+        variants: z
+          .object({
+            pages: z.number(),
+            page: z.array(File),
+          })
+          .nullable(),
+      })
+      .nullable(),
   }),
 });
 
