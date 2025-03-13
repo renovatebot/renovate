@@ -56,6 +56,7 @@ cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
 conftest 0.56.0
+container-structure-test 1.19.2
 cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
@@ -81,6 +82,7 @@ gomplate 3.11.7
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
+helm-docs 1.14.1
 helmfile 0.147.0
 hugo 0.104.3
 idris 1.3.4
@@ -90,7 +92,9 @@ just 1.7.0
 k3s 1.31.2+k3s1
 kind 0.19.0
 kotlin 1.7.20
+kubebuilder 3.10.0
 kubectl 1.26.3
+kubetail 1.6.19
 kustomize 4.5.7
 lua 5.4.4
 markdownlint-cli2 0.13.0
@@ -118,8 +122,12 @@ sbt 1.9.7
 scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
+skaffold 2.14.0
+talhelper 3.0.18
+talosctl 1.9.3
 terraform 1.3.3
 terraform-docs 0.16.0
+terraformer 0.8.21
 terragrunt 0.43.2
 tflint 0.44.1
 tfsec 1.28.1
@@ -218,6 +226,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'open-policy-agent/conftest',
             depName: 'conftest',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.19.2',
+            datasource: 'github-tags',
+            packageName: 'GoogleContainerTools/container-structure-test',
+            depName: 'container-structure-test',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -387,6 +402,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.14.1',
+            datasource: 'github-releases',
+            packageName: 'norwoodj/helm-docs',
+            depName: 'helm-docs',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '0.147.0',
             datasource: 'github-releases',
             packageName: 'helmfile/helmfile',
@@ -448,11 +470,24 @@ dummy 1.2.3
             extractVersion: '^(Kotlin |v)(?<version>\\S+)',
           },
           {
+            currentValue: '3.10.0',
+            datasource: 'github-tags',
+            packageName: 'kubernetes-sigs/kubebuilder',
+            depName: 'kubebuilder',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '1.26.3',
             datasource: 'github-tags',
             packageName: 'kubernetes/kubernetes',
             depName: 'kubectl',
             extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '1.6.19',
+            datasource: 'github-releases',
+            packageName: 'johanhaleby/kubetail',
+            depName: 'kubetail',
           },
           {
             currentValue: '4.5.7',
@@ -636,6 +671,27 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '2.14.0',
+            datasource: 'github-tags',
+            packageName: 'GoogleContainerTools/skaffold',
+            depName: 'skaffold',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.0.18',
+            datasource: 'github-tags',
+            packageName: 'budimanjojo/talhelper',
+            depName: 'talhelper',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.9.3',
+            datasource: 'github-tags',
+            packageName: 'siderolabs/talos',
+            depName: 'talosctl',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.3.3',
             datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
@@ -648,6 +704,12 @@ dummy 1.2.3
             packageName: 'terraform-docs/terraform-docs',
             depName: 'terraform-docs',
             extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '0.8.21',
+            datasource: 'github-releases',
+            packageName: 'GoogleCloudPlatform/terraformer',
+            depName: 'terraformer',
           },
           {
             currentValue: '0.43.2',
