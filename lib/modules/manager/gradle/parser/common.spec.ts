@@ -1,4 +1,5 @@
 import type { lexer } from 'good-enough-parser';
+import { lang } from 'good-enough-parser';
 import { partial } from '../../../../../test/util';
 import type { Ctx } from '../types';
 import {
@@ -9,6 +10,7 @@ import {
   interpolateString,
   loadFromTokenMap,
   prependNestingDepth,
+  qUri,
   reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
@@ -16,6 +18,7 @@ import {
 } from './common';
 
 describe('modules/manager/gradle/parser/common', () => {
+  const groovy = lang.createLang('groovy');
   let ctx: Ctx;
   const token = partial<lexer.Token>({ value: 'test' });
 
@@ -175,5 +178,19 @@ describe('modules/manager/gradle/parser/common', () => {
         ctx,
       ),
     ).toBeNull();
+  });
+
+  describe('qUri', () => {
+    it.each`
+      input                           | url
+      ${'"https://foo.bar/baz"'}      | ${'https://foo.bar/baz'}
+      ${'uri("https://foo.bar/baz")'} | ${'https://foo.bar/baz'}
+    `('$input', ({ input, url }) => {
+      const result = groovy.query(input, qUri, ctx);
+
+      expect(result).toMatchObject({
+        varTokens: [{ value: url }],
+      });
+    });
   });
 });
