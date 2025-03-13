@@ -468,7 +468,7 @@ function getGoConfig(content: string): {
   const match = regEx(/^go\s*(?<gover>\d+(\.\d+)+)$/m).exec(content);
 
   // go mod spec says if go directive is missing it's 1.16
-  let goDirective = match?.groups?.gover ?? '1.16';
+  const goDirective = match?.groups?.gover ?? '1.16';
   let goVersion = goDirective;
 
   // partial semver version without patch
