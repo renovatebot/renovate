@@ -2194,7 +2194,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.23.5',
       },
       {
-        cmd: 'go get -t ./... -d',
+        cmd: 'go get -t ./... toolchain@none',
       },
     ]);
 

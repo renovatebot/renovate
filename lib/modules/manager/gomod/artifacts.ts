@@ -472,7 +472,7 @@ function getGoConfig(content: string): {
   let goVersion = goDirective;
 
   // partial semver version without patch
-  if (/\d+\.\d+/.test(goVersion)) {
+  if (/^\d+\.\d+$/.test(goVersion)) {
     goVersion = `${goVersion}.0`;
   }
 
@@ -481,6 +481,6 @@ function getGoConfig(content: string): {
     go: goVersion,
     constraints:
       toolchainVer ??
-      (/\d+\.\d+\.\d+/.test(goDirective) ? goDirective : `^${goDirective}`),
+      (/^\d+\.\d+\.\d+$/.test(goDirective) ? goDirective : `^${goDirective}`),
   };
 }
