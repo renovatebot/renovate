@@ -2,20 +2,19 @@ import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import { mockedExtended } from '../../../test/util';
 import * as exec_ from '../exec';
 import { configSigningKey, writePrivateKey } from './private-key';
 import { setPrivateKey } from '.';
+import { Fixtures } from '~test/fixtures';
+import { mockedExtended } from '~test/util';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('../../../test/fixtures')>(
-      '../../../test/fixtures',
-    )
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
   ).fsExtra(),
 );
 vi.mock('../exec', () => ({ exec: mockFn() }));
+vi.unmock('.');
 
 const exec = mockedExtended(exec_);
 

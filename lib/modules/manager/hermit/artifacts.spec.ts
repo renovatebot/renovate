@@ -8,7 +8,6 @@ import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 
 const getRepoStatusMock = mockedFunction(getRepoStatus);

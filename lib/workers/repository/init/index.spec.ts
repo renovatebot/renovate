@@ -8,7 +8,6 @@ import * as _config from './config';
 import * as _merge from './merge';
 import { initRepo } from '.';
 
-vi.mock('../../../util/git');
 vi.mock('../onboarding/branch');
 vi.mock('../configured');
 vi.mock('../init/apis');

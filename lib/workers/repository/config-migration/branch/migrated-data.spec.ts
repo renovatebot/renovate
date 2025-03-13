@@ -10,7 +10,6 @@ import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 vi.mock('../../../../config/migration');
-vi.mock('../../../../util/git');
 vi.mock('../../../../util/fs');
 vi.mock('../../../../util/json-writer');
 vi.mock('../../init/merge');

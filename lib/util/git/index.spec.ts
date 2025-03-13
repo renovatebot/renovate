@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
@@ -14,15 +13,18 @@ import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+import { logger } from '~test/util';
 
 vi.mock('./conflicts-cache');
 vi.mock('./behind-base-branch-cache');
 vi.mock('./modified-cache');
 vi.mock('timers/promises');
 vi.mock('../cache/repository');
-const behindBaseCache = mocked(_behindBaseCache);
-const conflictsCache = mocked(_conflictsCache);
-const modifiedCache = mocked(_modifiedCache);
+vi.unmock('.');
+
+const behindBaseCache = vi.mocked(_behindBaseCache);
+const conflictsCache = vi.mocked(_conflictsCache);
+const modifiedCache = vi.mocked(_modifiedCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 

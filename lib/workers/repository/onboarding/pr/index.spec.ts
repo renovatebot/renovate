@@ -11,8 +11,6 @@ import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
 
-vi.mock('../../../../util/git');
-
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;

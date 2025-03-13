@@ -9,7 +9,6 @@ import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
-vi.mock('../../../util/git');
 vi.mock('./extract-update');
 
 const extract = mocked(_extractUpdate).extract;

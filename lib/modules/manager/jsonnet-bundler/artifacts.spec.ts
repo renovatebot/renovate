@@ -9,7 +9,6 @@ import { updateArtifacts } from '.';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

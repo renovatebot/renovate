@@ -20,7 +20,6 @@ import { checkConfigMigrationBranch } from '.';
 vi.mock('./migrated-data');
 vi.mock('./rebase');
 vi.mock('./create');
-vi.mock('../../../../util/git');
 vi.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');

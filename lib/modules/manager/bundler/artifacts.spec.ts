@@ -26,7 +26,6 @@ const bundlerHostRules = mocked(_bundlerHostRules);
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('./host-rules');
 

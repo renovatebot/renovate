@@ -8,7 +8,6 @@ import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 
 const globalConfig: RepoGlobalConfig = {

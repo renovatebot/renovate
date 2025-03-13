@@ -12,7 +12,6 @@ import * as nuget from '.';
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
 vi.mock('../../../util/host-rules', () => mockDeep());
-vi.mock('../../../util/git');
 vi.mock('./util');
 
 const { getDefaultRegistries, findGlobalJson } = mocked(util);

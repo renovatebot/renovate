@@ -9,8 +9,6 @@ import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 
-vi.mock('../../../../util/git');
-
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );

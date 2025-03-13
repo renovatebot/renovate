@@ -16,7 +16,6 @@ import * as composer from '.';
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 
 process.env.CONTAINERBASE = 'true';
 

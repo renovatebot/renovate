@@ -28,8 +28,6 @@ import type {
 } from './types';
 import * as gitea from '.';
 
-vi.mock('../../../util/git');
-
 /**
  * latest tested gitea version.
  */

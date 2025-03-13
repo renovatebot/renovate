@@ -17,7 +17,6 @@ import {
 } from './onboarding-branch-cache';
 
 vi.mock('../../../../util/cache/repository');
-vi.mock('../../../../util/git');
 const cache = mocked(_cache);
 
 describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {

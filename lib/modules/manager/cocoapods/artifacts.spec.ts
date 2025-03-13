@@ -11,7 +11,6 @@ import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
 

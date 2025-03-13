@@ -8,7 +8,6 @@ import type { LongCommitSha } from '../../../../util/git/types';
 import { isOnboarded } from './check';
 
 vi.mock('../../../../util/cache/repository');
-vi.mock('../../../../util/git');
 
 const cache = mocked(_cache);
 

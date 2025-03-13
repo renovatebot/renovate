@@ -27,7 +27,6 @@ import {
 } from './merge';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../onboarding/branch/onboarding-branch-cache');
 
 const migrate = mocked(_migrate);

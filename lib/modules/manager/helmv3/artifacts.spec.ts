@@ -20,7 +20,6 @@ vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 const datasource = mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {

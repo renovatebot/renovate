@@ -31,7 +31,6 @@ import * as _prCache from './pr-cache';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
 
-vi.mock('../../../../util/git');
 vi.mock('../../changelog');
 
 vi.mock('../../../global/limits');

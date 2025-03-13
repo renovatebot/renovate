@@ -5,8 +5,6 @@ import type { Pr } from '../../../../modules/platform/types';
 import * as schedule from '../branch/schedule';
 import { tryBranchAutomerge } from './automerge';
 
-vi.mock('../../../../util/git');
-
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     const isScheduledSpy = vi.spyOn(schedule, 'isScheduledNow');

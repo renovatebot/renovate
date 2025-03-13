@@ -12,7 +12,6 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as bitbucket from '.';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
