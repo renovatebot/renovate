@@ -671,3 +671,22 @@
 
 
     Thanks, the Renovate team
+
+'auto:disputed-issue':
+  comment: >
+    Hi there,
+
+
+    In this repo, the purpose of Issues is to track clearly actionable (ready to be worked on) items. Discussions are a triaging ground for general questions, ideas, and other non-actionable items.
+
+
+    If an Issue like this one attracts many comments, it's an indication that its scope is disputed, and therefore it's not actionable. If this is the case, it should be converted back to a Discussion.
+
+
+    If you are commenting in this Issue because you disagree with its requirements or think they're unclear, then please let us know and we will convert this Issue back to a Discussion.
+
+
+    Otherwise, please be aware that excessive comments or debates inside Issue comments result in them being less likely to be worked on, not more likely.
+
+
+    Thanks, the Renovate team
