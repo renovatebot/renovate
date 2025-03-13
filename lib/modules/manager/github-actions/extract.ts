@@ -213,6 +213,25 @@ const communityActions = [
         };
       }),
   },
+  {
+    use: /^astral-sh\/setup-uv@.*$/,
+    schema: z
+      .object({ with: z.object({ version: z.string() }) })
+      .transform(({ with: val }) => {
+        if (val.version === 'latest') {
+          return;
+        }
+
+        return {
+          datasource: GithubReleasesDatasource.id,
+          depName: 'astral-sh/uv',
+          versioning: npmVersioning.id,
+          packageName: 'astral-sh/uv',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
 ];
 
 function extractWithYAMLParser(

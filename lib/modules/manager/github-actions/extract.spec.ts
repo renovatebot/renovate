@@ -707,7 +707,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts package from community actions', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
         jobs:
           build:
             steps:
@@ -718,21 +718,33 @@ describe('modules/manager/github-actions/extract', () => {
                   tag: v1.12.1
                   platform: linux
                   arch: amd64
+              - name: Pinning a minor version of uv
+                uses: astral-sh/setup-uv@v5
+                with:
+                  version: "0.4.x"
               `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
-      expect(
-        res?.deps.filter((pkg) => pkg.depType !== 'actions'),
-      ).toMatchObject([
-        {
-          currentValue: 'v1.12.1',
-          datasource: 'github-releases',
-          depName: 'gotestyourself/gotestsum',
-          depType: 'uses-with',
-          packageName: 'gotestyourself/gotestsum',
-          versioning: 'loose',
-        },
-      ]);
+      expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
+        [
+          {
+            currentValue: 'v1.12.1',
+            datasource: 'github-releases',
+            depName: 'gotestyourself/gotestsum',
+            depType: 'uses-with',
+            packageName: 'gotestyourself/gotestsum',
+            versioning: 'loose',
+          },
+          {
+            currentValue: '0.4.x',
+            datasource: 'github-releases',
+            depName: 'astral-sh/uv',
+            depType: 'uses-with',
+            packageName: 'astral-sh/uv',
+            versioning: 'npm',
+          },
+        ],
+      );
     });
   });
 });
