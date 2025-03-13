@@ -109,6 +109,15 @@ const staticGroups = {
       },
     ],
   },
+  fontawesome: {
+    description: 'Group all packages by Font Awesome together.',
+    packageRules: [
+      {
+        groupName: 'Font Awesome',
+        matchPackageNames: ['@fortawesome/**'],
+      },
+    ],
+  },
   fusionjs: {
     description: 'Group Fusion.js packages together.',
     packageRules: [
