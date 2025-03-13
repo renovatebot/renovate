@@ -11,6 +11,7 @@ import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NpmDatasource } from '../../datasource/npm';
 import * as dockerVersioning from '../../versioning/docker';
 import * as looseVersioning from '../../versioning/loose';
 import * as nodeVersioning from '../../versioning/node';
@@ -228,6 +229,33 @@ const communityActions = [
           depName: 'astral-sh/uv',
           versioning: npmVersioning.id,
           packageName: 'astral-sh/uv',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
+  {
+    // https://github.com/pnpm/action-setup
+    use: /^pnpm\/action-setup@.*$/,
+    schema: z
+      .object({
+        with: z.object({
+          version: z.union([
+            z.string(),
+            z.number().transform((s) => s.toString()),
+          ]),
+        }),
+      })
+      .transform(({ with: val }): PackageDependency | undefined => {
+        if (val.version === 'latest') {
+          return;
+        }
+
+        return {
+          datasource: NpmDatasource.id,
+          depName: 'pnpm',
+          versioning: npmVersioning.id,
+          packageName: 'pnpm',
           currentValue: val.version,
           depType: 'uses-with',
         };

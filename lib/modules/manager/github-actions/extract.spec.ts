@@ -715,6 +715,9 @@ describe('modules/manager/github-actions/extract', () => {
                 uses: astral-sh/setup-uv@v5
                 with:
                   version: "latest"
+              - uses: pnpm/action-setup@v4
+                with:
+                  version: "latest"
               - name: Install gotestsum
                 uses: jaxxstorm/action-install-gh-release@v1.10.0
                 with:
@@ -726,6 +729,12 @@ describe('modules/manager/github-actions/extract', () => {
                 uses: astral-sh/setup-uv@v5
                 with:
                   version: "0.4.x"
+              - uses: pnpm/action-setup@v4
+                with:
+                  version: 10
+              - uses: pnpm/action-setup@v4
+                with:
+                  version: 10.x
               `;
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
@@ -745,6 +754,22 @@ describe('modules/manager/github-actions/extract', () => {
             depName: 'astral-sh/uv',
             depType: 'uses-with',
             packageName: 'astral-sh/uv',
+            versioning: 'npm',
+          },
+          {
+            currentValue: '10',
+            datasource: 'npm',
+            depName: 'pnpm',
+            depType: 'uses-with',
+            packageName: 'pnpm',
+            versioning: 'npm',
+          },
+          {
+            currentValue: '10.x',
+            datasource: 'npm',
+            depName: 'pnpm',
+            depType: 'uses-with',
+            packageName: 'pnpm',
             versioning: 'npm',
           },
         ],
