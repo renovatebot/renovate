@@ -2174,6 +2174,14 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
 
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.17.0' },
+        { version: '1.23.3' },
+        { version: '1.24.1' },
+      ],
+    });
+
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
@@ -2190,14 +2198,12 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'install-tool golang 1.23.5',
+        cmd: 'install-tool golang 1.24.1',
       },
       {
-        cmd: 'go get -t ./... toolchain@none',
+        cmd: 'go get -t ./... toolchain@none go@1.23.5',
       },
     ]);
-
-    expect(datasource.getPkgReleases).toBeCalledTimes(0);
   });
 
   it('preserve go.mod file without toolchain', async () => {
@@ -2241,7 +2247,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.24.1',
       },
       {
-        cmd: 'go get -t ./... toolchain@none',
+        cmd: 'go get -t ./... toolchain@none go@1.23',
       },
     ]);
   });

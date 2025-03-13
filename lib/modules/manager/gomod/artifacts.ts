@@ -196,13 +196,14 @@ export async function updateArtifacts({
     config.constraints?.go ?? goMod.toolchain ?? goMod.constraints;
 
   const getFlags = ['-t'];
-  if (!semver.satisfies(goMod.go, '>=1.17.0')) {
+  if (!semver.satisfies(goMod.minialGoVersion, '>=1.17.0')) {
     getFlags.push('-d');
   }
 
   const extraGetArguments: string[] = [];
-  if (semver.satisfies(goMod.go, '>=1.21.0')) {
+  if (semver.satisfies(goMod.minialGoVersion, '>=1.21.0')) {
     extraGetArguments.push(`toolchain@${goMod.toolchain ?? 'none'}`);
+    extraGetArguments.push(`go@${goMod.go}`);
   }
 
   try {
@@ -458,6 +459,7 @@ export async function updateArtifacts({
 
 function getGoConfig(content: string): {
   toolchain?: string;
+  minialGoVersion: string;
   go: string;
   constraints: string;
 } {
@@ -466,10 +468,10 @@ function getGoConfig(content: string): {
   );
   const toolchainVer = toolchainMatch?.groups?.gover;
 
-  const match = regEx(/^go\s*(?<gover>\d+(\.\d+)+)$/m).exec(content);
+  const goMatch = regEx(/^go\s*(?<gover>\d+(\.\d+)+)$/m).exec(content);
 
   // go mod spec says if go directive is missing it's 1.16
-  const goDirective = match?.groups?.gover ?? '1.16';
+  const goDirective = goMatch?.groups?.gover ?? '1.16';
   let goVersion = goDirective;
 
   // partial semver version without patch
@@ -479,9 +481,8 @@ function getGoConfig(content: string): {
 
   return {
     toolchain: toolchainVer,
-    go: goVersion,
-    constraints:
-      toolchainVer ??
-      (/^\d+\.\d+\.\d+$/.test(goDirective) ? goDirective : `^${goDirective}`),
+    minialGoVersion: goVersion,
+    go: goDirective,
+    constraints: `^${goVersion}`,
   };
 }
