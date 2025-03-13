@@ -64,7 +64,6 @@ export class CondaDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);

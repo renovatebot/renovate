@@ -1,14 +1,17 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as nodeVersioning from '../../versioning/node';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -226,6 +229,45 @@ function extractWithYAMLParser(
     }
 
     deps.push(...extractRunners(job?.['runs-on']));
+
+    const actionsWithVersions: Record<string, Partial<PackageDependency>> = {
+      go: {
+        versioning: npmVersioning.id,
+      },
+      node: {
+        versioning: nodeVersioning.id,
+      },
+      python: {
+        versioning: npmVersioning.id,
+      },
+      // Not covered yet because they use different datasources/packageNames:
+      // - dotnet
+      // - java
+    };
+
+    for (const step of coerceArray(job?.steps)) {
+      for (const [action, actionData] of Object.entries(actionsWithVersions)) {
+        const actionName = `actions/setup-${action}`;
+        if (
+          step.uses === actionName ||
+          step.uses?.startsWith(`${actionName}@`)
+        ) {
+          const fieldName = `${action}-version`;
+          const currentValue = step.with?.[fieldName];
+          if (currentValue) {
+            deps.push({
+              datasource: GithubReleasesDatasource.id,
+              depName: action,
+              packageName: `actions/${action}-versions`,
+              ...actionData,
+              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+              currentValue,
+              depType: 'uses-with',
+            });
+          }
+        }
+      }
+    }
   }
 
   return deps;

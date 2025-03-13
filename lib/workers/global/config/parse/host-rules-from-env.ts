@@ -61,7 +61,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const npmEnvPrefixes = ['npm_config_', 'npm_lifecycle_', 'npm_package_'];
 
   for (const envName of Object.keys(env).sort()) {
-    if (envName === 'GITHUB_COM_TOKEN') {
+    if (['GITHUB_COM_TOKEN', 'RENOVATE_GITHUB_COM_TOKEN'].includes(envName)) {
       continue;
     }
     if (npmEnvPrefixes.some((prefix) => envName.startsWith(prefix))) {
@@ -69,7 +69,11 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
       continue;
     }
     // Double underscore __ is used in place of hyphen -
-    const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
+    const splitEnv = envName
+      .replace(/^RENOVATE_/, '')
+      .toLowerCase()
+      .replace(/__/g, '-')
+      .split('_');
     const hostType = splitEnv.shift()!;
     if (
       datasources.has(hostType) ||
