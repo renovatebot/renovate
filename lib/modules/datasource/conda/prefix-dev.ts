@@ -7,25 +7,47 @@ import type { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { ReleaseResult } from '../types';
 
-const MAX_PREFIX_DEV_GRAPHQL_PAGE = 10;
+const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
 
 const File = z.object({
   version: z.string(),
   createdAt: z.string().nullable(),
   yankedReason: z.string().nullable(),
+  urls: z
+    .array(z.object({ url: z.string(), kind: z.string() }))
+    .optional()
+    .default([])
+    .transform((urls) => {
+      return Object.fromEntries(urls.map((url) => [url.kind, url.url]));
+    }),
 });
 
-const Version = z.object({
-  version: z.string(),
-});
+const query = `
+query search($channel: String!, $package: String!, $page: Int = 0) {
+  package(channelName: $channel, name: $package) {
+    variants(limit: 500, page: $page) {
+      pages
+      page {
+        createdAt
+        version
+        yankedReason
+        urls {
+          url
+          kind
+        }
+      }
+    }
+  }
+}
+`;
 
 const PagedResponseSchema = z.object({
   data: z.object({
-    data: z.object({
-      data: z
+    package: z.object({
+      variants: z
         .object({
           pages: z.number(),
-          page: z.array(z.unknown()),
+          page: z.array(File),
         })
         .nullable(),
     }),
@@ -42,55 +64,26 @@ export async function getReleases(
     'lookup package from prefix.dev graphql API',
   );
 
-  const versions = await getPagedResponse(
-    http,
-    `
-query search($channel: String!, $package: String!, $page: Int = 0) {
-  data: package(channelName: $channel, name: $package) {
-    data: versions(limit: 500, page: $page) {
-      pages
-      page {
-        version
-      }
-    }
-  }
-}
-`,
-    { channel, package: packageName },
-    Version,
-  );
-
-  if (versions.length === 0) {
-    return null;
-  }
-
-  const files = await getPagedResponse(
-    http,
-    `
-query search($channel: String!, $package: String!, $page: Int = 0) {
-  data: package(channelName: $channel, name: $package) {
-    data: variants(limit: 500, page: $page) {
-      pages
-      page {
-        version
-        createdAt
-        yankedReason
-      }
-    }
-  }
-}
-`,
-    { channel, package: packageName },
-    File,
-  );
+  const files = await getPagedResponse(http, query, {
+    channel,
+    package: packageName,
+  });
 
   const releaseDate: Record<string, Timestamp> = {};
   const yanked: Record<string, boolean> = {};
+  const versions = new Set<string>();
+
+  let homepage: string | undefined = undefined;
+  let sourceUrl: string | undefined = undefined;
 
   for (const file of files) {
+    versions.add(file.version);
     yanked[file.version] = Boolean(
       isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
     );
+
+    homepage = homepage ?? file.urls.HOME;
+    sourceUrl = sourceUrl ?? file.urls.DEV;
 
     const dt = MaybeTimestamp.parse(file.createdAt);
     if (is.nullOrUndefined(dt)) {
@@ -108,8 +101,14 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
     }
   }
 
+  if (!versions.size) {
+    return null;
+  }
+
   return {
-    releases: versions.map(({ version }) => {
+    homepage,
+    sourceUrl,
+    releases: Array.from(versions).map((version) => {
       return {
         version,
         releaseDate: releaseDate[version],
@@ -119,13 +118,12 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
   };
 }
 
-async function getPagedResponse<T extends z.Schema>(
+async function getPagedResponse(
   http: Http,
   query: string,
   data: any,
-  schema: T,
-): Promise<z.infer<T>[]> {
-  const result: unknown[] = [];
+): Promise<z.infer<typeof File>[]> {
+  const result: z.infer<typeof File>[] = [];
 
   for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
     const res = await http.postJson(
@@ -143,7 +141,7 @@ async function getPagedResponse<T extends z.Schema>(
       PagedResponseSchema,
     );
 
-    const currentPage = res.body.data.data?.data;
+    const currentPage = res.body.data.package?.variants;
     if (!currentPage) {
       break;
     }
@@ -155,5 +153,5 @@ async function getPagedResponse<T extends z.Schema>(
     }
   }
 
-  return z.array(schema).parse(result);
+  return result;
 }

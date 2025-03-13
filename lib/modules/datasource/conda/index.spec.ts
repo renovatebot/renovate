@@ -372,7 +372,7 @@ describe('modules/datasource/conda/index', () => {
       httpMock
         .scope('https://prefix.dev/api/graphql')
         .post('')
-        .reply(200, { data: { data: { data: null } } });
+        .reply(200, { data: { package: { variants: null } } });
 
       const config = {
         packageName: 'pytest',
@@ -386,57 +386,15 @@ describe('modules/datasource/conda/index', () => {
     });
 
     it('supports channel from prefix.dev with multiple page responses', async () => {
-      // mock versions
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                pages: 2,
-                page: [
-                  { version: '0.0.1' },
-                  { version: '0.0.2' },
-                  { version: '0.0.3' },
-                  { version: '0.0.4' },
-                ],
-              },
-            },
-          },
-        });
-
-      httpMock
-        .scope('https://prefix.dev/api/graphql')
-        .post('')
-        .once()
-        .reply(200, {
-          data: {
-            data: {
-              data: {
-                pages: 2,
-                page: [
-                  { version: '0.0.5' },
-                  { version: '0.0.6' },
-                  { version: '0.0.7' },
-                  { version: '0.0.8' },
-                ],
-              },
-            },
-          },
-        });
-
       // mock files
-
       httpMock
         .scope('https://prefix.dev/api/graphql')
         .post('')
         .once()
         .reply(200, {
           data: {
-            data: {
-              data: {
+            package: {
+              variants: {
                 pages: 2,
                 page: [
                   {
@@ -445,6 +403,7 @@ describe('modules/datasource/conda/index', () => {
                       '2020-02-29T01:40:21Z',
                     ).toString(),
                     yankedReason: null,
+                    urls: [{ url: 'https://dev/url', kind: 'DEV' }],
                   },
                   {
                     version: '0.0.5',
@@ -452,6 +411,7 @@ describe('modules/datasource/conda/index', () => {
                       '2020-02-29T01:40:20.840Z',
                     ).toString(),
                     yankedReason: null,
+                    urls: [{ url: 'https://home/url', kind: 'HOME' }],
                   },
                   {
                     version: '0.0.5',
@@ -476,8 +436,8 @@ describe('modules/datasource/conda/index', () => {
         .once()
         .reply(200, {
           data: {
-            data: {
-              data: {
+            package: {
+              variants: {
                 pages: 2,
                 page: [
                   {
@@ -520,53 +480,41 @@ describe('modules/datasource/conda/index', () => {
         ...config,
         datasource,
       });
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "registryUrl": "https://prefix.dev/conda-forge",
-          "releases": [
-            {
-              "isDeprecated": undefined,
-              "releaseDate": undefined,
-              "version": "0.0.1",
-            },
-            {
-              "isDeprecated": undefined,
-              "releaseDate": undefined,
-              "version": "0.0.2",
-            },
-            {
-              "isDeprecated": undefined,
-              "releaseDate": undefined,
-              "version": "0.0.3",
-            },
-            {
-              "isDeprecated": undefined,
-              "releaseDate": undefined,
-              "version": "0.0.4",
-            },
-            {
-              "isDeprecated": false,
-              "releaseDate": "2020-02-29T01:40:23.000Z",
-              "version": "0.0.5",
-            },
-            {
-              "isDeprecated": undefined,
-              "releaseDate": undefined,
-              "version": "0.0.6",
-            },
-            {
-              "isDeprecated": false,
-              "releaseDate": "2020-02-29T01:40:21.000Z",
-              "version": "0.0.7",
-            },
-            {
-              "isDeprecated": false,
-              "releaseDate": "2020-02-29T01:40:20.840Z",
-              "version": "0.0.8",
-            },
-          ],
-        }
-      `);
+      expect(res).toMatchObject({
+        registryUrl: 'https://prefix.dev/conda-forge',
+        homepage: 'https://home/url',
+        sourceUrl: 'https://dev/url',
+        releases: [
+          {
+            isDeprecated: false,
+            releaseDate: '2020-02-29T01:40:23.000Z',
+            version: '0.0.5',
+          },
+          {
+            isDeprecated: false,
+            releaseDate: '2020-02-29T01:40:21.000Z',
+            version: '0.0.7',
+          },
+          {
+            isDeprecated: false,
+            releaseDate: '2020-02-29T01:40:20.840Z',
+            version: '0.0.8',
+          },
+          {
+            isDeprecated: false,
+            releaseDate: '2020-02-29T01:40:23.000Z',
+            version: '0.0.10',
+          },
+          {
+            isDeprecated: false,
+            version: '0.0.56',
+          },
+          {
+            isDeprecated: false,
+            version: '0.0.560',
+          },
+        ],
+      });
     });
   });
 });
