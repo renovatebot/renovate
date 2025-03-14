@@ -1,7 +1,39 @@
 import { DateTime, Settings } from 'luxon';
-import { api as nodever } from '.';
+import dataFiles from '../../../data-files.generated';
+import type { LambdaData } from './schedule';
 
-describe('modules/versioning/node/index', () => {
+const lambdaSchedule: LambdaData = JSON.parse(
+  dataFiles.get('data/lambda-node-js-schedule.json')!,
+);
+
+//For this test fixture we're setting `support` to `true` for a specific version to simulate the fact that our datasource
+//doesn't consistently return a date for support date. Likewise, we're removing a known stable node version from the lambda
+//schedule to simulate the time period where there's a released LTS version that AWS hasn't released as a Lambda Runtime
+//yet.
+const scheduleWithSupportTrue = JSON.stringify({
+  ...lambdaSchedule,
+  '20': {
+    ...lambdaSchedule['20'],
+    support: true,
+  },
+  '22': undefined,
+});
+
+const mockDataFiles = new Map(dataFiles);
+mockDataFiles.set('data/lambda-node-js-schedule.json', scheduleWithSupportTrue);
+
+jest.spyOn(dataFiles, 'get').mockImplementation((fileName) => {
+  return mockDataFiles.get(fileName);
+});
+
+import { api as lambdaVer } from '.';
+
+describe('modules/versioning/lambda-node/index', () => {
+  beforeAll(() => {
+    const dt = DateTime.fromISO('2021-03-20');
+    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+  });
+
   it.each`
     currentValue | rangeStrategy | currentVersion | newVersion   | expected
     ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1.1.0'}
@@ -14,7 +46,7 @@ describe('modules/versioning/node/index', () => {
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      const res = nodever.getNewValue({
+      const res = lambdaVer.getNewValue({
         currentValue,
         rangeStrategy,
         currentVersion,
@@ -24,28 +56,35 @@ describe('modules/versioning/node/index', () => {
     },
   );
 
-  const t1 = DateTime.fromISO('2020-09-01');
-  const t2 = DateTime.fromISO('2021-06-01');
+  const t1 = DateTime.fromISO('2025-03-01');
+  const t2 = DateTime.fromISO('2024-03-01');
 
   it.each`
     version       | time  | expected
+    ${`v22.0.0`}  | ${t1} | ${false}
+    ${`v20.0.0`}  | ${t1} | ${true}
+    ${'v18.0.3'}  | ${t1} | ${true}
+    ${'v18.0.0'}  | ${t1} | ${true}
+    ${'18.0.0'}   | ${t1} | ${true}
+    ${'18.0.0a'}  | ${t1} | ${false}
+    ${'16.0.0'}   | ${t2} | ${true}
     ${'16.0.0'}   | ${t1} | ${false}
     ${'15.0.0'}   | ${t1} | ${false}
     ${'14.9.0'}   | ${t1} | ${false}
-    ${'14.0.0'}   | ${t2} | ${true}
-    ${'12.0.3'}   | ${t1} | ${true}
-    ${'v12.0.3'}  | ${t1} | ${true}
+    ${'14.0.0'}   | ${t1} | ${false}
+    ${'12.0.3'}   | ${t1} | ${false}
+    ${'v12.0.3'}  | ${t1} | ${false}
     ${'12.0.3a'}  | ${t1} | ${false}
     ${'11.0.0'}   | ${t1} | ${false}
-    ${'10.0.0'}   | ${t1} | ${true}
-    ${'10.0.999'} | ${t1} | ${true}
-    ${'10.1.0'}   | ${t1} | ${true}
+    ${'10.0.0'}   | ${t1} | ${false}
+    ${'10.0.999'} | ${t1} | ${false}
+    ${'10.1.0'}   | ${t1} | ${false}
     ${'10.0.0a'}  | ${t1} | ${false}
     ${'9.0.0'}    | ${t1} | ${false}
   `('isStable("$version") === $expected', ({ version, time, expected }) => {
     jest.spyOn(Settings, 'now').mockReturnValue(time.valueOf());
 
-    expect(nodever.isStable(version as string)).toBe(expected);
+    expect(lambdaVer.isStable(version as string)).toBe(expected);
   });
 
   it.each`
@@ -57,7 +96,7 @@ describe('modules/versioning/node/index', () => {
     ${'10.x'}     | ${true}
     ${'10.9.8.7'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(nodever.isValid(version as string)).toBe(expected);
+    expect(lambdaVer.isValid(version as string)).toBe(expected);
   });
 
   it.each`
@@ -67,7 +106,7 @@ describe('modules/versioning/node/index', () => {
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(nodever.matches(version as string, range as string)).toBe(
+      expect(lambdaVer.matches(version as string, range as string)).toBe(
         expected,
       );
     },
@@ -82,7 +121,7 @@ describe('modules/versioning/node/index', () => {
     'getSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.getSatisfyingVersion(versions as string[], range as string),
+        lambdaVer.getSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
     },
   );
@@ -96,7 +135,7 @@ describe('modules/versioning/node/index', () => {
     'minSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.minSatisfyingVersion(versions as string[], range as string),
+        lambdaVer.minSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
     },
   );
