@@ -372,22 +372,22 @@ describe('modules/datasource/conda/index', () => {
         releases: [
           {
             isDeprecated: false,
-            releaseDate: '2020-02-29T01:40:23.000Z',
+            releaseTimestamp: '2020-02-29T01:40:21.000Z',
             version: '0.0.5',
           },
           {
             isDeprecated: false,
-            releaseDate: '2020-02-29T01:40:21.000Z',
+            releaseTimestamp: '2020-02-29T01:40:21.000Z',
             version: '0.0.7',
           },
           {
             isDeprecated: false,
-            releaseDate: '2020-02-29T01:40:20.840Z',
+            releaseTimestamp: '2020-02-29T01:40:20.840Z',
             version: '0.0.8',
           },
           {
             isDeprecated: false,
-            releaseDate: '2020-02-29T01:40:23.000Z',
+            releaseTimestamp: '2020-02-29T01:40:23.000Z',
             version: '0.0.10',
           },
           {
