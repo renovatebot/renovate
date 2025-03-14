@@ -130,6 +130,7 @@ terraform 1.3.3
 terraform-docs 0.16.0
 terraformer 0.8.21
 terragrunt 0.43.2
+terramate 0.12.1
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
@@ -724,6 +725,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'gruntwork-io/terragrunt',
             depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.12.1',
+            datasource: 'github-releases',
+            packageName: 'terramate-io/terramate',
+            depName: 'terramate',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

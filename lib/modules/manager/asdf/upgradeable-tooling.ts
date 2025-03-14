@@ -778,6 +778,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  terramate: {
+    asdfPluginUrl: 'https://github.com/martinlindner/asdf-terramate',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'terramate-io/terramate',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   tflint: {
     asdfPluginUrl: 'https://github.com/skyzyx/asdf-tflint.git',
     config: {
