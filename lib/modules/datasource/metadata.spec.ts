@@ -1,4 +1,3 @@
-import { partial } from '../../../test/util';
 import type { Timestamp } from '../../util/timestamp';
 import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
@@ -11,6 +10,7 @@ import {
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
+import { partial } from '~test/util';
 
 describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {

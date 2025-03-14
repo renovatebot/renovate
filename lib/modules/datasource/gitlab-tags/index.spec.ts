@@ -1,6 +1,6 @@
 import { getDigest, getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { GitlabTagsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const datasource = GitlabTagsDatasource.id;
 

@@ -142,7 +142,7 @@
   },
   "volta": {
     "node": "22.14.0",
-    "pnpm": "10.5.2"
+    "pnpm": "10.6.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.738.0",
@@ -208,7 +208,7 @@
     "good-enough-parser": "1.1.23",
     "google-auth-library": "9.15.1",
     "got": "11.8.6",
-    "graph-data-structure": "4.4.0",
+    "graph-data-structure": "4.5.0",
     "handlebars": "4.7.8",
     "ignore": "7.0.3",
     "ini": "5.0.0",
@@ -309,7 +309,7 @@
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@vitest/coverage-v8": "3.0.7",
+    "@vitest/coverage-v8": "3.0.8",
     "@vitest/eslint-plugin": "1.1.36",
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
@@ -343,12 +343,12 @@
     "typescript": "5.8.2",
     "typescript-eslint": "8.26.0",
     "unified": "9.2.2",
-    "vite": "6.2.0",
+    "vite": "6.2.1",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.0.7",
+    "vitest": "3.0.8",
     "vitest-mock-extended": "3.0.1"
   },
-  "packageManager": "pnpm@10.5.2",
+  "packageManager": "pnpm@10.6.1",
   "files": [
     "dist",
     "renovate-schema.json"

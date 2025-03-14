@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { BazelModuleMetadata } from './schema';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/datasource/bazel/schema', () => {
   describe('BazelModuleMetadata', () => {

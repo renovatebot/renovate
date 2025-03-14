@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
@@ -9,6 +8,7 @@ import {
   extractFromServices,
 } from './extract';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 const config: ExtractConfig = {};
 

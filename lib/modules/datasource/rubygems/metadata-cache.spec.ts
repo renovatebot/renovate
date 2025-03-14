@@ -1,11 +1,10 @@
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
 import { MetadataCache } from './metadata-cache';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/cache/package');
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/rubygems/metadata-cache', () => {
   const packageCacheMock = new Map<string, unknown>();

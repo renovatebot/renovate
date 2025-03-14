@@ -1,10 +1,10 @@
 import { DateTime, Settings } from 'luxon';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { registryUrl } from './common';
 import { EndoflifeDateDatasource } from './index';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const datasource = EndoflifeDateDatasource.id;
 

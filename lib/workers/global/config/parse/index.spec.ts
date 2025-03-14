@@ -1,5 +1,4 @@
 import upath from 'upath';
-import { mocked } from '../../../../../test/util';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
@@ -8,7 +7,7 @@ vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
 vi.mock('./host-rules-from-env');
 
-const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
+const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
 
 describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
