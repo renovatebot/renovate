@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { TerraformModuleDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const consulData = Fixtures.get('registry-consul.json');
 const consulVersionsData = Fixtures.get('registry-consul-versions.json');

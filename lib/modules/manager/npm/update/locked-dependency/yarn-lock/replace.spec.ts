@@ -1,6 +1,6 @@
 import * as Diff from 'diff';
-import { Fixtures } from '../../../../../../../test/fixtures';
 import { replaceConstraintVersion } from './replace';
+import { Fixtures } from '~test/fixtures';
 
 const yarnLock1 = Fixtures.get('express.yarn.lock');
 const yarnLock2 = Fixtures.get('2.yarn.lock');

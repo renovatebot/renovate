@@ -1,5 +1,5 @@
-import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

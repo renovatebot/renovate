@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

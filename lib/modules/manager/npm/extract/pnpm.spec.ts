@@ -1,6 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs, getFixturePath, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as yaml from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
@@ -12,6 +10,8 @@ import {
   findPnpmWorkspace,
   getPnpmLock,
 } from './pnpm';
+import { Fixtures } from '~test/fixtures';
+import { fs, getFixturePath, logger, partial } from '~test/util';
 
 vi.mock('../../../../util/fs');
 
