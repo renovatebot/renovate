@@ -452,10 +452,7 @@ const staticGroups = {
       {
         groupName: 'Puppeteer',
         matchDatasources: ['npm'],
-        matchPackageNames: [
-          'puppeteer',
-          'puppeteer-core'
-        ],
+        matchPackageNames: ['puppeteer', 'puppeteer-core'],
       },
     ],
   },
