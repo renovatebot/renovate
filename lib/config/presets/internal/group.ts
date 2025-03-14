@@ -446,6 +446,18 @@ const staticGroups = {
       },
     ],
   },
+  puppeteer: {
+    description: 'Group Puppeteer packages together.',
+    packageRules: [
+      {
+        groupName: 'Puppeteer',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          'puppeteer',
+          'puppeteer-core'
+        ],
+      },
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
@@ -485,6 +497,7 @@ const staticGroups = {
       'group:micrometer',
       'group:phpstan',
       'group:polymer',
+      'group:puppeteer',
       'group:react',
       'group:remark',
       'group:resilience4j',
