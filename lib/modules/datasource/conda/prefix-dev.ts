@@ -55,11 +55,12 @@ export async function getReleases(
     homepage ??= file.urls.HOME;
     sourceUrl ??= file.urls.DEV;
 
-    releases[version] ??= {
-      version,
-      // we assume all packages are roughly released on the same time
-      releaseTimestamp: MaybeTimestamp.parse(file.createdAt),
-    };
+    releases[version] ??= { version };
+
+    // we assume all packages are roughly released on the same time
+    releases[version].releaseTimestamp =
+      releases[version].releaseTimestamp ??
+      MaybeTimestamp.parse(file.createdAt);
 
     // if the version has not been marked as deprecated, check other releases packages of the same version
     if (!releases[version].isDeprecated) {
