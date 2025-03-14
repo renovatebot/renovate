@@ -94,6 +94,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'aws/aws-cli',
     },
   },
+  'azure-cli': {
+    asdfPluginUrl: 'https://github.com/sourcesense/asdf-azure-cli',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'Azure/azure-cli',
+      extractVersion: '^azure-cli-(?<version>\\S+)',
+    },
+  },
   bun: {
     asdfPluginUrl: 'https://github.com/cometkim/asdf-bun',
     config: {
