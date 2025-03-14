@@ -47,50 +47,33 @@ export async function getReleases(
     return null;
   }
 
-  const releaseDate: Record<string, Timestamp> = {};
-  const yanked: Record<string, boolean> = {};
-  const versions: Record<string, boolean> = {};
-
   let homepage: string | undefined = undefined;
   let sourceUrl: string | undefined = undefined;
 
+  const releases: Record<string, Release> = {};
   for (const file of files) {
-    versions[file.version] = true;
-    yanked[file.version] = Boolean(
-      isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
-    );
+    const version = file.version;
 
-    homepage = homepage ?? file.urls.HOME;
-    sourceUrl = sourceUrl ?? file.urls.DEV;
+    homepage ??= file.urls.HOME;
+    sourceUrl ??= file.urls.DEV;
 
-    const dt = MaybeTimestamp.parse(file.createdAt);
-    if (is.nullOrUndefined(dt)) {
-      continue;
-    }
+    releases[version] ??= {
+      version,
+      // we assume all packages are roughly released on the same time
+      releaseTimestamp: MaybeTimestamp.parse(file.createdAt),
+    };
 
-    const currentDt = releaseDate[file.version];
-    if (is.nullOrUndefined(currentDt)) {
-      releaseDate[file.version] = dt;
-      continue;
-    }
-
-    if (currentDt.localeCompare(dt) < 0) {
-      releaseDate[file.version] = dt;
+    // if the version has not been marked as deprecated, check other releases packages of the same version
+    if (!releases[version].isDeprecated) {
+      releases[version].isDeprecated = isNotNullOrUndefined(file.yankedReason);
     }
   }
 
   return {
     homepage,
     sourceUrl,
-    releases: Object.keys(versions).map((version) => {
-      return {
-        version,
-        releaseDate: releaseDate[version],
-        isDeprecated: yanked[version],
-      };
-    }),
+    releases: Object.values(releases),
   };
-}
 
 async function getPagedResponse(
   http: Http,
