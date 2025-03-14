@@ -12,3 +12,20 @@ export const File = z.object({
       return Object.fromEntries(urls.map((url) => [url.kind, url.url]));
     }),
 });
+
+export type File = z.infer<typeof File>;
+
+export const PagedResponseSchema = z.object({
+  data: z.object({
+    package: z
+      .object({
+        variants: z
+          .object({
+            pages: z.number(),
+            page: z.array(File),
+          })
+          .nullable(),
+      })
+      .nullable(),
+  }),
+});

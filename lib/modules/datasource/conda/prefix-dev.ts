@@ -1,12 +1,11 @@
 import is from '@sindresorhus/is';
-import { z } from 'zod';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { Http } from '../../../util/http';
 import type { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
 import type { ReleaseResult } from '../types';
-import { File } from './schema/prefix-dev';
+import { type File, PagedResponseSchema } from './schema/prefix-dev';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
 
@@ -28,21 +27,6 @@ query search($channel: String!, $package: String!, $page: Int = 0) {
   }
 }
 `;
-
-const PagedResponseSchema = z.object({
-  data: z.object({
-    package: z
-      .object({
-        variants: z
-          .object({
-            pages: z.number(),
-            page: z.array(File),
-          })
-          .nullable(),
-      })
-      .nullable(),
-  }),
-});
 
 export async function getReleases(
   http: Http,
@@ -112,8 +96,8 @@ async function getPagedResponse(
   http: Http,
   query: string,
   data: any,
-): Promise<z.infer<typeof File>[]> {
-  const result: z.infer<typeof File>[] = [];
+): Promise<File[]> {
+  const result: File[] = [];
 
   for (let page = 0; page <= MAX_PREFIX_DEV_GRAPHQL_PAGE; page++) {
     const res = await http.postJson(
