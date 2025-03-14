@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { coerceArray } from '../../../util/array';

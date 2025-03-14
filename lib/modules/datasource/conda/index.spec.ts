@@ -2,7 +2,6 @@ import { DateTime } from 'luxon';
 import { getPkgReleases } from '..';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
-import type { CondaPackage } from './types';
 import { CondaDatasource } from './index';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
