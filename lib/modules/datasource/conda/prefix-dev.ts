@@ -45,13 +45,13 @@ export async function getReleases(
 
   const releaseDate: Record<string, Timestamp> = {};
   const yanked: Record<string, boolean> = {};
-  const versions: Record<string, boolean> = {};
+  const versions = new Set<string>();
 
   let homepage: string | undefined = undefined;
   let sourceUrl: string | undefined = undefined;
 
   for (const file of files) {
-    versions[file.version] = true;
+    versions.add(file.version);
     yanked[file.version] = Boolean(
       isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
     );
@@ -82,7 +82,7 @@ export async function getReleases(
   return {
     homepage,
     sourceUrl,
-    releases: Object.keys(versions).map((version) => {
+    releases: Array.from(versions).map((version) => {
       return {
         version,
         releaseDate: releaseDate[version],
