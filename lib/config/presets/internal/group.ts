@@ -457,6 +457,7 @@ const staticGroups = {
           'puppeteer-core'
         ],
       },
+    ],
   },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
