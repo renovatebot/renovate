@@ -1,6 +1,4 @@
 import { getChangeLogJSON } from '..';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
 import { toBase64 } from '../../../../../../util/string';
@@ -8,6 +6,8 @@ import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GiteaChangeLogSource } from '../gitea/source';
 import { getReleaseNotesMd } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',

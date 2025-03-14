@@ -1,5 +1,5 @@
-import * as httpMock from '../../../test/http-mock';
 import { GiteaHttp, setBaseUrl } from './gitea';
+import * as httpMock from '~test/http-mock';
 
 describe('util/http/gitea', () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';

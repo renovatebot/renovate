@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '../../../modules/manager';
 import { matchRegexOrGlobList } from '../../../util/string-match';
 import { presets } from './custom-managers';
+import { regexMatches } from '~test/util';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `$schema` version in biome.json', () => {

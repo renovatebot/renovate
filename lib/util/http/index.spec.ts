@@ -1,6 +1,4 @@
 import { ZodError, z } from 'zod';
-import * as httpMock from '../../../test/http-mock';
-import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -12,6 +10,8 @@ import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
 import { Http, HttpError } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 const baseUrl = 'http://renovate.com';
 

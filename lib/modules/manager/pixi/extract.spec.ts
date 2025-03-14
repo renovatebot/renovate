@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 
-import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

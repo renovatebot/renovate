@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { matchesContentDescriptor } from './extract';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger, partial } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -1039,7 +1039,7 @@ describe('modules/manager/gradle/extract', () => {
 
     it('prevents inclusion of non-Gradle files', async () => {
       const fsMock = {
-        'build.gradle': "apply from: '../../test.non-gradle'",
+        'build.gradle': "apply from: '~test.non-gradle'",
       };
       mockFs(fsMock);
 

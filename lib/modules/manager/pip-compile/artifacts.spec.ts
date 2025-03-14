@@ -1,13 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -18,12 +11,14 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { constructPipCompileCmd } from './artifacts';
 import { extractHeaderCommand } from './common';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, git, partial } from '~test/util';
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http');
 vi.mock('../../datasource', () => mockDeep());

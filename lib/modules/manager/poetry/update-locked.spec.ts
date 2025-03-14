@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import { updateLockedDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const lockFile = 'pyproject.11.toml.lock';
 const packageFile = 'pyproject.11.toml';
