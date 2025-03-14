@@ -76,17 +76,10 @@ export class CondaDatasource extends Datasource {
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
 
+      const releaseDate: Record<string, Timestamp> = {};
+      // we assume all packages are roughly released on the same time
       for (const file of coerceArray(response.body.files)) {
-        const dt = Timestamp.parse(file.upload_time);
-        const currentDt = releaseDate[file.version];
-        if (is.nullOrUndefined(currentDt)) {
-          releaseDate[file.version] = dt;
-          continue;
-        }
-
-        if (currentDt.localeCompare(dt) < 0) {
-          releaseDate[file.version] = dt;
-        }
+        releaseDate[file.version] ??= Timestamp.parse(file.upload_time);
       }
 
       response.body.versions.forEach((version: string) => {
