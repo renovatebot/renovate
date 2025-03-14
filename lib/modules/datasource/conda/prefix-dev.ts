@@ -43,6 +43,10 @@ export async function getReleases(
     package: packageName,
   });
 
+  if (!files.length) {
+    return null;
+  }
+
   const releaseDate: Record<string, Timestamp> = {};
   const yanked: Record<string, boolean> = {};
   const versions: Record<string, boolean> = {};
@@ -73,10 +77,6 @@ export async function getReleases(
     if (currentDt.localeCompare(dt) < 0) {
       releaseDate[file.version] = dt;
     }
-  }
-
-  if (!versions.size) {
-    return null;
   }
 
   return {
