@@ -1,10 +1,8 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { Http } from '../../../util/http';
-import type { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
-import type { ReleaseResult } from '../types';
+import type { Release, ReleaseResult } from '../types';
 import { type File, PagedResponseSchema } from './schema/prefix-dev';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
@@ -47,48 +45,33 @@ export async function getReleases(
     return null;
   }
 
-  const releaseDate: Record<string, Timestamp> = {};
-  const yanked: Record<string, boolean> = {};
-  const versions: Record<string, boolean> = {};
-
   let homepage: string | undefined = undefined;
   let sourceUrl: string | undefined = undefined;
 
+  const releases: Record<string, Release> = {};
   for (const file of files) {
-    versions[file.version] = true;
-    yanked[file.version] = Boolean(
-      isNotNullOrUndefined(file.yankedReason) || yanked[file.version],
-    );
+    const version = file.version;
 
-    homepage = homepage ?? file.urls.HOME;
-    sourceUrl = sourceUrl ?? file.urls.DEV;
+    homepage ??= file.urls.HOME;
+    sourceUrl ??= file.urls.DEV;
 
-    const dt = MaybeTimestamp.parse(file.createdAt);
-    if (is.nullOrUndefined(dt)) {
-      continue;
-    }
+    releases[version] ??= { version };
 
-    const currentDt = releaseDate[file.version];
-    if (is.nullOrUndefined(currentDt)) {
-      releaseDate[file.version] = dt;
-      continue;
-    }
+    // we assume all packages are roughly released on the same time
+    releases[version].releaseTimestamp =
+      releases[version].releaseTimestamp ??
+      MaybeTimestamp.parse(file.createdAt);
 
-    if (currentDt.localeCompare(dt) < 0) {
-      releaseDate[file.version] = dt;
+    // if the version has not been marked as deprecated, check other releases packages of the same version
+    if (!releases[version].isDeprecated) {
+      releases[version].isDeprecated = isNotNullOrUndefined(file.yankedReason);
     }
   }
 
   return {
     homepage,
     sourceUrl,
-    releases: Object.keys(versions).map((version) => {
-      return {
-        version,
-        releaseDate: releaseDate[version],
-        isDeprecated: yanked[version],
-      };
-    }),
+    releases: Object.values(releases),
   };
 }
 

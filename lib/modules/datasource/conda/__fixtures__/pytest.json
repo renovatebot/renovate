@@ -1,0 +1,1173 @@
+{
+  "app_entry": {},
+  "conda_platforms": [
+    "linux-ppc64le",
+    "linux-64",
+    "win-32",
+    "osx-64",
+    "linux-32",
+    "win-64"
+  ],
+  "full_name": "anaconda/pytest",
+  "owner": {
+    "description": "The packages on this channel are covered by the Anaconda repository Terms of Service. Among other things, the ToS prohibits heavy commercial use and mirroring by any third party for commercial purposes.",
+    "url": "",
+    "company": "Anaconda, Inc.",
+    "user_type": "org",
+    "location": "Austin, Texas",
+    "login": "anaconda",
+    "created_at": "2015-09-18 21:41:59.933000+00:00",
+    "name": "Anaconda's internal mirroring channel"
+  },
+  "home": "None",
+  "source_git_url": null,
+  "source_git_tag": null,
+  "app_type": {},
+  "upvoted": 0,
+  "id": "563802059c73330b8ae83d68",
+  "app_summary": {},
+  "public": true,
+  "revision": 530,
+  "files": [
+    {
+      "description": null,
+      "basename": "linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "labels": [
+        "main"
+      ],
+      "dependencies": [],
+      "distribution_type": "conda",
+      "attrs": {
+        "build_number": 0,
+        "name": "pytest",
+        "license": "MIT",
+        "timestamp": 1541443263263,
+        "source_url": "http://repo.continuum.io/pkgs/main/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+        "platform": "linux",
+        "depends": [
+          "atomicwrites >=1.0",
+          "attrs >=17.4.0",
+          "funcsigs",
+          "more-itertools >=4.0",
+          "pathlib2 >=2.2.0",
+          "pluggy >=0.7",
+          "py >=1.5.0",
+          "python >=2.7,<2.8.0a0",
+          "setuptools >=40.0",
+          "six >=1.10.0"
+        ],
+        "version": "3.10.0",
+        "subdir": "linux-32",
+        "build": "py27_0",
+        "sha256": "b6d51c12e8a9188c2f57a82655a3c6a6c6ac2956b49548a70924fc8a187fa884",
+        "arch": "x86",
+        "md5": "5b2f041b36b1fa2b1a52369b49f0265d",
+        "size": 340998
+      },
+      "full_name": "anaconda/pytest/3.10.0/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "owner": "anaconda",
+      "size": 340998,
+      "upload_time": "2020-02-28 11:46:01.948000+00:00",
+      "ndownloads": 6,
+      "download_url": "//api.anaconda.org/download/anaconda/pytest/3.10.0/linux-32/pytest-3.10.0-py27_0.tar.bz2",
+      "version": "3.10.0",
+      "md5": "5b2f041b36b1fa2b1a52369b49f0265d",
+      "type": "conda"
+    }
+  ],
+  "package_types": [
+    "conda"
+  ],
+  "description": "The pytest framework makes it easy to write small tests, yet scales to\nsupport complex functional testing for applications and libraries.\n",
+  "releases": [
+    {
+      "version": "2.7.0",
+      "distributions": [
+        "linux-32/pytest-2.7.0-py34_0.tar.bz2",
+        "linux-32/pytest-2.7.0-py33_0.tar.bz2",
+        "linux-32/pytest-2.7.0-py26_0.tar.bz2",
+        "linux-32/pytest-2.7.0-py27_0.tar.bz2",
+        "linux-64/pytest-2.7.0-py34_0.tar.bz2",
+        "linux-64/pytest-2.7.0-py33_0.tar.bz2",
+        "linux-64/pytest-2.7.0-py26_0.tar.bz2",
+        "linux-64/pytest-2.7.0-py27_0.tar.bz2",
+        "osx-64/pytest-2.7.0-py34_0.tar.bz2",
+        "osx-64/pytest-2.7.0-py33_0.tar.bz2",
+        "osx-64/pytest-2.7.0-py26_0.tar.bz2",
+        "osx-64/pytest-2.7.0-py27_0.tar.bz2",
+        "win-32/pytest-2.7.0-py34_0.tar.bz2",
+        "win-32/pytest-2.7.0-py33_0.tar.bz2",
+        "win-32/pytest-2.7.0-py26_0.tar.bz2",
+        "win-32/pytest-2.7.0-py27_0.tar.bz2",
+        "win-64/pytest-2.7.0-py34_0.tar.bz2",
+        "win-64/pytest-2.7.0-py33_0.tar.bz2",
+        "win-64/pytest-2.7.0-py26_0.tar.bz2",
+        "win-64/pytest-2.7.0-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.7.0"
+    },
+    {
+      "version": "2.5.1",
+      "distributions": [
+        "linux-32/pytest-2.5.1-py33_0.tar.bz2",
+        "linux-32/pytest-2.5.1-py26_0.tar.bz2",
+        "linux-32/pytest-2.5.1-py27_0.tar.bz2",
+        "linux-64/pytest-2.5.1-py33_0.tar.bz2",
+        "linux-64/pytest-2.5.1-py26_0.tar.bz2",
+        "linux-64/pytest-2.5.1-py27_0.tar.bz2",
+        "osx-64/pytest-2.5.1-py33_0.tar.bz2",
+        "osx-64/pytest-2.5.1-py26_0.tar.bz2",
+        "osx-64/pytest-2.5.1-py27_0.tar.bz2",
+        "win-32/pytest-2.5.1-py33_0.tar.bz2",
+        "win-32/pytest-2.5.1-py26_0.tar.bz2",
+        "win-32/pytest-2.5.1-py27_0.tar.bz2",
+        "win-64/pytest-2.5.1-py33_0.tar.bz2",
+        "win-64/pytest-2.5.1-py26_0.tar.bz2",
+        "win-64/pytest-2.5.1-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.5.1"
+    },
+    {
+      "version": "2.6.0",
+      "distributions": [
+        "linux-32/pytest-2.6.0-py27_0.tar.bz2",
+        "linux-32/pytest-2.6.0-py33_0.tar.bz2",
+        "linux-32/pytest-2.6.0-py26_0.tar.bz2",
+        "linux-32/pytest-2.6.0-py34_0.tar.bz2",
+        "linux-64/pytest-2.6.0-py27_0.tar.bz2",
+        "linux-64/pytest-2.6.0-py33_0.tar.bz2",
+        "linux-64/pytest-2.6.0-py26_0.tar.bz2",
+        "linux-64/pytest-2.6.0-py34_0.tar.bz2",
+        "osx-64/pytest-2.6.0-py27_0.tar.bz2",
+        "osx-64/pytest-2.6.0-py33_0.tar.bz2",
+        "osx-64/pytest-2.6.0-py26_0.tar.bz2",
+        "osx-64/pytest-2.6.0-py34_0.tar.bz2",
+        "win-32/pytest-2.6.0-py27_0.tar.bz2",
+        "win-32/pytest-2.6.0-py33_0.tar.bz2",
+        "win-32/pytest-2.6.0-py26_0.tar.bz2",
+        "win-32/pytest-2.6.0-py34_0.tar.bz2",
+        "win-64/pytest-2.6.0-py27_0.tar.bz2",
+        "win-64/pytest-2.6.0-py33_0.tar.bz2",
+        "win-64/pytest-2.6.0-py26_0.tar.bz2",
+        "win-64/pytest-2.6.0-py34_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.6.0"
+    },
+    {
+      "version": "2.3.4",
+      "distributions": [
+        "linux-32/pytest-2.3.4-py27_0.tar.bz2",
+        "linux-32/pytest-2.3.4-py26_1.tar.bz2",
+        "linux-32/pytest-2.3.4-py27_1.tar.bz2",
+        "linux-32/pytest-2.3.4-py26_0.tar.bz2",
+        "linux-64/pytest-2.3.4-py27_0.tar.bz2",
+        "linux-64/pytest-2.3.4-py26_1.tar.bz2",
+        "linux-64/pytest-2.3.4-py27_1.tar.bz2",
+        "linux-64/pytest-2.3.4-py26_0.tar.bz2",
+        "osx-64/pytest-2.3.4-py27_0.tar.bz2",
+        "osx-64/pytest-2.3.4-py26_1.tar.bz2",
+        "osx-64/pytest-2.3.4-py27_1.tar.bz2",
+        "osx-64/pytest-2.3.4-py26_0.tar.bz2",
+        "win-32/pytest-2.3.4-py27_0.tar.bz2",
+        "win-32/pytest-2.3.4-py26_1.tar.bz2",
+        "win-32/pytest-2.3.4-py27_1.tar.bz2",
+        "win-32/pytest-2.3.4-py26_0.tar.bz2",
+        "win-64/pytest-2.3.4-py27_0.tar.bz2",
+        "win-64/pytest-2.3.4-py26_1.tar.bz2",
+        "win-64/pytest-2.3.4-py27_1.tar.bz2",
+        "win-64/pytest-2.3.4-py26_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.3.4"
+    },
+    {
+      "version": "2.7.2",
+      "distributions": [
+        "linux-32/pytest-2.7.2-py27_0.tar.bz2",
+        "linux-32/pytest-2.7.2-py26_0.tar.bz2",
+        "linux-32/pytest-2.7.2-py34_0.tar.bz2",
+        "linux-32/pytest-2.7.2-py33_0.tar.bz2",
+        "linux-32/pytest-2.7.2-py35_0.tar.bz2",
+        "linux-64/pytest-2.7.2-py27_0.tar.bz2",
+        "linux-64/pytest-2.7.2-py26_0.tar.bz2",
+        "linux-64/pytest-2.7.2-py34_0.tar.bz2",
+        "linux-64/pytest-2.7.2-py33_0.tar.bz2",
+        "linux-64/pytest-2.7.2-py35_0.tar.bz2",
+        "osx-64/pytest-2.7.2-py27_0.tar.bz2",
+        "osx-64/pytest-2.7.2-py26_0.tar.bz2",
+        "osx-64/pytest-2.7.2-py34_0.tar.bz2",
+        "osx-64/pytest-2.7.2-py33_0.tar.bz2",
+        "osx-64/pytest-2.7.2-py35_0.tar.bz2",
+        "win-32/pytest-2.7.2-py27_0.tar.bz2",
+        "win-32/pytest-2.7.2-py26_0.tar.bz2",
+        "win-32/pytest-2.7.2-py34_0.tar.bz2",
+        "win-32/pytest-2.7.2-py33_0.tar.bz2",
+        "win-64/pytest-2.7.2-py27_0.tar.bz2",
+        "win-64/pytest-2.7.2-py26_0.tar.bz2",
+        "win-64/pytest-2.7.2-py34_0.tar.bz2",
+        "win-64/pytest-2.7.2-py33_0.tar.bz2",
+        "win-64/pytest-2.7.2-py35_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.7.2"
+    },
+    {
+      "version": "2.7.1",
+      "distributions": [
+        "linux-32/pytest-2.7.1-py27_0.tar.bz2",
+        "linux-32/pytest-2.7.1-py34_0.tar.bz2",
+        "linux-32/pytest-2.7.1-py33_0.tar.bz2",
+        "linux-32/pytest-2.7.1-py26_0.tar.bz2",
+        "linux-64/pytest-2.7.1-py27_0.tar.bz2",
+        "linux-64/pytest-2.7.1-py34_0.tar.bz2",
+        "linux-64/pytest-2.7.1-py33_0.tar.bz2",
+        "linux-64/pytest-2.7.1-py26_0.tar.bz2",
+        "osx-64/pytest-2.7.1-py27_0.tar.bz2",
+        "osx-64/pytest-2.7.1-py34_0.tar.bz2",
+        "osx-64/pytest-2.7.1-py33_0.tar.bz2",
+        "osx-64/pytest-2.7.1-py26_0.tar.bz2",
+        "win-32/pytest-2.7.1-py27_0.tar.bz2",
+        "win-32/pytest-2.7.1-py34_0.tar.bz2",
+        "win-32/pytest-2.7.1-py33_0.tar.bz2",
+        "win-32/pytest-2.7.1-py26_0.tar.bz2",
+        "win-64/pytest-2.7.1-py27_0.tar.bz2",
+        "win-64/pytest-2.7.1-py34_0.tar.bz2",
+        "win-64/pytest-2.7.1-py33_0.tar.bz2",
+        "win-64/pytest-2.7.1-py26_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.7.1"
+    },
+    {
+      "version": "2.6.1",
+      "distributions": [
+        "linux-32/pytest-2.6.1-py26_0.tar.bz2",
+        "linux-32/pytest-2.6.1-py34_0.tar.bz2",
+        "linux-32/pytest-2.6.1-py33_0.tar.bz2",
+        "linux-32/pytest-2.6.1-py27_0.tar.bz2",
+        "linux-64/pytest-2.6.1-py26_0.tar.bz2",
+        "linux-64/pytest-2.6.1-py34_0.tar.bz2",
+        "linux-64/pytest-2.6.1-py33_0.tar.bz2",
+        "linux-64/pytest-2.6.1-py27_0.tar.bz2",
+        "osx-64/pytest-2.6.1-py26_0.tar.bz2",
+        "osx-64/pytest-2.6.1-py34_0.tar.bz2",
+        "osx-64/pytest-2.6.1-py33_0.tar.bz2",
+        "osx-64/pytest-2.6.1-py27_0.tar.bz2",
+        "win-32/pytest-2.6.1-py26_0.tar.bz2",
+        "win-32/pytest-2.6.1-py34_0.tar.bz2",
+        "win-32/pytest-2.6.1-py33_0.tar.bz2",
+        "win-32/pytest-2.6.1-py27_0.tar.bz2",
+        "win-64/pytest-2.6.1-py26_0.tar.bz2",
+        "win-64/pytest-2.6.1-py34_0.tar.bz2",
+        "win-64/pytest-2.6.1-py33_0.tar.bz2",
+        "win-64/pytest-2.6.1-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.6.1"
+    },
+    {
+      "version": "2.3.3",
+      "distributions": [
+        "linux-32/pytest-2.3.3-py26_1.tar.bz2",
+        "linux-32/pytest-2.3.3-py27_1.tar.bz2",
+        "linux-64/pytest-2.3.3-py26_1.tar.bz2",
+        "linux-64/pytest-2.3.3-py27_1.tar.bz2",
+        "osx-64/pytest-2.3.3-py26_1.tar.bz2",
+        "osx-64/pytest-2.3.3-py27_1.tar.bz2",
+        "win-32/pytest-2.3.3-py27_1.tar.bz2",
+        "win-64/pytest-2.3.3-py27_1.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.3.3"
+    },
+    {
+      "version": "2.6.2",
+      "distributions": [
+        "linux-32/pytest-2.6.2-py34_0.tar.bz2",
+        "linux-32/pytest-2.6.2-py27_0.tar.bz2",
+        "linux-32/pytest-2.6.2-py33_0.tar.bz2",
+        "linux-32/pytest-2.6.2-py26_0.tar.bz2",
+        "linux-64/pytest-2.6.2-py34_0.tar.bz2",
+        "linux-64/pytest-2.6.2-py27_0.tar.bz2",
+        "linux-64/pytest-2.6.2-py33_0.tar.bz2",
+        "linux-64/pytest-2.6.2-py26_0.tar.bz2",
+        "osx-64/pytest-2.6.2-py34_0.tar.bz2",
+        "osx-64/pytest-2.6.2-py27_0.tar.bz2",
+        "osx-64/pytest-2.6.2-py33_0.tar.bz2",
+        "osx-64/pytest-2.6.2-py26_0.tar.bz2",
+        "win-32/pytest-2.6.2-py34_0.tar.bz2",
+        "win-32/pytest-2.6.2-py27_0.tar.bz2",
+        "win-32/pytest-2.6.2-py33_0.tar.bz2",
+        "win-32/pytest-2.6.2-py26_0.tar.bz2",
+        "win-64/pytest-2.6.2-py34_0.tar.bz2",
+        "win-64/pytest-2.6.2-py27_0.tar.bz2",
+        "win-64/pytest-2.6.2-py33_0.tar.bz2",
+        "win-64/pytest-2.6.2-py26_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.6.2"
+    },
+    {
+      "version": "2.3.5",
+      "distributions": [
+        "linux-32/pytest-2.3.5-py26_0.tar.bz2",
+        "linux-32/pytest-2.3.5-py27_0.tar.bz2",
+        "linux-64/pytest-2.3.5-py26_0.tar.bz2",
+        "linux-64/pytest-2.3.5-py27_0.tar.bz2",
+        "osx-64/pytest-2.3.5-py26_0.tar.bz2",
+        "osx-64/pytest-2.3.5-py27_0.tar.bz2",
+        "win-32/pytest-2.3.5-py26_0.tar.bz2",
+        "win-32/pytest-2.3.5-py27_0.tar.bz2",
+        "win-64/pytest-2.3.5-py26_0.tar.bz2",
+        "win-64/pytest-2.3.5-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.3.5"
+    },
+    {
+      "version": "2.6.3",
+      "distributions": [
+        "linux-32/pytest-2.6.3-py33_0.tar.bz2",
+        "linux-32/pytest-2.6.3-py34_0.tar.bz2",
+        "linux-32/pytest-2.6.3-py26_0.tar.bz2",
+        "linux-32/pytest-2.6.3-py27_0.tar.bz2",
+        "linux-64/pytest-2.6.3-py33_0.tar.bz2",
+        "linux-64/pytest-2.6.3-py34_0.tar.bz2",
+        "linux-64/pytest-2.6.3-py26_0.tar.bz2",
+        "linux-64/pytest-2.6.3-py27_0.tar.bz2",
+        "osx-64/pytest-2.6.3-py33_0.tar.bz2",
+        "osx-64/pytest-2.6.3-py34_0.tar.bz2",
+        "osx-64/pytest-2.6.3-py26_0.tar.bz2",
+        "osx-64/pytest-2.6.3-py27_0.tar.bz2",
+        "win-32/pytest-2.6.3-py33_0.tar.bz2",
+        "win-32/pytest-2.6.3-py34_0.tar.bz2",
+        "win-32/pytest-2.6.3-py26_0.tar.bz2",
+        "win-32/pytest-2.6.3-py27_0.tar.bz2",
+        "win-64/pytest-2.6.3-py33_0.tar.bz2",
+        "win-64/pytest-2.6.3-py34_0.tar.bz2",
+        "win-64/pytest-2.6.3-py26_0.tar.bz2",
+        "win-64/pytest-2.6.3-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.6.3"
+    },
+    {
+      "version": "2.8.0",
+      "distributions": [
+        "linux-32/pytest-2.8.0-py34_0.tar.bz2",
+        "linux-32/pytest-2.8.0-py27_0.tar.bz2",
+        "linux-32/pytest-2.8.0-py35_0.tar.bz2",
+        "linux-64/pytest-2.8.0-py34_0.tar.bz2",
+        "linux-64/pytest-2.8.0-py27_0.tar.bz2",
+        "linux-64/pytest-2.8.0-py35_0.tar.bz2",
+        "osx-64/pytest-2.8.0-py35_0.tar.bz2",
+        "osx-64/pytest-2.8.0-py34_0.tar.bz2",
+        "osx-64/pytest-2.8.0-py27_0.tar.bz2",
+        "win-64/pytest-2.8.0-py34_0.tar.bz2",
+        "win-64/pytest-2.8.0-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.8.0"
+    },
+    {
+      "version": "2.5.2",
+      "distributions": [
+        "linux-32/pytest-2.5.2-py33_0.tar.bz2",
+        "linux-32/pytest-2.5.2-py26_0.tar.bz2",
+        "linux-32/pytest-2.5.2-py34_0.tar.bz2",
+        "linux-32/pytest-2.5.2-py27_0.tar.bz2",
+        "linux-64/pytest-2.5.2-py33_0.tar.bz2",
+        "linux-64/pytest-2.5.2-py26_0.tar.bz2",
+        "linux-64/pytest-2.5.2-py34_0.tar.bz2",
+        "linux-64/pytest-2.5.2-py27_0.tar.bz2",
+        "osx-64/pytest-2.5.2-py33_0.tar.bz2",
+        "osx-64/pytest-2.5.2-py26_0.tar.bz2",
+        "osx-64/pytest-2.5.2-py34_0.tar.bz2",
+        "osx-64/pytest-2.5.2-py27_0.tar.bz2",
+        "win-32/pytest-2.5.2-py33_0.tar.bz2",
+        "win-32/pytest-2.5.2-py26_0.tar.bz2",
+        "win-32/pytest-2.5.2-py34_0.tar.bz2",
+        "win-32/pytest-2.5.2-py27_0.tar.bz2",
+        "win-64/pytest-2.5.2-py33_0.tar.bz2",
+        "win-64/pytest-2.5.2-py26_0.tar.bz2",
+        "win-64/pytest-2.5.2-py34_0.tar.bz2",
+        "win-64/pytest-2.5.2-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.5.2"
+    },
+    {
+      "version": "2.6.4",
+      "distributions": [
+        "linux-32/pytest-2.6.4-py27_0.tar.bz2",
+        "linux-32/pytest-2.6.4-py34_0.tar.bz2",
+        "linux-32/pytest-2.6.4-py26_0.tar.bz2",
+        "linux-32/pytest-2.6.4-py33_0.tar.bz2",
+        "linux-64/pytest-2.6.4-py27_0.tar.bz2",
+        "linux-64/pytest-2.6.4-py34_0.tar.bz2",
+        "linux-64/pytest-2.6.4-py26_0.tar.bz2",
+        "linux-64/pytest-2.6.4-py33_0.tar.bz2",
+        "osx-64/pytest-2.6.4-py27_0.tar.bz2",
+        "osx-64/pytest-2.6.4-py26_0.tar.bz2",
+        "osx-64/pytest-2.6.4-py34_0.tar.bz2",
+        "osx-64/pytest-2.6.4-py33_0.tar.bz2",
+        "win-32/pytest-2.6.4-py27_0.tar.bz2",
+        "win-32/pytest-2.6.4-py26_0.tar.bz2",
+        "win-32/pytest-2.6.4-py34_0.tar.bz2",
+        "win-32/pytest-2.6.4-py33_0.tar.bz2",
+        "win-64/pytest-2.6.4-py27_0.tar.bz2",
+        "win-64/pytest-2.6.4-py26_0.tar.bz2",
+        "win-64/pytest-2.6.4-py34_0.tar.bz2",
+        "win-64/pytest-2.6.4-py33_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.6.4"
+    },
+    {
+      "version": "2.8.1",
+      "distributions": [
+        "linux-32/pytest-2.8.1-py35_0.tar.bz2",
+        "linux-32/pytest-2.8.1-py27_0.tar.bz2",
+        "linux-32/pytest-2.8.1-py34_0.tar.bz2",
+        "linux-64/pytest-2.8.1-py35_0.tar.bz2",
+        "linux-64/pytest-2.8.1-py27_0.tar.bz2",
+        "linux-64/pytest-2.8.1-py34_0.tar.bz2",
+        "osx-64/pytest-2.8.1-py35_0.tar.bz2",
+        "osx-64/pytest-2.8.1-py27_0.tar.bz2",
+        "osx-64/pytest-2.8.1-py34_0.tar.bz2",
+        "win-32/pytest-2.8.1-py35_0.tar.bz2",
+        "win-32/pytest-2.8.1-py27_0.tar.bz2",
+        "win-32/pytest-2.8.1-py34_0.tar.bz2",
+        "win-64/pytest-2.8.1-py35_0.tar.bz2",
+        "win-64/pytest-2.8.1-py27_0.tar.bz2",
+        "win-64/pytest-2.8.1-py34_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.8.1"
+    },
+    {
+      "version": "2.4.2",
+      "distributions": [
+        "linux-32/pytest-2.4.2-py26_0.tar.bz2",
+        "linux-32/pytest-2.4.2-py27_0.tar.bz2",
+        "linux-64/pytest-2.4.2-py26_0.tar.bz2",
+        "linux-64/pytest-2.4.2-py27_0.tar.bz2",
+        "osx-64/pytest-2.4.2-py26_0.tar.bz2",
+        "osx-64/pytest-2.4.2-py27_0.tar.bz2",
+        "win-32/pytest-2.4.2-py26_0.tar.bz2",
+        "win-32/pytest-2.4.2-py27_0.tar.bz2",
+        "win-64/pytest-2.4.2-py26_0.tar.bz2",
+        "win-64/pytest-2.4.2-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.4.2"
+    },
+    {
+      "version": "2.8.5",
+      "distributions": [
+        "linux-32/pytest-2.8.5-py34_0.tar.bz2",
+        "linux-32/pytest-2.8.5-py35_0.tar.bz2",
+        "linux-32/pytest-2.8.5-py27_0.tar.bz2",
+        "linux-64/pytest-2.8.5-py34_0.tar.bz2",
+        "linux-64/pytest-2.8.5-py35_0.tar.bz2",
+        "linux-64/pytest-2.8.5-py27_0.tar.bz2",
+        "osx-64/pytest-2.8.5-py34_0.tar.bz2",
+        "osx-64/pytest-2.8.5-py35_0.tar.bz2",
+        "osx-64/pytest-2.8.5-py27_0.tar.bz2",
+        "win-32/pytest-2.8.5-py34_0.tar.bz2",
+        "win-32/pytest-2.8.5-py35_0.tar.bz2",
+        "win-32/pytest-2.8.5-py27_0.tar.bz2",
+        "win-64/pytest-2.8.5-py34_0.tar.bz2",
+        "win-64/pytest-2.8.5-py35_0.tar.bz2",
+        "win-64/pytest-2.8.5-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.8.5"
+    },
+    {
+      "version": "2.9.1",
+      "distributions": [
+        "linux-32/pytest-2.9.1-py34_0.tar.bz2",
+        "linux-32/pytest-2.9.1-py27_0.tar.bz2",
+        "linux-32/pytest-2.9.1-py35_0.tar.bz2",
+        "linux-64/pytest-2.9.1-py34_0.tar.bz2",
+        "linux-64/pytest-2.9.1-py27_0.tar.bz2",
+        "linux-64/pytest-2.9.1-py35_0.tar.bz2",
+        "osx-64/pytest-2.9.1-py34_0.tar.bz2",
+        "osx-64/pytest-2.9.1-py27_0.tar.bz2",
+        "osx-64/pytest-2.9.1-py35_0.tar.bz2",
+        "win-32/pytest-2.9.1-py34_0.tar.bz2",
+        "win-32/pytest-2.9.1-py27_0.tar.bz2",
+        "win-32/pytest-2.9.1-py35_0.tar.bz2",
+        "win-64/pytest-2.9.1-py34_0.tar.bz2",
+        "win-64/pytest-2.9.1-py27_0.tar.bz2",
+        "win-64/pytest-2.9.1-py35_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.9.1"
+    },
+    {
+      "version": "2.9.2",
+      "distributions": [
+        "linux-32/pytest-2.9.2-py34_0.tar.bz2",
+        "linux-32/pytest-2.9.2-py35_0.tar.bz2",
+        "linux-32/pytest-2.9.2-py27_0.tar.bz2",
+        "linux-64/pytest-2.9.2-py34_0.tar.bz2",
+        "linux-64/pytest-2.9.2-py35_0.tar.bz2",
+        "linux-64/pytest-2.9.2-py27_0.tar.bz2",
+        "osx-64/pytest-2.9.2-py34_0.tar.bz2",
+        "osx-64/pytest-2.9.2-py35_0.tar.bz2",
+        "osx-64/pytest-2.9.2-py27_0.tar.bz2",
+        "win-32/pytest-2.9.2-py34_0.tar.bz2",
+        "win-32/pytest-2.9.2-py35_0.tar.bz2",
+        "win-32/pytest-2.9.2-py27_0.tar.bz2",
+        "win-64/pytest-2.9.2-py34_0.tar.bz2",
+        "win-64/pytest-2.9.2-py35_0.tar.bz2",
+        "win-64/pytest-2.9.2-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/2.9.2"
+    },
+    {
+      "version": "3.0.3",
+      "distributions": [
+        "linux-32/pytest-3.0.3-py34_0.tar.bz2",
+        "linux-32/pytest-3.0.3-py35_0.tar.bz2",
+        "linux-32/pytest-3.0.3-py27_0.tar.bz2",
+        "linux-64/pytest-3.0.3-py34_0.tar.bz2",
+        "linux-64/pytest-3.0.3-py35_0.tar.bz2",
+        "linux-64/pytest-3.0.3-py27_0.tar.bz2",
+        "osx-64/pytest-3.0.3-py34_0.tar.bz2",
+        "osx-64/pytest-3.0.3-py35_0.tar.bz2",
+        "osx-64/pytest-3.0.3-py27_0.tar.bz2",
+        "win-32/pytest-3.0.3-py34_0.tar.bz2",
+        "win-32/pytest-3.0.3-py35_0.tar.bz2",
+        "win-32/pytest-3.0.3-py27_0.tar.bz2",
+        "win-64/pytest-3.0.3-py34_0.tar.bz2",
+        "win-64/pytest-3.0.3-py35_0.tar.bz2",
+        "win-64/pytest-3.0.3-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/3.0.3"
+    },
+    {
+      "version": "3.0.4",
+      "distributions": [
+        "linux-32/pytest-3.0.4-py35_0.tar.bz2",
+        "linux-32/pytest-3.0.4-py34_0.tar.bz2",
+        "linux-32/pytest-3.0.4-py27_0.tar.bz2",
+        "linux-64/pytest-3.0.4-py35_0.tar.bz2",
+        "linux-64/pytest-3.0.4-py34_0.tar.bz2",
+        "linux-64/pytest-3.0.4-py27_0.tar.bz2",
+        "osx-64/pytest-3.0.4-py35_0.tar.bz2",
+        "osx-64/pytest-3.0.4-py34_0.tar.bz2",
+        "osx-64/pytest-3.0.4-py27_0.tar.bz2",
+        "win-32/pytest-3.0.4-py35_0.tar.bz2",
+        "win-32/pytest-3.0.4-py34_0.tar.bz2",
+        "win-32/pytest-3.0.4-py27_0.tar.bz2",
+        "win-64/pytest-3.0.4-py35_0.tar.bz2",
+        "win-64/pytest-3.0.4-py34_0.tar.bz2",
+        "win-64/pytest-3.0.4-py27_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/3.0.4"
+    },
+    {
+      "version": "3.0.5",
+      "distributions": [
+        "linux-32/pytest-3.0.5-py34_0.tar.bz2",
+        "linux-32/pytest-3.0.5-py35_0.tar.bz2",
+        "linux-32/pytest-3.0.5-py27_0.tar.bz2",
+        "linux-64/pytest-3.0.5-py34_0.tar.bz2",
+        "linux-64/pytest-3.0.5-py35_0.tar.bz2",
+        "linux-64/pytest-3.0.5-py27_0.tar.bz2",
+        "osx-64/pytest-3.0.5-py34_0.tar.bz2",
+        "osx-64/pytest-3.0.5-py35_0.tar.bz2",
+        "osx-64/pytest-3.0.5-py27_0.tar.bz2",
+        "win-32/pytest-3.0.5-py34_0.tar.bz2",
+        "win-32/pytest-3.0.5-py35_0.tar.bz2",
+        "win-32/pytest-3.0.5-py27_0.tar.bz2",
+        "win-64/pytest-3.0.5-py34_0.tar.bz2",
+        "win-64/pytest-3.0.5-py35_0.tar.bz2",
+        "win-64/pytest-3.0.5-py27_0.tar.bz2",
+        "linux-32/pytest-3.0.5-py36_0.tar.bz2",
+        "linux-64/pytest-3.0.5-py36_0.tar.bz2"
+      ],
+      "full_name": "anaconda/pytest/3.0.5"
+    },
+    {
+      "version": "3.0.6",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.0.6"
+    },
+    {
+      "version": "3.0.7",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.0.7"
+    },
+    {
+      "version": "3.1.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.1.1"
+    },
+    {
+      "version": "3.1.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.1.2"
+    },
+    {
+      "version": "3.1.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.1.3"
+    },
+    {
+      "version": "3.2.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.2.1"
+    },
+    {
+      "version": "3.2.5",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.2.5"
+    },
+    {
+      "version": "3.3.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.3.0"
+    },
+    {
+      "version": "3.3.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.3.2"
+    },
+    {
+      "version": "3.4.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.4.0"
+    },
+    {
+      "version": "3.4.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.4.1"
+    },
+    {
+      "version": "3.4.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.4.2"
+    },
+    {
+      "version": "3.5.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.5.0"
+    },
+    {
+      "version": "3.5.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.5.1"
+    },
+    {
+      "version": "3.6.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.6.0"
+    },
+    {
+      "version": "3.6.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.6.1"
+    },
+    {
+      "version": "3.6.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.6.2"
+    },
+    {
+      "version": "3.6.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.6.3"
+    },
+    {
+      "version": "3.6.4",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.6.4"
+    },
+    {
+      "version": "3.7.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.7.1"
+    },
+    {
+      "version": "3.7.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.7.2"
+    },
+    {
+      "version": "3.7.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.7.3"
+    },
+    {
+      "version": "3.7.4",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.7.4"
+    },
+    {
+      "version": "3.8.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.8.0"
+    },
+    {
+      "version": "3.8.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.8.1"
+    },
+    {
+      "version": "3.8.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.8.2"
+    },
+    {
+      "version": "3.9.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.9.1"
+    },
+    {
+      "version": "3.9.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.9.3"
+    },
+    {
+      "version": "3.10.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.10.0"
+    },
+    {
+      "version": "3.10.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/3.10.1"
+    },
+    {
+      "version": "4.0.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.0.0"
+    },
+    {
+      "version": "4.0.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.0.1"
+    },
+    {
+      "version": "4.0.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.0.2"
+    },
+    {
+      "version": "4.1.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.1.0"
+    },
+    {
+      "version": "4.1.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.1.1"
+    },
+    {
+      "version": "4.2.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.2.0"
+    },
+    {
+      "version": "4.2.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.2.1"
+    },
+    {
+      "version": "4.3.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.3.0"
+    },
+    {
+      "version": "4.3.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.3.1"
+    },
+    {
+      "version": "4.4.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.4.0"
+    },
+    {
+      "version": "4.4.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.4.1"
+    },
+    {
+      "version": "4.4.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.4.2"
+    },
+    {
+      "version": "4.5.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.5.0"
+    },
+    {
+      "version": "4.6.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.6.2"
+    },
+    {
+      "version": "5.0.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.0.0"
+    },
+    {
+      "version": "5.0.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.0.1"
+    },
+    {
+      "version": "5.1.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.1.1"
+    },
+    {
+      "version": "5.1.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.1.2"
+    },
+    {
+      "version": "5.2.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.2.0"
+    },
+    {
+      "version": "5.2.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.2.1"
+    },
+    {
+      "version": "5.2.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.2.2"
+    },
+    {
+      "version": "5.2.4",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.2.4"
+    },
+    {
+      "version": "5.3.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.3.0"
+    },
+    {
+      "version": "5.3.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.3.1"
+    },
+    {
+      "version": "5.3.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.3.2"
+    },
+    {
+      "version": "5.3.4",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.3.4"
+    },
+    {
+      "version": "5.3.5",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.3.5"
+    },
+    {
+      "version": "5.4.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.4.1"
+    },
+    {
+      "version": "5.4.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.4.2"
+    },
+    {
+      "version": "5.4.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/5.4.3"
+    },
+    {
+      "version": "4.6.11",
+      "distributions": [],
+      "full_name": "anaconda/pytest/4.6.11"
+    },
+    {
+      "version": "6.0.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.0.1"
+    },
+    {
+      "version": "6.0.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.0.2"
+    },
+    {
+      "version": "6.1.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.1.0"
+    },
+    {
+      "version": "6.1.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.1.1"
+    },
+    {
+      "version": "6.1.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.1.2"
+    },
+    {
+      "version": "6.2.0",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.0"
+    },
+    {
+      "version": "6.2.1",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.1"
+    },
+    {
+      "version": "6.2.2",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.2"
+    },
+    {
+      "version": "6.2.3",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.3"
+    },
+    {
+      "version": "6.2.4",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.4"
+    },
+    {
+      "version": "6.2.5",
+      "distributions": [],
+      "full_name": "anaconda/pytest/6.2.5"
+    }
+  ],
+  "html_url": "http://anaconda.org/anaconda/pytest",
+  "builds": [
+    "py37h06a4308_0",
+    "py37h06a4308_1",
+    "py37h06a4308_2",
+    "py35h86f8f81_0",
+    "py35h17225b2_0",
+    "py35h4077b95_0",
+    "py38h9f7ea03_2",
+    "py37h6ffa863_0",
+    "py37h6ffa863_1",
+    "py37h6ffa863_2",
+    "py39h6ffa863_0",
+    "py38h9f7ea03_1",
+    "py35h71d55a8_0",
+    "py310haa95532_2",
+    "py39hecd8cb5_1",
+    "py27hc788ff3_0",
+    "py27hfc7e320_0",
+    "py36h842b08d_1",
+    "py39h6ffa863_2",
+    "py38h9f7ea03_0",
+    "py39h6ffa863_1",
+    "py39h06a4308_2",
+    "py39h06a4308_0",
+    "py39h06a4308_1",
+    "py36h6ffa863_1",
+    "py36h6ffa863_0",
+    "py35h656b196_1",
+    "py36h6ffa863_2",
+    "py27hb8c8e07_0",
+    "py36hecd8cb5_0",
+    "py36hf3522a2_0",
+    "py36hecd8cb5_2",
+    "py36hecd8cb5_1",
+    "py39haa95532_1",
+    "py38h06a4308_2",
+    "py38h06a4308_1",
+    "py38h06a4308_0",
+    "py36_1",
+    "py36_0",
+    "py36hd0a8424_0",
+    "py36he931aee_0",
+    "py35h19f52e9_0",
+    "py36hb68eef0_0",
+    "py27h3ff1b83_0",
+    "py35hfa6e833_0",
+    "py27h5e85035_0",
+    "py27h7cb0baa_1",
+    "py37h9f7ea03_1",
+    "py37h9f7ea03_0",
+    "py37h9f7ea03_2",
+    "py36h1cbdd60_0",
+    "py27h0f5291d_0",
+    "py38he931aee_0",
+    "py27h98000ae_1",
+    "py38_1",
+    "py38_0",
+    "py27h0d7acca_0",
+    "py36h707cbdc_0",
+    "py36h9963153_1",
+    "py36h9f7ea03_0",
+    "py36h9f7ea03_1",
+    "py36h9f7ea03_2",
+    "py39h9f7ea03_2",
+    "py39h9f7ea03_1",
+    "py39h9f7ea03_0",
+    "py35hff7db55_1",
+    "py36h11ad3bb_1",
+    "py310h9f7ea03_2",
+    "py27h0742b9d_0",
+    "py37_0",
+    "py37_1",
+    "py35h20b243e_0",
+    "py37he931aee_0",
+    "py39hecd8cb5_2",
+    "py39hecd8cb5_0",
+    "py36h753b05e_1",
+    "py36h06a4308_1",
+    "py36h06a4308_0",
+    "py36h06a4308_2",
+    "py35h18d855a_0",
+    "py36hfca598b_0",
+    "py36h942affe_1",
+    "py36hcf05f47_0",
+    "py35h465e706_0",
+    "py35h6c72b49_1",
+    "py310hecd8cb5_2",
+    "py35hc97c719_1",
+    "py39haa95532_0",
+    "py35h8337db3_1",
+    "py39haa95532_2",
+    "py37hecd8cb5_0",
+    "py37hecd8cb5_1",
+    "py37hecd8cb5_2",
+    "py37haa95532_2",
+    "py37haa95532_0",
+    "py37haa95532_1",
+    "py35_0",
+    "py35_1",
+    "py38h6ffa863_2",
+    "py38h6ffa863_1",
+    "py38h6ffa863_0",
+    "py27h173df03_1",
+    "py38haa95532_1",
+    "py38haa95532_0",
+    "py38haa95532_2",
+    "py27_1",
+    "py27_0",
+    "py36h288962d_0",
+    "py27hde36796_1",
+    "py36h146da80_0",
+    "py38hecd8cb5_2",
+    "py38hecd8cb5_1",
+    "py38hecd8cb5_0",
+    "py27h7013733_1",
+    "py27h0f0c922_0",
+    "py310h06a4308_2",
+    "py27h42e2595_0",
+    "py35h5c08cda_0",
+    "py36h23ce9bc_0",
+    "py36haa95532_2",
+    "py36haa95532_1",
+    "py36haa95532_0"
+  ],
+  "watchers": 1,
+  "dev_url": "https://github.com/pytest-dev/pytest/",
+  "name": "pytest",
+  "license": "MIT",
+  "versions": [
+    "2.7.0",
+    "2.5.1",
+    "2.6.0",
+    "2.3.4",
+    "2.7.2",
+    "2.7.1",
+    "2.6.1",
+    "2.3.3",
+    "2.6.2",
+    "2.3.5",
+    "2.6.3",
+    "2.8.0",
+    "2.5.2",
+    "2.6.4",
+    "2.8.1",
+    "2.4.2",
+    "2.8.5",
+    "2.9.1",
+    "2.9.2",
+    "3.0.3",
+    "3.0.4",
+    "3.0.5",
+    "3.0.6",
+    "3.0.7",
+    "3.1.1",
+    "3.1.2",
+    "3.1.3",
+    "3.2.1",
+    "3.2.5",
+    "3.3.0",
+    "3.3.2",
+    "3.4.0",
+    "3.4.1",
+    "3.4.2",
+    "3.5.0",
+    "3.5.1",
+    "3.6.0",
+    "3.6.1",
+    "3.6.2",
+    "3.6.3",
+    "3.6.4",
+    "3.7.1",
+    "3.7.2",
+    "3.7.3",
+    "3.7.4",
+    "3.8.0",
+    "3.8.1",
+    "3.8.2",
+    "3.9.1",
+    "3.9.3",
+    "3.10.0",
+    "3.10.1",
+    "4.0.0",
+    "4.0.1",
+    "4.0.2",
+    "4.1.0",
+    "4.1.1",
+    "4.2.0",
+    "4.2.1",
+    "4.3.0",
+    "4.3.1",
+    "4.4.0",
+    "4.4.1",
+    "4.4.2",
+    "4.5.0",
+    "4.6.2",
+    "5.0.0",
+    "5.0.1",
+    "5.1.1",
+    "5.1.2",
+    "5.2.0",
+    "5.2.1",
+    "5.2.2",
+    "5.2.4",
+    "5.3.0",
+    "5.3.1",
+    "5.3.2",
+    "5.3.4",
+    "5.3.5",
+    "5.4.1",
+    "5.4.2",
+    "5.4.3",
+    "4.6.11",
+    "6.0.1",
+    "6.0.2",
+    "6.1.0",
+    "6.1.1",
+    "6.1.2",
+    "6.2.0",
+    "6.2.1",
+    "6.2.2",
+    "6.2.3",
+    "6.2.4",
+    "6.2.5"
+  ],
+  "url": "http://api.anaconda.org/packages/anaconda/pytest",
+  "created_at": "2015-11-03 00:38:29.074000+00:00",
+  "modified_at": "2022-02-03 16:21:24.856000+00:00",
+  "latest_version": "6.2.5",
+  "summary": "Simple and powerful testing with Python.",
+  "license_url": null,
+  "doc_url": "https://docs.pytest.org/en/latest/"
+}
