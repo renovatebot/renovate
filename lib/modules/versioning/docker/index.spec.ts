@@ -19,18 +19,22 @@ describe('modules/versioning/docker/index', () => {
     ${'0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d'}  | ${true}
     ${'123098140293'}                              | ${true}
     ${'01aecc#v2.1.0'}                             | ${false}
+    ${'1.2.3-4'}                                   | ${true}
+    ${'1.2.3-beta.1'}                              | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = docker.isValid(version);
     expect(!!res).toBe(expected);
   });
 
   it.each`
-    version    | major   | minor   | patch
-    ${'1.2.3'} | ${1}    | ${2}    | ${3}
-    ${'18.04'} | ${18}   | ${4}    | ${null}
-    ${'10.1'}  | ${10}   | ${1}    | ${null}
-    ${'3'}     | ${3}    | ${null} | ${null}
-    ${'foo'}   | ${null} | ${null} | ${null}
+    version           | major   | minor   | patch
+    ${'1.2.3'}        | ${1}    | ${2}    | ${3}
+    ${'18.04'}        | ${18}   | ${4}    | ${null}
+    ${'10.1'}         | ${10}   | ${1}    | ${null}
+    ${'3'}            | ${3}    | ${null} | ${null}
+    ${'foo'}          | ${null} | ${null} | ${null}
+    ${'1.2.3-4'}      | ${1}    | ${2}    | ${3}
+    ${'1.2.3-beta.1'} | ${1}    | ${2}    | ${3}
   `(
     'getMajor, getMinor, getPatch for "$version"',
     ({ version, major, minor, patch }) => {
@@ -41,23 +45,31 @@ describe('modules/versioning/docker/index', () => {
   );
 
   it.each`
-    a          | b           | expected
-    ${'1.2.3'} | ${'1.2'}    | ${false}
-    ${'18.04'} | ${'18.1'}   | ${true}
-    ${'10.1'}  | ${'10.1.2'} | ${true}
-    ${'3'}     | ${'2'}      | ${true}
-    ${'1.2.3'} | ${'1.2.3'}  | ${false}
+    a                 | b           | expected
+    ${'1.2.3'}        | ${'1.2'}    | ${false}
+    ${'18.04'}        | ${'18.1'}   | ${true}
+    ${'10.1'}         | ${'10.1.2'} | ${true}
+    ${'3'}            | ${'2'}      | ${true}
+    ${'1.2.3'}        | ${'1.2.3'}  | ${false}
+    ${'1.2.3-4'}      | ${'1.2.3'}  | ${false}
+    ${'1.2.3-4'}      | ${'1.2.2'}  | ${true}
+    ${'1.2.3-beta.1'} | ${'1.2.3'}  | ${false}
+    ${'1.2.3-beta.1'} | ${'1.2.2'}  | ${true}
   `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
     expect(docker.isGreaterThan(a, b)).toBe(expected);
   });
 
   it.each`
-    version    | range       | expected
-    ${'1.2.3'} | ${'2.0'}    | ${true}
-    ${'18.04'} | ${'18.1'}   | ${false}
-    ${'10.1'}  | ${'10.0.4'} | ${false}
-    ${'3'}     | ${'4.0'}    | ${true}
-    ${'1.2'}   | ${'1.3.4'}  | ${true}
+    version           | range       | expected
+    ${'1.2.3'}        | ${'2.0'}    | ${true}
+    ${'18.04'}        | ${'18.1'}   | ${false}
+    ${'10.1'}         | ${'10.0.4'} | ${false}
+    ${'3'}            | ${'4.0'}    | ${true}
+    ${'1.2'}          | ${'1.3.4'}  | ${true}
+    ${'1.2.3-4'}      | ${'1.2.3'}  | ${true}
+    ${'1.2.3-4'}      | ${'1.2.2'}  | ${false}
+    ${'1.2.3-beta.1'} | ${'1.2.3'}  | ${true}
+    ${'1.2.3-beta.1'} | ${'1.2.2'}  | ${false}
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
@@ -66,12 +78,18 @@ describe('modules/versioning/docker/index', () => {
   );
 
   it.each`
-    a          | b           | expected
-    ${'1.2.3'} | ${'1.2.3'}  | ${true}
-    ${'18.04'} | ${'18.4'}   | ${true}
-    ${'10.0'}  | ${'10.0.4'} | ${false}
-    ${'3'}     | ${'4.0'}    | ${false}
-    ${'1.2'}   | ${'1.2.3'}  | ${false}
+    a                 | b                 | expected
+    ${'1.2.3'}        | ${'1.2.3'}        | ${true}
+    ${'18.04'}        | ${'18.4'}         | ${true}
+    ${'10.0'}         | ${'10.0.4'}       | ${false}
+    ${'3'}            | ${'4.0'}          | ${false}
+    ${'1.2'}          | ${'1.2.3'}        | ${false}
+    ${'1.2.3-4'}      | ${'1.2.3-4'}      | ${true}
+    ${'1.2.3-4'}      | ${'1.2.3-beta.1'} | ${false}
+    ${'1.2.3-4'}      | ${'1.2.3-04'}     | ${false}
+    ${'1.2.3-beta.1'} | ${'1.2.3-beta.1'} | ${true}
+    ${'1.2.3-beta.1'} | ${'1.2.3-beta.2'} | ${false}
+    ${'1.2.3-beta.1'} | ${'1.2.3-beta'}   | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(docker.equals(a, b)).toBe(expected);
   });
@@ -87,15 +105,19 @@ describe('modules/versioning/docker/index', () => {
       '2.2.2',
       '2.2',
       '2',
+      '1.2.3-4',
+      '1.2.3-beta.1',
     ];
 
     it.each`
-      version    | expected
-      ${'1.2.3'} | ${'1.2.3'}
-      ${'1.2'}   | ${'1.2'}
-      ${'1'}     | ${'1'}
-      ${'1.3'}   | ${null}
-      ${'0.9'}   | ${null}
+      version           | expected
+      ${'1.2.3'}        | ${'1.2.3'}
+      ${'1.2'}          | ${'1.2'}
+      ${'1'}            | ${'1'}
+      ${'1.3'}          | ${null}
+      ${'0.9'}          | ${null}
+      ${'1.2.3-4'}      | ${'1.2.3-4'}
+      ${'1.2.3-beta.1'} | ${'1.2.3-beta.1'}
     `(`satisfying for $version -> $expected`, ({ version, expected }) => {
       const satisfying = docker.getSatisfyingVersion(versions, version);
       const minSatisfying = docker.minSatisfyingVersion(versions, version);
@@ -106,11 +128,12 @@ describe('modules/versioning/docker/index', () => {
 
   describe('sortVersions(v1, v2)', () => {
     it.each`
-      a          | b
-      ${'1.1.1'} | ${'1.2.3'}
-      ${'1.2.3'} | ${'1.3.4'}
-      ${'2.0.1'} | ${'1.2.3'}
-      ${'1.2.3'} | ${'0.9.5'}
+      a            | b
+      ${'1.1.1'}   | ${'1.2.3'}
+      ${'1.2.3'}   | ${'1.3.4'}
+      ${'2.0.1'}   | ${'1.2.3'}
+      ${'1.2.3'}   | ${'0.9.5'}
+      ${'1.2.3-4'} | ${'1.2.3-beta.1'}
     `(
       'docker.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b")',
       ({ a, b }) => {
@@ -130,9 +153,13 @@ describe('modules/versioning/docker/index', () => {
         '3.8.0-alpine',
         '3.8.2',
         '3.8.0',
+        '1.2.3-4',
+        '1.2.3-beta.1',
       ];
 
       expect(versions.sort((x, y) => docker.sortVersions(x, y))).toEqual([
+        '1.2.3-4',
+        '1.2.3-beta.1',
         '3.7.0b1',
         '3.7.0b5',
         '3.7.0',
@@ -169,6 +196,8 @@ describe('modules/versioning/docker/index', () => {
     ${'3.8.0-alpine'}   | ${true}
     ${'3.8.0b1-alpine'} | ${false}
     ${'3.8.2'}          | ${true}
+    ${'1.2.3-4'}        | ${false}
+    ${'1.2.3-beta.1'}   | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
     const res = docker.isStable(version);
     expect(!!res).toBe(expected);
@@ -188,6 +217,10 @@ describe('modules/versioning/docker/index', () => {
     ${'3.8.0-alpine'}   | ${'3.7.0-alpine'} | ${true}
     ${'3.8.0b1-alpine'} | ${'3.7.0-alpine'} | ${true}
     ${'3.8.2'}          | ${'3.7.0-alpine'} | ${false}
+    ${'1.2.3-4'}        | ${'1.2.3'}        | ${false}
+    ${'1.2.3-beta.1'}   | ${'1.2.3'}        | ${false}
+    ${'1.2.3-4'}        | ${'1.2.2-0'}      | ${true}
+    ${'1.2.3-beta.1'}   | ${'1.2.2-beta.0'} | ${true}
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
@@ -204,6 +237,8 @@ describe('modules/versioning/docker/index', () => {
     ${'3.8.0-alpine'}   | ${'3.8.0'}
     ${'3.8.0b1-alpine'} | ${'3.8.0b1'}
     ${'3.8.2'}          | ${'3.8.2'}
+    ${'1.2.3-4'}        | ${'1.2.3-4'}
+    ${'1.2.3-beta.1'}   | ${'1.2.3-beta.1'}
     ${undefined}        | ${undefined}
   `('valueToVersion("$value") === $expected', ({ value, expected }) => {
     const res = docker.valueToVersion?.(value);

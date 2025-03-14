@@ -1,3 +1,6 @@
+import type { SemVer } from 'semver';
+import { parse as parseSemver } from 'semver';
+
 import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
 import type { GenericVersion } from '../generic';
@@ -20,6 +23,16 @@ class DockerVersioningApi extends GenericVersioningApi {
     if (!version) {
       return null;
     }
+
+    // Try to identify a pure semver prerelease first
+    const semver = this.parseSemverPrerelease(version);
+    if (semver) {
+      return {
+        release: [semver.major, semver.minor, semver.patch],
+        prerelease: semver.prerelease.join('.'),
+      };
+    }
+
     if (commitHashPattern.test(version) && !numericPattern.test(version)) {
       return null;
     }
@@ -88,9 +101,34 @@ class DockerVersioningApi extends GenericVersioningApi {
     );
   }
 
+  private parseSemverPrerelease(version: string): SemVer | null {
+    const semver = parseSemver(version);
+    if (!semver) {
+      return null;
+    }
+    if (semver.prerelease.length === 0) {
+      return null;
+    }
+    // Only consider the likes of 1.2.3-4 and 1.2.3-beta.0 to avoid catching 1.2.3-alpine as prerelease
+    const last = semver.prerelease[semver.prerelease.length - 1];
+    if (typeof last === 'number') {
+      return semver;
+    }
+    return null;
+  }
+
   valueToVersion(value: string): string {
+    if (!value) {
+      return value;
+    }
+
+    // Try to identify a pure semver prerelease first
+    if (this.parseSemverPrerelease(value)) {
+      return value;
+    }
+
     // Remove any suffix after '-', e.g. '-alpine'
-    return value ? value.split('-')[0] : value;
+    return value.split('-')[0];
   }
 }
 
