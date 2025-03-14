@@ -1,10 +1,8 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { Http } from '../../../util/http';
-import type { Timestamp } from '../../../util/timestamp';
 import { MaybeTimestamp } from '../../../util/timestamp';
-import type { ReleaseResult } from '../types';
+import type { Release, ReleaseResult } from '../types';
 import { type File, PagedResponseSchema } from './schema/prefix-dev';
 
 const MAX_PREFIX_DEV_GRAPHQL_PAGE = 100;
@@ -74,6 +72,7 @@ export async function getReleases(
     sourceUrl,
     releases: Object.values(releases),
   };
+}
 
 async function getPagedResponse(
   http: Http,

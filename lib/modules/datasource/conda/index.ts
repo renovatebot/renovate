@@ -66,8 +66,6 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
-    const releaseDate: Record<string, Timestamp> = {};
-
     let response: { body: CondaPackage };
 
     try {
