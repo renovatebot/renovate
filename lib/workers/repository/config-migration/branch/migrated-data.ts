@@ -32,8 +32,10 @@ const prettierConfigFilenames = new Set([
   '.prettierrc.json5',
   '.prettierrc.js',
   '.prettierrc.cjs',
+  '.prettierrc.mjs',
   'prettier.config.js',
   'prettier.config.cjs',
+  'prettier.config.mjs',
   '.prettierrc.toml',
 ]);
 
