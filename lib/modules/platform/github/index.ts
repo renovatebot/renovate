@@ -40,7 +40,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { coerceString, fromBase64, looseEquals } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import { incLimitedValue } from '../../../workers/global/limits';
 import type {
@@ -678,31 +678,6 @@ export async function initRepo({
           logger.warn({ err }, 'Could not set default branch');
         }
       }
-      // This is a lovely "hack" by GitHub that lets us force update our fork's default branch
-      // with the base commit from the parent repository
-      const url = `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`;
-      const sha = repo.defaultBranchRef.target.oid;
-      try {
-        logger.debug(
-          `Updating forked repository default sha ${sha} to match upstream`,
-        );
-        await githubApi.patchJson(url, {
-          body: {
-            sha,
-            force: true,
-          },
-          token: coerceString(forkToken, opts.token),
-        });
-      } catch (err) /* istanbul ignore next */ {
-        logger.warn(
-          { url, sha, err: err.err || err },
-          'Error updating fork from upstream - cannot continue',
-        );
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-        throw new ExternalHostError(err);
-      }
     } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
@@ -732,9 +707,15 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = `${config.repository}.git`;
   const url = URL.format(parsedEndpoint);
+  let upstreamUrl = undefined;
+  if (forkCreation) {
+    parsedEndpoint.pathname = config.parentRepo + '.git';
+    upstreamUrl = URL.format(parsedEndpoint);
+  }
   await git.initRepo({
     ...config,
     url,
+    upstreamUrl,
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
