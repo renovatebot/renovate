@@ -51,6 +51,7 @@ argocd 2.5.4
 asdf-plugin-manager 1.1.1
 atmos 1.100.0
 awscli 2.8.6
+azure-cli 2.70.0
 bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
@@ -193,6 +194,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'aws/aws-cli',
             depName: 'awscli',
+          },
+          {
+            currentValue: '2.70.0',
+            datasource: 'github-releases',
+            packageName: 'Azure/azure-cli',
+            depName: 'azure-cli',
+            extractVersion: '^azure-cli-(?<version>\\S+)',
           },
           {
             currentValue: '0.2.2',
