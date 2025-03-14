@@ -85,7 +85,6 @@ export async function updateArtifacts({
     }
 
     logger.debug({ err }, `Failed to update ${lockFileName} file`);
-
     return [
       {
         artifactError: {
