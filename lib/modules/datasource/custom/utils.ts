@@ -36,7 +36,6 @@ export function massageCustomDatasourceConfig(
   const transform: string[] = [];
   for (const transformTemplate of transformTemplates) {
     const templated = template.compile(transformTemplate, templateInput);
-
     transform.push(templated);
   }
 
