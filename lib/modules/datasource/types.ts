@@ -92,6 +92,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  latestReleaseTimestamp?: Timestamp;
 }
 
 export interface PostprocessReleaseConfig {
