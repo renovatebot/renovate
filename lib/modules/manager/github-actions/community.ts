@@ -60,7 +60,6 @@ export const communityActions = z.union([
     }),
   z
     .object({
-      // https://github.com/pnpm/action-setup
       uses: matchAction('pnpm/action-setup'),
       with: z.object({
         version: z
@@ -80,7 +79,6 @@ export const communityActions = z.union([
     }),
   z
     .object({
-      // https://github.com/astral-sh/setup-uv
       uses: matchAction('pdm-project/setup-pdm'),
       with: z.object({ version: z.string().refine((s) => s !== 'head') }),
     })
