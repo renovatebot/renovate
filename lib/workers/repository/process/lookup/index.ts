@@ -34,7 +34,7 @@ import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
-import { calculateLatestReleaseTimestamp } from './timestamps';
+import { calculateLatestReleaseBump } from './timestamps';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import {
   addReplacementUpdateIfValid,
@@ -143,7 +143,7 @@ export async function lookupUpdates(
       const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
         config,
       )
-        .transform((res) => calculateLatestReleaseTimestamp(versioningApi, res))
+        .transform((res) => calculateLatestReleaseBump(versioningApi, res))
         .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 

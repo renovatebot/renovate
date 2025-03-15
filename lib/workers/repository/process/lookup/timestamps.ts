@@ -3,7 +3,7 @@ import type { ReleaseResult } from '../../../../modules/datasource/types';
 import type { VersioningApi } from '../../../../modules/versioning/types';
 import { type Timestamp, asTimestamp } from '../../../../util/timestamp';
 
-export function calculateLatestReleaseTimestamp(
+export function calculateLatestReleaseBump(
   versioningApi: VersioningApi,
   releaseResult: ReleaseResult,
 ): ReleaseResult {
@@ -38,7 +38,7 @@ export function calculateLatestReleaseTimestamp(
     });
 
     if (!higherTimestampExists) {
-      releaseResult.latestReleaseTimestamp = highestVersionTimestamp;
+      releaseResult.bumpedAt = highestVersionTimestamp;
     }
   }
 
