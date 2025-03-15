@@ -30,20 +30,6 @@ function matchAction(action: string): z.ZodString {
 export const communityActions = z.union([
   z
     .object({
-      uses: matchAction('jaxxstorm/action-install-gh-release'),
-      with: z.object({ repo: z.string(), tag: z.string() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      return {
-        datasource: GithubReleasesDatasource.id,
-        depName: val.repo,
-        packageName: val.repo,
-        currentValue: val.tag,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
       // https://github.com/astral-sh/setup-uv
       uses: matchAction('astral-sh/setup-uv'),
       with: z.object({ version: z.string().refine((s) => s !== 'latest') }),
@@ -89,6 +75,35 @@ export const communityActions = z.union([
         versioning: pep440versioning.id,
         packageName: 'pdm',
         currentValue: val.version,
+        depType: 'uses-with',
+      };
+    }),
+  z
+    .object({
+      uses: matchAction('jaxxstorm/action-install-gh-release'),
+      with: z.object({ repo: z.string(), tag: z.string() }),
+    })
+    .transform(({ with: val }): PackageDependency => {
+      return {
+        datasource: GithubReleasesDatasource.id,
+        depName: val.repo,
+        packageName: val.repo,
+        currentValue: val.tag,
+        depType: 'uses-with',
+      };
+    }),
+  z
+    .object({
+      uses: matchAction('prefix-dev/setup-pixi'),
+      with: z.object({ 'pixi-version': z.string() }),
+    })
+    .transform(({ with: val }): PackageDependency => {
+      return {
+        datasource: GithubReleasesDatasource.id,
+        versioning: pep440versioning.id,
+        depName: 'prefix-dev/pixi',
+        packageName: 'prefix-dev/pixi',
+        currentValue: val['pixi-version'],
         depType: 'uses-with',
       };
     }),

@@ -839,6 +839,24 @@ describe('modules/manager/github-actions/extract', () => {
           },
         ],
       },
+      {
+        step: {
+          uses: 'prefix-dev/setup-pixi@v0.8.3',
+          with: {
+            'pixi-version': 'v0.41.4',
+          },
+        },
+        expected: +[
+          {
+            currentValue: 'v0.41.4',
+            datasource: 'github-releases',
+            depName: 'prefix-dev/pixi',
+            depType: 'uses-with',
+            packageName: 'prefix-dev/pixi',
+            versioning: 'pep440',
+          },
+        ],
+      },
     ])('extract from $step.uses', ({ step, expected }) => {
       const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
