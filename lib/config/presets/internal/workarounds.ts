@@ -289,9 +289,8 @@ export const presets: Record<string, Preset> = {
       'Skip updating tj-actions/changed-files due to it being hacked',
     packageRules: [
       {
-        matchDatasources: ['github-actions'],
-        matchPackageNames: ['tj-actions/changed-files'],
         enabled: false,
+        matchPackageNames: ['tj-actions/changed-files'],
       },
     ],
   },
