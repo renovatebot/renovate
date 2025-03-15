@@ -25,7 +25,7 @@ class DockerVersioningApi extends GenericVersioningApi {
     }
 
     // Try to identify a pure semver prerelease first
-    const semver = this.parseSemverPrerelease(version);
+    const semver = parseSemverPrerelease(version);
     if (semver) {
       return {
         release: [semver.major, semver.minor, semver.patch],
@@ -107,7 +107,7 @@ class DockerVersioningApi extends GenericVersioningApi {
     }
 
     // Try to identify a pure semver prerelease first
-    if (this.parseSemverPrerelease(value)) {
+    if (parseSemverPrerelease(value)) {
       return value;
     }
 
@@ -117,22 +117,22 @@ class DockerVersioningApi extends GenericVersioningApi {
 
   // Allow upgrading from 1.2.3-4 to 1.2.4-5
   allowUnstableMajorUpgrades = true;
+}
 
-  private parseSemverPrerelease(version: string): SemVer | null {
-    const semver = parseSemver(version);
-    if (!semver) {
-      return null;
-    }
-    if (semver.prerelease.length === 0) {
-      return null;
-    }
-    // Only consider the likes of 1.2.3-4 and 1.2.3-beta.0 to avoid catching 1.2.3-alpine as prerelease
-    const last = semver.prerelease[semver.prerelease.length - 1];
-    if (typeof last === 'number') {
-      return semver;
-    }
+function parseSemverPrerelease(version: string): SemVer | null {
+  const semver = parseSemver(version);
+  if (!semver) {
     return null;
   }
+  if (semver.prerelease.length === 0) {
+    return null;
+  }
+  // Only consider the likes of 1.2.3-4 and 1.2.3-beta.0 to avoid catching 1.2.3-alpine as prerelease
+  const last = semver.prerelease[semver.prerelease.length - 1];
+  if (typeof last === 'number') {
+    return semver;
+  }
+  return null;
 }
 
 export const api: VersioningApi = new DockerVersioningApi();
