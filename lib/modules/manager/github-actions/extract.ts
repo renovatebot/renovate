@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
@@ -11,12 +10,10 @@ import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import { NpmDatasource } from '../../datasource/npm';
-import { PypiDatasource } from '../../datasource/pypi';
+
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
-import * as pep440versioning from '../../versioning/pep440';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -24,6 +21,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Workflow } from './types';
+import { communityActions } from './community';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -197,95 +195,6 @@ function extractRunners(runner: unknown): PackageDependency[] {
 
   return runners.map(extractRunner).filter(isNotNullOrUndefined);
 }
-
-const communityActions = z.union([
-  z
-    .object({
-      // https://github.com/jaxxstorm/action-install-gh-release
-      uses: z
-        .string()
-        .regex(
-          /^(https:\/\/github\.com\/)?jaxxstorm\/action-install-gh-release@.*$/,
-        ),
-      with: z.object({ repo: z.string(), tag: z.string() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      return {
-        datasource: GithubReleasesDatasource.id,
-        depName: val.repo,
-        packageName: val.repo,
-        currentValue: val.tag,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      // https://github.com/astral-sh/setup-uv
-      uses: z
-        .string()
-        .regex(/^(https:\/\/github\.com\/)?astral-sh\/setup-uv@.*$/),
-      with: z.object({ version: z.string() }),
-    })
-    .transform(({ with: val }): PackageDependency | undefined => {
-      if (val.version === 'latest') {
-        return;
-      }
-
-      return {
-        datasource: GithubReleasesDatasource.id,
-        depName: 'astral-sh/uv',
-        versioning: npmVersioning.id,
-        packageName: 'astral-sh/uv',
-        currentValue: val.version,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      // https://github.com/pnpm/action-setup
-      uses: z
-        .string()
-        .regex(/^(https:\/\/github\.com\/)?pnpm\/action-setup@.*$/),
-      with: z.object({
-        version: z.union([
-          z.string(),
-          z.number().transform((s) => s.toString()),
-        ]),
-      }),
-    })
-    .transform(({ with: val }): PackageDependency | undefined => {
-      if (val.version === 'latest') {
-        return;
-      }
-
-      return {
-        datasource: NpmDatasource.id,
-        depName: 'pnpm',
-        versioning: npmVersioning.id,
-        packageName: 'pnpm',
-        currentValue: val.version,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      // https://github.com/astral-sh/setup-uv
-      uses: z
-        .string()
-        .regex(/^(https:\/\/github\.com\/)?pdm-project\/setup-pdm@.*$/),
-      with: z.object({ version: z.string().refine((s) => s !== 'head') }),
-    })
-    .transform(({ with: val }): PackageDependency | undefined => {
-      return {
-        datasource: PypiDatasource.id,
-        depName: 'pdm',
-        versioning: pep440versioning.id,
-        packageName: 'pdm',
-        currentValue: val.version,
-        depType: 'uses-with',
-      };
-    }),
-]);
 
 function extractWithYAMLParser(
   content: string,

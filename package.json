@@ -197,6 +197,7 @@
     "emoji-regex": "10.4.0",
     "emojibase": "16.0.0",
     "emojibase-regex": "16.0.0",
+    "escape-string-regexp": "5.0.0",
     "extract-zip": "2.0.1",
     "find-packages": "10.0.4",
     "find-up": "5.0.0",

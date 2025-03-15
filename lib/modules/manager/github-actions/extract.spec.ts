@@ -821,7 +821,7 @@ describe('modules/manager/github-actions/extract', () => {
           },
         ],
       },
-    ])('', async ({ step, expected }) => {
+    ])('extract from $step.uses', async ({ step, expected }) => {
       const yamlContent = dump({ jobs: { build: { steps: [step] } } });
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
