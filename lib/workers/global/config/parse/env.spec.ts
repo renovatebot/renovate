@@ -179,6 +179,41 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
+    it('supports RENOVATE_ prefixed github com token', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
+        RENOVATE_TOKEN: 'a github.com token',
+      };
+      expect(await env.getConfig(envParam)).toEqual({
+        token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
+      });
+    });
+
+    it('GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
+        RENOVATE_GITHUB_COM_TOKEN: 'github_pat_YYYYYY',
+        RENOVATE_TOKEN: 'a github.com token',
+      };
+      expect(await env.getConfig(envParam)).toEqual({
+        token: 'a github.com token',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: 'github_pat_XXXXXX',
+          },
+        ],
+      });
+    });
+
     it('supports GitHub custom endpoint and gitlab.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',

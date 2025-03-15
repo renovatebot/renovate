@@ -1,7 +1,7 @@
-import * as httpMock from '../../../test/http-mock';
 import * as hostRules from '../host-rules';
 import { range } from '../range';
 import { BitbucketServerHttp, setBaseUrl } from './bitbucket-server';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://git.example.com';
 
@@ -32,9 +32,7 @@ describe('util/http/bitbucket-server', () => {
   it('invalid path', async () => {
     setBaseUrl('some-in|valid-host');
     const res = api.getJsonUnchecked('/some-url');
-    await expect(res).rejects.toThrow(
-      'Bitbucket Server: cannot parse path /some-url',
-    );
+    await expect(res).rejects.toThrow('Invalid URL');
   });
 
   it('pagination: uses default limit if not configured', async () => {

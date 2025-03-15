@@ -1,7 +1,7 @@
-import { partial } from '../../../test/util';
 import type { GenericVersion } from './generic';
 import { GenericVersioningApi } from './generic';
 import type { NewValueConfig } from './types';
+import { partial } from '~test/util';
 
 describe('modules/versioning/generic', () => {
   const optionalFunctions = [

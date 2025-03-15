@@ -350,6 +350,7 @@
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
+    "istio": "https://github.com/istio/istio",
     "jackson": [
       "https://github.com/FasterXML/jackson",
       "https://github.com/FasterXML/jackson-annotations",
@@ -623,7 +624,8 @@
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
-    "swc": "https://github.com/swc-project/"
+    "swc": "https://github.com/swc-project/",
+    "twig": "https://github.com/twigphp/"
   },
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],

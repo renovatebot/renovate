@@ -1,11 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
-import { fs, git } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import { codeOwnersForPr } from './code-owners';
+import { fs, git } from '~test/util';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {

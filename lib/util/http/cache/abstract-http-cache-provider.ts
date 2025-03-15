@@ -16,7 +16,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    return httpCache as HttpCache;
+    return httpCache;
   }
 
   async setCacheHeaders<T extends Pick<GotOptions, 'headers'>>(
@@ -66,7 +66,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         timestamp,
       });
 
-      // istanbul ignore if: should never happen
+      /* v8 ignore next 4 -- should never happen */
       if (!newHttpCache) {
         logger.debug(`http cache: failed to persist cache for ${url}`);
         return resp;

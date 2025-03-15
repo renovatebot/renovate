@@ -20,7 +20,7 @@ export async function getPreset({
   }
 
   try {
-    response = await http.get(url);
+    response = await http.getText(url);
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;

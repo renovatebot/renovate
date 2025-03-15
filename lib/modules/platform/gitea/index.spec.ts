@@ -1,6 +1,4 @@
 import type { EnsureIssueConfig, RepoParams } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger, partial } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -27,8 +25,8 @@ import type {
   User,
 } from './types';
 import * as gitea from '.';
-
-vi.mock('../../../util/git');
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger, partial } from '~test/util';
 
 /**
  * latest tested gitea version.
@@ -356,7 +354,7 @@ describe('modules/platform/gitea/index', () => {
           uid: 1,
           archived: false,
         })
-        .replyWithError(new Error('searchRepos()'));
+        .replyWithError(httpMock.error('searchRepos()'));
       await initFakePlatform(scope);
 
       await expect(gitea.getRepos()).rejects.toThrow('searchRepos()');
@@ -464,7 +462,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
-        .replyWithError(new Error('getRepo()'));
+        .replyWithError(httpMock.error('getRepo()'));
       await initFakePlatform(scope);
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow('getRepo()');
     });

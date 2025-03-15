@@ -26,7 +26,7 @@ export class NugetV2Api {
     )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
     while (pkgUrlList !== null) {
       // typescript issue
-      const pkgVersionsListRaw = await http.get(pkgUrlList);
+      const pkgVersionsListRaw = await http.getText(pkgUrlList);
       const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
       const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');

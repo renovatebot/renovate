@@ -26,6 +26,7 @@ describe('workers/global/config/parse/file', () => {
     it.each([
       ['custom js config file', 'config.js'],
       ['custom js config file', 'config.cjs'],
+      ['custom js config file', 'config.mjs'],
       ['custom js config file exporting a Promise', 'config-promise.js'],
       ['custom js config file exporting a function', 'config-function.js'],
       // The next two are different syntactic ways of expressing the same thing
@@ -40,7 +41,7 @@ describe('workers/global/config/parse/file', () => {
       ['.renovaterc', '.renovaterc'],
       ['JSON5 config file', 'config.json5'],
       ['YAML config file', 'config.yaml'],
-    ])('parses %s', async (_fileType, filePath) => {
+    ])('parses %s > %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
       expect(
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
@@ -49,7 +50,9 @@ describe('workers/global/config/parse/file', () => {
 
     it('migrates', async () => {
       const configFile = upath.resolve(__dirname, './__fixtures__/config2.js');
-      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      // for coverage
+      const relativePath = upath.relative(process.cwd(), configFile);
+      const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
     });

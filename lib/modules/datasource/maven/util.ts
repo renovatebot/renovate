@@ -74,7 +74,7 @@ export async function downloadHttpProtocol(
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.get(url, opts),
+    http.getText(url, opts),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
@@ -459,7 +459,7 @@ async function getSnapshotFullVersion(
   );
 
   const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
-  // istanbul ignore if: hard to test
+  /* v8 ignore next 3 -- hard to test */
   if (!mavenMetadata) {
     return null;
   }
@@ -518,7 +518,7 @@ export async function getDependencyInfo(
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!pomContent) {
     return result;
   }

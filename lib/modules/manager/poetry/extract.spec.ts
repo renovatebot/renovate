@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -504,6 +504,7 @@ describe('modules/manager/poetry/extract', () => {
             {# comment #}
             [tool.poetry.dependencies]
             python = "^3.9"
+            {{ foo }} = "{{ bar }}"
             {% if foo %}
             dep1 = "^1.0.0"
             {% endif %}

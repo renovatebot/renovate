@@ -10,7 +10,6 @@ import {
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -20,10 +19,10 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
+import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 vi.mock('./azure-helper', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/sanitize', () =>
   mockDeep({ sanitize: (s: string) => s }),
@@ -42,10 +41,12 @@ describe('modules/platform/azure/index', () => {
     // reset module
     vi.resetModules();
     hostRules = await vi.importMock('../../../util/host-rules');
-    azure = await import('.');
+    azure = await vi.importActual('.');
     azureApi = await vi.importMock('./azure-got-wrapper');
     azureHelper = await vi.importMock('./azure-helper');
-    logger = vi.mocked(await import('../../../logger'), true).logger;
+    logger = (
+      await vi.importMock<typeof import('../../../logger')>('../../../logger')
+    ).logger;
     git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);

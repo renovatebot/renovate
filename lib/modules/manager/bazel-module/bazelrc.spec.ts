@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { fs } from '../../../../test/util';
 import { BazelOption, CommandEntry, ImportEntry, parse, read } from './bazelrc';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import type { Url } from 'node:url';
+import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
@@ -72,7 +73,7 @@ export function clear(check = true): void {
   }
 
   if (missing.length) {
-    const err = new Error(missingHttpMockMessage(done, missing));
+    const err = new Error(missingHttpMockMessage(done, missing, pending));
     massageHttpMockStacktrace(err);
     throw err;
   }
@@ -157,6 +158,7 @@ function massageHttpMockStacktrace(err: Error): void {
 function missingHttpMockMessage(
   done: RequestLog[],
   missing: MissingRequestLog[],
+  pending: string[],
 ): string {
   const blocks: string[] = [];
 
@@ -204,6 +206,14 @@ function missingHttpMockMessage(
       Requests done:
 
       ${done.map(({ method, url, status }) => `- ${method} ${url} [${status}]`).join('\n')}
+    `);
+  }
+
+  if (pending.length) {
+    blocks.push(codeBlock`
+      Pending mocks:
+
+      ${pending.join('\n')}
     `);
   }
 
@@ -264,3 +274,10 @@ afterAll(() => {
 afterEach(() => {
   clear();
 });
+
+export function error(props: string | Record<string, unknown> = {}): Error {
+  if (is.string(props)) {
+    return new Error(props);
+  }
+  return Object.assign(new Error(), props);
+}

@@ -1,10 +1,10 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
 
-const googleAuth = mocked(_googleAuth);
 vi.mock('google-auth-library');
+
+const googleAuth = vi.mocked(_googleAuth);
 
 describe('modules/datasource/utils', () => {
   it('is artifactory server invalid', () => {

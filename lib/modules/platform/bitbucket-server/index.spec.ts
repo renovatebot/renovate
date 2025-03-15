@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger } from '../../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -10,9 +8,10 @@ import {
 import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as bitbucket from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
@@ -400,6 +399,36 @@ describe('modules/platform/bitbucket-server/index', () => {
             endpoint: ensureTrailingSlash(url.href),
             gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
           });
+        });
+
+        it('should use fallback gitAuthor if user info has empty email address', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
+            .reply(200, {
+              ...userInfo,
+              emailAddress: '',
+            });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+              username,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              err: new Error('No email address configured for username abc'),
+            },
+            'Failed to get user info, fallback gitAuthor will be used',
+          );
         });
 
         it('should init', async () => {

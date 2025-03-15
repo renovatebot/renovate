@@ -62,7 +62,7 @@ describe('modules/manager/npm/update/package-version/index', () => {
           throw new Error('semver inc');
         },
       }));
-      const npmUpdater1 = await import('.');
+      const npmUpdater1 = await import('./index.js');
       const { bumpedContent } = npmUpdater1.bumpPackageVersion(
         content,
         '0.0.2',

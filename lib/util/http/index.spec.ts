@@ -1,6 +1,4 @@
 import { ZodError, z } from 'zod';
-import * as httpMock from '../../../test/http-mock';
-import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -12,6 +10,8 @@ import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
 import { Http, HttpError } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 const baseUrl = 'http://renovate.com';
 
@@ -28,7 +28,7 @@ describe('util/http/index', () => {
 
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    expect(await http.get('http://renovate.com/test')).toEqual({
+    expect(await http.getText('http://renovate.com/test')).toEqual({
       authorization: false,
       body: '',
       headers: {},
@@ -155,10 +155,12 @@ describe('util/http/index', () => {
   });
 
   it('headJson', async () => {
-    httpMock.scope(baseUrl).head('/').reply(200, {});
+    httpMock.scope(baseUrl).head('/').reply(200, undefined, {
+      'content-type': 'application/json',
+    });
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
       authorization: false,
-      body: {},
+      body: '',
       headers: {
         'content-type': 'application/json',
       },
