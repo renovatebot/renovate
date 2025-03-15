@@ -846,7 +846,7 @@ describe('modules/manager/github-actions/extract', () => {
             'pixi-version': 'v0.41.4',
           },
         },
-        expected: +[
+        expected: [
           {
             currentValue: 'v0.41.4',
             datasource: 'github-releases',
