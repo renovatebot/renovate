@@ -14,6 +14,7 @@ import {
 } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import * as memCache from '../../../util/cache/memory';
+import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
@@ -48,6 +49,7 @@ describe('modules/platform/gitlab/index', () => {
 
     gitlab.resetPlatform();
     memCache.init();
+    repoCache.resetCache();
   });
 
   async function initFakePlatform(version: string) {

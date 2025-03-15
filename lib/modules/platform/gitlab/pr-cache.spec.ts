@@ -146,8 +146,8 @@ describe('modules/platform/gitlab/pr-cache', () => {
 
     httpMock
       .scope('https://gitlab.com/api/v4')
-      .get(`/projects/repo/merge_requests?per_page=100&scope=created_by_me`)
-      .reply(200, [pr2]);
+      .get(`/projects/repo/merge_requests?per_page=20&scope=created_by_me`)
+      .reply(200, [pr2, pr1]);
 
     const res = await GitlabPrCache.getPrs(
       http,

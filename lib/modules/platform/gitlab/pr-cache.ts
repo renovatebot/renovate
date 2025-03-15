@@ -3,9 +3,8 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
 import type { GitlabHttp } from '../../../util/http/gitlab';
-import { getQueryString } from '../../../util/url';
+import { getQueryString, parseLinkHeader, parseUrl } from '../../../util/url';
 import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
 
@@ -103,9 +102,11 @@ export class GitlabPrCache {
     prCache.setPr(item);
   }
 
-  private reconcile(rawItems: GitLabMergeRequest[]): void {
+  private reconcile(rawItems: GitLabMergeRequest[]): boolean {
     const { items: oldItems } = this.cache;
     let { updated_at } = this.cache;
+
+    let needNextPage = true;
 
     for (const rawItem of rawItems) {
       const id = rawItem.iid;
@@ -115,9 +116,12 @@ export class GitlabPrCache {
 
       const itemNewTime = DateTime.fromISO(rawItem.updated_at);
 
-      if (!dequal(oldItem, newItem)) {
-        oldItems[id] = newItem;
+      if (dequal(oldItem, newItem)) {
+        needNextPage = false;
+        continue;
       }
+
+      oldItems[id] = newItem;
 
       const cacheOldTime = updated_at ? DateTime.fromISO(updated_at) : null;
       if (!cacheOldTime || itemNewTime > cacheOldTime) {
@@ -126,40 +130,39 @@ export class GitlabPrCache {
     }
 
     this.cache.updated_at = updated_at;
+    return needNextPage;
   }
 
   private async sync(http: GitlabHttp): Promise<GitlabPrCache> {
     logger.debug('Syncing PR list');
     const searchParams = {
-      per_page: '100',
+      per_page: this.items.length ? '20' : '100',
     } as any;
     if (!this.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
-    const query = getQueryString(searchParams);
-    const url = `/projects/${this.repo}/merge_requests?${query}`;
+    let query: string | null = getQueryString(searchParams);
 
-    const res = await http.getJsonUnchecked<GitLabMergeRequest[]>(url, {
-      paginate: true,
-    });
+    while (query) {
+      const res = await http.getJsonUnchecked<GitLabMergeRequest[]>(
+        `/projects/${this.repo}/merge_requests?${query}`,
+        {
+          memCache: false,
+          paginate: false,
+        },
+      );
 
-    const items = res.body;
-    logger.debug(`Fetched ${items.length} PRs to sync with cache`);
-    const oldCache = clone(this.cache.items);
+      const needNextPage = this.reconcile(res.body);
+      if (!needNextPage) {
+        break;
+      }
 
-    this.reconcile(items);
-
-    logger.debug(`Total PRs cached: ${Object.values(this.cache.items).length}`);
-    logger.trace(
-      {
-        items,
-        oldCache,
-        newCache: this.cache.items,
-      },
-      `PR cache sync finished`,
-    );
+      const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
+      query = uri ? uri.search : null;
+    }
 
     this.updateItems();
+
     return this;
   }
 
