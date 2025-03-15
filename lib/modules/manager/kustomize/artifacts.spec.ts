@@ -537,7 +537,7 @@ describe('modules/manager/kustomize/artifacts', () => {
       }),
     ).toEqual([{ artifactError: { stderr: 'not found' } }]);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-    expect(execSnapshots).toMatchObject([]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('throws on TEMPORARY_ERROR', async () => {
@@ -570,6 +570,6 @@ describe('modules/manager/kustomize/artifacts', () => {
       }),
     ).rejects.toThrowError(TEMPORARY_ERROR);
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-    expect(execSnapshots).toMatchObject([]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 });
