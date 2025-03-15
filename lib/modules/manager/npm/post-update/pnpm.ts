@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -75,11 +76,16 @@ export async function generateLockFile(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
+    const pnpmWorkspaceFilePath = getSiblingFileName(
+      lockFileName,
+      'pnpm-workspace.yaml',
+    );
+
     let args = '--lockfile-only';
     if (
-      await localPathExists(
-        getSiblingFileName(lockFileName, 'pnpm-workspace.yaml'),
-      )
+      pnpmToolConstraint.constraint &&
+      !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
+      (await localPathExists(pnpmWorkspaceFilePath))
     ) {
       args += ' --recursive';
     }
