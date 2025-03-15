@@ -42,10 +42,6 @@ describe('modules/manager/kustomize/artifacts', () => {
     );
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null if newPackageFileContent is not parseable', async () => {
     const updatedDeps = [
       {
