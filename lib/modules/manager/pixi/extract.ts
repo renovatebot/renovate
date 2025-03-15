@@ -67,6 +67,6 @@ export async function extractPackageFile(
 
   return {
     lockFiles,
-    deps: [],
+    deps: [...config.conda, ...config.pypi],
   };
 }
