@@ -39,7 +39,7 @@ export function massageCustomDatasourceConfig(
 
     logger.trace(
       { transformTemplate, templated },
-      `Custom manager transform template compiled.`,
+      `Custom datasource transform template compiled.`,
     );
 
     transform.push(templated);

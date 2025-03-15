@@ -58,6 +58,8 @@ export class CustomDatasource extends Datasource {
 
       try {
         data = await expression.evaluate(data);
+
+        logger.trace({ data }, `Custom manager evaluated data.`);
       } catch (err) {
         logger.once.warn(
           { err },
