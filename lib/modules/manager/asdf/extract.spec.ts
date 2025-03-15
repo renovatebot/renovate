@@ -51,6 +51,7 @@ argocd 2.5.4
 asdf-plugin-manager 1.1.1
 atmos 1.100.0
 awscli 2.8.6
+azure-cli 2.70.0
 bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
@@ -129,6 +130,7 @@ terraform 1.3.3
 terraform-docs 0.16.0
 terraformer 0.8.21
 terragrunt 0.43.2
+terramate 0.12.1
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
@@ -193,6 +195,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'aws/aws-cli',
             depName: 'awscli',
+          },
+          {
+            currentValue: '2.70.0',
+            datasource: 'github-releases',
+            packageName: 'Azure/azure-cli',
+            depName: 'azure-cli',
+            extractVersion: '^azure-cli-(?<version>\\S+)',
           },
           {
             currentValue: '0.2.2',
@@ -716,6 +725,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'gruntwork-io/terragrunt',
             depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.12.1',
+            datasource: 'github-releases',
+            packageName: 'terramate-io/terramate',
+            depName: 'terramate',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
