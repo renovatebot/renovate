@@ -10,7 +10,12 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../../util/exec/types';
-import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../../util/fs';
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -70,7 +75,14 @@ export async function generateLockFile(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
-    let args = '--recursive --lockfile-only';
+    let args = '--lockfile-only';
+    if (
+      await localPathExists(
+        getSiblingFileName(lockFileName, 'pnpm-workspace.yaml'),
+      )
+    ) {
+      args += ' --recursive';
+    }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
