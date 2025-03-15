@@ -20,8 +20,8 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Workflow } from './types';
 import { communityActions } from './community';
+import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(

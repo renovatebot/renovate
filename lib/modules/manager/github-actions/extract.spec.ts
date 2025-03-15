@@ -717,7 +717,6 @@ describe('modules/manager/github-actions/extract', () => {
         },
         expected: [],
       },
-
       {
         step: {
           uses: 'pnpm/action-setup@v4',
@@ -821,7 +820,7 @@ describe('modules/manager/github-actions/extract', () => {
           },
         ],
       },
-    ])('extract from $step.uses', async ({ step, expected }) => {
+    ])('extract from $step.uses', ({ step, expected }) => {
       const yamlContent = dump({ jobs: { build: { steps: [step] } } });
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
