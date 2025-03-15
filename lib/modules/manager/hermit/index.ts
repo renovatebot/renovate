@@ -8,7 +8,7 @@ export { updateDependency } from './update';
 export const url = 'https://cashapp.github.io/hermit';
 
 export const defaultConfig = {
-  fileMatch: partialDefaultConfig.fileMatch,
+  filePatterns: partialDefaultConfig.filePatterns,
   excludeCommitPaths: partialDefaultConfig.excludeCommitPaths,
   versioning: versionId,
 };

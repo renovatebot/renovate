@@ -25,14 +25,14 @@ Explain how this package manager is different from existing ones.
 
 ### What kind of package files, and names, does this package manager use?
 
-### Which [`fileMatch`](../usage/configuration-options.md#filematch) pattern(s) should Renovate use?
+### Which [`filePatterns`](../usage/configuration-options.md#filepatterns) pattern(s) should Renovate use?
 
-### Do many users need to extend the [`fileMatch`](../usage/configuration-options.md#filematch) pattern for custom file names?
+### Do many users need to extend the [`filePatterns`](../usage/configuration-options.md#filepatterns) pattern for custom file names?
 
 - [ ] Yes, provide details.
 - [ ] No.
 
-### Is the [`fileMatch`](../usage/configuration-options.md#filematch) pattern going to get many "false hits" for files that have nothing to do with package management?
+### Is the [`filePatterns`](../usage/configuration-options.md#filepatterns) pattern going to get many "false hits" for files that have nothing to do with package management?
 
 ## Parsing and Extraction
 

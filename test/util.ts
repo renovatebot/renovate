@@ -9,7 +9,6 @@ import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
-import { regEx } from '../lib/util/regex';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -78,11 +77,4 @@ function getCallerFileName(): string | null {
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
-}
-
-export function regexMatches(target: string, patterns: string[]): boolean {
-  return patterns.some((patt: string) => {
-    const re = regEx(patt);
-    return re.test(target);
-  });
 }
