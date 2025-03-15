@@ -40,10 +40,7 @@ export function massageCustomDatasourceConfig(
     transform.push(templated);
   }
 
-  logger.trace(
-    { transform },
-    `Custom datasource compiled data.`,
-  );
+  logger.trace({ transform }, `Custom datasource compiled data.`);
 
   return {
     format: customDatasource.format ?? 'json',
