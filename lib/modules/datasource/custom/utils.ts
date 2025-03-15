@@ -37,13 +37,13 @@ export function massageCustomDatasourceConfig(
   for (const transformTemplate of transformTemplates) {
     const templated = template.compile(transformTemplate, templateInput);
 
-    logger.trace(
-      { transformTemplate, templated },
-      `Custom datasource transform template compiled.`,
-    );
-
     transform.push(templated);
   }
+
+  logger.trace(
+    { transform },
+    `Custom datasource compiled data.`,
+  );
 
   return {
     format: customDatasource.format ?? 'json',
