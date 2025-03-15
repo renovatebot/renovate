@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { quote } from 'shlex';
 import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
