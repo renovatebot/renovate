@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { parse } from '../../../util/html';
 import { HttpError } from '../../../util/http';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -20,6 +21,10 @@ export class ArtifactoryDatasource extends Datasource {
   override readonly caching = true;
 
   override readonly registryStrategy = 'merge';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -45,7 +50,7 @@ export class ArtifactoryDatasource extends Datasource {
       releases: [],
     };
     try {
-      const response = await this.http.get(url);
+      const response = await this.http.getText(url);
       const body = parse(response.body, {
         blockTextElements: {
           script: true,
@@ -63,18 +68,17 @@ export class ArtifactoryDatasource extends Datasource {
         .forEach(
           // extract version and published time for each node
           (node) => {
-            const version: string =
-              node.innerHTML.slice(-1) === '/'
-                ? node.innerHTML.slice(0, -1)
-                : node.innerHTML;
+            const version: string = node.innerHTML.endsWith('/')
+              ? node.innerHTML.slice(0, -1)
+              : node.innerHTML;
 
-            const published = ArtifactoryDatasource.parseReleaseTimestamp(
-              node.nextSibling!.text, // TODO: can be null (#22198)
+            const releaseTimestamp = asTimestamp(
+              node.nextSibling?.text?.trimStart()?.split(regEx(/\s{2,}/))?.[0],
             );
 
             const thisRelease: Release = {
               version,
-              releaseTimestamp: published,
+              releaseTimestamp,
             };
 
             result.releases.push(thisRelease);
@@ -93,7 +97,6 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           logger.warn(
@@ -107,9 +110,5 @@ export class ArtifactoryDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
-  }
-
-  private static parseReleaseTimestamp(rawText: string): string {
-    return rawText.trim().replace(regEx(/ ?-$/), '') + 'Z';
   }
 }

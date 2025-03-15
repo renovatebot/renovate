@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { id as semverId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -21,10 +22,17 @@ export class FlutterVersionDatasource extends Datasource {
 
   override readonly defaultVersioning = semverId;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `release_date` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/flutter/flutter.';
+
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -36,7 +44,7 @@ export class FlutterVersionDatasource extends Datasource {
     };
     try {
       const resp = (
-        await this.http.getJson<FlutterResponse>(
+        await this.http.getJsonUnchecked<FlutterResponse>(
           `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
         )
       ).body;
@@ -51,7 +59,7 @@ export class FlutterVersionDatasource extends Datasource {
         })
         .map(({ version, release_date, channel }) => ({
           version,
-          releaseTimestamp: release_date,
+          releaseTimestamp: asTimestamp(release_date),
           isStable: channel === 'stable',
         }));
       return result.releases.length ? result : null;

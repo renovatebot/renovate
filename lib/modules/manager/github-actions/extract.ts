@@ -1,21 +1,28 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
+import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as nodeVersioning from '../../versioning/node';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<registryUrl>https:\/\/[.\w-]+\/)?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*-)?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
+  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*-)?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -44,7 +51,10 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   return {};
 }
 
-function extractWithRegex(content: string): PackageDependency[] {
+function extractWithRegex(
+  content: string,
+  config: ExtractConfig,
+): PackageDependency[] {
   const customRegistryUrlsPackageDependency =
     detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
@@ -57,7 +67,7 @@ function extractWithRegex(content: string): PackageDependency[] {
     const dockerMatch = dockerActionRe.exec(line);
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, true, config.registryAliases);
       dep.depType = 'docker';
       deps.push(dep);
       continue;
@@ -67,27 +77,30 @@ function extractWithRegex(content: string): PackageDependency[] {
     if (tagMatch?.groups) {
       const {
         depName,
+        packageName,
         currentValue,
         path = '',
         tag,
         replaceString,
         registryUrl = '',
+        commentWhiteSpaces = ' ',
       } = tagMatch.groups;
       let quotes = '';
-      if (replaceString.indexOf("'") >= 0) {
+      if (replaceString.includes("'")) {
         quotes = "'";
       }
-      if (replaceString.indexOf('"') >= 0) {
+      if (replaceString.includes('"')) {
         quotes = '"';
       }
       const dep: PackageDependency = {
         depName,
+        ...(packageName !== depName && { packageName }),
         commitMessageTopic: '{{{depName}}} action',
         datasource: GithubTagsDatasource.id,
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `${quotes}${registryUrl}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        autoReplaceStringTemplate: `${quotes}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}}${commentWhiteSpaces}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
         ...(registryUrl
           ? detectDatasource(registryUrl)
           : customRegistryUrlsPackageDependency),
@@ -125,11 +138,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
   };
 }
 
-function extractContainer(container: unknown): PackageDependency | undefined {
+function extractContainer(
+  container: unknown,
+  registryAliases: Record<string, string> | undefined,
+): PackageDependency | undefined {
   if (is.string(container)) {
-    return getDep(container);
+    return getDep(container, true, registryAliases);
   } else if (is.plainObject(container) && is.string(container.image)) {
-    return getDep(container.image);
+    return getDep(container.image, true, registryAliases);
   }
   return undefined;
 }
@@ -180,6 +196,7 @@ function extractRunners(runner: unknown): PackageDependency[] {
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageDependency[] {
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
@@ -187,7 +204,7 @@ function extractWithYAMLParser(
   let pkg: Workflow;
   try {
     // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content, { json: true });
+    pkg = parseSingleYaml(content);
   } catch (err) {
     logger.debug(
       { packageFile, err },
@@ -197,14 +214,14 @@ function extractWithYAMLParser(
   }
 
   for (const job of Object.values(pkg?.jobs ?? {})) {
-    const dep = extractContainer(job?.container);
+    const dep = extractContainer(job?.container, config.registryAliases);
     if (dep) {
       dep.depType = 'container';
       deps.push(dep);
     }
 
     for (const service of Object.values(job?.services ?? {})) {
-      const dep = extractContainer(service);
+      const dep = extractContainer(service, config.registryAliases);
       if (dep) {
         dep.depType = 'service';
         deps.push(dep);
@@ -212,6 +229,45 @@ function extractWithYAMLParser(
     }
 
     deps.push(...extractRunners(job?.['runs-on']));
+
+    const actionsWithVersions: Record<string, Partial<PackageDependency>> = {
+      go: {
+        versioning: npmVersioning.id,
+      },
+      node: {
+        versioning: nodeVersioning.id,
+      },
+      python: {
+        versioning: npmVersioning.id,
+      },
+      // Not covered yet because they use different datasources/packageNames:
+      // - dotnet
+      // - java
+    };
+
+    for (const step of coerceArray(job?.steps)) {
+      for (const [action, actionData] of Object.entries(actionsWithVersions)) {
+        const actionName = `actions/setup-${action}`;
+        if (
+          step.uses === actionName ||
+          step.uses?.startsWith(`${actionName}@`)
+        ) {
+          const fieldName = `${action}-version`;
+          const currentValue = step.with?.[fieldName];
+          if (currentValue) {
+            deps.push({
+              datasource: GithubReleasesDatasource.id,
+              depName: action,
+              packageName: `actions/${action}-versions`,
+              ...actionData,
+              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+              currentValue,
+              depType: 'uses-with',
+            });
+          }
+        }
+      }
+    }
   }
 
   return deps;
@@ -220,11 +276,12 @@ function extractWithYAMLParser(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig = {}, // TODO: enforce ExtractConfig
 ): PackageFileContent | null {
   logger.trace(`github-actions.extractPackageFile(${packageFile})`);
   const deps = [
-    ...extractWithRegex(content),
-    ...extractWithYAMLParser(content, packageFile),
+    ...extractWithRegex(content, config),
+    ...extractWithYAMLParser(content, packageFile, config),
   ];
   if (!deps.length) {
     return null;

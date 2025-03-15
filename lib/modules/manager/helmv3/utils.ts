@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';
 import type { PackageDependency } from '../types';
+import { removeOCIPrefix } from './oci';
 import type { ChartDefinition, Repository } from './types';
 
 export function parseRepository(
@@ -16,7 +16,7 @@ export function parseRepository(
     switch (url.protocol) {
       case 'oci:':
         res.datasource = DockerDatasource.id;
-        res.packageName = `${repositoryURL.replace('oci://', '')}/${depName}`;
+        res.packageName = `${removeOCIPrefix(repositoryURL)}/${depName}`;
         // https://github.com/helm/helm/issues/10312
         // https://github.com/helm/helm/issues/10678
         res.pinDigests = false;
@@ -50,7 +50,9 @@ export function resolveAlias(
     return repository;
   }
 
-  const repoWithPrefixRemoved = repository.slice(repository[0] === '@' ? 1 : 6);
+  const repoWithPrefixRemoved = repository.slice(
+    repository.startsWith('@') ? 1 : 6,
+  );
   const alias = registryAliases[repoWithPrefixRemoved];
   if (alias) {
     return alias;
@@ -86,25 +88,17 @@ export function isAlias(repository: string): boolean {
   return repository.startsWith('@') || repository.startsWith('alias:');
 }
 
-export function isOCIRegistry(
-  repository: Repository | string | null | undefined,
-): boolean {
-  if (is.nullOrUndefined(repository)) {
-    return false;
-  }
-  const repo = is.string(repository) ? repository : repository.repository;
-  return repo.startsWith('oci://');
-}
-
 export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
-  return Object.entries(registryAliases).map(([alias, url]) => {
-    return {
-      name: alias,
-      repository: url,
-    };
-  });
+  return Object.entries(registryAliases)
+    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .map(([alias, url]) => {
+      return {
+        name: alias,
+        repository: url,
+      };
+    });
 }
 
 export function isFileInDir(dir: string, file: string): boolean {

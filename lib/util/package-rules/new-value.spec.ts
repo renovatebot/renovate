@@ -4,13 +4,37 @@ describe('util/package-rules/new-value', () => {
   const matcher = new NewValueMatcher();
 
   describe('match', () => {
-    it('return null if non-regex', () => {
+    it('return true for exact match', () => {
       const result = matcher.matches(
         {
-          newValue: '"~> 1.1.0"',
+          newValue: '1.1.0',
         },
         {
-          matchNewValue: '^v',
+          matchNewValue: '1.1.0',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('return true for glob match', () => {
+      const result = matcher.matches(
+        {
+          newValue: '1.2.3',
+        },
+        {
+          matchNewValue: '1.2.*',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('return false for glob non match', () => {
+      const result = matcher.matches(
+        {
+          newValue: '1.2.3',
+        },
+        {
+          matchNewValue: '1.3.*',
         },
       );
       expect(result).toBeFalse();

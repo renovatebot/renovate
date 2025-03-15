@@ -1,11 +1,4 @@
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -35,6 +28,7 @@ import type {
 } from '../../../../util/git/types';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
+import type { Timestamp } from '../../../../util/timestamp';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import type { ResultWithPr } from '../pr';
@@ -48,39 +42,39 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { fs, git, partial, platform, scm } from '~test/util';
 
-jest.mock('./get-updated');
-jest.mock('./schedule');
-jest.mock('./check-existing');
-jest.mock('./reuse');
-jest.mock('../../../../modules/manager/npm/post-update');
-jest.mock('./automerge');
-jest.mock('./commit');
-jest.mock('../pr');
-jest.mock('../pr/automerge');
-jest.mock('../../changelog');
-jest.mock('../../../../util/exec');
-jest.mock('../../../../util/merge-confidence');
-jest.mock('../../../../util/sanitize');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('../../../global/limits');
-jest.mock('../../../../util/cache/repository');
+vi.mock('./get-updated');
+vi.mock('./schedule');
+vi.mock('./check-existing');
+vi.mock('./reuse');
+vi.mock('../../../../modules/manager/npm/post-update');
+vi.mock('./automerge');
+vi.mock('./commit');
+vi.mock('../pr');
+vi.mock('../pr/automerge');
+vi.mock('../../changelog');
+vi.mock('../../../../util/exec');
+vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/sanitize');
+vi.mock('../../../../util/fs');
+vi.mock('../../../global/limits');
+vi.mock('../../../../util/cache/repository');
 
-const getUpdated = mocked(_getUpdated);
-const schedule = mocked(_schedule);
-const checkExisting = mocked(_checkExisting);
-const reuse = mocked(_reuse);
-const npmPostExtract = mocked(_npmPostExtract);
-const automerge = mocked(_automerge);
-const commit = mocked(_commit);
-const mergeConfidence = mocked(_mergeConfidence);
-const prAutomerge = mocked(_prAutomerge);
-const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
-const sanitize = mocked(_sanitize);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const getUpdated = vi.mocked(_getUpdated);
+const schedule = vi.mocked(_schedule);
+const checkExisting = vi.mocked(_checkExisting);
+const reuse = vi.mocked(_reuse);
+const npmPostExtract = vi.mocked(_npmPostExtract);
+const automerge = vi.mocked(_automerge);
+const commit = vi.mocked(_commit);
+const mergeConfidence = vi.mocked(_mergeConfidence);
+const prAutomerge = vi.mocked(_prAutomerge);
+const prWorker = vi.mocked(_prWorker);
+const exec = vi.mocked(_exec);
+const sanitize = vi.mocked(_sanitize);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -103,13 +97,18 @@ describe('workers/repository/update/branch/index', () => {
       updatedPackageFiles: [],
       artifactErrors: [],
       updatedArtifacts: [],
+      artifactNotices: [],
     };
 
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
-      prWorker.ensurePr = jest.fn();
-      prWorker.getPlatformPrOptions = jest.fn();
-      prAutomerge.checkAutoMerge = jest.fn();
+      reuse.shouldReuseExistingBranch.mockImplementation(
+        // eslint-disable-next-line require-await, @typescript-eslint/require-await
+        async (config) => config,
+      );
+      prWorker.ensurePr = vi.fn();
+      prWorker.getPlatformPrOptions = vi.fn();
+      prAutomerge.checkAutoMerge = vi.fn();
       // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
@@ -138,7 +137,6 @@ describe('workers/repository/update/branch/index', () => {
         usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
-      // TODO: fix types, jest is using wrong overload (#22198)
       sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });
@@ -177,11 +175,13 @@ describe('workers/repository/update/branch/index', () => {
       config.prCreation = 'not-pending';
       (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
         {
-          releaseTimestamp: new Date('2019-01-01').getTime().toString(),
+          releaseTimestamp: new Date('2019-01-01')
+            .getTime()
+            .toString() as Timestamp,
           minimumReleaseAge: '1 day',
         },
         {
-          releaseTimestamp: new Date().toString(),
+          releaseTimestamp: new Date().toString() as Timestamp,
           minimumReleaseAge: '1 day',
         },
       ];
@@ -200,7 +200,7 @@ describe('workers/repository/update/branch/index', () => {
       config.prCreation = 'not-pending';
       config.upgrades = partial<BranchUpgradeConfig>([
         {
-          releaseTimestamp: '2099-12-31',
+          releaseTimestamp: '2099-12-31' as Timestamp,
           minimumReleaseAge: '1 day',
         },
       ]);
@@ -543,6 +543,42 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('returns if branch does not exist and in silent mode', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.mode = 'silent';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
+      });
+    });
+
+    it('returns if branch needs dependencyDashboardApproval', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.dependencyDashboardApproval = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
+      });
+    });
+
     it('returns if pr creation limit exceeded and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -859,6 +895,40 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it('ensures PR and comments notice', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactNotices: [{ file: 'go.mod', message: 'some notice' }],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 123 }),
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({ ...config, automerge: true });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith({
+        content: codeBlock`
+          ##### File name: go.mod
+
+          some notice
+        `,
+        number: 123,
+        topic: 'ℹ Artifact update notice',
+      });
+    });
+
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1016,7 +1086,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
+      config.releaseTimestamp = '2018-04-26T05:15:51.877Z' as Timestamp;
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -1041,7 +1111,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = new Date().toISOString();
+      config.releaseTimestamp = new Date().toISOString() as Timestamp;
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
@@ -1066,7 +1136,7 @@ describe('workers/repository/update/branch/index', () => {
         pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
-      config.releaseTimestamp = new Date().toISOString();
+      config.releaseTimestamp = new Date().toISOString() as Timestamp;
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         Error(MANAGER_LOCKFILE_ERROR),
       );
@@ -1238,6 +1308,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [partial<FileChange>()],
         updatedArtifacts: [partial<FileChange>()],
         artifactErrors: [{}],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1510,6 +1581,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1553,8 +1625,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo {{{versioning}}}$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1587,7 +1659,7 @@ describe('workers/repository/update/branch/index', () => {
         commitSha: null,
       });
       const errorMessage = expect.stringContaining(
-        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedPostUpgradeCommand",
+        "Post-upgrade command 'disallowed task' has not been added to the allowed list in allowedCommands",
       );
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1607,6 +1679,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       } satisfies PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1650,8 +1723,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^exit 1$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^exit 1$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1691,6 +1764,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
         updatedArtifacts: [],
+        artifactNotices: [],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
@@ -1734,8 +1808,8 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
-        allowPostUpgradeCommandTemplating: false,
+        allowedCommands: ['^echo {{{versioning}}}$'],
+        allowCommandTemplating: false,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1836,8 +1910,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo {{{depName}}}$'],
+        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1986,8 +2060,8 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedPostUpgradeCommands: ['^echo hardcoded-string$'],
-        allowPostUpgradeCommandTemplating: true,
+        allowedCommands: ['^echo hardcoded-string$'],
+        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });
@@ -2239,7 +2313,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard All Pending approval', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2276,7 +2350,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard open all rate-limited', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2313,7 +2387,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2352,7 +2426,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
         }),
       );
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
         }),

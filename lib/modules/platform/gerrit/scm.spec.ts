@@ -1,4 +1,3 @@
-import { git, mocked, partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { client as _client } from './client';
 import { GerritScm, configureScm } from './scm';
@@ -7,10 +6,10 @@ import type {
   GerritChange,
   GerritRevisionInfo,
 } from './types';
+import { git, partial } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('./client');
-const clientMock = mocked(_client);
+vi.mock('./client');
+const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
   const gerritScm = new GerritScm();
@@ -36,7 +35,7 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('open change found for branchname, rebase action is available -> isBehind == true ', async () => {
+    it('open change found for branchname, rebase action is available -> isBehind == true', async () => {
       const change = partial<GerritChange>({
         current_revision: 'currentRevSha',
         revisions: {
@@ -55,7 +54,7 @@ describe('modules/platform/gerrit/scm', () => {
       ).resolves.toBeTrue();
     });
 
-    it('open change found for branch name, but rebase action is not available -> isBehind == false ', async () => {
+    it('open change found for branch name, but rebase action is not available -> isBehind == false', async () => {
       const change = partial<GerritChange>({
         current_revision: 'currentRevSha',
         revisions: {
@@ -266,6 +265,7 @@ describe('modules/platform/gerrit/scm', () => {
           baseBranch: 'main',
           message: 'commit msg',
           files: [],
+          prTitle: 'pr title',
         }),
       ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
@@ -294,19 +294,26 @@ describe('modules/platform/gerrit/scm', () => {
           baseBranch: 'main',
           message: 'commit msg',
           files: [],
+          prTitle: 'pr title',
         }),
       ).toBe('commitSha');
       expect(git.prepareCommit).toHaveBeenCalledWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', expect.stringMatching(/Change-Id: I.{32}/)],
+        message: [
+          'pr title',
+          expect.stringMatching(
+            /^Renovate-Branch: renovate\/dependency-1\.x\nChange-Id: I[a-z0-9]{40}$/,
+          ),
+        ],
+        prTitle: 'pr title',
         force: true,
       });
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
+        targetRef: 'refs/for/main%notify=NONE',
       });
     });
 
@@ -333,13 +340,18 @@ describe('modules/platform/gerrit/scm', () => {
           baseBranch: 'main',
           message: ['commit msg'],
           files: [],
+          prTitle: 'pr title',
         }),
       ).toBeNull();
       expect(git.prepareCommit).toHaveBeenCalledWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', 'Change-Id: ...'],
+        message: [
+          'pr title',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+        ],
+        prTitle: 'pr title',
         force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
@@ -371,20 +383,25 @@ describe('modules/platform/gerrit/scm', () => {
           baseBranch: 'main',
           message: 'commit msg',
           files: [],
+          prTitle: 'pr title',
         }),
       ).toBe('commitSha');
       expect(git.prepareCommit).toHaveBeenCalledWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: ['commit msg', 'Change-Id: ...'],
+        message: [
+          'pr title',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+        ],
+        prTitle: 'pr title',
         force: true,
       });
       expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
+        targetRef: 'refs/for/main%notify=NONE',
       });
       expect(clientMock.wasApprovedBy).toHaveBeenCalledWith(
         existingChange,

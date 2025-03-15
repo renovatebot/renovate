@@ -17,7 +17,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import type { HttpResponse } from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
@@ -41,6 +41,12 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
+  Comment,
+  PullRequestActivity,
+  PullRequestCommentActivity,
+} from './schema';
+import { UserSchema } from './schema';
+import type {
   BbsConfig,
   BbsPr,
   BbsRestBranch,
@@ -49,6 +55,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -84,15 +91,21 @@ function updatePrVersion(pr: number, version: number): number {
 
 export async function initPlatform({
   endpoint,
+  token,
   username,
   password,
+  gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password',
+      'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
+    );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must configure either a Bitbucket Server password or a HTTP access token, not both',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -108,7 +121,7 @@ export async function initPlatform({
       bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const { version } = (
-        await bitbucketServerHttp.getJson<{ version: string }>(
+        await bitbucketServerHttp.getJsonUnchecked<{ version: string }>(
           `./rest/api/1.0/application-properties`,
         )
       ).body;
@@ -126,6 +139,43 @@ export async function initPlatform({
     );
   }
 
+  if (!gitAuthor && username) {
+    logger.debug(`Attempting to confirm gitAuthor from username`);
+    const options: HttpOptions = {
+      memCache: false,
+    };
+
+    if (token) {
+      options.token = token;
+    } else {
+      options.username = username;
+      options.password = password;
+    }
+
+    try {
+      const { displayName, emailAddress } = (
+        await bitbucketServerHttp.getJson(
+          `./rest/api/1.0/users/${username}`,
+          options,
+          UserSchema,
+        )
+      ).body;
+
+      if (!emailAddress.length) {
+        throw new Error(`No email address configured for username ${username}`);
+      }
+
+      platformConfig.gitAuthor = `${displayName} <${emailAddress}>`;
+
+      logger.debug(`Detected gitAuthor: ${platformConfig.gitAuthor}`);
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Failed to get user info, fallback gitAuthor will be used',
+      );
+    }
+  }
+
   return platformConfig;
 }
 
@@ -133,13 +183,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Server repositories');
   try {
-    const repos = await utils.accumulateValues(
-      `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`,
-    );
-    const result = repos.map(
-      (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key}/${r.slug}`,
-    );
+    const repos = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestRepo[]>(
+        `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`,
+        { paginate: true },
+      )
+    ).body;
+
+    const result = repos.map((repo) => `${repo.project.key}/${repo.slug}`);
     logger.debug({ result }, 'result of getRepos()');
     return result;
   } catch (err) /* istanbul ignore next */ {
@@ -158,14 +209,13 @@ export async function getRawFile(
   const fileUrl =
     `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
     (branchOrTag ? '&at=' + branchOrTag : '');
-  const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
+  const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
     return lines.map(({ text }) => text).join('\n');
   }
-  const msg = `The file is too big (${size}B)`;
-  logger.warn({ size }, msg);
-  throw new Error(msg);
+  logger.warn({ size }, 'The file is too big');
+  throw new Error(`The file is too big (${size}B)`);
 }
 
 export async function getJsonFile(
@@ -182,6 +232,7 @@ export async function getJsonFile(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
@@ -204,13 +255,13 @@ export async function initRepo({
 
   try {
     const info = (
-      await bitbucketServerHttp.getJson<BbsRestRepo>(
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestRepo>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    const branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
+    const branchRes = await bitbucketServerHttp.getJsonUnchecked<BbsRestBranch>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`,
     );
 
@@ -231,7 +282,9 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
+      extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
+      cloneSubmodulesFilter,
       fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
@@ -260,7 +313,7 @@ export async function getBranchForceRebase(
   _branchName: string,
 ): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
-  const res = await bitbucketServerHttp.getJson<{
+  const res = await bitbucketServerHttp.getJsonUnchecked<{
     mergeConfig: { defaultStrategy: { id: string } };
   }>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`,
@@ -284,7 +337,7 @@ export async function getPr(
     return null;
   }
 
-  const res = await bitbucketServerHttp.getJson<BbsRestPr>(
+  const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
     { memCache: !refreshCache },
   );
@@ -328,14 +381,17 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor) {
+    if (!config.ignorePrAuthor && config.username !== undefined) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
     const query = getQueryString(searchParams);
-    const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-    );
+    const values = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+        { paginate: true },
+      )
+    ).body;
 
     config.prList = values.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
@@ -361,16 +417,19 @@ export async function findPr({
     const searchParams: Record<string, string> = {
       state: 'OPEN',
     };
-    searchParams['direction'] = 'outgoing';
-    searchParams['at'] = `refs/heads/${branchName}`;
+    searchParams.direction = 'outgoing';
+    searchParams.at = `refs/heads/${branchName}`;
 
     const query = getQueryString(searchParams);
-    const prs = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-      'get',
-      {},
-      1, // only fetch the latest pr
-    );
+    const prs = (
+      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+        {
+          paginate: true,
+          limit: 1, // only fetch the latest pr
+        },
+      )
+    ).body;
 
     if (!prs.length) {
       logger.debug(`No PR found for branch ${branchName}`);
@@ -415,7 +474,7 @@ async function getStatus(
   const branchCommit = git.getBranchCommit(branchName);
 
   return (
-    await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
+    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       { memCache },
@@ -454,18 +513,18 @@ export async function getBranchStatus(
   }
 }
 
-function getStatusCheck(
+async function getStatusCheck(
   branchName: string,
   memCache = true,
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
-  return utils.accumulateValues(
-    // TODO: types (#22198)
-    `./rest/build-status/1.0/commits/${branchCommit!}`,
-    'get',
-    { memCache },
-  );
+  return (
+    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
+      `./rest/build-status/1.0/commits/${branchCommit!}`,
+      { paginate: true, memCache },
+    )
+  ).body;
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
@@ -668,7 +727,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   retryErrorMessages: string[],
 ): Promise<Awaited<ReturnType<T>>> {
   const maxAttempts = Math.max(maxTries, 1);
-  let lastError: Error | null = null;
+  let lastError: Error | undefined;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       return await fn(...args);
@@ -685,6 +744,8 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   }
 
   logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  // Can't be `undefined` here.
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw lastError;
 }
 
@@ -696,20 +757,22 @@ export function deleteLabel(issueNo: number, label: string): Promise<void> {
   return Promise.resolve();
 }
 
-type Comment = { text: string; id: number };
-
 async function getComments(prNo: number): Promise<Comment[]> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/activities
-  let comments = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`,
-  );
-
-  comments = comments
-    .filter(
-      (a: { action: string; commentAction: string }) =>
-        a.action === 'COMMENTED' && a.commentAction === 'ADDED',
+  const activities = (
+    await bitbucketServerHttp.getJsonUnchecked<PullRequestActivity[]>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`,
+      { paginate: true },
     )
-    .map((a: { comment: Comment }) => a.comment);
+  ).body;
+
+  const comments = activities
+    .filter(
+      (a): a is PullRequestCommentActivity =>
+        a.action === 'COMMENTED' && 'comment' in a && 'commentAction' in a,
+    )
+    .filter((a) => a.commentAction === 'ADDED')
+    .map((a) => a.comment);
 
   logger.debug(`Found ${comments.length} comments`);
 
@@ -732,7 +795,7 @@ async function getCommentVersion(
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   const { version } = (
-    await bitbucketServerHttp.getJson<{ version: number }>(
+    await bitbucketServerHttp.getJsonUnchecked<{ version: number }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`,
     )
   ).body;
@@ -858,24 +921,23 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
-  platformOptions,
+  platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
-  /* istanbul ignore else */
-  if (platformOptions?.bbUseDefaultReviewers) {
+  if (platformPrOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
-      await bitbucketServerHttp.getJson<{ id: number }>(
+      await bitbucketServerHttp.getJsonUnchecked<{ id: number }>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
 
     const defReviewers = (
-      await bitbucketServerHttp.getJson<{ name: string }[]>(
+      await bitbucketServerHttp.getJsonUnchecked<{ name: string }[]>(
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
@@ -943,7 +1005,7 @@ export async function updatePr({
   bitbucketInvalidReviewers,
   targetBranch,
 }: UpdatePrConfig & {
-  bitbucketInvalidReviewers: string[] | undefined;
+  bitbucketInvalidReviewers?: string[] | undefined;
 }): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
@@ -968,10 +1030,11 @@ export async function updatePr({
       };
     }
 
-    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
-      version: number;
-      state: string;
-    }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<
+      BbsRestPr & {
+        version: number;
+      }
+    >(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       { body },
     );
@@ -985,6 +1048,9 @@ export async function updatePr({
       ['closed']: 'DECLINED',
     }[state!];
 
+    let finalState: 'open' | 'closed' =
+      currentState === 'OPEN' ? 'open' : 'closed';
+
     if (
       newState &&
       ['OPEN', 'DECLINED'].includes(currentState) &&
@@ -997,7 +1063,26 @@ export async function updatePr({
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
       );
 
+      finalState = state!;
+
       updatePrVersion(pr.number, updatedStatePr.version);
+    }
+
+    if (config.prList) {
+      const bbsPr = utils.prInfo(updatedPr);
+      const existingIndex = config.prList.findIndex(
+        (item) => item.number === prNo,
+      );
+      // istanbul ignore if: should never happen
+      if (existingIndex === -1) {
+        logger.warn(
+          { pr: bbsPr },
+          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+        );
+        config.prList.push({ ...bbsPr, state: finalState });
+      } else {
+        config.prList[existingIndex] = { ...bbsPr, state: finalState };
+      }
     }
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
@@ -1061,10 +1146,10 @@ export async function mergePr({
 export function massageMarkdown(input: string): string {
   logger.debug(`massageMarkdown(${input.split(newlineRegex)[0]})`);
   // Remove any HTML we use
-  return smartTruncate(input, 30000)
+  return smartTruncate(input, maxBodyLength())
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"',
+      'PR is renamed to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',
@@ -1073,5 +1158,9 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
-    .replace(regEx('<!--.*?-->', 'g'), '');
+    .replace(regEx(/<!--.*?-->/gs), '');
+}
+
+export function maxBodyLength(): number {
+  return 30000;
 }

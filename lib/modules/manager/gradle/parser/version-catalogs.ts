@@ -2,6 +2,8 @@ import { query as q } from 'good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qArtifactId,
+  qGroupId,
   qStringValue,
   qStringValueAsSymbol,
   qValueMatcher,
@@ -9,14 +11,6 @@ import {
   storeVarToken,
 } from './common';
 import { handleLibraryDep, handlePlugin } from './handlers';
-
-const qGroupId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'groupId'),
-);
-
-const qArtifactId = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'artifactId'),
-);
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')

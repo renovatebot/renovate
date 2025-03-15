@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { BazelDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
@@ -58,6 +58,7 @@ describe('modules/datasource/bazel/index', () => {
           { version: '0.15.0' },
           { version: '0.16.0' },
         ],
+        sourceUrl: 'https://github.com/foo/bar',
       });
     });
 

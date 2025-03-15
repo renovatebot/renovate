@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://glasskube.dev/schemas/v1/package-manifest.json
+name: cloudnative-pg
+iconUrl: https://github.com/glasskube/glasskube/assets/16959694/99f3192a-587f-4eb9-884d-62800c022992
+shortDescription: A comprehensive platform designed to seamlessly manage PostgreSQL databases
+longDescription: |
+  **CloudNativePG** is an open source operator designed to manage PostgreSQL workloads on any supported Kubernetes
+  cluster running in private, public, hybrid, or multi-cloud environments. CloudNativePG adheres to DevOps principles
+  and concepts such as declarative configuration and immutable infrastructure.
+defaultNamespace: cnpg-system
+manifests:
+  - url: https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v1.23.1/cnpg-1.23.1.yaml

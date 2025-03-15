@@ -8,6 +8,7 @@ describe('modules/versioning/pep440/index', () => {
     ${'1.9'}                                         | ${true}
     ${'17.04.0'}                                     | ${true}
     ${'==1.2.3'}                                     | ${true}
+    ${'==1.2.3.0'}                                   | ${true}
     ${'==1.2.3rc0'}                                  | ${true}
     ${'~=1.2.3'}                                     | ${true}
     ${'==1.2.*'}                                     | ${true}
@@ -35,6 +36,16 @@ describe('modules/versioning/pep440/index', () => {
     ${'1.0.0'} | ${'1.0..foo'} | ${false}
   `('equals($a, $b) === $expected', ({ a, b, expected }) => {
     expect(pep440.equals(a, b)).toBe(expected);
+  });
+
+  it.each`
+    a          | b             | expected
+    ${'1.0'}   | ${'>=1.0.0'}  | ${true}
+    ${'3.0.0'} | ${'3.0.0'}    | ${true}
+    ${'1.6.2'} | ${'<2.2.1.0'} | ${true}
+    ${'>=3.8'} | ${'>=3.9'}    | ${false}
+  `('matches($a, $b) === $expected', ({ a, b, expected }) => {
+    expect(pep440.matches(a, b)).toBe(expected);
   });
 
   it.each`

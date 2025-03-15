@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
 
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -127,7 +127,7 @@ requires-python = "<3.9"
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update --no-sync dep1' +
+            'pdm update --no-sync --update-eager dep1' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',

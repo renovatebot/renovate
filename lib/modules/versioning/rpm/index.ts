@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import { GenericVersion, GenericVersioningApi } from '../generic';
+import type { GenericVersion } from '../generic';
+import { GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'rpm';
@@ -109,8 +110,6 @@ class RpmVersioningApi extends GenericVersioningApi {
       upstreamVersion = remainingVersion;
     }
 
-    upstreamVersion;
-
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
       parseInt(m[0], 10),
     );
@@ -168,12 +167,12 @@ class RpmVersioningApi extends GenericVersioningApi {
       const matchv2 = matchesv2[i];
 
       // compare tildes
-      if (matchv1?.[0] === '~' || matchv2?.[0] === '~') {
-        if (matchv1?.[0] !== '~') {
+      if (matchv1?.startsWith('~') || matchv2?.startsWith('~')) {
+        if (!matchv1?.startsWith('~')) {
           return 1;
         }
 
-        if (matchv2?.[0] !== '~') {
+        if (!matchv2?.startsWith('~')) {
           return -1;
         }
       }
@@ -211,11 +210,11 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     // If there is a tilde in a segment past the minimum number of segments, find it
-    if (matchesv1.length > matches && matchesv1[matches][0] === '~') {
+    if (matchesv1.length > matches && matchesv1[matches].startsWith('~')) {
       return -1;
     }
 
-    if (matchesv2.length > matches && matchesv2[matches][0] === '~') {
+    if (matchesv2.length > matches && matchesv2[matches].startsWith('~')) {
       return 1;
     }
 

@@ -45,20 +45,28 @@ describe('modules/manager/asdf/extract', () => {
       const res = extractPackageFile(
         codeBlock`
 act 0.2.54
+actionlint 0.7.0
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
+atmos 1.100.0
 awscli 2.8.6
+azure-cli 2.70.0
 bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+conftest 0.56.0
+container-structure-test 1.19.2
+cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
+dotnet-core 8.0.303
 dprint 0.32.2
 ecspresso 2.1.0
+editorconfig-checker 3.0.2
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
@@ -66,49 +74,68 @@ flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
+gitleaks 8.21.1
+gleam 1.3.1
 gohugo extended_0.104.3
-golang 1.19.2
+golang 1.23.3
 golangci-lint 1.52.2
+gomplate 3.11.7
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
+helm-docs 1.14.1
 helmfile 0.147.0
 hugo 0.104.3
 idris 1.3.4
 java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
+k3s 1.31.2+k3s1
 kind 0.19.0
 kotlin 1.7.20
+kubebuilder 3.10.0
 kubectl 1.26.3
+kubetail 1.6.19
 kustomize 4.5.7
 lua 5.4.4
+markdownlint-cli2 0.13.0
 maven 3.9.6
 mimirtool 2.11.0
+minikube 1.33.1
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
+oci 3.50.0
 opentofu 1.6.0
+packer 1.11.2
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
 poetry 1.3.2
 pre-commit 3.3.1
+protoc 28.3
 pulumi 3.57.1
 python 3.11.0
+rebar 3.23.0
 ruby 3.1.2
 rust 1.64.0
 sbt 1.9.7
 scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
+skaffold 2.14.0
+talhelper 3.0.18
+talosctl 1.9.3
 terraform 1.3.3
 terraform-docs 0.16.0
+terraformer 0.8.21
 terragrunt 0.43.2
+terramate 0.12.1
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yamllint 1.35.0
 yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
@@ -127,6 +154,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'nektos/act',
             depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.7.0',
+            datasource: 'github-releases',
+            packageName: 'rhysd/actionlint',
+            depName: 'actionlint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -150,10 +184,24 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.100.0',
+            datasource: 'github-releases',
+            packageName: 'cloudposse/atmos',
+            depName: 'atmos',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '2.8.6',
             datasource: 'github-tags',
             packageName: 'aws/aws-cli',
             depName: 'awscli',
+          },
+          {
+            currentValue: '2.70.0',
+            datasource: 'github-releases',
+            packageName: 'Azure/azure-cli',
+            depName: 'azure-cli',
+            extractVersion: '^azure-cli-(?<version>\\S+)',
           },
           {
             currentValue: '0.2.2',
@@ -183,6 +231,27 @@ dummy 1.2.3
             depName: 'clojure',
           },
           {
+            currentValue: '0.56.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/conftest',
+            depName: 'conftest',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.19.2',
+            datasource: 'github-tags',
+            packageName: 'GoogleContainerTools/container-structure-test',
+            depName: 'container-structure-test',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '2.2.4',
+            datasource: 'github-releases',
+            packageName: 'sigstore/cosign',
+            depName: 'cosign',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             packageName: 'crystal-lang/crystal',
@@ -208,6 +277,12 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '8.0.303',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-sdk',
+            depName: 'dotnet-core',
+          },
+          {
             currentValue: '0.32.2',
             datasource: 'github-releases',
             packageName: 'dprint/dprint',
@@ -218,6 +293,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'kayac/ecspresso',
             depName: 'ecspresso',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.0.2',
+            datasource: 'github-releases',
+            packageName: 'editorconfig-checker/editorconfig-checker',
+            depName: 'editorconfig-checker',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -266,6 +348,20 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '8.21.1',
+            datasource: 'github-releases',
+            packageName: 'gitleaks/gitleaks',
+            depName: 'gitleaks',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.3.1',
+            datasource: 'github-tags',
+            packageName: 'gleam-lang/gleam',
+            depName: 'gleam',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '0.104.3',
             datasource: 'github-releases',
             packageName: 'gohugoio/hugo',
@@ -273,7 +369,7 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
-            currentValue: '1.19.2',
+            currentValue: '1.23.3',
             datasource: 'github-tags',
             packageName: 'golang/go',
             depName: 'golang',
@@ -284,6 +380,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'golangci/golangci-lint',
             depName: 'golangci-lint',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '3.11.7',
+            datasource: 'github-releases',
+            packageName: 'hairyhenderson/gomplate',
+            depName: 'gomplate',
             extractVersion: '^v(?<version>.+)',
           },
           {
@@ -305,6 +408,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'helm/helm',
             depName: 'helm',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.14.1',
+            datasource: 'github-releases',
+            packageName: 'norwoodj/helm-docs',
+            depName: 'helm-docs',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -348,6 +458,13 @@ dummy 1.2.3
             depName: 'just',
           },
           {
+            currentValue: '1.31.2+k3s1',
+            datasource: 'github-releases',
+            packageName: 'k3s-io/k3s',
+            depName: 'k3s',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '0.19.0',
             datasource: 'github-releases',
             packageName: 'kubernetes-sigs/kind',
@@ -362,11 +479,24 @@ dummy 1.2.3
             extractVersion: '^(Kotlin |v)(?<version>\\S+)',
           },
           {
+            currentValue: '3.10.0',
+            datasource: 'github-tags',
+            packageName: 'kubernetes-sigs/kubebuilder',
+            depName: 'kubebuilder',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '1.26.3',
             datasource: 'github-tags',
             packageName: 'kubernetes/kubernetes',
             depName: 'kubectl',
             extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '1.6.19',
+            datasource: 'github-releases',
+            packageName: 'johanhaleby/kubetail',
+            depName: 'kubetail',
           },
           {
             currentValue: '4.5.7',
@@ -383,6 +513,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '0.13.0',
+            datasource: 'github-tags',
+            packageName: 'DavidAnson/markdownlint-cli2',
+            depName: 'markdownlint-cli2',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '3.9.6',
             datasource: 'github-releases',
             packageName: 'apache/maven',
@@ -394,6 +531,13 @@ dummy 1.2.3
             packageName: 'grafana/mimir',
             depName: 'mimirtool',
             extractVersion: '^mimir-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.33.1',
+            datasource: 'github-releases',
+            packageName: 'kubernetes/minikube',
+            depName: 'minikube',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.6.8',
@@ -414,10 +558,24 @@ dummy 1.2.3
             depName: 'ocaml',
           },
           {
+            currentValue: '3.50.0',
+            datasource: 'github-releases',
+            packageName: 'oracle/oci-cli',
+            depName: 'oci',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.0',
             datasource: 'github-releases',
             packageName: 'opentofu/opentofu',
             depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.11.2',
+            datasource: 'github-releases',
+            packageName: 'hashicorp/packer',
+            depName: 'packer',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -455,6 +613,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>.+)',
           },
           {
+            currentValue: '28.3',
+            datasource: 'github-releases',
+            packageName: 'protocolbuffers/protobuf',
+            depName: 'protoc',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '3.57.1',
             datasource: 'github-releases',
             packageName: 'pulumi/pulumi',
@@ -467,6 +632,12 @@ dummy 1.2.3
             packageName: 'python/cpython',
             depName: 'python',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.23.0',
+            datasource: 'github-tags',
+            packageName: 'erlang/rebar3',
+            depName: 'rebar',
           },
           {
             currentValue: '3.1.2',
@@ -509,6 +680,27 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '2.14.0',
+            datasource: 'github-tags',
+            packageName: 'GoogleContainerTools/skaffold',
+            depName: 'skaffold',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.0.18',
+            datasource: 'github-tags',
+            packageName: 'budimanjojo/talhelper',
+            depName: 'talhelper',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.9.3',
+            datasource: 'github-tags',
+            packageName: 'siderolabs/talos',
+            depName: 'talosctl',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.3.3',
             datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
@@ -523,10 +715,23 @@ dummy 1.2.3
             extractVersion: '^v(?<version>.+)',
           },
           {
+            currentValue: '0.8.21',
+            datasource: 'github-releases',
+            packageName: 'GoogleCloudPlatform/terraformer',
+            depName: 'terraformer',
+          },
+          {
             currentValue: '0.43.2',
             datasource: 'github-releases',
             packageName: 'gruntwork-io/terragrunt',
             depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.12.1',
+            datasource: 'github-releases',
+            packageName: 'terramate-io/terramate',
+            depName: 'terramate',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -555,6 +760,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.35.0',
+            datasource: 'github-tags',
+            packageName: 'adrienverge/yamllint',
+            depName: 'yamllint',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -694,32 +906,6 @@ awscli    2.8.6
         deps: [
           {
             currentValue: '16.0.0+36',
-            datasource: 'java-version',
-            depName: 'java',
-            packageName: 'java-jre',
-          },
-        ],
-      });
-      const semeruJdkRes = extractPackageFile(
-        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0',
-      );
-      expect(semeruJdkRes).toEqual({
-        deps: [
-          {
-            currentValue: '17.0.8.1+1',
-            datasource: 'java-version',
-            depName: 'java',
-            packageName: 'java-jdk',
-          },
-        ],
-      });
-      const semeruJreRes = extractPackageFile(
-        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0',
-      );
-      expect(semeruJreRes).toEqual({
-        deps: [
-          {
-            currentValue: '17.0.8.1+1',
             datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jre',

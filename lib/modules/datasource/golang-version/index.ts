@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
@@ -32,11 +33,18 @@ export class GolangVersionDatasource extends Datasource {
 
   override readonly defaultVersioning = semverVersioningId;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `Date` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use the URL: https://github.com/golang/go.';
+
   @cache({ namespace: `datasource-${GolangVersionDatasource.id}`, key: 'all' })
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -52,7 +60,7 @@ export class GolangVersionDatasource extends Datasource {
       '/HEAD/internal/history/release.go',
     );
 
-    const response = await this.http.get(golangVersionsUrl);
+    const response = await this.http.getText(golangVersionsUrl);
 
     const lines = response.body.split(lineTerminationRegex);
 
@@ -104,7 +112,9 @@ export class GolangVersionDatasource extends Datasource {
           const year = releaseDateMatch.groups.year.padStart(4, '0');
           const month = releaseDateMatch.groups.month.padStart(2, '0');
           const day = releaseDateMatch.groups.day.padStart(2, '0');
-          release.releaseTimestamp = `${year}-${month}-${day}T00:00:00.000Z`;
+          release.releaseTimestamp = asTimestamp(
+            `${year}-${month}-${day}T00:00:00.000Z`,
+          );
         }
         const releaseVersionMatch = releaseVersionRegex.exec(line);
         if (releaseVersionMatch?.groups) {

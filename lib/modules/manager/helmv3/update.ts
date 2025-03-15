@@ -1,4 +1,5 @@
-import semver, { ReleaseType } from 'semver';
+import type { ReleaseType } from 'semver';
+import semver from 'semver';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { BumpPackageVersionResult } from '../types';
@@ -30,7 +31,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped Chart.yaml version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,

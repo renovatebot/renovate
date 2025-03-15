@@ -9,6 +9,7 @@ import { get } from '../../../modules/manager';
 import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
+import * as template from '../../../util/template';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
@@ -16,12 +17,13 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substring(1);
 
-function sanitizeDepName(depName: string): string {
+export function sanitizeDepName(depName: string): string {
   return depName
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
     .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/:/g), '-')
     .replace(regEx(/-+/), '-')
     .toLowerCase();
 }
@@ -57,6 +59,12 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
       ); // remove everything up to the last slash
     }
   }
+  if (updateConfig.sourceDirectory) {
+    updateConfig.sourceDirectory = template.compile(
+      updateConfig.sourceDirectory,
+      updateConfig,
+    );
+  }
   generateBranchName(updateConfig);
   return updateConfig;
 }
@@ -80,7 +88,6 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
-      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }
@@ -113,7 +120,10 @@ export async function flattenUpdates(
               depConfig.datasource,
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = await applyPackageRules(
+              updateConfig,
+              'datasource-merge',
+            );
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
@@ -123,7 +133,10 @@ export async function flattenUpdates(
               delete updateConfig[updateType];
             }
             // Apply again in case any were added by the updateType config
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = await applyPackageRules(
+              updateConfig,
+              'update-type-merge',
+            );
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
@@ -143,13 +156,19 @@ export async function flattenUpdates(
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
-        lockFileConfig = applyPackageRules(lockFileConfig);
+        lockFileConfig = await applyPackageRules(
+          lockFileConfig,
+          'lock-file-maintenance-merge',
+        );
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
           lockFileConfig.lockFileMaintenance,
         );
-        lockFileConfig = applyPackageRules(lockFileConfig);
+        lockFileConfig = await applyPackageRules(
+          lockFileConfig,
+          'lock-file-maintenance-merge-2',
+        );
         // Remove unnecessary objects
         for (const updateType of updateTypes) {
           delete lockFileConfig[updateType];

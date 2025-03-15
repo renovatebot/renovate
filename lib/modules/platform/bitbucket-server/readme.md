@@ -5,9 +5,11 @@
 First, create a [HTTP access token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for the bot account.
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
-- Set your HTTP access token as a `password` in your `config.js` file
-- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
-- Set your HTTP access token when you run Renovate in the CLI with `--password=`
+- Set your HTTP access token as a `token` in your `config.js` file
+- Set your HTTP access token as an environment variable `RENOVATE_TOKEN`
+- Set your HTTP access token when you run Renovate in the CLI with `--token=`
+
+If you use project or repository based HTTP access tokens, it can only be used as `token`.
 
 Remember to set `platform=bitbucket-server` somewhere in your Renovate config file.
 

@@ -1,41 +1,25 @@
 import { DateTime } from 'luxon';
+import { z } from 'zod';
 import { logger } from '../../lib/logger';
-import * as hostRules from '../../lib/util/host-rules';
-import { GithubHttp } from '../../lib/util/http/github';
-import { getQueryString } from '../../lib/util/url';
+import { exec } from '../../lib/util/exec';
 
-const gitHubApiUrl = 'https://api.github.com/search/issues?';
-const githubApi = new GithubHttp();
-
-if (process.env.GITHUB_TOKEN) {
-  logger.debug('Using GITHUB_TOKEN from env');
-  hostRules.add({
-    matchHost: 'api.github.com',
-    token: process.env.GITHUB_TOKEN,
-  });
-}
-
-type GithubApiQueryResponse = {
-  total_count: number;
-  incomplete_results: boolean;
-  items: ItemsEntity[];
-};
-
-export type ItemsEntity = {
-  html_url: string;
+export interface ItemsEntity {
+  url: string;
   number: number;
   title: string;
   labels: LabelsEntity[];
-};
+  issueType: 'Bug' | 'Feature';
+}
 
-export type LabelsEntity = {
+export interface LabelsEntity {
   name: string;
-};
+}
 
 export interface RenovateOpenItems {
   managers: OpenItems;
   platforms: OpenItems;
   datasources: OpenItems;
+  versionings: OpenItems;
 }
 
 export type OpenItems = Record<string, Items | undefined>;
@@ -45,33 +29,75 @@ export interface Items {
   features: ItemsEntity[];
 }
 
+const GhOutputSchema = z.array(
+  z.object({
+    url: z.string(),
+    title: z.string(),
+    labels: z.array(
+      z.object({
+        name: z.string(),
+      }),
+    ),
+    number: z.number(),
+  }),
+);
+
+async function getIssuesByIssueType(
+  issueType: 'Bug' | 'Feature',
+): Promise<ItemsEntity[]> {
+  const command = `gh issue list --json "title,number,url,labels" --search "type:${issueType}" --limit 1000`;
+  const execRes = await exec(command);
+  const res = GhOutputSchema.safeParse(JSON.parse(execRes.stdout));
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data.map((issue) => {
+    return { ...issue, issueType };
+  });
+}
+
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
-  const q = `repo:renovatebot/renovate type:issue is:open`;
-  const per_page = 100;
-  try {
-    const query = getQueryString({ q, per_page });
-    const res = await githubApi.getJson<GithubApiQueryResponse>(
-      gitHubApiUrl + query,
-      {
-        paginationField: 'items',
-        paginate: true,
-      },
+  const result: RenovateOpenItems = {
+    managers: {},
+    platforms: {},
+    datasources: {},
+    versionings: {},
+  };
+
+  if (process.env.SKIP_GITHUB_ISSUES) {
+    logger.warn('Skipping GitHub issues');
+    return result;
+  }
+
+  if (!process.env.GITHUB_TOKEN) {
+    logger.warn(
+      'No GITHUB_TOKEN found in env, cannot fetch Github issues. Skipping...',
     );
-    const rawItems = res.body?.items ?? [];
+    return result;
+  }
 
-    const renovateOpenItems: RenovateOpenItems = {
-      managers: extractIssues(rawItems, 'manager:'),
-      platforms: extractIssues(rawItems, 'platform:'),
-      datasources: extractIssues(rawItems, 'datasource:'),
-    };
+  if (process.env.CI) {
+    return result;
+  }
 
-    return renovateOpenItems;
+  try {
+    const rawItems = (await getIssuesByIssueType('Bug')).concat(
+      await getIssuesByIssueType('Feature'),
+    );
+
+    result.managers = extractIssues(rawItems, 'manager:');
+    result.platforms = extractIssues(rawItems, 'platform:');
+    result.datasources = extractIssues(rawItems, 'datasource:');
+    result.versionings = extractIssues(rawItems, 'versioning:');
+
+    return result;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     if (process.env.CI) {
       throw err;
     }
-    return { managers: {}, platforms: {}, datasources: {} };
+    return result;
   }
 }
 
@@ -79,9 +105,8 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
   const issuesMap: OpenItems = {};
 
   for (const item of items) {
-    const type = item.labels
-      .find((l) => l.name.startsWith('type:'))
-      ?.name.split(':')[1];
+    const type = item.issueType;
+
     if (!type) {
       continue;
     }
@@ -95,10 +120,10 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
       issuesMap[label] = { bugs: [], features: [] };
     }
     switch (type) {
-      case 'bug':
+      case 'Bug':
         issuesMap[label]?.bugs.push(item);
         break;
-      case 'feature':
+      case 'Feature':
         issuesMap[label]?.features.push(item);
         break;
       default:
@@ -115,7 +140,7 @@ function stringifyIssues(items: ItemsEntity[] | undefined): string {
   }
   let list = '';
   for (const item of items) {
-    list += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
+    list += ` - ${item.title} [#${item.number}](${item.url})\n`;
   }
   return list;
 }

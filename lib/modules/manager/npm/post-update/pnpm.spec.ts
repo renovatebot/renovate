@@ -1,14 +1,14 @@
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, partial } from '~test/util';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
@@ -21,7 +21,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
@@ -104,13 +104,13 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: true,
       },
       {
-        groupName: 'some-group',
+        sharedVariableName: 'some-group',
         packageName: 'some-other-dep',
         newVersion: '1.1.0',
         isLockfileUpdate: false,
@@ -360,7 +360,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null if lockfileVersion is not a number', async () => {
+    it('returns null if lockfileVersion is not a number or numeric string', async () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: foo\n');
       const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
@@ -376,6 +376,18 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n');
       const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBe('>=6 <7');
+    });
+
+    it('maps supported versions for v6', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '6.0'\n");
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=7.24.2 <9');
+    });
+
+    it('maps supported versions for v9', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '9.0'\n");
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=9');
     });
   });
 });

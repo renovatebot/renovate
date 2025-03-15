@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { clone } from '../../../util/clone';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -25,11 +26,18 @@ export class JenkinsPluginsDatasource extends Datasource {
   private static readonly packageInfoPath = 'current/update-center.actual.json';
   private static readonly packageVersionsPath = 'current/plugin-versions.json';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The releaseTimestamp is determined from the `releaseTimestamp` or `buildDate` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `scm` field in the results.';
+
   async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -49,7 +57,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: JenkinsPluginsDatasource.id,
+    namespace: `datasource-${JenkinsPluginsDatasource.id}`,
     key: 'info',
     ttlMinutes: 1440,
   })
@@ -71,7 +79,10 @@ export class JenkinsPluginsDatasource extends Datasource {
     return info;
   }
 
-  @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
+  @cache({
+    namespace: `datasource-${JenkinsPluginsDatasource.id}`,
+    key: 'versions',
+  })
   async getJenkinsPluginVersions(
     updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {
@@ -86,8 +97,7 @@ export class JenkinsPluginsDatasource extends Datasource {
         const downloadUrl = plugins[name][version]?.url;
         const buildDate = plugins[name][version]?.buildDate;
         const releaseTimestamp =
-          plugins[name][version]?.releaseTimestamp ??
-          (buildDate ? new Date(`${buildDate} UTC`).toISOString() : null);
+          plugins[name][version]?.releaseTimestamp ?? asTimestamp(buildDate);
         const jenkins = plugins[name][version]?.requiredCore;
         const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
@@ -107,7 +117,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     try {
       logger.debug(`jenkins-plugins: Fetching Jenkins plugins from ${url}`);
       const startTime = Date.now();
-      response = (await this.http.getJson<T>(url)).body;
+      response = (await this.http.getJsonUnchecked<T>(url)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },

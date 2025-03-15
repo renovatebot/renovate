@@ -17,12 +17,13 @@ export {
   updateLockedDependency,
 };
 
+export const url = 'https://getcomposer.org/doc';
+export const categories: Category[] = ['php'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer\\.json$'],
   versioning: composerVersioningId,
 };
-
-export const categories: Category[] = ['php'];
 
 export const supportedDatasources = [
   BitbucketTagsDatasource.id,

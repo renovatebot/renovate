@@ -8,8 +8,10 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
+import { filterMap } from '../../../util/filter-map';
 import {
   ensureCacheDir,
+  findLocalSiblingOrParent,
   isValidLocalPath,
   readLocalFile,
   writeLocalFile,
@@ -24,6 +26,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { getExtraDepsNotice } from './artifacts-extra';
 
 const { major, valid } = semver;
 
@@ -126,10 +129,14 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
-  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
-  const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  const goModDir = upath.dirname(goModFileName);
 
+  const vendorDir = upath.join(goModDir, 'vendor/');
+  const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
+  const useVendor =
+    !!config.postUpdateOptions?.includes('gomodVendor') ||
+    (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
+      (await readLocalFile(vendorModulesFileName)) !== null);
   let massagedGoMod = newGoModContent;
 
   if (config.postUpdateOptions?.includes('gomodMassage')) {
@@ -184,7 +191,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+    config.constraints?.go ?? getGoConstraints(newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -201,9 +208,8 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints)
-          ? '-modcacherw'
-          : /* istanbul ignore next: hard to test */ null,
+        /* v8 ignore next -- TODO: add test */
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -281,10 +287,28 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
+    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
-      args = 'mod vendor';
-      logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
+      // If we find a go.work, then use go workspace vendoring.
+      const goWorkFile = await findLocalSiblingOrParent(
+        goModFileName,
+        'go.work',
+      );
+
+      if (goWorkFile) {
+        args = 'work vendor';
+        logger.debug('using go work vendor');
+        execCommands.push(`${cmd} ${args}`);
+
+        args = 'work sync';
+        logger.debug('using go work sync');
+        execCommands.push(`${cmd} ${args}`);
+      } else {
+        args = 'mod vendor';
+        logger.debug('using go mod vendor');
+        execCommands.push(`${cmd} ${args}`);
+      }
+
       if (isGoModTidyRequired) {
         args = 'mod tidy' + tidyOpts;
         logger.debug('go mod tidy command included');
@@ -304,7 +328,8 @@ export async function updateArtifacts({
     const status = await getRepoStatus();
     if (
       !status.modified.includes(sumFileName) &&
-      !status.modified.includes(goModFileName)
+      !status.modified.includes(goModFileName) &&
+      !status.modified.includes(goWorkSumFileName)
     ) {
       return null;
     }
@@ -317,6 +342,17 @@ export async function updateArtifacts({
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
+        },
+      });
+    }
+
+    if (status.modified.includes(goWorkSumFileName)) {
+      logger.debug('Returning updated go.work.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goWorkSumFileName,
+          contents: await readLocalFile(goWorkSumFileName),
         },
       });
     }
@@ -364,14 +400,30 @@ export async function updateArtifacts({
       .replace(regEx(/\/\/ renovate-replace /g), '')
       .replace(regEx(/renovate-replace-bracket/g), ')');
     if (finalGoModContent !== newGoModContent) {
-      logger.debug('Found updated go.mod after go.sum update');
-      res.push({
+      const artifactResult: UpdateArtifactsResult = {
         file: {
           type: 'addition',
           path: goModFileName,
           contents: finalGoModContent,
         },
-      });
+      };
+
+      const updatedDepNames = filterMap(updatedDeps, (dep) => dep?.depName);
+      const extraDepsNotice = getExtraDepsNotice(
+        newGoModContent,
+        finalGoModContent,
+        updatedDepNames,
+      );
+
+      if (extraDepsNotice) {
+        artifactResult.notice = {
+          file: goModFileName,
+          message: extraDepsNotice,
+        };
+      }
+
+      logger.debug('Found updated go.mod after go.sum update');
+      res.push(artifactResult);
     }
     return res;
   } catch (err) {
@@ -391,17 +443,37 @@ export async function updateArtifacts({
   }
 }
 
-async function getGoConstraints(
-  goModFileName: string,
-): Promise<string | undefined> {
-  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
-  if (!content) {
-    return undefined;
+function getGoConstraints(content: string): string | undefined {
+  // prefer toolchain directive when go.mod has one
+  const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
+    content,
+  );
+  const toolchainVer = toolchainMatch?.groups?.gover;
+  if (toolchainVer) {
+    logger.debug(
+      `Using go version ${toolchainVer} found in toolchain directive`,
+    );
+    return toolchainVer;
   }
+
+  // If go.mod doesn't have toolchain directive and has a full go version spec,
+  // for example `go 1.23.6`, pick this version, this doesn't match major.minor version spec.
+  //
+  // This is because when go.mod have same version defined in go directive and toolchain directive,
+  // go will remove toolchain directive from go.mod.
+  //
+  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5` by default,
+  // in this case, the go directive is the toolchain directive.
+  const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
+    ?.groups?.gover;
+  if (goFullVersion) {
+    return goFullVersion;
+  }
+
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
   const match = re.exec(content);
   if (!match?.groups?.gover) {
     return undefined;
   }
-  return '^' + match.groups.gover;
+  return `^${match.groups.gover}`;
 }

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { getRegexPredicate } from '../string-match';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class BaseBranchesMatcher extends Matcher {
@@ -16,12 +16,6 @@ export class BaseBranchesMatcher extends Matcher {
       return false;
     }
 
-    return matchBaseBranches.some((matchBaseBranch): boolean => {
-      const isAllowedPred = getRegexPredicate(matchBaseBranch);
-      if (isAllowedPred) {
-        return isAllowedPred(baseBranch);
-      }
-      return matchBaseBranch === baseBranch;
-    });
+    return matchRegexOrGlobList(baseBranch, matchBaseBranches);
   }
 }

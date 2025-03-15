@@ -1,13 +1,16 @@
+import { pipenv as pipenvDetect } from '@renovatebot/detect-tools';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
-import { localPathExists } from '../../../util/fs';
+import { getParentDir, localPathExists } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { PipFile } from './types';
+import type { PipFile, PipRequirement, PipSource } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
@@ -23,14 +26,10 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
-  pipfile: PipFile,
-  section: 'packages' | 'dev-packages',
+  sectionName: string,
+  pipfileSection: Record<string, PipRequirement>,
+  sources?: PipSource[],
 ): PackageDependency[] {
-  const pipfileSection = pipfile[section];
-  if (!pipfileSection) {
-    return [];
-  }
-
   const deps = Object.entries(pipfileSection)
     .map((x) => {
       const [packageNameString, requirements] = x;
@@ -39,17 +38,19 @@ function extractFromSection(
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
-      if (requirements.git) {
-        skipReason = 'git-dependency';
-      } else if (requirements.file) {
-        skipReason = 'file-dependency';
-      } else if (requirements.path) {
-        skipReason = 'local-dependency';
-      } else if (requirements.version) {
-        currentValue = requirements.version;
-        nestedVersion = true;
-      } else if (is.object(requirements)) {
-        skipReason = 'unspecified-version';
+      if (is.object(requirements)) {
+        if (requirements.git) {
+          skipReason = 'git-dependency';
+        } else if (requirements.file) {
+          skipReason = 'file-dependency';
+        } else if (requirements.path) {
+          skipReason = 'local-dependency';
+        } else if (requirements.version) {
+          currentValue = requirements.version;
+          nestedVersion = true;
+        } else {
+          skipReason = 'unspecified-version';
+        }
       } else {
         currentValue = requirements;
       }
@@ -76,8 +77,9 @@ function extractFromSection(
         }
       }
       const dep: PackageDependency = {
-        depType: section,
+        depType: sectionName,
         depName,
+        packageName: normalizePythonDepName(depName),
         managerData: {},
       };
       if (currentValue) {
@@ -95,20 +97,29 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (requirements.index) {
-        if (is.array(pipfile.source)) {
-          const source = pipfile.source.find(
-            (item) => item.name === requirements.index,
-          );
-          if (source) {
-            dep.registryUrls = [source.url];
-          }
+      if (sources && is.object(requirements) && requirements.index) {
+        const source = sources.find((item) => item.name === requirements.index);
+        if (source) {
+          dep.registryUrls = [source.url];
         }
       }
       return dep;
     })
     .filter(Boolean);
   return deps;
+}
+
+function isPipRequirements(
+  section?:
+    | Record<string, PipRequirement>
+    | Record<string, string>
+    | PipSource[],
+): section is Record<string, PipRequirement> {
+  return (
+    !is.array(section) &&
+    is.object(section) &&
+    !Object.values(section).some((dep) => !is.object(dep) && !is.string(dep))
+  );
 }
 
 export async function extractPackageFile(
@@ -126,30 +137,43 @@ export async function extractPackageFile(
     return null;
   }
   const res: PackageFileContent = { deps: [] };
-  if (pipfile.source) {
-    res.registryUrls = pipfile.source.map((source) => source.url);
+
+  const sources = pipfile?.source;
+
+  if (sources) {
+    res.registryUrls = sources.map((source) => source.url);
   }
 
-  res.deps = [
-    ...extractFromSection(pipfile, 'packages'),
-    ...extractFromSection(pipfile, 'dev-packages'),
-  ];
+  res.deps = Object.entries(pipfile)
+    .map(([category, section]) => {
+      if (
+        category === 'source' ||
+        category === 'requires' ||
+        !isPipRequirements(section)
+      ) {
+        return [];
+      }
+
+      return extractFromSection(category, section, sources);
+    })
+    .flat();
+
   if (!res.deps.length) {
     return null;
   }
 
   const extractedConstraints: Record<string, any> = {};
 
-  if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    extractedConstraints.python = `== ${pipfile.requires.python_version}.*`;
-  } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
+  const pipfileDir = getParentDir(ensureLocalPath(packageFile));
+
+  const pythonConstraint = await pipenvDetect.getPythonConstraint(pipfileDir);
+  if (pythonConstraint) {
+    extractedConstraints.python = pythonConstraint;
   }
 
-  if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    extractedConstraints.pipenv = pipfile.packages.pipenv;
-  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    extractedConstraints.pipenv = pipfile['dev-packages'].pipenv;
+  const pipenvConstraint = await pipenvDetect.getPipenvConstraint(pipfileDir);
+  if (pipenvConstraint) {
+    extractedConstraints.pipenv = pipenvConstraint;
   }
 
   const lockFileName = `${packageFile}.lock`;

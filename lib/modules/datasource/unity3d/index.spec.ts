@@ -1,157 +1,157 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { Unity3dDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/unity3d/index', () => {
   const fixtures = Object.fromEntries(
-    [
-      ...Object.keys(Unity3dDatasource.streams),
-      'no_title',
-      'no_channel',
-      'no_item',
-    ].map((fixture) => [fixture, Fixtures.get(fixture + '.xml')]),
+    [...Object.keys(Unity3dDatasource.streams)].map((fixture) => [
+      fixture,
+      Fixtures.get(`${fixture}.json`),
+    ]),
   );
 
-  const mockRSSFeeds = (streams: { [keys: string]: string }) => {
-    Object.entries(streams).map(([stream, url]) => {
+  const mockUnityReleasesApi = (streams: Record<string, string>) => {
+    for (const stream in streams) {
       const content = fixtures[stream];
 
-      const uri = new URL(url);
-
-      httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
-    });
+      const uri = new URL(streams[stream]);
+      httpMock
+        .scope(uri.origin)
+        .get(`${uri.pathname}${uri.search}`)
+        .reply(200, content);
+    }
   };
 
-  const stableStreamUrl = new URL(Unity3dDatasource.streams.stable);
-
-  it('handle 500 response', async () => {
-    httpMock
-      .scope(stableStreamUrl.origin)
-      .get(stableStreamUrl.pathname)
-      .reply(500, '500');
-
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    const response = await getPkgReleases({
+  it.each([
+    Unity3dDatasource.streams.lts,
+    Unity3dDatasource.legacyStreams.lts,
+    Unity3dDatasource.legacyStreams.stable,
+  ])('returns lts if requested %s', async (registryUrl) => {
+    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
-    });
-
-    expect(response).toBeNull();
-  });
-
-  it('handle 200 with no XML', async () => {
-    httpMock
-      .scope(stableStreamUrl.origin)
-      .get(stableStreamUrl.pathname)
-      .reply(200, 'not xml');
-
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    const response = await getPkgReleases({
-      datasource: Unity3dDatasource.id,
-      packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
-    });
-
-    expect(response).toBeNull();
-  });
-
-  it('handles missing title element', async () => {
-    const content = fixtures.no_title;
-    httpMock
-      .scope(stableStreamUrl.origin)
-      .get(stableStreamUrl.pathname)
-      .reply(200, content);
-
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    const responses = await getPkgReleases({
-      datasource: Unity3dDatasource.id,
-      packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
-    });
+      registryUrls: [registryUrl],
+    }))!;
 
     expect(responses).toEqual({
-      releases: [],
-      homepage: 'https://unity.com/',
-      registryUrl: Unity3dDatasource.streams.stable,
-    });
-  });
-
-  it('handles missing channel element', async () => {
-    const content = fixtures.no_channel;
-    httpMock
-      .scope(stableStreamUrl.origin)
-      .get(stableStreamUrl.pathname)
-      .reply(200, content);
-
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    const responses = await getPkgReleases({
-      datasource: Unity3dDatasource.id,
-      packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
-    });
-
-    expect(responses).toEqual({
-      releases: [],
-      homepage: 'https://unity.com/',
-      registryUrl: Unity3dDatasource.streams.stable,
-    });
-  });
-
-  it('handles missing item element', async () => {
-    const content = fixtures.no_item;
-    httpMock
-      .scope(stableStreamUrl.origin)
-      .get(stableStreamUrl.pathname)
-      .reply(200, content);
-
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    const responses = await getPkgReleases({
-      datasource: Unity3dDatasource.id,
-      packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
-    });
-
-    expect(responses).toEqual({
-      releases: [],
-      homepage: 'https://unity.com/',
-      registryUrl: Unity3dDatasource.streams.stable,
-    });
-  });
-
-  it('returns beta if requested', async () => {
-    mockRSSFeeds({ beta: Unity3dDatasource.streams.beta });
-    const responses = await getPkgReleases({
-      datasource: Unity3dDatasource.id,
-      packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.beta],
-    });
-
-    expect(responses).toEqual({
-      registryUrl: Unity3dDatasource.streams.beta,
       releases: [
         {
-          changelogUrl: 'https://unity.com/releases/editor/beta/2023.3.0b6',
-          isStable: false,
-          registryUrl: Unity3dDatasource.streams.beta,
-          releaseTimestamp: '2024-02-07T07:24:40.000Z',
-          version: '2023.3.0b6',
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2022_3_55f1_e905b1c414/2022_3_55f1_e905b1c414.md',
+          isStable: true,
+          releaseTimestamp: '2024-12-17T16:21:09.410Z',
+          version: '2022.3.55f1',
+        },
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_32f1_a564232097/6000_0_32f1_a564232097.md',
+          isStable: true,
+          releaseTimestamp: '2024-12-19T15:34:00.072Z',
+          version: '6000.0.32f1',
         },
       ],
       homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.lts,
     });
   });
 
-  it('returns stable and lts releases by default', async () => {
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    mockRSSFeeds(qualifyingStreams);
+  it('returns tech if requested', async () => {
+    mockUnityReleasesApi({ tech: Unity3dDatasource.streams.tech });
+    const responses = (await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.tech],
+    }))!;
+
+    expect(responses).toEqual({
+      releases: [
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_21f1_2b136c8c81/6000_0_21f1_2b136c8c81.md',
+          isStable: false,
+          releaseTimestamp: '2024-09-24T16:11:20.586Z',
+          version: '6000.0.21f1',
+        },
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_22f1_bde815b68f/6000_0_22f1_bde815b68f.md',
+          isStable: false,
+          releaseTimestamp: '2024-10-02T19:04:27.205Z',
+          version: '6000.0.22f1',
+        },
+      ],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.tech,
+    });
+  });
+
+  it('returns alpha if requested', async () => {
+    mockUnityReleasesApi({ alpha: Unity3dDatasource.streams.alpha });
+    const responses = (await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.alpha],
+    }))!;
+
+    expect(responses).toEqual({
+      releases: [
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_1_0a8_2d1304db16/6000_1_0a8_2d1304db16.md',
+          isStable: false,
+          releaseTimestamp: '2024-12-10T20:17:32.592Z',
+          version: '6000.1.0a8',
+        },
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_1_0a9_a19280e20b/6000_1_0a9_a19280e20b.md',
+          isStable: false,
+          releaseTimestamp: '2024-12-18T08:40:10.134Z',
+          version: '6000.1.0a9',
+        },
+      ],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.alpha,
+    });
+  });
+
+  it.each([
+    Unity3dDatasource.streams.beta,
+    Unity3dDatasource.legacyStreams.beta,
+  ])('returns beta if requested %s', async (registryUrl) => {
+    mockUnityReleasesApi({ beta: Unity3dDatasource.streams.beta });
+    const responses = (await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [registryUrl],
+    }))!;
+
+    expect(responses).toEqual({
+      releases: [
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_0b15_d7e1e209b0/6000_0_0b15_d7e1e209b0.md',
+          isStable: false,
+          releaseTimestamp: '2024-04-13T00:46:31.309Z',
+          version: '6000.0.0b15',
+        },
+        {
+          changelogUrl:
+            'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_0b16_c8ac27cff6/6000_0_0b16_c8ac27cff6.md',
+          isStable: false,
+          releaseTimestamp: '2024-04-19T15:47:47.012Z',
+          version: '6000.0.0b16',
+        },
+      ],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.beta,
+    });
+  });
+
+  it('returns lts releases by default', async () => {
+    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -162,22 +162,21 @@ describe('modules/datasource/unity3d/index', () => {
         releases: [
           {
             changelogUrl:
-              'https://unity.com/releases/editor/whats-new/2021.3.35',
+              'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/2022_3_55f1_e905b1c414/2022_3_55f1_e905b1c414.md',
             isStable: true,
-            registryUrl: Unity3dDatasource.streams.stable,
-            releaseTimestamp: '2024-02-06T15:40:15.000Z',
-            version: '2021.3.35f1',
+            releaseTimestamp: '2024-12-17T16:21:09.410Z',
+            version: '2022.3.55f1',
           },
           {
             changelogUrl:
-              'https://unity.com/releases/editor/whats-new/2023.2.9',
+              'https://storage.googleapis.com/live-platform-resources-prd/templates/assets/6000_0_32f1_a564232097/6000_0_32f1_a564232097.md',
             isStable: true,
-            registryUrl: Unity3dDatasource.streams.stable,
-            releaseTimestamp: '2024-02-07T06:56:57.000Z',
-            version: '2023.2.9f1',
+            releaseTimestamp: '2024-12-19T15:34:00.072Z',
+            version: '6000.0.32f1',
           },
         ],
         homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
 
@@ -186,24 +185,23 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.not.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/\(b\)/),
-            registryUrl: Unity3dDatasource.streams.beta,
           }),
           expect.objectContaining({
             version: expect.stringMatching(/\(b\)/),
-            registryUrl: Unity3dDatasource.streams.beta,
           }),
         ]),
         homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
   });
 
   it('returns hash if requested', async () => {
-    mockRSSFeeds({ stable: Unity3dDatasource.streams.stable });
+    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
     const responsesWithHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
-      registryUrls: [Unity3dDatasource.streams.stable],
+      registryUrls: [Unity3dDatasource.streams.lts],
     });
 
     expect(responsesWithHash).toEqual(
@@ -214,17 +212,17 @@ describe('modules/datasource/unity3d/index', () => {
           }),
         ]),
         homepage: 'https://unity.com/',
-        registryUrl: Unity3dDatasource.streams.stable,
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
   });
 
   it('returns no hash if not requested', async () => {
-    mockRSSFeeds({ stable: Unity3dDatasource.streams.stable });
+    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
     const responsesWithoutHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.stable],
+      registryUrls: [Unity3dDatasource.streams.lts],
     });
 
     expect(responsesWithoutHash).toEqual(
@@ -235,54 +233,13 @@ describe('modules/datasource/unity3d/index', () => {
           }),
         ]),
         homepage: 'https://unity.com/',
-        registryUrl: Unity3dDatasource.streams.stable,
+        registryUrl: Unity3dDatasource.streams.lts,
       }),
     );
   });
 
-  it('returns different versions for each stream', async () => {
-    mockRSSFeeds(Unity3dDatasource.streams);
-    const responses: { [keys: string]: string[] } = Object.fromEntries(
-      await Promise.all(
-        Object.keys(Unity3dDatasource.streams).map(async (stream) => [
-          stream,
-          (
-            await getPkgReleases({
-              datasource: Unity3dDatasource.id,
-              packageName: 'm_EditorVersion',
-              registryUrls: [Unity3dDatasource.streams[stream]],
-            })
-          )?.releases.map((release) => release.version),
-        ]),
-      ),
-    );
-
-    // none of the items in responses.beta are in responses.stable or responses.lts
-    expect(
-      responses.beta.every(
-        (betaVersion) =>
-          !responses.stable.includes(betaVersion) &&
-          !responses.lts.includes(betaVersion),
-      ),
-    ).toBe(true);
-    // some items in responses.stable are in responses.lts
-    expect(
-      responses.stable.some((stableVersion) =>
-        responses.lts.includes(stableVersion),
-      ),
-    ).toBe(true);
-    // not all items in responses.stable are in responses.lts
-    expect(
-      responses.stable.every((stableVersion) =>
-        responses.lts.includes(stableVersion),
-      ),
-    ).toBe(false);
-  });
-
-  it('returns only lts and stable by default', async () => {
-    const qualifyingStreams = { ...Unity3dDatasource.streams };
-    delete qualifyingStreams.beta;
-    mockRSSFeeds(qualifyingStreams);
+  it('returns only lts by default', async () => {
+    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
@@ -293,14 +250,13 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/[fp]/),
-            registryUrl: expect.stringMatching(/(releases|lts)/),
           }),
           expect.objectContaining({
             version: expect.stringMatching(/[fp]/),
-            registryUrl: expect.stringMatching(/(releases|lts)/),
           }),
         ]),
         homepage: 'https://unity.com/',
+        registryUrl: expect.stringMatching(/(releases|lts)/),
       }),
     );
   });

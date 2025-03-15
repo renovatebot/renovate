@@ -1,5 +1,6 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { asTimestamp } from '../../../util/timestamp';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type { GitlabRelease } from './types';
@@ -10,6 +11,13 @@ export class GitlabReleasesDatasource extends Datasource {
   override readonly defaultRegistryUrls = ['https://gitlab.com'];
 
   static readonly registryStrategy = 'first';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `released_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GitlabReleasesDatasource.id);
@@ -26,7 +34,7 @@ export class GitlabReleasesDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -36,7 +44,7 @@ export class GitlabReleasesDatasource extends Datasource {
 
     try {
       const gitlabReleasesResponse = (
-        await this.http.getJson<GitlabRelease[]>(apiUrl)
+        await this.http.getJsonUnchecked<GitlabRelease[]>(apiUrl)
       ).body;
 
       return {
@@ -46,7 +54,7 @@ export class GitlabReleasesDatasource extends Datasource {
             registryUrl,
             gitRef: tag_name,
             version: tag_name,
-            releaseTimestamp: released_at,
+            releaseTimestamp: asTimestamp(released_at),
           };
           return release;
         }),
@@ -54,7 +62,5 @@ export class GitlabReleasesDatasource extends Datasource {
     } catch (e) {
       this.handleGenericErrors(e);
     }
-    /* istanbul ignore next */
-    return null;
   }
 }

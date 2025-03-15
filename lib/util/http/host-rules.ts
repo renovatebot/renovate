@@ -12,12 +12,12 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
-import { dnsLookup } from './dns';
+import type { InternalHttpOptions } from './http';
 import { keepAliveAgents } from './keep-alive';
 import type { GotOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions,
+  GotOptions & InternalHttpOptions,
   | 'hostType'
   | 'url'
   | 'noAuth'
@@ -34,14 +34,15 @@ export type HostRulesGotOptions = Pick<
   | 'agent'
   | 'http2'
   | 'https'
+  | 'readOnly'
 >;
 
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
 ): HostRule {
-  const { hostType } = options;
-  let res = hostRules.find({ hostType, url });
+  const { hostType, readOnly } = options;
+  let res = hostRules.find({ hostType, url, readOnly });
 
   if (
     is.nonEmptyString(res.token) ||
@@ -160,10 +161,6 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     options.timeout = hostRule.timeout;
   }
 
-  if (hostRule.dnsCache) {
-    options.lookup = dnsLookup;
-  }
-
   if (hostRule.headers) {
     const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
     const filteredHeaders: Record<string, string> = {};
@@ -180,8 +177,8 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     }
 
     options.headers = {
-      ...filteredHeaders,
       ...options.headers,
+      ...filteredHeaders,
     };
   }
 
@@ -215,18 +212,4 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   }
 
   return options;
-}
-
-export function getConcurrentRequestsLimit(url: string): number | null {
-  const { concurrentRequestLimit } = hostRules.find({ url });
-  return is.number(concurrentRequestLimit) && concurrentRequestLimit > 0
-    ? concurrentRequestLimit
-    : null;
-}
-
-export function getThrottleIntervalMs(url: string): number | null {
-  const { maxRequestsPerSecond } = hostRules.find({ url });
-  return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
-    ? Math.ceil(1000 / maxRequestsPerSecond)
-    : null;
 }

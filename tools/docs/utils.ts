@@ -1,10 +1,12 @@
 import { logger } from '../../lib/logger';
 import type { ModuleApi } from '../../lib/types';
+import { regEx } from '../../lib/util/regex';
 import { readFile } from '../utils';
 
 const replaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
 const replaceStop = '<!-- Autogenerate end -->';
+const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
 
 export function capitalize(input: string): string {
   // console.log(input);
@@ -50,8 +52,13 @@ export function replaceContent(content: string, txt: string): string {
 
 export function formatUrls(urls: string[] | null | undefined): string {
   if (Array.isArray(urls) && urls.length) {
-    return `**References**:\n\n${urls
-      .map((url) => ` - [${url}](${url})`)
+    return `## References\n\n${urls
+      .map((url) => {
+        if (goodUrlRegex.test(url)) {
+          return ` - ${url}`;
+        }
+        return ` - [${url}](${url})`;
+      })
       .join('\n')}\n\n`;
   }
   return '';
@@ -65,7 +72,7 @@ export async function formatDescription(
   if (!content) {
     return '';
   }
-  return `**Description**:\n\n${content}\n`;
+  return `## Description\n\n${content}\n`;
 }
 
 export function getModuleLink(module: string, title?: string): string {

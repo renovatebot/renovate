@@ -1,3 +1,4 @@
+import type { Timestamp } from '../../../util/timestamp';
 import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
@@ -144,10 +145,13 @@ describe('modules/datasource/packagist/schema', () => {
       });
 
       expect(
-        ComposerRelease.parse({ version: '1.2.3', time: '12345' }),
+        ComposerRelease.parse({
+          version: '1.2.3',
+          time: '2025-01-16T12:00:00.000Z',
+        }),
       ).toEqual({
         version: '1.2.3',
-        time: '12345',
+        time: '2025-01-16T12:00:00.000Z',
         homepage: null,
         source: null,
         require: null,
@@ -312,7 +316,7 @@ describe('modules/datasource/packagist/schema', () => {
               'foo/bar': [
                 {
                   version: 'v1.1.1',
-                  time: '111',
+                  time: '2025-01-16T12:00:00+00:00' as Timestamp,
                   homepage: 'https://example.com/1',
                   source: { url: 'git@example.com:foo/bar-1' },
                   require: { php: '^8.0' },
@@ -321,7 +325,7 @@ describe('modules/datasource/packagist/schema', () => {
               'baz/qux': [
                 {
                   version: 'v2.2.2',
-                  time: '222',
+                  time: '2025-01-16T12:00:00+00:00' as Timestamp,
                   homepage: 'https://example.com/2',
                   source: { url: 'git@example.com:baz/qux-2' },
                   require: null,
@@ -334,7 +338,7 @@ describe('modules/datasource/packagist/schema', () => {
               'foo/bar': [
                 {
                   version: 'v3.3.3',
-                  time: '333',
+                  time: '2025-01-16T12:00:00+00:00' as Timestamp,
                   homepage: 'https://example.com/3',
                   source: { url: 'git@example.com:foo/bar-3' },
                   require: { php: '^7.0' },
@@ -343,7 +347,7 @@ describe('modules/datasource/packagist/schema', () => {
               'baz/qux': [
                 {
                   version: 'v4.4.4',
-                  time: '444',
+                  time: '2025-01-16T12:00:00+00:00' as Timestamp,
                   homepage: 'https://example.com/4',
                   source: { url: 'git@example.com:baz/qux-3' },
                   require: null,
@@ -359,13 +363,13 @@ describe('modules/datasource/packagist/schema', () => {
           {
             version: '1.1.1',
             gitRef: 'v1.1.1',
-            releaseTimestamp: '111',
+            releaseTimestamp: '2025-01-16T12:00:00.000Z' as Timestamp,
             constraints: { php: ['^8.0'] },
           },
           {
             version: '3.3.3',
             gitRef: 'v3.3.3',
-            releaseTimestamp: '333',
+            releaseTimestamp: '2025-01-16T12:00:00.000Z' as Timestamp,
             constraints: { php: ['^7.0'] },
           },
         ],

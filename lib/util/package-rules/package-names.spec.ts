@@ -4,10 +4,10 @@ describe('util/package-rules/package-names', () => {
   const packageNameMatcher = new PackageNameMatcher();
 
   describe('match', () => {
-    it('should return false if packageFile is not defined', () => {
+    it('should return false if packageName is not defined', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: undefined,
+          packageName: undefined,
         },
         {
           matchPackageNames: ['@opentelemetry/http'],
@@ -16,57 +16,41 @@ describe('util/package-rules/package-names', () => {
       expect(result).toBeFalse();
     });
 
-    it('should matchPackageName', () => {
+    it('should return false if not matching', () => {
       const result = packageNameMatcher.matches(
         {
           depName: 'abc',
           packageName: 'def',
         },
         {
-          matchPackageNames: ['def'],
-        },
-      );
-      expect(result).toBeTrue();
-    });
-
-    it('should fall back to matching depName', () => {
-      const result = packageNameMatcher.matches(
-        {
-          depName: 'abc',
-          packageName: 'def',
-        },
-        {
-          matchPackageNames: ['abc'],
-        },
-      );
-      expect(result).toBeTrue();
-    });
-  });
-
-  describe('exclude', () => {
-    it('should return false if packageFile is not defined', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          depName: undefined,
-        },
-        {
-          excludePackageNames: ['@opentelemetry/http'],
+          matchPackageNames: ['ghi'],
         },
       );
       expect(result).toBeFalse();
     });
-  });
 
-  it('should excludePackageName', () => {
-    const result = packageNameMatcher.excludes(
-      {
-        depName: 'abc',
-        packageName: 'def',
-      },
-      {
-        excludePackageNames: ['def'],
-      },
-    );
-    expect(result).toBeTrue();
+    it('should matchPackageName', () => {
+      const result = packageNameMatcher.matches(
+        {
+          packageName: 'def',
+        },
+        {
+          matchPackageNames: ['def', 'ghi'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should match pattern', () => {
+      const result = packageNameMatcher.matches(
+        {
+          packageName: 'b',
+        },
+        {
+          matchPackageNames: ['/b/'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
   });
 });

@@ -1,6 +1,7 @@
 import { gt, gte, lt } from '@renovatebot/ruby-semver';
 import { GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
-import { Range, parseRanges, stringifyRanges } from '../range';
+import type { Range } from '../range';
+import { parseRanges, stringifyRanges } from '../range';
 import { adapt, trimZeroes } from '../version';
 import { replacePart } from './replace';
 

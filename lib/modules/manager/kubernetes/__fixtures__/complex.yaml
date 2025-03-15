@@ -1,0 +1,255 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "call-nested" (list . "prosody" "prosody.fullname") }}-common
+  labels:
+    {{- include "jitsi-meet.labels" . | nindent 4 }}
+data:
+  ENABLE_AUTH: {{ ternary "1" "0" .Values.enableAuth | quote }}
+  ENABLE_GUESTS: {{ ternary "1" "0" .Values.enableGuests | quote }}
+  PUBLIC_URL: {{ include "jitsi-meet.publicURL" . }}
+  XMPP_DOMAIN: {{ include "jitsi-meet.xmpp.domain" . }}
+  XMPP_MUC_DOMAIN: {{ .Values.xmpp.mucDomain | default (printf "muc.%s" (include "jitsi-meet.xmpp.domain" .)) }}
+  XMPP_AUTH_DOMAIN: {{ .Values.xmpp.authDomain | default (printf "auth.%s" (include "jitsi-meet.xmpp.domain" .)) }}
+  XMPP_GUEST_DOMAIN: {{ .Values.xmpp.guestDomain | default (printf "guest.%s" (include "jitsi-meet.xmpp.domain" .)) }}
+  XMPP_RECORDER_DOMAIN: {{ .Values.xmpp.recorderDomain | default (printf "recorder.%s" (include "jitsi-meet.xmpp.domain" .)) }}
+  XMPP_INTERNAL_MUC_DOMAIN: {{ .Values.xmpp.internalMucDomain | default (printf "internal-muc.%s" (include "jitsi-meet.xmpp.domain" .)) }}
+  {{- if or .Values.websockets.colibri.enabled }}
+  ENABLE_COLIBRI_WEBSOCKET: 'true'
+  # TODO: rework into a proper regex or dynamic name list
+  ENABLE_COLIBRI_WEBSOCKET_UNSAFE_REGEX: '1'
+  {{- else }}
+  ENABLE_SCTP: 'true'
+  ENABLE_COLIBRI_WEBSOCKET: 'false'
+  JVB_PREFER_SCTP: 'true'
+  {{- end }}
+  {{- if .Values.websockets.xmpp.enabled }}
+  ENABLE_XMPP_WEBSOCKET: 'true'
+  {{- else }}
+  ENABLE_XMPP_WEBSOCKET: 'false'
+  {{- end }}
+  {{- if .Values.jibri.enabled }}
+  {{-   if .Values.jibri.recording }}
+  ENABLE_RECORDING: "true"
+  ENABLE_FILE_RECORDING_SERVICE_SHARING: "true"
+  {{-   end }}
+  {{-   if .Values.jibri.livestreaming }}
+  ENABLE_LIVESTREAMING: "true"
+  {{-   end }}
+  {{- end }}
+  TZ: '{{ .Values.tz }}'
+  {{- range $key, $value := .Values.extraCommonEnvs }}
+  {{- if not (kindIs "invalid" $value) }}
+  {{ $key }}: {{ tpl $value $ | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.octo.enabled }}
+  ENABLE_OCTO: "1"
+  TESTING_OCTO_PROBABILITY: "1"
+  DEPLOYMENTINFO_REGION: "all"
+  DEPLOYMENTINFO_USERREGION: "all"
+  {{- end }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "jitsi-meet.web.fullname" . }}-test-connection"
+  labels:
+    {{- include "jitsi-meet.web.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "jitsi-meet.web.fullname" . }}:{{ .Values.web.service.port }}']
+  restartPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jitsi-meet.jvb.fullname" . }}
+  labels:
+    {{- include "jitsi-meet.jvb.labels" . | nindent 4 }}
+  {{- with .Values.jvb.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.jvb.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "jitsi-meet.jvb.selectorLabels" . | nindent 6 }}
+  {{- if .Values.jvb.useHostPort }}
+  strategy:
+    type: Recreate
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "jitsi-meet.jvb.selectorLabels" . | nindent 8 }}
+      {{- range $label, $value := mergeOverwrite .Values.global.podLabels .Values.jvb.podLabels }}
+        {{ $label }}: {{ $value }}
+      {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/jvb/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/jvb/xmpp-secret.yaml") . | sha256sum }}
+        {{- if and .Values.jvb.metrics.enabled  .Values.jvb.metrics.prometheusAnnotations  }}
+        prometheus.io/port: "9888"
+        prometheus.io/scrape: "true"
+        {{- end }}
+      {{- range $annotation, $value := mergeOverwrite .Values.global.podAnnotations .Values.jvb.podAnnotations }}
+        {{ $annotation }}: {{ $value|quote }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jitsi-meet.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.jvb.podSecurityContext | nindent 8 }}
+      {{- if .Values.jvb.useHostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.jvb.securityContext | nindent 12 }}
+          image: "{{ .Values.jvb.image.repository }}:{{ default .Chart.AppVersion .Values.jvb.image.tag }}"
+          imagePullPolicy: {{ pluck "pullPolicy" .Values.jvb.image .Values.image | first }}
+          envFrom:
+          - secretRef:
+              name: {{ include "call-nested" (list . "prosody" "prosody.fullname") }}-jvb
+          - configMapRef:
+              name: {{ include "call-nested" (list . "prosody" "prosody.fullname") }}-common
+          - configMapRef:
+              name: {{ include "jitsi-meet.jvb.fullname" . }}
+          {{- if .Values.global.releaseSecretsOverride.enabled }}
+          {{- range .Values.global.releaseSecretsOverride.extraEnvFrom }}
+          - {{ tpl (toYaml . ) $ | indent 12 | trim }}
+          {{- end }}
+          {{- end }}
+          env:
+          {{- if or .Values.jvb.useNodeIP .Values.jvb.publicIPs }}
+          - name: DOCKER_HOST_ADDRESS
+            {{- if .Values.jvb.publicIPs }}
+            value: {{ first .Values.jvb.publicIPs }}
+            {{- else }}
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+            {{- end }}
+          - name: JVB_ADVERTISE_IPS
+            {{- if .Values.jvb.publicIPs }}
+            value: {{ .Values.jvb.publicIPs | join "," }}
+            {{- else }}
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+            {{- end }}
+          {{- else }}
+          {{- fail "(jvb.publicIPs | jvb.useNodeIP) Please set an external IP addresses for JVB(s) or enable the Node IP autodetection!" }}
+          {{- end }}
+          {{- if .Values.websockets.colibri.enabled }}
+          - name: JVB_WS_SERVER_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          {{- end }}
+          {{- if  .Values.octo.enabled }}
+          - name: JVB_OCTO_BIND_ADDRESS
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: JVB_OCTO_RELAY_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          {{- end }}
+          ports:
+            - name: rtp-udp
+              containerPort: {{ .Values.jvb.UDPPort }}
+              {{- if .Values.jvb.useHostPort }}
+              hostPort: {{ .Values.jvb.UDPPort }}
+              {{- end }}
+              protocol: UDP
+          {{- if .Values.websockets.colibri.enabled }}
+            - name: colibri-ws-tcp
+              containerPort: 9090
+              protocol: TCP
+          {{- end }}
+          {{- if .Values.octo.enabled }}
+            - name: octo
+              containerPort: 4096
+              protocol: TCP
+          {{- end }}
+          {{- with .Values.jvb.livenessProbe }}
+          livenessProbe:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.jvb.readinessProbe }}
+          readinessProbe:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.jvb.resources | nindent 12 }}
+          {{- with .Values.jvb.extraVolumeMounts }}
+          volumeMounts:
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+
+        {{- if .Values.jvb.metrics.enabled }}
+        - name: metrics
+          image: {{ .Values.jvb.metrics.image.repository }}:{{ .Values.jvb.metrics.image.tag }}
+          imagePullPolicy: {{ .Values.jvb.metrics.image.pullPolicy }}
+          securityContext:
+            runAsUser: 10001
+          command:
+            - /prometheus-jitsi-meet-exporter
+            - -videobridge-url
+            - http://localhost:8080/colibri/stats
+          ports:
+            - containerPort: 9888
+              name: tcp-metrics
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9888
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+        {{- toYaml .Values.jvb.metrics.resources | nindent 12 }}
+      {{- end }}
+
+      {{- with .Values.jvb.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- if or .Values.jvb.useHostPort .Values.jvb.affinity }}
+      affinity:
+      {{- if .Values.jvb.affinity }}
+        {{- toYaml .Values.jvb.affinity | nindent 8 }}
+      {{- else }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - jvb
+            topologyKey: "kubernetes.io/hostname"
+      {{- end }}
+    {{- end }}
+    {{- with .Values.jvb.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.jvb.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

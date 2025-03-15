@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
 const validFleetYamlWithCustom = Fixtures.get(
@@ -14,7 +14,7 @@ const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
 describe('modules/manager/fleet/extract', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('extractPackageFile()', () => {
@@ -60,6 +60,23 @@ kind: Fleet
             depName: 'logging-operator',
             registryUrls: ['https://kubernetes-charts.banzaicloud.com'],
             depType: 'fleet',
+          },
+          {
+            currentValue: '25.19.1',
+            datasource: 'helm',
+            depName: 'prometheus',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+            depType: 'fleet',
+          },
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            pinDigests: false,
           },
         ]);
       });

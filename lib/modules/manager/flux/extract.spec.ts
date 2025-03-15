@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
@@ -11,9 +10,13 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
+const fixtureHelmSource = Fixtures.get('helmSource.yaml');
+const fixtureHelmChart = Fixtures.get('helmChart.yaml');
+const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');
 
 describe('modules/manager/flux/extract', () => {
   beforeEach(() => {
@@ -35,6 +38,17 @@ describe('modules/manager/flux/extract', () => {
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
           },
           {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v0.13.4',
+            datasource: DockerDatasource.id,
+            depName: 'k8s.gcr.io/external-dns/external-dns',
+            packageName: 'k8s.gcr.io/external-dns/external-dns',
+            replaceString: 'v0.13.4',
+            versioning: DockerDatasource.id,
+          },
+          {
             currentValue: 'v11.35.4',
             datasource: GithubTagsDatasource.id,
             depName: 'renovate-repo',
@@ -48,6 +62,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             replaceString: 'v1.8.2',
           },
         ],
@@ -150,6 +165,22 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('ignores HelmRelease resources without any chart reference', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 10m
+        `,
+        'test.yaml',
+      );
+      expect(result).toBeNull();
+    });
+
     it('ignores HelmRelease resources without a chart name', () => {
       const result = extractPackageFile(
         codeBlock`
@@ -169,6 +200,34 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml',
       );
       expect(result).toBeNull();
+    });
+
+    it('skip HelmRelease with local chart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: cert-manager-config
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: ./charts/cert-manager-config
+                sourceRef:
+                  kind: GitRepository
+                  name: chart-repo
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: './charts/cert-manager-config',
+            skipReason: 'local-chart',
+          },
+        ],
+      });
     });
 
     it('does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace', () => {
@@ -200,7 +259,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmSource.yaml')}
+          ${fixtureHelmSource}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -230,7 +289,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('helmSource.yaml')}
+          ${fixtureHelmSource}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -292,6 +351,182 @@ describe('modules/manager/flux/extract', () => {
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
             skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('ignores HelmRelease resources using an invalid chartRef', () => {
+      const result = extractPackageFile(
+        fixtureHelmChartRefRelease,
+        'test.yaml',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('ignores HelmRelease resources using a chartRef targetting a HelmChart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmChartRefRelease}
+          ---
+          ${fixtureHelmChart}
+          ---
+          ${fixtureHelmSource}
+        `,
+        'test.yaml',
+      );
+      // HelmRelease is ignored, only HelmChart itself is processed (-> no duplicates expected)
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
+          },
+        ],
+      });
+    });
+
+    it('ignores HelmRelease resources using a chartRef targetting an OCIRepository', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${Fixtures.get('ociSource.yaml')}
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: kyverno-controller
+            namespace: kube-system
+          spec:
+            chartRef:
+              kind: OCIRepository
+              name: kyverno-controller
+              namespace: kube-system
+        `,
+        'test.yaml',
+      );
+      // HelmRelease is ignored, only OCIRepository itself is processed (-> no duplicates expected)
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts HelmChart version', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmSource}
+          ---
+          ${fixtureHelmChart}
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
+          },
+        ],
+      });
+    });
+
+    it('does not match HelmChart resources without a namespace', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmSource}
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+          spec:
+            interval: 10m
+            chart: sealed-secrets
+            sourceRef:
+              kind: HelmRepository
+              name: sealed-secrets
+            version: "2.0.2"
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('ignores HelmChart resources using git sources', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 10m
+            chart: ./helm/sealed-secrets
+            sourceRef:
+              kind: GitRepository
+              name: sealed-secrets
+        `,
+        'test.yaml',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('ignores HelmChart resources using bucket sources', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: Bucket
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 5m0s
+            endpoint: sealed-secrets.example.com
+            bucketName: example
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: HelmChart
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            interval: 10m
+            chart: ./helm/sealed-secrets
+            sourceRef:
+              kind: Bucket
+              name: sealed-secrets
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: './helm/sealed-secrets',
+            skipReason: 'unsupported-datasource',
           },
         ],
       });
@@ -502,7 +737,11 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             skipReason: 'unversioned-reference',
           },
         ],
@@ -523,6 +762,11 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        {
+          registryAliases: {
+            'ghcr.io': 'ghcr.proxy.test/some/path',
+          },
+        },
       );
       expect(result).toEqual({
         deps: [
@@ -532,6 +776,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString: 'v1.8.2',
           },
@@ -560,6 +805,7 @@ describe('modules/manager/flux/extract', () => {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
           },
         ],
@@ -590,6 +836,7 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString:
               'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
@@ -621,6 +868,73 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+          },
+        ],
+      });
+    });
+
+    it('extracts Kustomization', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: kustomize.toolkit.fluxcd.io/v1
+        kind: Kustomization
+        metadata:
+          name: podinfo
+          namespace: flux-system
+        spec:
+          images:
+          - name: podinfo
+            newName: my-registry/podinfo
+            newTag: v1
+          - name: podinfo
+            newTag: 1.8.0
+          - name: podinfo
+            newName: my-podinfo
+          - name: podinfo
+            digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1',
+            datasource: 'docker',
+            depName: 'my-registry/podinfo',
+            packageName: 'my-registry/podinfo',
+            replaceString: 'v1',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.8.0',
+            datasource: 'docker',
+            depName: 'podinfo',
+            packageName: 'podinfo',
+            replaceString: '1.8.0',
+          },
+          {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'my-podinfo',
+            packageName: 'my-podinfo',
+            replaceString: 'my-podinfo',
+          },
+          {
+            currentDigest:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
+            currentValue: undefined,
+            datasource: 'docker',
+            depName: 'podinfo',
+            packageName: 'podinfo',
+            replaceString:
+              'sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3',
           },
         ],
       });
@@ -698,6 +1012,7 @@ describe('modules/manager/flux/extract', () => {
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
+              packageName: 'ghcr.io/kyverno/manifests/kyverno',
               datasource: DockerDatasource.id,
               replaceString: 'v1.8.2',
             },
@@ -723,10 +1038,16 @@ describe('modules/manager/flux/extract', () => {
     });
 
     it('should handle HelmRepository with type OCI', async () => {
-      const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
-        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
-      ]);
+      const result = await extractAllPackageFiles(
+        {
+          ...config,
+          registryAliases: { 'ghcr.io': 'ghcr.proxy.test/some/path' },
+        },
+        [
+          'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+          'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        ],
+      );
       expect(result).toEqual([
         {
           deps: [
@@ -735,7 +1056,7 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
-                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+                'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
             },
           ],
           packageFile:
@@ -770,6 +1091,27 @@ describe('modules/manager/flux/extract', () => {
         'lib/modules/manager/flux/__fixtures__/bogus.yaml',
       ]);
       expect(result).toBeNull();
+    });
+
+    it('should pick correct package file when using HelmRepository with chartRef', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmChartRefRelease.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmChart.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.0.2',
+              datasource: HelmDatasource.id,
+              depName: 'sealed-secrets',
+              registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
+            },
+          ],
+          packageFile: 'lib/modules/manager/flux/__fixtures__/helmChart.yaml',
+        },
+      ]);
     });
   });
 });

@@ -1,13 +1,13 @@
-import { logger, mocked, partial } from '../../../test/util';
 import * as _repositoryCache from '../cache/repository';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
+import { logger, partial } from '~test/util';
 
-jest.mock('../cache/repository');
-const repositoryCache = mocked(_repositoryCache);
+vi.mock('../cache/repository');
+const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('util/git/modified-cache', () => {
   let repoCache: RepoCacheData = {};

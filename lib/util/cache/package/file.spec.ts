@@ -30,8 +30,14 @@ describe('util/cache/package/file', () => {
     await set('_test-namespace', 'valid', 1234);
     await set('_test-namespace', 'expired', 1234, -5);
     await cacache.put(cacheFileName, 'invalid', 'not json');
+    const expiredDigest = (
+      await cacache.get(cacheFileName, '_test-namespace-expired')
+    ).integrity;
     await cleanup();
     const entries = await cacache.ls(cacheFileName);
     expect(Object.keys(entries)).toEqual(['_test-namespace-valid']);
+    await expect(
+      cacache.get.byDigest(cacheFileName, expiredDigest),
+    ).rejects.toThrow('ENOENT');
   });
 });

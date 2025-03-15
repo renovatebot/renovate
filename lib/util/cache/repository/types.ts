@@ -8,6 +8,7 @@ import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
 
 export interface BaseBranchCache {
+  revision?: number;
   sha: string; // branch commit sha
   configHash: string; // object hash of config
   extractionFingerprints: Record<string, string | undefined>; // matching manager fingerprints
@@ -140,6 +141,7 @@ export interface RepoCacheData {
        */
       pullRequestsCache?: unknown;
       graphqlPageCache?: unknown;
+      issuesCache?: Record<number, unknown>;
     };
     bitbucket?: {
       pullRequestsCache?: unknown;

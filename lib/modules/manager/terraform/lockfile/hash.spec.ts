@@ -1,11 +1,13 @@
 import { createReadStream } from 'node:fs';
-import { DirectoryResult, dir } from 'tmp-promise';
-import { Fixtures } from '../../../../../test/fixtures';
-import * as httpMock from '../../../../../test/http-mock';
-import { getFixturePath, logger } from '../../../../../test/util';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { TerraformProviderHash } from './hash';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { getFixturePath, logger } from '~test/util';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
@@ -364,7 +366,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     ]);
   });
 
-  it('it does not add any ziphashes when the shasums endpoint fails`', async () => {
+  it('does not add any ziphashes when the shasums endpoint fails`', async () => {
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
@@ -425,5 +427,18 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
+  });
+
+  describe('hashOfZipContent', () => {
+    const zipWithFolderPath = Fixtures.getPath('test_with_folder.zip');
+
+    it('return hash for content with subfolders', async () => {
+      await expect(
+        TerraformProviderHash.hashOfZipContent(
+          zipWithFolderPath,
+          upath.join(cacheDir.path, 'test'),
+        ),
+      ).resolves.toBe('g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=');
+    });
   });
 });

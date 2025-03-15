@@ -14,12 +14,12 @@ const http = new Http('bazel');
 function getUrlFragments(rule: RecordFragment): StringFragment[] {
   const urls: StringFragment[] = [];
 
-  const urlRecord = rule.children['url'];
+  const urlRecord = rule.children.url;
   if (urlRecord?.type === 'string') {
     urls.push(urlRecord);
   }
 
-  const urlsRecord = rule.children['urls'];
+  const urlsRecord = rule.children.urls;
   if (urlsRecord?.type === 'array') {
     for (const urlRecord of urlsRecord.children) {
       if (urlRecord.type === 'string') {
@@ -80,7 +80,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     const cacheMinutes = 3 * 24 * 60; // 3 days
     await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return null;
   }
 }

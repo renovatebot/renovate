@@ -31,4 +31,4 @@ Or if it's only a single file then something like this:
 }
 ```
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const config: ExtractConfig = {};
 
@@ -57,7 +57,99 @@ describe('modules/manager/nuget/extract', () => {
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(23);
+    });
+
+    it('extracts msbuild sdk from the Sdk attr of Project element', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project Sdk="Microsoft.Build.NoTargets/3.4.0">
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Microsoft.Build.NoTargets',
+          depType: 'msbuild-sdk',
+          currentValue: '3.4.0',
+          datasource: 'nuget',
+        },
+      ]);
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('does not extract msbuild sdk from the Sdk attr of Project element if version is missing', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project Sdk="Microsoft.Build.NoTargets">
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res).toBeNull();
+    });
+
+    it('extracts msbuild sdk from the Sdk element', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project>
+        <Sdk Name="Microsoft.Build.NoTargets" Version="3.4.0" />
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Microsoft.Build.NoTargets',
+          depType: 'msbuild-sdk',
+          currentValue: '3.4.0',
+          datasource: 'nuget',
+        },
+      ]);
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('does not extract msbuild sdk from the Sdk element if version is missing', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project>
+        <Sdk Name="Microsoft.Build.NoTargets" />
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res).toBeNull();
+    });
+
+    it('extracts dependency with lower-case Version attribute', async () => {
+      const contents = codeBlock`
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net8.0</TargetFramework>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="Moq" version="4.18.4" />
+          </ItemGroup>
+        </Project>`;
+      const res = await extractPackageFile(contents, 'some.csproj', config);
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts all dependencies from global packages file', async () => {
@@ -65,7 +157,7 @@ describe('modules/manager/nuget/extract', () => {
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(17);
+      expect(res?.deps).toHaveLength(22);
     });
 
     it('extracts ContainerBaseImage', async () => {
@@ -83,6 +175,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',
@@ -108,6 +201,7 @@ describe('modules/manager/nuget/extract', () => {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
+            packageName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',

@@ -1,8 +1,9 @@
 // TODO: types (#22198)
+import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import type { HostRuleSearchResult } from '../../../types';
+import type { CombinedHostRule } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
@@ -21,12 +22,14 @@ export function getComposerArguments(
 
   if (config.composerIgnorePlatformReqs) {
     if (config.composerIgnorePlatformReqs.length === 0) {
-      // TODO: toolConstraint.constraint can be null or undefined? (#22198)
-      const major = api.getMajor(toolConstraint.constraint!);
-      const minor = api.getMinor(toolConstraint.constraint!);
-      args += api.matches(`${major}.${minor}`, '^2.2')
-        ? " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'"
-        : ' --ignore-platform-reqs';
+      if (
+        is.string(toolConstraint.constraint) &&
+        api.intersects!(toolConstraint.constraint, '^2.2')
+      ) {
+        args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'";
+      } else {
+        args += ' --ignore-platform-reqs';
+      }
     } else {
       config.composerIgnorePlatformReqs.forEach((req) => {
         args += ' --ignore-platform-req ' + quote(req);
@@ -41,6 +44,22 @@ export function getComposerArguments(
 
   if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
     args += ' --no-plugins';
+  }
+
+  return args;
+}
+
+export function getComposerUpdateArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = getComposerArguments(config, toolConstraint);
+
+  if (
+    is.string(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '>=2.7')
+  ) {
+    args += ' --minimal-changes';
   }
 
   return args;
@@ -93,10 +112,10 @@ export function extractConstraints(
     res.composer = requireDev['composer/composer'];
   }
   // composer platform package
-  else if (require['composer']) {
-    res.composer = require['composer'];
-  } else if (requireDev['composer']) {
-    res.composer = requireDev['composer'];
+  else if (require.composer) {
+    res.composer = require.composer;
+  } else if (requireDev.composer) {
+    res.composer = requireDev.composer;
   }
   // check last used composer version
   else if (pluginApiVersion) {
@@ -113,6 +132,6 @@ export function extractConstraints(
   return res;
 }
 
-export function isArtifactAuthEnabled(rule: HostRuleSearchResult): boolean {
+export function isArtifactAuthEnabled(rule: CombinedHostRule): boolean {
   return !rule.artifactAuth || rule.artifactAuth.includes('composer');
 }

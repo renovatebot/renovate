@@ -10,7 +10,7 @@ The `crossplane` manager supports these `depType`s:
 
 You can use these `depType`'s to control which dependencies Renovate will upgrade.
 
-If you need to change the versioning format, read the [versioning](../../../modules/versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../../modules/versioning/index.md) documentation to learn more.
 
 Some configuration examples:
 

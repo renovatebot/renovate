@@ -17,20 +17,27 @@ import {
   CdnjsAPIVersionResponseSchema,
 } from './schema';
 
-export class CdnJsDatasource extends Datasource {
+export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
   constructor() {
-    super(CdnJsDatasource.id);
+    super(CdnjsDatasource.id);
   }
 
   override readonly customRegistrySupport = false;
 
   override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field in the results.';
+
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
+    namespace: `datasource-${CdnjsDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => {
+      const library = packageName.split('/')[0];
+      return `getReleases:${library}`;
+    },
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
@@ -72,9 +79,9 @@ export class CdnJsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}-digest`,
+    namespace: `datasource-${CdnjsDatasource.id}`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
-      `${registryUrl}:${packageName}:${newValue}}`,
+      `getDigest:${registryUrl}:${packageName}:${newValue}}`,
   })
   override async getDigest(
     config: DigestConfig,

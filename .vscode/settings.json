@@ -16,11 +16,17 @@
     ".releaserc": "json"
   },
   "omnisharp.autoStart": false,
-  "jest.autoRun": "off",
-  "jest.jestCommandLine": "pnpm jest",
+  "vitest.nodeEnv": {
+    "LOG_LEVEL": "trace",
+    "GIT_ALLOW_PROTOCOL": "file"
+  },
   "npm.packageManager": "pnpm",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+  "yaml.customTags": [
+    "tag:yaml.org,2002:python/name:materialx.emoji.twemoji",
+    "tag:yaml.org,2002:python/name:materialx.emoji.to_svg"
+  ]
 }

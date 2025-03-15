@@ -1,20 +1,22 @@
-export type PlatformId =
-  | 'azure'
-  | 'codecommit'
-  | 'bitbucket'
-  | 'bitbucket-server'
-  | 'gerrit'
-  | 'gitea'
-  | 'github'
-  | 'gitlab'
-  | 'local';
+export const PLATFORM_HOST_TYPES = [
+  'azure',
+  'bitbucket',
+  'bitbucket-server',
+  'codecommit',
+  'gerrit',
+  'gitea',
+  'github',
+  'gitlab',
+  'local',
+] as const;
+
+export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',
   'gitea-changelog',
   'gitea-releases',
   'gitea-tags',
-  'custom',
 ];
 
 export const GITHUB_API_USING_HOST_TYPES = [
@@ -26,7 +28,6 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'hermit',
   'github-changelog',
   'conan',
-  'custom',
 ];
 
 export const GITLAB_API_USING_HOST_TYPES = [
@@ -36,12 +37,12 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-packages',
   'gitlab-changelog',
   'pypi',
-  'custom',
 ];
 
 export const BITBUCKET_API_USING_HOST_TYPES = [
   'bitbucket',
   'bitbucket-changelog',
   'bitbucket-tags',
-  'custom',
 ];
+
+export const BITBUCKET_SERVER_API_USING_HOST_TYPES = ['bitbucket-server'];

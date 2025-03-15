@@ -17,6 +17,10 @@ export class GitRefsDatasource extends GitDatasource {
 
   override readonly customRegistrySupport = false;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   @cache({
     namespace: `datasource-${GitRefsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
@@ -51,7 +55,7 @@ export class GitRefsDatasource extends GitDatasource {
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
-        newDigest: rawRefs!.find((rawRef) => rawRef.value === ref)?.hash,
+        newDigest: rawRefs.find((rawRef) => rawRef.value === ref)?.hash,
       })),
     };
 
@@ -64,7 +68,7 @@ export class GitRefsDatasource extends GitDatasource {
   ): Promise<string | null> {
     const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (!rawRefs) {
       return null;
     }

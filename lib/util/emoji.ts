@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import mathiasBynensEmojiRegex from 'emoji-regex';
 import {
   fromCodepointToUnicode,
@@ -12,6 +11,7 @@ import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
 import { logger } from '../logger';
 import { regEx } from './regex';
+import { Result } from './result';
 import { Json } from './schema-utils';
 
 let unicodeEmoji = true;
@@ -21,27 +21,48 @@ const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
 const EmojiShortcodesSchema = Json.pipe(
-  z.record(z.string(), z.union([z.string(), z.array(z.string())])),
+  z.record(
+    z.string(),
+    z.union([z.string().transform((val) => [val]), z.array(z.string())]),
+  ),
 );
+type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodesSchema>;
+
+const patchedEmojis: EmojiShortcodeMapping = {
+  '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
+};
+
+function initMapping(mapping: EmojiShortcodeMapping): void {
+  for (const [hex, shortcodes] of Object.entries(mapping)) {
+    const mainShortcode = `:${shortcodes[0]}:`;
+
+    shortCodesByHex.set(hex, mainShortcode);
+    shortCodesByHex.set(stripHexCode(hex), mainShortcode);
+
+    for (const shortcode of shortcodes) {
+      hexCodesByShort.set(`:${shortcode}:`, hex);
+    }
+  }
+}
 
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
-    const result = EmojiShortcodesSchema.safeParse(
-      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!,
+    const githubShortcodes = dataFiles.get(
+      'node_modules/emojibase-data/en/shortcodes/github.json',
     );
-    // istanbul ignore if: not easily testable
-    if (!result.success) {
-      logger.warn({ error: result.error }, 'Unable to parse emoji shortcodes');
-      return;
-    }
-    for (const [hex, val] of Object.entries(result.data)) {
-      const shortCodes = is.array(val) ? val : [val];
-      shortCodesByHex.set(hex, `:${shortCodes[0]}:`);
-      shortCodes.forEach((shortCode) => {
-        hexCodesByShort.set(`:${shortCode}:`, hex);
-      });
-    }
-    mappingsInitialized = true;
+
+    Result.parse(githubShortcodes, EmojiShortcodesSchema)
+      .onValue((data) => {
+        initMapping(data);
+        initMapping(patchedEmojis);
+        mappingsInitialized = true;
+      })
+      .onError(
+        /* istanbul ignore next */
+        (error) => {
+          logger.warn({ error }, 'Unable to parse emoji shortcodes');
+        },
+      );
   }
 }
 
@@ -99,7 +120,7 @@ export function unemojify(text: string): string {
   return text.replace(emojiRegex, (emoji) => {
     const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
     const shortCode = shortCodesByHex.get(hexCode);
-    return shortCode ?? '�';
+    return shortCode ?? /* istanbul ignore next */ '�';
   });
 }
 

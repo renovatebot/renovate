@@ -3,14 +3,15 @@ import {
   ensurePathPrefix,
   ensureTrailingSlash,
   getQueryString,
+  isHttpUrl,
   joinUrlParts,
+  massageHostUrl,
   parseLinkHeader,
   parseUrl,
   replaceUrlPath,
   resolveBaseUrl,
   trimSlashes,
   trimTrailingSlash,
-  validateUrl,
 } from './url';
 
 describe('util/url', () => {
@@ -97,15 +98,15 @@ describe('util/url', () => {
     expect(getQueryString({ a: 1, b: [1, 2] })).toBe('a=1&b=1&b=2');
   });
 
-  it('validates URLs', () => {
-    expect(validateUrl(undefined)).toBeFalse();
-    expect(validateUrl('')).toBeFalse();
-    expect(validateUrl(null)).toBeFalse();
-    expect(validateUrl('foo')).toBeFalse();
-    expect(validateUrl('ssh://github.com')).toBeFalse();
-    expect(validateUrl('http://github.com')).toBeTrue();
-    expect(validateUrl('https://github.com')).toBeTrue();
-    expect(validateUrl('https://github.com', false)).toBeTrue();
+  it('validates http-based URLs', () => {
+    expect(isHttpUrl(undefined)).toBeFalse();
+    expect(isHttpUrl('')).toBeFalse();
+    expect(isHttpUrl(null)).toBeFalse();
+    expect(isHttpUrl('foo')).toBeFalse();
+    expect(isHttpUrl('ssh://github.com')).toBeFalse();
+    expect(isHttpUrl('http://github.com')).toBeTrue();
+    expect(isHttpUrl('https://github.com')).toBeTrue();
+    expect(isHttpUrl(new URL('https://github.com'))).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -116,6 +117,7 @@ describe('util/url', () => {
     expect(url?.protocol).toBe('https:');
     expect(url?.host).toBe('github.com');
     expect(url?.pathname).toBe('/renovatebot/renovate');
+    expect(parseUrl(url)).toBe(url);
   });
 
   it('trimTrailingSlash', () => {
@@ -214,5 +216,14 @@ describe('util/url', () => {
         url: 'https://api.github.com/user/9287/repos?page=5&per_page=100',
       },
     });
+  });
+
+  it('massageHostUrl', () => {
+    expect(massageHostUrl('domain.com')).toBe('domain.com');
+    expect(massageHostUrl('domain.com:8080')).toBe('https://domain.com:8080');
+    expect(massageHostUrl('domain.com/some/path')).toBe(
+      'https://domain.com/some/path',
+    );
+    expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
   });
 });

@@ -1,17 +1,19 @@
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
+import { logger } from '../../../../logger';
+import * as hostRules from '../../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -89,7 +91,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update --no-sync dep1' +
+            'pdm update --no-sync --update-eager dep1' +
             '"',
         },
       ]);
@@ -141,20 +143,41 @@ describe('modules/manager/pep621/processors/pdm', () => {
         },
         { packageName: 'dep2', depType: depTypes.dependencies },
         {
-          depName: 'group1/dep3',
+          packageName: 'dep3',
+          managerData: { depGroup: 'group1' },
           depType: depTypes.optionalDependencies,
         },
-        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
         {
-          depName: 'group2/dep5',
-          depType: depTypes.pdmDevDependencies,
+          packageName: 'dep4',
+          depType: depTypes.optionalDependencies,
+          managerData: { depGroup: 'group1' },
         },
-        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
         {
-          depName: 'group3/dep7',
+          packageName: 'dep5',
           depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group2' },
         },
-        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
+        {
+          packageName: 'dep6',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group2' },
+        },
+        {
+          packageName: 'dep7',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group3' },
+        },
+        {
+          packageName: 'dep8',
+          depType: depTypes.pdmDevDependencies,
+          managerData: { depGroup: 'group3' },
+        },
+        { packageName: 'dep9', depType: depTypes.buildSystemRequires },
+        {
+          packageName: 'dep10',
+          depType: depTypes.dependencyGroups,
+          managerData: { depGroup: 'dev' },
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -176,18 +199,64 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update --no-sync dep1 dep2',
+          cmd: 'pdm update --no-sync --update-eager dep1 dep2',
         },
         {
-          cmd: 'pdm update --no-sync -G group1 dep3 dep4',
+          cmd: 'pdm update --no-sync --update-eager -G group1 dep3 dep4',
         },
         {
-          cmd: 'pdm update --no-sync -dG group2 dep5 dep6',
+          cmd: 'pdm update --no-sync --update-eager -dG group2 dep5 dep6',
         },
         {
-          cmd: 'pdm update --no-sync -dG group3 dep7 dep8',
+          cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8',
+        },
+        {
+          cmd: 'pdm update --no-sync --update-eager -dG dev dep10',
         },
       ]);
+    });
+
+    it('discard dependencies if the devGroup is missing', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep3',
+          depType: depTypes.optionalDependencies,
+        },
+        {
+          packageName: 'dep5',
+          depType: depTypes.pdmDevDependencies,
+        },
+        {
+          packageName: 'dep10',
+          depType: depTypes.dependencyGroups,
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {},
+      );
+      expect(result).toBeNull();
+      expect(execSnapshots).toEqual([]);
+      expect(logger.once.warn).toHaveBeenCalledTimes(3);
     });
 
     it('return update on lockfileMaintenance', async () => {
@@ -210,7 +279,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
@@ -227,9 +296,68 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update --no-sync',
+          cmd: 'pdm update --no-sync --update-eager',
           options: {
             cwd: '/tmp/github/some/repo/folder',
+          },
+        },
+      ]);
+    });
+
+    it('sets Git environment variables', async () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
+      // pdm
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
+      });
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'folder/pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            isLockFileMaintenance: true,
+          },
+          updatedDeps: [],
+        },
+        {},
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'pdm.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pdm update --no-sync --update-eager',
+          options: {
+            cwd: '/tmp/github/some/repo/folder',
+            env: {
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://user:pass@example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+              GIT_CONFIG_VALUE_1: 'git@example.com:',
+              GIT_CONFIG_VALUE_2: 'https://example.com/',
+            },
           },
         },
       ]);

@@ -21,8 +21,9 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
     }
 
     // TODO #22198
-    if (a.prPriority !== b.prPriority) {
-      return b.prPriority! - a.prPriority!;
+    const prPriorityDiff = getPrPriority(b) - getPrPriority(a);
+    if (prPriorityDiff !== 0) {
+      return prPriorityDiff;
     }
     // TODO #22198
     const sortDiff =
@@ -34,4 +35,8 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
     // Sort by prTitle if updateType is the same
     return a.prTitle! < b.prTitle! ? -1 : 1;
   });
+}
+
+function getPrPriority(branch: Partial<BranchConfig>): number {
+  return branch.prPriority ?? 0;
 }

@@ -1,6 +1,6 @@
-import { logger } from '../../test/util';
 import { detectPlatform, parseJson } from './common';
 import * as hostRules from './host-rules';
+import { logger } from '~test/util';
 
 const validJsonString = `
 {
@@ -40,6 +40,7 @@ describe('util/common', () => {
       ${'https://myorg.visualstudio.com/my-project/_git/my-repo.git'}        | ${'azure'}
       ${'https://bitbucket.org/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
+      ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
       ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'gitea'}
       ${'https://github.com/semantic-release/gitlab'}                        | ${'github'}

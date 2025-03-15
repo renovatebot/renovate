@@ -22,7 +22,7 @@ To learn what these variables do, read the [Go Modules Reference about the`GOPRO
 1. Renovate extracts existing dependencies from `require` statements
 1. Renovate resolves the dependency's source repository and checks for SemVer tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
 1. If Renovate finds an update, Renovate will update `go.mod` to the new value
-1. Renovate runs `go get` to update the `go.sum` files (you can configure which directory are included using the `goGetDirs` option)
+1. Renovate runs `go get` to update the `go.sum` files (you can configure which directories are included using the `goGetDirs` option)
 1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](./configuration-options.md#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
 1. If the user has any of the available `gomodTidy` options (e.g. `gomodTidy1.17`) in the [`postUpdateOptions`](./configuration-options.md#postupdateoptions), then Renovate runs `go mod tidy` with the respective options (multiple options are allowed).
 1. `go mod vendor` is run if vendored modules are detected
@@ -67,16 +67,16 @@ By default, Renovate will keep up with the latest version of the `go` binary.
 
 You can force Renovate to use a specific version of Go by setting a constraint.
 
-```json title="Getting Renovate to use the latest patch version of the 1.16 Go binary"
+```json title="Getting Renovate to use the latest patch version of the 1.23 Go binary"
 {
   "constraints": {
-    "go": "1.16"
+    "go": "1.23"
   }
 }
 ```
 
 We do not support patch level versions for the minimum `go` version.
-This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
+This means you cannot use `go 1.23.3`, but you can use `go 1.23` as a constraint.
 
 ### Custom registry support, and authentication
 

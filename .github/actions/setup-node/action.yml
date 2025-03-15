@@ -34,7 +34,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -47,18 +47,38 @@ runs:
           (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
         }}' >> "$GITHUB_ENV"
 
-    - name: Enable corepack
-      shell: bash
-      run: corepack enable
+    - name: Setup pnpm
+      uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      with:
+        standalone: true
 
     - name: Setup Node
-      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
+
+    - name: Calculate `PNPM_STORE`
+      shell: bash
+      run: |
+        echo "PNPM_STORE=$(pnpm store path)" >> "$GITHUB_ENV"
+
+    - name: Cache and restore `pnpm store`
+      if: env.CACHE_HIT != 'true'
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      with:
+        path: ${{ env.PNPM_STORE }}
+        key: |
+          pnpm_store-${{
+          inputs.os
+          }}-${{
+            inputs.node-version
+          }}-${{
+            hashFiles('pnpm-lock.yaml', 'package.json')
+          }}
+        enableCrossOsArchive: true
 
     - name: Install dependencies
-      uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
+      uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
@@ -67,7 +87,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

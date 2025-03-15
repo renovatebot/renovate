@@ -24,7 +24,7 @@ async function getComments(
   prNo: number,
 ): Promise<Comment[]> {
   const comments = (
-    await bitbucketHttp.getJson<PagedResult<Comment>>(
+    await bitbucketHttp.getJsonUnchecked<PagedResult<Comment>>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
       {
         paginate: true,

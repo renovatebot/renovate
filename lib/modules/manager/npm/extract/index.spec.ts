@@ -1,11 +1,13 @@
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
+import { codeBlock } from 'common-tags';
+import { extractAllPackageFiles } from '..';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import { postExtract } from './post';
 import * as npmExtract from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -20,8 +22,8 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
-    beforeEach(() => {
-      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
+    beforeEach(async () => {
+      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -258,6 +260,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
           return Promise.resolve(
@@ -277,12 +288,22 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc') {
+            return Promise.resolve('.yarnrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc') {
           return Promise.resolve('registry "https://registry.example.com"');
         }
         return Promise.resolve(null);
       });
+
       const res = await npmExtract.extractPackageFile(
         input02Content,
         'package.json',
@@ -291,6 +312,39 @@ describe('modules/manager/npm/extract/index', () => {
       expect(
         res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
+    it('resolves registry URLs using the package name if set', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(codeBlock`
+            npmScopes:
+              yarnpkg:
+                  npmRegistryServer: https://registry.example.com
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"packageManager": "yarn@4.1.1"}',
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'yarn',
+          registryUrls: ['https://registry.example.com'],
+        }),
+      ]);
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -540,6 +594,8 @@ describe('modules/manager/npm/extract/index', () => {
           n: 'git+https://github.com/owner/n#v2.0.0',
           o: 'git@github.com:owner/o.git#v2.0.0',
           p: 'Owner/P.git#v2.0.0',
+          q: 'github:owner/q#semver:1.1.0',
+          r: 'github:owner/r#semver:^1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -636,6 +692,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: 'v2.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/Owner/P',
+          },
+          {
+            depName: 'q',
+            currentValue: '1.1.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/q',
+          },
+          {
+            depName: 'r',
+            currentValue: '^1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/r',
           },
         ],
       });
@@ -747,6 +815,15 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('sets skipInstalls false if Yarn zero-install is used', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
+            return Promise.resolve('.yarnrc.yml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'yarn.lock') {
           return Promise.resolve('# yarn.lock');
@@ -869,15 +946,176 @@ describe('modules/manager/npm/extract/index', () => {
         ],
       });
     });
+
+    it('extracts dependencies from pnpm.overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "pnpm": {
+          "overrides": {
+            "node": "8.9.2",
+            "@types/react": "18.0.5",
+            "baz": {
+              "node": "8.9.2",
+              "bar": {
+                "foo": "1.0.0"
+              }
+            },
+            "foo2": {
+              ".": "1.0.0",
+              "bar2": "1.0.0"
+            },
+            "emptyObject":{}
+          }
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'pnpm.overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'pnpm.overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            depName: 'node',
+            managerData: { parents: ['baz'] },
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo',
+            managerData: { parents: ['baz', 'bar'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'bar2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
+
+    it('extracts dependencies from pnpm.overrides, with version ranges in flat syntax', async () => {
+      const content = codeBlock`{
+        "pnpm": {
+          "overrides": {
+            "foo>bar": "2.0.0",
+            "foo@1.0.0": "2.0.0",
+            "foo@>1.0.0": "2.0.0",
+            "foo@>=1.0.0": "2.0.0",
+            "foo@1.0.0>bar": "2.0.0",
+            "foo@>1.0.0>bar": "2.0.0",
+            "foo@>=1.0.0 <2.0.0": ">=2.0.0"
+          }
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm.overrides',
+            packageName: 'bar',
+            prettyDepType: 'overrides',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm.overrides',
+            packageName: 'foo',
+            prettyDepType: 'overrides',
+          },
+        ],
+      });
+    });
   });
 
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
-      const res = await npmExtract.extractAllPackageFiles(
-        defaultExtractConfig,
-        ['package.json'],
-      );
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'package.json',
+      ]);
       expect(res).toEqual([
         {
           deps: [
@@ -895,6 +1133,14 @@ describe('modules/manager/npm/extract/index', () => {
               depType: 'dependencies',
               prettyDepType: 'dependency',
             },
+            {
+              currentValue: '0.7.0',
+              datasource: 'npm',
+              depName: 'express>cookie',
+              packageName: 'cookie',
+              depType: 'pnpm.overrides',
+              prettyDepType: 'overrides',
+            },
           ],
           extractedConstraints: {},
           managerData: {
@@ -910,6 +1156,36 @@ describe('modules/manager/npm/extract/index', () => {
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
           skipInstalls: true,
+        },
+      ]);
+    });
+
+    it('extracts pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        packages:
+          - pkg-a
+
+        catalog:
+          is-positive: 1.0.0
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'is-positive',
+              depType: 'pnpm.catalog.default',
+              prettyDepType: 'pnpm.catalog.default',
+            },
+          ],
+          managerData: {
+            pnpmShrinkwrap: undefined,
+          },
+          packageFile: 'pnpm-workspace.yaml',
         },
       ]);
     });

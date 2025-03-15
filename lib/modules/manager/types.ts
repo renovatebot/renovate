@@ -6,12 +6,18 @@ import type {
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
-import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
+import type {
+  ModuleApi,
+  RangeStrategy,
+  SkipReason,
+  StageName,
+} from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
+import type { Timestamp } from '../../util/timestamp';
 import type { CustomExtractConfig } from './custom/types';
 
-export type Result<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T>;
 
 export interface ManagerData<T> {
   managerData?: T;
@@ -65,6 +71,7 @@ export interface PackageFileContent<T = Record<string, any>>
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  fileFormat?: string;
 }
 
 export interface PackageFile<T = Record<string, any>>
@@ -86,6 +93,7 @@ export interface LookupUpdate {
   newDigest?: string;
   newMajor?: number;
   newMinor?: number;
+  newPatch?: number;
   newName?: string;
   newValue?: string;
   semanticCommitType?: string;
@@ -97,8 +105,10 @@ export interface LookupUpdate {
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
-  releaseTimestamp?: any;
+  releaseTimestamp?: Timestamp;
+  newVersionAgeInDays?: number;
   registryUrl?: string;
+  libYears?: number;
 }
 
 /**
@@ -112,7 +122,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;
@@ -137,11 +147,13 @@ export interface PackageDependency<T = Record<string, any>>
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
+  currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
+  skipStage?: StageName;
   sourceLine?: number;
   newVersion?: string;
   updates?: LookupUpdate[];
@@ -180,17 +192,31 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   registryUrls?: string[] | null;
   currentVersion?: string;
   replaceString?: string;
+  replacementApproach?: 'replace' | 'alias';
+}
+
+export interface ArtifactNotice {
+  file: string;
+  message: string;
 }
 
 export interface ArtifactError {
+  fileName?: string;
   lockFile?: string;
   stderr?: string;
 }
 
-export interface UpdateArtifactsResult {
-  artifactError?: ArtifactError;
-  file?: FileChange;
-}
+export type UpdateArtifactsResult =
+  | {
+      file?: FileChange;
+      notice?: ArtifactNotice;
+      artifactError?: undefined;
+    }
+  | {
+      file?: undefined;
+      notice?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
@@ -243,34 +269,34 @@ export interface ManagerApi extends ModuleApi {
     currentValue: string,
     bumpVersion: ReleaseType,
     packageFile: string,
-  ): Result<BumpPackageVersionResult>;
+  ): MaybePromise<BumpPackageVersionResult>;
 
-  detectGlobalConfig?(): Result<GlobalManagerConfig>;
+  detectGlobalConfig?(): MaybePromise<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[],
-  ): Result<PackageFile[] | null>;
+  ): MaybePromise<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
     config?: ExtractConfig,
-  ): Result<PackageFileContent | null>;
+  ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact,
-  ): Result<UpdateArtifactsResult[] | null>;
+  ): MaybePromise<UpdateArtifactsResult[] | null>;
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-  ): Result<string | null>;
+  ): MaybePromise<string | null>;
 
   updateLockedDependency?(
     config: UpdateLockedConfig,
-  ): Result<UpdateLockedResult>;
+  ): MaybePromise<UpdateLockedResult>;
 }
 
 // TODO: name and properties used by npm manager
@@ -291,4 +317,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+
+  isLockFileMaintenance?: boolean;
 }

@@ -1,4 +1,5 @@
 import type { HttpResponse } from '../../../util/http/types';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -15,11 +16,18 @@ export class DartDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `published` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `repository` field of the latest release object in the results.';
+
   async getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -30,7 +38,7 @@ export class DartDatasource extends Datasource {
 
     let raw: HttpResponse<DartResult> | null = null;
     try {
-      raw = await this.http.getJson<DartResult>(pkgUrl);
+      raw = await this.http.getJsonUnchecked<DartResult>(pkgUrl);
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -42,7 +50,7 @@ export class DartDatasource extends Datasource {
         ?.filter(({ retracted }) => !retracted)
         ?.map(({ version, published }) => ({
           version,
-          releaseTimestamp: published,
+          releaseTimestamp: asTimestamp(published),
         }));
       if (releases && latest) {
         result = { releases };

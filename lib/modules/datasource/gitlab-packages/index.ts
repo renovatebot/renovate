@@ -1,5 +1,6 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -18,6 +19,10 @@ export class GitlabPackagesDatasource extends Datasource {
   override customRegistrySupport = true;
 
   override defaultRegistryUrls = ['https://gitlab.com'];
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
     super(datasource);
@@ -50,7 +55,7 @@ export class GitlabPackagesDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -70,7 +75,9 @@ export class GitlabPackagesDatasource extends Datasource {
     let response: GitlabPackage[];
     try {
       response = (
-        await this.http.getJson<GitlabPackage[]>(apiUrl, { paginate: true })
+        await this.http.getJsonUnchecked<GitlabPackage[]>(apiUrl, {
+          paginate: true,
+        })
       ).body;
 
       result.releases = response
@@ -79,7 +86,7 @@ export class GitlabPackagesDatasource extends Datasource {
         .filter((r) => r.name === packagePart)
         .map(({ version, created_at }) => ({
           version,
-          releaseTimestamp: created_at,
+          releaseTimestamp: asTimestamp(created_at),
         }));
     } catch (err) {
       this.handleGenericErrors(err);

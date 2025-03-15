@@ -1,3 +1,4 @@
+import { TimeoutError } from 'got';
 import { z } from 'zod';
 import prepareError, {
   prepareZodIssues,
@@ -7,15 +8,17 @@ import prepareError, {
 
 describe('logger/utils', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('checks for valid log levels', () => {
-    expect(validateLogLevel(undefined)).toBeUndefined();
-    expect(validateLogLevel('warn')).toBeUndefined();
-    expect(validateLogLevel('debug')).toBeUndefined();
-    expect(validateLogLevel('trace')).toBeUndefined();
-    expect(validateLogLevel('info')).toBeUndefined();
+    expect(validateLogLevel(undefined, 'info')).toBe('info');
+    expect(validateLogLevel('warn', 'info')).toBe('warn');
+    expect(validateLogLevel('debug', 'info')).toBe('debug');
+    expect(validateLogLevel('trace', 'info')).toBe('trace');
+    expect(validateLogLevel('info', 'info')).toBe('info');
+    expect(validateLogLevel('error', 'info')).toBe('error');
+    expect(validateLogLevel('fatal', 'info')).toBe('fatal');
   });
 
   it.each`
@@ -26,13 +29,13 @@ describe('logger/utils', () => {
     ${' '}
   `('checks for invalid log level: $input', (input) => {
     // Mock when the function exits
-    const mockExit = jest.spyOn(process, 'exit');
+    const mockExit = vi.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#22198)
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {
-      validateLogLevel(input);
+      validateLogLevel(input, 'info');
     }).toThrow();
     expect(mockExit).toHaveBeenCalledWith(1);
   });
@@ -46,9 +49,38 @@ describe('logger/utils', () => {
     ${'redis://:somepw@172.32.11.71:6379/0'}                              | ${'redis://**redacted**@172.32.11.71:6379/0'}
     ${'some text with\r\n url: https://somepw@domain.com\nand some more'} | ${'some text with\r\n url: https://**redacted**@domain.com\nand some more'}
     ${'[git://domain.com](git://pw@domain.com)'}                          | ${'[git://domain.com](git://**redacted**@domain.com)'}
+    ${'data:text/vnd-example;foo=bar;base64,R0lGODdh'}                    | ${'data:text/vnd-example;**redacted**'}
     ${'user@domain.com'}                                                  | ${'user@domain.com'}
   `('sanitizeValue("$input") == "$output"', ({ input, output }) => {
     expect(sanitizeValue(input)).toBe(output);
+  });
+
+  it('preserves secret template strings in redacted fields', () => {
+    const input = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '{{ secrets.CONTENT_SECRET }}',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: 'some-token',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: 'some-password',
+      },
+    };
+    const expected = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '[content]',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: '***********',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: '***********',
+      },
+    };
+    expect(sanitizeValue(input)).toEqual(expected);
   });
 
   describe('prepareError', () => {
@@ -75,6 +107,9 @@ describe('logger/utils', () => {
     }
 
     it('prepareZodIssues', () => {
+      expect(prepareZodIssues(null)).toBe(null);
+      expect(prepareZodIssues({ _errors: ['a', 'b'] })).toEqual(['a', 'b']);
+
       expect(prepareIssues(z.string(), 42)).toBe(
         'Expected string, received number',
       );
@@ -181,6 +216,22 @@ describe('logger/utils', () => {
         },
         message: 'Schema error',
         stack: expect.stringMatching(/^ZodError: Schema error/),
+      });
+    });
+
+    it('handles HTTP timout error', () => {
+      const err = new TimeoutError(
+        // @ts-expect-error some types are private
+        new Error('timeout'),
+        {},
+        { context: { hostType: 'foo' } },
+      );
+      Object.assign(err, {
+        response: {},
+      });
+      expect(prepareError(err)).toMatchObject({
+        message: 'timeout',
+        name: 'TimeoutError',
       });
     });
   });

@@ -23,7 +23,7 @@ describe('modules/manager/fvm/extract', () => {
       ).toBeNull();
     });
 
-    it('returns a result', () => {
+    it('returns a result for .fvm/fvm_config.json', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
         packageFile,
@@ -38,11 +38,35 @@ describe('modules/manager/fvm/extract', () => {
       ]);
     });
 
-    it('supports non range', () => {
+    it('returns a result for .fvmrc', () => {
+      const res = extractPackageFile('{"flutter": "2.10.1"}', packageFile);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.10.1',
+          datasource: 'flutter-version',
+          depName: 'flutter',
+          packageName: 'flutter/flutter',
+        },
+      ]);
+    });
+
+    it('supports non range for .fvm/fvm_config.json', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "stable", "flavors": {}}',
         packageFile,
       );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: 'stable',
+          datasource: 'flutter-version',
+          depName: 'flutter',
+          packageName: 'flutter/flutter',
+        },
+      ]);
+    });
+
+    it('supports non range for .fvmrc', () => {
+      const res = extractPackageFile('{"flutter": "stable"}', packageFile);
       expect(res?.deps).toEqual([
         {
           currentValue: 'stable',

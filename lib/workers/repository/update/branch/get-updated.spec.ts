@@ -1,38 +1,44 @@
-import { git, mocked } from '../../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
 import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
+import * as _gomod from '../../../../modules/manager/gomod';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
 import * as _pep621 from '../../../../modules/manager/pep621';
+import * as _pipCompile from '../../../../modules/manager/pip-compile';
 import * as _poetry from '../../../../modules/manager/poetry';
 import type { PackageFile } from '../../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
+import { git } from '~test/util';
 
-const bundler = mocked(_bundler);
-const composer = mocked(_composer);
-const gitSubmodules = mocked(_gitSubmodules);
-const helmv3 = mocked(_helmv3);
-const npm = mocked(_npm);
-const batectWrapper = mocked(_batectWrapper);
-const autoReplace = mocked(_autoReplace);
-const pep621 = mocked(_pep621);
-const poetry = mocked(_poetry);
+const bundler = vi.mocked(_bundler);
+const composer = vi.mocked(_composer);
+const gitSubmodules = vi.mocked(_gitSubmodules);
+const gomod = vi.mocked(_gomod);
+const helmv3 = vi.mocked(_helmv3);
+const npm = vi.mocked(_npm);
+const batectWrapper = vi.mocked(_batectWrapper);
+const autoReplace = vi.mocked(_autoReplace);
+const pep621 = vi.mocked(_pep621);
+const pipCompile = vi.mocked(_pipCompile);
+const poetry = vi.mocked(_poetry);
 
-jest.mock('../../../../modules/manager/bundler');
-jest.mock('../../../../modules/manager/composer');
-jest.mock('../../../../modules/manager/helmv3');
-jest.mock('../../../../modules/manager/npm');
-jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/batect-wrapper');
-jest.mock('../../../../modules/manager/pep621');
-jest.mock('../../../../modules/manager/poetry');
-jest.mock('../../../../util/git');
-jest.mock('./auto-replace');
+vi.mock('../../../../modules/manager/bundler');
+vi.mock('../../../../modules/manager/composer');
+vi.mock('../../../../modules/manager/helmv3');
+vi.mock('../../../../modules/manager/npm');
+vi.mock('../../../../modules/manager/git-submodules');
+vi.mock('../../../../modules/manager/gomod', () => mockDeep());
+vi.mock('../../../../modules/manager/batect-wrapper');
+vi.mock('../../../../modules/manager/pep621');
+vi.mock('../../../../modules/manager/pip-compile');
+vi.mock('../../../../modules/manager/poetry');
+vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -45,7 +51,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
       } satisfies BranchConfig;
-      npm.updateDependency = jest.fn();
+      npm.updateDependency = vi.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 
@@ -77,6 +83,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         reuseExistingBranch: undefined,
         updatedArtifacts: [],
         updatedPackageFiles: [],
+        artifactNotices: [],
       });
     });
 
@@ -110,6 +117,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         reuseExistingBranch: undefined,
         updatedArtifacts: [],
         updatedPackageFiles: [],
+        artifactNotices: [],
       });
     });
 
@@ -173,6 +181,54 @@ describe('workers/repository/update/branch/get-updated', () => {
             type: 'addition',
             path: 'composer.json',
             contents: 'some new content',
+          },
+        ],
+      });
+    });
+
+    it('handles artifact notices', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'go.mod',
+        manager: 'gomod',
+        branchName: 'foo/bar',
+      });
+      gomod.updateDependency.mockReturnValue('some new content');
+      gomod.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'go.mod',
+            contents: 'some content',
+          },
+          notice: {
+            file: 'go.mod',
+            message: 'some notice',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [
+          {
+            file: 'go.mod',
+            message: 'some notice',
+          },
+        ],
+        reuseExistingBranch: false,
+        updatedArtifacts: [
+          {
+            contents: 'some content',
+            path: 'go.mod',
+            type: 'addition',
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            contents: 'some new content',
+            path: 'go.mod',
+            type: 'addition',
           },
         ],
       });
@@ -353,6 +409,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": undefined,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -408,6 +465,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
+        packageFile: 'composer.json',
         branchName: '',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
@@ -533,6 +591,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": undefined,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -556,6 +615,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": false,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -581,6 +641,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(res).toMatchInlineSnapshot(`
         {
           "artifactErrors": [],
+          "artifactNotices": [],
           "reuseExistingBranch": false,
           "updatedArtifacts": [],
           "updatedPackageFiles": [],
@@ -807,6 +868,54 @@ describe('workers/repository/update/branch/get-updated', () => {
             expect.objectContaining({ newPackageFileContent: 'new contents' }),
           );
         });
+      });
+
+      it('passes package files to updateArtifacts in the same order they were returned by the manager', async () => {
+        config.upgrades.push({
+          packageFile: 'requirements-dev.in',
+          manager: 'pip-compile',
+          updateType: 'replacement',
+          depName: 'awscli',
+          currentValue: '==1.32.86',
+          newVersion: '1.32.92',
+          branchName: 'renovate/aws-packages',
+        });
+        config.upgrades.push({
+          packageFile: 'requirements.in',
+          manager: 'pip-compile',
+          updateType: 'replacement',
+          depName: 'botocore',
+          currentValue: '==1.34.86',
+          newVersion: '1.34.92',
+          branchName: 'renovate/aws-packages',
+        });
+        config.packageFiles = {
+          'pip-compile': [
+            {
+              packageFile: 'requirement.in',
+              deps: [],
+            },
+            {
+              packageFile: 'requirements-dev.in',
+              deps: [],
+            },
+          ],
+        };
+
+        pipCompile.updateArtifacts.mockResolvedValue([]);
+        autoReplace.doAutoReplace.mockResolvedValue('new content');
+
+        await getUpdatedPackageFiles(config);
+
+        expect(pipCompile.updateArtifacts).toHaveBeenCalledTimes(2);
+        expect(pipCompile.updateArtifacts).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ packageFileName: 'requirements.in' }),
+        );
+        expect(pipCompile.updateArtifacts).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ packageFileName: 'requirements-dev.in' }),
+        );
       });
     });
   });

@@ -176,6 +176,16 @@ terraform {
   source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
 }
 
+# gitlab-tags https with custom port
+terraform {
+  source = "git::https://gitlab.com:4321/hashicorp/example?ref=v1.0.1"
+}
+
+# gitlab-tags ssh with custom port
+terraform {
+  source = "git::ssh://gitlab.com:1234/hashicorp/example.git//foo/bar?ref=v1.0.2"
+}
+
 # gitea-tags
 terraform {
   source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"

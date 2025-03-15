@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
 import { allManagersList } from '../../lib/modules/manager';
@@ -92,6 +93,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimentalDescription',
     'experimentalIssues',
     'advancedUse',
+    'deprecationMsg',
+    'patternMatch',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -118,7 +121,10 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         el[1] = `<code>${el[1]}</code>`;
       }
       // objects and arrays should be printed in JSON notation
-      if ((type === 'object' || type === 'array') && el[0] === 'default') {
+      if (
+        (type === 'object' || type === 'array') &&
+        (el[0] === 'default' || el[0] === 'additionalProperties')
+      ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
           return;
@@ -174,6 +180,17 @@ function genExperimentalMsg(el: Record<string, any>): string {
       (issues
         .map((issue: number) => `[#${issue}](${ghIssuesUrl}${issue})`)
         .join(', ') as string) + '.';
+  }
+
+  return warning + '\n';
+}
+
+function genDeprecationMsg(el: Record<string, any>): string {
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+
+  if (el.deprecationMsg) {
+    warning += indent`${2}${el.deprecationMsg}`;
   }
 
   return warning + '\n';
@@ -240,6 +257,10 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       if (el.experimental) {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
+
+      if (is.nonEmptyString(el.deprecationMsg)) {
+        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
       }
     });
 

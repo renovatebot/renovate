@@ -147,7 +147,7 @@ export async function updateDependency({
    */
   let newUrl: string;
   // Example urls:
-  // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+  // "https://github.com/bazelbuild/bazel-watcher/archive/refs/tags/v0.8.2.tar.gz"
   // "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
   const oldParsedUrlPath = parseUrlPath(upgrade.managerData?.url);
   if (!oldParsedUrlPath || !upgrade.managerData) {
@@ -164,16 +164,16 @@ export async function updateDependency({
       upgrade.newValue
     }/${repoName}-${String(semver.coerce(upgrade.newValue))}.tar.gz`;
     newSha256 = await hashStream(http.stream(newUrl), 'sha256');
-  } catch (errOuter) {
+  } catch {
     logger.debug(
       `Failed to download release download for ${upgrade.depName} - trying archive instead`,
     );
     try {
       const ownerName = String(upgrade.managerData.ownerName);
       const repoName = String(upgrade.managerData.repoName);
-      newUrl = `https://github.com/${ownerName}/${repoName}/archive/${upgrade.newValue}.tar.gz`;
+      newUrl = `https://github.com/${ownerName}/${repoName}/archive/refs/tags/${upgrade.newValue}.tar.gz`;
       newSha256 = await hashStream(http.stream(newUrl), 'sha256');
-    } catch (errInner) {
+    } catch {
       logger.debug(
         `Failed to download archive download for ${upgrade.depName} - update failed`,
       );

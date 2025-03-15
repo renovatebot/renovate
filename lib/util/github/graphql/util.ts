@@ -1,4 +1,5 @@
-import { DateTime, DurationLikeObject } from 'luxon';
+import type { DurationLikeObject } from 'luxon';
+import { DateTime } from 'luxon';
 
 export function prepareQuery(payloadQuery: string): string {
   return `

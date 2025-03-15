@@ -1,11 +1,12 @@
-import { Fixtures } from '../../test/fixtures';
-import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { decryptConfig } from './decrypt';
+import {
+  decryptConfig,
+  getAzureCollection,
+  validateDecryptedValue,
+} from './decrypt';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
+import { logger } from '~test/util';
 
-const privateKey = Fixtures.get('private.pem');
-const privateKeyPgp = Fixtures.get('private-pgp.pem');
 const repository = 'abc/def';
 
 describe('config/decrypt', () => {
@@ -15,6 +16,8 @@ describe('config/decrypt', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
+      delete process.env.MEND_HOSTED;
+      delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
     });
 
     it('returns empty with no privateKey', async () => {
@@ -25,188 +28,255 @@ describe('config/decrypt', () => {
 
     it('warns if no privateKey found', async () => {
       config.encrypted = { a: '1' };
+      GlobalConfig.set({ encryptedWarning: 'text' });
+
       const res = await decryptConfig(config, repository);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith('text');
       expect(res.encrypted).toBeUndefined();
       expect(res.a).toBeUndefined();
     });
 
-    it('handles invalid encrypted type', async () => {
-      config.encrypted = 1;
-      GlobalConfig.set({ privateKey });
-      const res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-    });
+    it('throws exception if encrypted found but no privateKey', async () => {
+      config.encrypted = { a: '1' };
 
-    it('handles invalid encrypted value', async () => {
-      config.encrypted = { a: 1 };
-      GlobalConfig.set({ privateKey, privateKeyOld: 'invalid-key' });
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
       await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
+        'config-validation',
       );
     });
 
-    it('replaces npm token placeholder in npmrc', async () => {
-      GlobalConfig.set({
-        privateKey: 'invalid-key',
-        privateKeyOld: privateKey,
-      }); // test old key failover
-      config.npmrc =
-        '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n';
-      config.encrypted = {
-        npmToken:
-          'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
-      };
-      const res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.npmToken).toBeUndefined();
-      expect(res.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
+    // coverage
+    it('throws exception if encrypted found but no privateKey- Mend Hosted', async () => {
+      config.encrypted = { a: '1' };
+
+      process.env.MEND_HOSTED = 'true';
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+      await expect(decryptConfig(config, repository)).rejects.toThrow(
+        'config-validation',
       );
     });
+  });
 
-    it('appends npm token in npmrc', async () => {
-      GlobalConfig.set({ privateKey });
-      config.npmrc = 'foo=bar\n';
-      config.encrypted = {
-        npmToken:
-          'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
-      };
-      const res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.npmToken).toBeUndefined();
-      expect(res.npmrc).toMatchSnapshot();
+  describe('validateDecryptedValue()', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
     });
 
-    it('decrypts nested', async () => {
-      GlobalConfig.set({ privateKey });
-      config.packageFiles = [
-        {
-          packageFile: 'package.json',
-          devDependencies: {
-            encrypted: {
-              branchPrefix:
-                'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
-              npmToken:
-                'FLA9YHIzpE7YetAg/P0X46npGRCMqn7hgyzwX5ZQ9wYgu9BRRbTiBVsUIFTyM5BuP1Q22slT2GkWvFvum7GU236Y6QiT7Nr8SLvtsJn2XUuq8H7REFKzdy3+wqyyWbCErYTFyY1dcPM7Ht+CaGDWdd8u/FsoX7AdMRs/X1jNUo6iSmlUiyGlYDKF+QMnCJom1VPVgZXWsGKdjI2MLny991QMaiv0VajmFIh4ENv4CtXOl/1twvIl/6XTXAaqpJJKDTPZEuydi+PHDZmal2RAOfrkH4m0UURa7SlfpUlIg+EaqbNGp85hCYXLwRcEET1OnYr3rH1oYkcYJ40any1tvQ==',
-            },
+    describe('platforms non azure', () => {
+      it.each`
+        str                                                 | repo             | expected
+        ${'{"o":"abcd",         "r":"",     "v":"123#'}     | ${'abcd/edf'}    | ${null}
+        ${'{"o":"abcd",         "r":"",     "v":""}'}       | ${'abcd/edf'}    | ${null}
+        ${'{"o":"",             "r":"",     "v":"val"}'}    | ${'abcd/edf'}    | ${null}
+        ${'{"o":"abcd",         "r":"edf",  "v":"val-1"}'}  | ${'abcd/edf'}    | ${'val-1'}
+        ${'{"o":"abcd",         "r":"",     "v":"val-2"}'}  | ${'abcd/edf'}    | ${'val-2'}
+        ${'{"o":"abcd/fgh",     "r":"ef",   "v":"val-3"}'}  | ${'abcd/fgh/ef'} | ${'val-3'}
+        ${'{"o":"abcd/fgh",     "r":"",     "v":"val-4"}'}  | ${'abcd/fgh/ef'} | ${'val-4'}
+        ${'{"o":"a/b/c/d",      "r":"ef",   "v":"val-5"}'}  | ${'a/b/c/d/ef'}  | ${'val-5'}
+        ${'{"o":"abcd/fgh",     "r":"any",  "v":"val-6"}'}  | ${'abcd/fgh/ef'} | ${null}
+        ${'{"o":"abcd/xy",      "r":"",     "v":"val-7"}'}  | ${'abcd/fgh/ef'} | ${null}
+        ${'{"o":"xy",           "r":"",     "v":"val-8"}'}  | ${'abcd/fgh/ef'} | ${null}
+        ${'{"o":"xy, abcd/fgh", "r":"ef",   "v":"val-9"}'}  | ${'abcd/fgh/ef'} | ${'val-9'}
+        ${'{"o":"xy ,abcd",     "r":"ef",   "v":"val-10"}'} | ${'abcd/ef'}     | ${'val-10'}
+        ${'{"o":"abcd, xy",     "r":"",     "v":"val-11"}'} | ${'abcd/fgh/ef'} | ${'val-11'}
+        ${'{"o":"abcd,xy ",     "r":"",     "v":"val-12"}'} | ${'abcd/ef'}     | ${'val-12'}
+        ${'{"o":" xy,abc",      "r":"",     "v":"val-13"}'} | ${'abcd/fgh/ef'} | ${null}
+      `('equals("$str", "$repo") === $expected', ({ str, repo, expected }) => {
+        expect(validateDecryptedValue(str, repo)).toBe(expected);
+      });
+    });
+
+    describe('azure only platform', () => {
+      describe('general tests', () => {
+        it.each`
+          str                                                    | repo         | expected
+          ${'{"o":"any",           "r":"",     "v":"wrong-123#'} | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any",           "r":"",     "v":""}'}         | ${'fgh/rp1'} | ${null}
+          ${'{"o":"",              "r":"",     "v":"any"}'}      | ${'fgh/rp1'} | ${null}
+          ${'{"o":"fgh",           "r":"rp1",  "v":"zv-1"}'}     | ${'fgh/rp1'} | ${'zv-1'}
+          ${'{"o":"fgh",           "r":"",     "v":"zv-2"}'}     | ${'fgh/rp1'} | ${'zv-2'}
+          ${'{"o":"az123/fgh",     "r":"rp1",  "v":"zv-3"}'}     | ${'fgh/rp1'} | ${'zv-3'}
+          ${'{"o":"az123/fgh",     "r":"",     "v":"zv-4"}'}     | ${'fgh/rp1'} | ${'zv-4'}
+          ${'{"o":"az123/*",       "r":"",     "v":"zv-5"}'}     | ${'fgh/rp1'} | ${'zv-5'}
+          ${'{"o":"az123/",        "r":"",     "v":"zv-6"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123",         "r":"",     "v":"zv-7"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az1",           "r":"",     "v":"zv-8"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"rp1",  "v":"zv-9"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"",     "v":"zv-10"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*",         "r":"",     "v":"zv-11"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/*,any/*", "r":"",     "v":"zv-12"}'}    | ${'fgh/rp1'} | ${'zv-12'}
+          ${'{"o":"fgh,any/*",     "r":"",     "v":"zv-13"}'}    | ${'fgh/rp1'} | ${'zv-13'}
+          ${'{"o":"az123/,any/*",  "r":"",     "v":"zv-14"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,fgh/",    "r":"",     "v":"zv-15"}'}    | ${'fgh/rp1'} | ${'zv-15'}
+          ${'{"o":"any/*,az123",   "r":"",     "v":"zv-16"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,az12",    "r":"",     "v":"zv-17"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az12,any/*",    "r":"",     "v":"zv-18"}'}    | ${'fgh/rp1'} | ${null}
+        `(
+          'equals("$str", "$repo") === $expected',
+          ({ str, repo, expected }) => {
+            GlobalConfig.set({
+              platform: 'azure',
+              endpoint: 'https://dev.azure.com/az123',
+            });
+            expect(validateDecryptedValue(str, repo)).toBe(expected);
           },
-        },
-        'backend/package.json',
-      ];
-      // TODO: fix types #22198
-      const res = (await decryptConfig(config, repository)) as any;
-      expect(res.encrypted).toBeUndefined();
-      expect(res.packageFiles[0].devDependencies.encrypted).toBeUndefined();
-      expect(res.packageFiles[0].devDependencies.branchPrefix).toBe(
-        'abcdef-ghijklm-nopqf-stuvwxyz',
-      );
-      expect(res.packageFiles[0].devDependencies.npmToken).toBeUndefined();
-      expect(res.packageFiles[0].devDependencies.npmrc).toBe(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n',
-      );
+        );
+      });
+
+      describe('tests self hosted - ignore "tfs/" before collection name', () => {
+        it.each`
+          str                                                    | repo         | expected
+          ${'{"o":"any",           "r":"",     "v":"wrong-123#'} | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any",           "r":"",     "v":""}'}         | ${'fgh/rp1'} | ${null}
+          ${'{"o":"",              "r":"",     "v":"any"}'}      | ${'fgh/rp1'} | ${null}
+          ${'{"o":"fgh",           "r":"rp1",  "v":"zv-1"}'}     | ${'fgh/rp1'} | ${'zv-1'}
+          ${'{"o":"fgh",           "r":"",     "v":"zv-2"}'}     | ${'fgh/rp1'} | ${'zv-2'}
+          ${'{"o":"az123/fgh",     "r":"rp1",  "v":"zv-3"}'}     | ${'fgh/rp1'} | ${'zv-3'}
+          ${'{"o":"az123/fgh",     "r":"",     "v":"zv-4"}'}     | ${'fgh/rp1'} | ${'zv-4'}
+          ${'{"o":"az123/*",       "r":"",     "v":"zv-5"}'}     | ${'fgh/rp1'} | ${'zv-5'}
+          ${'{"o":"az123/",        "r":"",     "v":"zv-6"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123",         "r":"",     "v":"zv-7"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az1",           "r":"",     "v":"zv-8"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"rp1",  "v":"zv-9"}'}     | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/any",     "r":"",     "v":"zv-10"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*",         "r":"",     "v":"zv-11"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az123/*,any/*", "r":"",     "v":"zv-12"}'}    | ${'fgh/rp1'} | ${'zv-12'}
+          ${'{"o":"fgh,any/*",     "r":"",     "v":"zv-13"}'}    | ${'fgh/rp1'} | ${'zv-13'}
+          ${'{"o":"az123/,any/*",  "r":"",     "v":"zv-14"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,fgh/",    "r":"",     "v":"zv-15"}'}    | ${'fgh/rp1'} | ${'zv-15'}
+          ${'{"o":"any/*,az123",   "r":"",     "v":"zv-16"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"any/*,az12",    "r":"",     "v":"zv-17"}'}    | ${'fgh/rp1'} | ${null}
+          ${'{"o":"az12,any/*",    "r":"",     "v":"zv-18"}'}    | ${'fgh/rp1'} | ${null}
+        `(
+          'equals("$str", "$repo") === $expected',
+          ({ str, repo, expected }) => {
+            GlobalConfig.set({
+              platform: 'azure',
+              endpoint: 'http://your-server-name:8080/tfs/az123',
+            });
+            expect(validateDecryptedValue(str, repo)).toBe(expected);
+          },
+        );
+      });
+
+      it('endpoint URL invalid', () => {
+        GlobalConfig.set({
+          platform: 'azure',
+          endpoint: 'ht tps://dev.az ure.com/az123',
+        });
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"repo", "v":"any-1"}',
+            'proj/repo',
+          ),
+        ).toBe('any-1');
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"", "v":"any-2"}',
+            'proj/repo',
+          ),
+        ).toBe('any-2');
+
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/proj", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/*", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+      });
+
+      it('endpoint URL without collection', () => {
+        GlobalConfig.set({
+          platform: 'azure',
+          endpoint: 'https://dev.azure.com/',
+        });
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"repo", "v":"any-3"}',
+            'proj/repo',
+          ),
+        ).toBe('any-3');
+        expect(
+          validateDecryptedValue(
+            '{"o":"proj", "r":"", "v":"any-4"}',
+            'proj/repo',
+          ),
+        ).toBe('any-4');
+
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/proj", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+        expect(
+          validateDecryptedValue(
+            '{"o":"col/*", "r":"", "v":"any"}',
+            'proj/repo',
+          ),
+        ).toBeNull();
+      });
+    });
+  });
+
+  describe('getAzureCollection()', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
     });
 
-    it('rejects invalid PGP message', async () => {
-      GlobalConfig.set({ privateKey: privateKeyPgp });
-      config.encrypted = {
-        token:
-          'long-but-wrong-wcFMAw+4H7SgaqGOAQ//ZNPgHJ4RQBdfFoDX8Ywe9UxqMlc8k6VasCszQ2JULh/BpEdKdgRUGNaKaeZ+oBKYDBmDwAD5V5FEMlsg+KO2gykp/p2BAwvKGtYK0MtxLh4h9yJbN7TrVnGO3/cC+Inp8exQt0gD6f1Qo/9yQ9NE4/BIbaSs2b2DgeIK7Ed8N675AuSo73UOa6o7t+9pKeAAK5TQwgSvolihbUs8zjnScrLZD+nhvL3y5gpAqK9y//a+bTu6xPA1jdLjsswoCUq/lfVeVsB2GWV2h6eex/0fRKgN7xxNgdMn0a7msrvumhTawP8mPisPY2AAsHRIgQ9vdU5HbOPdGoIwI9n9rMdIRn9Dy7/gcX9Ic+RP2WwS/KnPHLu/CveY4W5bYqYoikWtJs9HsBCyWFiHIRrJF+FnXwtKdoptRfxTfJIkBoLrV6fDIyKo79iL+xxzgrzWs77KEJUJfexZBEGBCnrV2o7mo3SU197S0qx7HNvqrmeCj8CLxq8opXC71TNa+XE6BQUVyhMFxtW9LNxZUHRiNzrTSikArT4hzjyr3f9cb0kZVcs6XJQsm1EskU3WXo7ETD7nsukS9GfbwMn7tfYidB/yHSHl09ih871BcgByDmEKKdmamcNilW2bmTAqB5JmtaYT5/H8jRQWo/VGrEqlmiA4KmwSv7SZPlDnaDFrmzmMZZDSRgHe5KWl283XLmSeE8J0NPqwFH3PeOv4fIbOjJrnbnFBwSAsgsMe2K4OyFDh2COfrho7s8EP1Kl5lBkYJ+VRreGRerdSu24',
-      };
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
-      config.encrypted = {
-        // Missing value
-        token:
-          'wcFMAw+4H7SgaqGOAQ//ZNPgHJ4RQBdfFoDX8Ywe9UxqMlc8k6VasCszQ2JULh/BpEdKdgRUGNaKaeZ+oBKYDBmDwAD5V5FEMlsg+KO2gykp/p2BAwvKGtYK0MtxLh4h9yJbN7TrVnGO3/cC+Inp8exQt0gD6f1Qo/9yQ9NE4/BIbaSs2b2DgeIK7Ed8N675AuSo73UOa6o7t+9pKeAAK5TQwgSvolihbUs8zjnScrLZD+nhvL3y5gpAqK9y//a+bTu6xPA1jdLjsswoCUq/lfVeVsB2GWV2h6eex/0fRKgN7xxNgdMn0a7msrvumhTawP8mPisPY2AAsHRIgQ9vdU5HbOPdGoIwI9n9rMdIRn9Dy7/gcX9Ic+RP2WwS/KnPHLu/CveY4W5bYqYoikWtJs9HsBCyWFiHIRrJF+FnXwtKdoptRfxTfJIkBoLrV6fDIyKo79iL+xxzgrzWs77KEJUJfexZBEGBCnrV2o7mo3SU197S0qx7HNvqrmeCj8CLxq8opXC71TNa+XE6BQUVyhMFxtW9LNxZUHRiNzrTSikArT4hzjyr3f9cb0kZVcs6XJQsm1EskU3WXo7ETD7nsukS9GfbwMn7tfYidB/yHSHl09ih871BcgByDmEKKdmamcNilW2bmTAqB5JmtaYT5/H8jRQWo/VGrEqlmiA4KmwSv7SZPlDnaDFrmzmMZZDSRgHe5KWl283XLmSeE8J0NPqwFH3PeOv4fIbOjJrnbnFBwSAsgsMe2K4OyFDh2COfrho7s8EP1Kl5lBkYJ+VRreGRerdSu24',
-      };
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
-      config.encrypted = {
-        // Missing org scope
-        token:
-          'wcFMAw+4H7SgaqGOAQ//W38A3PmaZnE9XTCHGDQFD52Kz78UYnaiYeAT13cEqYWTwEvQ57B7D7I6i4jCLe7KwkUCS90kyoqd7twD75W/sO70MyIveKnMlqqnpkagQkFgmzMaXXNHaJXEkjzsflTELZu6UsUs/kZYmab7r14YLl9HbH/pqN9exil/9s3ym9URCPOyw/l04KWntdMAy0D+c5M4mE+obv6fz6nDb8tkdeT5Rt2uU+qw3gH1OsB2yu+zTWpI/xTGwDt5nB5txnNTsVrQ/ZK85MSktacGVcYuU9hsEDmSrShmtqlg6Myq+Hjb7cYAp2g4n13C/I3gGGaczl0PZaHD7ALMjI7p6O1q+Ix7vMxipiKMVjS3omJoqBCz3FKc6DVhyX4tfhxgLxFo0DpixNwGbBRbMBO8qZfUk7bicAl/oCRc2Ijmay5DDYuvtkw3G3Ou+sZTe6DNpWUFy6VA4ai7hhcLvcAuiYmLdwPISRR/X4ePa8ZrmSVPyVOvbmmwLhcDYSDlC9Mw4++7ELomlve5kvjVSHvPv9BPVb5sJF7gX4vOT4FrcKalQRPmhNCZrE8tY2lvlrXwV2EEhya8EYv4QTd3JUYEYW5FXiJrORK5KDTnISw+U02nFZjFlnoz9+R6h+aIT1crS3/+YjCHE/EIKvSftOnieYb02Gk7M9nqU19EYL9ApYw4+IjSRgFM3DShIrvuDwDkAwUfaq8mKtr9Vjg/r+yox//GKS3u3r4I3+dfCljA3OwskTPfbSD+huBk4mylIvaL5v8Fngxo979wiLw',
-      };
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
-      config.encrypted = {
-        // Impossible to parse
-        token:
-          'wcFMAw+4H7SgaqGOAQ//Wa/gHgQdH7tj3LQdW6rWKjzmkYVKZW9EbexJExu4WLaMgEKodlRMilcqCKfQZpjzoiC31J8Ly/x6Soury+lQnLVbtIQ4KWa/uCIz4lXCpPpGNgN2jPfOmdwWBMOcXIT+BgAMxRu3rAmvTtunrkACJ3J92eYNwJhTzp2Azn9LpT7kHnZ64z2SPhbdUgMMhCBwBG5BPArPzF5fdaqa8uUSbKhY0GMiqPXq6Zeq+EBNoPc/RJp2urpYTknO+nRb39avKjihd9MCZ/1d3QYymbRj7SZC3LJhenVF0hil3Uk8TBASnGQiDmBcIXQFhJ0cxavXqKjx+AEALq+kTdwGu5vuE2+2B820/o3lAXR9OnJHr8GodJ2ZBpzOaPrQe5zvxL0gLEeUUPatSOwuLhdo/6+bRCl2wNz23jIjDEFFTmsLqfEHcdVYVTH2QqvLjnUYcCRRuM32vS4rCMOEe0l6p0CV2rk22UZDIPcxqXjKucxse2Sow8ATWiPoIw7zWj7XBLqUKHFnMpPV2dCIKFKBsOKYgLjF4BvKzZJyhmVEPgMcKQLYqeT/2uWDR77NSWH0Cyiwk9M3KbOIMmV3pWh9PiXk6CvumECELbJHYH0Mc+P//BnbDq2Ie9dHdmKhFgRyHU7gWvkPhic9BX36xyldPcnhTgr1XWRoVe0ETGLDPCcqrQ/SUQGrLiujSOgxGu2K/6LDJhi4IKz1/nf7FUSj5eTIDqQiSPP5pXDjlH7oYxXXrHI/aYOCZ5sBx7mOzlEcENIrYblCHO/CYMTWdCJ4Wrftqk7K/A=',
-      };
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
-      config.encrypted = {
-        token: 'too-short',
-      };
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
+    it('no pathname and url ends with slash', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/',
+      });
+      expect(getAzureCollection()).toBeUndefined();
     });
 
-    it('handles PGP org constraint', async () => {
-      GlobalConfig.set({ privateKey: privateKeyPgp });
-      config.encrypted = {
-        token:
-          'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
-      };
-      const res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
+    it('no pathname and no slash at end of URL', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com',
+      });
+      expect(getAzureCollection()).toBeUndefined();
     });
 
-    it('handles PGP multi-org constraint', async () => {
-      GlobalConfig.set({ privateKey: privateKeyPgp });
-      config.encrypted = {
-        token:
-          'wcFMAw+4H7SgaqGOAQ//Yk4RTQoLEhO0TKxN2IUBrCi88ts+CG1SXKeL06sJ2qikN/3n2JYAGGKgkHRICfu5dOnsjyFdLJ1XWUrbsM3XgVWikMbrmzD1Xe7N5DsoZXlt4Wa9pZ+IkZuE6XcKKu9whIJ22ciEwCzFwDmk/CBshdCCVVQ3IYuM6uibEHn/AHQ8K15XhraiSzF6DbJpevs5Cy7b5YHFyE936H25CVnouUQnMPsirpQq3pYeMq/oOtV/m4mfRUUQ7MUxvtrwE4lq4hLjFu5n9rwlcqaFPl7I7BEM++1c9LFpYsP5mTS7hHCZ9wXBqER8fa3fKYx0bK1ihCpjP4zUkR7P/uhWDArXamv7gHX2Kj/Qsbegn7KjTdZlggAmaJl/CuSgCbhySy+E55g3Z1QFajiLRpQ5+RsWFDbbI08YEgzyQ0yNCaRvrkgo7kZ1D95rEGRfY96duOQbjzOEqtvYmFChdemZ2+f9Kh/JH1+X9ynxY/zYe/0p/U7WD3QNTYN18loc4aXiB1adXD5Ka2QfNroLudQBmLaJpJB6wASFfuxddsD5yRnO32NSdRaqIWC1x6ti3ZYJZ2RsNwJExPDzjpQTuMOH2jtpu3q7NHmW3snRKy2YAL2UjI0YdeKIlhc/qLCJt9MRcOxWYvujTMD/yGprhG44qf0jjMkJBu7NjuVIMONujabl9b7SUQGfO/t+3rMuC68bQdCGLlO8gf3hvtD99utzXphi6idjC0HKSW/9KzuMkm+syGmIAYq/0L3EFvpZ38uq7z8KzwFFQHI3sBA34bNEr5zpU5OMWg',
-      };
-      let res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      res = await decryptConfig(config, 'def/ghi');
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      await expect(decryptConfig(config, 'wrong/org')).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
+    it('pathname no slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa',
+      });
+      expect(getAzureCollection()).toBe('aaa');
     });
 
-    it('handles PGP org/repo constraint', async () => {
-      GlobalConfig.set({ privateKey: privateKeyPgp });
-      config.encrypted = {
-        token:
-          'wcFMAw+4H7SgaqGOAQ//Wp7N0PaDZp0uOdwsc1CuqAq0UPcq+IQdHyKpJs3tHiCecXBHogy4P+rY9nGaUrVneCr4HexuKGuyJf1yl0ZqFffAUac5PjF8eDvjukQGOUq4aBlOogJCEefnuuVxVJx+NRR5iF1P6v57bmI1c+zoqZI/EQB30KU6O1BsdGPLUA/+R3dwCZd5Mbd36s34eYBasqcY9/QbqFcpElXMEPMse3kMCsVXPbZ+UMjtPJiBPUmtJq+ifnu1LzDrfshusSQMwgd/QNk7nEsijiYKllkWhHTP6g7zigvJ46x0h6AYS108YiuK3B9XUhXN9m05Ac6KTEEUdRI3E/dK2dQuRkLjXC8wceQm4A19Gm0uHoMIJYOCbiVoBCH6ayvKbZWZV5lZ4D1JbDNGmKeIj6OX9XWEMKiwTx0Xe89V7BdJzwIGrL0TCLtXuYWZ/R2k+UuBqtgzr44BsBqMpKUA0pcGBoqsEou1M05Ae9fJMF6ADezF5UQZPxT1hrMldiTp3p9iHGfWN2tKHeoW/8CqlIqg9JEkTc+Pl/L9E6ndy5Zjf097PvcmSGhxUQBE7XlrZoIlGhiEU/1HPMen0UUIs0LUu1ywpjCex2yTWnU2YmEwy0MQI1sekSr96QFxDDz9JcynYOYbqR/X9pdxEWyzQ+NJ3n6K97nE1Dj9Sgwu7mFGiUdNkf/SUAF0eZi/eXg71qumpMGBd4eWPtgkeMPLHjvMSYw9vBUfcoKFz6RJ4woG0dw5HOFkPnIjXKWllnl/o01EoBp/o8uswsIS9Nb8i+bp27U6tAHE',
-      };
-      const res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
+    it('pathname with slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/',
+      });
+      expect(getAzureCollection()).toBe('aaa');
     });
 
-    it('handles PGP multi-org/repo constraint', async () => {
-      GlobalConfig.set({ privateKey: privateKeyPgp });
-      config.encrypted = {
-        token:
-          'wcFMAw+4H7SgaqGOARAAibXL3zr0KZawiND868UGdPpGRo1aVZfn0NUBHpm8mXfgB1rBHaLsP7qa8vxDHpwH9DRD1IyB4vvPUwtu7wmuv1Vtr596tD40CCcCZYB5JjZLWRF0O0xaZFCOi7Z9SqqdaOQoMScyvPO+3/lJkS7zmLllJFH0mQoX5Cr+owUAMSWqbeCQ9r/KAXpnhmpraDjTav48WulcdTMc8iQ/DHimcdzHErLOAjtiQi4OUe1GnDCcN76KQ+c+ZHySnkXrYi/DhOOu9qB4glJ5n68NueFja+8iR39z/wqCI6V6TIUiOyjFN86iVyNPQ4Otem3KuNwrnwSABLDqP491eUNjT8DUDffsyhNC9lnjQLmtViK0EN2yLVpMdHq9cq8lszBChB7gobD9rm8nUHnTuLf6yJvZOj6toD5Yqj8Ibj58wN90Q8CUsBp9/qp0J+hBVUPOx4sT6kM2p6YarlgX3mrIW5c1U+q1eDbCddLjHiU5cW7ja7o+cqlA6mbDRu3HthjBweiXTicXZcRu1o/wy/+laQQ95x5FzAXDnOwQUHBmpTDI3tUJvQ+oy8XyBBbyC0LsBye2c2SLkPJ4Ai3IMR+Mh8puSzVywTbneiAQNBzJHlj5l85nCF2tUjvNo3dWC+9mU5sfXg11iEC6LRbg+icjpqRtTjmQURtciKDUbibWacwU5T/SVAGPXnW7adBOS0PZPIZQcSwjchOdOl0IjzBy6ofu7ODdn2CXZXi8zbevTICXsHvjnW4MAj5oXrStxK3LkWyM3YBOLe7sOfWvWz7n9TM3dHg032navQ',
-      };
-      let res = await decryptConfig(config, repository);
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      res = await decryptConfig(config, 'def/def');
-      expect(res.encrypted).toBeUndefined();
-      expect(res.token).toBe('123');
-      await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
-        CONFIG_VALIDATION,
-      );
+    it('pathname 2 levels no slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/bbb',
+      });
+      expect(getAzureCollection()).toBe('aaa/bbb');
+    });
+
+    it('pathname 2 levels with slash at end', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/aaa/bbb/',
+      });
+      expect(getAzureCollection()).toBe('aaa/bbb');
     });
   });
 });

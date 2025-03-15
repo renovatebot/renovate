@@ -30,11 +30,8 @@ function getNewValue({
     }
     return shorten(newVersion);
   }
-  if (rangeStrategy === 'replace' && !matches(currentValue, newVersion)) {
-    if (npm.matches(newVersion, '>=1.20.0')) {
-      return newVersion;
-    }
-    return shorten(newVersion);
+  if (rangeStrategy === 'replace' && !matches(newVersion, currentValue)) {
+    return newVersion;
   }
   return currentValue;
 }

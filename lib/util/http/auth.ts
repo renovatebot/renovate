@@ -29,11 +29,20 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
 
   options.headers ??= {};
   if (options.token) {
-    if (
+    const authType = options.context?.authType;
+    if (authType) {
+      if (authType === 'Token-Only') {
+        options.headers.authorization = options.token;
+      } else {
+        options.headers.authorization = `${authType} ${options.token}`;
+      }
+    } else if (
       options.hostType &&
       GITEA_API_USING_HOST_TYPES.includes(options.hostType)
     ) {
-      options.headers.authorization = `token ${options.token}`;
+      // Gitea v1.8.0 and later support `Bearer` as alternate to `token`
+      // https://github.com/go-gitea/gitea/pull/5378
+      options.headers.authorization = `Bearer ${options.token}`;
     } else if (
       options.hostType &&
       GITHUB_API_USING_HOST_TYPES.includes(options.hostType)
@@ -61,14 +70,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
         options.headers.authorization = `Bearer ${options.token}`;
       }
     } else {
-      // Custom Auth type, eg `Basic XXXX_TOKEN`
-      const type = options.context?.authType ?? 'Bearer';
-
-      if (type === 'Token-Only') {
-        options.headers.authorization = options.token;
-      } else {
-        options.headers.authorization = `${type} ${options.token}`;
-      }
+      options.headers.authorization = `Bearer ${options.token}`;
     }
     delete options.token;
   } else if (options.password !== undefined) {
@@ -107,7 +109,6 @@ export function removeAuthorization(options: Options): void {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
     // This can be evaluated for removal after upgrading to Got v10
     const portInUrl = options.href?.split?.('/')?.[2]?.split(':')?.[1];
-    // istanbul ignore next
     if (!portInUrl) {
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
     }

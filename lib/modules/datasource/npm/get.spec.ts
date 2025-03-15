@@ -1,15 +1,14 @@
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as _packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { CACHE_REVISION, getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 function getPath(s = ''): string {
   const [x] = s.split('\n');
@@ -362,10 +361,12 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]
@@ -508,10 +509,12 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]
@@ -548,10 +551,12 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
           "method": "GET",
+          "status": 200,
           "url": "https://test.org/@neutrinojs%2Freact",
         },
       ]

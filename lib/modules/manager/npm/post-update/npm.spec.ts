@@ -1,14 +1,14 @@
 import upath from 'upath';
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs } from '~test/util';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -16,7 +16,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
@@ -515,6 +515,17 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
       },
       {
+        packageFile: 'some-dir/docs/dir.has.period/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
+      {
         packageFile: 'some-missing-dir/docs/a/package.json',
         packageName: 'hello',
         depType: 'dependencies',
@@ -548,6 +559,9 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/dir.has.period hello@1.1.1',
         },
 
         {
@@ -583,6 +597,9 @@ describe('modules/manager/npm/post-update/npm', () => {
         },
         {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/dir.has.period hello@1.1.1',
         },
 
         {
@@ -689,8 +706,20 @@ describe('modules/manager/npm/post-update/npm', () => {
             },
             workspace: 'docs/a',
           },
+          {
+            packageFile: 'docs/dir.has.period/package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'docs/dir.has.period',
+          },
         ],
-        workspaces: new Set(['docs/a', 'web/b']),
+        workspaces: new Set(['docs/a', 'web/b', 'docs/dir.has.period']),
         rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
       });
     });

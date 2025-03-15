@@ -1,20 +1,18 @@
 import is from '@sindresorhus/is';
-import { mockDeep } from 'jest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import type { logger as _logger } from '../../../logger';
-import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
-import type { Platform } from '../types';
+import { ensureTrailingSlash } from '../../../util/url';
+import * as bitbucket from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
-jest.mock('timers/promises');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('timers/promises');
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -175,21 +173,20 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-type HostRules = typeof import('../../../util/host-rules');
-
 describe('modules/platform/bitbucket-server/index', () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
 
+    // eslint-disable-next-line vitest/valid-title
     describe(scenarioName, () => {
-      let bitbucket: Platform;
-
-      let hostRules: jest.Mocked<HostRules>;
-      let git: jest.Mocked<typeof _git>;
-      let logger: jest.Mocked<typeof _logger>;
       const username = 'abc';
       const password = '123';
+      const userInfo = {
+        name: username,
+        emailAddress: 'abc@def.com',
+        displayName: 'Abc Def',
+      };
 
       async function initRepo(config = {}): Promise<httpMock.Scope> {
         const scope = httpMock
@@ -211,12 +208,6 @@ describe('modules/platform/bitbucket-server/index', () => {
       }
 
       beforeEach(async () => {
-        // reset module
-        jest.resetModules();
-        bitbucket = await import('.');
-        logger = mocked(await import('../../../logger')).logger;
-        hostRules = jest.requireMock('../../../util/host-rules');
-        git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
@@ -234,6 +225,10 @@ describe('modules/platform/bitbucket-server/index', () => {
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/application-properties`)
           .reply(200, { version: '8.0.0' });
+        httpMock
+          .scope(urlHost)
+          .get(`${urlPath}/rest/api/1.0/users/${username}`)
+          .reply(200, userInfo);
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -247,11 +242,44 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
 
-        it('should throw if no username/password', async () => {
+        it('should throw if no username/password/token', async () => {
           expect.assertions(1);
           await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' }),
           ).rejects.toThrow();
+        });
+
+        it('should throw if password and token is set', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+              token: 'abc',
+            }),
+          ).rejects.toThrow();
+        });
+
+        it('should not throw if username/password', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+            }),
+          ).resolves.not.toThrow();
+        });
+
+        it('should not throw if token', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              token: 'abc',
+            }),
+          ).resolves.not.toThrow();
         });
 
         it('should throw if version could not be fetched', async () => {
@@ -259,20 +287,54 @@ describe('modules/platform/bitbucket-server/index', () => {
             .scope('https://stash.renovatebot.com')
             .get('/rest/api/1.0/application-properties')
             .reply(403);
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
 
           await bitbucket.initPlatform({
             endpoint: 'https://stash.renovatebot.com',
             username: 'abc',
             password: '123',
           });
-          expect(logger.debug).toHaveBeenCalledWith(
+          expect(logger.logger.debug).toHaveBeenCalledWith(
             expect.any(Object),
             'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
           );
         });
 
+        it('should not throw if user info fetch fails', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
+            .reply(404);
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              username,
+              password,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            expect.any(Object),
+            'Failed to get user info, fallback gitAuthor will be used',
+          );
+        });
+
         it('should skip api call to fetch version when platform version is set in environment', async () => {
           process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
           await expect(
             bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
@@ -283,11 +345,102 @@ describe('modules/platform/bitbucket-server/index', () => {
           delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
+        it('should skip users api call when gitAuthor is configured', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              username: 'def',
+              password: '123',
+              gitAuthor: `Def Abc <def@abc.com>`,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+        });
+
+        it('should skip users api call when no username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+        });
+
+        it('should fetch user info if token with username', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+              username,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+            gitAuthor: `${userInfo.displayName} <${userInfo.emailAddress}>`,
+          });
+        });
+
+        it('should use fallback gitAuthor if user info has empty email address', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/users/${username}`)
+            .reply(200, {
+              ...userInfo,
+              emailAddress: '',
+            });
+
+          expect(
+            await bitbucket.initPlatform({
+              endpoint: url.href,
+              token: '123',
+              username,
+            }),
+          ).toEqual({
+            endpoint: ensureTrailingSlash(url.href),
+          });
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              err: new Error('No email address configured for username abc'),
+            },
+            'Failed to get user info, fallback gitAuthor will be used',
+          );
+        });
+
         it('should init', async () => {
           httpMock
             .scope('https://stash.renovatebot.com')
             .get('/rest/api/1.0/application-properties')
             .reply(200, { version: '8.0.0' });
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/users/${username}`)
+            .reply(200, userInfo);
+
           expect(
             await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
@@ -570,12 +723,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/pull-requests`,
             )
             .reply(200, {
               mergeConfig: null,
             });
-          const actual = await bitbucket.getBranchForceRebase!('main');
+          const actual = await bitbucket.getBranchForceRebase('main');
           expect(actual).toBeFalse();
         });
 
@@ -584,14 +737,14 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/pull-requests`,
             )
             .reply(200, {
               mergeConfig: {
                 defaultStrategy: null,
               },
             });
-          const actual = await bitbucket.getBranchForceRebase!('main');
+          const actual = await bitbucket.getBranchForceRebase('main');
           expect(actual).toBeFalse();
         });
 
@@ -602,7 +755,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             httpMock
               .scope(urlHost)
               .get(
-                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
+                `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/pull-requests`,
               )
               .reply(200, {
                 mergeConfig: {
@@ -611,7 +764,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getBranchForceRebase!('main');
+            const actual = await bitbucket.getBranchForceRebase('main');
             expect(actual).toBeTrue();
           },
         );
@@ -623,7 +776,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             httpMock
               .scope(urlHost)
               .get(
-                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
+                `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/pull-requests`,
               )
               .reply(200, {
                 mergeConfig: {
@@ -632,7 +785,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getBranchForceRebase!('main');
+            const actual = await bitbucket.getBranchForceRebase('main');
             expect(actual).toBeFalse();
           },
         );
@@ -640,6 +793,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
       describe('addAssignees()', () => {
         it('does not throw', async () => {
+          await initRepo();
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
         });
       });
@@ -835,7 +989,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/3/activities?limit=100`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/activities?limit=100`,
             )
             .reply(200);
           const res = await bitbucket.ensureComment({
@@ -1107,7 +1261,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1126,7 +1280,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100&start=1`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1454,7 +1608,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
-            platformOptions: {
+            platformPrOptions: {
               bbUseDefaultReviewers: true,
             },
           });
@@ -1481,7 +1635,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             prTitle: 'title',
             prBody: 'body',
             labels: null,
-            platformOptions: {
+            platformPrOptions: {
               bbUseDefaultReviewers: true,
             },
           });
@@ -1556,7 +1710,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200);
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              toRef: {
+                id: 'refs/heads/new_base',
+                displayId: 'new_base',
+                latestCommit: '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+              },
+            });
 
           await expect(
             bitbucket.updatePr({
@@ -1578,7 +1739,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, { state: 'OPEN', version: 42 })
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              state: 'OPEN',
+              version: 42,
+            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`,
             )
@@ -1604,7 +1769,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, { state: 'DECLINED', version: 42 })
+            .reply(200, {
+              ...prMock(url, 'SOME', 'repo'),
+              state: 'DECLINED',
+              version: 42,
+            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`,
             )
@@ -1742,6 +1911,67 @@ describe('modules/platform/bitbucket-server/index', () => {
             bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrowErrorMatchingSnapshot();
         });
+      });
+
+      it('ensure runtime getPrList() integrity', async () => {
+        const scope = await initRepo();
+        scope
+          .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`,
+          )
+          .reply(200, [{ name: 'jcitizen' }])
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [],
+          })
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .put(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(200, { ...prMock(url, 'SOME', 'repo'), title: 'new_title' });
+
+        // initialize runtime pr list
+        await bitbucket.getPrList();
+        const pr = await bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformPrOptions: {
+            bbUseDefaultReviewers: true,
+          },
+        });
+
+        // check that created pr is added to runtime pr list
+        const createdPr = (await bitbucket.getPrList()).find(
+          (pri) => pri.number === pr?.number,
+        );
+        expect(createdPr).toBeDefined();
+
+        await bitbucket.updatePr({
+          number: 5,
+          prTitle: 'new_title',
+          prBody: 'body',
+          targetBranch: 'master',
+        });
+
+        // check that runtime pr list is updated after updatePr() call
+        const updatedPr = (await bitbucket.getPrList()).find(
+          (pri) => pri.number === pr?.number,
+        );
+        expect(updatedPr?.title).toBe('new_title');
       });
 
       describe('mergePr()', () => {
@@ -1889,9 +2119,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'green',
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
         });
 
         it('should be pending', async () => {
@@ -1906,9 +2134,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'yellow',
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
 
           scope
             .get(
@@ -1920,9 +2146,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'yellow',
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
         });
 
         it('should be failed', async () => {
@@ -1937,9 +2161,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'red',
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
 
           scope
             .get(
@@ -1947,17 +2169,15 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'red',
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
         });
 
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(
-            bitbucket.getBranchStatus('somebranch', true),
-          ).rejects.toThrow(REPOSITORY_CHANGED);
+          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
+            REPOSITORY_CHANGED,
+          );
         });
       });
 

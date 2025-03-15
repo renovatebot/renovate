@@ -8,7 +8,7 @@ const config: FetchPresetConfig = {
   fetch: undefined as never,
 };
 
-const fetch = jest.fn(() => Promise.resolve<Preset | null>({}));
+const fetch = vi.fn(() => Promise.resolve<Preset | null>({}));
 
 describe('config/presets/util', () => {
   beforeEach(() => {
@@ -43,6 +43,7 @@ describe('config/presets/util', () => {
     await expect(fetchPreset({ ...config, fetch })).rejects.toThrow('fails');
   });
 
+  // eslint-disable-next-line vitest/valid-title
   it(PRESET_DEP_NOT_FOUND, async () => {
     fetch.mockResolvedValueOnce(null);
     await expect(fetchPreset({ ...config, fetch })).rejects.toThrow(
@@ -56,6 +57,7 @@ describe('config/presets/util', () => {
     );
   });
 
+  // eslint-disable-next-line vitest/valid-title
   it(PRESET_NOT_FOUND, async () => {
     fetch.mockResolvedValueOnce({});
     await expect(

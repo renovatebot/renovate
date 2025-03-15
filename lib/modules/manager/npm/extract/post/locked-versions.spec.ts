@@ -1,21 +1,21 @@
-import { logger, mocked } from '../../../../../../test/util';
 import type { PackageFile } from '../../../types';
 import type { NpmManagerData } from '../../types';
 import * as _npm from '../npm';
 import * as _pnpm from '../pnpm';
 import * as _yarn from '../yarn';
 import { getLockedVersions } from './locked-versions';
+import { logger } from '~test/util';
 
-const npm = mocked(_npm);
-const pnpm = mocked(_pnpm);
-const yarn = mocked(_yarn);
+const npm = vi.mocked(_npm);
+const pnpm = vi.mocked(_pnpm);
+const yarn = vi.mocked(_yarn);
 
-jest.mock('../npm');
-jest.mock('../yarn', () => ({
-  ...jest.requireActual<typeof import('../yarn')>('../yarn'),
-  getYarnLock: jest.fn(),
+vi.mock('../npm');
+vi.mock('../yarn', async () => ({
+  ...(await vi.importActual<typeof import('../yarn')>('../yarn')),
+  getYarnLock: vi.fn(),
 }));
-jest.mock('../pnpm');
+vi.mock('../pnpm');
 
 describe('modules/manager/npm/extract/post/locked-versions', () => {
   describe('.getLockedVersions()', () => {
@@ -582,6 +582,66 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
         lockFiles: ['pnpm-lock.yaml'],
         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         packageFile: 'package.json',
+      },
+    ]);
+  });
+
+  it('uses pnpm-lock for pnpm.catalog depType', async () => {
+    pnpm.getPnpmLock.mockResolvedValue({
+      lockedVersionsWithCatalog: {
+        default: {
+          a: '1.0.0',
+        },
+        named: {
+          b: '2.0.0',
+        },
+      },
+      lockfileVersion: 9.0,
+    });
+    const packageFiles = [
+      {
+        managerData: {
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        extractedConstraints: {
+          pnpm: '9.15.3',
+        },
+        deps: [
+          {
+            depName: 'a',
+            depType: 'pnpm.catalog.default',
+            currentValue: '1.0.0',
+          },
+          {
+            depName: 'b',
+            depType: 'pnpm.catalog.named',
+            currentValue: '2.0.0',
+          },
+        ],
+        packageFile: 'pnpm-workspace.yaml',
+      },
+    ];
+    await getLockedVersions(packageFiles);
+    expect(packageFiles).toEqual([
+      {
+        extractedConstraints: { pnpm: '9.15.3' },
+        deps: [
+          {
+            currentValue: '1.0.0',
+            depName: 'a',
+            lockedVersion: '1.0.0',
+            depType: 'pnpm.catalog.default',
+          },
+          {
+            currentValue: '2.0.0',
+            depName: 'b',
+            lockedVersion: '2.0.0',
+            depType: 'pnpm.catalog.named',
+          },
+        ],
+        lockFiles: ['pnpm-lock.yaml'],
+        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        packageFile: 'pnpm-workspace.yaml',
       },
     ]);
   });

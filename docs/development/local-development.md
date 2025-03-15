@@ -10,27 +10,28 @@ For example, if you think anything is unclear, or you think something needs to b
 
 You need the following dependencies for local development:
 
-- Git `>=2.33.0`
-- Node.js `^18.12.0 || >=20.0.0`
-- pnpm `^8.6.11` (use corepack)
+- Git `>=2.45.1`
+- Node.js `^22.13.0`
+- pnpm `^10.0.0`
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc`.
+We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
+Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
 
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get update
 sudo apt-get install -y git build-essential nodejs
-corepack enable
+npm install -g pnpm
 ```
 
 #### Nix
 
-To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `corepack enable`.
+To enter a development shell with the necessary packages, run `nix-shell --packages gcc gitFull nodejs` and then `npm install --global pnpm`.
 
 #### Windows
 
@@ -39,8 +40,8 @@ If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
-- Enable corepack: `corepack enable`
+- In an Administrator PowerShell prompt, run `npm install --global npm` and then `npm --debug install --global windows-build-tools`
+- Install pnpm with: `npm install --global pnpm`
 
   You can see what versions you're using like this:
 
@@ -69,13 +70,13 @@ pnpm build
 #### Local Docker
 
 If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
-To build the correct docker image:
+To build the correct Docker image:
 
 ```
 docker build -f .devcontainer/Dockerfile -t renovatebot_local .
 ```
 
-Starting from Docker Engine 23.0 and Docker Desktop 4.19, Docker uses Buildx by default.
+Starting from Docker Engine `23.0` and Docker Desktop `4.19`, Docker uses Buildx by default.
 So you must run the following command to get the image loaded to the Docker image store:
 
 ```
@@ -116,14 +117,14 @@ It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 ### Register new account (optional)
 
-If you're going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
+If you're going to be doing a lot of Renovate development then we recommend that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
 ### Generate platform token
 
 Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
-Select **repo** scope when generating the token.
+Select the **repo** scope when generating the token.
 
 ### Export platform token
 
@@ -132,8 +133,8 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 
 ### Run against a real repo
 
-To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
-Now, add a file called `.nvmrc` with the content `8.13.0`.
+To make sure everything is working, create a test repository in your account, e.g. like `https://github.com/r4harry/testrepo1`.
+Now, add a file called `.nvmrc` with the content `20.0.0`.
 Now run against the test repo you created, e.g. `pnpm start r4harry/testrepo1`.
 If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
@@ -143,21 +144,21 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
-### Jest
+### Vitest
 
-Run the Jest unit tests with the `pnpm jest` command.
-You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
+Run the Vitest unit tests with the `pnpm vitest` command.
+You can also run a subset of the Vitest tests using file matching, e.g. `pnpm vitest composer` or `pnpm vitest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
+e.g. `pnpm vitest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `/* v8 ignore ... */` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -173,6 +174,17 @@ You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+## Documentation
+
+We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
+To install the required dependency, use `pdm install`.
+You can run `pnpm build:docs` to generate the docs.
+Then use `pnpm mkdocs serve` to preview the documentation locally.
+The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
+
+Also, make sure to set the `GITHUB_TOKEN` in your environment as we use [gh cli](https://cli.github.com/manual/gh_issue_list) to fetch the issues.
+If you wish to skip fetching the issues, then set `SKIP_GITHUB_ISSUES` to `true` before building the docs.
+
 ## Keeping your Renovate fork up to date
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
@@ -180,15 +192,14 @@ First of all, never commit to the `main` branch of your fork - always use a "fea
 Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
-[Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
-
-[Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
+- [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
+- [Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
 
 ### Log files
 
-Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
+Usually the `debug` log level is good enough to troubleshoot most problems or verify functionality.
 
 It's usually easier to have the logs in a file that you can open with a text editor.
 You can use a command like this to put the log messages in a file:
@@ -197,7 +208,8 @@ You can use a command like this to put the log messages in a file:
 LOG_LEVEL=debug pnpm start myaccount/therepo > debug.log
 ```
 
-The example command will redirect/save Renovate's output to the `debug.log` file (and overwrite `debug.log` if it already exists).
+The example command will redirect and save Renovate's output to the `debug.log` file.
+Warning: the command will overwrite a existing `debug.log`!
 
 ### Adding configuration options
 

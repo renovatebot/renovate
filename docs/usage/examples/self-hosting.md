@@ -24,9 +24,9 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:35
-docker run --rm renovate/renovate:35.14
-docker run --rm renovate/renovate:35.14.4
+docker run --rm renovate/renovate:39
+docker run --rm renovate/renovate:39.177
+docker run --rm renovate/renovate:39.178.1
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:39.178.1
               args:
                 - user/repo
               # Environment Variables
@@ -84,7 +84,7 @@ metadata:
   name: renovate-env
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
@@ -105,7 +105,7 @@ data:
   config.json: |-
     {
       "repositories": ["orgname/repo","username/repo"],
-      "dryRun" : "true"
+      "dryRun" : "full"
     }
 
 ---
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:35.14.4
+            - image: renovate/renovate:39.178.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -162,7 +162,7 @@ If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](ht
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
-Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `RENOVATE_GITHUB_COM_TOKEN`).
 
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
@@ -248,7 +248,7 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate.
+Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
 If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
@@ -263,7 +263,7 @@ Most people use `cron` to schedule when Renovate runs, usually on an hourly sche
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
 export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps
-export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
+export RENOVATE_GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 
 # Renovate
 renovate
@@ -331,7 +331,7 @@ metadata:
   namespace: <namespace>
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
   RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
@@ -367,7 +367,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:35.14.4
+              image: renovate/renovate:39.178.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -384,7 +384,7 @@ spec:
 ## Logging
 
 If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
-Debug logging is usually needed for any debugging, while JSON format will mean that the output is parseable.
+Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
 
@@ -416,7 +416,10 @@ This means Renovate can safely connect to systems using that certificate or cert
 
 Helper programs like Git and npm use the system trust store.
 For those programs to trust a self-signed certificate you must add it to the systems trust store.
-On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+On Ubuntu/Debian and many Linux-based systems, this can be done by:
+
+1. copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/`
+1. and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/noble/man8/update-ca-certificates.8.html) to update the system trust store afterwards
 
 ### Renovate Docker image
 
@@ -433,16 +436,8 @@ COPY self-signed-certificate.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # Change back to the Ubuntu user
-USER 1000
+USER 12021
 
-# Some tools come with their own certificate authority stores and thus need to trust the self-signed certificate or the entire OS store explicitly.
-# This list is _not_ comprehensive and other tools may require further configuration.
-#
-# Node
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
-# Python
-RUN pip config set global.cert /etc/ssl/certs/ca-certificates.crt
-ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 # OpenSSL
 ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ```

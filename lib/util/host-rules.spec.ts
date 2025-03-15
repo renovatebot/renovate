@@ -56,6 +56,27 @@ describe('util/host-rules', () => {
         username: 'user1',
       });
     });
+
+    it('massages host url', () => {
+      add({
+        matchHost: 'some.domain.com:8080',
+        username: 'user1',
+        password: 'pass1',
+      });
+      add({
+        matchHost: 'domain.com/',
+        username: 'user2',
+        password: 'pass2',
+      });
+      expect(find({ url: 'https://some.domain.com:8080' })).toEqual({
+        password: 'pass1',
+        username: 'user1',
+      });
+      expect(find({ url: 'https://domain.com/' })).toEqual({
+        password: 'pass2',
+        username: 'user2',
+      });
+    });
   });
 
   describe('find()', () => {
@@ -125,7 +146,7 @@ describe('util/host-rules', () => {
     });
 
     it('matches on specific path', () => {
-      // Initialized platform holst rule
+      // Initialized platform host rule
       add({
         hostType: 'github',
         matchHost: 'https://api.github.com',
@@ -244,16 +265,6 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
-    it('host with port is interpreted as empty', () => {
-      add({
-        matchHost: 'domain.com:9118',
-        token: 'def',
-      });
-      expect(find({ url: 'https://domain.com:9118' }).token).toBe('def');
-      expect(find({ url: 'https://domain.com' }).token).toBe('def');
-      expect(find({ url: 'httpsdomain.com' }).token).toBe('def');
-    });
-
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
@@ -294,6 +305,25 @@ describe('util/host-rules', () => {
           url: 'https://nuget.local/api/sub-resource',
         }),
       ).toEqual({ token: 'longest' });
+    });
+
+    it('matches readOnly requests', () => {
+      add({
+        matchHost: 'https://api.github.com/repos/',
+        token: 'aaa',
+        hostType: 'github',
+      });
+      add({
+        matchHost: 'https://api.github.com',
+        token: 'bbb',
+        readOnly: true,
+      });
+      expect(
+        find({
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'bbb' });
     });
   });
 

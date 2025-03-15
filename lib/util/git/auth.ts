@@ -1,10 +1,10 @@
-import type { PlatformId } from '../../constants/platforms';
+import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
 import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
-import { createURLFromHostOrURL, validateUrl } from '../url';
+import { createURLFromHostOrURL, isHttpUrl } from '../url';
 import type { AuthenticationRule } from './types';
 import { parseGitUrl } from './url';
 
@@ -14,16 +14,6 @@ const githubApiUrls = new Set([
   'https://api.github.com',
   'https://api.github.com/',
 ]);
-
-const standardGitAllowedHostTypes = [
-  // All known git platforms
-  'azure',
-  'bitbucket',
-  'bitbucket-server',
-  'gitea',
-  'github',
-  'gitlab',
-] satisfies PlatformId[];
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -36,8 +26,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token && !(username && password)) {
     logger.warn(
-      // TODO: types (#22198)
-      `Could not create environment variable for ${matchHost!} as neither token or username and password was set`,
+      { host: matchHost },
+      `Could not create environment variable for host as neither token or username and password was set`,
     );
     return { ...environmentVariables };
   }
@@ -51,9 +41,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${String(
-          process.env.GIT_CONFIG_COUNT,
-        )}. Ignoring it.`,
+        {
+          GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
+        },
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
       gitConfigCount = 0;
     }
@@ -71,6 +62,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 
     authenticationRules = getAuthenticationRules(
       originalGitUrl,
+      hostType,
       `${encodedUsername}:${encodedPassword}`,
     );
   }
@@ -88,7 +80,7 @@ export function getGitAuthenticatedEnvironmentVariables(
       rule.insteadOf;
     gitConfigCount++;
   }
-  newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
+  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
 }
@@ -106,20 +98,38 @@ function getAuthenticationRulesWithToken(
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
-  return getAuthenticationRules(url, token);
+  return getAuthenticationRules(url, type, token);
 }
 
 /**
  * Generates the authentication rules for later git usage for the given host
  * @link https://coolaj86.com/articles/vanilla-devops-git-credentials-cheatsheet/
+ * @param gitUrl Git repository URL
+ * @param hostType Git host type
+ * @param token Authentication token or `username:password` string
  */
 export function getAuthenticationRules(
   gitUrl: string,
+  hostType: string | undefined | null,
   token: string,
 ): AuthenticationRule[] {
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
   const insteadUrl = parseGitUrl(gitUrl);
+  let sshPort = insteadUrl.port;
+
+  if (hostType === 'bitbucket-server') {
+    // For Bitbucket Server/Data Center, `source` must be `bitbucket-server`
+    // to generate HTTP(s) URLs correctly.
+    // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
+    insteadUrl.source = 'bitbucket-server';
+
+    if (!sshPort) {
+      // By default, bitbucket-server SSH port is 7999.
+      // For non-default port, the generated auth config will likely be incorrect.
+      sshPort = 7999;
+    }
+  }
 
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
@@ -133,7 +143,7 @@ export function getAuthenticationRules(
     // only edge case, need to stringify ourself because the exact syntax is not supported by the library
     // https://github.com/IonicaBizau/git-url-parse/blob/246c9119fb42c2ea1c280028fe77c53eb34c190c/lib/index.js#L246
     insteadOf: `ssh://git@${insteadUrl.resource}${
-      insteadUrl.port ? `:${insteadUrl.port}` : ''
+      sshPort ? `:${sshPort}` : ''
     }/${insteadUrl.full_name}${insteadUrl.git_suffix ? '.git' : ''}`,
   });
 
@@ -141,7 +151,7 @@ export function getAuthenticationRules(
   url.token = hasUser ? token : `git:${token}`;
   authenticationRules.push({
     url: url.toString(protocol),
-    insteadOf: insteadUrl.toString('ssh'),
+    insteadOf: { ...insteadUrl, port: sshPort }.toString('ssh'),
   });
 
   // https protocol with no user as default fallback
@@ -175,7 +185,7 @@ export function getGitEnvironmentVariables(
   // construct the Set of allowed hostTypes consisting of the standard Git provides
   // plus additionalHostTypes, which are provided as parameter
   const gitAllowedHostTypes = new Set<string>([
-    ...standardGitAllowedHostTypes,
+    ...PLATFORM_HOST_TYPES,
     ...additionalHostTypes,
   ]);
 
@@ -203,7 +213,7 @@ function addAuthFromHostRule(
 ): NodeJS.ProcessEnv {
   let environmentVariables = env;
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
-  if (validateUrl(httpUrl)) {
+  if (isHttpUrl(httpUrl)) {
     logger.trace(`Adding Git authentication for ${httpUrl} using token auth.`);
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       httpUrl!,

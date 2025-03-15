@@ -4,7 +4,7 @@ import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFileContent } from '../modules/manager/types';
-import type { HostRuleSearchResult } from '../types';
+import type { CombinedHostRule } from '../types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
@@ -73,7 +73,7 @@ export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
 }
 
 export function findGithubToken(
-  searchResult: HostRuleSearchResult,
+  searchResult: CombinedHostRule,
 ): string | undefined {
   return searchResult?.token?.replace('x-access-token:', '');
 }

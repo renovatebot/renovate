@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import {
+  findLocalSiblingOrParent,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { NpmDatasource } from '../../../datasource/npm';
 
@@ -13,11 +17,12 @@ import type {
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getExtractedConstraints } from './common/dependency';
 import { extractPackageJson } from './common/package-file';
+import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
 import { isZeroInstall } from './yarn';
+import type { YarnConfig } from './yarnrc';
 import {
-  YarnConfig,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
@@ -37,7 +42,7 @@ export async function extractPackageFile(
   let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
@@ -122,17 +127,29 @@ export async function extractPackageFile(
     npmrc = config.npmrc;
   }
 
-  const yarnrcYmlFileName = getSiblingFileName(packageFile, '.yarnrc.yml');
-  const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+  const yarnrcYmlFileName = await findLocalSiblingOrParent(
+    packageFile,
+    '.yarnrc.yml',
+  );
+  const yarnZeroInstall = yarnrcYmlFileName
+    ? await isZeroInstall(yarnrcYmlFileName)
+    : false;
 
   let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  const repoYarnrcYml = yarnrcYmlFileName
+    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
+    : null;
   if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
-  const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
-  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  const legacyYarnrcFileName = await findLocalSiblingOrParent(
+    packageFile,
+    '.yarnrc',
+  );
+  const repoLegacyYarnrc = legacyYarnrcFileName
+    ? await readLocalFile(legacyYarnrcFileName, 'utf8')
+    : null;
   if (is.string(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
@@ -177,7 +194,7 @@ export async function extractPackageFile(
     for (const dep of res.deps) {
       if (dep.depName) {
         const registryUrlFromYarnConfig = resolveRegistryUrl(
-          dep.depName,
+          dep.packageName ?? dep.depName,
           yarnConfig,
         );
         if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {
@@ -213,12 +230,33 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const deps = await extractPackageFile(content, packageFile, config);
-      if (deps) {
-        npmFiles.push({
-          ...deps,
+      // pnpm workspace files are their own package file, defined via fileMatch.
+      // We duck-type the content here, to allow users to rename the file itself.
+      const parsedPnpmWorkspaceYaml = tryParsePnpmWorkspaceYaml(content);
+      if (parsedPnpmWorkspaceYaml.success) {
+        logger.trace(
+          { packageFile },
+          `Extracting file as a pnpm workspace YAML file`,
+        );
+        const deps = await extractPnpmWorkspaceFile(
+          parsedPnpmWorkspaceYaml.data,
           packageFile,
-        });
+        );
+        if (deps) {
+          npmFiles.push({
+            ...deps,
+            packageFile,
+          });
+        }
+      } else {
+        logger.trace({ packageFile }, `Extracting as a package.json file`);
+        const deps = await extractPackageFile(content, packageFile, config);
+        if (deps) {
+          npmFiles.push({
+            ...deps,
+            packageFile,
+          });
+        }
       }
     } else {
       logger.debug({ packageFile }, `No content found`);

@@ -31,15 +31,22 @@ If you use Gitea packages, add the `read:packages` scope.
 ## Unsupported platform features/concepts
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.17.0 do not have the required API.
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 and Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
 - **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation
 
 - none
 
-## Repo autodiscover sorting
+## Repo autodiscover
+
+Renovate can discover repositories on Gitea using the `autodiscover` feature.
+Repositories are ignored when one of the following conditions is met:
+
+- The repository is a `mirror`
+- We do not have push or pull permissions to that repository
+- Pull requests are disabled for that repository
 
 You can change the default server-side sort method and order for autodiscover API.
-Set those via [`RENOVATE_X_AUTODISCOVER_REPO_SORT`](../../../self-hosted-experimental.md#renovate_x_autodiscover_repo_sort) and [`RENOVATE_X_AUTODISCOVER_REPO_ORDER`](../../../self-hosted-experimental.md#renovate_x_autodiscover_repo_order).
+Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.

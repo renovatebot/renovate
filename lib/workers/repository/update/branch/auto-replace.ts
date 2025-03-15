@@ -91,6 +91,7 @@ export async function confirmIfDepUpdated(
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
     logger.debug(
       {
+        depName: upgrade.depName,
         manager,
         packageFile,
         expectedValue: upgrade.newValue,
@@ -108,6 +109,7 @@ export async function confirmIfDepUpdated(
   ) {
     logger.debug(
       {
+        depName: upgrade.depName,
         manager,
         packageFile,
         expectedValue: upgrade.newDigest,
@@ -146,7 +148,7 @@ export async function checkBranchDepsMatchBaseDeps(
     )!;
     const branchDeps = res!.deps;
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
       'Failed to parse branchContent - rebasing',
@@ -188,8 +190,10 @@ export async function doAutoReplace(
   const {
     packageFile,
     depName,
+    depNameTemplate,
     newName,
     currentValue,
+    currentValueTemplate,
     newValue,
     currentDigest,
     currentDigestShort,
@@ -235,24 +239,52 @@ export async function doAutoReplace(
       newString = replaceString!;
 
       const autoReplaceRegExpFlag = autoReplaceGlobalMatch ? 'g' : '';
-      if (currentValue && newValue) {
+      if (currentValue && newValue && currentValue !== newValue) {
+        if (!newString.includes(currentValue)) {
+          logger.debug(
+            { stringToReplace: newString, currentValue, currentValueTemplate },
+            'currentValue not found in string to replace',
+          );
+        }
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
           newValue,
         );
       }
-      if (depName && newName) {
+      if (depName && newName && depName !== newName) {
+        if (!newString.includes(depName)) {
+          logger.debug(
+            { stringToReplace: newString, depName, depNameTemplate },
+            'depName not found in string to replace',
+          );
+        }
         newString = newString.replace(
           regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
           newName,
         );
       }
-      if (currentDigest && newDigest) {
+      if (currentDigest && newDigest && currentDigest !== newDigest) {
+        if (!newString.includes(currentDigest)) {
+          logger.debug(
+            { stringToReplace: newString, currentDigest },
+            'currentDigest not found in string to replace',
+          );
+        }
         newString = newString.replace(
           regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
           newDigest,
         );
-      } else if (currentDigestShort && newDigest) {
+      } else if (
+        currentDigestShort &&
+        newDigest &&
+        currentDigestShort !== newDigest
+      ) {
+        if (!newString.includes(currentDigestShort)) {
+          logger.debug(
+            { stringToReplace: newString, currentDigestShort },
+            'currentDigestShort not found in string to replace',
+          );
+        }
         newString = newString.replace(
           regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
           newDigest,

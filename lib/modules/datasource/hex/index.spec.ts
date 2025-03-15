@@ -1,15 +1,15 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { hostRules } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HexDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { hostRules } from '~test/util';
 
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;
@@ -168,7 +168,8 @@ describe('modules/datasource/hex/index', () => {
 
       expect(result).toEqual({
         homepage: 'https://hex.pm/packages/renovate_test/private_package',
-        registryUrl: 'https://hex.pm/',
+        sourceUrl: 'https://github.com/renovate_test/private_package',
+        registryUrl: 'https://hex.pm',
         releases: [
           { releaseTimestamp: '2021-08-04T15:26:26.500Z', version: '0.1.0' },
           { releaseTimestamp: '2021-08-04T17:46:00.274Z', version: '0.1.1' },

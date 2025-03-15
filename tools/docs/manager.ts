@@ -7,7 +7,8 @@ import {
   isCustomManager,
 } from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,
@@ -41,11 +42,13 @@ export const CategoryNames: Record<Category, string> = {
   c: 'C and C++',
   cd: 'Continuous Delivery',
   ci: 'Continuous Integration',
+  custom: 'Custom Managers',
   dart: 'Dart',
   docker: 'Docker',
   dotnet: '.NET',
   elixir: 'Elixir',
   golang: 'Go',
+  haskell: 'Haskell',
   helm: 'Helm',
   iac: 'Infrastructure as Code',
   java: 'Java',
@@ -140,11 +143,7 @@ export async function generateManagers(
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
-
-      if (urls?.length) {
-        md += '## References';
-        md += formatUrls(urls).replace('**References**:', '');
-      }
+      md += formatUrls(urls);
       md += '## Default config\n\n';
       md += '```json\n';
       md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';

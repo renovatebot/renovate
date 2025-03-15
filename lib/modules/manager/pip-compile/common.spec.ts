@@ -1,14 +1,16 @@
-import { mockDeep } from 'jest-mock-extended';
-import { hostRules } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { logger } from '../../../logger';
 import {
-  allowedPipOptions,
+  allowedOptions,
   extractHeaderCommand,
-  getRegistryCredVarsFromPackageFile,
+  extractPythonVersion,
+  getRegistryCredVarsFromPackageFiles,
+  matchManager,
 } from './common';
 import { inferCommandExecDir } from './utils';
+import { hostRules } from '~test/util';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#
@@ -135,11 +137,23 @@ describe('modules/manager/pip-compile/common', () => {
       ).toEqual(exampleSourceFiles);
     });
 
-    it.each(allowedPipOptions)(
-      'returned sourceFiles must not contain options',
+    it.each(allowedOptions['pip-compile'])(
+      'returned sourceFiles must not contain options (pip-compile)',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
           getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
+          'reqs.txt',
+        ).sourceFiles;
+        expect(sourceFiles).not.toContainEqual(argument);
+        expect(sourceFiles).toEqual(['reqs.in']);
+      },
+    );
+
+    it.each(allowedOptions.uv)(
+      'returned sourceFiles must not contain options (uv)',
+      (argument: string) => {
+        const sourceFiles = extractHeaderCommand(
+          getCommandInHeader(`uv pip compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
@@ -153,7 +167,7 @@ describe('modules/manager/pip-compile/common', () => {
           getCommandInHeader(`./pip-compile-wrapper reqs.in`),
           'reqs.txt',
         ),
-      ).toHaveProperty('isCustomCommand', true);
+      ).toHaveProperty('commandType', 'custom');
     });
 
     it.each([
@@ -170,7 +184,22 @@ describe('modules/manager/pip-compile/common', () => {
     );
   });
 
-  describe('getCredentialVarsFromPackageFile()', () => {
+  describe('extractPythonVersion()', () => {
+    it('extracts Python version from valid header', () => {
+      expect(
+        extractPythonVersion(
+          getCommandInHeader('pip-compile reqs.in'),
+          'reqs.txt',
+        ),
+      ).toBe('3.11');
+    });
+
+    it('returns undefined if version cannot be extracted', () => {
+      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
+    });
+  });
+
+  describe('getRegistryCredVarsFromPackageFiles()', () => {
     it('handles both registryUrls and additionalRegistryUrls', () => {
       hostRules.find.mockReturnValueOnce({
         username: 'user1',
@@ -181,11 +210,13 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password2',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
-          deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
-          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
-        }),
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            registryUrls: ['https://example.com/pypi/simple'],
+            additionalRegistryUrls: ['https://example2.com/pypi/simple'],
+          },
+        ]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
@@ -206,13 +237,15 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password2',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: [
-            'https://example.com/pypi/simple',
-            'https://example2.com/pypi/simple',
-          ],
-        }),
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: [
+              'https://example.com/pypi/simple',
+              'https://example2.com/pypi/simple',
+            ],
+          },
+        ]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
@@ -228,10 +261,12 @@ describe('modules/manager/pip-compile/common', () => {
         username: 'user',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: ['https://example.com/pypi/simple'],
-        }),
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user',
@@ -244,10 +279,12 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: ['https://example.com/pypi/simple'],
-        }),
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: '',
@@ -260,11 +297,67 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: ['invalid-url'],
-        }),
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            additionalRegistryUrls: ['invalid-url'],
+          },
+        ]),
       ).toEqual({});
+    });
+  });
+
+  it('handles multiple package files', () => {
+    hostRules.find.mockReturnValueOnce({
+      username: 'user1',
+      password: 'password1',
+    });
+    hostRules.find.mockReturnValueOnce({
+      username: 'user2',
+      password: 'password2',
+    });
+    expect(
+      getRegistryCredVarsFromPackageFiles([
+        {
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+        },
+        {
+          deps: [],
+          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
+        },
+      ]),
+    ).toEqual({
+      KEYRING_SERVICE_NAME_0: 'example.com',
+      KEYRING_SERVICE_USERNAME_0: 'user1',
+      KEYRING_SERVICE_PASSWORD_0: 'password1',
+      KEYRING_SERVICE_NAME_1: 'example2.com',
+      KEYRING_SERVICE_USERNAME_1: 'user2',
+      KEYRING_SERVICE_PASSWORD_1: 'password2',
+    });
+  });
+
+  describe('matchManager()', () => {
+    it('matches pip_setup setup.py', () => {
+      expect(matchManager('setup.py')).toBe('pip_setup');
+    });
+
+    it('matches setup-cfg setup.cfg', () => {
+      expect(matchManager('setup.cfg')).toBe('setup-cfg');
+    });
+
+    it('matches pep621 pyproject.toml', () => {
+      expect(matchManager('pyproject.toml')).toBe('pep621');
+    });
+
+    it('matches pip_requirements any .in file', () => {
+      expect(matchManager('file.in')).toBe('pip_requirements');
+      expect(matchManager('another_file.in')).toBe('pip_requirements');
+    });
+
+    it('matches pip_requirements any .txt file', () => {
+      expect(matchManager('file.txt')).toBe('pip_requirements');
+      expect(matchManager('another_file.txt')).toBe('pip_requirements');
     });
   });
 });

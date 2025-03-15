@@ -7,4 +7,4 @@ if [[ "${CODESPACES}" == true ]]; then
   sudo chmod 1777 /tmp
 fi
 
-pnpm install
+pnpm install --reporter append-only --aggregate-output

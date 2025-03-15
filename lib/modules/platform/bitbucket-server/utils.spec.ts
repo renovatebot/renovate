@@ -1,5 +1,4 @@
 import type { Response } from 'got';
-import { partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type {
   BbsRestRepo,
@@ -8,9 +7,13 @@ import type {
 } from './types';
 import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
+  getExtraCloneOpts,
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils';
+import { partial } from '~test/util';
+
+vi.unmock('../../../util/git');
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -61,6 +64,7 @@ function infoMock(
     }
     return {
       id: 123,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
@@ -70,6 +74,7 @@ function infoMock(
     // if ssh and https are both turned off
     return {
       id: 1,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },
@@ -116,6 +121,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
 
   describe('getRepoGitUrl', () => {
     Object.entries(scenarios).forEach(([scenarioName, url]) => {
+      // eslint-disable-next-line vitest/valid-title
       describe(scenarioName, () => {
         const username = 'abc';
         const password = '123';
@@ -268,6 +274,32 @@ describe('modules/platform/bitbucket-server/utils', () => {
             ),
           );
         });
+
+        it('works gitUrl:endpoint no basic auth', () => {
+          expect(
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'endpoint',
+              infoMock(url, 'SOME', 'repo'),
+              {},
+            ),
+          ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
+        });
+      });
+    });
+  });
+
+  describe('getExtraCloneOpts', () => {
+    it('should not configure bearer token', () => {
+      const res = getExtraCloneOpts({});
+      expect(res).toEqual({});
+    });
+
+    it('should configure bearer token', () => {
+      const res = getExtraCloneOpts({ token: 'abc' });
+      expect(res).toEqual({
+        '-c': 'http.extraheader=Authorization: Bearer abc',
       });
     });
   });

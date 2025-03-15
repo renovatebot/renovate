@@ -1,7 +1,7 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import * as lockedVersion from './locked-version';
 import { updateLockedDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const lockFileContent = Fixtures.get('lockfile-parsing/Cargo.v1.lock');
 
@@ -53,7 +53,7 @@ describe('modules/manager/cargo/update-locked', () => {
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
 
-  it('returns update-failed incase of errors', () => {
+  it('returns update-failed in case of errors', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'Cargo.toml',
       lockFile: 'Cargo.lock',
@@ -62,9 +62,10 @@ describe('modules/manager/cargo/update-locked', () => {
       newVersion: '1.0.3',
       currentVersion: '1.0.0',
     };
-    jest
-      .spyOn(lockedVersion, 'extractLockFileContentVersions')
-      .mockReturnValueOnce(new Error() as never);
+    vi.spyOn(
+      lockedVersion,
+      'extractLockFileContentVersions',
+    ).mockReturnValueOnce(new Error() as never);
     expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });

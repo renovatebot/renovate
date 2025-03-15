@@ -2,7 +2,8 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { noLeadingAtSymbol } from '../../../../util/common';
 import { sampleSize } from '../../../../util/sample';
 import { codeOwnersForPr } from './code-owners';
@@ -73,17 +74,26 @@ export async function addParticipants(
   let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(config, reviewers, pr);
+    logger.debug(
+      `Reviewers from code owners: ${reviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
+    );
   }
   if (
     is.array(config.additionalReviewers) &&
     config.additionalReviewers.length > 0
   ) {
+    logger.debug(
+      `Additional reviewers: ${config.additionalReviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
+    );
     reviewers = reviewers.concat(config.additionalReviewers);
   }
   if (reviewers.length > 0) {
     try {
       reviewers = await prepareParticipants(config, reviewers);
       if (is.number(config.reviewersSampleSize)) {
+        logger.debug(
+          `Sampling reviewersSampleSize=${config.reviewersSampleSize} reviewers`,
+        );
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
       if (reviewers.length > 0) {

@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { joinUrlParts } from '../../../util/url';
 import * as hexVersioning from '../../versioning/hex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -12,11 +13,16 @@ export class HexDatasource extends Datasource {
     super(HexDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://hex.pm/'];
-
-  override readonly customRegistrySupport = false;
+  override readonly defaultRegistryUrls = ['https://hex.pm'];
 
   override readonly defaultVersioning = hexVersioning.id;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined the `inserted_at` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `Github` field in the results.';
 
   @cache({
     namespace: `datasource-${HexDatasource.id}`,
@@ -26,7 +32,7 @@ export class HexDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -40,12 +46,19 @@ export class HexDatasource extends Datasource {
     const organizationUrlPrefix = organizationName
       ? `repos/${organizationName}/`
       : '';
-    const hexUrl = `${registryUrl}api/${organizationUrlPrefix}packages/${hexPackageName}`;
+
+    const hexUrl = joinUrlParts(
+      registryUrl,
+      `/api/${organizationUrlPrefix}packages/${hexPackageName}`,
+    );
 
     const { val: result, err } = await this.http
       .getJsonSafe(hexUrl, HexRelease)
       .onError((err) => {
-        logger.warn({ datasource: 'hex', packageName, err }, `Error fetching ${hexUrl}`); // prettier-ignore
+        logger.warn(
+          { url: hexUrl, datasource: 'hex', packageName, err },
+          'Error fetching from url',
+        );
       })
       .unwrap();
 

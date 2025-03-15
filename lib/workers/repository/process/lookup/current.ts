@@ -6,7 +6,7 @@ import { regEx } from '../../../../util/regex';
 export function getCurrentVersion(
   currentValue: string,
   lockedVersion: string,
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
   allVersions: string[],
@@ -20,28 +20,28 @@ export function getCurrentVersion(
     return currentValue;
   }
   let useVersions = allVersions.filter((v) =>
-    versioning.matches(v, currentValue),
+    versioningApi.matches(v, currentValue),
   );
   if (useVersions.length === 1) {
     return useVersions[0];
   }
-  if (latestVersion && versioning.matches(latestVersion, currentValue)) {
+  if (latestVersion && versioningApi.matches(latestVersion, currentValue)) {
     useVersions = useVersions.filter(
-      (v) => !versioning.isGreaterThan(v, latestVersion),
+      (v) => !versioningApi.isGreaterThan(v, latestVersion),
     );
   }
   if (rangeStrategy === 'pin') {
     return (
       lockedVersion ||
-      versioning.getSatisfyingVersion(useVersions, currentValue)
+      versioningApi.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
     // Use the lowest version in the current range
-    return versioning.minSatisfyingVersion(useVersions, currentValue);
+    return versioningApi.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  const satisfyingVersion = versioning.getSatisfyingVersion(
+  const satisfyingVersion = versioningApi.getSatisfyingVersion(
     useVersions,
     currentValue,
   );
@@ -49,10 +49,10 @@ export function getCurrentVersion(
     return satisfyingVersion;
   }
 
-  if (versioning.isVersion(currentValue)) {
+  if (versioningApi.isVersion(currentValue)) {
     return currentValue;
   }
-  if (versioning.isSingleVersion(currentValue)) {
+  if (versioningApi.isSingleVersion(currentValue)) {
     return currentValue.replace(regEx(/=/g), '').trim();
   }
 

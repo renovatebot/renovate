@@ -49,6 +49,23 @@ To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard
 
 This section explains some common use cases where having the Dependency Dashboard can help.
 
+### Warnings for deprecated dependencies
+
+If Renovate finds:
+
+- packages flagged as deprecated on their registry, or
+- packages that have a community-sourced replacement PR available
+
+Then Renovate adds a prominent warning about these packages near the top of the Dependency Dashboard.
+Here is an example of how this can look:
+
+> The following dependencies are deprecated:
+
+| Datasource | Name                | Replacement?                                                                      |
+| ---------- | ------------------- | --------------------------------------------------------------------------------- |
+| npm        | `airbnb-prop-types` | ![Available](https://img.shields.io/badge/available-green?style=flat-square)      |
+| npm        | `left-pad`          | ![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square) |
+
 ### Visibility into rejected/deferred updates
 
 Renovate's Dependency Dashboard shows an overview of all updates that are still "to do".
@@ -121,7 +138,7 @@ If you want to approve specific packages, set `dependencyDashboardApproval` to `
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@somescope"],
+      "matchPackageName": ["@somescope/**"],
       "dependencyDashboardApproval": true
     }
   ]

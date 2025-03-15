@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "all": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "extends": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ignoreDeps": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["description", "extends"]
+    }
+  },
+  "patternProperties": {
+    "^[a-zA-Z0-9-]+$": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "packageRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "matchCurrentVersion": { "type": "string" },
+              "matchDatasources": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "matchPackageNames": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "replacementName": { "type": "string" },
+              "replacementVersion": { "type": "string" },
+              "description": { "type": "string" },
+              "replacementNameTemplate": { "type": "string" }
+            },
+            "required": ["matchDatasources", "matchPackageNames"]
+          },
+          "contains": {
+            "type": "object",
+            "oneOf": [
+              { "required": ["replacementName"] },
+              { "required": ["replacementNameTemplate"] }
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["description", "packageRules"]
+    }
+  },
+  "additionalProperties": false
+}

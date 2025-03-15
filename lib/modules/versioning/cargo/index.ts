@@ -94,6 +94,10 @@ function getNewValue({
   if (!currentValue || currentValue === '*') {
     return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
+  // If the current value is a simple version, bump to fully specified newVersion
+  if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
+    return newVersion;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -101,6 +105,9 @@ function getNewValue({
     }
     res += newVersion;
     return res;
+  }
+  if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
+    return currentValue;
   }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
@@ -138,6 +145,7 @@ function getNewValue({
     const components = currentValue.split('.').length;
     newCargo = withoutCaret.split('.').slice(0, components).join('.');
   }
+
   return newCargo;
 }
 

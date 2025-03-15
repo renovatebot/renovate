@@ -1,8 +1,9 @@
-import {
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
+import type {
   GitCommit,
-  GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
@@ -86,15 +87,15 @@ export async function getFile(
       const result = WrappedExceptionSchema.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
-          logger.warn(`Unable to find file ${filePath}`);
+          logger.warn({ filePath }, 'Unable to find file');
           return null;
         }
         if (result.data.typeKey === 'GitUnresolvableToCommitException') {
-          logger.warn(`Unable to find branch ${branchName}`);
+          logger.warn({ branchName }, 'Unable to find branch');
           return null;
         }
       }
-    } catch (error) {
+    } catch {
       // it 's not a JSON, so I send the content directly with the line under
     }
 
@@ -122,11 +123,11 @@ export async function getMergeMethod(
   logger.debug(
     `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
   );
-  type Scope = {
+  interface Scope {
     repositoryId: string;
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
-  };
+  }
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&
@@ -174,7 +175,26 @@ export async function getMergeMethod(
           ] as never as GitPullRequestMergeStrategy,
       )
       .find((p) => p)!;
-  } catch (err) {
+  } catch {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
+}
+
+export async function getAllProjectTeams(
+  projectId: string,
+): Promise<WebApiTeam[]> {
+  const allTeams: WebApiTeam[] = [];
+  const azureApiCore = await azureApi.coreApi();
+  const top = 100;
+  let skip = 0;
+  let length = 0;
+
+  do {
+    const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    length = teams.length;
+    allTeams.push(...teams);
+    skip += top;
+  } while (top <= length);
+
+  return allTeams;
 }

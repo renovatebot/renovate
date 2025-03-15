@@ -27,3 +27,6 @@ test/datasource/nuget/_fixtures/obj
 
 # testing
 /docker-compose.yml
+
+# pdm
+/.pdm-python

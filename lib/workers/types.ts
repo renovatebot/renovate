@@ -10,6 +10,7 @@ import type {
 import type { Release } from '../modules/datasource/types';
 import type {
   ArtifactError,
+  ArtifactNotice,
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
@@ -18,6 +19,7 @@ import type {
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { Timestamp } from '../util/timestamp';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
@@ -30,6 +32,7 @@ export interface BranchUpgradeConfig
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
+  artifactNotices?: ArtifactNotice[];
   autoReplaceStringTemplate?: string;
   baseDeps?: PackageDependency[];
   branchName: string;
@@ -39,7 +42,10 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+
+  currentValueTemplate?: string;
   depIndex?: number;
+  depTypes?: string[];
 
   displayPending?: string;
   excludeCommitPaths?: string[];
@@ -62,7 +68,7 @@ export interface BranchUpgradeConfig
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
-  releaseTimestamp?: string;
+  releaseTimestamp?: Timestamp;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
@@ -119,7 +125,7 @@ export interface BranchConfig
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
-  releaseTimestamp?: string;
+  releaseTimestamp?: Timestamp;
   forceCommit?: boolean;
   rebaseRequested?: boolean;
   result?: BranchResult;

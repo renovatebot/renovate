@@ -8,11 +8,10 @@ export { extractPackageFile };
 
 export const displayName = 'CircleCI';
 export const url = 'https://circleci.com/docs/configuration-reference';
+export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.circleci/.+\\.ya?ml$'],
 };
-
-export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];

@@ -5,11 +5,12 @@ import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 
 export { extractPackageFile } from './extract';
 
+export const url = 'https://www.puppet.com/docs/index.html';
+export const categories: Category[] = ['iac', 'ruby'];
+
 export const defaultConfig = {
   fileMatch: ['(^|/)Puppetfile$'],
 };
-
-export const categories: Category[] = ['iac', 'ruby'];
 
 export const supportedDatasources = [
   PuppetForgeDatasource.id,

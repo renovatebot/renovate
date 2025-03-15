@@ -1,12 +1,13 @@
 import { getChangeLogJSON } from '..';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
 import { toBase64 } from '../../../../../../util/string';
+import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GiteaChangeLogSource } from '../gitea/source';
 import { getReleaseNotesMd } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -22,10 +23,13 @@ const upgrade = partial<BranchUpgradeConfig>({
     { version: '5.2.0' },
     {
       version: '5.4.0',
-      releaseTimestamp: '2018-08-24T14:23:00.000Z',
+      releaseTimestamp: '2018-08-24T14:23:00.000Z' as Timestamp,
     },
     { version: '5.5.0', gitRef: 'eba303e91c930292198b2fc57040145682162a1b' },
-    { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
+    {
+      version: '5.6.0',
+      releaseTimestamp: '2020-02-13T15:37:00.000Z' as Timestamp,
+    },
     { version: '5.6.1' },
   ],
 });
@@ -391,41 +395,6 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           { version: '5.4.0' },
         ],
       });
-
-      // TODO: find right mocks
-      httpMock.clear(false);
-    });
-
-    it('supports overwriting sourceUrl for self-hosted gitea changelog', async () => {
-      httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
-      const sourceUrl = 'https://git.test.com/meno/dropzone/';
-      const replacementSourceUrl =
-        'https://git.test.com/replacement/sourceurl/';
-      const config = {
-        ...upgrade,
-        platform: 'gitea',
-        endpoint: 'https://git.test.com/api/v1/',
-        sourceUrl,
-        customChangelogUrl: replacementSourceUrl,
-      };
-      hostRules.add({
-        hostType: 'gitea',
-        matchHost: 'https://git.test.com/',
-        token: 'abc',
-      });
-      expect(await getChangeLogJSON(config)).toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://git.test.com/api/v1/',
-          baseUrl: 'https://git.test.com/',
-          packageName: 'renovate',
-          repository: 'replacement/sourceurl',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://git.test.com/replacement/sourceurl/',
-          type: 'gitea',
-        },
-      });
-      expect(config.sourceUrl).toBe(sourceUrl); // ensure unmodified function argument
 
       // TODO: find right mocks
       httpMock.clear(false);

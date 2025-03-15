@@ -1,9 +1,9 @@
 import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
-import Sqlite from 'better-sqlite3';
 import type { Database, Statement } from 'better-sqlite3';
 import { exists } from 'fs-extra';
 import * as upath from 'upath';
+import { sqlite } from '../../../expose.cjs';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';
 import type { PackageCacheNamespace } from './types';
@@ -34,6 +34,8 @@ export class SqlitePackageCache {
   private readonly countStatement: Statement<unknown[]>;
 
   static async init(cacheDir: string): Promise<SqlitePackageCache> {
+    // simply let it throw if it fails, so no test coverage needed
+    const Sqlite = sqlite();
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');

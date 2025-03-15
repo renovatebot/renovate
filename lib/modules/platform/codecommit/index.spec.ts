@@ -2,10 +2,12 @@ import {
   CodeCommitClient,
   CreatePullRequestApprovalRuleCommand,
   CreatePullRequestCommand,
+  type CreatePullRequestOutput,
   DeleteCommentContentCommand,
   GetCommentsForPullRequestCommand,
   GetFileCommand,
   GetPullRequestCommand,
+  type GetPullRequestOutput,
   GetRepositoryCommand,
   ListPullRequestsCommand,
   ListRepositoriesCommand,
@@ -16,16 +18,16 @@ import {
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as aws4 from 'aws4';
-import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { getCodeCommitUrl } from './codecommit-client';
-import { CodeCommitPr, config } from './index';
+import type { CodeCommitPr } from './index';
+import { config } from './index';
+import { git, logger } from '~test/util';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -33,7 +35,7 @@ describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
 
   beforeAll(async () => {
-    codeCommit = await import('.');
+    codeCommit = await vi.importActual('.');
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
@@ -49,7 +51,7 @@ describe('modules/platform/codecommit/index', () => {
     codeCommitClient.reset();
     config.prList = undefined;
     config.repository = undefined;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('validates massageMarkdown functionality', () => {
@@ -59,6 +61,10 @@ describe('modules/platform/codecommit/index', () => {
     expect(newStr).toBe(
       '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)',
     );
+  });
+
+  it('maxBodyLength', () => {
+    expect(codeCommit.maxBodyLength()).toBe(Infinity);
   });
 
   describe('initPlatform()', () => {
@@ -103,7 +109,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('initRepos()', () => {
     it('fails to git.initRepo', async () => {
-      jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+      git.initRepo.mockImplementationOnce(() => {
         throw new Error('any error');
       });
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
@@ -119,7 +125,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('fails on getRepositoryInfo', async () => {
-      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient
         .on(GetRepositoryCommand)
         .rejectsOnce(new Error('Could not find repository'));
@@ -129,7 +134,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results', async () => {
-      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      git.initRepo.mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' }),
@@ -137,7 +142,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results 2', async () => {
-      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
         repositoryMetadata: {
           repositoryId: 'id',
@@ -149,7 +153,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('initiates repo successfully', async () => {
-      jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
         repositoryMetadata: {
           defaultBranch: 'main',
@@ -200,7 +203,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets url with username and token', () => {
-      jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+      vi.useFakeTimers().setSystemTime(new Date('2020-01-01'));
       process.env.AWS_ACCESS_KEY_ID = 'access-key-id';
       process.env.AWS_SECRET_ACCESS_KEY = 'secret-access-key';
       process.env.AWS_REGION = 'eu-central-1';
@@ -257,7 +260,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1', '2'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -321,7 +324,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -352,7 +355,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -383,10 +386,10 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: '!open',
+          pullRequestStatus: 'CLOSED',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -414,10 +417,10 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: 'closed',
+          pullRequestStatus: 'CLOSED',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -455,7 +458,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -482,7 +485,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -502,7 +505,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('getPr()', () => {
     it('gets pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           description: 'body',
@@ -529,7 +532,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets closed pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'CLOSED',
@@ -555,7 +558,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets merged pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -669,7 +672,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('createPr()', () => {
     it('posts PR', async () => {
-      const prRes = {
+      const prRes: CreatePullRequestOutput = {
         pullRequest: {
           pullRequestId: '1',
           pullRequestStatus: 'OPEN',
@@ -704,7 +707,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('doesnt return a title', async () => {
-      const prRes = {
+      const prRes: CreatePullRequestOutput = {
         pullRequest: {
           pullRequestId: '1',
           pullRequestStatus: 'OPEN',
@@ -823,9 +826,9 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   // describe('mergePr()', () => {
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('checks that rebase is not supported', async () => {
   //     expect(
   //       await codeCommit.mergePr({
@@ -836,7 +839,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeFalse();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with auto', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -870,7 +873,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeTrue();
   //   });
   //
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with squash', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -903,7 +906,7 @@ describe('modules/platform/codecommit/index', () => {
   //     ).toBeTrue();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('posts Merge with fast-forward', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -933,10 +936,10 @@ describe('modules/platform/codecommit/index', () => {
   //         id: 1,
   //         strategy: 'fast-forward',
   //       })
-  //     ).toBe(true);
+  //     ).toBeTrue();
   //   });
 
-  // eslint-disable-next-line jest/no-commented-out-tests
+  // eslint-disable-next-line vitest/no-commented-out-tests
   //   it('checks that merge-commit is not supported', async () => {
   //     const prRes = {
   //       pullRequest: {
@@ -985,9 +988,9 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['42'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
-          number: '42',
+          pullRequestId: '42',
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [
@@ -1111,7 +1114,7 @@ describe('modules/platform/codecommit/index', () => {
       );
     });
 
-    it('throws an exception in case of api failed connection ', async () => {
+    it('throws an exception in case of api failed connection', async () => {
       const err = new Error('some error');
       codeCommitClient.on(GetCommentsForPullRequestCommand).rejectsOnce(err);
       const res = await codeCommit.ensureComment({
@@ -1153,9 +1156,9 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['42'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
-          number: '42',
+          pullRequestId: '42',
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [

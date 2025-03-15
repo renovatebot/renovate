@@ -9,6 +9,18 @@ import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 import type { WorkerExtractConfig } from '../../types';
 
+function massageDepNames(packageFiles: PackageFile[] | null): void {
+  if (packageFiles) {
+    for (const packageFile of packageFiles) {
+      for (const dep of packageFile.deps) {
+        if (dep.packageName && !dep.depName) {
+          dep.depName = dep.packageName;
+        }
+      }
+    }
+  }
+}
+
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig,
 ): Promise<PackageFile[] | null> {
@@ -35,6 +47,7 @@ export async function getManagerPackageFiles(
       config,
       fileList,
     );
+    massageDepNames(allPackageFiles);
     return allPackageFiles;
   }
   const packageFiles: PackageFile[] = [];
@@ -58,5 +71,6 @@ export async function getManagerPackageFiles(
       logger.debug(`${packageFile} has no content`);
     }
   }
+  massageDepNames(packageFiles);
   return packageFiles;
 }

@@ -3,66 +3,34 @@ import slugify from 'slugify';
 import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
+import type { StageName } from '../../types/skip-reason';
+import { compile } from '../template';
 import matchers from './matchers';
-import { matcherOR } from './utils';
 
-function matchesRule(
+async function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule,
-): boolean {
-  let positiveMatch = true;
-  let matchApplied = false;
-  // matches
-  for (const groupMatchers of matchers) {
-    const isMatch = matcherOR(
-      'matches',
-      groupMatchers,
-      inputConfig,
-      packageRule,
-    );
+): Promise<boolean> {
+  for (const matcher of matchers) {
+    const isMatch = await matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
       continue;
     }
 
-    matchApplied = true;
-
     if (!is.truthy(isMatch)) {
       return false;
     }
   }
 
-  // not a single match rule is defined --> assume to match everything
-  if (!matchApplied) {
-    positiveMatch = true;
-  }
-
-  // excludes
-  for (const groupExcludes of matchers) {
-    const isExclude = matcherOR(
-      'excludes',
-      groupExcludes,
-      inputConfig,
-      packageRule,
-    );
-
-    // no rules are defined
-    if (is.nullOrUndefined(isExclude)) {
-      continue;
-    }
-
-    if (isExclude) {
-      return false;
-    }
-  }
-
-  return positiveMatch;
+  return true;
 }
 
-export function applyPackageRules<T extends PackageRuleInputConfig>(
+export async function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T,
-): T {
+  stageName?: StageName,
+): Promise<T> {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
   logger.trace(
@@ -71,7 +39,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
   );
   for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches
-    if (matchesRule(config, packageRule)) {
+    if (await matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
       const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
@@ -80,6 +48,46 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
           lower: true,
         });
       }
+      if (toApply.enabled === false && config.enabled !== false) {
+        config.skipReason = 'package-rules';
+        if (stageName) {
+          config.skipStage = stageName;
+        }
+      }
+      if (toApply.enabled === true && config.enabled === false) {
+        delete config.skipReason;
+        delete config.skipStage;
+      }
+      if (
+        is.string(toApply.overrideDatasource) &&
+        toApply.overrideDatasource !== config.datasource
+      ) {
+        logger.debug(
+          `Overriding datasource from ${config.datasource} to ${toApply.overrideDatasource} for ${config.depName}`,
+        );
+        config.datasource = toApply.overrideDatasource;
+      }
+      if (
+        is.string(toApply.overrideDepName) &&
+        toApply.overrideDepName !== config.depName
+      ) {
+        logger.debug(
+          `Overriding depName from ${config.depName} to ${toApply.overrideDepName}`,
+        );
+        config.depName = compile(toApply.overrideDepName, config);
+      }
+      if (
+        is.string(toApply.overridePackageName) &&
+        toApply.overridePackageName !== config.packageName
+      ) {
+        logger.debug(
+          `Overriding packageName from ${config.packageName} to ${toApply.overridePackageName} for ${config.depName}`,
+        );
+        config.packageName = compile(toApply.overridePackageName, config);
+      }
+      delete toApply.overrideDatasource;
+      delete toApply.overrideDepName;
+      delete toApply.overridePackageName;
       config = mergeChildConfig(config, toApply);
     }
   }

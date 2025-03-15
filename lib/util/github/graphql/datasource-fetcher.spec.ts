@@ -1,8 +1,8 @@
 import AggregateError from 'aggregate-error';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked, partial } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
-import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
+import type { Timestamp } from '../../../util/timestamp';
+import type { GithubGraphqlResponse } from '../../http/github';
+import { GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
   GithubGraphqlDatasourceFetcher as Datasource,
@@ -13,9 +13,11 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
-jest.mock('../../../util/cache/package');
-const packageCache = mocked(_packageCache);
+vi.mock('../../../util/cache/package');
+const packageCache = vi.mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;
@@ -53,7 +55,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
     version && releaseTimestamp && foo
       ? {
           version,
-          releaseTimestamp,
+          releaseTimestamp: releaseTimestamp as Timestamp,
           bar: foo,
         }
       : null,

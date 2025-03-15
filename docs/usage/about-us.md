@@ -42,13 +42,25 @@ Some features made a lot of people happy, and efficient!
 - [@cgrindel](https://github.com/cgrindel) created the `bazel-module` manager
 - [@RahulGautamSingh](https://github.com/RahulGautamSingh) refactored a lot of code and worked on performance improvements like reduced cloning during updates and onboarding
 - [@Gabriel-Ladzaretti](https://github.com/Gabriel-Ladzaretti) S3 repo cache, child process refactoring, others
+- [@not7cd](https://github.com/not7cd) improved the `pip-compile` manager
+- [@squidfunk](https://github.com/squidfunk) for creating and maintaining the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) framework, that we use to build our docs, and for helping us with problems with the framework, or our docs
+- [The MkDocs project](https://www.mkdocs.org/) for making the static site generator, that we use to build our docs
 
 ## Renovate development
 
 The source code for Renovate is available on [GitHub at `renovatebot/renovate`](https://github.com/renovatebot/renovate).
 This is where we do most of the development.
 
+### Getting more paid help
+
+If you need more assistance than what this project offers, you have two options:
+
+1. Become a Mend.io customer, such as by buying Renovate Enterprise, or
+1. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do _not_ offer this service, but one of our volunteer maintainers, [`@secustor`](https://github.com/secustor), does
+
 ## About these docs
 
 The Renovate docs are built from Markdown files in our [`renovatebot/renovate` repository](https://github.com/renovatebot/renovate).
 Most of the source files can be found in the [`docs/usage/` directory](https://github.com/renovatebot/renovate/tree/main/docs/usage).
+
+We use [MkDocs](https://www.mkdocs.org/) and [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) to build our docs.

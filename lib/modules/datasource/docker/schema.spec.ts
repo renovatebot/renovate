@@ -152,6 +152,60 @@ describe('modules/datasource/docker/schema', () => {
     });
   });
 
+  it('parses OCI flux artifact', () => {
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.cncf.flux.content.v1.tar+gzip',
+          digest:
+            'sha256:243a01363756cd6bc04243680d4c9aeac274523f298f9525823db9ae7e188a3c',
+          size: 1113,
+        },
+      ],
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    };
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    });
+
+    expect(Manifest.parse(manifest)).toMatchObject({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.cncf.flux.config.v1+json',
+        digest:
+          'sha256:7cd37ea18409c76d241ad0d4ed484e206275be3535782be144ae257d54dd8d50',
+        size: 233,
+      },
+      annotations: {
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+      },
+    });
+  });
+
   it('parses distribution manifest', () => {
     const manifest = {
       schemaVersion: 2,
@@ -279,6 +333,44 @@ describe('modules/datasource/docker/schema', () => {
 
     expect(OciHelmConfig.parse(manifest)).toMatchObject({
       sources: ['https://github.com/bitnami/charts/tree/main/bitnami/harbor'],
+    });
+  });
+
+  it('parses devcontainer manifest', () => {
+    const manifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.oci.image.manifest.v1+json',
+      config: {
+        mediaType: 'application/vnd.devcontainers',
+        digest:
+          'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        size: 0,
+      },
+      layers: [
+        {
+          mediaType: 'application/vnd.devcontainers.layer.v1+tar',
+          digest:
+            'sha256:d8b664ac545af10e7b241df64305d0ee7b544b826b7fe53bd7f35af114fdad97',
+          size: 22528,
+          annotations: {
+            'org.opencontainers.image.title': 'devcontainer-feature-ruby.tgz',
+          },
+        },
+      ],
+      annotations: {
+        'dev.containers.metadata':
+          '{"id":"ruby","version":"1.2.1","name":"Ruby (via rvm)","documentationURL":"https://github.com/devcontainers/features/tree/main/src/ruby","description":"Installs Ruby, rvm, rbenv, common Ruby utilities, and needed dependencies.","options":{"version":{"type":"string","proposals":["latest","none","3.1","3.0","2.7"],"default":"latest","description":"Select or enter a Ruby version to install"}},"customizations":{"vscode":{"extensions":["shopify.ruby-lsp"]}},"containerEnv":{"GEM_PATH":"/usr/local/rvm/gems/default:/usr/local/rvm/gems/default@global","GEM_HOME":"/usr/local/rvm/gems/default","MY_RUBY_HOME":"/usr/local/rvm/rubies/default","PATH":"/usr/local/rvm/gems/default/bin:/usr/local/rvm/gems/default@global/bin:/usr/local/rvm/rubies/default/bin:/usr/local/share/rbenv/bin:${PATH}"},"installsAfter":["ghcr.io/devcontainers/features/common-utils"]}',
+        'com.github.package.type': 'devcontainer_feature',
+      },
+    };
+
+    expect(OciImageManifest.parse(manifest)).toMatchObject({
+      config: {
+        mediaType: 'application/vnd.devcontainers',
+        digest:
+          'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        size: 0,
+      },
     });
   });
 

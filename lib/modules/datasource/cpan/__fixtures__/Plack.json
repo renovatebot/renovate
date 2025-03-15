@@ -24,6 +24,7 @@
                      "version" : "1.0048"
                   }
                ],
+               "status": "latest",
                "date" : "2020-11-30T00:21:36",
                "maturity" : "released",
                "distribution" : "Plack",
@@ -47,6 +48,7 @@
                      "name" : "Plack"
                   }
                ],
+               "status": "cpan",
                "date" : "2018-02-10T09:25:30",
                "maturity" : "released"
             },
@@ -63,6 +65,7 @@
                      "name" : "Plack"
                   }
                ],
+               "status": "cpan",
                "date" : "2018-02-10T07:52:31",
                "deprecated" : false
             },
@@ -84,6 +87,7 @@
                      "name" : "Plack"
                   }
                ],
+               "status": "cpan",
                "date" : "2017-12-31T20:42:50",
                "distribution" : "Plack",
                "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0045.tar.gz"
@@ -107,6 +111,7 @@
                      "version" : "1.0044"
                   }
                ],
+               "status": "cpan",
                "date" : "2017-04-27T17:48:20",
                "maturity" : "released",
                "deprecated" : false
@@ -134,6 +139,7 @@
                      "version" : "1.0043"
                   }
                ],
+               "status": "cpan",
                "date" : "2017-02-22T03:02:05",
                "maturity" : "released",
                "distribution" : "Plack",
@@ -158,6 +164,7 @@
                      "version" : "1.0042"
                   }
                ],
+               "status": "cpan",
                "date" : "2016-09-29T05:38:42",
                "deprecated" : false
             }
@@ -172,6 +179,7 @@
                      "version" : "1.0041"
                   }
                ],
+               "status": "cpan",
                "date" : "2016-09-25T21:25:47",
                "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0041.tar.gz",
                "distribution" : "Plack"
@@ -195,6 +203,7 @@
                      "name" : "Plack"
                   }
                ],
+               "status": "cpan",
                "date" : "2016-04-01T16:58:21",
                "maturity" : "developer"
             },
@@ -217,10 +226,34 @@
                      "name" : "Plack"
                   }
                ],
+               "status": "cpan",
                "date" : "2015-12-06T11:29:40",
                "distribution" : "Plack",
                "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0039.tar.gz"
             },
+            "_index" : "cpan_v1_01",
+            "_id" : "Y7WlIYOZjk3rh9O05F3UZE6WwGo",
+            "_score" : null,
+            "sort" : [
+               1449401380000
+            ]
+         },
+         {
+            "_type" : "file",
+            "_source" : {
+               "deprecated" : false,
+               "maturity" : "released",
+               "module" : [
+                  {
+                     "version" : "1.0038",
+                     "name" : "Plack"
+                  }
+               ],
+               "date" : "2015-12-06T11:29:40",
+               "distribution" : "Plack",
+               "download_url" : "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0039.tar.gz"
+            },
+            "status": "invalid",
             "_index" : "cpan_v1_01",
             "_id" : "Y7WlIYOZjk3rh9O05F3UZE6WwGo",
             "_score" : null,

@@ -56,7 +56,7 @@ export class RepologyDatasource extends Datasource {
 
   private async queryPackages(url: string): Promise<RepologyPackage[]> {
     try {
-      const res = await this.http.getJson<RepologyPackage[]>(url);
+      const res = await this.http.getJsonUnchecked<RepologyPackage[]>(url);
       return res.body;
     } catch (err) {
       if (err.statusCode === 404) {
@@ -109,7 +109,7 @@ export class RepologyDatasource extends Datasource {
 
   @cache({
     ttlMinutes: 60,
-    namespace: `datasource-${RepologyDatasource.id}-list`,
+    namespace: `datasource-${RepologyDatasource.id}`,
     key: (registryUrl: string, repoName: string, pkgName: string) =>
       joinUrlParts(registryUrl, repoName, pkgName),
   })
@@ -189,7 +189,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

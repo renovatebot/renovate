@@ -1,7 +1,6 @@
-import { mockDeep } from 'jest-mock-extended';
+import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked, partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -12,6 +11,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
@@ -22,23 +22,23 @@ import { hashBody } from '../pr-body';
 import type {
   CreatePRConfig,
   ReattemptPlatformAutomergeConfig,
-  RepoParams,
   UpdatePrConfig,
 } from '../types';
 import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('timers/promises');
+vi.mock('timers/promises');
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http/queue');
-const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http/queue');
+const hostRules = vi.mocked(_hostRules);
 
-jest.mock('../../../util/git');
-const git: jest.Mocked<typeof _git> = mocked(_git);
+const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
@@ -66,7 +66,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE <3.10 ', async () => {
+    it('should throw if using fine-grained token with GHE <3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -81,7 +81,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE unknown version ', async () => {
+    it('should throw if using fine-grained token with GHE unknown version', async () => {
       httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
       await expect(
         github.initPlatform({
@@ -532,7 +532,7 @@ describe('modules/platform/github/index', () => {
   }
 
   describe('initRepo', () => {
-    it('should rebase', async () => {
+    it('should squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
@@ -675,7 +675,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should squash', async () => {
+    it('should merge', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -687,8 +687,8 @@ describe('modules/platform/github/index', () => {
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
               mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
-              squashMergeAllowed: true,
+              rebaseMergeAllowed: true,
+              squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
                 target: {
@@ -704,7 +704,7 @@ describe('modules/platform/github/index', () => {
       expect(config).toMatchSnapshot();
     });
 
-    it('should merge', async () => {
+    it('should rebase', async () => {
       httpMock
         .scope(githubApiHost)
         .post(`/graphql`)
@@ -715,8 +715,8 @@ describe('modules/platform/github/index', () => {
               isArchived: false,
               nameWithOwner: 'some/repo',
               hasIssuesEnabled: true,
-              mergeCommitAllowed: true,
-              rebaseMergeAllowed: false,
+              mergeCommitAllowed: false,
+              rebaseMergeAllowed: true,
               squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
@@ -1134,35 +1134,14 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
       expect(pr2).toEqual(pr);
     });
+  });
 
-    it('should reopen and cache autoclosed PR', async () => {
+  describe('tryReuseAutoclosedPr()', () => {
+    it('should reopen autoclosed PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        )
-        .reply(200, [
-          {
-            number: 90,
-            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: 'open',
-            updated_at: '01-09-2022',
-          },
-          {
-            number: 91,
-            head: {
-              ref: 'somebranch',
-              sha: '123',
-              repo: { full_name: 'some/repo' },
-            },
-            title: 'old title - autoclosed',
-            state: 'closed',
-            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
-            updated_at: '01-09-2022',
-          },
-        ])
-        .head('/repos/some/repo/git/commits/123')
+        .head('/repos/some/repo/git/commits/1234')
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
@@ -1176,127 +1155,62 @@ describe('modules/platform/github/index', () => {
           updated_at: '01-09-2022',
         });
       await github.initRepo({ repository: 'some/repo' });
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
-      const pr = await github.getBranchPr('somebranch');
-      const pr2 = await github.getBranchPr('somebranch');
+      const pr = await github.tryReuseAutoclosedPr({
+        number: 91,
+        title: 'old title - autoclosed',
+        state: 'closed',
+        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+        sourceBranch: 'somebranch',
+        sha: '1234' as LongCommitSha,
+      });
 
       expect(pr).toMatchObject({ number: 91, sourceBranch: 'somebranch' });
-      expect(pr2).toEqual(pr);
-    });
-
-    it('dryrun - skip autoclosed PR reopening', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      GlobalConfig.set({ dryRun: 'full' });
-      scope
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        )
-        .reply(200, [
-          {
-            number: 1,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            title: 'old title - autoclosed',
-            state: 'closed',
-            closed_at: DateTime.now().minus({ days: 6 }).toISO(),
-          },
-        ]);
-
-      await github.initRepo(partial<RepoParams>({ repository: 'some/repo' }));
-
-      await expect(github.getBranchPr('somebranch')).resolves.toBeNull();
-      expect(logger.logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would try to reopen autoclosed PR',
-      );
-    });
-
-    it('aborts reopen if PR is too old', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        )
-        .reply(200, [
-          {
-            number: 90,
-            head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: 'open',
-          },
-          {
-            number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            title: 'old title - autoclosed',
-            state: 'closed',
-            closed_at: DateTime.now().minus({ days: 7 }).toISO(),
-          },
-        ]);
-
-      await github.initRepo({ repository: 'some/repo' });
-      const pr = await github.getBranchPr('somebranch');
-      expect(pr).toBeNull();
     });
 
     it('aborts reopening if branch recreation fails', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        )
-        .reply(200, [
-          {
-            number: 91,
-            head: {
-              ref: 'somebranch',
-              repo: { full_name: 'some/repo' },
-              sha: '123',
-            },
-            title: 'old title - autoclosed',
-            state: 'closed',
-            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
-          },
-        ])
-        .head('/repos/some/repo/git/commits/123')
+        .head('/repos/some/repo/git/commits/1234')
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(422);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       await github.initRepo({ repository: 'some/repo' });
-      const pr = await github.getBranchPr('somebranch');
+
+      const pr = await github.tryReuseAutoclosedPr({
+        number: 91,
+        title: 'old title - autoclosed',
+        state: 'closed',
+        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+        sourceBranch: 'somebranch',
+        sha: '1234' as LongCommitSha,
+      });
+
       expect(pr).toBeNull();
     });
 
     it('aborts reopening if PR reopening fails', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope
-        .get(
-          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
-        )
-        .reply(200, [
-          {
-            number: 91,
-            head: {
-              ref: 'somebranch',
-              sha: '123',
-              repo: { full_name: 'some/repo' },
-            },
-            title: 'old title - autoclosed',
-            state: 'closed',
-            closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
-          },
-        ])
-        .head('/repos/some/repo/git/commits/123')
-        .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockRejectedValueOnce('oops');
+      scope.head('/repos/some/repo/git/commits/1234').reply(400);
 
       await github.initRepo({ repository: 'some/repo' });
-      const pr = await github.getBranchPr('somebranch');
+
+      const pr = await github.tryReuseAutoclosedPr({
+        number: 91,
+        title: 'old title - autoclosed',
+        state: 'closed',
+        closedAt: DateTime.now().minus({ days: 6 }).toISO(),
+        sourceBranch: 'somebranch',
+        sha: '1234' as LongCommitSha,
+      });
+
       expect(pr).toBeNull();
     });
   });
@@ -1618,6 +1532,57 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('getIssue()', () => {
+    it('returns null if issues disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { hasIssuesEnabled: false });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+    });
+
+    it('returns issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      const issue = {
+        number: 1,
+        state: 'open',
+        title: 'title-1',
+        body: 'body-1',
+      };
+      scope
+        .get('/repos/some/repo/issues/1')
+        .reply(200, { ...issue, updated_at: '2022-01-01T00:00:00Z' });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toMatchObject({
+        ...issue,
+        lastModified: '2022-01-01T00:00:00Z',
+      });
+    });
+
+    it('returns null if issue not found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/issues/1').reply(404);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+    });
+
+    it('logs debug message if issue deleted', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/issues/1').reply(410);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getIssue(1);
+      expect(res).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Issue #1 has been deleted',
+      );
+    });
+  });
+
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
       httpMock
@@ -1745,7 +1710,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1860,7 +1831,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1966,7 +1943,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2019,7 +2002,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2108,14 +2097,6 @@ describe('modules/platform/github/index', () => {
             },
           },
         })
-        .get('/repos/some/repo/issues/2')
-        .reply(200, {
-          number: 2,
-          state: 'open',
-          title: 'title-1',
-          body: 'newer-content',
-          updated_at: '2021-01-01T00:00:00Z',
-        })
         .patch('/repos/some/repo/issues/1')
         .reply(200);
       const res = await github.ensureIssue({
@@ -2162,7 +2143,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-2',
         body: 'new-content',
@@ -2253,7 +2240,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .patch('/repos/undefined/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'closed',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
   });
@@ -2272,7 +2265,13 @@ describe('modules/platform/github/index', () => {
     it('should add the given assignees to the issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.post('/repos/some/repo/issues/42/assignees').reply(200);
+      scope.post('/repos/some/repo/issues/42/assignees').reply(200, {
+        number: 42,
+        state: 'open',
+        title: 'title-42',
+        body: 'body-42',
+        updated_at: '2023-01-01T00:00:00Z',
+      });
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
@@ -2506,6 +2505,57 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('skips PR with non-matching state', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'closed',
+            closed_at: DateTime.now().minus({ days: 1 }).toISO(),
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('skips PRs from forks', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'other/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const res = await github.findPr({
+        branchName: 'branch-a',
+        state: 'open',
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('skips PR with non-matching title', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -2570,7 +2620,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .get('/repos/some/repo/pulls?head=some:branch&state=open')
         .reply(200, [
           {
             number: 1,
@@ -2600,7 +2650,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .get('/repos/some/repo/pulls?head=some:branch&state=open')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.findPr({
@@ -2710,7 +2760,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR can be edited by maintainers.',
           labels: null,
-          platformOptions: {
+          platformPrOptions: {
             forkModeDisallowMaintainerEdits: false,
           },
         });
@@ -2755,7 +2805,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR *cannot* be edited by maintainers.',
           labels: null,
-          platformOptions: {
+          platformPrOptions: {
             forkModeDisallowMaintainerEdits: true,
           },
         });
@@ -2797,7 +2847,7 @@ describe('modules/platform/github/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { usePlatformAutomerge: true },
+        platformPrOptions: { usePlatformAutomerge: true },
       };
 
       const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
@@ -2848,7 +2898,7 @@ describe('modules/platform/github/index', () => {
           },
           variables: {
             pullRequestId: 'abcd',
-            mergeMethod: 'REBASE',
+            mergeMethod: 'SQUASH',
           },
         },
       };
@@ -3006,7 +3056,13 @@ describe('modules/platform/github/index', () => {
           });
         scope
           .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
-          .reply(200, {});
+          .reply(200, {
+            number: 123,
+            state: 'open',
+            title: 'bump someDep to v2',
+            body: 'many informations about someDep',
+            updated_at: '2023-01-01T00:00:00Z',
+          });
         await github.initRepo({ repository: 'some/repo' });
         const pr = await github.createPr({
           targetBranch: 'main',
@@ -3370,9 +3426,27 @@ describe('modules/platform/github/index', () => {
         `Deleting label old_label from #1234`,
       );
     });
+
+    describe('addLabels', () => {
+      it('warns if adding labels failed', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.post('/repos/undefined/issues/2/labels').reply(400, {
+          message: 'Failed to add labels',
+        });
+        await expect(github.addLabels(2, ['fail'])).toResolve();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            err: expect.any(Object),
+            issueNo: 2,
+            labels: ['fail'],
+          },
+          'Error while adding labels. Skipping',
+        );
+      });
+    });
   });
 
-  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
     const getPrListResp = [
       {
         number: 1234,
@@ -3400,7 +3474,7 @@ describe('modules/platform/github/index', () => {
 
     const pr: ReattemptPlatformAutomergeConfig = {
       number: 123,
-      platformOptions: { usePlatformAutomerge: true },
+      platformPrOptions: { usePlatformAutomerge: true },
     };
 
     const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
@@ -3452,7 +3526,7 @@ describe('modules/platform/github/index', () => {
         },
         variables: {
           pullRequestId: 'abcd',
-          mergeMethod: 'REBASE',
+          mergeMethod: 'SQUASH',
         },
       },
     };
@@ -3488,7 +3562,7 @@ describe('modules/platform/github/index', () => {
       await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err: new Error('external-host-error') },
+        { err: new ExternalHostError(expect.any(RequestError), 'github') },
         'Error re-attempting PR platform automerge',
       );
     });
@@ -3565,6 +3639,7 @@ describe('modules/platform/github/index', () => {
         await github.mergePr({
           branchName: '',
           id: pr.number,
+          strategy: 'merge-commit', // for coverage - has no effect on this test
         }),
       ).toBeFalse();
     });
@@ -3586,8 +3661,51 @@ describe('modules/platform/github/index', () => {
         await github.mergePr({
           branchName: '',
           id: pr.number,
+          strategy: 'auto', // for coverage -- has not effect on this test
         }),
       ).toBeFalse();
+    });
+
+    it('should warn if automergeStrategy is not supported', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'fast-forward',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+    });
+
+    it('should use configured automergeStrategy', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(200);
+      await github.initRepo({ repository: 'some/repo' });
+
+      const mergeResult = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        strategy: 'rebase',
+      });
+
+      expect(mergeResult).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          options: {
+            body: { merge_method: 'rebase' },
+          },
+          url: 'repos/some/repo/pulls/1234/merge',
+        },
+        'mergePr',
+      );
     });
   });
 
@@ -3625,7 +3743,7 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('mergePr(prNo) - autodetection', () => {
-    it('should try rebase first', async () => {
+    it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1235/merge').reply(200);
@@ -3644,12 +3762,12 @@ describe('modules/platform/github/index', () => {
       ).toBeTrue();
     });
 
-    it('should try squash after rebase', async () => {
+    it('should try merge after squash', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1236/merge')
-        .reply(400, 'no rebasing allowed');
+        .reply(400, 'no squashing allowed');
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1236,
@@ -3665,14 +3783,14 @@ describe('modules/platform/github/index', () => {
       ).toBeFalse();
     });
 
-    it('should try merge after squash', async () => {
+    it('should try rebase after merge', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
         .reply(405, 'no squashing allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .reply(405, 'no merging allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .reply(200);
       await github.initRepo({ repository: 'some/repo' });
@@ -3695,11 +3813,11 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .put('/repos/some/repo/pulls/1237/merge')
-        .reply(405, 'no rebasing allowed')
-        .put('/repos/some/repo/pulls/1237/merge')
-        .replyWithError('no squashing allowed')
+        .reply(405, 'no squashing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('no merging allowed')
+        .put('/repos/some/repo/pulls/1237/merge')
+        .replyWithError('no rebasing allowed')
         .put('/repos/some/repo/pulls/1237/merge')
         .replyWithError('never gonna give you up');
       await github.initRepo({ repository: 'some/repo' });
@@ -3730,153 +3848,174 @@ describe('modules/platform/github/index', () => {
     });
 
     it('returns empty if error', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, {});
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('returns array if found', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                          range: '0.0.2',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'left-pad',
               },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
             },
           },
-        });
-      const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(1);
-    });
-
-    it('returns array if found on GHE', async () => {
-      const gheApiHost = 'https://ghe.renovatebot.com';
-
-      httpMock
-        .scope(gheApiHost)
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
-        .get('/user')
-        .reply(200, { login: 'renovate-bot' })
-        .get('/user/emails')
-        .reply(200, {});
-
-      httpMock
-        .scope(gheApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                          range: '0.0.2',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'foo',
               },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: null,
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
             },
           },
-        });
-
-      await github.initPlatform({
-        endpoint: gheApiHost,
-        token: '123test',
-      });
-
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
     });
 
     it('returns empty if disabled', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: {repository: {}}});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, { data: { repository: {} } });
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('handles network error', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').replyWithError('unknown error');
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .replyWithError('unknown error');
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('calls logger.debug with only items that include securityVulnerability', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: null,
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'left-pad',
               },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
             },
           },
-        });
+
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: null,
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
         'GitHub vulnerability details',
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('returns normalized names for PIP ecosystem', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'pip',
+                name: 'FrIeNdLy.-.BARD',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res[0].security_vulnerability!.package.name).toBe('friendly-bard');
     });
   });
 
@@ -4034,7 +4173,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4063,7 +4202,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4094,7 +4233,7 @@ describe('modules/platform/github/index', () => {
         .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
@@ -4123,7 +4262,7 @@ describe('modules/platform/github/index', () => {
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
-      jest.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(true);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',

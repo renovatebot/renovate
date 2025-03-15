@@ -1,31 +1,59 @@
 import type { WriteStream } from 'node:fs';
+import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
+import type { RenovateLogger } from './renovate-logger';
+import { ProblemStream } from './utils';
 import {
   addMeta,
   addStream,
   clearProblems,
+  createDefaultStreams,
   getContext,
   getProblems,
   levels,
+  logLevel,
   logger,
   removeMeta,
   setContext,
   setMeta,
+  withMeta,
 } from '.';
+import { partial } from '~test/util';
 
-jest.unmock('.');
+const initialContext = 'initial_context';
+
+vi.unmock('.');
+vi.mock('nanoid', () => ({
+  nanoid: () => 'initial_context',
+}));
+
+const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });
 
+  it('uses an auto-generated log context', () => {
+    logger.debug('');
+
+    expect(bunyanDebugSpy).toHaveBeenCalledWith(
+      { logContext: initialContext },
+      '',
+    );
+  });
+
   it('sets and gets context', () => {
-    setContext('123test');
-    expect(getContext()).toBe('123test');
+    const logContext = '123test';
+    const msg = 'test';
+    setContext(logContext);
+
+    logger.debug(msg);
+
+    expect(getContext()).toBe(logContext);
+    expect(bunyanDebugSpy).toHaveBeenCalledWith({ logContext }, msg);
   });
 
   it('supports logging with metadata', () => {
@@ -40,31 +68,143 @@ describe('logger/index', () => {
     expect(() => logger.debug('some meta')).not.toThrow();
   });
 
-  it('sets meta', () => {
-    expect(() => setMeta({ any: 'test' })).not.toThrow();
+  describe('meta functions', () => {
+    beforeEach(() => {
+      setContext(initialContext);
+    });
+
+    it('sets meta', () => {
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
+      setMeta(meta);
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds meta', () => {
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
+      addMeta(meta);
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes meta', () => {
+      const logMeta = { foo: 'foo' };
+      const meta = { bar: 'bar' };
+      setMeta(meta);
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...meta, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
+
+      removeMeta(Object.keys(meta));
+
+      logger.debug(logMeta, '');
+
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
+      expect(bunyanDebugSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('withMeta adds and removes metadata correctly', () => {
+      const logMeta = { foo: 'foo' };
+      const tempMeta = { bar: 'bar' };
+
+      withMeta(tempMeta, () => {
+        logger.debug(logMeta, '');
+        expect(bunyanDebugSpy).toHaveBeenCalledWith(
+          { logContext: initialContext, ...tempMeta, ...logMeta },
+          '',
+        );
+      });
+
+      logger.debug(logMeta, '');
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
+    });
+
+    it('withMeta handles cleanup when callback throws', () => {
+      const logMeta = { foo: 'foo' };
+      const tempMeta = { bar: 'bar' };
+
+      expect(() =>
+        withMeta(tempMeta, () => {
+          logger.debug(logMeta, '');
+          throw new Error('test error');
+        }),
+      ).toThrow('test error');
+
+      logger.debug(logMeta, '');
+      expect(bunyanDebugSpy).toHaveBeenCalledWith(
+        { logContext: initialContext, ...logMeta },
+        '',
+      );
+    });
   });
 
-  it('adds meta', () => {
-    expect(() => addMeta({ new: 'test' })).not.toThrow();
-  });
-
-  it('removes meta', () => {
-    expect(() => removeMeta(['new'])).not.toThrow();
+  describe('createDefaultStreams', () => {
+    it('creates log file stream', () => {
+      expect(
+        createDefaultStreams('info', new ProblemStream(), 'file.log'),
+      ).toMatchObject([
+        { name: 'stdout', type: 'raw' },
+        { name: 'problems', type: 'raw' },
+        { name: 'logfile' },
+      ]);
+    });
   });
 
   it('sets level', () => {
+    expect(logLevel()).toBeDefined(); // depends on passed env
     expect(() => levels('stdout', 'debug')).not.toThrow();
+    expect(logLevel()).toBe('debug');
+  });
+
+  it('should create a child logger', () => {
+    const childLogger = (logger as RenovateLogger).childLogger();
+    const loggerSpy = vi.spyOn(logger, 'debug');
+    const childLoggerSpy = vi.spyOn(childLogger, 'debug');
+
+    childLogger.debug('test');
+
+    expect(loggerSpy).toHaveBeenCalledTimes(0);
+    expect(childLoggerSpy).toHaveBeenCalledTimes(1);
+    expect(childLoggerSpy).toHaveBeenCalledWith('test');
   });
 
   it('saves problems', () => {
     addSecret('p4$$w0rd');
     levels('stdout', 'fatal');
+    logger.fatal('fatal error');
     logger.error('some meta');
     logger.error({ some: 'meta', password: 'super secret' });
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
+    logger.trace('ignored');
     logger.info('ignored');
     expect(getProblems()).toMatchObject([
+      { msg: 'fatal error' },
       { msg: 'some meta' },
       { some: 'meta', password: '***********' },
       { some: 'meta', msg: 'message' },
@@ -96,7 +236,7 @@ describe('logger/index', () => {
 
   it('supports file-based logging', () => {
     let chunk = '';
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -119,7 +259,7 @@ describe('logger/index', () => {
 
   it('handles cycles', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -147,7 +287,7 @@ describe('logger/index', () => {
 
   it('sanitizes secrets', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {

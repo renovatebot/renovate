@@ -10,10 +10,10 @@ import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { RegistryFile } from './schema';
 import {
   PackagesResponse,
   PackagistFile,
-  RegistryFile,
   RegistryMeta,
   extractDepReleases,
   parsePackagesResponses,
@@ -26,11 +26,19 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://packagist.org'];
+  override readonly defaultRegistryUrls = ['https://repo.packagist.org'];
 
   override readonly defaultVersioning = composerVersioning.id;
 
   override readonly registryStrategy = 'hunt';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `time` field in the results.';
+  // Note: this can be changed to 'release', as the source is present in each release but we remove it while processing
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from `source` field in the results.';
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
@@ -41,13 +49,13 @@ export class PackagistDatasource extends Datasource {
     return username && password ? { username, password } : {};
   }
 
-  private async getJson<T, U extends z.ZodSchema<T>>(
+  private async getJson<Schema extends z.ZodType<any, any, any>>(
     url: string,
-    schema: U,
-  ): Promise<z.infer<typeof schema>> {
+    schema: Schema,
+  ): Promise<z.infer<Schema>> {
     const opts = PackagistDatasource.getHostOpts(url);
-    const { body } = await this.http.getJson(url, opts);
-    return schema.parse(body);
+    const { body } = await this.http.getJson(url, opts, schema);
+    return body;
   }
 
   @cache({
@@ -78,9 +86,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-public-files`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string, regFile: RegistryFile) =>
-      PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+      `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
     cacheable: (regUrl: string) =>
       !PackagistDatasource.isPrivatePackage(regUrl),
     ttlMinutes: 1440,
@@ -117,9 +125,9 @@ export class PackagistDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
+    namespace: `datasource-${PackagistDatasource.id}`,
     key: (registryUrl: string, metadataUrl: string, packageName: string) =>
-      `${registryUrl}:${metadataUrl}:${packageName}`,
+      `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,
   })
   async packagistV2Lookup(
@@ -182,7 +190,7 @@ export class PackagistDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

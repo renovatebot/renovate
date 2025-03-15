@@ -14,6 +14,9 @@ export type NpmPackage = PackageJson & {
   dependenciesMeta?: DependenciesMeta;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
+  pnpm?: {
+    overrides?: PackageJson.Dependency;
+  };
 };
 
 export type LockFileEntry = Record<
@@ -27,12 +30,24 @@ export interface LockFile {
     string,
     Record<string, Record<string, string>>
   >;
+  lockedVersionsWithCatalog?: Record<string, Record<string, string>>;
   lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }
 
 export interface PnpmWorkspaceFile {
   packages: string[];
+  catalog?: Record<string, string>;
+  catalogs?: Record<string, Record<string, string>>;
+}
+
+/**
+ * A pnpm catalog is either the default catalog (catalog:, catalogs:default), or
+ * a named one (catalogs:<name>)
+ */
+export interface PnpmCatalog {
+  name: string;
+  dependencies: NpmPackageDependency;
 }
 
 export type OverrideDependency = Record<string, RecursiveOverride>;

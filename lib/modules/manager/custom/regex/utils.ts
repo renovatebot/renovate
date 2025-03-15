@@ -4,26 +4,13 @@ import { migrateDatasource } from '../../../../config/migrations/custom/datasour
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import type { PackageDependency } from '../../types';
+import type { ValidMatchFields } from '../utils';
+import { validMatchFields } from '../utils';
 import type {
   ExtractionTemplate,
   RegexManagerConfig,
   RegexManagerTemplates,
 } from './types';
-
-export const validMatchFields = [
-  'depName',
-  'packageName',
-  'currentValue',
-  'currentDigest',
-  'datasource',
-  'versioning',
-  'extractVersion',
-  'registryUrl',
-  'depType',
-  'indentation',
-] as const;
-
-type ValidMatchFields = (typeof validMatchFields)[number];
 
 function updateDependency(
   dependency: PackageDependency,
@@ -36,7 +23,7 @@ function updateDependency(
       try {
         const url = new URL(value).toString();
         dependency.registryUrls = [url];
-      } catch (err) {
+      } catch {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
       break;
@@ -67,7 +54,7 @@ export function createDependency(
       try {
         const compiled = template.compile(tmpl, groups, false);
         updateDependency(dependency, field, compiled);
-      } catch (err) {
+      } catch {
         logger.warn(
           { template: tmpl },
           'Error compiling template for custom manager',
@@ -118,17 +105,4 @@ export function mergeExtractionTemplate(
     groups: mergeGroups(base.groups, addition.groups),
     replaceString: addition.replaceString ?? base.replaceString,
   };
-}
-
-export function isValidDependency({
-  depName,
-  currentValue,
-  currentDigest,
-}: PackageDependency): boolean {
-  // check if all the fields are set
-  return (
-    is.nonEmptyStringAndNotWhitespace(depName) &&
-    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
-      is.nonEmptyStringAndNotWhitespace(currentValue))
-  );
 }

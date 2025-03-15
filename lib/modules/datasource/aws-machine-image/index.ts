@@ -1,22 +1,23 @@
-import {
-  DescribeImagesCommand,
-  EC2Client,
-  Filter,
-  Image,
-} from '@aws-sdk/client-ec2';
+import type { Filter, Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { AwsClientConfig, ParsedConfig } from './types';
 
-export class AwsMachineImageDataSource extends Datasource {
+export class AwsMachineImageDatasource extends Datasource {
   static readonly id = 'aws-machine-image';
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
   override readonly caching = true;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is determined from the `CreationDate` field in the results.';
 
   override readonly defaultConfig = {
     // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'
@@ -38,7 +39,7 @@ export class AwsMachineImageDataSource extends Datasource {
   private readonly now: number;
 
   constructor() {
-    super(AwsMachineImageDataSource.id);
+    super(AwsMachineImageDatasource.id);
     this.now = Date.now();
   }
 
@@ -77,7 +78,7 @@ export class AwsMachineImageDataSource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: (serializedAmiFilter: string) =>
       `getSortedAwsMachineImages:${serializedAmiFilter}`,
   })
@@ -92,17 +93,17 @@ export class AwsMachineImageDataSource extends Datasource {
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)
-        : /* istanbul ignore next */ 0;
+        : /* v8 ignore next */ 0; // TODO: add date coersion util
 
       const ts2 = image2.CreationDate
         ? Date.parse(image2.CreationDate)
-        : /* istanbul ignore next */ 0;
+        : /* v8 ignore next */ 0; // TODO: add date coersion util
       return ts1 - ts2;
     });
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig, newValue: string) =>
       `getDigest:${packageName}:${newValue ?? ''}`,
   })
@@ -119,20 +120,21 @@ export class AwsMachineImageDataSource extends Datasource {
       const newValueMatchingImages = images.filter(
         (image) => image.ImageId === newValue,
       );
-      if (newValueMatchingImages.length === 1) {
-        return (
-          newValueMatchingImages[0].Name ?? /* istanbul ignore next */ null
-        );
+      if (
+        newValueMatchingImages.length === 1 &&
+        newValueMatchingImages[0].Name
+      ) {
+        return newValueMatchingImages[0].Name;
       }
       return null;
     }
 
     const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
+    return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
   }
 
   @cache({
-    namespace: `datasource-${AwsMachineImageDataSource.id}`,
+    namespace: `datasource-${AwsMachineImageDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
@@ -147,7 +149,7 @@ export class AwsMachineImageDataSource extends Datasource {
       releases: [
         {
           version: latestImage.ImageId,
-          releaseTimestamp: latestImage.CreationDate,
+          releaseTimestamp: asTimestamp(latestImage.CreationDate),
           isDeprecated:
             Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
             this.now,

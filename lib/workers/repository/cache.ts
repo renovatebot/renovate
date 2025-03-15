@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
@@ -92,6 +90,9 @@ async function generateBranchCache(
           baseBranch,
           baseBranchSha,
         ) ?? undefined;
+    } else if (baseBranchSha && !branchSha && branch.prNo) {
+      // if branch was deleted/ PR exists and ignored
+      prNo = branch.prNo;
     }
 
     const automerge = !!branch.automerge;

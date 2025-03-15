@@ -26,7 +26,7 @@ describe('modules/manager/metadata', () => {
           (customManagers.includes(manager) ? 'custom/' : '') + manager
         }/readme.md`;
         readme = await fs.readFile(readmeFilePath, 'utf8');
-      } catch (err) {
+      } catch {
         // do nothing
       }
       expect(readme).toBeDefined();

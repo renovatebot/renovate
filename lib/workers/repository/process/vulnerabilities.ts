@@ -1,5 +1,6 @@
 // TODO #22198
-import { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
+import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
@@ -11,12 +12,8 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../../../modules/manager/types';
-import {
-  VersioningApi,
-  get as getVersioning,
-} from '../../../modules/versioning';
-import { findGithubToken } from '../../../util/check-token';
-import { find } from '../../../util/host-rules';
+import type { VersioningApi } from '../../../modules/versioning';
+import { get as getVersioning } from '../../../modules/versioning';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -36,6 +33,7 @@ export class Vulnerabilities {
   > = {
     crate: 'crates.io',
     go: 'Go',
+    hackage: 'Hackage',
     hex: 'Hex',
     maven: 'Maven',
     npm: 'npm',
@@ -45,18 +43,12 @@ export class Vulnerabilities {
     rubygems: 'RubyGems',
   };
 
-  private constructor() {}
+  private constructor() {
+    // private constructor
+  }
 
   private async initialize(): Promise<void> {
-    // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
-    const token = findGithubToken(
-      find({
-        hostType: 'github',
-        url: 'https://api.github.com/',
-      }),
-    );
-
-    this.osvOffline = await OsvOffline.create(token);
+    this.osvOffline = await OsvOffline.create();
   }
 
   static async create(): Promise<Vulnerabilities> {
@@ -249,8 +241,8 @@ export class Vulnerabilities {
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
-        { err },
-        `Error fetching vulnerability information for ${packageName}`,
+        { err, packageName },
+        'Error fetching vulnerability information for package',
       );
       return null;
     }
@@ -409,7 +401,7 @@ export class Vulnerabilities {
       this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
-      return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
+      return this.getFixedVersionByEcosystem(fixedVersion, ecosystem);
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
@@ -421,6 +413,18 @@ export class Vulnerabilities {
     }
 
     return null;
+  }
+
+  private getFixedVersionByEcosystem(
+    fixedVersion: string,
+    ecosystem: Ecosystem,
+  ): string {
+    if (ecosystem === 'Maven' || ecosystem === 'NuGet') {
+      return `[${fixedVersion},)`;
+    }
+
+    // crates.io, Go, Hex, npm, RubyGems, PyPI
+    return `>= ${fixedVersion}`;
   }
 
   private getLastAffectedByEcosystem(
@@ -471,7 +475,7 @@ export class Vulnerabilities {
       packageFileConfig,
     } = vul;
     if (is.nullOrUndefined(fixedVersion)) {
-      logger.info(
+      logger.debug(
         `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`,
       );
       return null;
@@ -506,7 +510,7 @@ export class Vulnerabilities {
       const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
-    } catch (err) {
+    } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
 

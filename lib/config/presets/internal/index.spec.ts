@@ -5,10 +5,10 @@ import { validateConfig } from '../../validation';
 import * as npm from '../npm';
 import * as internal from '.';
 
-jest.mock('../npm');
-jest.mock('../../../modules/datasource/npm');
+vi.mock('../npm');
+vi.mock('../../../modules/datasource/npm');
 
-jest.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
+vi.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
@@ -30,7 +30,8 @@ describe('config/presets/internal/index', () => {
             const config = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
-            const res = await validateConfig('repo', config, true);
+            const configType = groupName === 'global' ? 'global' : 'repo';
+            const res = await validateConfig(configType, config, true);
             expect(res.errors).toHaveLength(0);
             expect(res.warnings).toHaveLength(0);
           } catch (err) {
@@ -43,4 +44,19 @@ describe('config/presets/internal/index', () => {
       }
     }
   }
+
+  it('internal presets should not contain handlebars', () => {
+    Object.entries(internal.groups)
+      .map(([groupName, groupPresets]) =>
+        Object.entries(groupPresets).map(
+          ([presetName]) => `${groupName}:${presetName}`,
+        ),
+      )
+      .flat()
+      .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
+  });
+
+  it('returns undefined for unknown preset', () => {
+    expect(internal.getPreset({ repo: 'some/repo' })).toBeUndefined();
+  });
 });

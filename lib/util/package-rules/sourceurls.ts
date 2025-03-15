@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class SourceUrlsMatcher extends Matcher {
@@ -10,13 +11,10 @@ export class SourceUrlsMatcher extends Matcher {
     if (is.undefined(matchSourceUrls)) {
       return null;
     }
-    if (is.undefined(sourceUrl)) {
+    if (!sourceUrl) {
       return false;
     }
 
-    const upperCaseSourceUrl = sourceUrl?.toUpperCase();
-    return matchSourceUrls.some(
-      (url) => upperCaseSourceUrl === url.toUpperCase(),
-    );
+    return matchRegexOrGlobList(sourceUrl, matchSourceUrls);
   }
 }

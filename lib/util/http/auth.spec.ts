@@ -1,7 +1,7 @@
 import type { NormalizedOptions } from 'got';
-import { partial } from '../../../test/util';
 import { applyAuthorization, removeAuthorization } from './auth';
 import type { GotOptions } from './types';
+import { partial } from '~test/util';
 
 describe('util/http/auth', () => {
   describe('applyAuthorization', () => {
@@ -57,7 +57,7 @@ describe('util/http/auth', () => {
       expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
-            "authorization": "token XXXX",
+            "authorization": "Bearer XXXX",
           },
           "hostType": "gitea",
           "token": "XXXX",
@@ -189,6 +189,30 @@ describe('util/http/auth', () => {
         token: 'test',
       });
     });
+
+    it(`honors authType`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'test',
+        context: {
+          authType: 'Bearer',
+        },
+        hostType: 'custom',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        context: {
+          authType: 'Bearer',
+        },
+        headers: {
+          authorization: 'Bearer test',
+        },
+        hostType: 'custom',
+        token: 'test',
+      });
+    });
   });
 
   describe('removeAuthorization', () => {
@@ -197,6 +221,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
 
       removeAuthorization(opts);
@@ -205,6 +230,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
     });
 

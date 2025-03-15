@@ -1,8 +1,9 @@
 import type { PackageCacheNamespace } from '../../cache/package/types';
+import type { Timestamp } from '../../timestamp';
 
 export interface GithubDatasourceItem {
   version: string;
-  releaseTimestamp: string;
+  releaseTimestamp: Timestamp;
 }
 
 /**

@@ -21,6 +21,11 @@ describe('util/emoji', () => {
       expect(emojify(':foo: :bar: :bee:')).toBe(':foo: :bar: 🐝');
     });
 
+    it('convert warning shortcode to emoji', () => {
+      const warning = emojify(':warning:');
+      expect(warning).toBe('⚠️');
+    });
+
     it('does not encode when config option is disabled', () => {
       setEmojiConfig({ unicodeEmoji: false });
       expect(emojify('Let it :bee:')).toBe('Let it :bee:');
@@ -46,26 +51,27 @@ describe('util/emoji', () => {
       expect(result).toEqual(text);
     });
 
-    describe('unsupported characters', () => {
-      const unsupported = '🫠';
-
-      it('uses replacement character', () => {
-        setEmojiConfig({ unicodeEmoji: false });
-        expect(unemojify(unsupported)).toBe('�');
-      });
+    it('converts warning emoji to shortcode', () => {
+      setEmojiConfig({ unicodeEmoji: false });
+      const emoji = '⚠️';
+      const result = unemojify(emoji);
+      expect(result).toBe(':warning:');
     });
   });
 
-  describe('problem characters', () => {
-    it.each(['🚀', '💎', '🧹', '📦'])('converts %s forth and back', (char) => {
-      setEmojiConfig({ unicodeEmoji: false });
-      const codified = unemojify(char);
-      expect(codified).not.toEqual(char);
+  describe('problematic characters', () => {
+    it.each(['🚀', '💎', '🧹', '📦', '⚠️'])(
+      'converts %s forth and back',
+      (char) => {
+        setEmojiConfig({ unicodeEmoji: false });
+        const codified = unemojify(char);
+        expect(codified).not.toEqual(char);
 
-      setEmojiConfig({ unicodeEmoji: true });
-      const emojified = emojify(codified);
-      expect(emojified).toEqual(char);
-    });
+        setEmojiConfig({ unicodeEmoji: true });
+        const emojified = emojify(codified);
+        expect(emojified).toEqual(char);
+      },
+    );
   });
 
   describe('stripEmojis', () => {

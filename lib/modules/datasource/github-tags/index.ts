@@ -20,6 +20,14 @@ export class GithubTagsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly releaseTimestampSupport = true;
+  // Note: not sure
+  override readonly releaseTimestampNote =
+    'The get release timestamp is determined from the `releaseTimestamp` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
+
   override http: GithubHttp;
 
   constructor() {
@@ -35,7 +43,7 @@ export class GithubTagsDatasource extends Datasource {
     let digest: string | null = null;
     try {
       const url = `${apiBaseUrl}repos/${githubRepo}/commits?per_page=1`;
-      const res = await this.http.getJson<{ sha: string }[]>(url);
+      const res = await this.http.getJsonUnchecked<{ sha: string }[]>(url);
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(

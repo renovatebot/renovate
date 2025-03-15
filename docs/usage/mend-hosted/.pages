@@ -1,0 +1,6 @@
+title: Mend-hosted Apps
+nav:
+  - 'Overview': 'overview.md'
+  - 'Configuration': 'hosted-apps-config.md'
+  - 'Credentials': 'credentials.md'
+  - 'Migrating Secrets': 'migrating-secrets.md'

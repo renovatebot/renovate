@@ -1,14 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import {
   extractAllPackageFiles,
+  extractExtensions,
   extractPackage,
   extractRegistries,
   resolveParents,
 } from './extract';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
@@ -233,6 +234,16 @@ describe('modules/manager/maven/extract', () => {
       });
     });
 
+    it('extract dependencies with windows line endings', () => {
+      extractPackage(
+        '<?xml version="1.0" encoding="UTF-8"?> \r\n',
+        'some-file',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+      );
+    });
+
     it('tries minimum manifests', () => {
       const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
       expect(res).toEqual({
@@ -241,6 +252,20 @@ describe('modules/manager/maven/extract', () => {
         mavenProps: {},
         packageFile: 'some-file',
         packageFileVersion: '1',
+      });
+    });
+
+    it('tries minimum snapshot manifests', () => {
+      const res = extractPackage(
+        Fixtures.get(`minimum_snapshot.pom.xml`),
+        'some-file',
+      );
+      expect(res).toEqual({
+        datasource: 'maven',
+        deps: [],
+        mavenProps: {},
+        packageFile: 'some-file',
+        packageFileVersion: '0.0.1-SNAPSHOT',
       });
     });
   });
@@ -351,6 +376,27 @@ describe('modules/manager/maven/extract', () => {
     });
   });
 
+  describe('extractExtensions', () => {
+    it('returns null for invalid xml files', () => {
+      expect(extractExtensions('', '.mvn/extensions.xml')).toBeNull();
+      expect(
+        extractExtensions('invalid xml content', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<foobar></foobar>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<extensions></extensions>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions(
+          '<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"></extensions>',
+          '.mvn/extensions.xml',
+        ),
+      ).toBeNull();
+    });
+  });
+
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
       fs.readLocalFile.mockResolvedValueOnce('');
@@ -428,7 +474,7 @@ describe('modules/manager/maven/extract', () => {
               depType: 'compile',
               editFile: 'parent.pom.xml',
               fileReplacePosition: 470,
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
               registryUrls: [
                 'http://example.com/',
                 'http://example.com/nexus/xyz',
@@ -649,12 +695,12 @@ describe('modules/manager/maven/extract', () => {
             {
               depName: 'org.example:quux',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quux-test',
               currentValue: '1.2.3.4',
-              groupName: 'quuxVersion',
+              sharedVariableName: 'quuxVersion',
             },
             {
               depName: 'org.example:quuz',
@@ -692,6 +738,47 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
+    it('should extract from .mvn/extensions.xml file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/EXTENSIONS/1.0.0 http://maven.apache.org/xsd/core-extensions-1.0.0.xsd">
+        <extension>
+          <groupId>io.jenkins.tools.incrementals</groupId>
+          <artifactId>git-changelist-maven-extension</artifactId>
+          <version>1.6</version>
+        </extension>
+      </extensions>
+    `);
+      const res = await extractAllPackageFiles({}, ['.mvn/extensions.xml']);
+      expect(res).toMatchObject([
+        {
+          packageFile: '.mvn/extensions.xml',
+          deps: [
+            {
+              datasource: 'maven',
+              depName:
+                'io.jenkins.tools.incrementals:git-changelist-maven-extension',
+              currentValue: '1.6',
+              depType: 'build',
+              fileReplacePosition: 372,
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should return empty array if extensions file is invalid or empty', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce('')
+        .mockResolvedValueOnce('invalid xml content');
+      expect(
+        await extractAllPackageFiles({}, [
+          '.mvn/extensions.xml',
+          'grp/.mvn/extensions.xml',
+        ]),
+      ).toBeEmptyArray();
+    });
+
     describe('root pom handling', () => {
       it('should skip root pom.xml', async () => {
         fs.readLocalFile.mockResolvedValueOnce(codeBlock`
@@ -720,6 +807,48 @@ describe('modules/manager/maven/extract', () => {
         ]);
         expect(res).toMatchObject([
           { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
+      it('should skip root pom.xml when it has an external parent', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+            <parent>
+              <groupId>org.acme</groupId>
+              <artifactId>external-parent</artifactId>
+              <version>1.0.0</version>
+            </parent>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const res = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(res).toMatchObject([
+          {
+            packageFile: 'pom.xml',
+            deps: [{ depName: 'org.acme:external-parent', depType: 'parent' }],
+          },
           {
             packageFile: 'foo.bar/pom.xml',
             deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
