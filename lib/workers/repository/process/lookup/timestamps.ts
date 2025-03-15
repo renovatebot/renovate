@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import type { ReleaseResult } from '../../../../modules/datasource/types';
 import type { VersioningApi } from '../../../../modules/versioning/types';
 import { type Timestamp, asTimestamp } from '../../../../util/timestamp';
@@ -6,27 +7,39 @@ export function calculateLatestReleaseTimestamp(
   versioningApi: VersioningApi,
   releaseResult: ReleaseResult,
 ): ReleaseResult {
-  let latestVersion: string | undefined;
-  let latestReleaseTimestamp: Timestamp | null = null;
+  let highestVersion: string | undefined;
+  let highestVersionTimestamp: Timestamp | null = null;
   for (const release of releaseResult.releases) {
-    if (!latestVersion) {
-      latestVersion = release.version;
-      latestReleaseTimestamp = asTimestamp(release.releaseTimestamp);
+    if (!highestVersion) {
+      highestVersion = release.version;
+      highestVersionTimestamp = asTimestamp(release.releaseTimestamp);
       continue;
     }
 
     try {
-      if (versioningApi.isGreaterThan(release.version, latestVersion)) {
-        latestVersion = release.version;
-        latestReleaseTimestamp = asTimestamp(release.releaseTimestamp);
+      if (versioningApi.isGreaterThan(release.version, highestVersion)) {
+        highestVersion = release.version;
+        highestVersionTimestamp = asTimestamp(release.releaseTimestamp);
+        continue;
       }
-    } catch /* v8 ignore start */ {
-      // no-op
-    } /* v8 ignore stop */
+      // eslint-disable-next-line no-empty
+    } catch /* v8 ignore next */ {}
   }
 
-  if (latestReleaseTimestamp) {
-    releaseResult.latestReleaseTimestamp = latestReleaseTimestamp;
+  if (highestVersionTimestamp) {
+    const highestVersionDateTime = DateTime.fromISO(highestVersionTimestamp);
+    const higherTimestampExists = releaseResult.releases.some((release) => {
+      const releaseTimestamp = asTimestamp(release.releaseTimestamp);
+      if (!releaseTimestamp) {
+        return false;
+      }
+
+      return DateTime.fromISO(releaseTimestamp) > highestVersionDateTime;
+    });
+
+    if (!higherTimestampExists) {
+      releaseResult.latestReleaseTimestamp = highestVersionTimestamp;
+    }
   }
 
   return releaseResult;

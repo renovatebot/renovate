@@ -132,4 +132,24 @@ describe('workers/repository/process/lookup/timestamps', () => {
       expect(result.tags).toEqual({ latest: '1.0.0' });
     });
   });
+
+  it('handles ancient versions that are higher than the ones recently released', () => {
+    const releaseResult: ReleaseResult = {
+      releases: [
+        {
+          version: '99.99.99-alpha',
+          releaseTimestamp: asTimestamp('2010-01-01T00:00:00.000Z'),
+        },
+        {
+          version: '2.0.0',
+          releaseTimestamp: asTimestamp('2022-01-01T00:00:00.000Z'),
+        },
+      ],
+    };
+
+    const result = calculateLatestReleaseTimestamp(versioning, releaseResult);
+
+    expect(result).toBe(releaseResult);
+    expect(result.latestReleaseTimestamp).toBeUndefined();
+  });
 });
