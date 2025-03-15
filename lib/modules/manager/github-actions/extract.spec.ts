@@ -768,6 +768,25 @@ describe('modules/manager/github-actions/extract', () => {
       },
       {
         step: {
+          name: 'Pinning a minor version of uv',
+          uses: 'https://github.com/astral-sh/setup-uv@v5',
+          with: {
+            version: '0.4.x',
+          },
+        },
+        expected: [
+          {
+            currentValue: '0.4.x',
+            datasource: 'github-releases',
+            depName: 'astral-sh/uv',
+            depType: 'uses-with',
+            packageName: 'astral-sh/uv',
+            versioning: 'npm',
+          },
+        ],
+      },
+      {
+        step: {
           uses: 'pnpm/action-setup@v4',
           with: {
             version: 10,
