@@ -45,7 +45,7 @@ export class CustomDatasource extends Datasource {
 
     logger.trace(
       { data },
-      `Custom datasource fetcher '${format}' returned data.`,
+      `Custom datasource API fetcher '${format}' received data. Starting transformation.`,
     );
 
     for (const transformTemplate of transformTemplates) {
