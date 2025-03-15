@@ -106,6 +106,7 @@ nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
 oci 3.50.0
+opa 1.2.0
 opentofu 1.6.0
 packer 1.11.2
 perl 5.37.5
@@ -562,6 +563,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'oracle/oci-cli',
             depName: 'oci',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.2.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/opa',
+            depName: 'opa',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
