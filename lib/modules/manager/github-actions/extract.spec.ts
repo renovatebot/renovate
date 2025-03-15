@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../config/global';
+import { dump } from '../../../util/yaml';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
@@ -704,6 +705,110 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
         },
       ]);
+    });
+
+    it('extracts package from community actions', () => {
+      const yamlContent = dump({
+        jobs: {
+          build: {
+            steps: [
+              {
+                name: 'Pinning a minor version of uv',
+                uses: 'astral-sh/setup-uv@v5',
+                with: {
+                  version: 'latest',
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: 'latest',
+                },
+              },
+              {
+                name: 'Install gotestsum',
+                uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
+                with: {
+                  repo: 'gotestyourself/gotestsum',
+                  tag: 'v1.12.1',
+                  platform: 'linux',
+                  arch: 'amd64',
+                },
+              },
+              {
+                name: 'Pinning a minor version of uv',
+                uses: 'astral-sh/setup-uv@v5',
+                with: {
+                  version: '0.4.x',
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: 10,
+                },
+              },
+              {
+                uses: 'pnpm/action-setup@v4',
+                with: {
+                  version: '10.x',
+                },
+              },
+              {
+                uses: 'pdm-project/setup-pdm@v4.2',
+                with: {
+                  version: '1.2.3',
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
+        [
+          {
+            currentValue: 'v1.12.1',
+            datasource: 'github-releases',
+            depName: 'gotestyourself/gotestsum',
+            depType: 'uses-with',
+            packageName: 'gotestyourself/gotestsum',
+          },
+          {
+            currentValue: '0.4.x',
+            datasource: 'github-releases',
+            depName: 'astral-sh/uv',
+            depType: 'uses-with',
+            packageName: 'astral-sh/uv',
+            versioning: 'npm',
+          },
+          {
+            currentValue: '10',
+            datasource: 'npm',
+            depName: 'pnpm',
+            depType: 'uses-with',
+            packageName: 'pnpm',
+            versioning: 'npm',
+          },
+          {
+            currentValue: '10.x',
+            datasource: 'npm',
+            depName: 'pnpm',
+            depType: 'uses-with',
+            packageName: 'pnpm',
+            versioning: 'npm',
+          },
+          {
+            currentValue: '1.2.3',
+            datasource: 'pypi',
+            depName: 'pdm',
+            depType: 'uses-with',
+            packageName: 'pdm',
+            versioning: 'pep440',
+          },
+        ],
+      );
     });
   });
 });

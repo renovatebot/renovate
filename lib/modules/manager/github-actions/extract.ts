@@ -1,17 +1,22 @@
 import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NpmDatasource } from '../../datasource/npm';
+import { PypiDatasource } from '../../datasource/pypi';
 import * as dockerVersioning from '../../versioning/docker';
 import * as nodeVersioning from '../../versioning/node';
 import * as npmVersioning from '../../versioning/npm';
+import * as pep440versioning from '../../versioning/pep440';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -193,6 +198,89 @@ function extractRunners(runner: unknown): PackageDependency[] {
   return runners.map(extractRunner).filter(isNotNullOrUndefined);
 }
 
+const communityActions = [
+  {
+    // https://github.com/jaxxstorm/action-install-gh-release
+    use: /^jaxxstorm\/action-install-gh-release@.*$/,
+    schema: z
+      .object({ with: z.object({ repo: z.string(), tag: z.string() }) })
+      .transform(({ with: val }): PackageDependency => {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          depName: val.repo,
+          packageName: val.repo,
+          currentValue: val.tag,
+          depType: 'uses-with',
+        };
+      }),
+  },
+  {
+    // https://github.com/astral-sh/setup-uv
+    use: /^astral-sh\/setup-uv@.*$/,
+    schema: z
+      .object({ with: z.object({ version: z.string() }) })
+      .transform(({ with: val }): PackageDependency | undefined => {
+        if (val.version === 'latest') {
+          return;
+        }
+
+        return {
+          datasource: GithubReleasesDatasource.id,
+          depName: 'astral-sh/uv',
+          versioning: npmVersioning.id,
+          packageName: 'astral-sh/uv',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
+  {
+    // https://github.com/pnpm/action-setup
+    use: /^pnpm\/action-setup@.*$/,
+    schema: z
+      .object({
+        with: z.object({
+          version: z.union([
+            z.string(),
+            z.number().transform((s) => s.toString()),
+          ]),
+        }),
+      })
+      .transform(({ with: val }): PackageDependency | undefined => {
+        if (val.version === 'latest') {
+          return;
+        }
+
+        return {
+          datasource: NpmDatasource.id,
+          depName: 'pnpm',
+          versioning: npmVersioning.id,
+          packageName: 'pnpm',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
+  {
+    // https://github.com/astral-sh/setup-uv
+    use: /^pdm-project\/setup-pdm@.*$/,
+    schema: z
+      .object({
+        with: z.object({ version: z.string().refine((s) => s !== 'head') }),
+      })
+      .transform(({ with: val }): PackageDependency | undefined => {
+        return {
+          datasource: PypiDatasource.id,
+          depName: 'pdm',
+          versioning: pep440versioning.id,
+          packageName: 'pdm',
+          currentValue: val.version,
+          depType: 'uses-with',
+        };
+      }),
+  },
+];
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
@@ -246,6 +334,17 @@ function extractWithYAMLParser(
     };
 
     for (const step of coerceArray(job?.steps)) {
+      if (step.uses) {
+        for (const action of communityActions) {
+          if (action.use.test(step.uses)) {
+            const val = Result.parse(step, action.schema).unwrapOrNull();
+            if (val) {
+              deps.push(val);
+            }
+          }
+        }
+      }
+
       for (const [action, actionData] of Object.entries(actionsWithVersions)) {
         const actionName = `actions/setup-${action}`;
         if (
