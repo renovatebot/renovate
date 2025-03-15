@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../config/global';
-import { dump } from '../../../util/yaml';
+import * as yaml from '../../../util/yaml';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
@@ -840,7 +840,7 @@ describe('modules/manager/github-actions/extract', () => {
         ],
       },
     ])('extract from $step.uses', ({ step, expected }) => {
-      const yamlContent = dump({ jobs: { build: { steps: [step] } } });
+      const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
       const res = extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
