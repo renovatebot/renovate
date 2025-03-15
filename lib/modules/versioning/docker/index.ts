@@ -101,6 +101,23 @@ class DockerVersioningApi extends GenericVersioningApi {
     );
   }
 
+  valueToVersion(value: string): string {
+    if (!value) {
+      return value;
+    }
+
+    // Try to identify a pure semver prerelease first
+    if (this.parseSemverPrerelease(value)) {
+      return value;
+    }
+
+    // Remove any suffix after '-', e.g. '-alpine'
+    return value.split('-')[0];
+  }
+
+  // Allow upgrading from 1.2.3-4 to 1.2.4-5
+  allowUnstableMajorUpgrades = true;
+
   private parseSemverPrerelease(version: string): SemVer | null {
     const semver = parseSemver(version);
     if (!semver) {
@@ -115,20 +132,6 @@ class DockerVersioningApi extends GenericVersioningApi {
       return semver;
     }
     return null;
-  }
-
-  valueToVersion(value: string): string {
-    if (!value) {
-      return value;
-    }
-
-    // Try to identify a pure semver prerelease first
-    if (this.parseSemverPrerelease(value)) {
-      return value;
-    }
-
-    // Remove any suffix after '-', e.g. '-alpine'
-    return value.split('-')[0];
   }
 }
 
