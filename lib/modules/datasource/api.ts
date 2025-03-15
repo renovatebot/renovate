@@ -1,4 +1,5 @@
 import { ArtifactoryDatasource } from './artifactory';
+import { AwsEKSAddonDataSource } from './aws-eks-addon';
 import { AwsMachineImageDatasource } from './aws-machine-image';
 import { AwsRdsDatasource } from './aws-rds';
 import { AzureBicepResourceDatasource } from './azure-bicep-resource';
@@ -72,6 +73,7 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
+api.set(AwsEKSAddonDataSource.id, new AwsEKSAddonDataSource());
 api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
 api.set(AwsRdsDatasource.id, new AwsRdsDatasource());
 api.set(AzureBicepResourceDatasource.id, new AzureBicepResourceDatasource());
