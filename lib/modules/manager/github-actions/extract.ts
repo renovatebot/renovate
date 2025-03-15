@@ -198,88 +198,94 @@ function extractRunners(runner: unknown): PackageDependency[] {
   return runners.map(extractRunner).filter(isNotNullOrUndefined);
 }
 
-const communityActions = [
-  {
-    // https://github.com/jaxxstorm/action-install-gh-release
-    use: /^jaxxstorm\/action-install-gh-release@.*$/,
-    schema: z
-      .object({ with: z.object({ repo: z.string(), tag: z.string() }) })
-      .transform(({ with: val }): PackageDependency => {
-        return {
-          datasource: GithubReleasesDatasource.id,
-          depName: val.repo,
-          packageName: val.repo,
-          currentValue: val.tag,
-          depType: 'uses-with',
-        };
-      }),
-  },
-  {
-    // https://github.com/astral-sh/setup-uv
-    use: /^astral-sh\/setup-uv@.*$/,
-    schema: z
-      .object({ with: z.object({ version: z.string() }) })
-      .transform(({ with: val }): PackageDependency | undefined => {
-        if (val.version === 'latest') {
-          return;
-        }
+const communityActions = z.union([
+  z
+    .object({
+      // https://github.com/jaxxstorm/action-install-gh-release
+      uses: z
+        .string()
+        .regex(
+          /^(https:\/\/github\.com\/)?jaxxstorm\/action-install-gh-release@.*$/,
+        ),
+      with: z.object({ repo: z.string(), tag: z.string() }),
+    })
+    .transform(({ with: val }): PackageDependency => {
+      return {
+        datasource: GithubReleasesDatasource.id,
+        depName: val.repo,
+        packageName: val.repo,
+        currentValue: val.tag,
+        depType: 'uses-with',
+      };
+    }),
+  z
+    .object({
+      // https://github.com/astral-sh/setup-uv
+      uses: z
+        .string()
+        .regex(/^(https:\/\/github\.com\/)?astral-sh\/setup-uv@.*$/),
+      with: z.object({ version: z.string() }),
+    })
+    .transform(({ with: val }): PackageDependency | undefined => {
+      if (val.version === 'latest') {
+        return;
+      }
 
-        return {
-          datasource: GithubReleasesDatasource.id,
-          depName: 'astral-sh/uv',
-          versioning: npmVersioning.id,
-          packageName: 'astral-sh/uv',
-          currentValue: val.version,
-          depType: 'uses-with',
-        };
+      return {
+        datasource: GithubReleasesDatasource.id,
+        depName: 'astral-sh/uv',
+        versioning: npmVersioning.id,
+        packageName: 'astral-sh/uv',
+        currentValue: val.version,
+        depType: 'uses-with',
+      };
+    }),
+  z
+    .object({
+      // https://github.com/pnpm/action-setup
+      uses: z
+        .string()
+        .regex(/^(https:\/\/github\.com\/)?pnpm\/action-setup@.*$/),
+      with: z.object({
+        version: z.union([
+          z.string(),
+          z.number().transform((s) => s.toString()),
+        ]),
       }),
-  },
-  {
-    // https://github.com/pnpm/action-setup
-    use: /^pnpm\/action-setup@.*$/,
-    schema: z
-      .object({
-        with: z.object({
-          version: z.union([
-            z.string(),
-            z.number().transform((s) => s.toString()),
-          ]),
-        }),
-      })
-      .transform(({ with: val }): PackageDependency | undefined => {
-        if (val.version === 'latest') {
-          return;
-        }
+    })
+    .transform(({ with: val }): PackageDependency | undefined => {
+      if (val.version === 'latest') {
+        return;
+      }
 
-        return {
-          datasource: NpmDatasource.id,
-          depName: 'pnpm',
-          versioning: npmVersioning.id,
-          packageName: 'pnpm',
-          currentValue: val.version,
-          depType: 'uses-with',
-        };
-      }),
-  },
-  {
-    // https://github.com/astral-sh/setup-uv
-    use: /^pdm-project\/setup-pdm@.*$/,
-    schema: z
-      .object({
-        with: z.object({ version: z.string().refine((s) => s !== 'head') }),
-      })
-      .transform(({ with: val }): PackageDependency | undefined => {
-        return {
-          datasource: PypiDatasource.id,
-          depName: 'pdm',
-          versioning: pep440versioning.id,
-          packageName: 'pdm',
-          currentValue: val.version,
-          depType: 'uses-with',
-        };
-      }),
-  },
-];
+      return {
+        datasource: NpmDatasource.id,
+        depName: 'pnpm',
+        versioning: npmVersioning.id,
+        packageName: 'pnpm',
+        currentValue: val.version,
+        depType: 'uses-with',
+      };
+    }),
+  z
+    .object({
+      // https://github.com/astral-sh/setup-uv
+      uses: z
+        .string()
+        .regex(/^(https:\/\/github\.com\/)?pdm-project\/setup-pdm@.*$/),
+      with: z.object({ version: z.string().refine((s) => s !== 'head') }),
+    })
+    .transform(({ with: val }): PackageDependency | undefined => {
+      return {
+        datasource: PypiDatasource.id,
+        depName: 'pdm',
+        versioning: pep440versioning.id,
+        packageName: 'pdm',
+        currentValue: val.version,
+        depType: 'uses-with',
+      };
+    }),
+]);
 
 function extractWithYAMLParser(
   content: string,
@@ -335,13 +341,9 @@ function extractWithYAMLParser(
 
     for (const step of coerceArray(job?.steps)) {
       if (step.uses) {
-        for (const action of communityActions) {
-          if (action.use.test(step.uses)) {
-            const val = Result.parse(step, action.schema).unwrapOrNull();
-            if (val) {
-              deps.push(val);
-            }
-          }
+        const val = Result.parse(step, communityActions).unwrapOrNull();
+        if (val) {
+          deps.push(val);
         }
       }
 

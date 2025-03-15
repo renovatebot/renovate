@@ -707,67 +707,38 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('extracts package from community actions', () => {
-      const yamlContent = dump({
-        jobs: {
-          build: {
-            steps: [
-              {
-                name: 'Pinning a minor version of uv',
-                uses: 'astral-sh/setup-uv@v5',
-                with: {
-                  version: 'latest',
-                },
-              },
-              {
-                uses: 'pnpm/action-setup@v4',
-                with: {
-                  version: 'latest',
-                },
-              },
-              {
-                name: 'Install gotestsum',
-                uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
-                with: {
-                  repo: 'gotestyourself/gotestsum',
-                  tag: 'v1.12.1',
-                  platform: 'linux',
-                  arch: 'amd64',
-                },
-              },
-              {
-                name: 'Pinning a minor version of uv',
-                uses: 'astral-sh/setup-uv@v5',
-                with: {
-                  version: '0.4.x',
-                },
-              },
-              {
-                uses: 'pnpm/action-setup@v4',
-                with: {
-                  version: 10,
-                },
-              },
-              {
-                uses: 'pnpm/action-setup@v4',
-                with: {
-                  version: '10.x',
-                },
-              },
-              {
-                uses: 'pdm-project/setup-pdm@v4.2',
-                with: {
-                  version: '1.2.3',
-                },
-              },
-            ],
+    it.each([
+      {
+        step: {
+          uses: 'astral-sh/setup-uv@v5',
+          with: {
+            version: 'latest',
           },
         },
-      });
+        expected: [],
+      },
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
-        [
+      {
+        step: {
+          uses: 'pnpm/action-setup@v4',
+          with: {
+            version: 'latest',
+          },
+        },
+        expected: [],
+      },
+      {
+        step: {
+          name: 'Install gotestsum',
+          uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
+          with: {
+            repo: 'gotestyourself/gotestsum',
+            tag: 'v1.12.1',
+            platform: 'linux',
+            arch: 'amd64',
+          },
+        },
+        expected: [
           {
             currentValue: 'v1.12.1',
             datasource: 'github-releases',
@@ -775,6 +746,17 @@ describe('modules/manager/github-actions/extract', () => {
             depType: 'uses-with',
             packageName: 'gotestyourself/gotestsum',
           },
+        ],
+      },
+      {
+        step: {
+          name: 'Pinning a minor version of uv',
+          uses: 'astral-sh/setup-uv@v5',
+          with: {
+            version: '0.4.x',
+          },
+        },
+        expected: [
           {
             currentValue: '0.4.x',
             datasource: 'github-releases',
@@ -783,6 +765,16 @@ describe('modules/manager/github-actions/extract', () => {
             packageName: 'astral-sh/uv',
             versioning: 'npm',
           },
+        ],
+      },
+      {
+        step: {
+          uses: 'pnpm/action-setup@v4',
+          with: {
+            version: 10,
+          },
+        },
+        expected: [
           {
             currentValue: '10',
             datasource: 'npm',
@@ -791,6 +783,16 @@ describe('modules/manager/github-actions/extract', () => {
             packageName: 'pnpm',
             versioning: 'npm',
           },
+        ],
+      },
+      {
+        step: {
+          uses: 'pnpm/action-setup@v4',
+          with: {
+            version: '10.x',
+          },
+        },
+        expected: [
           {
             currentValue: '10.x',
             datasource: 'npm',
@@ -799,6 +801,16 @@ describe('modules/manager/github-actions/extract', () => {
             packageName: 'pnpm',
             versioning: 'npm',
           },
+        ],
+      },
+      {
+        step: {
+          uses: 'pdm-project/setup-pdm@v4.2',
+          with: {
+            version: '1.2.3',
+          },
+        },
+        expected: [
           {
             currentValue: '1.2.3',
             datasource: 'pypi',
@@ -808,6 +820,13 @@ describe('modules/manager/github-actions/extract', () => {
             versioning: 'pep440',
           },
         ],
+      },
+    ])('', async ({ step, expected }) => {
+      const yamlContent = dump({ jobs: { build: { steps: [step] } } });
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
+        expected,
       );
     });
   });
