@@ -262,7 +262,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchObject([]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('inflates new version if old version is inflated and kustomizeInflateHelmCharts is not enabled', async () => {
@@ -498,7 +498,7 @@ describe('modules/manager/kustomize/artifacts', () => {
       }),
     ).toBeNull();
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-    expect(execSnapshots).toMatchObject([]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('catches errors', async () => {
