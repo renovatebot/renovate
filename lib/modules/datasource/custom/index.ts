@@ -60,9 +60,11 @@ export class CustomDatasource extends Datasource {
       }
 
       try {
-        data = await expression.evaluate(data);
-
-        logger.trace({ data }, `Custom datasource evaluated data.`);
+        const modifiedData = await expression.evaluate(data);
+        
+        logger.trace({ before: data, after: modifiedData }, `Custom datasource transformed data.`);
+        
+        data = modifiedData
       } catch (err) {
         logger.once.warn(
           { err },
