@@ -72,6 +72,30 @@ describe('workers/repository/process/lookup/timestamps', () => {
       expect(result.bumpedAt).toBeUndefined();
     });
 
+    it('handles latest release with deprecation flag', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: asTimestamp('2021-01-01T00:00:00.000Z'),
+          },
+          {
+            version: '2.0.0',
+            releaseTimestamp: asTimestamp('2022-01-01T00:00:00.000Z'),
+          },
+          {
+            version: '3.0.0',
+            releaseTimestamp: asTimestamp('2023-01-01T00:00:00.000Z'),
+            isDeprecated: true,
+          },
+        ],
+      };
+
+      const result = calculateLatestReleaseBump(versioning, releaseResult);
+
+      expect(result.bumpedAt).toBeUndefined();
+    });
+
     it('handles latest release with invalid version', () => {
       const releaseResult: ReleaseResult = {
         releases: [
