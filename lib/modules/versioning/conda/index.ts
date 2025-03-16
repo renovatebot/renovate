@@ -84,6 +84,8 @@ function getNewValue({
     return null;
   }
 
+  currentValue = new VersionSpec(currentValue).toString();
+
   // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
   if (/^(\d+\.)+\*$/.test(currentValue)) {
     const newValue = pep440.api.getNewValue({
