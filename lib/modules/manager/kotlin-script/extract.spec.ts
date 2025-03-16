@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
 const customRepositoriesFileContent = Fixtures.get(

@@ -83,6 +83,7 @@
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "cake": "https://github.com/cake-build/cake",
+    "cake-issues": "https://github.com/cake-contrib/Cake.Issues",
     "capacitor": "https://github.com/ionic-team/capacitor",
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
     "chromely": "https://github.com/chromelyapps/Chromely",
@@ -278,7 +279,10 @@
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
-      "https://github.com/dotnet/sdk"
+      "https://github.com/dotnet/sdk",
+      "https://github.com/dotnet/windowsdesktop",
+      "https://github.com/dotnet/winforms",
+      "https://github.com/dotnet/wpf"
     ],
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
@@ -346,6 +350,7 @@
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
+    "istio": "https://github.com/istio/istio",
     "jackson": [
       "https://github.com/FasterXML/jackson",
       "https://github.com/FasterXML/jackson-annotations",
@@ -463,6 +468,7 @@
     "orleans": "https://github.com/dotnet/orleans",
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
+    "payloadcms": "https://github.com/payloadcms/payload",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
@@ -494,6 +500,7 @@
       "https://github.com/ReactTraining/react-router",
       "https://github.com/remix-run/react-router"
     ],
+    "react-spectrum": "https://github.com/adobe/react-spectrum",
     "reactivestack-cookies": "https://github.com/reactivestack/cookies",
     "reakit": "https://github.com/reakit/reakit",
     "redwood": "https://github.com/redwoodjs/redwood",
@@ -522,6 +529,7 @@
     "sentry-rust": "https://github.com/getsentry/sentry-rust",
     "serde": "https://github.com/serde-rs/serde",
     "serenity-js": "https://github.com/serenity-js/serenity-js",
+    "servicestack": "https://github.com/ServiceStack/ServiceStack",
     "shedlock": "https://github.com/lukas-krecan/ShedLock",
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
@@ -616,7 +624,8 @@
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
-    "swc": "https://github.com/swc-project/"
+    "swc": "https://github.com/swc-project/",
+    "twig": "https://github.com/twigphp/"
   },
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],

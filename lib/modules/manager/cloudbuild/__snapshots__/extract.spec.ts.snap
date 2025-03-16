@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/cloudbuild/extract extractPackageFile() extracts multiple image lines 1`] = `
+exports[`modules/manager/cloudbuild/extract > extractPackageFile() > extracts multiple image lines 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

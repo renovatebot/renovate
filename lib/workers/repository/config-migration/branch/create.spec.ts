@@ -1,25 +1,21 @@
 import { codeBlock } from 'common-tags';
 import type { Indent } from 'detect-indent';
-import { Fixtures } from '../../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../../test/util';
-import { fs, partial, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { Fixtures } from '~test/fixtures';
+import { fs, partial, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/config-migration/branch/create', () => {
   const raw = Fixtures.getJson('./renovate.json');
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting',
-  );
+  const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;

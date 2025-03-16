@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/presets/index getPreset gets linters 1`] = `
+exports[`config/presets/index > getPreset > gets linters 1`] = `
 {
   "description": [
     "All lint-related packages.",
@@ -20,13 +20,13 @@ exports[`config/presets/index getPreset gets linters 1`] = `
 }
 `;
 
-exports[`config/presets/index getPreset handles 404 packages 1`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages 1`] = `undefined`;
 
-exports[`config/presets/index getPreset handles 404 packages 2`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages 2`] = `undefined`;
 
-exports[`config/presets/index getPreset handles 404 packages 3`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages 3`] = `undefined`;
 
-exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = `
+exports[`config/presets/index > resolvePreset > migrates automerge in presets 1`] = `
 {
   "automergeType": "pr",
   "branchPrefix": "renovate/",
@@ -136,7 +136,7 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
 }
 `;
 
-exports[`config/presets/index resolvePreset resolves eslint 1`] = `
+exports[`config/presets/index > resolvePreset > resolves eslint 1`] = `
 {
   "matchPackageNames": [
     "@types/eslint",
@@ -153,7 +153,7 @@ exports[`config/presets/index resolvePreset resolves eslint 1`] = `
 }
 `;
 
-exports[`config/presets/index resolvePreset resolves linters 1`] = `
+exports[`config/presets/index > resolvePreset > resolves linters 1`] = `
 {
   "description": [
     "All lint-related packages.",
@@ -183,7 +183,7 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
 }
 `;
 
-exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
+exports[`config/presets/index > resolvePreset > resolves nested groups 1`] = `
 {
   "description": [
     "Update lint packages automatically if tests pass.",
@@ -221,7 +221,7 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
 }
 `;
 
-exports[`config/presets/index resolvePreset resolves self-hosted presets without baseConfig 1`] = `
+exports[`config/presets/index > resolvePreset > resolves self-hosted presets without baseConfig 1`] = `
 {
   "labels": [
     "self-hosted resolved",

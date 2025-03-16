@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../../test/fixtures';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
 import type { BranchUpgradeConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
+import { Fixtures } from '~test/fixtures';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -1371,6 +1371,44 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@1cf887 # tag=v2.0.0
+        `,
+      );
+    });
+
+    it('github-actions: failes to update currentDigestShort', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@2485f4 # tag=v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigestShort = 'wrong';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'actions/checkout@2485f4 # tag=v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflow.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@2485f4 # tag=v2.0.0
         `,
       );
     });

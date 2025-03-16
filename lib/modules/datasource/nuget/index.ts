@@ -38,7 +38,7 @@ export class NugetDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`nuget.getReleases(${packageName})`);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

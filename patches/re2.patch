@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index a56ab59ef647288ee6028abd2b1780eaa92ebc9d..ec2c43e63f3134b6d54d616b2ef715447f873bbe 100644
+--- a/package.json
++++ b/package.json
+@@ -28,7 +28,7 @@
+     "test": "node tests/tests.js",
+     "ts-test": "tsc",
+     "save-to-github": "save-to-github-cache --artifact build/Release/re2.node",
+-    "install": "install-from-cache --artifact build/Release/re2.node --host-var RE2_DOWNLOAD_MIRROR --skip-path-var RE2_DOWNLOAD_SKIP_PATH --skip-ver-var RE2_DOWNLOAD_SKIP_VER || node-gyp -j max rebuild",
++    "install": "npm_package_github=https://github.com/uhop/node-re2 npm_package_scripts_verify_build=true install-from-cache --artifact build/Release/re2.node --host-var RE2_DOWNLOAD_MIRROR --skip-path-var RE2_DOWNLOAD_SKIP_PATH --skip-ver-var RE2_DOWNLOAD_SKIP_VER || node-gyp -j max rebuild",
+     "verify-build": "node scripts/verify-build.js",
+     "build:dev": "node-gyp -j max build --debug",
+     "build": "node-gyp -j max build",

@@ -86,15 +86,11 @@ export function getQueryString(params: Record<string, any>): string {
 }
 
 export function isHttpUrl(url: unknown): boolean {
-  if (!is.nonEmptyString(url)) {
+  if (!is.nonEmptyString(url) && !is.urlInstance(url)) {
     return false;
   }
-  try {
-    const { protocol } = new URL(url);
-    return protocol === 'https:' || protocol === 'http:';
-  } catch {
-    return false;
-  }
+  const protocol = parseUrl(url)?.protocol;
+  return protocol === 'https:' || protocol === 'http:';
 }
 
 export function parseUrl(url: URL | string | undefined | null): URL | null {

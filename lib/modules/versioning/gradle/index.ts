@@ -19,7 +19,7 @@ export const urls = [
   'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
+export const supportedRangeStrategies: RangeStrategy[] = ['pin', 'bump'];
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 

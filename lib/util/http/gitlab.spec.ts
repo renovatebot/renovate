@@ -1,9 +1,10 @@
 import { HTTPError } from 'got';
-import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 hostRules.add({
   hostType: 'gitlab',
@@ -36,18 +37,26 @@ describe('util/http/gitlab', () => {
       .scope(gitlabApiHost)
       .get('/api/v4/some-url')
       .reply(200, ['a'], {
-        link: '<https://gitlab.com/api/v4/some-url&page=2>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://gitlab.com/api/v4/some-url&page=2>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
       })
       .get('/api/v4/some-url&page=2')
       .reply(200, ['b', 'c'], {
-        link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+        link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
       })
       .get('/api/v4/some-url&page=3')
-      .reply(200, ['d']);
+      .reply(200, ['d'], {
+        link: '<https://gitlab.com/api/v4/some-url&page=4>; rel="next", <https://gitlab.com/api/v4/some-url&page=4>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=4')
+      .reply(500);
     const res = await gitlabApi.getJsonUnchecked('some-url', {
       paginate: true,
     });
     expect(res.body).toHaveLength(4);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Pagination error',
+    );
   });
 
   it('paginates with GITLAB_IGNORE_REPO_URL set', async () => {
@@ -114,7 +123,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Response code 403 (Forbidden)"`,
+        `[HTTPError: Response code 403 (Forbidden)]`,
       );
     });
 
@@ -123,7 +132,7 @@ describe('util/http/gitlab', () => {
       await expect(
         gitlabApi.get('some-url'),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Response code 404 (Not Found)"`,
+        `[HTTPError: Response code 404 (Not Found)]`,
       );
     });
 
@@ -138,7 +147,7 @@ describe('util/http/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/some-url')
-        .replyWithError({ code: 'EAI_AGAIN' });
+        .replyWithError(httpMock.error({ code: 'EAI_AGAIN' }));
       await expect(gitlabApi.get('some-url')).rejects.toThrow(
         EXTERNAL_HOST_ERROR,
       );

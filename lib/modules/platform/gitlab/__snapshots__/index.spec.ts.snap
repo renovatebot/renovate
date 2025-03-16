@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
+exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should return the PR object 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -14,22 +14,7 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the
 }
 `;
 
-exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip deprecated draft prefix from title 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "hasAssignees": false,
-  "isDraft": true,
-  "number": 91,
-  "sourceBranch": "some-branch",
-  "state": "open",
-  "targetBranch": "master",
-  "title": "some change",
-}
-`;
-
-exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draft prefix from title 1`] = `
+exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should strip deprecated draft prefix from title 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -44,7 +29,22 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draf
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft prefix from returned title 1`] = `
+exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should strip draft prefix from title 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "hasAssignees": false,
+  "isDraft": true,
+  "number": 91,
+  "sourceBranch": "some-branch",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "some change",
+}
+`;
+
+exports[`modules/platform/gitlab/index > getPr(prNo) > removes deprecated draft prefix from returned title 1`] = `
 {
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
@@ -59,7 +59,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft pref
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from returned title 1`] = `
+exports[`modules/platform/gitlab/index > getPr(prNo) > removes draft prefix from returned title 1`] = `
 {
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
@@ -74,7 +74,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from ret
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 1`] = `
+exports[`modules/platform/gitlab/index > getPr(prNo) > returns the PR 1`] = `
 {
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
@@ -88,7 +88,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 1`] = `
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisting branch 1`] = `
+exports[`modules/platform/gitlab/index > getPr(prNo) > returns the PR with nonexisting branch 1`] = `
 {
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
@@ -102,7 +102,7 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisti
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] = `
+exports[`modules/platform/gitlab/index > getPr(prNo) > returns the mergeable PR 1`] = `
 {
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
@@ -116,21 +116,21 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] 
 }
 `;
 
-exports[`modules/platform/gitlab/index initPlatform() should accept custom endpoint 1`] = `
+exports[`modules/platform/gitlab/index > initPlatform() > should accept custom endpoint 1`] = `
 {
   "endpoint": "https://gitlab.renovatebot.com/",
   "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 
-exports[`modules/platform/gitlab/index initPlatform() should default to gitlab.com 1`] = `
+exports[`modules/platform/gitlab/index > initPlatform() > should default to gitlab.com 1`] = `
 {
   "endpoint": "https://gitlab.com/api/v4/",
   "gitAuthor": "Renovate Bot <a@b.com>",
 }
 `;
 
-exports[`modules/platform/gitlab/index initRepo should fall back respecting when GITLAB_IGNORE_REPO_URL is set 1`] = `
+exports[`modules/platform/gitlab/index > initRepo > should fall back respecting when GITLAB_IGNORE_REPO_URL is set 1`] = `
 [
   [
     {
@@ -146,7 +146,7 @@ exports[`modules/platform/gitlab/index initRepo should fall back respecting when
 ]
 `;
 
-exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gitUrl is set to ssh 1`] = `
+exports[`modules/platform/gitlab/index > initRepo > should use ssh_url_to_repo if gitUrl is set to ssh 1`] = `
 [
   [
     {
@@ -162,7 +162,7 @@ exports[`modules/platform/gitlab/index initRepo should use ssh_url_to_repo if gi
 ]
 `;
 
-exports[`modules/platform/gitlab/index massageMarkdown(input) returns updated pr body 1`] = `
+exports[`modules/platform/gitlab/index > massageMarkdown(input) > returns updated pr body 1`] = `
 "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
 
   Merge Requests are the best, here are some MRs.

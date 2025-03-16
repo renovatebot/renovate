@@ -47,7 +47,7 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes['root'].inputs;
+  const rootInputs = flakeLock.nodes.root.inputs;
 
   if (!rootInputs) {
     logger.debug(

@@ -71,6 +71,7 @@ export interface PackageFileContent<T = Record<string, any>>
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  fileFormat?: string;
 }
 
 export interface PackageFile<T = Record<string, any>>
@@ -191,6 +192,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   registryUrls?: string[] | null;
   currentVersion?: string;
   replaceString?: string;
+  replacementApproach?: 'replace' | 'alias';
 }
 
 export interface ArtifactNotice {
@@ -315,4 +317,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+
+  isLockFileMaintenance?: boolean;
 }

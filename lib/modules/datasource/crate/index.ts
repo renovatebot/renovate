@@ -58,7 +58,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 6 -- should never happen */
     if (!registryUrl) {
       logger.warn(
         'crate datasource: No registryUrl specified, cannot perform getReleases',
@@ -155,7 +155,9 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      type Response = { crate: CrateMetadata };
+      interface Response {
+        crate: CrateMetadata;
+      }
       const response = await this.http.getJsonUnchecked<Response>(crateUrl);
       return response.body.crate;
     } catch (err) {
@@ -191,7 +193,7 @@ export class CrateDatasource extends Datasource {
       );
       const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
-        return (await this.http.get(crateUrl)).body;
+        return (await this.http.getText(crateUrl)).body;
       } catch (err) {
         this.handleGenericErrors(err);
       }
@@ -252,7 +254,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

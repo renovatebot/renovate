@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { regexMatches } from '../../../../test/util';
-import { extractPackageFile } from '../../../modules/manager/custom/regex';
+import { extractPackageFile } from '../../../modules/manager';
 import { presets } from './custom-managers';
+import { regexMatches } from '~test/util';
 
 describe('config/presets/internal/custom-managers', () => {
   describe('Update `$schema` version in biome.json', () => {
-    const customManager = presets['biomeVersions'].customManagers?.[0];
+    const customManager = presets.biomeVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -15,6 +15,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'jsonata',
         fileContent,
         'biome.json',
         customManager!,
@@ -25,7 +26,6 @@ describe('config/presets/internal/custom-managers', () => {
           currentValue: '1.7.3',
           datasource: 'npm',
           depName: '@biomejs/biome',
-          replaceString: '"https://biomejs.dev/schemas/1.7.3/schema.json"',
         },
       ]);
     });
@@ -46,7 +46,7 @@ describe('config/presets/internal/custom-managers', () => {
 
   describe('Update `_VERSION` variables in Bitbucket Pipelines', () => {
     const customManager =
-      presets['bitbucketPipelinesVersions'].customManagers?.[0];
+      presets.bitbucketPipelinesVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -79,6 +79,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'bitbucket-pipelines.yml',
         customManager!,
@@ -166,7 +167,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `_VERSION` variables in Dockerfiles', () => {
-    const customManager = presets['dockerfileVersions'].customManagers?.[0];
+    const customManager = presets.dockerfileVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -194,6 +195,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'Dockerfile',
         customManager!,
@@ -266,7 +268,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `_VERSION` environment variables in GitHub Action files', () => {
-    const customManager = presets['githubActionsVersions'].customManagers?.[0];
+    const customManager = presets.githubActionsVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -302,6 +304,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'github-workflow.yaml',
         customManager!,
@@ -380,7 +383,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `_VERSION` environment variables in GitLab pipeline file', () => {
-    const customManager = presets['gitlabPipelineVersions'].customManagers?.[0];
+    const customManager = presets.gitlabPipelineVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -401,6 +404,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'gitlab-ci.yml',
         customManager!,
@@ -455,8 +459,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `appVersion` value in Helm chart Chart.yaml', () => {
-    const customManager =
-      presets['helmChartYamlAppVersions'].customManagers?.[0];
+    const customManager = presets.helmChartYamlAppVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -472,6 +475,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'Chart.yaml',
         customManager!,
@@ -516,7 +520,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('Update `_VERSION` variables in Makefiles', () => {
-    const customManager = presets['makefileVersions'].customManagers?.[0];
+    const customManager = presets.makefileVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -534,6 +538,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'gitlab-ci.yml',
         customManager!,
@@ -589,7 +594,7 @@ describe('config/presets/internal/custom-managers', () => {
   });
 
   describe('finds dependencies in pom.xml properties', () => {
-    const customManager = presets['mavenPropertyVersions'].customManagers?.[0];
+    const customManager = presets.mavenPropertyVersions.customManagers?.[0];
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
@@ -604,6 +609,7 @@ describe('config/presets/internal/custom-managers', () => {
       `;
 
       const res = await extractPackageFile(
+        'regex',
         fileContent,
         'pom.xml',
         customManager!,

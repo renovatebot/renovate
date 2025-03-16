@@ -261,7 +261,11 @@ export async function getPrList(): Promise<AzurePr[]> {
     do {
       fetchedPrs = await azureApiGit.getPullRequests(
         config.repoId,
-        { status: 4 },
+        {
+          status: 4,
+          // fetch only prs directly created on the repo and not by forks
+          sourceRepositoryId: config.project,
+        },
         config.project,
         0,
         skip,
@@ -887,7 +891,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiGit = await azureApi.gitApi();
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
-  const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const repo = repos.find((c) => c.id === config.repoId)!;
   const requiredReviewerPrefix = 'required:';
   const validReviewers = new Set<string>();
 

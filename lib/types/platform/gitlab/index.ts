@@ -1,9 +1,9 @@
 import type { GitTreeNode } from '../../git';
 
-export type GitLabBranch = {
+export interface GitLabBranch {
   default: boolean;
   name: string;
-};
+}
 
 /**
  * https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree

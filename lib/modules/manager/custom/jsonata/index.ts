@@ -2,9 +2,11 @@ import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
+import { parse as parseToml } from '../../../../util/toml';
 import { parseYaml } from '../../../../util/yaml';
 import type { PackageFileContent } from '../../types';
-import type { JsonataExtractConfig } from './types';
+import { validMatchFields } from '../utils';
+import type { JSONataManagerTemplates, JsonataExtractConfig } from './types';
 import { handleMatching } from './utils';
 
 export const categories: Category[] = ['custom'];
@@ -29,6 +31,9 @@ export async function extractPackageFile(
       case 'yaml':
         json = parseYaml(content);
         break;
+      case 'toml':
+        json = parseToml(content);
+        break;
     }
   } catch (err) {
     logger.debug(
@@ -47,7 +52,20 @@ export async function extractPackageFile(
     return null;
   }
 
-  return {
+  const res: PackageFileContent & JSONataManagerTemplates = {
     deps,
+    matchStrings: config.matchStrings,
+    fileFormat: config.fileFormat,
   };
+
+  // copy over templates for autoreplace
+  for (const field of validMatchFields.map(
+    (f) => `${f}Template` as keyof JSONataManagerTemplates,
+  )) {
+    if (config[field]) {
+      res[field] = config[field];
+    }
+  }
+
+  return res;
 }

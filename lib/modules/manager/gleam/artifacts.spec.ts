@@ -1,18 +1,14 @@
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec as _exec } from '../../../util/exec';
+import { exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
-import * as _fs from '../../../util/fs';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/exec');
-jest.mock('../../../util/fs');
-
-const exec = mocked(_exec);
-const fs = mocked(_fs);
+vi.mock('../../../util/exec');
+vi.mock('../../../util/fs');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
@@ -81,7 +77,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('supports lockFileMaintenance', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
@@ -98,7 +94,7 @@ describe('modules/manager/gleam/artifacts', () => {
 
     it('returns null if lockfile content unchanged', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
-      updateArtifact.config.updateType = 'lockFileMaintenance';
+      updateArtifact.config.isLockFileMaintenance = true;
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
@@ -115,7 +111,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
-      exec.mockRejectedValueOnce(execError);
+      vi.mocked(exec).mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
       );
@@ -142,7 +138,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock.toString());
-      exec.mockRejectedValueOnce(execError);
+      vi.mocked(exec).mockRejectedValueOnce(execError);
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {

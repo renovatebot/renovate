@@ -111,7 +111,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
   const dependencyDashboardAllRateLimited =
     checkOpenAllRateLimitedPR(issueBody);
-  dependencyDashboardChecks['configMigrationCheckboxState'] =
+  dependencyDashboardChecks.configMigrationCheckboxState =
     getConfigMigrationCheckboxState(issueBody);
   return {
     dependencyDashboardChecks,
@@ -183,7 +183,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   if (repoProblems.size) {
     newIssueBody += '## Repository problems\n\n';
     const repoProblemsHeader =
-      config.customizeDashboard?.['repoProblemsHeader'] ??
+      config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
     newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
 

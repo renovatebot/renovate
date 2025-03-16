@@ -1,8 +1,8 @@
-export type GitTreeNode = {
+export interface GitTreeNode {
   type: 'tree' | 'blob';
   path: string;
   mode: string;
-};
+}
 
 export type GitProtocol = 'ssh' | 'http' | 'https';
 

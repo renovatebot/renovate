@@ -1,14 +1,15 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import type { RenovateLogger } from './renovate-logger';
+import { ProblemStream } from './utils';
 import {
   addMeta,
   addStream,
   clearProblems,
+  createDefaultStreams,
   getContext,
   getProblems,
   levels,
@@ -19,15 +20,16 @@ import {
   setMeta,
   withMeta,
 } from '.';
+import { partial } from '~test/util';
 
 const initialContext = 'initial_context';
 
-jest.unmock('.');
-jest.mock('nanoid', () => ({
+vi.unmock('.');
+vi.mock('nanoid', () => ({
   nanoid: () => 'initial_context',
 }));
 
-const bunyanDebugSpy = jest.spyOn(bunyan.prototype, 'debug');
+const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
   it('inits', () => {
@@ -161,6 +163,18 @@ describe('logger/index', () => {
     });
   });
 
+  describe('createDefaultStreams', () => {
+    it('creates log file stream', () => {
+      expect(
+        createDefaultStreams('info', new ProblemStream(), 'file.log'),
+      ).toMatchObject([
+        { name: 'stdout', type: 'raw' },
+        { name: 'problems', type: 'raw' },
+        { name: 'logfile' },
+      ]);
+    });
+  });
+
   it('sets level', () => {
     expect(logLevel()).toBeDefined(); // depends on passed env
     expect(() => levels('stdout', 'debug')).not.toThrow();
@@ -169,8 +183,8 @@ describe('logger/index', () => {
 
   it('should create a child logger', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
-    const loggerSpy = jest.spyOn(logger, 'debug');
-    const childLoggerSpy = jest.spyOn(childLogger, 'debug');
+    const loggerSpy = vi.spyOn(logger, 'debug');
+    const childLoggerSpy = vi.spyOn(childLogger, 'debug');
 
     childLogger.debug('test');
 
@@ -222,7 +236,7 @@ describe('logger/index', () => {
 
   it('supports file-based logging', () => {
     let chunk = '';
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -245,7 +259,7 @@ describe('logger/index', () => {
 
   it('handles cycles', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {
@@ -273,7 +287,7 @@ describe('logger/index', () => {
 
   it('sanitizes secrets', () => {
     let logged: Record<string, any> = {};
-    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+    vi.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
       partial<WriteStream>({
         writable: true,
         write(x: string): boolean {

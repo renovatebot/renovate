@@ -1,12 +1,4 @@
 import { codeBlock } from 'common-tags';
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -50,39 +42,39 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { fs, git, partial, platform, scm } from '~test/util';
 
-jest.mock('./get-updated');
-jest.mock('./schedule');
-jest.mock('./check-existing');
-jest.mock('./reuse');
-jest.mock('../../../../modules/manager/npm/post-update');
-jest.mock('./automerge');
-jest.mock('./commit');
-jest.mock('../pr');
-jest.mock('../pr/automerge');
-jest.mock('../../changelog');
-jest.mock('../../../../util/exec');
-jest.mock('../../../../util/merge-confidence');
-jest.mock('../../../../util/sanitize');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('../../../global/limits');
-jest.mock('../../../../util/cache/repository');
+vi.mock('./get-updated');
+vi.mock('./schedule');
+vi.mock('./check-existing');
+vi.mock('./reuse');
+vi.mock('../../../../modules/manager/npm/post-update');
+vi.mock('./automerge');
+vi.mock('./commit');
+vi.mock('../pr');
+vi.mock('../pr/automerge');
+vi.mock('../../changelog');
+vi.mock('../../../../util/exec');
+vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/sanitize');
+vi.mock('../../../../util/fs');
+vi.mock('../../../global/limits');
+vi.mock('../../../../util/cache/repository');
 
-const getUpdated = mocked(_getUpdated);
-const schedule = mocked(_schedule);
-const checkExisting = mocked(_checkExisting);
-const reuse = mocked(_reuse);
-const npmPostExtract = mocked(_npmPostExtract);
-const automerge = mocked(_automerge);
-const commit = mocked(_commit);
-const mergeConfidence = mocked(_mergeConfidence);
-const prAutomerge = mocked(_prAutomerge);
-const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
-const sanitize = mocked(_sanitize);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const getUpdated = vi.mocked(_getUpdated);
+const schedule = vi.mocked(_schedule);
+const checkExisting = vi.mocked(_checkExisting);
+const reuse = vi.mocked(_reuse);
+const npmPostExtract = vi.mocked(_npmPostExtract);
+const automerge = vi.mocked(_automerge);
+const commit = vi.mocked(_commit);
+const mergeConfidence = vi.mocked(_mergeConfidence);
+const prAutomerge = vi.mocked(_prAutomerge);
+const prWorker = vi.mocked(_prWorker);
+const exec = vi.mocked(_exec);
+const sanitize = vi.mocked(_sanitize);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -114,9 +106,9 @@ describe('workers/repository/update/branch/index', () => {
         // eslint-disable-next-line require-await, @typescript-eslint/require-await
         async (config) => config,
       );
-      prWorker.ensurePr = jest.fn();
-      prWorker.getPlatformPrOptions = jest.fn();
-      prAutomerge.checkAutoMerge = jest.fn();
+      prWorker.ensurePr = vi.fn();
+      prWorker.getPlatformPrOptions = vi.fn();
+      prAutomerge.checkAutoMerge = vi.fn();
       // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
@@ -145,7 +137,6 @@ describe('workers/repository/update/branch/index', () => {
         usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
-      // TODO: fix types, jest is using wrong overload (#22198)
       sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });
@@ -2322,7 +2313,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard All Pending approval', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2359,7 +2350,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard open all rate-limited', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2396,7 +2387,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2435,7 +2426,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
         }),
       );
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
         }),

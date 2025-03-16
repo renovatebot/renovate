@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../../test/util';
 import type { JsonataExtractConfig } from './types';
 import { defaultConfig, extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 describe('modules/manager/custom/jsonata/index', () => {
   it('has default config', () => {
@@ -67,6 +67,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -119,6 +120,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -190,6 +192,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const res = await extractPackageFile(json, 'unused', config);
 
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -313,6 +316,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     };
     const res = await extractPackageFile('{}', 'unused', config);
     expect(res).toMatchObject({
+      ...config,
       deps: [
         {
           depName: 'foo',
@@ -323,6 +327,88 @@ describe('modules/manager/custom/jsonata/index', () => {
           depName: 'bar',
           currentValue: '1.0.0',
           datasource: 'npm',
+        },
+      ],
+    });
+  });
+
+  it('populates manager config and jsonata manager template fields in extract result', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+      // should be included present extract result as it is not valid jsonata manager template
+      // adding here for testing
+      autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+        {
+          depName: 'bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+    });
+  });
+
+  it('extracts toml', async () => {
+    const json = codeBlock`
+        [[packages]]
+        dep_name = "foo"
+        package_name = "fii"
+        current_value = "1.2.3"
+        current_digest = "1234"
+        data_source = "nuget"
+        versioning = "maven"
+        extract_version = "custom-extract-version"
+        registry_url = "https://registry.npmjs.org"
+        dep_type = "dev"
+
+        some = true
+    `;
+    const config = {
+      fileFormat: 'toml',
+      matchStrings: [
+        `packages.{
+            "depName": dep_name,
+            "packageName": package_name,
+            "currentValue": current_value,
+            "currentDigest": current_digest,
+            "datasource": data_source,
+            "versioning": versioning,
+            "extractVersion": extract_version,
+            "registryUrl": registry_url,
+            "depType": dep_type
+        }`,
+      ],
+    };
+    const res = await extractPackageFile(json, 'unused', config);
+
+    expect(res).toMatchObject({
+      ...config,
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'fii',
+          currentValue: '1.2.3',
+          currentDigest: '1234',
+          datasource: 'nuget',
+          versioning: 'maven',
+          extractVersion: 'custom-extract-version',
+          registryUrls: ['https://registry.npmjs.org/'],
+          depType: 'dev',
         },
       ],
     });

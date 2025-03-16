@@ -57,6 +57,11 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: Config = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  renovateUserUuid = null;
+}
+
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
@@ -164,7 +169,7 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url, {
+  const res = await bitbucketHttp.getText(url, {
     cacheProvider: repoCacheProvider,
     memCache: true,
   });
@@ -517,7 +522,11 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; title: string; content?: { raw: string } };
+interface BbIssue {
+  id: number;
+  title: string;
+  content?: { raw: string };
+}
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
@@ -600,7 +609,7 @@ export async function ensureIssue({
   logger.debug(`ensureIssue()`);
   /* istanbul ignore if */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.debug('Issues are disabled - cannot ensureIssue');
     logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }

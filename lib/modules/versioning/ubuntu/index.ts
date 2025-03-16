@@ -66,7 +66,7 @@ function isStable(version: string): boolean {
 
 function getVersionByCodename(version: string): string {
   const datedImgVersion = getDatedContainerImageCodename(version);
-  const getVersion = datedImgVersion ? datedImgVersion : version;
+  const getVersion = datedImgVersion ?? version;
   return di.getVersionByCodename(getVersion);
 }
 

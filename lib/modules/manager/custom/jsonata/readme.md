@@ -1,6 +1,6 @@
-With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON or YAML files, that are not detected by its other built-in package managers.
+With `customManagers` using `JSONata` queries you can configure Renovate so it finds dependencies in JSON, TOML and YAML files, that are not detected by its other built-in package managers.
 
-Renovate uses the `jsonata` package to process the `json` or `yaml` file content using the queries.
+Renovate uses the `jsonata` package to process the file content using the queries, after the content has been parsed into `json` format.
 
 For more on the jsonata query language, read the [jsonata query language site](https://docs.jsonata.org/overview.html).
 
@@ -67,7 +67,7 @@ When you configure a JSONata manager, use the following syntax:
 Overwrite the `<query>` placeholder text with your [JSONata](https://docs.jsonata.org/overview.html) query.
 The JSONata query transforms the content to a JSON object, similar to the this:
 
-```javascript dependencies information extracted usig jsonata query
+```javascript title="dependencies information extracted usig jsonata query"
 [
   {
     depName: 'some_dep',
@@ -224,6 +224,22 @@ packages:
 packages:
   - version: 1.2.5
     package: bar
+```
+
+Query:
+
+```
+packages.{ "depName": package, "currentValue": version }
+```
+
+```toml title="JSONata manager config to extract deps from a toml file"
+[[packages]]
+version = "1.2.3"
+package = "foo"
+
+[[packages]]
+version = "1.2.2"
+package = "bar"
 ```
 
 Query:
