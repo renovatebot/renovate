@@ -43,7 +43,10 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    logger.trace({ data }, `Custom manager fetcher '${format}' returned data.`);
+    logger.trace(
+      { data },
+      `Custom datasource API fetcher '${format}' received data. Starting transformation.`,
+    );
 
     for (const transformTemplate of transformTemplates) {
       const expression = getExpression(transformTemplate);
@@ -57,7 +60,14 @@ export class CustomDatasource extends Datasource {
       }
 
       try {
-        data = await expression.evaluate(data);
+        const modifiedData = await expression.evaluate(data);
+
+        logger.trace(
+          { before: data, after: modifiedData },
+          `Custom datasource transformed data.`,
+        );
+
+        data = modifiedData;
       } catch (err) {
         logger.once.warn(
           { err },
