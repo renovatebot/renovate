@@ -41,7 +41,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     const filter = res.data;
 
     const cmd = new DescribeAddonVersionsCommand({
-      kubernetesVersion: filter?.kubernetesVersion,
+      kubernetesVersion: filter.kubernetesVersion,
       addonName: filter.addonName,
       maxResults: 1,
     });
