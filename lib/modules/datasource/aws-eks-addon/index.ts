@@ -4,7 +4,9 @@ import {
   EKSClient,
 } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { cache } from '../../../util/cache/package/decorator';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon';
 import { Datasource } from '../datasource';
@@ -52,13 +54,14 @@ export class AwsEKSAddonDataSource extends Datasource {
         .flatMap((addon) => {
           return addon.addonVersions;
         })
+        .filter(is.nonEmptyObject)
         .map((versionInfo) => ({
-          version: versionInfo?.addonVersion ?? '',
+          version: versionInfo.addonVersion ?? '',
           default:
-            versionInfo?.compatibilities?.some(
+            versionInfo.compatibilities?.some(
               (comp: Compatibility): boolean | undefined => comp.defaultVersion,
             ) ?? false,
-          compatibleWith: versionInfo?.compatibilities?.flatMap(
+          compatibleWith: versionInfo.compatibilities?.flatMap(
             (comp: Compatibility): string | undefined => comp.clusterVersion,
           ),
         }))
