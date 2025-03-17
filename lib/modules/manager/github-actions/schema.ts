@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseRecord, Yaml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Yaml } from '../../../util/schema-utils';
 
 export const WorkflowJobsSchema = Yaml.pipe(
   z.object({
@@ -23,8 +23,14 @@ export const WorkflowJobsSchema = Yaml.pipe(
         'runs-on': z
           .union([z.string().transform((v) => [v]), z.array(z.string())])
           .catch([]),
+        steps: LooseArray(
+          z.object({
+            uses: z.string(),
+            with: LooseRecord(z.string()),
+          }),
+        ).catch([]),
       }),
-    ).catch({}),
+    ),
   }),
 )
   .transform((v) => Object.values(v.jobs))

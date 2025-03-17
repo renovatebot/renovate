@@ -14,11 +14,14 @@ export class GithubRunnersDatasource extends Datasource {
    * Deprecated runners must have the `isDeprecated: true` property.
    * Stable runners should have no extra properties.
    * For more details, read the github-runners datasource readme.
+   * Check https://github.blog/changelog/label/actions/ for stable and deprecation dates.
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
       { version: '24.04' },
+      { version: '24.04-arm', isStable: false },
       { version: '22.04' },
+      { version: '22.04-arm', isStable: false },
       { version: '20.04', isDeprecated: true },
       { version: '18.04', isDeprecated: true },
       { version: '16.04', isDeprecated: true },

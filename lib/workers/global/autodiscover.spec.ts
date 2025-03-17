@@ -4,13 +4,14 @@ import * as _ghApi from '../../modules/platform/github';
 import * as _hostRules from '../../util/host-rules';
 import { autodiscoverRepositories } from './autodiscover';
 
-jest.mock('../../modules/platform/github');
-jest.unmock('../../modules/platform');
-jest.unmock('../../modules/platform/scm');
+vi.mock('../../modules/platform/github');
+vi.mock('../../util/host-rules');
+vi.unmock('../../modules/platform');
+vi.unmock('../../modules/platform/scm');
 
 // imports are readonly
-const hostRules = _hostRules;
-const ghApi: jest.Mocked<typeof _ghApi> = _ghApi as never;
+const hostRules = vi.mocked(_hostRules);
+const ghApi = vi.mocked(_ghApi);
 
 describe('workers/global/autodiscover', () => {
   let config: RenovateConfig;
@@ -44,10 +45,10 @@ describe('workers/global/autodiscover', () => {
   it('autodiscovers github but empty', async () => {
     config.autodiscover = true;
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => Promise.resolve([]));
+    ghApi.getRepos.mockImplementation(() => Promise.resolve([]));
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
   });
@@ -55,10 +56,10 @@ describe('workers/global/autodiscover', () => {
   it('autodiscovers github repos', async () => {
     config.autodiscover = true;
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => Promise.resolve(['a', 'b']));
+    ghApi.getRepos.mockImplementation(() => Promise.resolve(['a', 'b']));
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toHaveLength(2);
   });
@@ -67,10 +68,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
@@ -81,10 +82,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/*'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/.github']),
     );
     const res = await autodiscoverRepositories(config);
@@ -95,10 +96,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['another-project/repo', 'another-project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
@@ -109,10 +110,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['/project/RE*./i'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
@@ -123,10 +124,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['!/project/re*./'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
@@ -137,10 +138,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = '!project/re*';
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
@@ -151,10 +152,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['/project/re**./'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
     await expect(autodiscoverRepositories(config)).rejects.toThrow();
@@ -164,7 +165,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['another-project/re*', 'department/dev/*'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
     // retains order
@@ -173,7 +174,7 @@ describe('workers/global/autodiscover', () => {
       'another-project/repo',
       'department/dev/bProject',
     ];
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve([
         'another-project/another-repo',
         ...expectedRepositories,
@@ -187,10 +188,10 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find = jest.fn(() => ({
+    hostRules.find.mockImplementation(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() =>
+    ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'PROJECT/repo2']),
     );
     const res = await autodiscoverRepositories(config);

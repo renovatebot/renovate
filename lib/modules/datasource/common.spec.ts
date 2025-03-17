@@ -1,4 +1,3 @@
-import { logger } from '../../../test/util';
 import { defaultVersioning } from '../versioning';
 import {
   applyConstraintsFiltering,
@@ -13,6 +12,7 @@ import {
 import { CustomDatasource } from './custom';
 import { NpmDatasource } from './npm';
 import type { ReleaseResult } from './types';
+import { logger } from '~test/util';
 
 describe('modules/datasource/common', () => {
   describe('getDatasourceFor', () => {

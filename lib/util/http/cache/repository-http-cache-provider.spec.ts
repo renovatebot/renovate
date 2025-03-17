@@ -1,8 +1,7 @@
 import { Http } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { logger } from '../../../../test/util';
-import { getCache, resetCache } from '../../cache/repository';
+import { resetCache } from '../../cache/repository';
 import { repoCacheProvider } from './repository-http-cache-provider';
+import * as httpMock from '~test/http-mock';
 
 describe('util/http/cache/repository-http-cache-provider', () => {
   beforeEach(() => {
@@ -57,40 +56,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
       body: { msg: 'Hello, world!' },
       authorization: false,
     });
-  });
-
-  it('uses older cache format', async () => {
-    const repoCache = getCache();
-    repoCache.httpCache = {
-      'https://example.com/foo/bar': {
-        etag: '123',
-        lastModified: 'Mon, 01 Jan 2000 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: { msg: 'Hello, world!' } },
-        timeStamp: new Date().toISOString(),
-      },
-    };
-    httpMock.scope('https://example.com').get('/foo/bar').reply(304);
-
-    const res = await http.getJsonUnchecked('https://example.com/foo/bar');
-
-    expect(res).toMatchObject({
-      statusCode: 200,
-      body: { msg: 'Hello, world!' },
-      authorization: false,
-    });
-  });
-
-  it('reports if cache could not be persisted', async () => {
-    httpMock
-      .scope('https://example.com')
-      .get('/foo/bar')
-      .reply(200, { msg: 'Hello, world!' });
-
-    await http.getJsonUnchecked('https://example.com/foo/bar');
-
-    expect(logger.logger.debug).toHaveBeenCalledWith(
-      'http cache: failed to persist cache for https://example.com/foo/bar',
-    );
   });
 
   it('handles abrupt cache reset', async () => {

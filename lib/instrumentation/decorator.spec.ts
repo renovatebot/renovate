@@ -4,7 +4,7 @@ import { disableInstrumentations } from '.';
 afterAll(disableInstrumentations);
 
 describe('instrumentation/decorator', () => {
-  const spy = jest.fn(() => Promise.resolve());
+  const spy = vi.fn(() => Promise.resolve());
 
   it('should instrument async function', async () => {
     class MyClass {

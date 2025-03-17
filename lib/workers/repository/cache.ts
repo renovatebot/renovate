@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';

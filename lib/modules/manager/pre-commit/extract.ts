@@ -96,6 +96,8 @@ function extractDependency(
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
     regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
+    // This splits "ssh://git@github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
+    regEx(/^ssh:\/\/git@(?<hostname>[^/]+)\/(?<depName>\S*)/),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);

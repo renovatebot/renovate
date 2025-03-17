@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/bitbucket-pipelines/extract', () => {
   describe('extractPackageFile()', () => {
@@ -130,7 +130,8 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
             currentDigest: undefined,
             currentValue: '2.0.2',
             datasource: 'docker',
-            depName: 'some.jfrog.mirror/jfrog-setup-cli',
+            depName: 'jfrogecosystem/jfrog-setup-cli',
+            packageName: 'some.jfrog.mirror/jfrog-setup-cli',
             depType: 'docker',
           },
           {

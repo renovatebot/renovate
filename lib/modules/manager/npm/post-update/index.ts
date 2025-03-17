@@ -242,7 +242,12 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (!packageFile.path.endsWith('package.json')) {
+    if (
+      !(
+        packageFile.path.endsWith('package.json') ||
+        packageFile.path.endsWith('pnpm-workspace.yaml')
+      )
+    ) {
       continue;
     }
     logger.debug(`Writing ${packageFile.path}`);
@@ -372,7 +377,7 @@ export async function getAdditionalFiles(
   }
   logger.debug('Getting updated lock files');
   if (
-    config.updateType === 'lockFileMaintenance' &&
+    config.isLockFileMaintenance &&
     config.reuseExistingBranch &&
     (await scm.branchExists(config.branchName))
   ) {

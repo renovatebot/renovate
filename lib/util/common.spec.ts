@@ -1,6 +1,6 @@
-import { logger } from '../../test/util';
 import { detectPlatform, parseJson } from './common';
 import * as hostRules from './host-rules';
+import { logger } from '~test/util';
 
 const validJsonString = `
 {

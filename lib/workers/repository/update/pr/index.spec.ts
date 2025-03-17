@@ -1,12 +1,4 @@
 import { DateTime } from 'luxon';
-import {
-  git,
-  logger,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -30,27 +22,27 @@ import * as _participants from './participants';
 import * as _prCache from './pr-cache';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
+import { git, logger, partial, platform, scm } from '~test/util';
 
-jest.mock('../../../../util/git');
-jest.mock('../../changelog');
+vi.mock('../../changelog');
 
-jest.mock('../../../global/limits');
-const limits = mocked(_limits);
+vi.mock('../../../global/limits');
+const limits = vi.mocked(_limits);
 
-jest.mock('../branch/status-checks');
-const checks = mocked(_statusChecks);
+vi.mock('../branch/status-checks');
+const checks = vi.mocked(_statusChecks);
 
-jest.mock('./body');
-const prBody = mocked(_prBody);
+vi.mock('./body');
+const prBody = vi.mocked(_prBody);
 
-jest.mock('./participants');
-const participants = mocked(_participants);
+vi.mock('./participants');
+const participants = vi.mocked(_participants);
 
-jest.mock('../../../../modules/platform/comment');
-const comment = mocked(_comment);
+vi.mock('../../../../modules/platform/comment');
+const comment = vi.mocked(_comment);
 
-jest.mock('./pr-cache');
-const prCache = mocked(_prCache);
+vi.mock('./pr-cache');
+const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {
@@ -463,7 +455,7 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
-      it('ignores reviewable content ', async () => {
+      it('ignores reviewable content', async () => {
         // See: https://reviewable.io/
 
         const reviewableContent =
@@ -676,9 +668,9 @@ describe('workers/repository/update/pr/index', () => {
       it('comments on automerge failure', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
-        jest
-          .spyOn(platform, 'massageMarkdown')
-          .mockImplementation((prBody) => 'markdown content');
+        vi.spyOn(platform, 'massageMarkdown').mockImplementation(
+          (prBody) => 'markdown content',
+        );
         await ensurePr({
           ...config,
           automerge: true,

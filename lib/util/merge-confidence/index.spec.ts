@@ -1,4 +1,3 @@
-import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -12,6 +11,7 @@ import {
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
+import * as httpMock from '~test/http-mock';
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
@@ -414,7 +414,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(`/api/mc/availability`)
-          .replyWithError({ code: 'ECONNRESET' });
+          .replyWithError(httpMock.error({ code: 'ECONNRESET' }));
 
         await expect(
           initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),

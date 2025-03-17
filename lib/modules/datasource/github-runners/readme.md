@@ -1,5 +1,5 @@
 This datasource returns a list of all runners that are hosted by GitHub.
-The datasource is based on [GitHub's `runner-images` repository](https://github.com/actions/runner-images).
+The datasource is based on GitHub's [`runner-images`](https://github.com/actions/runner-images) and [`partner-runner-images`](https://github.com/actions/partner-runner-images) repositories.
 
 Examples: `windows-2022` / `ubuntu-24.04` / `macos-14`
 

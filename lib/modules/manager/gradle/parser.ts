@@ -33,6 +33,7 @@ const ctx: Ctx = {
   varTokens: [],
   tmpKotlinImportStore: [],
   tmpNestingDepth: [],
+  tmpRegistryContent: [],
   tmpTokenStore: {},
   tokenMap: {},
 };

@@ -1,7 +1,7 @@
 import type { NormalizedOptions } from 'got';
-import { partial } from '../../../test/util';
 import { applyAuthorization, removeAuthorization } from './auth';
 import type { GotOptions } from './types';
+import { partial } from '~test/util';
 
 describe('util/http/auth', () => {
   describe('applyAuthorization', () => {
@@ -221,6 +221,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
 
       removeAuthorization(opts);
@@ -229,6 +230,7 @@ describe('util/http/auth', () => {
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
+        headers: {},
       });
     });
 

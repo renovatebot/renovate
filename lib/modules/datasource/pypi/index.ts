@@ -6,6 +6,7 @@ import { coerceArray } from '../../../util/array';
 import { parse } from '../../../util/html';
 import type { OutgoingHttpHeaders } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
@@ -173,7 +174,7 @@ export class PypiDatasource extends Datasource {
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
           version,
-          releaseTimestamp,
+          releaseTimestamp: asTimestamp(releaseTimestamp),
         };
         if (isDeprecated) {
           result.isDeprecated = isDeprecated;
@@ -258,7 +259,7 @@ export class PypiDatasource extends Datasource {
     );
     const dependency: ReleaseResult = { releases: [] };
     const headers = await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.get(lookupUrl, { headers });
+    const response = await this.http.getText(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');

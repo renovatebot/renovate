@@ -1,12 +1,13 @@
 import { satisfies } from '@renovatebot/pep440';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as githubGraphql from '../../../util/github/graphql';
+import type { Timestamp } from '../../../util/timestamp';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
 import { datasource, defaultRegistryUrl } from './common';
 import { PythonVersionDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/python-version/index', () => {
   describe('dependent datasources', () => {
@@ -31,14 +32,14 @@ describe('modules/datasource/python-version/index', () => {
         .get('/api/python.json')
         .reply(200, Fixtures.get('eol.json'));
 
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           url: 'https://example.com',
           name: 'containerbase/python-prebuild',
           description: 'some description',
           version: '3.12.1',
-          releaseTimestamp: '2020-03-09T13:00:00Z',
+          releaseTimestamp: '2020-03-09T13:00:00Z' as Timestamp,
         },
         {
           id: 2,
@@ -46,7 +47,7 @@ describe('modules/datasource/python-version/index', () => {
           name: 'containerbase/python-prebuild',
           description: 'some description',
           version: '3.12.0',
-          releaseTimestamp: '2020-03-09T13:00:00Z',
+          releaseTimestamp: '2020-03-09T13:00:00Z' as Timestamp,
         },
         {
           id: 3,
@@ -54,7 +55,7 @@ describe('modules/datasource/python-version/index', () => {
           name: 'containerbase/python-prebuild',
           description: 'some description',
           version: '3.7.8',
-          releaseTimestamp: '2020-03-09T13:00:00Z',
+          releaseTimestamp: '2020-03-09T13:00:00Z' as Timestamp,
         },
       ]);
     });
@@ -105,7 +106,7 @@ describe('modules/datasource/python-version/index', () => {
         expect(res?.releases[0]).toEqual({
           isDeprecated: true,
           isStable: true,
-          releaseTimestamp: '2020-06-27T12:55:01.000Z',
+          releaseTimestamp: '2020-06-27T12:55:01.000Z' as Timestamp,
           version: '3.7.8',
         });
       });

@@ -67,7 +67,7 @@ import { repoFingerprint } from '../util';
 import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
-import { coerceRestPr, githubApi } from './common';
+import { coerceRestPr, githubApi, mapMergeStartegy } from './common';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
@@ -423,7 +423,7 @@ export async function createFork(
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
-          organization: forkOrg ? forkOrg : undefined,
+          organization: forkOrg ?? undefined,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -1126,9 +1126,7 @@ async function getStatusCheck(
   ).body;
 }
 
-interface GithubToRenovateStatusMapping {
-  [index: string]: BranchStatus;
-}
+type GithubToRenovateStatusMapping = Record<string, BranchStatus>;
 const githubToRenovateStatusMapping: GithubToRenovateStatusMapping = {
   success: 'green',
   error: 'red',
@@ -1849,6 +1847,7 @@ export async function reattemptPlatformAutomerge({
 export async function mergePr({
   branchName,
   id: prNo,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   const url = `repos/${
@@ -1863,9 +1862,12 @@ export async function mergePr({
   }
   let automerged = false;
   let automergeResult: HttpResponse<unknown>;
-  if (config.mergeMethod) {
-    // This path is taken if we have auto-detected the allowed merge types from the repo
-    options.body.merge_method = config.mergeMethod;
+  const mergeStrategy = mapMergeStartegy(strategy) ?? config.mergeMethod;
+
+  if (mergeStrategy) {
+    // This path is taken if we have auto-detected the allowed merge types from the repo or
+    // automergeStrategy is configured by user
+    options.body.merge_method = mergeStrategy;
     try {
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);

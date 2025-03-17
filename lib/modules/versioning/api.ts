@@ -1,3 +1,4 @@
+import * as awsEksAddon from './aws-eks-addon';
 import * as amazonMachineImage from './aws-machine-image';
 import * as azureRestApi from './azure-rest-api';
 import * as bazelModule from './bazel-module';
@@ -45,6 +46,7 @@ import * as unity3d from './unity3d';
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
 
+api.set(awsEksAddon.id, awsEksAddon.api);
 api.set(amazonMachineImage.id, amazonMachineImage.api);
 api.set(azureRestApi.id, azureRestApi.api);
 api.set(bazelModule.id, bazelModule.api);

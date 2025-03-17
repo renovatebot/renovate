@@ -3,9 +3,12 @@ import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
+import * as nodeVersioning from '../../versioning/node';
+import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -80,10 +83,10 @@ function extractWithRegex(
         commentWhiteSpaces = ' ',
       } = tagMatch.groups;
       let quotes = '';
-      if (replaceString.indexOf("'") >= 0) {
+      if (replaceString.includes("'")) {
         quotes = "'";
       }
-      if (replaceString.indexOf('"') >= 0) {
+      if (replaceString.includes('"')) {
         quotes = '"';
       }
       const dep: PackageDependency = {
@@ -195,6 +198,39 @@ function extractWithYAMLParser(
       const dep = extractRunner(runner);
       if (dep) {
         deps.push(dep);
+      }
+    }
+
+    const versionedActions: Record<string, string> = {
+      go: npmVersioning.id,
+      node: nodeVersioning.id,
+      python: npmVersioning.id,
+      // Not covered yet because they use different datasources/packageNames:
+      // - dotnet
+      // - java
+    };
+
+    for (const step of job.steps) {
+      for (const [action, versioning] of Object.entries(versionedActions)) {
+        const actionName = `actions/setup-${action}`;
+        if (
+          step.uses === actionName ||
+          step.uses?.startsWith(`${actionName}@`)
+        ) {
+          const fieldName = `${action}-version`;
+          const currentValue = step.with?.[fieldName];
+          if (currentValue) {
+            deps.push({
+              datasource: GithubReleasesDatasource.id,
+              depName: action,
+              packageName: `actions/${action}-versions`,
+              versioning,
+              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+              currentValue,
+              depType: 'uses-with',
+            });
+          }
+        }
       }
     }
   }

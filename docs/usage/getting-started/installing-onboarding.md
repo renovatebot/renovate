@@ -5,7 +5,7 @@
 Read the [Security and Permissions](../security-and-permissions.md) page to learn more about:
 
 - Renovate's security stance
-- What do if you need to use certificed software
+- What do if you need to use certified software
 - The security/disclosure process
 - Permissions
 - Privacy

@@ -1,5 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
 import * as _onboarding from '../onboarding/branch';
@@ -7,24 +5,25 @@ import * as _apis from './apis';
 import * as _config from './config';
 import * as _merge from './merge';
 import { initRepo } from '.';
+import { logger, partial } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../onboarding/branch');
-jest.mock('../configured');
-jest.mock('../init/apis');
-jest.mock('../init/config');
-jest.mock('../init/merge');
-jest.mock('../../../config/secrets');
-jest.mock('../../../modules/platform', () => ({
-  platform: { initRepo: jest.fn() },
-  getPlatformList: jest.fn(),
+vi.mock('../onboarding/branch');
+vi.mock('../configured');
+vi.mock('../init/apis');
+vi.mock('../init/config');
+vi.mock('../init/merge');
+vi.mock('../../../config/secrets');
+vi.mock('../../../modules/platform', () => ({
+  platform: { initRepo: vi.fn() },
+  getPlatformList: vi.fn(),
 }));
 
-const apis = mocked(_apis);
-const config = mocked(_config);
-const merge = mocked(_merge);
-const onboarding = mocked(_onboarding);
-const secrets = mocked(_secrets);
+const apis = vi.mocked(_apis);
+const config = vi.mocked(_config);
+const merge = vi.mocked(_merge);
+const onboarding = vi.mocked(_onboarding);
+const secrets = vi.mocked(_secrets);
 
 describe('workers/repository/init/index', () => {
   beforeEach(() => {

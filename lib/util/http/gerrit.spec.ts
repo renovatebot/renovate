@@ -1,5 +1,5 @@
-import * as httpMock from '../../../test/http-mock';
 import { GerritHttp, setBaseUrl } from './gerrit';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://gerrit.example.com/';
 
@@ -18,7 +18,7 @@ describe('util/http/gerrit', () => {
       .get(/some-url\/$/)
       .reply(200, body, { 'content-type': 'text/plain;charset=utf-8' });
 
-    const res = await api.get(pathOrUrl);
+    const res = await api.getText(pathOrUrl);
     expect(res.body).toEqual(body);
   });
 

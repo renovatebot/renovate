@@ -46,7 +46,7 @@ export function hasValidSchedule(
     if (parsedCron !== undefined) {
       if (
         parsedCron.minute.filter((v) => v !== 1).length !== 0 ||
-        scheduleText.indexOf(minutesChar) !== 0
+        !scheduleText.startsWith(minutesChar)
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
         return true;

@@ -3,8 +3,8 @@
 // TODO: fix, should only allow `Error` type
 
 import { z } from 'zod';
-import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
+import { logger } from '~test/util';
 
 describe('util/result', () => {
   describe('Result', () => {
@@ -212,7 +212,7 @@ describe('util/result', () => {
 
       it('skips transform for error Result', () => {
         const res: Result<number, string> = Result.err('oops');
-        const fn = jest.fn((x: number) => x + 1);
+        const fn = vi.fn((x: number) => x + 1);
         expect(res.transform(fn)).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -316,13 +316,13 @@ describe('util/result', () => {
 
     describe('Handlers', () => {
       it('supports value handlers', () => {
-        const cb = jest.fn();
+        const cb = vi.fn();
         Result.ok(42).onValue(cb);
         expect(cb).toHaveBeenCalledWith(42);
       });
 
       it('supports error handlers', () => {
-        const cb = jest.fn();
+        const cb = vi.fn();
         Result.err('oops').onError(cb);
         expect(cb).toHaveBeenCalledWith('oops');
       });
@@ -479,7 +479,7 @@ describe('util/result', () => {
 
       it('skips transform for failed promises', async () => {
         const res = AsyncResult.err('oops');
-        const fn = jest.fn((x: number) => x + 1);
+        const fn = vi.fn((x: number) => x + 1);
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -514,7 +514,7 @@ describe('util/result', () => {
 
       it('skips async transform for error Result', async () => {
         const input: Result<number, string> = Result.err('oops');
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
         const res = await input.transform(fn);
         expect(res).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
@@ -522,7 +522,7 @@ describe('util/result', () => {
 
       it('skips async transform for rejected promise', async () => {
         const res: AsyncResult<number, string> = AsyncResult.err('oops');
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -666,13 +666,13 @@ describe('util/result', () => {
 
   describe('Handlers', () => {
     it('supports value handlers', async () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       await AsyncResult.ok(42).onValue(cb);
       expect(cb).toHaveBeenCalledWith(42);
     });
 
     it('supports error handlers', async () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       await AsyncResult.err('oops').onError(cb);
       expect(cb).toHaveBeenCalledWith('oops');
     });

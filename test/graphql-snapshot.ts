@@ -83,7 +83,7 @@ function getArguments(key: string, val: ValueNode): Arguments {
 }
 
 function simplifyArguments(
-  argNodes?: ReadonlyArray<ArgumentNode>,
+  argNodes?: readonly ArgumentNode[],
 ): Arguments | null {
   if (argNodes) {
     let result: Arguments = {};
@@ -150,7 +150,7 @@ function getTypeName(typeNode: TypeNode): string {
 }
 
 function simplifyVariableDefinitions(
-  varNodes: ReadonlyArray<VariableDefinitionNode> | null,
+  varNodes: readonly VariableDefinitionNode[] | null,
 ): Variables {
   const result: Variables = {};
   if (varNodes) {

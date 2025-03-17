@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GitlabHttp } from '../../../util/http/gitlab';
+import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -60,7 +61,7 @@ export class GitlabTagsDatasource extends Datasource {
     dependency.releases = gitlabTags.map(({ name, commit }) => ({
       version: name,
       gitRef: name,
-      releaseTimestamp: commit?.created_at,
+      releaseTimestamp: asTimestamp(commit?.created_at),
     }));
 
     return dependency;

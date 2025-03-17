@@ -123,11 +123,11 @@ export async function getMergeMethod(
   logger.debug(
     `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
   );
-  type Scope = {
+  interface Scope {
     repositoryId: string;
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
-  };
+  }
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&

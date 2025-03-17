@@ -82,18 +82,13 @@ export class GalaxyDatasource extends Datasource {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 
-    result.releases = versions.map(
-      (version: { name: string; created?: string }) => {
-        const release: Release = {
-          version: version.name,
-        };
-
-        if (is.nonEmptyString(version.created)) {
-          release.releaseTimestamp = version.created;
-        }
-        return release;
-      },
-    );
+    result.releases = versions.map(({ version, releaseTimestamp }) => {
+      const release: Release = { version };
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      return release;
+    });
 
     return result;
   }

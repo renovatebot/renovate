@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
@@ -73,7 +74,7 @@ export async function extractAllPackageFiles(
       continue;
     }
     lockFileArgs.set(fileMatch, compileArgs);
-    for (const constraint in compileArgs.constraintsFiles) {
+    for (const constraint of coerceArray(compileArgs.constraintsFiles)) {
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -167,7 +168,7 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) => lockedDep.packageName! === dep.packageName!,
+            (lockedDep) => lockedDep.packageName === dep.packageName,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -247,7 +248,7 @@ function extendWithIndirectDeps(
   for (const lockedDep of lockedDeps) {
     if (
       !packageFileContent.deps.find(
-        (dep) => lockedDep.packageName! === dep.packageName!,
+        (dep) => lockedDep.packageName === dep.packageName,
       )
     ) {
       packageFileContent.deps.push(indirectDep(lockedDep));

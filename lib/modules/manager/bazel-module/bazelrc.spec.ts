@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { fs } from '../../../../test/util';
 import { BazelOption, CommandEntry, ImportEntry, parse, read } from './bazelrc';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -54,13 +54,13 @@ describe('modules/manager/bazel-module/bazelrc', () => {
   it('parse', () => {
     const input = codeBlock`
         # Bob's Bazel option defaults
-        
+
         startup --host_jvm_args=-XX:-UseParallelGC
         import /home/bobs_project/bazelrc
         build --show_timestamps --keep_going --jobs 600
         build --color=yes
         query --keep_going
-        
+
         # Definition of --config=memcheck
         build:memcheck --strip=never --test_timeout=3600
 

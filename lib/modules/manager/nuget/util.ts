@@ -76,7 +76,7 @@ export async function getConfiguredRegistries(
     const sourceMappedPackagePatterns = packageSourceMapping
       ?.childWithAttribute('key', registry.name)
       ?.childrenNamed('package')
-      .map((packagePattern) => packagePattern.attr['pattern']);
+      .map((packagePattern) => packagePattern.attr.pattern);
 
     registry.sourceMappedPackagePatterns = sourceMappedPackagePatterns;
   }
@@ -96,7 +96,7 @@ export async function getConfiguredRegistries(
           const sourceMappedPackagePatterns = packageSourceMapping
             ?.childWithAttribute('key', child.attr.key)
             ?.childrenNamed('package')
-            .map((packagePattern) => packagePattern.attr['pattern']);
+            .map((packagePattern) => packagePattern.attr.pattern);
 
           logger.debug(
             {
@@ -197,6 +197,7 @@ export function applyRegistries(
  * Sorts patterns by specificity:
  * 1. Exact match patterns
  * 2. Wildcard match patterns
+ * The longest pattern has precedence.
  */
 function sortPatterns(
   a: [string, Registry[]],
@@ -210,7 +211,10 @@ function sortPatterns(
     return -1;
   }
 
-  return a[0].localeCompare(b[0]) * -1;
+  const aTrim = a[0].slice(0, -1);
+  const bTrim = b[0].slice(0, -1);
+
+  return aTrim.localeCompare(bTrim) * -1;
 }
 
 export async function findGlobalJson(

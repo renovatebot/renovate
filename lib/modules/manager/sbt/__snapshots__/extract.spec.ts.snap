@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extract deps from native scala file with private variables 1`] = `
 {
   "deps": [
     {
@@ -35,7 +35,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extract deps from native scala file with variables 1`] = `
 {
   "deps": [
     {
@@ -97,7 +97,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps for generic use-cases 1`] = `
 {
   "deps": [
     {
@@ -286,7 +286,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined in a variable 1`] = `
 {
   "deps": [
     {
@@ -434,7 +434,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with ThisBuild scope 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined in a variable with ThisBuild scope 1`] = `
 {
   "deps": [
     {
@@ -460,7 +460,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined in a variable with a trailing comma 1`] = `
 {
   "deps": [
     {
@@ -486,7 +486,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with ThisBuild scope 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined with ThisBuild scope 1`] = `
 {
   "deps": [
     {
@@ -512,7 +512,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when scala version is defined with a trailing comma 1`] = `
+exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when scala version is defined with a trailing comma 1`] = `
 {
   "deps": [
     {

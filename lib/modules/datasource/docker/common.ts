@@ -200,7 +200,7 @@ export async function getAuthHeaders(
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
-    // istanbul ignore if
+    /* v8 ignore next 4 -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;
@@ -341,7 +341,7 @@ export function findLatestStable(tags: string[]): string | null {
   return stable;
 }
 
-const chartRepo = regEx(/charts?|helm|helm-charts/i);
+const chartRepo = regEx(/charts?|helm|helm-charts?/i);
 
 function isPossibleChartRepo(url: string): boolean {
   if (detectPlatform(url) === null) {

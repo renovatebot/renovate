@@ -3,12 +3,12 @@ import type { RenovateConfig } from '../types';
 // TODO: Proper typing
 export type Preset = RenovateConfig & Record<string, unknown>;
 
-export type PresetConfig = {
+export interface PresetConfig {
   repo: string;
   presetPath?: string | undefined;
   presetName?: string;
   tag?: string | undefined;
-};
+}
 
 export interface PresetApi {
   getPreset(
@@ -32,11 +32,11 @@ export type PresetFetcher = (
   tag?: string,
 ) => Promise<Preset | null | undefined>;
 
-export type FetchPresetConfig = {
+export interface FetchPresetConfig {
   repo: string;
   filePreset: string;
   presetPath?: string | undefined;
   endpoint: string;
   tag?: string | undefined;
   fetch: PresetFetcher;
-};
+}

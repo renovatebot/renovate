@@ -1,7 +1,7 @@
-import { fs } from '../../../../test/util';
 import { extractAllPackageFiles } from './extract';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/bun/extract', () => {
   describe('extractAllPackageFiles()', () => {
@@ -15,7 +15,7 @@ describe('modules/manager/bun/extract', () => {
       });
 
       it('ignores invalid package.json file', async () => {
-        (fs.readLocalFile as jest.Mock).mockResolvedValueOnce('invalid');
+        vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
         expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
       });
 
@@ -73,7 +73,7 @@ describe('modules/manager/bun/extract', () => {
       });
 
       it('ignores invalid package.json file', async () => {
-        (fs.readLocalFile as jest.Mock).mockResolvedValueOnce('invalid');
+        vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
         expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
       });
 

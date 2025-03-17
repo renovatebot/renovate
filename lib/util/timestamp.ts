@@ -87,7 +87,7 @@ export function asTimestamp(input: unknown): Timestamp | null {
   return null;
 }
 
-export const TimestampSchema = z.unknown().transform((input, ctx) => {
+export const Timestamp = z.unknown().transform((input, ctx) => {
   const timestamp = asTimestamp(input);
   if (!timestamp) {
     ctx.addIssue({
@@ -99,3 +99,4 @@ export const TimestampSchema = z.unknown().transform((input, ctx) => {
 
   return timestamp;
 });
+export const MaybeTimestamp = Timestamp.nullable().catch(null);
