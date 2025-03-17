@@ -19,7 +19,7 @@ The goal of Renovate is to detect and maintain all third-party dependencies in y
 ### File Matching
 
 Most Renovate managers have a default `filePatterns` array.
-The `filePatterns` array has a regular expression, or glob pattern, that matches against the repository file list.
+The `filePatterns` array can hold a regular expression or glob pattern, that match against the repository file list.
 
 #### Managers with no default filePatterns
 
