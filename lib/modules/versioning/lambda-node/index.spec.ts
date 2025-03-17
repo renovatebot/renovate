@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import type { DataFile } from '../../../data-files.generated';
-import { findLambdaScheduleForVersion, LambdaData } from './schedule';
+import { LambdaData } from './schedule';
 import { api as lambdaVer } from '.';
 
 vi.mock('../../../data-files.generated', async (importOriginal) => {
@@ -71,29 +71,10 @@ describe('modules/versioning/lambda-node/index', () => {
   const t2 = DateTime.fromISO('2024-03-01');
 
   it.each`
-    version      | time  | expected
-    ${`v22.0.0`} | ${t1} | ${true}
-    ${`v20.0.0`} | ${t1} | ${false}
-    ${`Iron`}    | ${t1} | ${true}
-    ${'v18.0.3'} | ${t1} | ${false}
-    ${'v18.0.0'} | ${t1} | ${false}
-    ${'18.0.0'}  | ${t1} | ${false}
-    ${'18.0.0a'} | ${t1} | ${false}
-  `(
-    'isNull(findLambdaScheduleForVersion("$version")) === $expected',
-    ({ version, time, expected }) => {
-      vi.setSystemTime(time);
-
-      expect(findLambdaScheduleForVersion(version as string) === null).toBe(
-        expected,
-      );
-    },
-  );
-
-  it.each`
     version       | time  | expected
     ${`v22.0.0`}  | ${t1} | ${false}
     ${`v20.0.0`}  | ${t1} | ${true}
+    ${`Iron`}     | ${t1} | ${false}
     ${'v18.0.3'}  | ${t1} | ${true}
     ${'v18.0.0'}  | ${t1} | ${true}
     ${'18.0.0'}   | ${t1} | ${true}

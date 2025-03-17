@@ -2,7 +2,6 @@ import { DateTime } from 'luxon';
 import {
   getNewValue,
   getSatisfyingVersion,
-  isStable as isNodeStable,
   isValid,
   matches,
   minSatisfyingVersion,
@@ -17,13 +16,9 @@ export const urls = [];
 export const supportsRanges = false;
 
 export function isStable(version: string): boolean {
-  if (!isNodeStable(version)) {
-    return false;
-  }
-
   const schedule = findLambdaScheduleForVersion(version);
 
-  if (!schedule) {
+  if (schedule === null) {
     return false;
   }
 

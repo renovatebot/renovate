@@ -1,4 +1,5 @@
 import dataFiles from '../../../data-files.generated';
+import { isStable } from '../node';
 
 interface LambdaSchedule {
   cycle: string;
@@ -21,9 +22,9 @@ export function findLambdaScheduleForVersion(
 ): LambdaSchedule | null {
   const majorVersionMatch = /^v?([0-9]+)\./.exec(version);
 
-  if (!majorVersionMatch?.[1]) {
+  if (!isStable(version)) {
     return null;
   }
 
-  return lambdaSchedule[majorVersionMatch[1]] ?? null;
+  return lambdaSchedule[majorVersionMatch![1]] ?? null;
 }
