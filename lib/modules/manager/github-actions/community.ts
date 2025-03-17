@@ -23,7 +23,7 @@ function matchAction(action: string): z.ZodString {
 
 /**
  * schema here should match the whole step,
- * there are some actions use env as arguments version.
+ * there may be some actions use env as arguments version.
  *
  * each type should return `PackageDependency | undefined`
  */
