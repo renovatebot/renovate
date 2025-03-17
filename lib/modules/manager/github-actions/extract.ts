@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
+import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
@@ -175,7 +175,9 @@ function extractWithYAMLParser(
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
-  const jobs = WorkflowJobsSchema.parse(content);
+  const jobs = withMeta({ packageFile }, () =>
+    WorkflowJobsSchema.parse(content),
+  );
 
   for (const job of jobs) {
     if (job.container) {

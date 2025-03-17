@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { LooseArray, LooseRecord, Yaml } from '../../../util/schema-utils';
+import {
+  LooseArray,
+  LooseRecord,
+  Yaml,
+  withDebugMessage,
+} from '../../../util/schema-utils';
 
 export const WorkflowJobsSchema = Yaml.pipe(
   z.object({
@@ -34,4 +39,4 @@ export const WorkflowJobsSchema = Yaml.pipe(
   }),
 )
   .transform((v) => Object.values(v.jobs))
-  .catch([]);
+  .catch(withDebugMessage([], 'Error parsing workflow'));
