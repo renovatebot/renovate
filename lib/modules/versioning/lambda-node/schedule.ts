@@ -25,5 +25,5 @@ export function findLambdaScheduleForVersion(
     return null;
   }
 
-  return lambdaSchedule[majorVersionMatch[1]];
+  return lambdaSchedule[majorVersionMatch[1]] ?? null;
 }
