@@ -31,7 +31,7 @@ export const WorkflowJobsSchema = Yaml.pipe(
         steps: LooseArray(
           z.object({
             uses: z.string(),
-            with: LooseRecord(z.union([z.string(), z.number()])),
+            with: LooseRecord(z.any()),
           }),
         ).catch([]),
       }),
