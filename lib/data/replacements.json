@@ -675,11 +675,11 @@
     "description": "gradle/wrapper-validation-action got renamed to gradle/actions/wrapper-validation",
     "packageRules": [
       {
-        "matchCurrentVersion": "/3(\\.\\d+\\.\\d+)?/",
+        "matchCurrentVersion": "/^3(\\.)?/",
         "matchDatasources": ["github-actions"],
         "matchPackageNames": ["gradle/wrapper-validation-action"],
         "replacementName": "gradle/actions/wrapper-validation",
-        "replacementVersion": "3.3.0"
+        "replacementVersion": "3.5.0"
       }
     ]
   },
