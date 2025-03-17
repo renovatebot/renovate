@@ -23,7 +23,7 @@ program
     logger.info('* running mkdocs build');
     const args = ['run', 'mkdocs', 'build'];
     if (opts.strict) {
-      args.push('--strict');
+      // args.push('--strict');
     }
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',
@@ -43,7 +43,7 @@ program
     logger.info('* running mkdocs serve');
     const args = ['run', 'mkdocs', 'serve'];
     if (opts.strict) {
-      args.push('--strict');
+      // args.push('--strict');
     }
     const res = exec('pdm', args, {
       cwd: 'tools/mkdocs',

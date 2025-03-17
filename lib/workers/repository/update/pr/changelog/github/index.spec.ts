@@ -1,6 +1,4 @@
 import { getChangeLogJSON } from '..';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import { GlobalConfig } from '../../../../../../config/global';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../../util/github/graphql';
@@ -8,6 +6,8 @@ import type { GithubTagItem } from '../../../../../../util/github/graphql/types'
 import * as hostRules from '../../../../../../util/host-rules';
 import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 vi.mock('../../../../../../modules/datasource/npm');
 

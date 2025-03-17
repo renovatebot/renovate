@@ -3,9 +3,9 @@ import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
 import { add, clear } from '../../../util/host-rules';
 import { GitRefsDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
 
 vi.mock('simple-git');
 const simpleGitFactoryMock = vi.mocked(simpleGit);

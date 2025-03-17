@@ -1,5 +1,5 @@
-import { regexMatches } from '../../../../test/util';
 import { defaultConfig } from '.';
+import { regexMatches } from '~test/util';
 
 describe('modules/manager/circleci/index', () => {
   describe('file names match fileMatch', () => {

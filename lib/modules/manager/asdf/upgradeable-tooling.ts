@@ -94,6 +94,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'aws/aws-cli',
     },
   },
+  'azure-cli': {
+    asdfPluginUrl: 'https://github.com/sourcesense/asdf-azure-cli',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'Azure/azure-cli',
+      extractVersion: '^azure-cli-(?<version>\\S+)',
+    },
+  },
   bun: {
     asdfPluginUrl: 'https://github.com/cometkim/asdf-bun',
     config: {
@@ -453,6 +461,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^(Kotlin |v)(?<version>\\S+)',
     },
   },
+  kubebuilder: {
+    asdfPluginUrl: 'https://github.com/virtualstaticvoid/asdf-kubebuilder.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'kubernetes-sigs/kubebuilder',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   kubectl: {
     asdfPluginUrl: 'https://github.com/Banno/asdf-kubectl.git',
     config: {
@@ -543,6 +559,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'oracle/oci-cli',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  opa: {
+    asdfPluginUrl: 'https://github.com/tochukwuvictor/asdf-opa',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'open-policy-agent/opa',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -759,6 +783,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'gruntwork-io/terragrunt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  terramate: {
+    asdfPluginUrl: 'https://github.com/martinlindner/asdf-terramate',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'terramate-io/terramate',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

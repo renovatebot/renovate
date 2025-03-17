@@ -1,10 +1,7 @@
-import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
-import { logger } from '../../../logger';
-import { coerceArray, isNotNullOrUndefined } from '../../../util/array';
+import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
@@ -18,7 +15,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Workflow } from './types';
+import { WorkflowJobsSchema } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -138,18 +135,6 @@ function detectDatasource(registryUrl: string): PackageDependency {
   };
 }
 
-function extractContainer(
-  container: unknown,
-  registryAliases: Record<string, string> | undefined,
-): PackageDependency | undefined {
-  if (is.string(container)) {
-    return getDep(container, true, registryAliases);
-  } else if (is.plainObject(container) && is.string(container.image)) {
-    return getDep(container.image, true, registryAliases);
-  }
-  return undefined;
-}
-
 const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,
 );
@@ -182,17 +167,6 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
-function extractRunners(runner: unknown): PackageDependency[] {
-  const runners: string[] = [];
-  if (is.string(runner)) {
-    runners.push(runner);
-  } else if (is.array(runner, is.string)) {
-    runners.push(...runner);
-  }
-
-  return runners.map(extractRunner).filter(isNotNullOrUndefined);
-}
-
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
@@ -201,52 +175,45 @@ function extractWithYAMLParser(
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
-  let pkg: Workflow;
-  try {
-    // TODO: use schema (#9610)
-    pkg = parseSingleYaml(content);
-  } catch (err) {
-    logger.debug(
-      { packageFile, err },
-      'Failed to parse GitHub Actions Workflow YAML',
-    );
-    return [];
-  }
+  const jobs = withMeta({ packageFile }, () =>
+    WorkflowJobsSchema.parse(content),
+  );
 
-  for (const job of Object.values(pkg?.jobs ?? {})) {
-    const dep = extractContainer(job?.container, config.registryAliases);
-    if (dep) {
-      dep.depType = 'container';
-      deps.push(dep);
+  for (const job of jobs) {
+    if (job.container) {
+      const dep = getDep(job.container, true, config.registryAliases);
+      if (dep) {
+        dep.depType = 'container';
+        deps.push(dep);
+      }
     }
 
-    for (const service of Object.values(job?.services ?? {})) {
-      const dep = extractContainer(service, config.registryAliases);
+    for (const service of job.services) {
+      const dep = getDep(service, true, config.registryAliases);
       if (dep) {
         dep.depType = 'service';
         deps.push(dep);
       }
     }
 
-    deps.push(...extractRunners(job?.['runs-on']));
+    for (const runner of job['runs-on']) {
+      const dep = extractRunner(runner);
+      if (dep) {
+        deps.push(dep);
+      }
+    }
 
-    const actionsWithVersions: Record<string, Partial<PackageDependency>> = {
-      go: {
-        versioning: npmVersioning.id,
-      },
-      node: {
-        versioning: nodeVersioning.id,
-      },
-      python: {
-        versioning: npmVersioning.id,
-      },
+    const versionedActions: Record<string, string> = {
+      go: npmVersioning.id,
+      node: nodeVersioning.id,
+      python: npmVersioning.id,
       // Not covered yet because they use different datasources/packageNames:
       // - dotnet
       // - java
     };
 
-    for (const step of coerceArray(job?.steps)) {
-      for (const [action, actionData] of Object.entries(actionsWithVersions)) {
+    for (const step of job.steps) {
+      for (const [action, versioning] of Object.entries(versionedActions)) {
         const actionName = `actions/setup-${action}`;
         if (
           step.uses === actionName ||
@@ -259,7 +226,8 @@ function extractWithYAMLParser(
               datasource: GithubReleasesDatasource.id,
               depName: action,
               packageName: `actions/${action}-versions`,
-              ...actionData,
+              versioning,
+              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
               currentValue,
               depType: 'uses-with',
             });
