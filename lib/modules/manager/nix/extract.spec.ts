@@ -602,4 +602,45 @@ describe('modules/manager/nix/extract', () => {
       ],
     });
   });
+
+  const flake12Lock = `{
+    "nodes": {
+      "subgroup-project": {
+        "locked": {
+          "lastModified": 1739792862,
+          "narHash": "sha256-n0MrSIZZknq2OqOYgNS0iMp2yVRekpBFGhrhsT7aXGg=",
+          "owner": "group%2Fsub-group",
+          "repo": "subgroup-project",
+          "rev": "24b560624f154c9e962d146217b2a964faaf2055",
+          "type": "gitlab"
+        },
+        "original": {
+          "owner": "group%2Fsub-group",
+          "repo": "subgroup-project",
+          "type": "gitlab"
+        }
+      },
+      "root": {
+        "inputs": {
+          "subgroup-project": "subgroup-project"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+
+  it('uri decode gitlab subgroup', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake12Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: '24b560624f154c9e962d146217b2a964faaf2055',
+          datasource: 'git-refs',
+          depName: 'subgroup-project',
+          packageName: 'https://gitlab.com/group/sub-group/subgroup-project',
+        },
+      ],
+    });
+  });
 });
