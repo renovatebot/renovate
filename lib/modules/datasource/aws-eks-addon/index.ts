@@ -46,7 +46,7 @@ export class AwsEKSAddonDataSource extends Datasource {
       maxResults: 1,
     });
     const response = await this.getClient(filter).send(cmd);
-    const addons = response.addons ?? [];
+    const addons = coerceArray(response.addons);
     return {
       releases: addons
         .flatMap((addon) => {
