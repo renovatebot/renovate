@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Timestamp } from '../../../timestamp';
 import type { GithubGraphqlDatasourceAdapter, GithubTagItem } from '../types';
 import { prepareQuery } from '../util';
 
@@ -10,7 +11,7 @@ const GithubGraphqlTag = z.object({
     z.object({
       type: z.literal('Commit'),
       oid: z.string(),
-      releaseTimestamp: z.string(),
+      releaseTimestamp: Timestamp,
     }),
     z.object({
       type: z.literal('Tag'),
@@ -18,7 +19,7 @@ const GithubGraphqlTag = z.object({
         oid: z.string(),
       }),
       tagger: z.object({
-        releaseTimestamp: z.string(),
+        releaseTimestamp: Timestamp,
       }),
     }),
   ]),

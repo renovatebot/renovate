@@ -88,7 +88,7 @@ Pinning your development dependencies means you, and your team, are using the sa
 This makes the developer-tool side of your builds reproducible.
 Debugging faulty versions of your tools is easier, because you can use Git to check out different versions of the tools.
 
-### Why updating often is easier, faster and safer
+## Why updating often is easier, faster and safer
 
 You may think that updating takes too much time.
 But updating regularly actually _saves_ you time, because:
@@ -98,14 +98,14 @@ But updating regularly actually _saves_ you time, because:
 - You'll be ready for CVE patches
 - You'll look for ways to automate the updates
 
-#### Regular updates tend to be small
+### Regular updates tend to be small
 
 Firstly, when you update regularly updates tend to be small.
 The update's changelogs are small, quick to read, and easy to understand.
 You probably only need to make changes in a few places (if at all) to merge the PR and get going again.
 Because you're reading the changelogs regularly, you'll get a feel for the direction of the upstream project.
 
-#### Applying `major` updates is easier
+### Applying `major` updates is easier
 
 Secondly, when you're current with upstream, `major` updates are easier.
 This is because you already:
@@ -114,14 +114,14 @@ This is because you already:
 - use the latest names for features/variables
 - read the previous changelogs
 
-#### You'll be ready for CVE patches
+### You'll be ready for CVE patches
 
 Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
 If you're current, you can review and merge Renovate's PR quickly.
 
 When you're behind on updates, you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
-#### You'll look for ways to automate the updates
+### You'll look for ways to automate the updates
 
 Finally, when you're updating often, you'll start looking for ways to automate the updates.
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.

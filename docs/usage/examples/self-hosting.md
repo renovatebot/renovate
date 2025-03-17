@@ -25,8 +25,8 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:39
-docker run --rm renovate/renovate:39.10
-docker run --rm renovate/renovate:39.10.2
+docker run --rm renovate/renovate:39.205
+docker run --rm renovate/renovate:39.205.1
 ```
 
 <!-- prettier-ignore -->
@@ -62,7 +62,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:39.10.2
+              image: renovate/renovate:39.205.1
               args:
                 - user/repo
               # Environment Variables
@@ -84,7 +84,7 @@ metadata:
   name: renovate-env
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
@@ -121,7 +121,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:39.10.2
+            - image: renovate/renovate:39.205.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -162,7 +162,7 @@ If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](ht
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
-Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`, `RENOVATE_GITHUB_COM_TOKEN`).
 
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
@@ -263,7 +263,7 @@ Most people use `cron` to schedule when Renovate runs, usually on an hourly sche
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
 export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps
-export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
+export RENOVATE_GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 
 # Renovate
 renovate
@@ -331,7 +331,7 @@ metadata:
   namespace: <namespace>
 type: Opaque
 stringData:
-  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
   RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
@@ -367,7 +367,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:39.10.2
+              image: renovate/renovate:39.205.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

@@ -31,11 +31,10 @@ Here's how `"auto"` works with the `gleam` manager:
 | Simple range             | `0.39.0`    | `<= 0.38.0`              | `<= 0.39.0`              | If update outside current range: widens range to include the new version. |
 | Exact version constraint | `0.13.0`    | `== 0.12.0`              | `== 0.13.0`              | Replace old version with new version.                                     |
 
-#### Do not set `rangeStrategy` to `update-lockfile` or `in-range-only`
+### Recommended `rangeStrategy` for apps and libraries
 
-Do _not_ set `rangeStrategy` to:
+For applications, we recommend using `rangeStrategy=pin`.
+This pins your dependencies to exact versions, which is generally considered [best practice for apps](../../../dependency-pinning.md).
 
-- `"update-lockfile"`
-- `"in-range-only"`
-
-Renovate's `gleam` manager ignores these values, and uses the `widen` strategy instead.
+For libraries, use `rangeStrategy=widen` with version ranges in your `gleam.toml`.
+This allows for greater compatibility with other projects that may use your library as a dependency.

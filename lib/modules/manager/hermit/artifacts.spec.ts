@@ -1,5 +1,3 @@
-import { mockExecAll } from '../../../../test/exec-util';
-import { mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { ExecError } from '../../../util/exec/exec-error';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
@@ -7,14 +5,15 @@ import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { partial } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
-const getRepoStatusMock = mockedFunction(getRepoStatus);
+const getRepoStatusMock = vi.mocked(getRepoStatus);
 
-const lstatsMock = mockedFunction(localPathIsSymbolicLink);
-const readlinkMock = mockedFunction(readLocalSymlink);
+const lstatsMock = vi.mocked(localPathIsSymbolicLink);
+const readlinkMock = vi.mocked(readLocalSymlink);
 
 describe('modules/manager/hermit/artifacts', () => {
   describe('updateArtifacts', () => {

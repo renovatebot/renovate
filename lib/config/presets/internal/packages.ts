@@ -135,7 +135,8 @@ export const presets: Record<string, Preset> = {
   },
   react: {
     description: 'All React packages.',
-    matchPackageNames: ['@types/react', 'react**'],
+    matchDatasources: ['npm'],
+    matchPackageNames: ['@types/react**', 'react**'],
   },
   stylelint: {
     description: 'All Stylelint packages.',

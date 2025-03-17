@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { PixiConfigSchema } from '../pixi/schema';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -36,6 +37,10 @@ const HatchSchema = z.object({
     .optional(),
 });
 
+const UvIndexSource = z.object({
+  index: z.string(),
+});
+
 const UvGitSource = z.object({
   git: z.string(),
   rev: z.string().optional(),
@@ -58,6 +63,7 @@ const UvWorkspaceSource = z.object({
 
 // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
 const UvSource = z.union([
+  UvIndexSource,
   UvGitSource,
   UvUrlSource,
   UvPathSource,
@@ -71,6 +77,16 @@ const UvSchema = z.object({
     z.string().transform((source) => normalizePythonDepName(source)),
     UvSource,
   ).optional(),
+  index: z
+    .array(
+      z.object({
+        name: z.string(),
+        url: z.string(),
+        default: z.boolean().default(false),
+        explicit: z.boolean().default(false),
+      }),
+    )
+    .optional(),
 });
 
 export const PyProjectSchema = z.object({
@@ -97,6 +113,7 @@ export const PyProjectSchema = z.object({
     .optional(),
   tool: z
     .object({
+      pixi: PixiConfigSchema.optional(),
       pdm: PdmSchema.optional(),
       hatch: HatchSchema.optional(),
       uv: UvSchema.optional(),

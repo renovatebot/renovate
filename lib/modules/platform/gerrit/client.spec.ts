@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import type { FindPRConfig } from '../types';
@@ -10,6 +8,8 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
@@ -243,6 +243,7 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
           tag: 'tag',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
@@ -253,6 +254,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message')).toResolve();
@@ -265,6 +267,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: okMessage,
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, tooBigMessage)).toResolve();
@@ -311,6 +314,7 @@ describe('modules/platform/gerrit/client', () => {
         .post('/a/changes/123456/revisions/current/review', {
           message: 'new trimmed message',
           tag: 'TAG',
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
 
@@ -347,6 +351,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           labels: { 'Code-Review': 2 },
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
@@ -357,11 +362,12 @@ describe('modules/platform/gerrit/client', () => {
     it('add', async () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/reviewers', {
-          reviewer: 'username',
+        .post('/a/changes/123456/revisions/current/review', {
+          reviewers: [{ reviewer: 'user1' }, { reviewer: 'user2' }],
+          notify: 'OWNER_REVIEWERS',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addReviewer(123456, 'username')).toResolve();
+      await expect(client.addReviewers(123456, ['user1', 'user2'])).toResolve();
     });
   });
 
@@ -421,6 +427,7 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           labels: { 'Code-Review': +2 },
+          notify: 'NONE',
         })
         .reply(200, gerritRestResponse(''), jsonResultHeader);
       await expect(client.approveChange(123456)).toResolve();

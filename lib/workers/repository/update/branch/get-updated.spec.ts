@@ -1,5 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
-import { git, mocked } from '../../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
@@ -15,31 +14,31 @@ import type { PackageFile } from '../../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
+import { git } from '~test/util';
 
-const bundler = mocked(_bundler);
-const composer = mocked(_composer);
-const gitSubmodules = mocked(_gitSubmodules);
-const gomod = mocked(_gomod);
-const helmv3 = mocked(_helmv3);
-const npm = mocked(_npm);
-const batectWrapper = mocked(_batectWrapper);
-const autoReplace = mocked(_autoReplace);
-const pep621 = mocked(_pep621);
-const pipCompile = mocked(_pipCompile);
-const poetry = mocked(_poetry);
+const bundler = vi.mocked(_bundler);
+const composer = vi.mocked(_composer);
+const gitSubmodules = vi.mocked(_gitSubmodules);
+const gomod = vi.mocked(_gomod);
+const helmv3 = vi.mocked(_helmv3);
+const npm = vi.mocked(_npm);
+const batectWrapper = vi.mocked(_batectWrapper);
+const autoReplace = vi.mocked(_autoReplace);
+const pep621 = vi.mocked(_pep621);
+const pipCompile = vi.mocked(_pipCompile);
+const poetry = vi.mocked(_poetry);
 
-jest.mock('../../../../modules/manager/bundler');
-jest.mock('../../../../modules/manager/composer');
-jest.mock('../../../../modules/manager/helmv3');
-jest.mock('../../../../modules/manager/npm');
-jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/gomod', () => mockDeep());
-jest.mock('../../../../modules/manager/batect-wrapper');
-jest.mock('../../../../modules/manager/pep621');
-jest.mock('../../../../modules/manager/pip-compile');
-jest.mock('../../../../modules/manager/poetry');
-jest.mock('../../../../util/git');
-jest.mock('./auto-replace');
+vi.mock('../../../../modules/manager/bundler');
+vi.mock('../../../../modules/manager/composer');
+vi.mock('../../../../modules/manager/helmv3');
+vi.mock('../../../../modules/manager/npm');
+vi.mock('../../../../modules/manager/git-submodules');
+vi.mock('../../../../modules/manager/gomod', () => mockDeep());
+vi.mock('../../../../modules/manager/batect-wrapper');
+vi.mock('../../../../modules/manager/pep621');
+vi.mock('../../../../modules/manager/pip-compile');
+vi.mock('../../../../modules/manager/poetry');
+vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
@@ -52,7 +51,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
       } satisfies BranchConfig;
-      npm.updateDependency = jest.fn();
+      npm.updateDependency = vi.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 

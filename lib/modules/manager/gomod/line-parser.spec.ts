@@ -6,10 +6,10 @@ describe('modules/manager/gomod/line-parser', () => {
   });
 
   it('should parse go version', () => {
-    const line = 'go 1.16';
+    const line = 'go 1.23';
     const res = parseLine(line);
     expect(res).toStrictEqual({
-      currentValue: '1.16',
+      currentValue: '1.23',
       datasource: 'golang-version',
       depName: 'go',
       depType: 'golang',
@@ -31,10 +31,10 @@ describe('modules/manager/gomod/line-parser', () => {
   });
 
   it('should parse toolchain version', () => {
-    const line = 'toolchain go1.16';
+    const line = 'toolchain go1.23';
     const res = parseLine(line);
     expect(res).toStrictEqual({
-      currentValue: '1.16',
+      currentValue: '1.23',
       datasource: 'golang-version',
       depName: 'go',
       depType: 'toolchain',

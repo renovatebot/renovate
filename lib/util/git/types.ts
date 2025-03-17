@@ -21,6 +21,7 @@ export interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
 }
 

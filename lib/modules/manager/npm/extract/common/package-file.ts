@@ -1,3 +1,4 @@
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
@@ -91,7 +92,8 @@ export function extractPackageJson(
             )) {
               if (is.string(overridesVal)) {
                 // Newer flat syntax: `parent>parent>child`
-                const packageName = overridesKey.split('>').pop()!;
+                const packageName =
+                  parsePkgAndParentSelector(overridesKey).targetPkg.name;
                 dep = {
                   depName: overridesKey,
                   packageName,

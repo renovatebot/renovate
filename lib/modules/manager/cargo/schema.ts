@@ -99,13 +99,24 @@ const CargoSection = z.object({
 
 const CargoWorkspace = z.object({
   dependencies: withDepType(CargoDeps, 'workspace.dependencies').optional(),
+  package: z
+    .object({
+      version: z.string().optional(),
+    })
+    .optional(),
 });
 
 const CargoTarget = z.record(z.string(), CargoSection);
 
 export const CargoManifestSchema = Toml.pipe(
   CargoSection.extend({
-    package: z.object({ version: z.string().optional() }).optional(),
+    package: z
+      .object({
+        version: z
+          .union([z.string(), z.object({ workspace: z.literal(true) })])
+          .optional(),
+      })
+      .optional(),
     workspace: CargoWorkspace.optional(),
     target: CargoTarget.optional(),
   }),

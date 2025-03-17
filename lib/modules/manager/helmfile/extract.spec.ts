@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const localDir = '/tmp/github/some/repo';
 
@@ -358,6 +358,32 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
+          },
+        ],
+      });
+    });
+
+    it('allows OCI chart names containing forward slashes', async () => {
+      const content = `
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+      releases:
+        - name: nested-example
+          version: 1.2.3
+          chart: oci-repo/nested/path/chart
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.2.3',
+            depName: 'nested/path/chart',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/nested/path/chart',
           },
         ],
       });

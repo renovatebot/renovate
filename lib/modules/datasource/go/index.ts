@@ -8,6 +8,7 @@ import { id as semverId } from '../../versioning/semver';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -98,6 +99,9 @@ export class GoDatasource extends Datasource {
       case GitTagsDatasource.id: {
         return this.direct.git.getDigest(source, tag);
       }
+      case GiteaTagsDatasource.id: {
+        return this.direct.gitea.getDigest(source, tag);
+      }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
@@ -115,7 +119,7 @@ export class GoDatasource extends Datasource {
   }
 }
 
-// istanbul ignore if
+/* v8 ignore next 3 -- hard to test */
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
   if (uri?.password) {

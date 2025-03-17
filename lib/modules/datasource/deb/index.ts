@@ -90,13 +90,14 @@ export class DebDatasource extends Datasource {
         await extract(compressedFile, compression, extractedFile);
         lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
-        logger.error(
+        logger.warn(
           {
+            compressedFile,
             componentUrl,
             compression,
             error: error.message,
           },
-          `Failed to extract package file from ${compressedFile}`,
+          'Failed to extract package file from compressed file',
         );
       } finally {
         await fs.rmCache(compressedFile);
@@ -186,7 +187,7 @@ export class DebDatasource extends Datasource {
    */
   private async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
     const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
-    const response = await this.http.get(inReleaseUrl);
+    const response = await this.http.getText(inReleaseUrl);
     return response.body;
   }
 
@@ -213,7 +214,8 @@ export class DebDatasource extends Datasource {
       return response.statusCode !== 304;
     } catch (error) {
       logger.warn(
-        `Could not determine if ${packageUrl} is modified since ${lastDownloadTimestamp.toUTCString()}: ${error.message}`,
+        { packageUrl, lastDownloadTimestamp, errorMessage: error.message },
+        'Could not determine if package file is modified since last download',
       );
       return true; // Assume it needs to be downloaded if check fails
     }
@@ -305,7 +307,7 @@ export class DebDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

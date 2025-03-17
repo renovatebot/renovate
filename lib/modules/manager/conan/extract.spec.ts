@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const conanfile1 = Fixtures.get('conanfile.txt');
 const conanfile2 = Fixtures.get('conanfile2.txt');
@@ -54,6 +54,13 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'cairo/1.17.2@_/_',
           replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
+        },
+        {
+          currentValue: '8.62.134',
+          depName: 'Fake',
+          depType: 'requires',
+          packageName: 'Fake/8.62.134@_/_',
+          replaceString: 'Fake/8.62.134',
         },
         {
           currentValue: '[>1.1 <2.1, include_prerelease=True]',

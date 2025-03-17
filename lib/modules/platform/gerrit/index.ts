@@ -96,7 +96,7 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo(${repository}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${gitUrl})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -258,6 +258,13 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
+    const hasBlockingLabels =
+      changes.filter((change) =>
+        Object.values(change.labels ?? {}).some((label) => label.blocking),
+      ).length > 0;
+    if (hasBlockingLabels) {
+      return 'red';
+    }
   }
   return 'yellow';
 }
@@ -284,11 +291,12 @@ export async function getBranchStatusCheck(
     if (change) {
       const labelRes = change.labels?.[context];
       if (labelRes) {
-        if (labelRes.approved) {
-          return 'green';
-        }
+        // Check for rejected first, as a label could have both rejected and approved
         if (labelRes.rejected) {
           return 'red';
+        }
+        if (labelRes.approved) {
+          return 'green';
         }
       }
     }
@@ -340,9 +348,7 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  for (const reviewer of reviewers) {
-    await client.addReviewer(number, reviewer);
-  }
+  await client.addReviewers(number, reviewers);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { isValidDependency } from '../custom/regex/utils';
+import { isValidDependency } from '../custom/utils';
 import { getDep as getDockerDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,

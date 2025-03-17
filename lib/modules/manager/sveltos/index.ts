@@ -4,13 +4,11 @@ import { HelmDatasource } from '../../datasource/helm';
 
 export { extractPackageFile } from './extract';
 
-export const displayName = 'Sveltos';
-export const url = 'https://projectsveltos.github.io/sveltos/';
+export const url = 'https://projectsveltos.github.io/sveltos';
+export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const defaultConfig = {
   fileMatch: [],
 };
-
-export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];

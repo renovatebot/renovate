@@ -1,18 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import {
-  env,
-  fs,
-  git,
-  logger,
-  mockedFunction,
-  partial,
-} from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
@@ -22,12 +11,15 @@ import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types';
 import { updateBuildFile, updateLockFiles } from './artifacts';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { env, fs, git, logger, partial } from '~test/util';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../gradle');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../gradle');
 
 process.env.CONTAINERBASE = 'true';
 
@@ -42,7 +34,7 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {
@@ -65,7 +57,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
     );
 
     // java
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },
@@ -440,7 +432,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
           },
         },
       ];
-      mockedFunction(gradleUpdateArtifacts).mockResolvedValue(updatedArtifacts);
+      vi.mocked(gradleUpdateArtifacts).mockResolvedValue(updatedArtifacts);
 
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({

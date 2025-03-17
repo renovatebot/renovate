@@ -287,7 +287,7 @@ async function fetchReleases(
   let { registryUrls } = config;
   // istanbul ignore if: need test
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
-    logger.warn('Unknown datasource: ' + datasourceName);
+    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
   if (datasourceName === 'npm') {

@@ -59,8 +59,6 @@ export async function lookupUpdates(
   config.versioning ??= getDefaultVersioning(config.datasource);
 
   const versioningApi = allVersioning.get(config.versioning);
-  const unconstrainedValue =
-    !!config.lockedVersion && is.undefined(config.currentValue);
 
   let dependency: ReleaseResult | null = null;
   const res: UpdateResult = {
@@ -124,10 +122,14 @@ export async function lookupUpdates(
         );
       }
     }
+
     const isValid =
       is.string(compareValue) && versioningApi.isValid(compareValue);
 
-    if (unconstrainedValue || isValid) {
+    const unconstrainedValue =
+      !!config.lockedVersion && is.undefined(config.currentValue);
+
+    if (isValid || unconstrainedValue) {
       if (
         !config.updatePinnedDependencies &&
         // TODO #22198
@@ -569,6 +571,12 @@ export async function lookupUpdates(
 
     if (isReplacementRulesConfigured(config)) {
       addReplacementUpdateIfValid(res.updates, config);
+    } else if (dependency?.replacementName && dependency.replacementVersion) {
+      res.updates.push({
+        updateType: 'replacement',
+        newName: dependency.replacementName,
+        newValue: dependency.replacementVersion,
+      });
     }
 
     // Record if the dep is fixed to a version
@@ -752,7 +760,6 @@ export async function lookupUpdates(
         rollbackPrs: config.rollbackPrs,
         isVulnerabilityAlert: config.isVulnerabilityAlert,
         updatePinnedDependencies: config.updatePinnedDependencies,
-        unconstrainedValue,
         err,
       },
       'lookupUpdates error',

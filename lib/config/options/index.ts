@@ -52,6 +52,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     globalOnly: true,
     patternMatch: true,
+    mergeable: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -107,7 +108,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowPostUpgradeCommandTemplating',
+    name: 'allowCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
@@ -115,9 +116,9 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowedPostUpgradeCommands',
+    name: 'allowedCommands',
     description:
-      'A list of regular expressions that decide which post-upgrade tasks are allowed.',
+      'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -515,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.0.15',
+    default: 'ghcr.io/containerbase/sidecar:13.8.5',
     globalOnly: true,
   },
   {
@@ -1135,6 +1136,7 @@ const options: RenovateOptions[] = [
     supportedManagers: [
       'ansible',
       'bitbucket-pipelines',
+      'buildpacks',
       'crossplane',
       'devcontainer',
       'docker-compose',
@@ -1462,6 +1464,16 @@ const options: RenovateOptions[] = [
     parents: ['packageRules'],
     cli: false,
     env: false,
+  },
+  {
+    name: 'replacementApproach',
+    description:
+      'Select whether to perform a direct replacement or alias replacement.',
+    type: 'string',
+    stage: 'branch',
+    allowedValues: ['replace', 'alias'],
+    supportedManagers: ['npm'],
+    default: 'replace',
   },
   {
     name: 'matchConfidence',
@@ -1867,6 +1879,17 @@ const options: RenovateOptions[] = [
     default: 'strict',
   },
   {
+    name: 'processEnv',
+    description: 'Environment variables to be used in global config only.',
+    type: 'object',
+    default: {},
+    globalOnly: true,
+    stage: 'global',
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1987,7 +2010,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',
@@ -2388,6 +2411,7 @@ const options: RenovateOptions[] = [
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
+      'gomodVendor',
       'helmUpdateSubChartArchives',
       'npmDedupe',
       'pnpmDedupe',
@@ -2732,18 +2756,26 @@ const options: RenovateOptions[] = [
     description:
       'Custom manager to use. Valid only within a `customManagers` object.',
     type: 'string',
-    allowedValues: ['regex'],
+    allowedValues: ['jsonata', 'regex'],
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fileFormat',
+    description:
+      'It specifies the syntax of the package file being managed by the custom JSONata manager.',
+    type: 'string',
+    allowedValues: ['json', 'toml', 'yaml'],
     parents: ['customManagers'],
     cli: false,
     env: false,
   },
   {
     name: 'matchStrings',
-    description:
-      'Regex capture rule to use. Valid only within a `customManagers` object.',
+    description: 'Queries to use. Valid only within a `customManagers` object.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     parents: ['customManagers'],
     cli: false,
     env: false,
@@ -2855,6 +2887,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'cloneSubmodulesFilter',
+    description:
+      'List of submodules names or patterns to clone when cloneSubmodules=true.',
+    type: 'array',
+    subType: 'string',
+    default: ['*'],
+  },
+  {
     name: 'ignorePrAuthor',
     description:
       'Set to `true` to fetch the entire list of PRs instead of only those authored by the Renovate user.',
@@ -2885,7 +2925,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['gitlab', 'bitbucket-server'],
+    supportedPlatforms: ['gitea', 'gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',

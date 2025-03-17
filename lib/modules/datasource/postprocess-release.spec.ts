@@ -1,4 +1,4 @@
-import { mocked } from '../../../test/util';
+import type { Timestamp } from '../../util/timestamp';
 import * as _datasourceCommon from './common';
 import { Datasource } from './datasource';
 import { postprocessRelease } from './postprocess-release';
@@ -10,8 +10,8 @@ import type {
   ReleaseResult,
 } from './types';
 
-jest.mock('./common');
-const { getDatasourceFor } = mocked(_datasourceCommon);
+vi.mock('./common');
+const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
   constructor() {
@@ -86,7 +86,7 @@ describe('modules/datasource/postprocess-release', () => {
         _config: PostprocessReleaseConfig,
         release: Release,
       ): Promise<PostprocessReleaseResult> {
-        release.releaseTimestamp = '2024-09-05';
+        release.releaseTimestamp = '2024-09-05' as Timestamp;
         return Promise.resolve(release);
       }
     }
@@ -122,31 +122,6 @@ describe('modules/datasource/postprocess-release', () => {
     );
 
     expect(release).toBeNull();
-  });
-
-  it('preserves rejected release when `extractVersion` was set', async () => {
-    const releaseOrig: Release = { version: '1.2.3' };
-
-    class SomeDatasource extends DummyDatasource {
-      override postprocessRelease(
-        _config: PostprocessReleaseConfig,
-        _release: Release,
-      ): Promise<PostprocessReleaseResult> {
-        return Promise.resolve('reject');
-      }
-    }
-    getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
-
-    const release = await postprocessRelease(
-      {
-        datasource: 'some-datasource',
-        packageName: 'some-package',
-        extractVersion: '^(?<version>\\d+)$',
-      },
-      releaseOrig,
-    );
-
-    expect(release).toBe(releaseOrig);
   });
 
   it('falls back when error was thrown', async () => {

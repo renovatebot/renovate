@@ -47,13 +47,16 @@ You can set alternative feeds:
 
 ```json
 {
-  "nuget": {
-    "registryUrls": [
-      "https://api.nuget.org/v3/index.json",
-      "https://example1.com/nuget/",
-      "https://example2.com/nuget/v3/index.json"
-    ]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["nuget"],
+      "registryUrls": [
+        "https://api.nuget.org/v3/index.json",
+        "https://example1.com/nuget/",
+        "https://example2.com/nuget/v3/index.json"
+      ]
+    }
+  ]
 }
 ```
 
@@ -93,9 +96,12 @@ If a `v3` feed URL does not end with `index.json`, you must specify the version 
 
   ```json
   {
-    "nuget": {
-      "registryUrls": ["http://myV3feed#protocolVersion=3"]
-    }
+    "packageRules": [
+      {
+        "matchDatasources": ["nuget"],
+        "registryUrls": ["https://example1.com/nuget/#protocolVersion=3"]
+      }
+    ]
   }
   ```
 
@@ -129,6 +135,23 @@ If you use Azure DevOps:
     For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
     The username of the PAT must match the username of the _user of the PAT_.
     The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
+
+## Ignoring package files when using presets
+
+Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
+For example:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "nuget": {
+    "ignorePaths": ["IgnoreThisPackage/**"]
+  }
+}
+```
+
+Otherwise, all `nuget.ignorePaths` values in `:ignoreModulesAndTests` will override values you put inside `ignorePaths` at the top-level config.
 
 ## Future work
 

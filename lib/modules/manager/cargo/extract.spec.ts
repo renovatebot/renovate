@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -628,6 +628,22 @@ replace-with = "mcorbin"
         name = "test"
         version = "0.1.0"
         edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
+    });
+
+    it('should extract project version from workspace', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version.workspace = true
+        edition = "2021"
+        [workspace.package]
+        version = "0.1.0"
         [dependencies]
         syn = "2.0"
         `;

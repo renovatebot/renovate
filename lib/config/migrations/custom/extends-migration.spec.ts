@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../global';
 import { ExtendsMigration } from './extends-migration';
 
 describe('config/migrations/custom/extends-migration', () => {
-  it('it migrates preset strings to array', () => {
+  it('migrates preset strings to array', () => {
     expect(ExtendsMigration).toMigrate(
       {
         extends: ':js-app',
@@ -22,7 +22,7 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('it migrates presets array', () => {
+  it('migrates presets array', () => {
     expect(ExtendsMigration).toMigrate(
       {
         extends: ['foo', ':js-app', 'bar'],
@@ -55,7 +55,7 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
-  it('it migrates presets', () => {
+  it('migrates presets', () => {
     GlobalConfig.set({
       migratePresets: {
         '@org': 'local>org/renovate-config',

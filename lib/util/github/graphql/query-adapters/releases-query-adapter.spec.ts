@@ -1,9 +1,10 @@
+import type { Timestamp } from '../../../../util/timestamp';
 import { adapter } from './releases-query-adapter';
 import type { GithubGraphqlRelease } from './releases-query-adapter';
 
 const item: GithubGraphqlRelease = {
   version: '1.2.3',
-  releaseTimestamp: '2024-09-24',
+  releaseTimestamp: '2024-09-24' as Timestamp,
   isDraft: false,
   isPrerelease: false,
   url: 'https://example.com',
@@ -18,7 +19,7 @@ describe('util/github/graphql/query-adapters/releases-query-adapter', () => {
       description: 'description',
       id: 123,
       name: 'name',
-      releaseTimestamp: '2024-09-24',
+      releaseTimestamp: '2024-09-24T00:00:00.000Z' as Timestamp,
       url: 'https://example.com',
       version: '1.2.3',
     });

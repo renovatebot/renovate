@@ -4,6 +4,7 @@ This manager extracts image references in a `Dockerfile` and/or `Containerfile` 
 
 - [`FROM`](https://docs.docker.com/reference/dockerfile/#from) images
 - [`COPY --from`](https://docs.docker.com/reference/dockerfile/#copy---from) images
+- [`RUN --mount`](https://docs.docker.com/reference/dockerfile/#run---mount) images
 - [`syntax`](https://docs.docker.com/reference/dockerfile/#syntax) images
 
 #### `FROM` support
@@ -35,6 +36,16 @@ Renovate can update images referenced in `COPY --from` directives.
 ```dockerfile
 FROM node:20.9.0
 COPY --from alpine:3.19.4 /bin/sh /usr/local/sh
+```
+
+#### `RUN --mount` support
+
+Images referenced in `RUN --mount` directives are also supported.
+
+```dockerfile
+FROM python:3.12
+RUN --mount=from=ghcr.io/astral-sh/uv:0.5,source=/uv,target=/bin/uv \
+    uv venv
 ```
 
 #### `syntax` support

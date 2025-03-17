@@ -4,13 +4,10 @@ import upath from 'upath';
 import { rawExec as _exec } from '../lib/util/exec/common';
 import type { RawExecOptions } from '../lib/util/exec/types';
 import { regEx } from '../lib/util/regex';
-import { mockedFunction } from './util';
-
-jest.mock('../lib/util/exec/common');
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
-export const exec = mockedFunction(_exec);
+export const exec = vi.mocked(_exec);
 
 export interface ExecSnapshot {
   cmd: string;

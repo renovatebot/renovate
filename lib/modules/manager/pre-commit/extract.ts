@@ -7,6 +7,7 @@ import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { pep508ToPackageDependency } from '../pep621/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
@@ -95,6 +96,8 @@ function extractDependency(
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
     regEx(/^git:\/\/(?<hostname>[^/]+)\/(?<depName>\S*)/),
+    // This splits "ssh://git@github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
+    regEx(/^ssh:\/\/git@(?<hostname>[^/]+)\/(?<depName>\S*)/),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
@@ -137,6 +140,23 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
   }
   const packageDependencies: PackageDependency[] = [];
   precommitFile.repos.forEach((item) => {
+    // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
+    if (item.repo !== 'meta') {
+      item.hooks?.forEach((hook) => {
+        // normally language are not defined in yaml
+        // only support it when it's explicitly defined.
+        // this avoid to parse hooks from pre-commit-hooks.yaml from git repo
+        if (hook.language === 'python') {
+          hook.additional_dependencies?.map((req) => {
+            const dep = pep508ToPackageDependency('pre-commit-python', req);
+            if (dep) {
+              packageDependencies.push(dep);
+            }
+          });
+        }
+      });
+    }
+
     if (matchesPrecommitDependencyHeuristic(item)) {
       logger.trace(item, 'Matched pre-commit dependency spec');
       const repository = String(item.repo);

@@ -1,3 +1,4 @@
+import { TimeoutError } from 'got';
 import { z } from 'zod';
 import prepareError, {
   prepareZodIssues,
@@ -7,7 +8,7 @@ import prepareError, {
 
 describe('logger/utils', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('checks for valid log levels', () => {
@@ -28,7 +29,7 @@ describe('logger/utils', () => {
     ${' '}
   `('checks for invalid log level: $input', (input) => {
     // Mock when the function exits
-    const mockExit = jest.spyOn(process, 'exit');
+    const mockExit = vi.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
       // TODO: types (#22198)
       throw new Error(`process.exit: ${number}`);
@@ -106,6 +107,9 @@ describe('logger/utils', () => {
     }
 
     it('prepareZodIssues', () => {
+      expect(prepareZodIssues(null)).toBe(null);
+      expect(prepareZodIssues({ _errors: ['a', 'b'] })).toEqual(['a', 'b']);
+
       expect(prepareIssues(z.string(), 42)).toBe(
         'Expected string, received number',
       );
@@ -212,6 +216,22 @@ describe('logger/utils', () => {
         },
         message: 'Schema error',
         stack: expect.stringMatching(/^ZodError: Schema error/),
+      });
+    });
+
+    it('handles HTTP timout error', () => {
+      const err = new TimeoutError(
+        // @ts-expect-error some types are private
+        new Error('timeout'),
+        {},
+        { context: { hostType: 'foo' } },
+      );
+      Object.assign(err, {
+        response: {},
+      });
+      expect(prepareError(err)).toMatchObject({
+        message: 'timeout',
+        name: 'TimeoutError',
       });
     });
   });

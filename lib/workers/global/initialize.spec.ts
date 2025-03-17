@@ -1,11 +1,10 @@
-import { git, mockedFunction } from '../../../test/util';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { initPlatform as _initPlatform } from '../../modules/platform';
 import * as hostRules from '../../util/host-rules';
 import { globalInitialize } from './initialize';
+import { git } from '~test/util';
 
-jest.mock('../../util/git');
-const initPlatform = mockedFunction(_initPlatform);
+const initPlatform = vi.mocked(_initPlatform);
 
 describe('workers/global/initialize', () => {
   beforeEach(() => {

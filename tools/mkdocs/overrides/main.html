@@ -6,6 +6,6 @@
 
 {% block announce %}
 <p>
-  We released Renovate <code>v38</code>. Read the <a href="https://docs.renovatebot.com/release-notes-for-major-versions/">Release notes for major versions of Renovate</a> to learn what's changed.
+  If you use a Mend-hosted Renovate App <em>and</em> you have encrypted secrets in your Renovate config, then you must migrate the secrets to the Developer Portal UI. If you do not migrate the secrets, eventually Renovate will stop running on repositories that use the Mend-hosted Renovate App. Please read the <a href="https://github.com/renovatebot/renovate/discussions/33407">announcement about the disabling of Encrypted Secrets in Mend-hosted Renovate apps</a> to learn more.
 </p>
 {% endblock %}
