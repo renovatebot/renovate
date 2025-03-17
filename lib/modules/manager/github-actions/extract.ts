@@ -237,7 +237,7 @@ function extractWithYAMLParser(
               packageName: `actions/${action}-versions`,
               versioning,
               extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
-              currentValue,
+              currentValue: currentValue.toString(),
               depType: 'uses-with',
             });
           }
