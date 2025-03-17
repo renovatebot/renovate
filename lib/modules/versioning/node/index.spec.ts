@@ -1,7 +1,17 @@
-import { DateTime, Settings } from 'luxon';
+import { DateTime } from 'luxon';
 import { api as nodever } from '.';
 
 describe('modules/versioning/node/index', () => {
+  let dtLocal: any;
+
+  beforeEach(() => {
+    dtLocal = DateTime.local;
+  });
+
+  afterEach(() => {
+    DateTime.local = dtLocal;
+  });
+
   it.each`
     currentValue | rangeStrategy | currentVersion | newVersion   | expected
     ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1.1.0'}
@@ -43,8 +53,8 @@ describe('modules/versioning/node/index', () => {
     ${'10.0.0a'}  | ${t1} | ${false}
     ${'9.0.0'}    | ${t1} | ${false}
   `('isStable("$version") === $expected', ({ version, time, expected }) => {
-    jest.spyOn(Settings, 'now').mockReturnValue(time.valueOf());
-
+    DateTime.local = (...args: any[]) =>
+      args.length ? dtLocal.apply(DateTime, args) : time;
     expect(nodever.isStable(version as string)).toBe(expected);
   });
 

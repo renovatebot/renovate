@@ -1,4 +1,3 @@
-import got from 'got';
 import { updateJsonFile } from './utils.mjs';
 
 /**
@@ -13,29 +12,36 @@ const lambdaDataUrl = 'https://endoflife.date/api/aws-lambda.json';
 
 await (async () => {
   console.log('Generating node schedule');
-  const { body } = await got(lambdaDataUrl);
 
   /**
    * @type Array<RuntimeDefinition>
    */
-  const lambdas = JSON.parse(body);
-  const nodeRuntimes = lambdas
-    // Filter Runtimes down to only NodeJS Runtimes
-    .filter((lambda) => lambda.cycle.startsWith('nodejs'))
-    // The only Runtime where support is not either `true` or a Date as a string is `0.10.x`, which we don't need
-    .filter((lambda) => lambda.support !== false)
-    .reduce((schedule, lambda) => {
-      const versionMatch = /^nodejs([0-9]+)\.x$/.exec(lambda.cycle);
+  const lambdas = await fetch(lambdaDataUrl).then((response) =>
+    response.json(),
+  );
 
-      if (!versionMatch?.[1]) {
-        return schedule;
-      }
+  /**
+   * @type {{ [version: string]: RuntimeDefinition }}
+   */
+  const nodeRuntimes = {};
 
-      return {
-        ...schedule,
-        [versionMatch[1]]: lambda,
-      };
-    }, {});
+  for (let lambda of lambdas) {
+    if (!lambda.cycle.startsWith('nodejs')) {
+      continue;
+    }
+
+    if (lambda.support === false) {
+      continue;
+    }
+
+    const versionMatch = /^nodejs([0-9]+)\.x$/.exec(lambda.cycle);
+
+    if (!versionMatch?.[1]) {
+      continue;
+    }
+
+    nodeRuntimes[versionMatch[1]] = lambda;
+  }
 
   await updateJsonFile(
     './data/lambda-node-js-schedule.json',

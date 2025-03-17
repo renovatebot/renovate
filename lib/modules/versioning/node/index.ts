@@ -53,7 +53,7 @@ export function isStable(version: string): boolean {
     const schedule = findScheduleForVersion(version);
     if (schedule?.lts) {
       // TODO: use the exact release that started LTS (#9716)
-      return DateTime.now() > DateTime.fromISO(schedule.lts);
+      return DateTime.local() > DateTime.fromISO(schedule.lts);
     }
   }
   return false;
