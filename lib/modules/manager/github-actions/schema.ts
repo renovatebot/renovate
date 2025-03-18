@@ -39,4 +39,4 @@ export const WorkflowJobsSchema = Yaml.pipe(
   }),
 )
   .transform((v) => Object.values(v.jobs))
-  .catch(withDebugMessage([], 'Error parsing workflow'));
+  .catch(withDebugMessage([], 'Does not match schema'));
