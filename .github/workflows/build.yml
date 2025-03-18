@@ -605,7 +605,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
+        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -698,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@1a9a958e2982661f0baa123ce50aeba1a8726e3c # v3.10.8
+        uses: containerbase/internal-tools@ad08d617d8a1eace44bb91726064e61580f4f115 # v3.10.11
         with:
           command: docker-config
 
