@@ -176,4 +176,27 @@ describe('workers/repository/process/lookup/timestamps', () => {
     expect(result).toBe(releaseResult);
     expect(result.bumpedAt).toBeUndefined();
   });
+
+  it('handles errors thrown for invalid versions', () => {
+    const releaseResult: ReleaseResult = {
+      releases: [
+        {
+          version: 'foo',
+          releaseTimestamp: asTimestamp('2020-01-01T00:00:00.000Z'),
+        },
+        {
+          version: 'bar',
+          releaseTimestamp: asTimestamp('2021-01-01T00:00:00.000Z'),
+        },
+        {
+          version: '1.0.0',
+          releaseTimestamp: asTimestamp('2022-01-01T00:00:00.000Z'),
+        },
+      ],
+    };
+
+    const result = calculateLatestReleaseBump(versioning, releaseResult);
+
+    expect(result.bumpedAt).toBe('2022-01-01T00:00:00.000Z');
+  });
 });
