@@ -185,18 +185,22 @@ describe('workers/repository/process/lookup/timestamps', () => {
           releaseTimestamp: asTimestamp('2020-01-01T00:00:00.000Z'),
         },
         {
-          version: 'bar',
+          version: '1.0.0',
           releaseTimestamp: asTimestamp('2021-01-01T00:00:00.000Z'),
         },
         {
-          version: '1.0.0',
+          version: 'bar',
           releaseTimestamp: asTimestamp('2022-01-01T00:00:00.000Z'),
+        },
+        {
+          version: '2.0.0',
+          releaseTimestamp: asTimestamp('2023-01-01T00:00:00.000Z'),
         },
       ],
     };
 
     const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-    expect(result.bumpedAt).toBe('2022-01-01T00:00:00.000Z');
+    expect(result.bumpedAt).toBe('2023-01-01T00:00:00.000Z');
   });
 });
