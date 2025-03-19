@@ -3818,6 +3818,7 @@ This feature works with the following managers:
 - [`kubernetes`](modules/manager/kubernetes/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
+- [`pixi`](modules/manager/pixi/index.md)
 
 ```json title="Setting generic aliases"
 {
