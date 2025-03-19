@@ -75,6 +75,7 @@ flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
 gitleaks 8.21.1
+ginkgo 2.22.2
 gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.23.3
@@ -353,6 +354,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'gitleaks/gitleaks',
             depName: 'gitleaks',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '2.22.2',
+            datasource: 'github-releases',
+            packageName: 'onsi/ginkgo',
+            depName: 'ginkgo',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
