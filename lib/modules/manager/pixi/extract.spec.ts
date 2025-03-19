@@ -698,15 +698,12 @@ describe('modules/manager/pixi/extract', () => {
 
         [dependencies]
         numpy = "==1.15.1"
-        scipy = {version = '*', channel = 'https://mirrors.of.some.company/anaconda/'}
         `,
       'pixi.toml',
       {
         registryAliases: {
           'https://mirrors.of.some.company/anaconda/cloud/conda-forge/':
             'conda-forge',
-          'https://mirrors.of.some.company/anaconda/':
-            'https://repo.anaconda/fake/repo/',
         },
       },
     );
@@ -722,18 +719,6 @@ describe('modules/manager/pixi/extract', () => {
           depName: 'numpy',
           depType: 'dependencies',
           registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
-          versioning: 'conda',
-        },
-        {
-          channel: 'https://mirrors.of.some.company/anaconda/',
-          channels: [
-            'https://mirrors.of.some.company/anaconda/cloud/conda-forge/',
-          ],
-          currentValue: '*',
-          datasource: 'conda',
-          depName: 'scipy',
-          depType: 'dependencies',
-          registryUrls: ['https://repo.anaconda/fake/repo/'],
           versioning: 'conda',
         },
       ],

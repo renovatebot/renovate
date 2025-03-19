@@ -1,17 +1,21 @@
-import { z } from 'zod';
 import is from '@sindresorhus/is';
+import { z } from 'zod';
 
 import { logger } from '../../../logger';
-import { ensureTrailingSlash } from '../../../util/url';
-
+import { isNotNullOrUndefined } from '../../../util/array';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+
 import { Result } from '../../../util/result';
 import { Toml } from '../../../util/schema-utils';
+import { ensureTrailingSlash } from '../../../util/url';
+import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/conda/common';
 import { PyProjectSchema } from '../pep621/schema';
 import type { ExtractConfig, PackageFileContent } from '../types';
-import { type PixiConfig, PixiPackageDependency, PixiToml } from './schema';
-import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/conda/common';
-import { isNotNullOrUndefined } from '../../../util/array';
+import type {
+  type PixiConfig,
+  PixiPackageDependency,
+  PixiToml,
+} from './schema';
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
 
@@ -124,7 +128,7 @@ export async function extractPackageFile(
 
   return {
     lockFiles,
-    deps: [...conda, ...val.pypi.concat(val.feature.pypi)],
+    deps: [...conda, ...val.pypi, ...val.feature.pypi],
   };
 }
 
@@ -132,21 +136,13 @@ function channelToRegistryUrl(
   channel: string,
   aliasConfig?: Record<string, string>,
 ): string {
-  const alias = aliasConfig?.[channel];
-  if (isNotNullOrUndefined(alias)) {
-    // help to alias mirror url to anaconda repo
-    if (!looksLikeUrl(alias)) {
-      return defaultCondaRegistryAPi + alias + '/';
-    }
-
-    return alias;
+  // help to alias mirror url to anaconda repo
+  const alias = aliasConfig?.[channel] ?? channel;
+  if (looksLikeUrl(alias)) {
+    return ensureTrailingSlash(alias);
   }
 
-  if (looksLikeUrl(channel)) {
-    return ensureTrailingSlash(channel);
-  }
-
-  return defaultCondaRegistryAPi + channel + '/';
+  return defaultCondaRegistryAPi + alias + '/';
 }
 
 function orderChannels(channels: Channels = []): string[] {
