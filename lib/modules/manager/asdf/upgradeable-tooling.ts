@@ -285,6 +285,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  ginkgo: {
+    asdfPluginUrl: 'https://github.com/jimmidyson/asdf-ginkgo',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'onsi/ginkgo',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   gleam: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-gleam.git',
     config: {
