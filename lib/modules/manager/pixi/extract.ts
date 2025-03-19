@@ -9,7 +9,11 @@ import { ensureTrailingSlash } from '../../../util/url';
 import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/conda/common';
 import { PyProjectSchema } from '../pep621/schema';
 import type { ExtractConfig, PackageFileContent } from '../types';
-import { type PixiConfig, PixiPackageDependency, PixiToml } from './schema';
+import {
+  type PixiConfig,
+  type PixiPackageDependency,
+  PixiToml,
+} from './schema';
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
 
