@@ -697,7 +697,7 @@ dummy 1.2.3
           },
           {
             currentValue: '2.14.0',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'GoogleContainerTools/skaffold',
             depName: 'skaffold',
             extractVersion: '^v(?<version>\\S+)',

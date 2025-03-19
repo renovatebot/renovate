@@ -726,7 +726,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   skaffold: {
     asdfPluginUrl: 'https://github.com/nklmilojevic/asdf-skaffold',
     config: {
-      datasource: GithubTagsDatasource.id,
+      datasource: GithubReleasesDatasource.id,
       packageName: 'GoogleContainerTools/skaffold',
       extractVersion: '^v(?<version>\\S+)',
     },
