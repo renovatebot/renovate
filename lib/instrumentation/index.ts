@@ -8,13 +8,16 @@ import type {
 } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider, SpanStatusCode } from '@opentelemetry/api';
+import {
+  getNodeAutoInstrumentations,
+  getResourceDetectors,
+} from '@opentelemetry/auto-instrumentations-node';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { Resource } from '@opentelemetry/resources';
+import { detectResourcesSync, Resource } from '@opentelemetry/resources';
 import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
@@ -51,7 +54,7 @@ export function init(): void {
       ['service.namespace']:
         process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
       [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
-    }),
+    }).merge(detectResourcesSync({ detectors: getResourceDetectors() })),
   });
 
   // add processors
@@ -72,9 +75,9 @@ export function init(): void {
     contextManager,
   });
 
-  instrumentations = [
-    new HttpInstrumentation({
-      /* v8 ignore start -- not easily testable */
+  instrumentations = getNodeAutoInstrumentations({
+    // load custom configuration for http instrumentation
+    '@opentelemetry/instrumentation-http': {
       applyCustomAttributesOnSpan: (span, request, response) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
         if (
@@ -86,10 +89,10 @@ export function init(): void {
           span.setStatus({ code: SpanStatusCode.OK });
         }
       },
-      /* v8 ignore stop */
-    }),
-    new BunyanInstrumentation(),
-  ];
+    },
+  });
+  instrumentations.push(new BunyanInstrumentation());
+
   registerInstrumentations({
     instrumentations,
   });
