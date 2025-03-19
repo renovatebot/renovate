@@ -2,9 +2,7 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 
 import { logger } from '../../../logger';
-import { isNotNullOrUndefined } from '../../../util/array';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-
 import { Result } from '../../../util/result';
 import { Toml } from '../../../util/schema-utils';
 import { ensureTrailingSlash } from '../../../util/url';
