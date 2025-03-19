@@ -2360,6 +2360,7 @@ Supported lock files:
 - `requirements.txt`
 - `uv.lock`
 - `yarn.lock`
+- `pixi.lock`
 
 Support for new lock files may be added via feature request.
 
