@@ -83,7 +83,9 @@ function validateUrlAndParams(url: URL, requiredParams: string[]): void {
 function getReleaseParam(url: URL, optionalParams: string[]): string[] {
   const releases = optionalParams.flatMap((param) => {
     const paramValue = url.searchParams.get(param);
-    if (paramValue === null) return [];
+    if (paramValue === null) {
+      return [];
+    }
     return paramValue.split(',');
   });
   if (releases.length === 0) {
