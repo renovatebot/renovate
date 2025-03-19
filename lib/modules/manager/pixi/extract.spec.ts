@@ -685,4 +685,59 @@ describe('modules/manager/pixi/extract', () => {
   it('returns null for non-known config file', async () => {
     expect(await extractPackageFile(`{}`, 'unexpected.json')).toBe(null);
   });
+
+  it(`extract package with registryAliases`, async () => {
+    const result = await extractPackageFile(
+      codeBlock`
+        [project]
+        authors = ["Trim21 <trim21.me@gmail.com>"]
+        channels = ["https://mirrors.of.some.company/anaconda/cloud/conda-forge/"]
+        name = "pixi"
+        platforms = ["win-64"]
+        version = "0.1.0"
+
+        [dependencies]
+        numpy = "==1.15.1"
+        scipy = {version = '*', channel = 'https://mirrors.of.some.company/anaconda/'}
+        `,
+      'pixi.toml',
+      {
+        registryAliases: {
+          'https://mirrors.of.some.company/anaconda/cloud/conda-forge/':
+            'conda-forge',
+          'https://mirrors.of.some.company/anaconda/':
+            'https://repo.anaconda/fake/repo/',
+        },
+      },
+    );
+
+    expect(result).toMatchObject({
+      deps: [
+        {
+          channels: [
+            'https://mirrors.of.some.company/anaconda/cloud/conda-forge/',
+          ],
+          currentValue: '==1.15.1',
+          datasource: 'conda',
+          depName: 'numpy',
+          depType: 'dependencies',
+          registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
+          versioning: 'conda',
+        },
+        {
+          channel: 'https://mirrors.of.some.company/anaconda/',
+          channels: [
+            'https://mirrors.of.some.company/anaconda/cloud/conda-forge/',
+          ],
+          currentValue: '*',
+          datasource: 'conda',
+          depName: 'scipy',
+          depType: 'dependencies',
+          registryUrls: ['https://repo.anaconda/fake/repo/'],
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
+  });
 });

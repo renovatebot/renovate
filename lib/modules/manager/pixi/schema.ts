@@ -2,17 +2,12 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
-import { ensureTrailingSlash } from '../../../util/url';
 import { CondaDatasource } from '../../datasource/conda/';
-import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/conda/common';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as condaVersion from '../../versioning/conda/';
 import { id as gitRefVersionID } from '../../versioning/git';
 import { id as pep440VersionID } from '../../versioning/pep440/';
 import type { PackageDependency } from '../types';
-
-type Channel = string | { channel: string; priority: number };
-type Channels = Channel[];
 
 export interface PixiPackageDependency extends PackageDependency {
   channel?: string;
@@ -206,96 +201,7 @@ export const PixiConfigSchema = z
         project: projectSchema,
       }),
     ]),
-  )
-  .transform(
-    (
-      val,
-    ): {
-      conda: PixiPackageDependency[];
-      pypi: PixiPackageDependency[];
-    } => {
-      const project = val.project;
-      const channels: Channels = structuredClone(project.channels);
-
-      // resolve channels and build registry urls for each channel with order
-      const conda: PixiPackageDependency[] = val.conda
-        .map((item) => {
-          return { ...item, channels } as PixiPackageDependency;
-        })
-        .concat(
-          val.feature.conda.map(
-            (item: PixiPackageDependency): PixiPackageDependency => {
-              return {
-                ...item,
-                channels: [...(item.channels ?? []), ...project.channels],
-              };
-            },
-          ),
-        )
-        .map((item) => {
-          const channels = orderChannels(item.channels);
-          if (item.channel) {
-            return {
-              ...item,
-              channels,
-              registryUrls: [channelToRegistryUrl(item.channel)],
-            };
-          }
-
-          if (channels.length === 0) {
-            return {
-              ...item,
-              channels,
-              skipStage: 'extract',
-              skipReason: 'unknown-registry',
-            };
-          }
-
-          return {
-            ...item,
-            channels,
-            registryUrls: channels.map(channelToRegistryUrl),
-          } satisfies PixiPackageDependency;
-        });
-
-      return {
-        conda,
-        pypi: val.pypi.concat(val.feature.pypi),
-      };
-    },
   );
-
-function channelToRegistryUrl(channel: string): string {
-  if (looksLikeUrl(channel)) {
-    return ensureTrailingSlash(channel);
-  }
-
-  return defaultCondaRegistryAPi + channel + '/';
-}
-
-function orderChannels(channels: Channels = []): string[] {
-  return channels
-    .map((channel, index) => {
-      if (is.string(channel)) {
-        return { channel, priority: 0, index };
-      }
-
-      return { ...channel, index: 0 };
-    })
-    .toSorted((a, b) => {
-      // first based on priority then based on index
-      if (a.priority !== b.priority) {
-        return b.priority - a.priority;
-      }
-
-      return a.index - b.index;
-    })
-    .map((c) => c.channel);
-}
-
-function looksLikeUrl(s: string): boolean {
-  return s.startsWith('https://') || s.startsWith('http://');
-}
 
 export type PixiConfig = z.infer<typeof PixiConfigSchema>;
 
