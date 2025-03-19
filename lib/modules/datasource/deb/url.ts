@@ -30,7 +30,7 @@ export function constructComponentUrls(registryUrl: string): string[] {
     const url = new URL(registryUrl);
     validateUrlAndParams(url, REQUIRED_PARAMS);
 
-    const release = getReleaseParam(url, OPTIONAL_PARAMS);
+    const releases = getReleaseParam(url, OPTIONAL_PARAMS);
     const binaryArch = url.searchParams.get('binaryArch');
     const components = url.searchParams.get('components')!.split(',');
 
@@ -39,13 +39,15 @@ export function constructComponentUrls(registryUrl: string): string[] {
       url.searchParams.delete(param),
     );
 
-    return components.map((component) =>
-      joinUrlParts(
-        url.toString(),
-        `dists`,
-        release,
-        component,
-        `binary-${binaryArch}`,
+    return releases.flatMap((release) =>
+      components.map((component) =>
+        joinUrlParts(
+          url.toString(),
+          `dists`,
+          release,
+          component,
+          `binary-${binaryArch}`,
+        ),
       ),
     );
   } catch (error) {
@@ -78,14 +80,16 @@ function validateUrlAndParams(url: URL, requiredParams: string[]): void {
  * @returns The value of the release parameter.
  * @throws Will throw an error if none of the optional parameters are found.
  */
-function getReleaseParam(url: URL, optionalParams: string[]): string {
-  for (const param of optionalParams) {
+function getReleaseParam(url: URL, optionalParams: string[]): string[] {
+  const releases = optionalParams.flatMap((param) => {
     const paramValue = url.searchParams.get(param);
-    if (paramValue !== null) {
-      return paramValue;
-    }
+    if (paramValue === null) return [];
+    return paramValue.split(',');
+  });
+  if (releases.length === 0) {
+    throw new Error(
+      `Missing one of ${optionalParams.join(', ')} query parameter`,
+    );
   }
-  throw new Error(
-    `Missing one of ${optionalParams.join(', ')} query parameter`,
-  );
+  return releases;
 }
