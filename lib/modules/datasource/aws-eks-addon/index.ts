@@ -1,8 +1,4 @@
-import {
-  type Compatibility,
-  DescribeAddonVersionsCommand,
-  EKSClient,
-} from '@aws-sdk/client-eks';
+import { DescribeAddonVersionsCommand, EKSClient } from '@aws-sdk/client-eks';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
