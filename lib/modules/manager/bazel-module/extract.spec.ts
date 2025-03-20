@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BazelDatasource } from '../../datasource/bazel';
@@ -9,6 +8,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
 import * as parser from './parser';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/modules/manager/bazel-module/__fixtures__'),

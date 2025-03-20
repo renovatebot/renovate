@@ -1,7 +1,7 @@
 import { Http } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import * as memCache from '../../cache/memory';
 import { memCacheProvider as cacheProvider } from './memory-http-cache-provider';
+import * as httpMock from '~test/http-mock';
 
 describe('util/http/cache/memory-http-cache-provider', () => {
   beforeEach(() => {

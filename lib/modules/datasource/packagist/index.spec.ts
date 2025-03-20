@@ -1,12 +1,12 @@
 import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import type { HostRule } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';
 import { PackagistDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 

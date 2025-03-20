@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { logger } from '../../../../test/util';
 import { addLibYears } from '../../../instrumentation/reporting';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../instrumentation/reporting');
 

@@ -1,6 +1,4 @@
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdateArtifact } from '../types';
@@ -9,6 +7,8 @@ import {
   getLockFilePath,
   getRubyConstraint,
 } from './common';
+import { Fixtures } from '~test/fixtures';
+import { fs, partial } from '~test/util';
 
 vi.mock('../../../util/fs');
 

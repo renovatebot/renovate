@@ -1,12 +1,8 @@
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../test/http-mock';
-import { mocked, partial } from '../../../../../../test/util';
 import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
 import type { Timestamp } from '../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -24,10 +20,11 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { hostRules, partial } from '~test/util';
 
 vi.mock('../../../../../util/host-rules', () => mockDeep());
-
-const hostRules = mocked(_hostRules);
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');

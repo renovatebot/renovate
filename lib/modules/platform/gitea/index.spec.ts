@@ -1,6 +1,4 @@
 import type { EnsureIssueConfig, RepoParams } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger, partial } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -27,8 +25,8 @@ import type {
   User,
 } from './types';
 import * as gitea from '.';
-
-vi.mock('../../../util/git');
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger, partial } from '~test/util';
 
 /**
  * latest tested gitea version.

@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import { logger } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   EXTERNAL_HOST_ERROR,
@@ -24,6 +23,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from '.';
+import { logger } from '~test/util';
 
 const datasource = 'dummy';
 const packageName = 'package';

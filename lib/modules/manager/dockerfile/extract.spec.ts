@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
 import { extractVariables, getDep } from './extract';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const d1 = Fixtures.get('1.Dockerfile');
 const d2 = Fixtures.get('2.Dockerfile');

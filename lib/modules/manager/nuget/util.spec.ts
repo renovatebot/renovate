@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
-import { fs } from '../../../../test/util';
 import type { Registry } from './types';
 import { bumpPackageVersion } from './update';
 import {
@@ -9,6 +8,7 @@ import {
   findVersion,
   getConfiguredRegistries,
 } from './util';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

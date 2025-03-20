@@ -1,15 +1,14 @@
 import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
 import { Http } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/cache/package', () => mockDeep());
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 const http = new Http('test');
 
