@@ -63,12 +63,12 @@ export class AwsEKSAddonDataSource extends Datasource {
           } => is.nonEmptyObject(versionInfo),
         )
         .map((versionInfo) => ({
-          version: versionInfo?.addonVersion ?? '',
+          version: versionInfo.addonVersion ?? '',
           default:
-            versionInfo?.compatibilities?.some(
+            versionInfo.compatibilities?.some(
               (comp: Compatibility): boolean | undefined => comp.defaultVersion,
             ) ?? false,
-          compatibleWith: versionInfo?.compatibilities?.flatMap(
+          compatibleWith: versionInfo.compatibilities?.flatMap(
             (comp: Compatibility): string | undefined => comp.clusterVersion,
           ),
         }))
