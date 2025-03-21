@@ -79,6 +79,8 @@ export interface GerritLabelInfo {
   rejected?: GerritAccountInfo;
   /** If true, the label blocks submit operation. If not set, the default is false. */
   blocking?: boolean;
+  /** List of votes. Only set when o=DETAILED_LABELS. */
+  all?: GerritApprovalInfo[];
 }
 
 export interface GerritActionInfo {
@@ -100,4 +102,9 @@ export interface GerritMergeableInfo {
     | 'MERGE_ALWAYS'
     | 'CHERRY_PICK';
   mergeable: boolean;
+}
+
+export interface GerritApprovalInfo {
+  value?: number;
+  username?: string;
 }
