@@ -12,7 +12,7 @@ export const urls = [
 ];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)bitrise\\.ya?ml$'],
+  filePatterns: ['/(^|/)bitrise\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [

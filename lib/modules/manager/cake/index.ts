@@ -8,7 +8,7 @@ export const url = 'https://cakebuild.net/docs';
 export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
-  fileMatch: ['\\.cake$'],
+  filePatterns: ['/\\.cake$/'],
 };
 
 export const supportedDatasources = [NugetDatasource.id];

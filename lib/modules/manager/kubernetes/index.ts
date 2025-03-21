@@ -8,7 +8,7 @@ export const url = 'https://kubernetes.io/docs';
 export const categories: Category[] = ['kubernetes'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  filePatterns: [],
 };
 
 export const supportedDatasources = [

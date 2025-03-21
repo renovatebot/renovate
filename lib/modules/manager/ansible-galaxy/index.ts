@@ -10,7 +10,7 @@ export const url =
 export const categories: Category[] = ['ansible', 'iac'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)(galaxy|requirements)(\\.ansible)?\\.ya?ml$'],
+  filePatterns: ['/(^|/)(galaxy|requirements)(\\.ansible)?\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [

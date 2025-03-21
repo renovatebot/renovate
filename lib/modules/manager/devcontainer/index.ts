@@ -8,7 +8,10 @@ export const url =
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {
-  fileMatch: ['^.devcontainer/devcontainer.json$', '^.devcontainer.json$'],
+  filePatterns: [
+    '/^.devcontainer/devcontainer.json$/',
+    '/^.devcontainer.json$/',
+  ],
 };
 
 export const supportedDatasources = [DockerDatasource.id];
