@@ -258,7 +258,7 @@
     "zod": "3.24.2"
   },
   "optionalDependencies": {
-    "better-sqlite3": "11.8.1",
+    "better-sqlite3": "11.9.0",
     "openpgp": "6.1.0",
     "re2": "1.21.4"
   },
