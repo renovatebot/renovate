@@ -22,14 +22,14 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     return null;
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency & { currentValue: typeof content } = {
     depName: 'Deno',
     packageName: 'deno',
     currentValue: content.trim(),
     datasource: NpmDatasource.id,
   };
 
-  if (!isValid(content.trim())) {
+  if (!isValid(dep.currentValue)) {
     dep.skipReason = 'invalid-version';
   }
   return { deps: [dep] };
