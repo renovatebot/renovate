@@ -79,8 +79,7 @@ With the above config:
 - ESLint dependencies will have the label `linting`
 - All other dependencies will have the label `dependencies`
 
-If you want to have labels added dynamically, you can use
-[templates](./templates.md) such as `depName` for `addLabels`:
+If you want to use dynamic labels, you can use [templates](./templates.md) such as this example using `depName` for `addLabels`:
 
 ```json
 {
