@@ -14,8 +14,11 @@ To use a Debian repository with the datasource, you must set a properly formatte
 - `components`: Comma-separated list of repository components (e.g., `main,contrib,non-free`).
 - `binaryArch`: Architecture of the binary packages (e.g., `amd64`,`all`).
 - Either `suite` or `release`:
-  - `suite`: A rolling release alias like `stable`.
-  - `release`: A fixed release name such as `bullseye` or `buster`.
+  - `suite`: Comma-separated list of rolling release aliases like `stable`.
+  - `release`: Comma-separated list of fixed release names such as `bullseye` or `buster`.
+
+Debian-based distributions usually have auxiliary pseudo-releases like `*-updates`, `*-backports`, `*-security`.
+It may be necessary to include both the actual release/suite name, and its corresponding `-updates`, to track the latest version of a package.
 
 <!-- prettier-ignore -->
 !!! note
@@ -29,6 +32,12 @@ https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&bina
 ```
 
 This URL points to the `stable` suite of the Debian repository for `amd64` architecture, including `main`, `contrib`, and `non-free` components.
+
+```
+https://archive.ubuntu.com/ubuntu?release=noble,noble-updates&components=main&binaryArch=amd64
+```
+
+This URL points to Ubuntu 24.04 `noble`, including its `-updates` repository.
 
 ## Usage Example
 

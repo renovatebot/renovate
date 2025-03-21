@@ -23,6 +23,17 @@ describe('modules/datasource/deb/url', () => {
     expect(componentUrls).toEqual(expectedUrls);
   });
 
+  it('constructs URLs correctly for multiple releases', () => {
+    const registryUrl =
+      'https://archive.ubuntu.com/ubuntu?release=noble,noble-updates&components=main&binaryArch=amd64';
+    const expectedUrls = [
+      'https://archive.ubuntu.com/ubuntu/dists/noble/main/binary-amd64',
+      'https://archive.ubuntu.com/ubuntu/dists/noble-updates/main/binary-amd64',
+    ];
+    const componentUrls = constructComponentUrls(registryUrl);
+    expect(componentUrls).toEqual(expectedUrls);
+  });
+
   it('throws an error if required parameters are missing', () => {
     const registryUrl = 'https://deb.debian.org/debian?components=main,contrib';
     expect(() => constructComponentUrls(registryUrl)).toThrow(

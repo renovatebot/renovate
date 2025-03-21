@@ -46,7 +46,7 @@ describe('modules/datasource/deb/index', () => {
       datasource: 'deb',
       packageName: 'album',
       registryUrls: [
-        getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
+        getRegistryUrl(debBaseUrl, ['stable'], ['non-free'], 'amd64'),
       ],
     };
 
@@ -146,7 +146,7 @@ describe('modules/datasource/deb/index', () => {
 
       it('returns a valid version for the package `album` if release is used in the registryUrl', async () => {
         cfg.registryUrls = [
-          getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'amd64'),
+          getRegistryUrl(debBaseUrl, ['stable'], ['non-free'], 'amd64'),
         ];
         const res = await getPkgReleases(cfg);
         expect(res).toEqual({
@@ -184,7 +184,7 @@ describe('modules/datasource/deb/index', () => {
           cfg.registryUrls = [
             getRegistryUrl(
               debBaseUrl,
-              'stable',
+              ['stable'],
               ['non-free', 'non-free-second'],
               'amd64',
             ),
@@ -226,6 +226,44 @@ describe('modules/datasource/deb/index', () => {
           });
         });
       });
+
+      it('returns two releases for `album` from two different suites', async () => {
+        httpMock
+          .scope(debBaseUrl)
+          .get(getPackageUrl('', 'stable-updates', 'non-free', 'amd64'))
+          .replyWithFile(200, fixturePackagesArchivePath2);
+
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash2,
+          'stable-updates',
+          'non-free',
+          'amd64',
+        );
+
+        cfg.registryUrls = [
+          getRegistryUrl(
+            debBaseUrl,
+            ['stable', 'stable-updates'],
+            ['non-free'],
+            'amd64',
+          ),
+        ];
+
+        const res = await getPkgReleases(cfg);
+        expect(res).toEqual({
+          homepage: 'http://marginalhacks.com/Hacks/album',
+          registryUrl:
+            'http://deb.debian.org/debian?suite=stable,stable-updates&components=non-free&binaryArch=amd64',
+          releases: [
+            {
+              version: '4.14-1',
+            },
+            {
+              version: '4.15-1',
+            },
+          ],
+        });
+      });
     });
 
     describe('without server response', () => {
@@ -257,7 +295,7 @@ describe('modules/datasource/deb/index', () => {
       );
 
       cfg.registryUrls = [
-        getRegistryUrl(debBaseUrl, 'stable', ['non-free'], 'riscv'),
+        getRegistryUrl(debBaseUrl, ['stable'], ['non-free'], 'riscv'),
       ];
 
       const res = await getPkgReleases(cfg);
@@ -568,18 +606,18 @@ function getPackageUrl(
  * Constructs a URL used generating the component url with specific release, components, and architecture.
  *
  * @param baseUrl - The base URL of the repository.
- * @param release - The release name or codename (e.g., 'buster', 'bullseye').
+ * @param release - An array of release names or codenames (e.g., 'buster', 'bullseye').
  * @param components - An array of component names (e.g., ['main', 'contrib', 'non-free']).
  * @param arch - The architecture name (e.g., 'amd64', 'i386').
  * @returns The complete URL to the package registry.
  */
 function getRegistryUrl(
   baseUrl: string,
-  release: string,
+  release: string[],
   components: string[],
   arch: string,
 ) {
-  return `${baseUrl}/debian?suite=${release}&components=${components.join(',')}&binaryArch=${arch}`;
+  return `${baseUrl}/debian?suite=${release.join(',')}&components=${components.join(',')}&binaryArch=${arch}`;
 }
 
 /**
