@@ -1,6 +1,6 @@
-import * as httpMock from '../../../../test/http-mock';
 import type { HermitSearchResult } from './types';
 import { HermitDatasource } from './';
+import * as httpMock from '~test/http-mock';
 
 const datasource = new HermitDatasource();
 const githubApiHost = 'https://api.github.com';

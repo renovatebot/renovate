@@ -171,6 +171,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'pnpm',
     versioning: npmVersioningId,
   },
+  pixi: {
+    datasource: 'github-releases',
+    packageName: 'prefix-dev/pixi',
+    versioning: pep440VersioningId,
+  },
   poetry: {
     datasource: 'pypi',
     packageName: 'poetry',

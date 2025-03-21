@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.22.3 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.22.4 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -196,9 +196,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    permissions:
-      actions: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -212,38 +209,27 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          key: eslint-cache
+          restore-keys: eslint-cache-
 
       - name: Lint
         run: pnpm eslint-ci
 
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache ||
-            echo "Cache not found"
-
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          key: eslint-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
-
-    permissions:
-      actions: write
 
     steps:
       - name: Checkout code
@@ -258,10 +244,11 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          key: prettier-cache
+          restore-keys: prettier-cache-
 
       - name: Lint
         run: |
@@ -272,21 +259,12 @@ jobs:
             exit 1
           }
 
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache ||
-            echo "Cache not found"
-
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          key: prettier-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
@@ -379,7 +357,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/vitest
           key: |
@@ -416,7 +394,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -436,7 +414,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: coverage-*
           path: coverage
@@ -472,7 +450,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: coverage-*
           path: coverage
@@ -487,10 +465,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 97 \
-            --functions 98 \
-            --lines 97 \
-            --statements 97
+            --branches 97.5 \
+            --functions 98.98 \
+            --lines 97.84 \
+            --statements 97.84
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -563,6 +541,36 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Upload dist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: renovate-dist
+          path: dist/
+
+  build-docker:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: false
+
+      - name: Download dist
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: renovate-dist
+          path: dist/
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
+
       - name: Build docker
         run: pnpm build:docker build --tries=3 --args '--load'
         env:
@@ -576,15 +584,6 @@ jobs:
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pack
-        run: pnpm test-e2e:pack
-
-      - name: Upload
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
-        with:
-          name: renovate-package
-          path: renovate-0.0.0-semantic-release.tgz
 
   build-docs:
     needs:
@@ -606,7 +605,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
+        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -625,7 +624,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: docs
           path: tmp/docs/
@@ -646,20 +645,20 @@ jobs:
         with:
           show-progress: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          standalone: true
-
       - name: Setup Node.js
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
 
-      - name: Download package
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+      - name: Download dist
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
-          name: renovate-package
+          name: renovate-dist
+          path: dist/
+
+      - name: Pack
+        run: pnpm test-e2e:pack
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -670,6 +669,7 @@ jobs:
   release:
     needs:
       - setup-build
+      - build-docker
       - lint-eslint
       - lint-prettier
       - lint-docs
@@ -698,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@ae028f61f149ff76eed4be1d327d5bf69af1f280 # v3.10.7
+        uses: containerbase/internal-tools@ad08d617d8a1eace44bb91726064e61580f4f115 # v3.10.11
         with:
           command: docker-config
 

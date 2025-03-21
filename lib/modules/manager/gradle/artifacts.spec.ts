@@ -1,20 +1,6 @@
 import os from 'node:os';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import {
-  env,
-  fs,
-  git,
-  logger,
-  mockedFunction,
-  partial,
-  scm,
-} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -23,9 +9,10 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git, logger, partial, scm } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 
@@ -54,7 +41,7 @@ describe('modules/manager/gradle/artifacts', () => {
     resetPrefetchedImages();
 
     // java
-    mockedFunction(getPkgReleases).mockResolvedValue({
+    vi.mocked(getPkgReleases).mockResolvedValue({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },

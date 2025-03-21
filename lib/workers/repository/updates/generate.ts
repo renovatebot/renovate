@@ -285,7 +285,6 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&

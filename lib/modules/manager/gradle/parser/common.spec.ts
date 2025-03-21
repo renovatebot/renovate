@@ -1,5 +1,4 @@
 import type { lexer } from 'good-enough-parser';
-import { partial } from '../../../../../test/util';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
@@ -14,6 +13,7 @@ import {
   storeVarToken,
   stripReservedPrefixFromKeyTokens,
 } from './common';
+import { partial } from '~test/util';
 
 describe('modules/manager/gradle/parser/common', () => {
   let ctx: Ctx;

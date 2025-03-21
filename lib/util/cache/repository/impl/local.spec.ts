@@ -1,4 +1,3 @@
-import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compressToBase64 } from '../../../compress';
@@ -8,6 +7,7 @@ import type { RepoCacheRecord } from '../schema';
 import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
+import { fs } from '~test/util';
 
 vi.mock('../../../fs');
 

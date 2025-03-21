@@ -1,11 +1,11 @@
 import { getChangeLogJSON } from '..';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
 import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GitLabChangeLogSource } from './source';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -90,6 +90,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -132,6 +133,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -167,6 +169,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -202,6 +205,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
