@@ -2368,6 +2368,7 @@ Supported lock files:
 - `requirements.txt`
 - `uv.lock`
 - `yarn.lock`
+- `pixi.lock`
 
 Support for new lock files may be added via feature request.
 
@@ -3826,6 +3827,7 @@ This feature works with the following managers:
 - [`kubernetes`](modules/manager/kubernetes/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
+- [`pixi`](modules/manager/pixi/index.md)
 
 ```json title="Setting generic aliases"
 {
