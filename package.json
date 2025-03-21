@@ -148,6 +148,7 @@
     "@aws-sdk/client-codecommit": "3.738.0",
     "@aws-sdk/client-ec2": "3.738.0",
     "@aws-sdk/client-ecr": "3.739.0",
+    "@aws-sdk/client-eks": "3.750.0",
     "@aws-sdk/client-rds": "3.740.0",
     "@aws-sdk/client-s3": "3.740.0",
     "@aws-sdk/credential-providers": "3.738.0",
@@ -258,7 +259,7 @@
     "zod": "3.24.2"
   },
   "optionalDependencies": {
-    "better-sqlite3": "11.8.1",
+    "better-sqlite3": "11.9.0",
     "openpgp": "6.1.0",
     "re2": "1.21.4"
   },
@@ -329,7 +330,7 @@
     "graphql": "16.10.0",
     "husky": "9.1.7",
     "jest-extended": "4.0.2",
-    "lint-staged": "15.4.3",
+    "lint-staged": "15.5.0",
     "markdownlint-cli2": "0.17.2",
     "memfs": "4.17.0",
     "nock": "14.0.1",
@@ -344,7 +345,7 @@
     "typescript": "5.8.2",
     "typescript-eslint": "8.26.0",
     "unified": "9.2.2",
-    "vite": "6.2.1",
+    "vite": "6.2.2",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.0.8",
     "vitest-mock-extended": "3.0.1"
