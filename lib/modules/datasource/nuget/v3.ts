@@ -211,6 +211,7 @@ export class NugetV3Api {
         const metaresult = await http.getText(nuspecUrl);
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
+        dep.datasourceProvidedReleaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
         }
