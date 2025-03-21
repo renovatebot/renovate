@@ -1495,6 +1495,10 @@ If you are running on any platform except `github.com`, you need to [configure a
 
 ## filePatterns
 
+`filePatterns` were formerly known as `fileMatch`, and regex-only.
+`filePatterns` instead supports regex or glob patterns, and any existing config containing `fileMatch` patterns will be automatically migrated.
+Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
+
 `filePatterns` tells Renovate which repository files to parse and extract.
 `filePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
 
