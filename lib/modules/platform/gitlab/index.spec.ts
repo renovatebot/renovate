@@ -11,6 +11,8 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
+import * as memCache from '../../../util/cache/memory';
+import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
@@ -46,6 +48,8 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.RENOVATE_X_PLATFORM_VERSION;
 
     gitlab.resetPlatform();
+    memCache.init();
+    repoCache.resetCache();
   });
 
   async function initFakePlatform(version: string) {
@@ -519,6 +523,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
+
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
     });
@@ -2009,6 +2014,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2037,6 +2046,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2065,6 +2078,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.1.0-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2093,6 +2110,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.2.0-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2121,6 +2142,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2163,6 +2188,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2221,6 +2250,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2272,6 +2305,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2344,6 +2381,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2379,6 +2420,10 @@ describe('modules/platform/gitlab/index', () => {
 
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
           squash_option: 'default_on',
@@ -2418,6 +2463,10 @@ describe('modules/platform/gitlab/index', () => {
 
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
           squash_option: 'always',
@@ -2456,6 +2505,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2506,6 +2559,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2550,6 +2607,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2608,6 +2669,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2677,6 +2742,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2756,6 +2825,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2806,6 +2879,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2856,6 +2933,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2889,6 +2970,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
