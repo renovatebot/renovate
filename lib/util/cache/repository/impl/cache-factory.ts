@@ -1,6 +1,7 @@
 import type { RepositoryCacheType } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { RepoCache } from '../types';
+import { RepoCacheGit } from './git';
 import { RepoCacheLocal } from './local';
 import { RepoCacheS3 } from './s3';
 
@@ -16,6 +17,8 @@ export class CacheFactory {
         return new RepoCacheLocal(repository, repoFingerprint);
       case 's3':
         return new RepoCacheS3(repository, repoFingerprint, cacheType);
+      case 'git':
+        return new RepoCacheGit(repository, repoFingerprint);
       default:
         logger.warn(
           { cacheType },
