@@ -59,4 +59,8 @@ export class LocalFs implements PlatformScm {
   mergeToLocal(branchName: string): Promise<void> {
     return Promise.resolve();
   }
+
+  syncForkWithUpstream(baseBranch: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
