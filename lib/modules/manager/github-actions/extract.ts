@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
@@ -15,6 +16,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { communityActions } from './community';
 import { WorkflowJobsSchema } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
@@ -213,6 +215,13 @@ function extractWithYAMLParser(
     };
 
     for (const step of job.steps) {
+      if (step.uses) {
+        const val = Result.parse(step, communityActions).unwrapOrNull();
+        if (val) {
+          deps.push(val);
+        }
+      }
+
       for (const [action, versioning] of Object.entries(versionedActions)) {
         const actionName = `actions/setup-${action}`;
         if (
@@ -228,7 +237,7 @@ function extractWithYAMLParser(
               packageName: `actions/${action}-versions`,
               versioning,
               extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
-              currentValue,
+              currentValue: currentValue.toString(),
               depType: 'uses-with',
             });
           }

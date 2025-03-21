@@ -178,6 +178,9 @@ importers:
       emojibase-regex:
         specifier: 16.0.0
         version: 16.0.0
+      escape-string-regexp:
+        specifier: 4.0.0
+        version: 4.0.0
       extract-zip:
         specifier: 2.0.1
         version: 2.0.1
