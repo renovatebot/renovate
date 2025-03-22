@@ -137,10 +137,10 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-    // istanbul ignore if: experimental feature
+    /* v8 ignore start: experimental feature */
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
       gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
-    } else {
+    } /* v8 ignore stop */ else {
       const version = (
         await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
           token,
@@ -289,8 +289,8 @@ function getRepoUrl(
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol:
-        protocol.slice(0, -1) ||
-        /* istanbul ignore next: should never happen */ 'https',
+        /* v8 ignore next: should never happen */
+        protocol.slice(0, -1) || 'https',
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
@@ -357,11 +357,11 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    // istanbul ignore if
+    /* v8 ignore start */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
-    }
+    } /* v8 ignore stop */
     config.mergeMethod = res.body.merge_method || 'merge';
     if (res.body.squash_option) {
       config.squash =
@@ -376,7 +376,7 @@ export async function initRepo({
       ...config,
       url,
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -395,7 +395,7 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
-  }
+  } /* v8 ignore stop */
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
@@ -449,13 +449,13 @@ async function getStatus(
         memCache: useCache,
       })
     ).body;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  }
+  } /* v8 ignore stop */
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
@@ -483,14 +483,14 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
-  // istanbul ignore if
+  /* v8 ignore start */
   if (!is.array(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses',
     );
     return 'yellow';
-  }
+  } /* v8 ignore stop */
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
   const mr = await getBranchPr(branchName);
@@ -552,10 +552,10 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  // istanbul ignore if
+  /* v8 ignore start */
   if (!config.ignorePrAuthor) {
     searchParams.scope = 'created_by_me';
-  }
+  } /* v8 ignore stop */
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
@@ -566,13 +566,13 @@ async function fetchPrList(): Promise<Pr[]> {
       },
     );
     return res.body.map((pr) => prInfo(pr));
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function getPrList(): Promise<Pr[]> {
@@ -722,9 +722,9 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
-  }
+  } /* v8 ignore stop */
 }
 
 async function approvePr(pr: number): Promise<void> {
@@ -769,10 +769,10 @@ export async function createPr({
 
   const pr = prInfo(res.body);
 
-  // istanbul ignore if
+  /* v8 ignore start */
   if (config.prList) {
     config.prList.push(pr);
-  }
+  } /* v8 ignore stop */
 
   if (platformPrOptions?.autoApprove) {
     await approvePr(pr.number);
@@ -841,14 +841,14 @@ export async function updatePr({
     const existingIndex = config.prList.findIndex(
       (pr) => pr.number === updatedPr.number,
     );
-    // istanbul ignore if: should not happen
+    /* v8 ignore start: should not happen */
     if (existingIndex === -1) {
       logger.warn(
         { pr: updatedPr },
         'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
       );
       config.prList.push(updatedPr);
-    } else {
+    } /* v8 ignore stop */ else {
       config.prList[existingIndex] = updatedPr;
     }
   }
@@ -878,7 +878,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
       },
     );
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -890,7 +890,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     logger.debug({ err }, 'merge PR error');
     logger.debug('PR merge failed');
     return false;
-  }
+  } /* v8 ignore stop */
 }
 
 export function massageMarkdown(input: string): string {
@@ -916,10 +916,11 @@ export function maxBodyLength(): number {
   }
 }
 
-// istanbul ignore next: no need to test
+/* v8 ignore start: no need to test */
 export function labelCharLimit(): number {
   return 255;
 }
+/* v8 ignore stop */
 
 // Branch
 
@@ -1061,7 +1062,7 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (
       err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending',
@@ -1073,7 +1074,7 @@ export async function setBranchStatus({
       logger.debug({ err });
       logger.warn('Failed to set branch status');
     }
-  }
+  } /* v8 ignore stop */
 }
 
 // Issue
@@ -1094,11 +1095,11 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       memCache: false,
       paginate: true,
     });
-    // istanbul ignore if
+    /* v8 ignore start */
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
-    }
+    } /* v8 ignore stop */
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
@@ -1123,10 +1124,10 @@ export async function getIssue(
       number,
       body: issueBody,
     };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
@@ -1138,10 +1139,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch /* istanbul ignore next */ {
+  } catch /* v8 ignore start */ {
     logger.warn('Error finding issue');
     return null;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function ensureIssue({
@@ -1194,13 +1195,13 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* v8 ignore stop */
   return null;
 }
 
@@ -1326,9 +1327,9 @@ export async function deleteLabel(
         body: { labels },
       },
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  }
+  } /* v8 ignore stop */
 }
 
 async function getComments(issueNo: number): Promise<GitlabComment[]> {

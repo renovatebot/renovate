@@ -133,6 +133,6 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  // istanbul ignore next
+  /* v8 ignore next */
   return label.default_value;
 }

@@ -95,12 +95,13 @@ export async function getFile(
           return null;
         }
       }
-    } catch {
+    } catch /* v8 ignore start */ {
       // it 's not a JSON, so I send the content directly with the line under
-    }
+    } /* v8 ignore stop */
 
     return fileContent;
   }
+
   return null; // no file found
 }
 
