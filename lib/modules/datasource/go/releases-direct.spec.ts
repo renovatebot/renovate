@@ -1,18 +1,17 @@
 import { mockDeep } from 'vitest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('./base');
 
 const datasource = new GoDirectDatasource();
 const getDatasourceSpy = vi.spyOn(BaseGoDatasource, 'getDatasource');
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
   const gitGetTags = vi.spyOn(GitTagsDatasource.prototype, 'getReleases');

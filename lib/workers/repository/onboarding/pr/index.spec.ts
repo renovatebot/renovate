@@ -1,6 +1,4 @@
 import type { RequestError, Response } from 'got';
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial, platform, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,8 +8,8 @@ import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
-
-vi.mock('../../../../util/git');
+import { partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
