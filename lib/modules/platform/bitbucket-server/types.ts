@@ -35,8 +35,10 @@ export interface BbsRestUserRef {
   user: BbsRestUser;
 }
 
+// https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp280
 export interface BbsRestPr {
   createdDate: string;
+  updatedDate: number;
   description: string;
   fromRef: BbsRestBranchRef;
   id: number;
@@ -70,4 +72,10 @@ export interface BitbucketErrorResponse {
 
 export interface BitbucketError extends HTTPError {
   readonly response: Response<BitbucketErrorResponse>;
+}
+
+export interface BbsPrCacheData {
+  items: Record<number, BbsPr>;
+  updatedDate: number | null;
+  author: string | null;
 }

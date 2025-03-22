@@ -7,6 +7,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
+import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as bitbucket from '.';
@@ -230,6 +231,9 @@ describe('modules/platform/bitbucket-server/index', () => {
           .scope(urlHost)
           .get(`${urlPath}/rest/api/1.0/users/${username}`)
           .reply(200, userInfo);
+
+        repoCache.resetCache();
+
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -1572,7 +1576,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
 
           const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
@@ -1598,7 +1609,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
 
           const pr = await bitbucket.createPr({
             sourceBranch: 'branch',
@@ -1688,6 +1706,13 @@ describe('modules/platform/bitbucket-server/index', () => {
                 displayId: 'new_base',
                 latestCommit: '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
               },
+            })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
             });
 
           await expect(
@@ -1718,7 +1743,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`,
             )
-            .reply(200, { status: 'DECLINED' });
+            .reply(200, { status: 'DECLINED' })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
 
           await expect(
             bitbucket.updatePr({
@@ -1748,7 +1780,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`,
             )
-            .reply(200, { status: 'OPEN' });
+            .reply(200, { status: 'OPEN' })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
 
           await expect(
             bitbucket.updatePr({
@@ -1837,7 +1876,14 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
               (body) => body.reviewers.length === 0,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
 
           await expect(
             bitbucket.updatePr({
@@ -1898,7 +1944,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'))
           .get(
-            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
           )
           .reply(200, {
             isLastPage: true,
@@ -1911,7 +1957,21 @@ describe('modules/platform/bitbucket-server/index', () => {
           .put(
             `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
           )
-          .reply(200, { ...prMock(url, 'SOME', 'repo'), title: 'new_title' });
+          .reply(200, { ...prMock(url, 'SOME', 'repo'), title: 'new_title' })
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [prMock(url, 'SOME', 'REPO')],
+          })
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=20&role.1=AUTHOR&username.1=abc`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [prMock(url, 'SOME', 'REPO')],
+          });
 
         // initialize runtime pr list
         await bitbucket.getPrList();

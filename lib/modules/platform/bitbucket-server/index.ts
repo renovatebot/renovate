@@ -40,6 +40,7 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { BbsPrCache } from './pr-cache';
 import type {
   Comment,
   PullRequestActivity,
@@ -374,22 +375,13 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList || refreshCache) {
-    const searchParams: Record<string, string> = {
-      state: 'ALL',
-    };
-    if (!config.ignorePrAuthor && config.username !== undefined) {
-      searchParams['role.1'] = 'AUTHOR';
-      searchParams['username.1'] = config.username;
-    }
-    const query = getQueryString(searchParams);
-    const values = (
-      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-        { paginate: true },
-      )
-    ).body;
-
-    config.prList = values.map(utils.prInfo);
+    config.prList = await BbsPrCache.getPrs(
+      bitbucketServerHttp,
+      config.projectKey,
+      config.repositorySlug,
+      config.ignorePrAuthor,
+      config.username,
+    );
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
@@ -990,6 +982,15 @@ export async function createPr({
     config.prList.push(pr);
   }
 
+  await BbsPrCache.setPr(
+    bitbucketServerHttp,
+    config.projectKey,
+    config.repositorySlug,
+    config.ignorePrAuthor,
+    config.username,
+    pr,
+  );
+
   return pr;
 }
 
@@ -1064,8 +1065,9 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
 
+    const bbsPr = utils.prInfo(updatedPr);
+
     if (config.prList) {
-      const bbsPr = utils.prInfo(updatedPr);
       const existingIndex = config.prList.findIndex(
         (item) => item.number === prNo,
       );
@@ -1080,6 +1082,14 @@ export async function updatePr({
         config.prList[existingIndex] = { ...bbsPr, state: finalState };
       }
     }
+    await BbsPrCache.setPr(
+      bitbucketServerHttp,
+      config.projectKey,
+      config.repositorySlug,
+      config.ignorePrAuthor,
+      config.username,
+      bbsPr,
+    );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
     if (err.statusCode === 404) {
