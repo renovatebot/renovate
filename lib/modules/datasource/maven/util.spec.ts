@@ -58,7 +58,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns error for xml parse error', async () => {
       const http = partial<Http>({
-        get: () =>
+        getText: () =>
           Promise.resolve({
             statusCode: 200,
             body: 'invalid xml',
