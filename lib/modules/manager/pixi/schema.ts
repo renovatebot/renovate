@@ -38,7 +38,7 @@ function collectNamedPackages(
     .filter((dep) => isNotNullOrUndefined(dep));
 }
 
-const pypiDepdency = z.union([
+const PypiDepdency = z.union([
   z.string().transform((version) => {
     return {
       currentValue: version,
@@ -57,7 +57,7 @@ const pypiDepdency = z.union([
   }),
 ]);
 
-const gitDepdency = z
+const PypiGitDepdency = z
   .object({ git: z.string(), rev: z.optional(z.string()) })
   .transform(({ git, rev }) => {
     // empty ref default to HEAD, so do we not need to do anything
@@ -74,12 +74,12 @@ const gitDepdency = z
     } satisfies PixiPackageDependency;
   });
 
-const pixiPypiDependencies = LooseRecord(
+const PypiDependencies = LooseRecord(
   z.string(),
-  z.union([pypiDepdency, gitDepdency, z.any().transform(() => null)]),
+  z.union([PypiDepdency, PypiGitDepdency, z.any().transform(() => null)]),
 ).transform(collectNamedPackages);
 
-const condaDependency = z.union([
+const CondaDependency = z.union([
   z.string().transform((version) => {
     return {
       currentValue: version,
@@ -101,15 +101,15 @@ const condaDependency = z.union([
     }),
 ]);
 
-const condaDependencies = LooseRecord(z.string(), condaDependency).transform(
+const CondaDependencies = LooseRecord(z.string(), CondaDependency).transform(
   collectNamedPackages,
 );
 
 const Targets = LooseRecord(
   z.string(),
   z.object({
-    dependencies: z.optional(condaDependencies).default({}),
-    'pypi-dependencies': z.optional(pixiPypiDependencies).default({}),
+    dependencies: z.optional(CondaDependencies).default({}),
+    'pypi-dependencies': z.optional(PypiDependencies).default({}),
   }),
 ).transform((val) => {
   const conda: PixiPackageDependency[] = [];
@@ -123,14 +123,14 @@ const Targets = LooseRecord(
   return { pypi, conda };
 });
 
-const projectSchema = z.object({
+const Project = z.object({
   channels: z.array(z.string()).default([]),
 });
 
 const DependencieSchemaMixin = z
   .object({
-    dependencies: z.optional(condaDependencies).default({}),
-    'pypi-dependencies': z.optional(pixiPypiDependencies).default({}),
+    dependencies: z.optional(CondaDependencies).default({}),
+    'pypi-dependencies': z.optional(PypiDependencies).default({}),
     target: z.optional(Targets).default({}),
   })
   .transform(
@@ -144,7 +144,7 @@ const DependencieSchemaMixin = z
     },
   );
 
-const pixiFeatures = LooseRecord(
+const Features = LooseRecord(
   z.string(),
   z
     .object({
@@ -184,19 +184,19 @@ const pixiFeatures = LooseRecord(
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
 export const PixiConfigSchema = z
-  .object({ feature: pixiFeatures })
+  .object({ feature: Features })
   .and(DependencieSchemaMixin)
   .and(
     z.union([
       z
         .object({
-          workspace: projectSchema,
+          workspace: Project,
         })
         .transform((val) => {
           return { project: val.workspace };
         }),
       z.object({
-        project: projectSchema,
+        project: Project,
       }),
     ]),
   );
