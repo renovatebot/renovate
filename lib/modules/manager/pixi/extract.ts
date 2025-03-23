@@ -79,12 +79,10 @@ export async function extractPackageFile(
   // resolve channels and build registry urls for each channel with order
   const conda: PixiPackageDependency[] = [];
 
-  // Process val.conda items
   for (const item of val.conda) {
     conda.push({ ...item, channels } satisfies PixiPackageDependency);
   }
 
-  // Process val.feature.conda items
   for (const item of val.feature.conda) {
     conda.push({
       ...item,
@@ -92,27 +90,26 @@ export async function extractPackageFile(
     });
   }
 
-  // Process each item to add registryUrls or skipReason
-  for (let i = 0; i < conda.length; i++) {
-    const item = conda[i];
+  const condaWithRegistryURL: PixiPackageDependency[] = [];
+  for (const item of conda) {
     const channels = orderChannels(item.channels);
 
     if (item.channel) {
-      conda[i] = {
+      condaWithRegistryURL.push({
         ...item,
         channels,
         registryUrls: [channelToRegistryUrl(item.channel)],
-      };
+      });
       continue;
     }
 
     if (channels.length === 0) {
-      conda[i] = {
+      condaWithRegistryURL.push({
         ...item,
         channels,
         skipStage: 'extract',
         skipReason: 'unknown-registry',
-      };
+      });
       continue;
     }
 
@@ -121,16 +118,16 @@ export async function extractPackageFile(
       registryUrls.push(channelToRegistryUrl(channel));
     }
 
-    conda[i] = {
+    condaWithRegistryURL.push({
       ...item,
       channels,
       registryUrls,
-    } satisfies PixiPackageDependency;
+    });
   }
 
   return {
     lockFiles,
-    deps: [...conda, ...val.pypi, ...val.feature.pypi],
+    deps: [...condaWithRegistryURL, ...val.pypi, ...val.feature.pypi],
   };
 }
 
