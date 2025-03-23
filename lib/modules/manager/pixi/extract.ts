@@ -80,7 +80,7 @@ export async function extractPackageFile(
   const conda: PixiPackageDependency[] = [];
 
   for (const item of val.conda) {
-    conda.push({ ...item, channels } satisfies PixiPackageDependency);
+    conda.push({ ...item, channels });
   }
 
   for (const item of val.feature.conda) {
