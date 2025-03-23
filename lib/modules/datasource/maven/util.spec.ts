@@ -65,7 +65,7 @@ describe('modules/datasource/maven/util', () => {
             headers: {},
           }),
       });
-      const res = await downloadMavenXml(http, 'https://example.com/');
+      const res = await downloadMavenXml(http, new URL('https://example.com/'));
       expect(res.unwrap()).toEqual({
         ok: false,
         err: { type: 'xml-parse-error', err: expect.any(Error) },

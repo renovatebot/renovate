@@ -281,34 +281,28 @@ export function getMavenUrl(
 
 export async function downloadMaven(
   http: Http,
-  url: URL | string,
+  url: URL,
 ): Promise<MavenFetchResult> {
-  const pkgUrl = url instanceof URL ? url : parseUrl(url);
-  // istanbul ignore if
-  if (!pkgUrl) {
-    return Result.err({ type: 'invalid-url' });
-  }
-
-  const protocol = pkgUrl.protocol.slice(0, -1);
+  const protocol = url.protocol.slice(0, -1);
 
   let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
 
   if (protocol === 'http' || protocol === 'https') {
-    result = await downloadHttpProtocol(http, pkgUrl);
+    result = await downloadHttpProtocol(http, url);
   }
 
   if (protocol === 'artifactregistry') {
-    result = await downloadArtifactRegistryProtocol(http, pkgUrl);
+    result = await downloadArtifactRegistryProtocol(http, url);
   }
 
   if (protocol === 's3') {
-    result = await downloadS3Protocol(pkgUrl);
+    result = await downloadS3Protocol(url);
   }
 
   return result.onError((err) => {
     if (err.type === 'unsupported-protocol') {
       logger.debug(
-        { url: pkgUrl.toString() },
+        { url: url.toString() },
         `Maven lookup error: unsupported protocol (${protocol})`,
       );
     }
@@ -317,7 +311,7 @@ export async function downloadMaven(
 
 export async function downloadMavenXml(
   http: Http,
-  url: URL | string,
+  url: URL,
 ): Promise<MavenFetchResult<XmlDocument>> {
   const rawResult = await downloadMaven(http, url);
   return rawResult.transform((result): MavenFetchResult<XmlDocument> => {
