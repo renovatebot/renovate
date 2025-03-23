@@ -695,7 +695,7 @@ export async function initRepo({
         });
       } catch (err) /* v8 ignore start */ {
         logger.warn(
-          { url, sha, err: err.err || err },
+          { url, sha, err: err.err ?? err },
           'Error updating fork from upstream - cannot continue',
         );
         if (err instanceof ExternalHostError) {
@@ -1423,7 +1423,7 @@ async function tryAddMilestone(
     GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
     /* v8 ignore next */
-    const actualError = err.response?.body || err;
+    const actualError = err.response?.body ?? err;
     logger.warn(
       {
         milestone: milestoneNo,
