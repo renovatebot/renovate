@@ -60,7 +60,6 @@ function getUserPixiConfig(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig = {},
 ): Promise<PackageFileContent | null> {
   logger.trace(`pixi.extractPackageFile(${packageFile})`);
 
@@ -102,9 +101,7 @@ export async function extractPackageFile(
       conda[i] = {
         ...item,
         channels,
-        registryUrls: [
-          channelToRegistryUrl(item.channel, config.registryAliases),
-        ],
+        registryUrls: [channelToRegistryUrl(item.channel)],
       };
       continue;
     }
@@ -121,7 +118,7 @@ export async function extractPackageFile(
 
     const registryUrls: string[] = [];
     for (const channel of channels) {
-      registryUrls.push(channelToRegistryUrl(channel, config.registryAliases));
+      registryUrls.push(channelToRegistryUrl(channel));
     }
 
     conda[i] = {
@@ -137,17 +134,12 @@ export async function extractPackageFile(
   };
 }
 
-function channelToRegistryUrl(
-  channel: string,
-  aliasConfig?: Record<string, string>,
-): string {
-  // help to alias mirror url to anaconda repo
-  const alias = aliasConfig?.[channel] ?? channel;
-  if (looksLikeUrl(alias)) {
-    return ensureTrailingSlash(alias);
+function channelToRegistryUrl(channel: string): string {
+  if (looksLikeUrl(channel)) {
+    return ensureTrailingSlash(channel);
   }
 
-  return `${defaultCondaRegistryAPi}${alias}/`;
+  return `${defaultCondaRegistryAPi}${channel}/`;
 }
 
 function orderChannels(channels: Channels = []): string[] {

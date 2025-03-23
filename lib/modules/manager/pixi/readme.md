@@ -12,24 +12,3 @@ The minimal support version of pixi is `0.40.0` (`pixi lock` has only been intro
 Therefore when you are setting `constraints.pixi` in your config, please be careful to pick a supported pixi version.
 
 This also means if you have a lock file with version `<6`, renovatebot can't generate lock file with same version, it will upgrade lock file to latest version.
-
-If you want to map a mirror repo to official repo, you can use `registryAliases`:
-
-for pixi.toml:
-
-```toml
-[project]
-name = "example-project"
-authors = []
-channels = ["https://mirrors.of.some.company/conda/conda-forge"]
-platforms = ["win-64"]
-version = "0.1.0"
-```
-
-```json
-{
-  "registryAliases": {
-    "https://mirrors.of.some.company/conda/conda-forge": "conda-forge"
-  }
-}
-```
