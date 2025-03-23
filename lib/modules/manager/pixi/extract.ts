@@ -75,59 +75,58 @@ export async function extractPackageFile(
   }
 
   const project = val.project;
-  const channels: Channels = structuredClone(project.channels);
+
   // resolve channels and build registry urls for each channel with order
   const conda: PixiPackageDependency[] = [];
 
   for (const item of val.conda) {
-    conda.push({ ...item, channels });
+    conda.push(addRegistryUrls({ ...item, channels: project.channels }));
   }
 
   for (const item of val.feature.conda) {
-    conda.push({
-      ...item,
-      channels: [...(item.channels ?? []), ...project.channels],
-    });
-  }
-
-  const condaWithRegistryURL: PixiPackageDependency[] = [];
-  for (const item of conda) {
-    const channels = orderChannels(item.channels);
-
-    if (item.channel) {
-      condaWithRegistryURL.push({
+    conda.push(
+      addRegistryUrls({
         ...item,
-        channels,
-        registryUrls: [channelToRegistryUrl(item.channel)],
-      });
-      continue;
-    }
-
-    if (channels.length === 0) {
-      condaWithRegistryURL.push({
-        ...item,
-        channels,
-        skipStage: 'extract',
-        skipReason: 'unknown-registry',
-      });
-      continue;
-    }
-
-    const registryUrls: string[] = [];
-    for (const channel of channels) {
-      registryUrls.push(channelToRegistryUrl(channel));
-    }
-
-    condaWithRegistryURL.push({
-      ...item,
-      channels,
-      registryUrls,
-    });
+        channels: [...(item.channels ?? []), ...project.channels],
+      }),
+    );
   }
 
   return {
     lockFiles,
-    deps: [...condaWithRegistryURL, ...val.pypi, ...val.feature.pypi],
+    deps: [...conda, ...val.pypi, ...val.feature.pypi],
+  };
+}
+
+function addRegistryUrls(item: PixiPackageDependency): PixiPackageDependency {
+  const channels = orderChannels(item.channels);
+
+  if (item.channel) {
+    return {
+      ...item,
+      channels,
+      registryUrls: [channelToRegistryUrl(item.channel)],
+    };
+  }
+
+  if (channels.length === 0) {
+    return {
+      ...item,
+      channels,
+      skipStage: 'extract',
+      skipReason: 'unknown-registry',
+    };
+  }
+
+  const registryUrls: string[] = [];
+  for (const channel of channels) {
+    registryUrls.push(channelToRegistryUrl(channel));
+  }
+
+  return {
+    ...item,
+    channels,
+    registryUrls,
   };
 }
 
