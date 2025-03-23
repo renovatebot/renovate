@@ -12,13 +12,11 @@ import type { ExtractConfig, PackageFileContent } from '../types';
 import {
   type PixiConfig,
   type PixiPackageDependency,
+  type Channels,
   PixiToml,
 } from './schema';
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
-
-type Channel = string | { channel: string; priority: number };
-type Channels = Channel[];
 
 function getUserPixiConfig(
   content: string,
@@ -80,49 +78,58 @@ export async function extractPackageFile(
   const project = val.project;
   const channels: Channels = structuredClone(project.channels);
   // resolve channels and build registry urls for each channel with order
-  const conda: PixiPackageDependency[] = val.conda
-    .map((item) => {
-      return { ...item, channels } as PixiPackageDependency;
-    })
-    .concat(
-      val.feature.conda.map(
-        (item: PixiPackageDependency): PixiPackageDependency => {
-          return {
-            ...item,
-            channels: [...(item.channels ?? []), ...project.channels],
-          };
-        },
-      ),
-    )
-    .map((item) => {
-      const channels = orderChannels(item.channels);
-      if (item.channel) {
-        return {
-          ...item,
-          channels,
-          registryUrls: [
-            channelToRegistryUrl(item.channel, config.registryAliases),
-          ],
-        };
-      }
+  const conda: PixiPackageDependency[] = [];
 
-      if (channels.length === 0) {
-        return {
-          ...item,
-          channels,
-          skipStage: 'extract',
-          skipReason: 'unknown-registry',
-        };
-      }
+  // Process val.conda items
+  for (const item of val.conda) {
+    conda.push({ ...item, channels } satisfies PixiPackageDependency);
+  }
 
-      return {
+  // Process val.feature.conda items
+  for (const item of val.feature.conda) {
+    conda.push({
+      ...item,
+      channels: [...(item.channels ?? []), ...project.channels],
+    });
+  }
+
+  // Process each item to add registryUrls or skipReason
+  for (let i = 0; i < conda.length; i++) {
+    const item = conda[i];
+    const channels = orderChannels(item.channels);
+
+    if (item.channel) {
+      conda[i] = {
         ...item,
         channels,
-        registryUrls: channels.map((item) =>
-          channelToRegistryUrl(item, config.registryAliases),
-        ),
-      } satisfies PixiPackageDependency;
-    });
+        registryUrls: [
+          channelToRegistryUrl(item.channel, config.registryAliases),
+        ],
+      };
+      continue;
+    }
+
+    if (channels.length === 0) {
+      conda[i] = {
+        ...item,
+        channels,
+        skipStage: 'extract',
+        skipReason: 'unknown-registry',
+      };
+      continue;
+    }
+
+    const registryUrls: string[] = [];
+    for (const channel of channels) {
+      registryUrls.push(channelToRegistryUrl(channel, config.registryAliases));
+    }
+
+    conda[i] = {
+      ...item,
+      channels,
+      registryUrls,
+    } satisfies PixiPackageDependency;
+  }
 
   return {
     lockFiles,
@@ -140,7 +147,7 @@ function channelToRegistryUrl(
     return ensureTrailingSlash(alias);
   }
 
-  return defaultCondaRegistryAPi + alias + '/';
+  return `${defaultCondaRegistryAPi}${alias}/`;
 }
 
 function orderChannels(channels: Channels = []): string[] {

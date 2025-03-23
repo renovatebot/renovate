@@ -9,6 +9,13 @@ import { id as gitRefVersionID } from '../../versioning/git';
 import { id as pep440VersionID } from '../../versioning/pep440/';
 import type { PackageDependency } from '../types';
 
+export type Channels = z.infer<typeof Channel>[];
+
+const Channel = z.union([
+  z.string(),
+  z.object({ channel: z.string(), priority: z.number() }),
+]);
+
 export interface PixiPackageDependency extends PackageDependency {
   channel?: string;
   channels?: (string | { channel: string; priority: number })[];
@@ -148,14 +155,7 @@ export const PixiConfigSchema = z
       z.string(),
       z
         .object({
-          channels: z
-            .array(
-              z.union([
-                z.string(),
-                z.object({ channel: z.string(), priority: z.number() }),
-              ]),
-            )
-            .optional(),
+          channels: z.array(Channel).optional(),
         })
         .and(DependencieSchemaMixin),
     )
