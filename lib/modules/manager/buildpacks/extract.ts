@@ -1,13 +1,20 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { BuildpacksRegistryDatasource } from '../../datasource/buildpacks-registry';
+import { isVersion } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type ProjectDescriptor, ProjectDescriptorToml } from './schema';
+import {
+  type ProjectDescriptor,
+  ProjectDescriptorToml,
+  isBuildpackByName,
+  isBuildpackByURI,
+} from './schema';
 
 const dockerPrefix = regEx(/^docker:\/?\//);
 const dockerRef = regEx(
@@ -19,6 +26,24 @@ function isDockerRef(ref: string): boolean {
     return true;
   }
   return false;
+}
+const buildpackRegistryPrefix = 'urn:cnb:registry:';
+const buildpackRegistryId = regEx(
+  /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
+);
+
+function isBuildpackRegistryId(ref: string): boolean {
+  const bpRegistryMatch = buildpackRegistryId.exec(ref);
+  if (!bpRegistryMatch) {
+    return false;
+  } else if (!bpRegistryMatch.groups?.version) {
+    return true;
+  }
+  return isVersion(bpRegistryMatch.groups.version);
+}
+
+function isBuildpackRegistryRef(ref: string): boolean {
+  return isBuildpackRegistryId(ref) || ref.startsWith(buildpackRegistryPrefix);
 }
 
 function parseProjectToml(
@@ -76,7 +101,7 @@ export function extractPackageFile(
     is.array(descriptor.io.buildpacks.group)
   ) {
     for (const group of descriptor.io.buildpacks.group) {
-      if (group.uri && isDockerRef(group.uri)) {
+      if (isBuildpackByURI(group) && isDockerRef(group.uri)) {
         const dep = getDep(
           group.uri.replace(dockerPrefix, ''),
           true,
@@ -92,6 +117,31 @@ export function extractPackageFile(
         );
 
         deps.push(dep);
+      } else if (isBuildpackByURI(group) && isBuildpackRegistryRef(group.uri)) {
+        const dependency = group.uri.replace(buildpackRegistryPrefix, '');
+
+        if (dependency.includes('@')) {
+          const version = dependency.split('@')[1];
+          const dep: PackageDependency = {
+            datasource: BuildpacksRegistryDatasource.id,
+            currentValue: version,
+            packageName: dependency.split('@')[0],
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          };
+          deps.push(dep);
+        }
+      } else if (isBuildpackByName(group)) {
+        const version = group.version;
+
+        if (version) {
+          const dep: PackageDependency = {
+            datasource: BuildpacksRegistryDatasource.id,
+            currentValue: version,
+            packageName: group.id,
+          };
+          deps.push(dep);
+        }
       }
     }
   }

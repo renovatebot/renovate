@@ -1,7 +1,5 @@
-import { mocked, partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
 import type {
@@ -14,11 +12,11 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
+import { hostRules, partial } from '~test/util';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://gerrit.example.com';
-const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/utils', () => {
   beforeEach(() => {

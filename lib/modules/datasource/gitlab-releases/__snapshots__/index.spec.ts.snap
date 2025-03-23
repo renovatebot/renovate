@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/gitlab-releases/index getReleases returns releases from custom registry 1`] = `
+exports[`modules/datasource/gitlab-releases/index > getReleases > returns releases from custom registry 1`] = `
 {
   "registryUrl": "https://gitlab.company.com",
   "releases": [
@@ -21,7 +21,7 @@ exports[`modules/datasource/gitlab-releases/index getReleases returns releases f
 }
 `;
 
-exports[`modules/datasource/gitlab-releases/index getReleases returns releases from default registry 1`] = `
+exports[`modules/datasource/gitlab-releases/index > getReleases > returns releases from default registry 1`] = `
 {
   "registryUrl": "https://gitlab.com",
   "releases": [

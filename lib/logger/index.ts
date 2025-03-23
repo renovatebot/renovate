@@ -34,7 +34,6 @@ export function createDefaultStreams(
     stream: process.stdout,
   };
 
-  // istanbul ignore if: not testable
   if (getEnv('LOG_FORMAT') !== 'json') {
     // TODO: typings (#9615)
     const prettyStdOut = new RenovateStream() as any;
@@ -50,7 +49,6 @@ export function createDefaultStreams(
     type: 'raw',
   };
 
-  // istanbul ignore next: not easily testable
   const logFileStream: bunyan.Stream | undefined = is.string(logFile)
     ? createLogFileStream(logFile)
     : undefined;
@@ -60,7 +58,6 @@ export function createDefaultStreams(
   ) as bunyan.Stream[];
 }
 
-// istanbul ignore next: not easily testable
 function createLogFileStream(logFile: string): bunyan.Stream {
   // Ensure log file directory exists
   const directoryName = upath.dirname(logFile);
@@ -126,9 +123,16 @@ export function removeMeta(fields: string[]): void {
   loggerInternal.removeMeta(fields);
 }
 
-export /* istanbul ignore next */ function addStream(
-  stream: bunyan.Stream,
-): void {
+export function withMeta<T>(obj: Record<string, unknown>, cb: () => T): T {
+  addMeta(obj);
+  try {
+    return cb();
+  } finally {
+    removeMeta(Object.keys(obj));
+  }
+}
+
+export function addStream(stream: bunyan.Stream): void {
   loggerInternal.addStream(stream);
 }
 

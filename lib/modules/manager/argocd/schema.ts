@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LooseArray } from '../../../util/schema-utils';
+import { LooseArray, multidocYaml } from '../../../util/schema-utils';
 
 export const KubernetesResource = z.object({
   apiVersion: z.string(),
@@ -38,3 +38,7 @@ export const ApplicationSet = KubernetesResource.extend({
 
 export const ApplicationDefinition = Application.or(ApplicationSet);
 export type ApplicationDefinition = z.infer<typeof ApplicationDefinition>;
+
+export const ApplicationDefinitionSchema = multidocYaml({
+  removeTemplates: true,
+}).pipe(LooseArray(ApplicationDefinition));

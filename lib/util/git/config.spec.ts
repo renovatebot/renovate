@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../config/global';
-import { simpleGitConfig } from './config';
+import { setNoVerify, simpleGitConfig } from './config';
 
 describe('util/git/config', () => {
   beforeEach(() => {
@@ -22,5 +22,12 @@ describe('util/git/config', () => {
       },
       config: ['core.quotePath=false'],
     });
+  });
+
+  it('throws', () => {
+    // @ts-expect-error -- testing invalid input
+    expect(() => setNoVerify(1)).toThrowError(
+      'config error: gitNoVerify should be an array of strings',
+    );
   });
 });

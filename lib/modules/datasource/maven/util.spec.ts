@@ -1,5 +1,4 @@
 import type Request from 'got/dist/source/core';
-import { partial } from '../../../../test/util';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { Http, HttpError } from '../../../util/http';
 import type { MavenFetchError } from './types';
@@ -8,6 +7,7 @@ import {
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
+import { partial } from '~test/util';
 
 const http = new Http('test');
 
@@ -86,7 +86,7 @@ describe('modules/datasource/maven/util', () => {
   describe('downloadHttpProtocol', () => {
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ message: HOST_DISABLED })),
+        getText: () => Promise.reject(httpError({ message: HOST_DISABLED })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -97,7 +97,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for host error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
+        getText: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -108,7 +108,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for temporary error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -119,7 +119,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for connection error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
+        getText: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -130,7 +130,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for unsupported error', async () => {
       const http = partial<Http>({
-        get: () =>
+        getText: () =>
           Promise.reject(httpError({ name: 'UnsupportedProtocolError' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');

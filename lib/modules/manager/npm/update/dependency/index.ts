@@ -122,7 +122,7 @@ export function updateDependency({
   }
 
   const { depType, managerData } = upgrade;
-  const depName: string = managerData?.key || upgrade.depName;
+  const depName: string = managerData?.key ?? upgrade.depName;
   let { newValue } = upgrade;
 
   newValue = getNewGitValue(upgrade) ?? newValue;
@@ -142,7 +142,7 @@ export function updateDependency({
       if (overrideDepParents) {
         // old version when there is an object as a value in overrides block
         const { depObjectReference, overrideDepName } = overrideDepPosition(
-          parsedContents['overrides']!,
+          parsedContents.overrides!,
           overrideDepParents,
           depName,
         );
@@ -161,25 +161,38 @@ export function updateDependency({
     }
 
     // TODO #22198
-    let newFileContent = replaceAsString(
-      parsedContents,
-      fileContent,
-      depType as NpmDepType,
-      depName,
-      oldVersion!,
-      newValue!,
-      overrideDepParents,
-    );
-    if (upgrade.newName) {
+    let newFileContent: string;
+    if (upgrade.newName && upgrade.replacementApproach === 'alias') {
       newFileContent = replaceAsString(
         parsedContents,
-        newFileContent,
+        fileContent,
         depType as NpmDepType,
         depName,
-        depName,
-        upgrade.newName,
+        oldVersion!,
+        `npm:${upgrade.newName}@${newValue}`,
         overrideDepParents,
       );
+    } else {
+      newFileContent = replaceAsString(
+        parsedContents,
+        fileContent,
+        depType as NpmDepType,
+        depName,
+        oldVersion!,
+        newValue!,
+        overrideDepParents,
+      );
+      if (upgrade.newName) {
+        newFileContent = replaceAsString(
+          parsedContents,
+          newFileContent,
+          depType as NpmDepType,
+          depName,
+          depName,
+          upgrade.newName,
+          overrideDepParents,
+        );
+      }
     }
     // istanbul ignore if
     if (!newFileContent) {

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import * as httpMock from '../../../../test/http-mock';
 import { Http } from '../../../util/http';
 import { VersionsEndpointCache, memCache } from './versions-endpoint-cache';
+import * as httpMock from '~test/http-mock';
 
 const rubygems = new VersionsEndpointCache(new Http('rubygems'));
 
@@ -81,11 +81,11 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
 
   describe('Delta sync', () => {
     beforeAll(() => {
-      jest.useFakeTimers({ advanceTimers: true });
+      vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
     beforeEach(() => {
-      jest.setSystemTime(new Date('2021-05-04T00:00:00.000Z'));
+      vi.setSystemTime(new Date('2021-05-04T00:00:00.000Z'));
     });
 
     it('refreshes after 15 minutes', async () => {
@@ -94,7 +94,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
       expect(res1.unwrap().val).toEqual(['1.1.1']);
 
-      jest.advanceTimersByTime(15 * 60 * 1000);
+      vi.advanceTimersByTime(15 * 60 * 1000);
       httpMock
         .scope(registryUrl)
         .get('/versions')
@@ -120,7 +120,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
       expect(res1.unwrap().val).toEqual(['1.1.1']);
 
-      jest.advanceTimersByTime(15 * 60 * 1000);
+      vi.advanceTimersByTime(15 * 60 * 1000);
       httpMock
         .scope(registryUrl)
         .get('/versions')
@@ -157,7 +157,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
       const res1 = await rubygems.getVersions(registryUrl, 'foo');
       expect(res1.unwrap().val).toEqual(['1.1.1']);
 
-      jest.advanceTimersByTime(15 * 60 * 1000);
+      vi.advanceTimersByTime(15 * 60 * 1000);
       httpMock
         .scope(registryUrl)
         .get('/versions')
@@ -180,7 +180,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
 
         await rubygems.getVersions(registryUrl, 'foo');
 
-        jest.advanceTimersByTime(15 * 60 * 1000);
+        vi.advanceTimersByTime(15 * 60 * 1000);
       });
 
       it('handles 404', async () => {

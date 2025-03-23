@@ -10,6 +10,7 @@ import {
   parse,
   parseMavenBasedRange,
   parsePrefixRange,
+  parseSingleVersionRange,
 } from './compare';
 
 export const id = 'gradle';
@@ -18,7 +19,7 @@ export const urls = [
   'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
+export const supportedRangeStrategies: RangeStrategy[] = ['pin', 'bump'];
 
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
@@ -112,6 +113,12 @@ const matches = (a: string, b: string): boolean => {
   }
   if (isVersion(b)) {
     return equals(a, b);
+  }
+
+  const singleVersionRange = parseSingleVersionRange(b);
+  if (singleVersionRange) {
+    const { val } = singleVersionRange;
+    return equals(a, val);
   }
 
   const prefixRange = parsePrefixRange(b);

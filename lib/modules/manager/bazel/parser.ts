@@ -253,7 +253,7 @@ function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
 function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
   const ruleFragment = currentFragment(ctx);
   if (ruleFragment.type === 'record') {
-    ruleFragment.children['rule'] = { type: 'string', value, offset };
+    ruleFragment.children.rule = { type: 'string', value, offset };
   }
 
   return ctx;

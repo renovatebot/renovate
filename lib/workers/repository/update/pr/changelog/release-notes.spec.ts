@@ -1,12 +1,8 @@
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime } from 'luxon';
-import { Fixtures } from '../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../test/http-mock';
-import { mocked, partial } from '../../../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
 import type { Timestamp } from '../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -24,10 +20,11 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { hostRules, partial } from '~test/util';
 
-jest.mock('../../../../../util/host-rules', () => mockDeep());
-
-const hostRules = mocked(_hostRules);
+vi.mock('../../../../../util/host-rules', () => mockDeep());
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');
@@ -113,7 +110,7 @@ const gitlabProject = partial<ChangeLogProject>({
 });
 
 describe('workers/repository/update/pr/changelog/release-notes', () => {
-  const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
+  const githubReleasesMock = vi.spyOn(githubGraphql, 'queryReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
@@ -1182,7 +1179,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
-      jest.setTimeout(0);
       httpMock
         .scope('https://api.gitlab.com/')
         .get(
@@ -1212,7 +1208,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('parses self hosted gitlab', async () => {
       hostRules.find.mockReturnValue({ token: 'some-token' });
-      jest.setTimeout(0);
       httpMock
         .scope('https://my.custom.domain/')
         .get(

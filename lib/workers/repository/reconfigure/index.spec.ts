@@ -1,12 +1,12 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { logger, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _validate from './validate';
 import { checkReconfigureBranch } from '.';
+import { logger, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('./validate');
+vi.mock('./validate');
 
-const validate = mocked(_validate);
+const validate = vi.mocked(_validate);
 
 describe('workers/repository/reconfigure/index', () => {
   const config: RenovateConfig = {

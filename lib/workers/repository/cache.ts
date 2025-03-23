@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
@@ -123,7 +121,7 @@ async function generateBranchCache(
       upgrades,
     };
   } catch (error) {
-    const err = error.err || error; // external host error nests err
+    const err = error.err ?? error; // external host error nests err
     const errCodes = [401, 404];
     // istanbul ignore if
     if (errCodes.includes(err.response?.statusCode)) {

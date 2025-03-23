@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
@@ -24,13 +25,16 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
         file,
       ) as RenovateConfig;
     case '.cjs':
+    case '.mjs':
     case '.js': {
-      const tmpConfig = await import(
-        upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
-      );
-      let config = tmpConfig.default
-        ? tmpConfig.default
-        : /* istanbul ignore next: hard to test */ tmpConfig;
+      const absoluteFilePath = upath.isAbsolute(file)
+        ? file
+        : `${process.cwd()}/${file}`;
+      // use file url paths to avoid issues with windows paths
+      // typescript does not support file URL for import
+      const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
+      /* v8 ignore next -- not testable */
+      let config = tmpConfig.default ?? tmpConfig;
       // Allow the config to be a function
       if (is.function_(config)) {
         config = config();
@@ -45,7 +49,8 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
 
-  if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
+  const configFileExists = await fs.pathExists(configFile);
+  if (env.RENOVATE_CONFIG_FILE && !configFileExists) {
     logger.fatal(
       { configFile },
       `Custom config file specified in RENOVATE_CONFIG_FILE must exist`,
@@ -53,8 +58,14 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     process.exit(1);
   }
 
-  logger.debug('Checking for config file in ' + configFile);
   let config: AllConfig = {};
+
+  if (!configFileExists) {
+    logger.debug('No config file found on disk - skipping');
+    return config;
+  }
+
+  logger.debug('Checking for config file in ' + configFile);
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
@@ -74,8 +85,25 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal('Error parsing config file');
       process.exit(1);
     }
-    // istanbul ignore next: we can ignore this
-    logger.debug('No config file found on disk - skipping');
+    logger.debug('Error reading or parsing file - skipping');
+  }
+
+  if (is.nonEmptyObject(config.processEnv)) {
+    const exportedKeys = [];
+    for (const [key, value] of Object.entries(config.processEnv)) {
+      if (!is.nonEmptyString(value)) {
+        logger.error({ key }, 'processEnv value is not a string.');
+        continue;
+      }
+
+      exportedKeys.push(key);
+      process.env[key] = value;
+    }
+    logger.debug(
+      { keys: exportedKeys },
+      'processEnv keys were exported to env',
+    );
+    delete config.processEnv;
   }
 
   return migrateAndValidateConfig(config, configFile);

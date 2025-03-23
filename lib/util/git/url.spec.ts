@@ -1,8 +1,8 @@
-import { mockDeep } from 'jest-mock-extended';
-import { hostRules } from '../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
+import { hostRules } from '~test/util';
 
-jest.mock('../host-rules', () => mockDeep());
+vi.mock('../host-rules', () => mockDeep());
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {

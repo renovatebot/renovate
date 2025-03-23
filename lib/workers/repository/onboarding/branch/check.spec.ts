@@ -1,16 +1,15 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { git, mocked, partial, platform, scm } from '../../../../../test/util';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
 import * as _cache from '../../../../util/cache/repository';
 import type { LongCommitSha } from '../../../../util/git/types';
 import { isOnboarded } from './check';
+import { git, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/cache/repository');
 
-const cache = mocked(_cache);
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
   const config = partial<RenovateConfig>({

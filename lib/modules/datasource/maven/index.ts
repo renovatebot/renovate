@@ -30,7 +30,7 @@ import {
 } from './util';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -89,7 +89,7 @@ export class MavenDatasource extends Datasource {
       cacheNamespace,
       cacheKey,
     );
-    /* istanbul ignore if */
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedVersions) {
       return cachedVersions;
     }
@@ -123,7 +123,7 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

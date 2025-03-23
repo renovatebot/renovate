@@ -109,7 +109,7 @@ export class PodDatasource extends Datasource {
     packageName: string,
   ): Promise<string | null> {
     try {
-      const resp = await this.http.get(url);
+      const resp = await this.http.getText(url);
       if (resp?.body) {
         return resp.body;
       }
@@ -190,8 +190,7 @@ export class PodDatasource extends Datasource {
     const resp = await this.requestCDN(url, packageName);
     if (resp) {
       const lines = resp.split(newlineRegex);
-      for (let idx = 0; idx < lines.length; idx += 1) {
-        const line = lines[idx];
+      for (const line of lines) {
         const [name, ...versions] = line.split('/');
         if (name === packageName.replace(regEx(/\/.*$/), '')) {
           const releases = versions.map((version) => ({ version }));
@@ -213,7 +212,7 @@ export class PodDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
