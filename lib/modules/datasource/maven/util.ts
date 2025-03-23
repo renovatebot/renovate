@@ -21,8 +21,8 @@ import type {
   MavenFetchSuccess,
 } from './types';
 
-function getHost(url: string): string | null {
-  return parseUrl(url)?.host ?? /* istanbul ignore next: not possible */ null;
+function getHost(url: string): string | undefined {
+  return parseUrl(url)?.host;
 }
 
 function isTemporaryError(err: HttpError): boolean {
@@ -87,10 +87,10 @@ export async function downloadHttpProtocol(
       return result;
     })
     .catch((err): MavenFetchResult => {
-      // istanbul ignore next: never happens, needs for type narrowing
+      /* v8 ignore start: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
-      }
+      } /* v8 ignore stop */
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {
