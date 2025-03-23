@@ -172,8 +172,8 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.every(
           (upgrade) =>
-            upgrade.isLockFileMaintenance ||
-            upgrade.isRemediation ||
+            upgrade.isLockFileMaintenance ??
+            upgrade.isRemediation ??
             is.number(upgrade.depIndex),
         ),
       ).toBeTrue();
