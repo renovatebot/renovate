@@ -10,9 +10,9 @@ import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/
 import { PyProjectSchema } from '../pep621/schema';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import {
+  type Channels,
   type PixiConfig,
   type PixiPackageDependency,
-  type Channels,
   PixiToml,
 } from './schema';
 

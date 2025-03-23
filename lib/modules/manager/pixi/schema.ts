@@ -38,80 +38,78 @@ function collectNamedPackages(
     .filter((dep) => isNotNullOrUndefined(dep));
 }
 
-const pypiDependencies = z
-  .record(
-    z.string(),
-    z.union([
-      z.string().transform((version) => {
-        return {
-          currentValue: version,
-          versioning: pep440VersionID,
-          datasource: PypiDatasource.id,
-          depType: 'pypi-dependencies',
-        } satisfies PixiPackageDependency;
-      }),
-      z.object({ version: z.string() }).transform(({ version }) => {
-        return {
-          currentValue: version,
-          versioning: pep440VersionID,
-          datasource: PypiDatasource.id,
-          depType: 'pypi-dependencies',
-        } satisfies PixiPackageDependency;
-      }),
-      z
-        .object({ git: z.string(), rev: z.optional(z.string()) })
-        .transform(({ git, rev }) => {
-          // empty ref default to HEAD, so do we not need to do anything
-          if (!rev) {
-            return null;
-          }
+const pypiDepdency = z.union([
+  z.string().transform((version) => {
+    return {
+      currentValue: version,
+      versioning: pep440VersionID,
+      datasource: PypiDatasource.id,
+      depType: 'pypi-dependencies',
+    } satisfies PixiPackageDependency;
+  }),
+  z.object({ version: z.string() }).transform(({ version }) => {
+    return {
+      currentValue: version,
+      versioning: pep440VersionID,
+      datasource: PypiDatasource.id,
+      depType: 'pypi-dependencies',
+    } satisfies PixiPackageDependency;
+  }),
+]);
 
-          return {
-            currentValue: rev,
-            sourceUrl: git,
-            depType: 'pypi-dependencies',
-            gitRef: true,
-            versioning: gitRefVersionID,
-          } satisfies PixiPackageDependency;
-        }),
-      z.any().transform(() => null),
-    ]),
-  )
-  .transform(collectNamedPackages);
+const gitDepdency = z
+  .object({ git: z.string(), rev: z.optional(z.string()) })
+  .transform(({ git, rev }) => {
+    // empty ref default to HEAD, so do we not need to do anything
+    if (!rev) {
+      return null;
+    }
 
-const condaDependencies = z
-  .record(
-    z.string(),
-    z.union([
-      z.string().transform((version) => {
-        return {
-          currentValue: version,
-          versioning: condaVersion.id,
-          datasource: CondaDatasource.id,
-          depType: 'dependencies',
-        } satisfies PixiPackageDependency;
-      }),
-      z
-        .object({ version: z.string(), channel: z.optional(z.string()) })
-        .transform(({ version, channel }) => {
-          return {
-            currentValue: version,
-            versioning: condaVersion.id,
-            datasource: CondaDatasource.id,
-            depType: 'dependencies',
-            channel,
-          } satisfies PixiPackageDependency;
-        }),
-      z.any().transform(() => null),
-    ]),
-  )
-  .transform(collectNamedPackages);
+    return {
+      currentValue: rev,
+      sourceUrl: git,
+      depType: 'pypi-dependencies',
+      gitRef: true,
+      versioning: gitRefVersionID,
+    } satisfies PixiPackageDependency;
+  });
+
+const pixiPypiDependencies = LooseRecord(
+  z.string(),
+  z.union([pypiDepdency, gitDepdency, z.any().transform(() => null)]),
+).transform(collectNamedPackages);
+
+const condaDependency = z.union([
+  z.string().transform((version) => {
+    return {
+      currentValue: version,
+      versioning: condaVersion.id,
+      datasource: CondaDatasource.id,
+      depType: 'dependencies',
+    } satisfies PixiPackageDependency;
+  }),
+  z
+    .object({ version: z.string(), channel: z.optional(z.string()) })
+    .transform(({ version, channel }) => {
+      return {
+        currentValue: version,
+        versioning: condaVersion.id,
+        datasource: CondaDatasource.id,
+        depType: 'dependencies',
+        channel,
+      } satisfies PixiPackageDependency;
+    }),
+]);
+
+const condaDependencies = LooseRecord(z.string(), condaDependency).transform(
+  collectNamedPackages,
+);
 
 const Targets = LooseRecord(
   z.string(),
   z.object({
     dependencies: z.optional(condaDependencies).default({}),
-    'pypi-dependencies': z.optional(pypiDependencies).default({}),
+    'pypi-dependencies': z.optional(pixiPypiDependencies).default({}),
   }),
 ).transform((val) => {
   const conda: PixiPackageDependency[] = [];
@@ -132,7 +130,7 @@ const projectSchema = z.object({
 const DependencieSchemaMixin = z
   .object({
     dependencies: z.optional(condaDependencies).default({}),
-    'pypi-dependencies': z.optional(pypiDependencies).default({}),
+    'pypi-dependencies': z.optional(pixiPypiDependencies).default({}),
     target: z.optional(Targets).default({}),
   })
   .transform(
@@ -146,47 +144,47 @@ const DependencieSchemaMixin = z
     },
   );
 
+const pixiFeatures = LooseRecord(
+  z.string(),
+  z
+    .object({
+      channels: z.array(Channel).optional(),
+    })
+    .and(DependencieSchemaMixin),
+)
+  .default({})
+  .transform(
+    (
+      features,
+    ): {
+      conda: PixiPackageDependency[];
+      pypi: PixiPackageDependency[];
+    } => {
+      const pypi: PixiPackageDependency[] = [];
+      const conda: PixiPackageDependency[] = [];
+
+      for (const feature of Object.values(features)) {
+        conda.push(
+          ...feature.conda.map((item) => {
+            return {
+              ...item,
+              channels: feature.channels,
+            };
+          }),
+        );
+
+        pypi.push(...feature.pypi);
+      }
+
+      return { pypi, conda };
+    },
+  );
+
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
 export const PixiConfigSchema = z
-  .object({
-    feature: LooseRecord(
-      z.string(),
-      z
-        .object({
-          channels: z.array(Channel).optional(),
-        })
-        .and(DependencieSchemaMixin),
-    )
-      .default({})
-      .transform(
-        (
-          features,
-        ): {
-          conda: PixiPackageDependency[];
-          pypi: PixiPackageDependency[];
-        } => {
-          const pypi: PixiPackageDependency[] = [];
-          const conda: PixiPackageDependency[] = [];
-
-          for (const feature of Object.values(features)) {
-            conda.push(
-              ...feature.conda.map((item) => {
-                return {
-                  ...item,
-                  channels: feature.channels,
-                };
-              }),
-            );
-
-            pypi.push(...feature.pypi);
-          }
-
-          return { pypi, conda };
-        },
-      ),
-  })
+  .object({ feature: pixiFeatures })
   .and(DependencieSchemaMixin)
   .and(
     z.union([
