@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 1 returned image 1`] = `
+exports[`modules/datasource/aws-machine-image/index > getSortedAwsMachineImages() > with 1 returned image 1`] = `
 [
   DescribeImagesCommand {
     "deserialize": [Function],
@@ -38,7 +38,7 @@ exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() 
 ]
 `;
 
-exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() with 3 returned images 1`] = `
+exports[`modules/datasource/aws-machine-image/index > getSortedAwsMachineImages() > with 3 returned images 1`] = `
 [
   DescribeImagesCommand {
     "deserialize": [Function],
@@ -76,7 +76,7 @@ exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() 
 ]
 `;
 
-exports[`modules/datasource/aws-machine-image/index getSortedAwsMachineImages() without returned images 1`] = `
+exports[`modules/datasource/aws-machine-image/index > getSortedAwsMachineImages() > without returned images 1`] = `
 [
   DescribeImagesCommand {
     "deserialize": [Function],

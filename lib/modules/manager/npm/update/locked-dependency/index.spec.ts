@@ -1,8 +1,8 @@
 import { updateLockedDependency } from '../..';
-import { Fixtures } from '../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../test/http-mock';
 import { clone } from '../../../../../util/clone';
 import type { UpdateLockedConfig } from '../../../types';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const packageFileContent = Fixtures.get('package.json', './package-lock');
 const lockFileContent = Fixtures.get('package-lock-v1.json', './package-lock');

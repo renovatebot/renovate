@@ -1,9 +1,9 @@
 import { getDigest, getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { HttpError } from '../../../util/http';
 import { CdnjsDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://api.cdnjs.com/';
 

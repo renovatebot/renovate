@@ -1,4 +1,3 @@
-/** istanbul ignore file */
 import crypto from 'node:crypto';
 import { logger } from '../../logger';
 

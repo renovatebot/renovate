@@ -13,7 +13,7 @@ describe('config/migrations/custom/go-mod-tidy-migration', () => {
     );
   });
 
-  it('should handle case when postUpdateOptions is not defined ', () => {
+  it('should handle case when postUpdateOptions is not defined', () => {
     expect(GoModTidyMigration).toMigrate(
       {
         gomodTidy: true,

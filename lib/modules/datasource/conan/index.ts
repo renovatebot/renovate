@@ -141,7 +141,7 @@ export class ConanDatasource extends Datasource {
             if (isArtifactoryServer(rep)) {
               const conanApiRegexp =
                 /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/;
-              const groups = url.match(conanApiRegexp)?.groups;
+              const groups = conanApiRegexp.exec(url)?.groups;
               if (!groups) {
                 return dep;
               }

@@ -12,7 +12,7 @@ async function updateArtifact(
   const url = `https://github.com/batect/batect/releases/download/${version}/${fileName}`;
 
   try {
-    const response = await http.get(url);
+    const response = await http.getText(url);
     const contents = response.body;
 
     return {

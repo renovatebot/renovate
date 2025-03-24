@@ -1,6 +1,4 @@
-import { mock } from 'jest-mock-extended';
-import type { RenovateConfig } from '../../../../test/util';
-import { fs, git, mocked, partial, platform, scm } from '../../../../test/util';
+import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
@@ -8,14 +6,15 @@ import * as _cache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
 import { validateReconfigureBranch } from './validate';
+import { fs, git, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../util/cache/repository');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../init/merge');
+vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/fs');
+vi.mock('../init/merge');
 
-const cache = mocked(_cache);
-const merge = mocked(_merge);
+const cache = vi.mocked(_cache);
+const merge = vi.mocked(_merge);
 
 describe('workers/repository/reconfigure/validate', () => {
   const config: RenovateConfig = {
@@ -215,6 +214,27 @@ describe('workers/repository/reconfigure/validate', () => {
     fs.readLocalFile.mockResolvedValueOnce(`
         {
             "enabledManagers": ["npm",]
+        }
+        `);
+    await validateReconfigureBranch(config);
+    expect(platform.setBranchStatus).toHaveBeenCalledWith({
+      branchName: 'prefix/reconfigure',
+      context: 'renovate/config-validation',
+      description: 'Validation Successful',
+      state: 'green',
+    });
+  });
+
+  it('handles array fields which accept strings', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(`
+        {
+          "packageRules": [
+            {
+              "description": "test",
+              "matchPackageNames": ["pkg"],
+              "enabled": false
+            }
+          ]
         }
         `);
     await validateReconfigureBranch(config);

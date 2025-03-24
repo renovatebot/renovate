@@ -1,11 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import {
@@ -19,16 +13,17 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
-const datasource = mocked(_datasource);
-const bundlerHostRules = mocked(_bundlerHostRules);
+const datasource = vi.mocked(_datasource);
+const bundlerHostRules = vi.mocked(_bundlerHostRules);
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('./host-rules');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./host-rules');
 
 process.env.CONTAINERBASE = 'true';
 

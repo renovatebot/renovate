@@ -93,11 +93,11 @@ export class AwsMachineImageDatasource extends Datasource {
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)
-        : /* istanbul ignore next */ 0;
+        : /* v8 ignore next */ 0; // TODO: add date coersion util
 
       const ts2 = image2.CreationDate
         ? Date.parse(image2.CreationDate)
-        : /* istanbul ignore next */ 0;
+        : /* v8 ignore next */ 0; // TODO: add date coersion util
       return ts1 - ts2;
     });
   }
@@ -120,16 +120,17 @@ export class AwsMachineImageDatasource extends Datasource {
       const newValueMatchingImages = images.filter(
         (image) => image.ImageId === newValue,
       );
-      if (newValueMatchingImages.length === 1) {
-        return (
-          newValueMatchingImages[0].Name ?? /* istanbul ignore next */ null
-        );
+      if (
+        newValueMatchingImages.length === 1 &&
+        newValueMatchingImages[0].Name
+      ) {
+        return newValueMatchingImages[0].Name;
       }
       return null;
     }
 
     const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? /* istanbul ignore next */ null;
+    return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
   }
 
   @cache({

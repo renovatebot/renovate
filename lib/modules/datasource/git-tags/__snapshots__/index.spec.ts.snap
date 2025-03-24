@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/git-tags/index getReleases returns versions filtered from tags 1`] = `
+exports[`modules/datasource/git-tags/index > getReleases > returns versions filtered from tags 1`] = `
 {
   "releases": [
     {

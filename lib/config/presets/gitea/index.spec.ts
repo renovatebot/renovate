@@ -1,22 +1,17 @@
-import { mockDeep } from 'jest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
-import * as _hostRules from '../../../util/host-rules';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as gitea from '.';
-
-jest.mock('../../../util/host-rules', () => mockDeep());
-
-const hostRules = mocked(_hostRules);
+import { hostRules } from '~test/host-rules';
+import * as httpMock from '~test/http-mock';
 
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/api/v1/repos/some/repo/contents';
 
 describe('config/presets/gitea/index', () => {
   beforeEach(() => {
-    hostRules.find.mockReturnValue({ token: 'abc' });
+    hostRules.add({ token: 'abc' });
     setBaseUrl(giteaApiHost);
   });
 
@@ -53,6 +48,24 @@ describe('config/presets/gitea/index', () => {
         null,
       );
       expect(res).toEqual({ from: 'api' });
+    });
+
+    it('throws external host error', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(404, {});
+
+      hostRules.add({ abortOnError: true });
+
+      await expect(
+        gitea.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          giteaApiHost,
+          null,
+        ),
+      ).rejects.toThrow(ExternalHostError);
     });
   });
 

@@ -463,6 +463,16 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
+
+  /**
+   * Managers which support this option, leave undefined if all managers support it.
+   */
+  supportedManagers?: string[];
+
+  /**
+   * Platforms which support this option, leave undefined if all platforms support it.
+   */
+  supportedPlatforms?: PlatformId[];
 }
 
 export interface RenovateArrayOption<
@@ -472,35 +482,25 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
   subType: 'number';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
   default?: boolean | null;
   type: 'boolean';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
   default?: number | null;
   type: 'integer';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
@@ -510,8 +510,6 @@ export interface RenovateStringOption extends RenovateOptionBase {
   // Not used
   replaceLineReturns?: boolean;
   type: 'string';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
@@ -519,8 +517,6 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export type RenovateOptions =

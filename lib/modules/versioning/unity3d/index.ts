@@ -6,7 +6,7 @@ import type { VersioningApi } from '../types';
 export const id = 'unity3d';
 export const displayName = 'Unity3D';
 export const urls = [
-  'https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html#version-define-expressions',
+  'https://docs.unity3d.com/Manual/assembly-definition-includes.html#version-define-expressions',
 ];
 export const supportsRanges = false;
 

@@ -36,7 +36,14 @@ describe('modules/manager/gradle/utils', () => {
     });
 
     it('returns null for invalid inputs', () => {
-      const inputs = ['', undefined, null, 'foobar', 'latest'];
+      const inputs = [
+        '',
+        undefined,
+        null,
+        'foobar',
+        'latest',
+        '[1.6.0, ]  ,  abc',
+      ];
       for (const input of inputs) {
         expect(versionLikeSubstring(input)).toBeNull();
       }
@@ -53,6 +60,9 @@ describe('modules/manager/gradle/utils', () => {
       ${'foo:bar:1.2.3@zip'}                   | ${true}
       ${'foo:bar:x86@x86'}                     | ${true}
       ${'foo.bar:baz:1.2.+'}                   | ${true}
+      ${'foo.bar:baz:[1.6.0, ]'}               | ${true}
+      ${'foo.bar:baz:[, 1.6.0)'}               | ${true}
+      ${'foo.bar:baz:]1.6.0,]'}                | ${true}
       ${'foo:bar:baz:qux'}                     | ${false}
       ${'foo:bar:baz:qux:quux'}                | ${false}
       ${"foo:bar:1.2.3'"}                      | ${false}
@@ -74,6 +84,7 @@ describe('modules/manager/gradle/utils', () => {
       ${'foo.foo:bar.bar:1.2.3'}  | ${{ depName: 'foo.foo:bar.bar', currentValue: '1.2.3' }}
       ${'foo.bar:baz:1.2.3'}      | ${{ depName: 'foo.bar:baz', currentValue: '1.2.3' }}
       ${'foo:bar:1.2.+'}          | ${{ depName: 'foo:bar', currentValue: '1.2.+' }}
+      ${'foo.bar:baz:[1.6.0, ]'}  | ${{ depName: 'foo.bar:baz', currentValue: '[1.6.0, ]' }}
       ${'foo:bar:1.2.3@zip'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
       ${'foo:bar:baz:qux'}        | ${null}
       ${'foo:bar:baz:qux:quux'}   | ${null}

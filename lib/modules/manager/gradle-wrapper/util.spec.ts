@@ -1,7 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { codeBlock } from 'common-tags';
-import { fs, partial } from '../../../../test/util';
 import {
   extractGradleVersion,
   getJavaConstraint,
@@ -10,9 +9,10 @@ import {
   gradleWrapperFileName,
   prepareGradleCommand,
 } from './utils';
+import { fs, partial } from '~test/util';
 
-const platform = jest.spyOn(os, 'platform');
-jest.mock('../../../util/fs');
+const platform = vi.spyOn(os, 'platform');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/gradle-wrapper/util', () => {
   describe('getJavaConstraint()', () => {

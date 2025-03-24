@@ -1,14 +1,14 @@
-import { mockDeep } from 'jest-mock-extended';
 import { DateTime, Settings } from 'luxon';
+import { mockDeep } from 'vitest-mock-extended';
 import { Http } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
 import type { HttpCache } from './schema';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/cache/package', () => mockDeep());
-const packageCache = mocked(_packageCache);
+vi.mock('../../../util/cache/package', () => mockDeep());
+const packageCache = vi.mocked(_packageCache);
 
 const http = new Http('test');
 
@@ -18,7 +18,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {
@@ -30,14 +30,14 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[k] = v as HttpCache;
       return Promise.resolve(null as never);
     });
+
+    GlobalConfig.reset();
   });
 
   const mockTime = (time: string) => {
     const value = DateTime.fromISO(time).valueOf();
     Settings.now = () => value;
   };
-
-  beforeAll(() => {});
 
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
@@ -50,11 +50,11 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      softTtlMinutes: 0,
+      ttlMinutes: 0,
     });
     httpMock.scope(url).get('').reply(200, 'new response');
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('new response');
   });
@@ -71,15 +71,18 @@ describe('util/http/cache/package-http-cache-provider', () => {
       namespace: '_test-namespace',
     });
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
     expect(packageCache.set).not.toHaveBeenCalled();
 
     mockTime('2024-06-15T00:15:00.000Z');
-    httpMock.scope(url).get('').reply(200, 'new response', { etag: 'foobar' });
+    httpMock.scope(url).get('').reply(200, 'new response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, public',
+    });
 
-    const res2 = await http.get(url, { cacheProvider });
+    const res2 = await http.getText(url, { cacheProvider });
     expect(res2.body).toBe('new response');
     expect(packageCache.set).toHaveBeenCalled();
   });
@@ -88,12 +91,12 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
     });
-    httpMock
-      .scope(url)
-      .get('')
-      .reply(200, 'fetched response', { etag: 'foobar' });
+    httpMock.scope(url).get('').reply(200, 'fetched response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, public',
+    });
 
-    const res = await http.get(url, { cacheProvider });
+    const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('fetched response');
     expect(cache).toEqual({
@@ -108,5 +111,80 @@ describe('util/http/cache/package-http-cache-provider', () => {
         timestamp: expect.any(String),
       },
     });
+  });
+
+  it('prevents caching when cache-control is private', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
+    GlobalConfig.set({ cachePrivatePackages: true });
+
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+      checkCacheControl: false,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).toHaveBeenCalled();
+  });
+
+  it('allows caching when cache-control is private but checkCacheControl=false', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+      checkCacheControl: false,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response', {
+      etag: 'foobar',
+      'cache-control': 'max-age=180, private',
+    });
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).toHaveBeenCalled();
+  });
+
+  it('serves stale response during revalidation error', async () => {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
+      httpResponse: { statusCode: 200, body: 'cached response' },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+    });
+    httpMock.scope(url).get('').reply(500);
+
+    const res = await http.getText(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
   });
 });

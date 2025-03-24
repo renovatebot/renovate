@@ -123,7 +123,7 @@ function resolveHelmRepository(
             `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
             false,
             registryAliases,
-          ).depName;
+          ).packageName;
           return null;
         } else {
           return repo.spec.url;
@@ -164,6 +164,17 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
+        if (resource.spec.chartRef) {
+          logger.trace(
+            'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+        if (!resource.spec.chart) {
+          logger.debug('invalid or incomplete HelmRelease spec, skipping');
+          continue;
+        }
+
         const chartSpec = resource.spec.chart.spec;
         const depName = chartSpec.chart;
         const dep: PackageDependency = {
@@ -194,6 +205,37 @@ function resolveResourceManifest(
         }
         break;
       }
+
+      case 'HelmChart': {
+        if (resource.spec.sourceRef.kind === 'GitRepository') {
+          logger.trace(
+            'HelmChart using GitRepository was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+
+        const dep: PackageDependency = {
+          depName: resource.spec.chart,
+        };
+
+        if (resource.spec.sourceRef.kind === 'HelmRepository') {
+          dep.currentValue = resource.spec.version;
+          dep.datasource = HelmDatasource.id;
+
+          const matchingRepositories = helmRepositories.filter(
+            (rep) =>
+              rep.kind === resource.spec.sourceRef?.kind &&
+              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.metadata.namespace === resource.metadata?.namespace,
+          );
+          resolveHelmRepository(dep, matchingRepositories, registryAliases);
+        } else {
+          dep.skipReason = 'unsupported-datasource';
+        }
+        deps.push(dep);
+        break;
+      }
+
       case 'GitRepository': {
         const dep: PackageDependency = {
           depName: resource.metadata.name,

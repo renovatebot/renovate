@@ -35,7 +35,7 @@ export async function extractPackageFile(
   async function processGroupBlock(
     line: string,
     repositoryUrl?: string,
-    trimGroupLine: boolean = false,
+    trimGroupLine = false,
   ): Promise<void> {
     const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
     if (groupMatch) {

@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const miseFilename = '.mise.toml';
 

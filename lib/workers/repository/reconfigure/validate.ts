@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
@@ -138,7 +139,8 @@ export async function validateReconfigureBranch(
   }
 
   // perform validation and provide a passing or failing check based on result
-  const validationResult = await validateConfig('repo', configFileParsed);
+  const massagedConfig = massageConfig(configFileParsed);
+  const validationResult = await validateConfig('repo', massagedConfig);
 
   // failing check
   if (validationResult.errors.length > 0) {

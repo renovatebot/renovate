@@ -1,5 +1,4 @@
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs, getFixturePath, logger, partial } from '../../../../../test/util';
+import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global';
 import * as yaml from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
@@ -7,11 +6,14 @@ import type { NpmManagerData } from '../types';
 import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
+  extractPnpmWorkspaceFile,
   findPnpmWorkspace,
   getPnpmLock,
 } from './pnpm';
+import { Fixtures } from '~test/fixtures';
+import { fs, getFixturePath, logger, partial } from '~test/util';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/pnpm', () => {
   beforeAll(() => {
@@ -19,7 +21,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('.extractPnpmFilters()', () => {
@@ -41,7 +43,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
+      vi.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
         throw new Error();
       });
 
@@ -88,8 +90,8 @@ describe('modules/manager/npm/extract/pnpm', () => {
   });
 
   describe('.detectPnpmWorkspaces()', () => {
-    beforeEach(() => {
-      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
+    beforeEach(async () => {
+      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.
@@ -278,10 +280,171 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
     });
 
+    it('extracts version from catalogs', async () => {
+      const lockfileContent = codeBlock`
+        lockfileVersion: '9.0'
+
+        settings:
+          autoInstallPeers: true
+          excludeLinksFromLockfile: false
+
+        catalogs:
+          default:
+            react:
+              specifier: ^18
+              version: 18.3.1
+
+        importers:
+
+          .:
+            dependencies:
+              react:
+                specifier: 'catalog:'
+                version: 18.3.1
+
+        packages:
+
+          js-tokens@4.0.0:
+            resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
+          loose-envify@1.4.0:
+            resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+            hasBin: true
+
+          react@18.3.1:
+            resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+            engines: {node: '>=0.10.0'}
+
+        snapshots:
+
+          js-tokens@4.0.0: {}
+
+          loose-envify@1.4.0:
+            dependencies:
+              js-tokens: 4.0.0
+
+          react@18.3.1:
+            dependencies:
+              loose-envify: 1.4.0
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithCatalog!)).toHaveLength(1);
+    });
+
     it('returns empty if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
       expect(res.lockedVersionsWithPath).toBeUndefined();
+    });
+  });
+
+  describe('.extractPnpmWorkspaceFile()', () => {
+    it('handles empty catalog entries', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          { catalog: {}, catalogs: {} },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [],
+      });
+    });
+
+    it('parses valid pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            catalog: {
+              react: '18.3.0',
+            },
+            catalogs: {
+              react17: {
+                react: '17.0.2',
+              },
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '18.3.0',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'pnpm.catalog.default',
+            prettyDepType: 'pnpm.catalog.default',
+          },
+          {
+            currentValue: '17.0.2',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'pnpm.catalog.react17',
+            prettyDepType: 'pnpm.catalog.react17',
+          },
+        ],
+      });
+    });
+
+    it('finds relevant lockfile', async () => {
+      const lockfileContent = codeBlock`
+        lockfileVersion: '9.0'
+
+        catalogs:
+          default:
+            react:
+              specifier: 18.3.1
+              version: 18.3.1
+
+        importers:
+
+          .:
+            dependencies:
+              react:
+                specifier: 'catalog:'
+                version: 18.3.1
+
+        packages:
+
+          js-tokens@4.0.0:
+            resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
+          loose-envify@1.4.0:
+            resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+            hasBin: true
+
+          react@18.3.1:
+            resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+            engines: {node: '>=0.10.0'}
+
+        snapshots:
+
+          js-tokens@4.0.0: {}
+
+          loose-envify@1.4.0:
+            dependencies:
+              js-tokens: 4.0.0
+
+          react@18.3.1:
+            dependencies:
+              loose-envify: 1.4.0
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-lock.yaml');
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            catalog: {
+              react: '18.3.1',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        managerData: {
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+      });
     });
   });
 });

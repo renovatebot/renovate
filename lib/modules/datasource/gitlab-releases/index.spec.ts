@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { GitlabReleasesDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/gitlab-releases/index', () => {
   describe('getReleases', () => {

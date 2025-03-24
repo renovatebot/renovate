@@ -22,7 +22,6 @@ export default function configSerializer(
       if (contentFields.includes(key)) {
         this.update('[content]');
       }
-      // istanbul ignore if
       if (arrayFields.includes(key)) {
         this.update('[Array]');
       }

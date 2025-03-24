@@ -49,8 +49,9 @@ export interface BbsRestPr {
 
 export interface BbsRestRepo {
   id: number;
+  slug: string;
   project: { key: string };
-  origin: { name: string; slug: string };
+  origin?: { name: string; slug: string }; // only present in forks
   links: {
     clone?: { href: string; name: string }[];
   };

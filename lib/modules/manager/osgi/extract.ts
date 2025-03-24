@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import * as json5 from 'json5';
+import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
@@ -44,7 +44,7 @@ export function extractPackageFile(
 
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
   const execEnvFramework =
-    featureModel['execution-environment:JSON|false']?.['framework'];
+    featureModel['execution-environment:JSON|false']?.framework;
   if (!is.nullOrUndefined(execEnvFramework)) {
     allBundles.push(execEnvFramework);
   }

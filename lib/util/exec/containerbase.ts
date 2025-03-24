@@ -35,7 +35,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
   composer: {
     datasource: 'github-releases',
-    packageName: 'composer/composer',
+    packageName: 'containerbase/composer-prebuild',
     versioning: composerVersioningId,
   },
   copier: {
@@ -47,6 +47,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     packageName: 'corepack',
     versioning: npmVersioningId,
+  },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: semverVersioningId,
   },
   dotnet: {
     datasource: 'dotnet-version',
@@ -74,8 +79,8 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   golang: {
-    datasource: 'golang-version',
-    packageName: 'golang',
+    datasource: 'github-releases',
+    packageName: 'containerbase/golang-prebuild',
     versioning: npmVersioningId,
   },
   gradle: {
@@ -121,18 +126,18 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   maven: {
-    datasource: 'maven',
-    packageName: 'org.apache.maven:maven',
+    datasource: 'github-releases',
+    packageName: 'containerbase/maven-prebuild',
     versioning: mavenVersioningId,
   },
   nix: {
-    datasource: 'github-tags',
-    packageName: 'NixOS/nix',
+    datasource: 'github-releases',
+    packageName: 'containerbase/nix-prebuild',
     versioning: semverVersioningId,
   },
   node: {
-    datasource: 'node-version',
-    packageName: 'node',
+    datasource: 'github-releases',
+    packageName: 'containerbase/node-prebuild',
     versioning: nodeVersioningId,
   },
   npm: {
@@ -165,6 +170,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     packageName: 'pnpm',
     versioning: npmVersioningId,
+  },
+  pixi: {
+    datasource: 'github-releases',
+    packageName: 'prefix-dev/pixi',
+    versioning: pep440VersioningId,
   },
   poetry: {
     datasource: 'pypi',
@@ -207,8 +217,8 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
   flutter: {
-    datasource: 'flutter-version',
-    packageName: 'flutter',
+    datasource: 'github-releases',
+    packageName: 'containerbase/flutter-prebuild',
     versioning: npmVersioningId,
   },
   vendir: {
@@ -225,7 +235,7 @@ async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
   if (_getPkgReleases === null) {
-    _getPkgReleases = import('../../modules/datasource');
+    _getPkgReleases = import('../../modules/datasource/index.js');
   }
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);

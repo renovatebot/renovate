@@ -1,12 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import {
-  fs,
-  hostRules,
-  mocked,
-  mockedFunction,
-} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -18,13 +11,15 @@ import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
+import { mockExecAll } from '~test/exec-util';
+import { fs, hostRules } from '~test/util';
 
-jest.mock('google-auth-library');
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('google-auth-library');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
-const googleAuth = mocked(_googleAuth);
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const googleAuth = vi.mocked(_googleAuth);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -480,8 +475,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -611,8 +606,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -710,8 +705,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -787,7 +782,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
