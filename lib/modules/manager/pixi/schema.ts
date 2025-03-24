@@ -38,7 +38,7 @@ function collectNamedPackages(
     .filter((dep) => isNotNullOrUndefined(dep));
 }
 
-const PypiDepdency = z.union([
+const PypiDependency = z.union([
   z.string().transform((version) => {
     return {
       currentValue: version,
@@ -57,7 +57,7 @@ const PypiDepdency = z.union([
   }),
 ]);
 
-const PypiGitDepdency = z
+const PypiGitDependency = z
   .object({ git: z.string(), rev: z.optional(z.string()) })
   .transform(({ git, rev }) => {
     // empty ref default to HEAD, so do we not need to do anything
@@ -76,7 +76,7 @@ const PypiGitDepdency = z
 
 const PypiDependencies = LooseRecord(
   z.string(),
-  z.union([PypiDepdency, PypiGitDepdency]),
+  z.union([PypiDependency, PypiGitDependency]),
 )
   .catch({})
   .transform(collectNamedPackages);
