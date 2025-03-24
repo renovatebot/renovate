@@ -420,8 +420,8 @@ importers:
         specifier: 1.5.3
         version: 1.5.3
       '@types/global-agent':
-        specifier: 2.1.3
-        version: 2.1.3
+        specifier: 3.0.0
+        version: 3.0.0
       '@types/ini':
         specifier: 4.1.1
         version: 4.1.1
@@ -2121,8 +2121,8 @@ packages:
   '@types/github-url-from-git@1.5.3':
     resolution: {integrity: sha512-0vnjtdEpqLTRBlgkzXsRaAQ0T8Nx48fW7qWl/Y5a4MTXEL2mXFV8rNPiFPCYrJFPOeyUJRzNzcs91MgJd+fFSA==}
 
-  '@types/global-agent@2.1.3':
-    resolution: {integrity: sha512-rGtZZcgZcKWuKNTkGBGsqyOQ7Nn2MjXh4+xeZbf+5b5KMUx8H1rTqLRackxos7pUlreszbYjQcop5JvqCnZlLw==}
+  '@types/global-agent@3.0.0':
+    resolution: {integrity: sha512-OmvaPJtTaY/wd1hxelLJmf8oKQpmKZdrlfQ+MWL59eKSEHJDDEifIo69248bdJ0yLIN+iMNQ6sKMtnwU6AxajA==}
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
@@ -8815,7 +8815,7 @@ snapshots:
 
   '@types/github-url-from-git@1.5.3': {}
 
-  '@types/global-agent@2.1.3': {}
+  '@types/global-agent@3.0.0': {}
 
   '@types/http-cache-semantics@4.0.4': {}
 
