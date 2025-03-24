@@ -126,10 +126,10 @@ const Targets = LooseRecord(
 });
 
 const Project = z.object({
-  channels: z.array(z.string()).default([]),
+  channels: z.array(Channel).default([]),
 });
 
-const DependencieSchemaMixin = z
+const DependenciesMixin = z
   .object({
     dependencies: z.optional(CondaDependencies).default({}),
     'pypi-dependencies': z.optional(PypiDependencies).default({}),
@@ -152,7 +152,7 @@ const Features = LooseRecord(
     .object({
       channels: z.array(Channel).optional(),
     })
-    .and(DependencieSchemaMixin),
+    .and(DependenciesMixin),
 )
   .default({})
   .transform(
@@ -187,7 +187,7 @@ const Features = LooseRecord(
  */
 export const PixiConfigSchema = z
   .object({ feature: Features })
-  .and(DependencieSchemaMixin)
+  .and(DependenciesMixin)
   .and(
     z.union([
       z
