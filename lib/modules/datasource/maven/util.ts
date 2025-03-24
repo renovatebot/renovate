@@ -5,6 +5,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { type Http, HttpError } from '../../../util/http';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
@@ -63,14 +64,17 @@ function isUnsupportedHostError(err: HttpError): boolean {
   return err.name === 'UnsupportedProtocolError';
 }
 
+const cacheProvider = new PackageHttpCacheProvider({
+  namespace: 'datasource-maven:cache-provider',
+});
+
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
-  opts: HttpOptions = {},
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.getText(url, opts),
+    http.getText(url, { cacheProvider }),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
@@ -151,7 +155,7 @@ export async function downloadHttpContent(
   pkgUrl: URL | string,
   opts: HttpOptions = {},
 ): Promise<string | null> {
-  const fetchResult = await downloadHttpProtocol(http, pkgUrl, opts);
+  const fetchResult = await downloadHttpProtocol(http, pkgUrl);
   return fetchResult.transform(({ data }) => data).unwrapOrNull();
 }
 
@@ -261,7 +265,7 @@ export async function downloadArtifactRegistryProtocol(
 
   const url = pkgUrl.toString().replace('artifactregistry:', 'https:');
 
-  return downloadHttpProtocol(http, url, opts);
+  return downloadHttpProtocol(http, url);
 }
 
 function containsPlaceholder(str: string): boolean {
