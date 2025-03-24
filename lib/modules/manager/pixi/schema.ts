@@ -18,7 +18,7 @@ const Channel = z.union([
 
 export interface PixiPackageDependency extends PackageDependency {
   channel?: string;
-  channels?: (string | { channel: string; priority: number })[];
+  channels?: Channels;
 }
 
 function collectNamedPackages(
