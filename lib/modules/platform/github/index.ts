@@ -33,6 +33,7 @@ import type {
   LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
@@ -1054,6 +1055,7 @@ export async function getBranchStatus(
       },
       paginate: true,
       paginationField: 'check_runs',
+      cacheProvider: memCacheProvider,
     };
     const checkRunsRaw = (
       await githubApi.getJsonUnchecked<{
@@ -1117,11 +1119,11 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (
-    await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, {
-      memCache: useCache,
-    })
-  ).body;
+  const opts: GithubHttpOptions = useCache
+    ? { cacheProvider: memCacheProvider }
+    : { memCache: false };
+
+  return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }
 
 type GithubToRenovateStatusMapping = Record<string, BranchStatus>;
