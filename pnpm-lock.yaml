@@ -482,9 +482,6 @@ importers:
       '@types/tmp':
         specifier: 0.2.6
         version: 0.2.6
-      '@types/unist':
-        specifier: 2.0.11
-        version: 2.0.11
       '@types/url-join':
         specifier: 4.0.3
         version: 4.0.3
