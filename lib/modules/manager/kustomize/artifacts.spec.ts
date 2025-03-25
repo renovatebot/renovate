@@ -4,9 +4,7 @@ import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
-import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifactsConfig } from '../types';
@@ -14,7 +12,6 @@ import * as kustomize from '.';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -33,10 +30,7 @@ describe('modules/manager/kustomize/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
-    docker.resetPrefetchedImages();
-    hostRules.clear();
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    fs.deleteLocalFile.mockResolvedValueOnce(undefined);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
