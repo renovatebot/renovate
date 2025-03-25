@@ -209,7 +209,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
           key: eslint-cache
@@ -220,7 +220,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
           key: eslint-cache-${{ github.run_id }}-${{ github.run_attempt }}
@@ -244,7 +244,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
           key: prettier-cache
@@ -261,7 +261,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
           key: prettier-cache-${{ github.run_id }}-${{ github.run_attempt }}
@@ -357,7 +357,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/vitest
           key: |
@@ -394,7 +394,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -414,7 +414,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: coverage-*
           path: coverage
@@ -450,7 +450,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: coverage-*
           path: coverage
@@ -465,10 +465,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 97.5 \
-            --functions 98.98 \
-            --lines 97.84 \
-            --statements 97.84
+            --branches 98.16 \
+            --functions 99.51 \
+            --lines 98.22 \
+            --statements 98.22
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -542,7 +542,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: renovate-dist
           path: dist/
@@ -560,7 +560,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: renovate-dist
           path: dist/
@@ -605,7 +605,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
+        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -624,7 +624,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: docs
           path: tmp/docs/
@@ -652,7 +652,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: renovate-dist
           path: dist/
@@ -698,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@1a9a958e2982661f0baa123ce50aeba1a8726e3c # v3.10.8
+        uses: containerbase/internal-tools@5f238c35cea9be15114787fd3eb32473160258f7 # v3.10.13
         with:
           command: docker-config
 

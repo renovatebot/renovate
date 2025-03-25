@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
@@ -102,7 +103,7 @@ function resolveGitRepositoryPerSourceTag(
 
   dep.datasource = GitTagsDatasource.id;
   dep.packageName = gitUrl;
-  if (gitUrl.startsWith('https://')) {
+  if (isHttpUrl(gitUrl)) {
     dep.sourceUrl = gitUrl.replace(/\.git$/, '');
   }
 }
@@ -247,7 +248,7 @@ function resolveResourceManifest(
           dep.datasource = GitRefsDatasource.id;
           dep.packageName = gitUrl;
           dep.replaceString = resource.spec.ref.commit;
-          if (gitUrl.startsWith('https://')) {
+          if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
         } else if (resource.spec.ref?.tag) {

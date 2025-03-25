@@ -285,6 +285,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  ginkgo: {
+    asdfPluginUrl: 'https://github.com/jimmidyson/asdf-ginkgo',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'onsi/ginkgo',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   gleam: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-gleam.git',
     config: {
@@ -562,6 +570,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  opa: {
+    asdfPluginUrl: 'https://github.com/tochukwuvictor/asdf-opa',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'open-policy-agent/opa',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
     config: {
@@ -710,7 +726,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   skaffold: {
     asdfPluginUrl: 'https://github.com/nklmilojevic/asdf-skaffold',
     config: {
-      datasource: GithubTagsDatasource.id,
+      datasource: GithubReleasesDatasource.id,
       packageName: 'GoogleContainerTools/skaffold',
       extractVersion: '^v(?<version>\\S+)',
     },

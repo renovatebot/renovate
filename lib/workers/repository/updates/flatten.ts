@@ -179,7 +179,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles || []) {
+        for (const lockFile of packageFileConfig.lockFiles ?? []) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]

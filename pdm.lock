@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:ac5d87cb2461164b7431eeaf644827f4f15c530ebd0d41d4ffc999182de5212b"
+content_hash = "sha256:5a1ebb5926811c4a1d6ced95540d671b6ac19563f9d11c5b346a46ba0b26f449"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -310,7 +310,7 @@ files = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.8"
+version = "9.6.9"
 requires_python = ">=3.8"
 summary = "Documentation that simply works"
 groups = ["default"]
@@ -328,8 +328,8 @@ dependencies = [
     "requests~=2.26",
 ]
 files = [
-    {file = "mkdocs_material-9.6.8-py3-none-any.whl", hash = "sha256:0a51532dd8aa80b232546c073fe3ef60dfaef1b1b12196ac7191ee01702d1cf8"},
-    {file = "mkdocs_material-9.6.8.tar.gz", hash = "sha256:8de31bb7566379802532b248bd56d9c4bc834afc4625884bf5769f9412c6a354"},
+    {file = "mkdocs_material-9.6.9-py3-none-any.whl", hash = "sha256:6e61b7fb623ce2aa4622056592b155a9eea56ff3487d0835075360be45a4c8d1"},
+    {file = "mkdocs_material-9.6.9.tar.gz", hash = "sha256:a4872139715a1f27b2aa3f3dc31a9794b7bbf36333c0ba4607cf04786c94f89c"},
 ]
 
 [[package]]
@@ -388,13 +388,13 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.3.6"
-requires_python = ">=3.8"
+version = "4.3.7"
+requires_python = ">=3.9"
 summary = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 groups = ["default"]
 files = [
-    {file = "platformdirs-4.3.6-py3-none-any.whl", hash = "sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb"},
-    {file = "platformdirs-4.3.6.tar.gz", hash = "sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907"},
+    {file = "platformdirs-4.3.7-py3-none-any.whl", hash = "sha256:a03875334331946f13c549dbd8f4bac7a13a50a895a0eb1e8c6a8ace80d40a94"},
+    {file = "platformdirs-4.3.7.tar.gz", hash = "sha256:eb437d586b6a0986388f0d6f74aa0cde27b48d0e3d66843640bfb6bdcdb6e351"},
 ]
 
 [[package]]

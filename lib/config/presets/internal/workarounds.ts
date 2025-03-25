@@ -25,7 +25,6 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
-      'workarounds:tjActionsChangedFiles',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -242,6 +241,7 @@ export const presets: Record<string, Preset> = {
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
+          '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
         ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
@@ -281,16 +281,6 @@ export const presets: Record<string, Preset> = {
           'redhat/**',
         ],
         versioning: 'redhat',
-      },
-    ],
-  },
-  tjActionsChangedFiles: {
-    description:
-      'Skip updating tj-actions/changed-files due to it being hacked',
-    packageRules: [
-      {
-        enabled: false,
-        matchPackageNames: ['tj-actions/changed-files'],
       },
     ],
   },

@@ -79,6 +79,14 @@ With the above config:
 - ESLint dependencies will have the label `linting`
 - All other dependencies will have the label `dependencies`
 
+If you want to use dynamic labels, you can use [templates](./templates.md) such as this example using `depName` for `addLabels`:
+
+```json
+{
+  "addLabels": ["{{depName}}"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Keep your labels within the maximum character limit for your Git hosting platform.
