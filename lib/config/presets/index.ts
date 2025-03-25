@@ -149,7 +149,7 @@ export async function getPreset(
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  logger.trace({ presetConfig }, `Found preset ${preset}`);
+  logger.debug({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
