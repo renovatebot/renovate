@@ -126,7 +126,7 @@ describe('modules/manager/bun/extract', () => {
     });
   });
 
-  describe('modules/manager/bun/extract - workspaces', () => {
+  describe('workspaces', () => {
     it('processes workspace package files when workspaces are detected', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
 
@@ -162,7 +162,6 @@ describe('modules/manager/bun/extract', () => {
       // We expect two package file objects: one for the main package.json and one for the workspace.
       expect(result.length).toBe(2);
 
-      // Verify the main package file was processed correctly.
       const mainPackage = result.find(
         (pkg) => pkg.packageFile === 'package.json',
       );
@@ -170,13 +169,32 @@ describe('modules/manager/bun/extract', () => {
       expect(mainPackage?.packageFileVersion).toBe('0.0.1');
       expect(mainPackage?.lockFiles).toEqual(['bun.lock']);
 
-      // Verify the workspace package file was processed and added.
       const workspacePackage = result.find(
         (pkg) => pkg.packageFile === 'packages/pkg1/package.json',
       );
       expect(workspacePackage).toBeDefined();
       expect(workspacePackage?.packageFileVersion).toBe('1.0.0');
       expect(workspacePackage?.lockFiles).toEqual(['bun.lock']);
+    });
+
+    it('skips workspace processing when workspaces is not a valid array', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: 'invalid',
+        }),
+      );
+      // Only the main package.json file is processed
+      const result = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+      expect(result).toHaveLength(1);
+      expect(result[0].packageFile).toBe('package.json');
     });
   });
 });
