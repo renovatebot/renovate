@@ -6,8 +6,14 @@ import {
   withDebugMessage,
 } from '../../../util/schema-utils';
 
-export const WorkflowJobsSchema = Yaml.pipe(
-  z.object({
+const StepsSchema = z.object({
+  uses: z.string(),
+  with: LooseRecord(z.string()),
+});
+export type Steps = z.infer<typeof StepsSchema>;
+
+const WorkFlowJobsSchema = z
+  .object({
     jobs: LooseRecord(
       z.object({
         container: z
@@ -28,15 +34,15 @@ export const WorkflowJobsSchema = Yaml.pipe(
         'runs-on': z
           .union([z.string().transform((v) => [v]), z.array(z.string())])
           .catch([]),
-        steps: LooseArray(
-          z.object({
-            uses: z.string(),
-            with: LooseRecord(z.string()),
-          }),
-        ).catch([]),
+        steps: LooseArray(StepsSchema).catch([]),
       }),
     ),
-  }),
-)
-  .transform((v) => Object.values(v.jobs))
-  .catch(withDebugMessage([], 'Does not match schema'));
+  })
+  .transform((v) => Object.values(v.jobs));
+
+const ActionStepsSchema = z.object({
+  steps: LooseArray(StepsSchema).catch([]),
+});
+export const WorkflowSchema = Yaml.pipe(
+  z.union([WorkFlowJobsSchema, ActionStepsSchema, z.null()]),
+).catch(withDebugMessage(null, 'Does not match schema'));
