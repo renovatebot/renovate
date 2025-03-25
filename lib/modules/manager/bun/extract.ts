@@ -68,9 +68,10 @@ export async function extractAllPackageFiles(
     // Check if package.json contains workspaces
     const workspaces = res?.managerData?.workspaces;
 
-    if (!(is.array(workspaces), is.string)) {
+    if (!is.array(workspaces) || !workspaces.every(is.string)) {
       continue;
     }
+
     logger.debug(`Found bun workspaces in ${packageFile}`);
     const pwd = getParentDir(packageFile);
     const workspacePackageFiles = filesMatchingWorkspaces(
