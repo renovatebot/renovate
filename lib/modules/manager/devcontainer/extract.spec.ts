@@ -377,7 +377,7 @@ describe('modules/manager/devcontainer/extract', () => {
           "ghcr.io/devcontainers/features/go:1": {"version": "1.24"},
           "ghcr.io/devcontainers/features/node:1": {"version": "20"},
           "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
-          "ghcr.io/devcontainers/features/ruby:1": {"version": "3.4"}
+          "ghcr.io/devcontainers/features/ruby:1": {}
         }
       }`;
       const extractConfig = {
@@ -440,9 +440,10 @@ describe('modules/manager/devcontainer/extract', () => {
             depType: 'feature',
           },
           {
-            currentValue: '3.4',
+            currentValue: undefined,
             datasource: RubyVersionDatasource.id,
             depName: 'ruby',
+            skipReason: 'unspecified-version',
           },
         ],
       });

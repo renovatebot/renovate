@@ -47,39 +47,45 @@ export function extractPackageFile(
           featureDep.depType = 'feature';
           featureDep.pinDigests = false;
           deps.push(featureDep);
-          if (!value.version) {
-            continue;
-          }
+
+          let dep: PackageDependency;
           switch (featureDep.depName) {
             case 'ghcr.io/devcontainers/features/node':
-              deps.push({
+              dep = {
                 depName: 'node',
                 datasource: NodeVersionDatasource.id,
                 currentValue: value.version,
-              });
+              };
               break;
             case 'ghcr.io/devcontainers/features/go':
-              deps.push({
+              dep = {
                 depName: 'go',
                 datasource: GolangVersionDatasource.id,
                 currentValue: value.version,
-              });
+              };
               break;
             case 'ghcr.io/devcontainers/features/python':
-              deps.push({
+              dep = {
                 depName: 'python',
                 datasource: PythonVersionDatasource.id,
                 currentValue: value.version,
-              });
+              };
               break;
             case 'ghcr.io/devcontainers/features/ruby':
-              deps.push({
+              dep = {
                 depName: 'ruby',
                 datasource: RubyVersionDatasource.id,
                 currentValue: value.version,
-              });
+              };
               break;
+            default:
+              // skip additional checks if not a known feature
+              continue;
           }
+          if (!value.version) {
+            dep.skipReason = 'unspecified-version';
+          }
+          deps.push(dep);
           continue;
         }
         logger.trace(
