@@ -4,27 +4,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Specific Vitest Test",
-      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-      "args": [
-        "run",
-        "--no-file-parallelism",
-        "--no-coverage",
-        "--test-timeout=0",
-        "--hook-timeout=0",
-        "lib/modules/manager/bun/extract.spec.ts",
-        "-t",
-        "workspaces"
-      ],
-      "env": {
-        "LOG_LEVEL": "debug"
-      },
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": {
