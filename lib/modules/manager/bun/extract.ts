@@ -8,9 +8,9 @@ import {
 
 import { extractPackageJson } from '../npm/extract/common/package-file';
 import type { NpmPackage } from '../npm/extract/types';
-import { filesMatchingWorkspaces } from '../npm/extract/utils';
 import type { NpmManagerData } from '../npm/types';
 import type { ExtractConfig, PackageFile } from '../types';
+import { filesMatchingWorkspaces } from './utils';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
