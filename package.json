@@ -312,7 +312,7 @@
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
     "@vitest/coverage-v8": "3.0.9",
-    "@vitest/eslint-plugin": "1.1.37",
+    "@vitest/eslint-plugin": "1.1.38",
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
