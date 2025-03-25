@@ -2,8 +2,6 @@
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger, mocked } from '../../../../test/util';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -18,13 +16,15 @@ import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
 import * as prBodyModule from '../utils/pr-body';
 import * as gitlab from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/git', () => mockDeep());
 vi.mock('timers/promises');
 vi.mock('../utils/pr-body', { spy: true });
 
-const timers = mocked(_timers);
+const timers = vi.mocked(_timers);
 
 const gitlabApiHost = 'https://gitlab.com';
 

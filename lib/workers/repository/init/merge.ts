@@ -187,7 +187,7 @@ export async function mergeRenovateConfig(
       configFileParsed: await getOnboardingConfig(config),
     };
   }
-  const configFileParsed = repoConfig?.configFileParsed || {};
+  const configFileParsed = repoConfig?.configFileParsed ?? {};
   const configFileAndEnv = await mergeStaticRepoEnvConfig(
     configFileParsed,
     process.env,

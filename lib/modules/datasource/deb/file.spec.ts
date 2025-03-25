@@ -1,10 +1,10 @@
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { extract } from './file';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
 

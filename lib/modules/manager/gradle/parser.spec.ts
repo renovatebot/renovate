@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
 import {
   parseGradle,
   parseJavaToolchainVersion,
@@ -13,6 +11,8 @@ import {
   GRADLE_TEST_SUITES,
   REGISTRY_URLS,
 } from './parser/common';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -123,11 +123,19 @@ describe('modules/manager/gradle/parser', () => {
               buildTools: '30.0.3'
             ],
             kotlin: '1.4.30',
+            'spring-boot': '2.7.3',
             androidx: [
               paging: '2.1.2',
               kotlin: [
                 stdlib: '1.4.20',
                 coroutines: '1.3.7',
+              ],
+            ],
+            'androidx': [
+              'appcompat': '1.6.1',
+              'compose': [
+                'ui': '1.6.0',
+                'runtime': '1.6.0',
               ],
             ],
             espresso: '3.2.0'
@@ -144,6 +152,10 @@ describe('modules/manager/gradle/parser', () => {
             key: 'versions.kotlin',
             value: '1.4.30',
           },
+          'versions.spring-boot': {
+            key: 'versions.spring-boot',
+            value: '2.7.3',
+          },
           'versions.androidx.paging': {
             key: 'versions.androidx.paging',
             value: '2.1.2',
@@ -155,6 +167,18 @@ describe('modules/manager/gradle/parser', () => {
           'versions.androidx.kotlin.coroutines': {
             key: 'versions.androidx.kotlin.coroutines',
             value: '1.3.7',
+          },
+          'versions.androidx.appcompat': {
+            key: 'versions.androidx.appcompat',
+            value: '1.6.1',
+          },
+          'versions.androidx.compose.ui': {
+            key: 'versions.androidx.compose.ui',
+            value: '1.6.0',
+          },
+          'versions.androidx.compose.runtime': {
+            key: 'versions.androidx.compose.runtime',
+            value: '1.6.0',
           },
           'versions.espresso': {
             key: 'versions.espresso',

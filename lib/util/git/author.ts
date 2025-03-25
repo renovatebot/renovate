@@ -38,7 +38,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
       }
       return result;
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.debug({ err }, 'Unknown error parsing gitAuthor');
   }
   // give up

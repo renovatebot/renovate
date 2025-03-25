@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger } from '../../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -10,9 +8,10 @@ import {
 import type { LongCommitSha } from '../../../util/git/types';
 import { ensureTrailingSlash } from '../../../util/url';
 import * as bitbucket from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
