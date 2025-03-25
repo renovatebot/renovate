@@ -307,7 +307,6 @@
     "@types/semver-utils": "1.1.3",
     "@types/tar": "6.1.13",
     "@types/tmp": "0.2.6",
-    "@types/unist": "2.0.11",
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
