@@ -71,10 +71,11 @@ const cacheProvider = new PackageHttpCacheProvider({
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
+  opts: HttpOptions = {},
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.getText(url, { cacheProvider }),
+    http.getText(url, { ...opts, cacheProvider }),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
@@ -155,7 +156,7 @@ export async function downloadHttpContent(
   pkgUrl: URL | string,
   opts: HttpOptions = {},
 ): Promise<string | null> {
-  const fetchResult = await downloadHttpProtocol(http, pkgUrl);
+  const fetchResult = await downloadHttpProtocol(http, pkgUrl, opts);
   return fetchResult.transform(({ data }) => data).unwrapOrNull();
 }
 
@@ -265,7 +266,7 @@ export async function downloadArtifactRegistryProtocol(
 
   const url = pkgUrl.toString().replace('artifactregistry:', 'https:');
 
-  return downloadHttpProtocol(http, url);
+  return downloadHttpProtocol(http, url, opts);
 }
 
 function containsPlaceholder(str: string): boolean {
