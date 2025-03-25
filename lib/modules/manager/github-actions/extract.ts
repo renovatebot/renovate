@@ -15,7 +15,8 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { WorkflowJobsSchema } from './schema';
+import type { Steps } from './schema';
+import { WorkflowSchema } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -167,6 +168,41 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
+const versionedActions: Record<string, string> = {
+  go: npmVersioning.id,
+  node: nodeVersioning.id,
+  python: npmVersioning.id,
+  // Not covered yet because they use different datasources/packageNames:
+  // - dotnet
+  // - java
+};
+
+function extractSteps(
+  steps: Steps[],
+  deps: PackageDependency<Record<string, any>>[],
+): void {
+  for (const step of steps) {
+    for (const [action, versioning] of Object.entries(versionedActions)) {
+      const actionName = `actions/setup-${action}`;
+      if (step.uses === actionName || step.uses?.startsWith(`${actionName}@`)) {
+        const fieldName = `${action}-version`;
+        const currentValue = step.with?.[fieldName];
+        if (currentValue) {
+          deps.push({
+            datasource: GithubReleasesDatasource.id,
+            depName: action,
+            packageName: `actions/${action}-versions`,
+            versioning,
+            extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+            currentValue,
+            depType: 'uses-with',
+          });
+        }
+      }
+    }
+  }
+}
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
@@ -175,11 +211,19 @@ function extractWithYAMLParser(
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
-  const jobs = withMeta({ packageFile }, () =>
-    WorkflowJobsSchema.parse(content),
-  );
+  const obj = withMeta({ packageFile }, () => WorkflowSchema.parse(content));
 
-  for (const job of jobs) {
+  if (!obj) {
+    return deps;
+  }
+
+  // composite action
+  if ('steps' in obj) {
+    extractSteps(obj.steps, deps);
+    return deps;
+  }
+
+  for (const job of obj) {
     if (job.container) {
       const dep = getDep(job.container, true, config.registryAliases);
       if (dep) {
@@ -203,38 +247,7 @@ function extractWithYAMLParser(
       }
     }
 
-    const versionedActions: Record<string, string> = {
-      go: npmVersioning.id,
-      node: nodeVersioning.id,
-      python: npmVersioning.id,
-      // Not covered yet because they use different datasources/packageNames:
-      // - dotnet
-      // - java
-    };
-
-    for (const step of job.steps) {
-      for (const [action, versioning] of Object.entries(versionedActions)) {
-        const actionName = `actions/setup-${action}`;
-        if (
-          step.uses === actionName ||
-          step.uses?.startsWith(`${actionName}@`)
-        ) {
-          const fieldName = `${action}-version`;
-          const currentValue = step.with?.[fieldName];
-          if (currentValue) {
-            deps.push({
-              datasource: GithubReleasesDatasource.id,
-              depName: action,
-              packageName: `actions/${action}-versions`,
-              versioning,
-              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
-              currentValue,
-              depType: 'uses-with',
-            });
-          }
-        }
-      }
-    }
+    extractSteps(job.steps, deps);
   }
 
   return deps;
