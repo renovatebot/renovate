@@ -165,7 +165,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('returns null if newVersion is not found and currentVersion is already inflated', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.localPathExists.mockResolvedValueOnce(true);
     const updatedDeps = [
@@ -189,7 +188,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('returns null if old version is not inflated and kustomizeInflateHelmCharts is not enabled', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
