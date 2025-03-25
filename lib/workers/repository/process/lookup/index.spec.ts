@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
 import * as hostRules from '../../../../../lib/util/host-rules';
-import { Fixtures } from '../../../../../test/fixtures';
-import * as httpMock from '../../../../../test/http-mock';
-import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
 import type { AllConfig } from '../../../../config/types';
@@ -34,6 +31,9 @@ import { Result } from '../../../../util/result';
 import type { Timestamp } from '../../../../util/timestamp';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),
@@ -50,33 +50,27 @@ const webpackJson = Fixtures.get('webpack.json');
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
-  const getGithubReleases = jest.spyOn(
+  const getGithubReleases = vi.spyOn(
     GithubReleasesDatasource.prototype,
     'getReleases',
   );
 
-  const getGithubTags = jest.spyOn(
-    GithubTagsDatasource.prototype,
-    'getReleases',
-  );
+  const getGithubTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
-  const getDockerReleases = jest.spyOn(
-    DockerDatasource.prototype,
-    'getReleases',
-  );
+  const getDockerReleases = vi.spyOn(DockerDatasource.prototype, 'getReleases');
 
-  const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
-  const postprocessMavenRelease = jest.spyOn(
+  const getMavenReleases = vi.spyOn(MavenDatasource.prototype, 'getReleases');
+  const postprocessMavenRelease = vi.spyOn(
     MavenDatasource.prototype,
     'postprocessRelease',
   );
 
-  const getCustomDatasourceReleases = jest.spyOn(
+  const getCustomDatasourceReleases = vi.spyOn(
     CustomDatasource.prototype,
     'getReleases',
   );
 
-  const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
+  const getDockerDigest = vi.spyOn(DockerDatasource.prototype, 'getDigest');
 
   beforeEach(() => {
     // TODO: fix types #22198
@@ -84,14 +78,12 @@ describe('workers/repository/process/lookup/index', () => {
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
-    jest
-      .spyOn(GitRefsDatasource.prototype, 'getReleases')
-      .mockResolvedValueOnce({
-        releases: [{ version: 'master' }],
-      });
-    jest
-      .spyOn(GitRefsDatasource.prototype, 'getDigest')
-      .mockResolvedValueOnce('4b825dc642cb6eb9a060e54bf8d69288fbee4904');
+    vi.spyOn(GitRefsDatasource.prototype, 'getReleases').mockResolvedValueOnce({
+      releases: [{ version: 'master' }],
+    });
+    vi.spyOn(GitRefsDatasource.prototype, 'getDigest').mockResolvedValueOnce(
+      '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+    );
   });
 
   // TODO: fix mocks
@@ -596,7 +588,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       const res = await lookup.lookupUpdates(config);
 
-      expect(() => res.unwrapOrThrow()).toThrow(Error(CONFIG_VALIDATION));
+      expect(() => res.unwrapOrThrow()).toThrow(CONFIG_VALIDATION);
     });
 
     it('returns patch update even if separate patches not configured', async () => {
@@ -2989,7 +2981,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      const getGithubTagsDigest = jest
+      const getGithubTagsDigest = vi
         .spyOn(GithubTagsDatasource.prototype, 'getDigest')
         .mockResolvedValueOnce('digest1234');
 
@@ -5000,10 +4992,7 @@ describe('workers/repository/process/lookup/index', () => {
         mergeConfidenceEndpoint: defaultApiBaseUrl,
         mergeConfidenceDatasources: presetSupportedDatasources,
       };
-      const getMergeConfidenceSpy = jest.spyOn(
-        McApi,
-        'getMergeConfidenceLevel',
-      );
+      const getMergeConfidenceSpy = vi.spyOn(McApi, 'getMergeConfidenceLevel');
       const hostRule: HostRule = {
         hostType: 'merge-confidence',
         token: 'some-token',

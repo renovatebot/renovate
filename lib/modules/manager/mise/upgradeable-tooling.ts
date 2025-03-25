@@ -60,7 +60,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/lang/java.html',
     config: (version) => {
       // no prefix is shorthand for openjdk
-      const versionMatch = version.match(/^(\d\S+)/)?.[1];
+      const versionMatch = /^(\d\S+)/.exec(version)?.[1];
       if (versionMatch) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -68,9 +68,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: versionMatch,
         };
       }
-      const openJdkMatches = version.match(
-        /^openjdk-(?<version>\d\S+)/,
-      )?.groups;
+      const openJdkMatches = /^openjdk-(?<version>\d\S+)/.exec(version)?.groups;
       if (openJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -78,8 +76,8 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: openJdkMatches.version,
         };
       }
-      const adoptOpenJdkMatches = version.match(
-        /^adoptopenjdk-(?<version>\d\S+)/,
+      const adoptOpenJdkMatches = /^adoptopenjdk-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (adoptOpenJdkMatches) {
         return {
@@ -88,8 +86,8 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJdkMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(
-        /^temurin-(?<version>\d\S+)/,
+      const temurinJdkMatches = /^temurin-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (temurinJdkMatches) {
         return {
@@ -98,8 +96,8 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const correttoJdkMatches = version.match(
-        /^corretto-(?<version>\d\S+)/,
+      const correttoJdkMatches = /^corretto-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (correttoJdkMatches) {
         return {
@@ -108,7 +106,7 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: correttoJdkMatches.version,
         };
       }
-      const zuluJdkMatches = version.match(/^zulu-(?<version>\d\S+)/)?.groups;
+      const zuluJdkMatches = /^zulu-(?<version>\d\S+)/.exec(version)?.groups;
       if (zuluJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -116,8 +114,8 @@ export const miseTooling: Record<string, ToolingDefinition> = {
           currentValue: zuluJdkMatches.version,
         };
       }
-      const oracleGraalvmJdkMatches = version.match(
-        /^oracle-graalvm-(?<version>\d\S+)/,
+      const oracleGraalvmJdkMatches = /^oracle-graalvm-(?<version>\d\S+)/.exec(
+        version,
       )?.groups;
       if (oracleGraalvmJdkMatches) {
         return {

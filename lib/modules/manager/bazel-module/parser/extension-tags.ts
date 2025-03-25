@@ -1,7 +1,7 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
-import type { Ctx } from '../context';
 import { kvParams } from './common';
+import type { Ctx } from './context';
 
 import { mavenExtensionPrefix, mavenExtensionTags } from './maven';
 import { ociExtensionPrefix, ociExtensionTags } from './oci';
@@ -34,7 +34,7 @@ export const extensionTags = q
     const rawExtension = token.value;
     const match = rawExtension.match(supportedExtensionRegex)!;
     const extension = match[1];
-    return ctx.prepareExtensionTag(extension, rawExtension);
+    return ctx.prepareExtensionTag(extension, rawExtension, token.offset);
   })
   .op('.')
   .sym(supportedExtensionTagsRegex, (ctx, token) => {
@@ -45,6 +45,15 @@ export const extensionTags = q
       type: 'wrapped-tree',
       maxDepth: 1,
       search: kvParams,
-      postHandler: (ctx) => ctx.endExtensionTag(),
+      postHandler: (ctx, tree) => {
+        if (tree.type === 'wrapped-tree') {
+          const { endsWith } = tree;
+          const endOffset = endsWith.offset + endsWith.value.length;
+          return ctx.endExtensionTag(endOffset);
+        }
+
+        // istanbul ignore next
+        throw new Error(`Unexpected tree in postHandler: ${tree.type}`);
+      },
     }),
   );

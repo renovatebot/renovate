@@ -79,6 +79,14 @@ With the above config:
 - ESLint dependencies will have the label `linting`
 - All other dependencies will have the label `dependencies`
 
+If you want to use dynamic labels, you can use [templates](./templates.md) such as this example using `depName` for `addLabels`:
+
+```json
+{
+  "addLabels": ["{{depName}}"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Keep your labels within the maximum character limit for your Git hosting platform.
@@ -114,6 +122,7 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## assignees
 
 Must be valid usernames on the platform in use.
+This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
 
 ## assigneesFromCodeOwners
 
@@ -203,10 +212,6 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 <!-- prettier-ignore -->
 !!! note
     Branches creation follows [`schedule`](#schedule) and the automerge follows [`automergeSchedule`](#automergeschedule).
-
-<!-- prettier-ignore -->
-!!! warning "Negative reviews on GitHub block Renovate automerge"
-    Renovate won't automerge on GitHub if a PR has a negative review.
 
 <!-- prettier-ignore -->
 !!! note
@@ -849,7 +854,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 It specifies the syntax of the package file that's managed by the custom `jsonata` manager.
 This setting helps the system correctly parse and interpret the configuration file's contents.
 
-Only the `json` and `yaml` formats are supported.
+Only the `json`, `toml` and `yaml` formats are supported.
 `yaml` files are parsed as multi document YAML files.
 
 ```json title="Parsing a JSON file with a custom manager"
@@ -860,7 +865,7 @@ Only the `json` and `yaml` formats are supported.
       "fileFormat": "json",
       "fileMatch": [".renovaterc"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]
@@ -875,7 +880,22 @@ Only the `json` and `yaml` formats are supported.
       "fileFormat": "yaml",
       "fileMatch": ["file.yml"],
       "matchStrings": [
-        "packages.{ \"depName\": package, \"currentValue\": version }"
+        "packages.{ 'depName': package, 'currentValue': version }"
+      ]
+    }
+  ]
+}
+```
+
+```json title="Parsing a TOML file with a custom manager"
+{
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "fileFormat": "toml",
+      "fileMatch": ["file.toml"],
+      "matchStrings": [
+        "packages.{ 'depName': package, 'currentValue': version }"
       ]
     }
   ]

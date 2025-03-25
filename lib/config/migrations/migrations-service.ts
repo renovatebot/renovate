@@ -106,7 +106,7 @@ export class MigrationsService {
     ['regexManagers', 'customManagers'],
   ]);
 
-  static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
+  static readonly customMigrations: readonly MigrationConstructor[] = [
     AutomergeMajorMigration,
     AutomergeMigration,
     AutomergeMinorMigration,
@@ -196,7 +196,7 @@ export class MigrationsService {
   public static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig,
-  ): ReadonlyArray<Migration> {
+  ): readonly Migration[] {
     const migrations: Migration[] = [];
 
     for (const propertyName of MigrationsService.removedProperties) {
@@ -231,7 +231,7 @@ export class MigrationsService {
   }
 
   private static getMigration(
-    migrations: ReadonlyArray<Migration>,
+    migrations: readonly Migration[],
     key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {

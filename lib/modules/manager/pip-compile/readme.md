@@ -33,12 +33,10 @@ In turn `pip-compile` manager will find all source files and parse them as packa
 
 The following files are currently supported:
 
-|  Source filename | Manager            |
-| ---------------: | ------------------ |
-|       `setup.py` | `pip_setup`        |
-|      `setup.cfg` | `setup-cfg`        |
-| `pyproject.toml` | `pep621`           |
-| `*.in` / `*.txt` | `pip_requirements` |
+| Source filename | Manager            |
+| --------------: | ------------------ |
+|      `setup.py` | `pip_setup`        |
+|          `*.in` | `pip_requirements` |
 
 Example header:
 
@@ -62,19 +60,13 @@ Because `pip-compile` will update source files with their associated manager you
   },
   "pip_setup": {
     "enabled": false
-  },
-  "setup-cfg": {
-    "enabled": false
-  },
-  "pep621": {
-    "enabled": false
   }
 }
 ```
 
 ### Configuration of Python version
 
-By default Renovate extracts Python version from the header.
+By default Renovate extracts Python version from the header for `pip-compile`, and from the `--python-version` option for `uv`.
 To get Renovate to use another version of Python, add a constraints` rule to the Renovate config:
 
 ```json

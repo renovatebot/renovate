@@ -1,21 +1,22 @@
 import os from 'node:os';
 import fs from 'fs-extra';
-import { any, mockDeep } from 'jest-mock-extended';
 import upath from 'upath';
-import { Fixtures } from '../../../test/fixtures';
-import { mockedExtended } from '../../../test/util';
+import { any, mockFn } from 'vitest-mock-extended';
 import * as exec_ from '../exec';
-import { configSigningKey, writePrivateKey } from './private-key';
-import { setPrivateKey } from '.';
+import {
+  configSigningKey,
+  setPrivateKey,
+  writePrivateKey,
+} from './private-key';
+import { Fixtures } from '~test/fixtures';
+import { mockedExtended } from '~test/util';
 
-jest.mock('fs-extra', () =>
-  jest
-    .requireActual<
-      typeof import('../../../test/fixtures')
-    >('../../../test/fixtures')
-    .fsExtra(),
+vi.mock('fs-extra', async () =>
+  (
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
+  ).fsExtra(),
 );
-jest.mock('../exec', () => mockDeep());
+vi.mock('../exec', () => ({ exec: mockFn() }));
 
 const exec = mockedExtended(exec_);
 
@@ -23,9 +24,11 @@ describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     beforeEach(() => {
       Fixtures.reset();
+      exec.exec.mockReset();
     });
 
     it('returns if no private key', async () => {
+      setPrivateKey(undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });

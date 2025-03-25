@@ -1,10 +1,10 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { mocked } from '../../../test/util';
 import type { HttpResponse } from '../../util/http/types';
 import { getGoogleAuthToken, isArtifactoryServer } from './util';
 
-const googleAuth = mocked(_googleAuth);
-jest.mock('google-auth-library');
+vi.mock('google-auth-library');
+
+const googleAuth = vi.mocked(_googleAuth);
 
 describe('modules/datasource/utils', () => {
   it('is artifactory server invalid', () => {
@@ -27,8 +27,8 @@ describe('modules/datasource/utils', () => {
 
   it('retrieves a Google Access token', async () => {
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
       })),
     );
 
@@ -38,8 +38,8 @@ describe('modules/datasource/utils', () => {
 
   it('no Google Access token results in null', async () => {
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockReturnValue(''),
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockReturnValue(''),
       })),
     );
 
@@ -50,8 +50,8 @@ describe('modules/datasource/utils', () => {
   it('Google Access token error throws an exception', async () => {
     const err = 'some-error';
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockRejectedValue(new Error(err)),
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockRejectedValue(new Error(err)),
       })),
     );
 
@@ -60,8 +60,8 @@ describe('modules/datasource/utils', () => {
 
   it('Google Access token could not load default credentials', async () => {
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockRejectedValue({
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockRejectedValue({
           message: 'Could not load the default credentials',
         }),
       })),

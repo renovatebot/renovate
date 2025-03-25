@@ -1,12 +1,11 @@
-import { mocked, platform } from '../../../test/util';
 import * as _cache from '../../util/cache/repository';
 import type { RepoCacheData } from '../../util/cache/repository/types';
 import { ensureComment, ensureCommentRemoval } from './comment';
+import { platform } from '~test/util';
 
-jest.mock('.');
-jest.mock('../../util/cache/repository');
+vi.mock('../../util/cache/repository');
 
-const cache = mocked(_cache);
+const cache = vi.mocked(_cache);
 
 describe('modules/platform/comment', () => {
   let repoCache: RepoCacheData = {};

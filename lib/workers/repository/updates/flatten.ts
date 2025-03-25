@@ -88,7 +88,6 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
-      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }
@@ -180,7 +179,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles || []) {
+        for (const lockFile of packageFileConfig.lockFiles ?? []) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]

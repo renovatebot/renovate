@@ -279,7 +279,10 @@
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
-      "https://github.com/dotnet/sdk"
+      "https://github.com/dotnet/sdk",
+      "https://github.com/dotnet/windowsdesktop",
+      "https://github.com/dotnet/winforms",
+      "https://github.com/dotnet/wpf"
     ],
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
@@ -347,6 +350,7 @@
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
+    "istio": "https://github.com/istio/istio",
     "jackson": [
       "https://github.com/FasterXML/jackson",
       "https://github.com/FasterXML/jackson-annotations",
@@ -566,6 +570,7 @@
     "testcontainers-node": "https://github.com/testcontainers/testcontainers-node",
     "theme-ui": "https://github.com/system-ui/theme-ui",
     "tika": "https://github.com/apache/tika",
+    "timvir": "https://github.com/timvir/timvir",
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
@@ -620,7 +625,8 @@
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
     "semantic-release": "https://github.com/semantic-release/",
-    "swc": "https://github.com/swc-project/"
+    "swc": "https://github.com/swc-project/",
+    "twig": "https://github.com/twigphp/"
   },
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],

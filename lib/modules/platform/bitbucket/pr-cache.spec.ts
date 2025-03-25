@@ -1,4 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
 import { reset as memCacheReset } from '../../../util/cache/memory';
 import {
   getCache,
@@ -8,6 +7,7 @@ import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { BitbucketPrCache } from './pr-cache';
 import type { PrResponse } from './types';
 import { prInfo } from './utils';
+import * as httpMock from '~test/http-mock';
 
 const http = new BitbucketHttp();
 

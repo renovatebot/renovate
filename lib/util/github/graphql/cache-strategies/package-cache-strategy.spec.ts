@@ -15,8 +15,8 @@ const mockTime = (input: string): void => {
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
 describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
-  const cacheGet = jest.spyOn(packageCache, 'get');
-  const cacheSet = jest.spyOn(packageCache, 'set');
+  const cacheGet = vi.spyOn(packageCache, 'get');
+  const cacheSet = vi.spyOn(packageCache, 'set');
 
   it('reconciles old cache record with new items', async () => {
     const item1 = { version: '1', releaseTimestamp: isoTs('2020-01-01 10:00') };

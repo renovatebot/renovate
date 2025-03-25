@@ -59,7 +59,7 @@ export class HexpmBobDatasource extends Datasource {
       ...HexpmBobDatasource.getPackageDetails(packageType),
     };
     try {
-      const { body } = await this.http.get(url);
+      const { body } = await this.http.getText(url);
       result.releases = body
         .split('\n')
         .map((line) => line.trim())
@@ -109,7 +109,7 @@ export class HexpmBobDatasource extends Datasource {
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
-        return version.match(/^v\d+\.\d+\.\d+($|-otp)/) !== null;
+        return /^v\d+\.\d+\.\d+($|-otp)/.test(version);
       case 'erlang':
         return version.startsWith('OTP-');
     }

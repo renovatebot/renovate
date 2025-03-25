@@ -7,7 +7,7 @@ import type { GotOptions } from './types';
 
 const url = 'https://github.com';
 
-jest.mock('global-agent');
+vi.mock('global-agent');
 
 describe('util/http/host-rules', () => {
   const options: GotOptions = {

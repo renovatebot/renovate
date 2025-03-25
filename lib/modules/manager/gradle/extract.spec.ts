@@ -1,23 +1,24 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { matchesContentDescriptor } from './extract';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger, partial } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  // TODO: fix types, jest is using wrong overload (#22198)
-  fs.getLocalFiles.mockImplementation((fileNames: string[]): Promise<any> => {
-    const fileContentMap: Record<string, string | null> = {};
-    for (const fileName of fileNames) {
-      fileContentMap[fileName] = files?.[fileName];
-    }
+  fs.getLocalFiles.mockImplementation(
+    (fileNames: string[]): Promise<Record<string, string | null>> => {
+      const fileContentMap: Record<string, string | null> = {};
+      for (const fileName of fileNames) {
+        fileContentMap[fileName] = files?.[fileName];
+      }
 
-    return Promise.resolve(fileContentMap);
-  });
+      return Promise.resolve(fileContentMap);
+    },
+  );
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
@@ -30,7 +31,7 @@ function mockFs(files: Record<string, string>): void {
 
 describe('modules/manager/gradle/extract', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('returns null', async () => {
@@ -56,7 +57,7 @@ describe('modules/manager/gradle/extract', () => {
     };
     mockFs(fsMock);
 
-    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
+    vi.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
       throw err;
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
@@ -1038,7 +1039,7 @@ describe('modules/manager/gradle/extract', () => {
 
     it('prevents inclusion of non-Gradle files', async () => {
       const fsMock = {
-        'build.gradle': "apply from: '../../test.non-gradle'",
+        'build.gradle': "apply from: '~test.non-gradle'",
       };
       mockFs(fsMock);
 

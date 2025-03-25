@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/helmv3/extract extractPackageFile() extract correctly oci references 1`] = `
+exports[`modules/manager/helmv3/extract > extractPackageFile() > extract correctly oci references 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -23,7 +23,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() extract correctly o
 }
 `;
 
-exports[`modules/manager/helmv3/extract extractPackageFile() parses simple Chart.yaml correctly 1`] = `
+exports[`modules/manager/helmv3/extract > extractPackageFile() > parses simple Chart.yaml correctly 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -46,7 +46,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() parses simple Chart
 }
 `;
 
-exports[`modules/manager/helmv3/extract extractPackageFile() resolves aliased registry urls 1`] = `
+exports[`modules/manager/helmv3/extract > extractPackageFile() > resolves aliased registry urls 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -76,7 +76,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() resolves aliased re
 }
 `;
 
-exports[`modules/manager/helmv3/extract extractPackageFile() skips invalid registry urls 1`] = `
+exports[`modules/manager/helmv3/extract > extractPackageFile() > skips invalid registry urls 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -100,7 +100,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() skips invalid regis
 }
 `;
 
-exports[`modules/manager/helmv3/extract extractPackageFile() skips local dependencies 1`] = `
+exports[`modules/manager/helmv3/extract > extractPackageFile() > skips local dependencies 1`] = `
 {
   "datasource": "helm",
   "deps": [

@@ -25,9 +25,8 @@ function testSqlite() {
     try {
       if (e.status === 1) {
         console.log(`Retry re2 install ...`);
-        execSync('pnpm run install', {
+        execSync('pnpm rb re2', {
           stdio: 'inherit',
-          cwd: `${process.cwd()}/node_modules/re2`,
         });
         testRe2();
         return;
@@ -49,9 +48,8 @@ function testSqlite() {
     try {
       if (e.status === 1) {
         console.log(`Retry better-sqlite3 install ...`);
-        execSync('pnpm run install', {
+        execSync('pnpm rb better-sqlite3', {
           stdio: 'inherit',
-          cwd: `${process.cwd()}/node_modules/better-sqlite3`,
         });
         testSqlite();
         return;

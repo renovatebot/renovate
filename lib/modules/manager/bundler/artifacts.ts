@@ -85,7 +85,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  const updatedDepNames = updatedDeps
+  const updatedDepNames: string[] = updatedDeps
     .map(({ depName }) => depName)
     .filter(is.nonEmptyStringAndNotWhitespace);
 

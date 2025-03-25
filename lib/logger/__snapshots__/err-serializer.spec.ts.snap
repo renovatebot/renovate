@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`logger/err-serializer got sanitize http error 1`] = `
+exports[`logger/err-serializer > got > sanitize http error 1`] = `
 {
   "code": "ERR_NON_2XX_3XX_RESPONSE",
   "message": "Response code 412 (Precondition Failed)",
@@ -27,7 +27,7 @@ exports[`logger/err-serializer got sanitize http error 1`] = `
     "headers": {
       "content-type": "application/json",
     },
-    "httpVersion": null,
+    "httpVersion": "1.1",
     "retryCount": 0,
     "statusCode": 412,
     "statusMessage": "Precondition Failed",

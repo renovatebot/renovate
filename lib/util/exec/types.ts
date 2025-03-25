@@ -26,10 +26,10 @@ export interface DockerOptions {
 }
 
 export type DataListener = (chunk: any) => void;
-export type OutputListeners = {
+export interface OutputListeners {
   stdout?: DataListener[];
   stderr?: DataListener[];
-};
+}
 
 export interface RawExecOptions extends ChildProcessSpawnOptions {
   // TODO: to be removed in #16655

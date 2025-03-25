@@ -1,12 +1,18 @@
-import { logger } from '../../../../test/util';
+import { addLibYears } from '../../../instrumentation/reporting';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
+
+vi.mock('../../../instrumentation/reporting');
 
 describe('workers/repository/process/libyear', () => {
+  const config: RenovateConfig = {};
+
   describe('calculateLibYears', () => {
     it('returns early if no packageFiles', () => {
-      calculateLibYears(undefined);
+      calculateLibYears(config, undefined);
       expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
@@ -87,7 +93,7 @@ describe('workers/repository/process/libyear', () => {
           },
         ],
       };
-      calculateLibYears(packageFiles);
+      calculateLibYears(config, packageFiles);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for some/image',
       );
@@ -110,6 +116,18 @@ describe('workers/repository/process/libyear', () => {
           outdatedDepsCount: 4,
         },
         'Repository libYears',
+      );
+      expect(addLibYears).toHaveBeenCalledWith(
+        config,
+        {
+          bundler: 0.5027322404371585,
+          dockerfile: 0,
+          npm: 1,
+        },
+        // eslint-disable-next-line no-loss-of-precision
+        1.5027322404371585,
+        5,
+        4,
       );
     });
 
@@ -172,7 +190,7 @@ describe('workers/repository/process/libyear', () => {
           },
         ],
       };
-      calculateLibYears(packageFiles);
+      calculateLibYears(config, packageFiles);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           managerLibYears: {

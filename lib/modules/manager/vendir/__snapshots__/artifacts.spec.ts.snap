@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/vendir/artifacts returns null if unchanged 1`] = `
+exports[`modules/manager/vendir/artifacts > returns null if unchanged 1`] = `
 [
   {
     "cmd": "vendir sync",

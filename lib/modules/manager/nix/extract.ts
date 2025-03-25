@@ -47,7 +47,7 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = flakeLock.nodes['root'].inputs;
+  const rootInputs = flakeLock.nodes.root.inputs;
 
   if (!rootInputs) {
     logger.debug(
@@ -105,7 +105,7 @@ export async function extractPackageFile(
           currentValue: flakeOriginal.ref,
           currentDigest: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
-          packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`,
         });
         break;
       case 'git':

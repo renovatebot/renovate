@@ -289,7 +289,7 @@ export const Toml = z.string().transform((str, ctx) => {
 export function withDepType<
   Output extends PackageDependency[],
   Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string, force: boolean = true): ZodEffects<Schema> {
+>(schema: Schema, depType: string, force = true): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {

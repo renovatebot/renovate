@@ -20,9 +20,8 @@ export async function getPreset({
   }
 
   try {
-    response = await http.get(url);
+    response = await http.getText(url);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }

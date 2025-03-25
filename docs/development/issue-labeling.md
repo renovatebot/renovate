@@ -203,7 +203,7 @@ Add a label `auto:logs` to indicate that there's a problem with the logs, and th
 
 Add a label `auto:needs-details` to discussions which need more details to move forward.
 
-Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by istanbul ignoring code with the `// istanbul ignore` comment.
+Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by v8 ignoring code with the `/* v8 ignore ... */` comment.
 
 Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
 

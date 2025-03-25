@@ -317,4 +317,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+
+  isLockFileMaintenance?: boolean;
 }

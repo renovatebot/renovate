@@ -6,8 +6,8 @@ import {
   removeGlobalConfig,
 } from './index';
 
-jest.mock('../modules/datasource/npm');
-jest.mock('../../config.js', () => ({}), { virtual: true });
+vi.mock('../modules/datasource/npm');
+vi.mock('../../config.js', () => ({ default: {} }));
 
 const defaultConfig = getConfig();
 
@@ -97,7 +97,7 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = await import('./index');
+      const configParser = await import('./index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules).toHaveLength(2);
     });

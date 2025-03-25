@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as hashicorp from '../../versioning/hashicorp';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 const modules = Fixtures.get('modules.tf');
 const bitbucketModules = Fixtures.get('bitbucketModules.tf');
@@ -28,7 +28,7 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 // auto-mock fs
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/terraform/extract', () => {
   beforeEach(() => {

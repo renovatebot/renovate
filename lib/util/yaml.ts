@@ -10,6 +10,7 @@ import { parseAllDocuments, parseDocument, stringify } from 'yaml';
 import type { ZodType } from 'zod';
 import { logger } from '../logger';
 import { regEx } from './regex';
+import { stripTemplates } from './string';
 
 export interface YamlOptions<
   ResT = unknown,
@@ -167,12 +168,7 @@ export function dump(obj: any, opts?: DumpOptions): string {
 
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
-    return content
-      .replace(regEx(/\s+{{.+?}}:.+/gs), '')
-      .replace(regEx(/{{`.+?`}}/gs), '')
-      .replace(regEx(/{{.+?}}/gs), '')
-      .replace(regEx(/{%`.+?`%}/gs), '')
-      .replace(regEx(/{%.+?%}/g), '');
+    return stripTemplates(content.replace(regEx(/\s+{{.+?}}:.+/gs), ''));
   }
 
   return content;

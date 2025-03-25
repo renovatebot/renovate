@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/hex/index getReleases process public repo without auth 1`] = `
+exports[`modules/datasource/hex/index > getReleases > process public repo without auth 1`] = `
 {
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm",
@@ -90,7 +90,7 @@ exports[`modules/datasource/hex/index getReleases process public repo without au
 }
 `;
 
-exports[`modules/datasource/hex/index getReleases processes a private repo with auth 1`] = `
+exports[`modules/datasource/hex/index > getReleases > processes a private repo with auth 1`] = `
 {
   "homepage": "https://hex.pm/packages/renovate_test/private_package",
   "registryUrl": "https://hex.pm",
@@ -108,7 +108,7 @@ exports[`modules/datasource/hex/index getReleases processes a private repo with 
 }
 `;
 
-exports[`modules/datasource/hex/index getReleases processes real data 1`] = `
+exports[`modules/datasource/hex/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://hex.pm/packages/certifi",
   "registryUrl": "https://hex.pm",

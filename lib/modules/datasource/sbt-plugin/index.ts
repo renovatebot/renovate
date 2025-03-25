@@ -224,7 +224,7 @@ export class SbtPluginDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -242,8 +242,7 @@ export class SbtPluginDatasource extends Datasource {
     }
     searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
 
-    for (let idx = 0; idx < searchRoots.length; idx += 1) {
-      const searchRoot = searchRoots[idx];
+    for (const searchRoot of searchRoots) {
       let versions = await this.resolvePluginReleases(
         searchRoot,
         artifact,

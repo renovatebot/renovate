@@ -1,6 +1,6 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial } from '../../../../../test/util';
 import { getBaseBranchDesc } from './base-branch';
+import type { RenovateConfig } from '~test/util';
+import { partial } from '~test/util';
 
 describe('workers/repository/onboarding/pr/base-branch', () => {
   describe('getBaseBranchDesc()', () => {

@@ -3,7 +3,11 @@ import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
-import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
+import type {
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
@@ -30,6 +34,7 @@ export function getPythonVersionConstraint(
 
   return undefined;
 }
+
 export function getPipToolsVersionConstraint(
   config: UpdateArtifactsConfig,
 ): string {
@@ -43,14 +48,44 @@ export function getPipToolsVersionConstraint(
 
   return '';
 }
+
+export function getUvVersionConstraint(config: UpdateArtifactsConfig): string {
+  const { constraints = {} } = config;
+  const { uv } = constraints;
+
+  if (is.string(uv)) {
+    logger.debug('Using uv constraint from config');
+    return uv;
+  }
+
+  return '';
+}
+
+export function getToolVersionConstraint(
+  config: UpdateArtifactsConfig,
+  commandType: CommandType,
+): ToolConstraint {
+  if (commandType === 'uv') {
+    return {
+      toolName: 'uv',
+      constraint: getUvVersionConstraint(config),
+    };
+  }
+
+  return {
+    toolName: 'pip-tools',
+    constraint: getPipToolsVersionConstraint(config),
+  };
+}
+
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
+  commandType: CommandType,
   cwd: string,
   extraEnv: ExtraEnv<string>,
   extractedPythonVersion: string | undefined,
 ): Promise<ExecOptions> {
   const constraint = getPythonVersionConstraint(config, extractedPythonVersion);
-  const pipToolsConstraint = getPipToolsVersionConstraint(config);
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
@@ -60,10 +95,7 @@ export async function getExecOptions(
         toolName: 'python',
         constraint,
       },
-      {
-        toolName: 'pip-tools',
-        constraint: pipToolsConstraint,
-      },
+      getToolVersionConstraint(config, commandType),
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
@@ -93,7 +125,11 @@ const pipOptionsWithArguments = [
   '--constraint',
   ...commonOptionsWithArguments,
 ];
-const uvOptionsWithArguments = ['--constraints', ...commonOptionsWithArguments];
+const uvOptionsWithArguments = [
+  '--constraints',
+  '--python-version',
+  ...commonOptionsWithArguments,
+];
 export const optionsWithArguments = [
   ...pipOptionsWithArguments,
   ...uvOptionsWithArguments,
@@ -192,6 +228,8 @@ export function extractHeaderCommand(
           throw new Error('Cannot use multiple --output-file options');
         }
         result.outputFile = upath.normalize(value);
+      } else if (option === '--python-version') {
+        result.pythonVersion = value;
       } else if (option === '--index-url') {
         if (result.indexUrl) {
           throw new Error('Cannot use multiple --index-url options');
@@ -241,15 +279,9 @@ const pythonVersionRegex = regEx(
 );
 
 export function extractPythonVersion(
-  commandType: CommandType,
   content: string,
   fileName: string,
 ): string | undefined {
-  // uv's headers do not include the Python version
-  // https://github.com/astral-sh/uv/issues/3588
-  if (commandType === 'uv') {
-    return;
-  }
   const match = pythonVersionRegex.exec(content);
   if (match?.groups === undefined) {
     logger.warn(

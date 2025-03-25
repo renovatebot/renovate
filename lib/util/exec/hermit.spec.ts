@@ -1,14 +1,14 @@
 import { codeBlock } from 'common-tags';
 import _findUp from 'find-up';
 import upath from 'upath';
-import { mockExecAll } from '../../../test/exec-util';
-import { mockedFunction, partial } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';
 import type { RawExecOptions } from './types';
+import { mockExecAll } from '~test/exec-util';
+import { partial } from '~test/util';
 
-jest.mock('find-up');
-const findUp = mockedFunction(_findUp);
+vi.mock('find-up');
+const findUp = vi.mocked(_findUp);
 const localDir = '/tmp/renovate/repository/project-a';
 
 describe('util/exec/hermit', () => {

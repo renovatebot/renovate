@@ -1,13 +1,13 @@
-import { partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import * as schedule from '../branch/schedule';
 import * as prAutomerge from './automerge';
+import { partial, platform, scm } from '~test/util';
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
-    const spy = jest.spyOn(schedule, 'isScheduledNow');
+    const spy = vi.spyOn(schedule, 'isScheduledNow');
     let config: BranchConfig;
     let pr: Pr;
 

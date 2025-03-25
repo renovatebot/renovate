@@ -68,6 +68,8 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+
+If you are using a template command, the regular expression should match the template itself, not the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:
@@ -501,9 +503,10 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
+- `RENOVATE_` prefix (at the moment this prefix optional, but usage of prefix will be required in the future)
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
-- `matchHost`
+- `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
 - Underscore (`_`)
 - Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
@@ -606,8 +609,6 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerMaxPages
-
-By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
 
 If set to an positive integer, Renovate will use this value as the maximum page number.
 Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
@@ -779,7 +780,7 @@ Possible values:
 
 ## githubTokenWarn
 
-By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
@@ -1150,6 +1151,28 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 ## privateKeyPathOld
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
+
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Only supported in file configuration (not via CLI or environment).
 
 ## productLinks
 

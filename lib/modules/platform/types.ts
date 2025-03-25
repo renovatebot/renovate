@@ -97,7 +97,7 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-export type PlatformPrOptions = {
+export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
@@ -106,7 +106,7 @@ export type PlatformPrOptions = {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-};
+}
 
 export interface CreatePRConfig {
   sourceBranch: string;

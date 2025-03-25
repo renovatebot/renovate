@@ -1,11 +1,8 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -15,13 +12,16 @@ import { toBase64 } from '../../../util/string';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, git, partial } from '~test/util';
 
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-const datasource = mocked(_datasource);
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
+
+const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -155,7 +155,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         packageFileName: 'Chart.yaml',
         updatedDeps: [],
         newPackageFileContent: chartFile,
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toMatchObject([
       {
@@ -573,7 +573,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
-  it('sets repositories from registryAliases', async () => {
+  it('sets repositories from registryAliases ignoring not well formed URI', async () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -589,8 +589,12 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
-          registryAliases: { stable: 'the stable_url', repo1: 'the_repo1_url' },
+          isLockFileMaintenance: true,
+          registryAliases: {
+            stable: 'http://the_stable_url',
+            repo1: 'https://the_repo1_url',
+            $REGISTRY_ALIAS: 'my.registry.tld',
+          },
         },
       }),
     ).toMatchObject([
@@ -630,8 +634,12 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
-          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          isLockFileMaintenance: true,
+          registryAliases: {
+            stable: 'http://the_stable_url',
+            repo1: 'https://the_repo1_url',
+            $REGISTRY_ALIAS: 'my.registry.tld',
+          },
         },
       }),
     ).toMatchObject([
@@ -676,9 +684,9 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
-            stable: 'the_stable_url',
+            stable: 'http://the_stable_url',
             oci: 'oci://registry.example.com/organization',
             repo1: 'https://the_repo1_url',
           },
@@ -726,7 +734,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -774,7 +782,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -840,7 +848,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -895,7 +903,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -954,7 +962,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileECR,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {},
         },
       }),
@@ -1009,7 +1017,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
             repo1:
               'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
@@ -1057,7 +1065,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFileAlias,
         config: {
           ...config,
-          updateType: 'lockFileMaintenance',
+          isLockFileMaintenance: true,
           registryAliases: {
             jetstack: 'https://charts.jetstack.io',
           },

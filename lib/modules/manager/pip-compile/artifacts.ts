@@ -115,11 +115,12 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
-      const pythonVersion = extractPythonVersion(
-        compileArgs.commandType,
-        existingOutput,
-        outputFileName,
-      );
+      let pythonVersion: string | undefined;
+      if (compileArgs.commandType === 'uv') {
+        pythonVersion = compileArgs.pythonVersion;
+      } else {
+        pythonVersion = extractPythonVersion(existingOutput, outputFileName);
+      }
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFiles: PackageFileContent[] = [];
@@ -139,6 +140,7 @@ export async function updateArtifacts({
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
+        compileArgs.commandType,
         cwd,
         getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,
