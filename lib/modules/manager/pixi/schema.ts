@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
