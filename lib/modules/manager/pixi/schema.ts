@@ -27,10 +27,6 @@ function collectNamedPackages(
 ): PackageDependency[] {
   return Object.entries(packages)
     .map(([depName, config]) => {
-      if (is.nullOrUndefined(config)) {
-        return;
-      }
-
       return {
         ...config,
         depName,
