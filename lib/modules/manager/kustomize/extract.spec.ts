@@ -55,6 +55,15 @@ describe('modules/manager/kustomize/extract', () => {
     expect(file?.kind).toBe('Kustomization');
   });
 
+  it('should extract chartHome', () => {
+    const file = parseKustomize(`
+      helmGlobals:
+        chartHome: customPathToCharts
+    `);
+    expect(file).not.toBeNull();
+    expect(file!.helmGlobals?.chartHome).toBe('customPathToCharts');
+  });
+
   describe('extractBase', () => {
     it('should return null for a local base', () => {
       const res = extractResource('./service-1');
