@@ -465,10 +465,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 97.5 \
-            --functions 98.98 \
-            --lines 97.84 \
-            --statements 97.84
+            --branches 98.16 \
+            --functions 99.51 \
+            --lines 98.22 \
+            --statements 98.22
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -698,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@ad08d617d8a1eace44bb91726064e61580f4f115 # v3.10.11
+        uses: containerbase/internal-tools@5f238c35cea9be15114787fd3eb32473160258f7 # v3.10.13
         with:
           command: docker-config
 
