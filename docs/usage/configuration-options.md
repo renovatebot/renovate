@@ -2446,6 +2446,17 @@ In those cases a feature request needs to be implemented.
 !!! warning "Warning for Maven users"
     For `minimumReleaseAge` to work, the Maven source must return reliable `last-modified` headers.
 
+    If your custom maven source registry doesnt support `last-modified` header, like GAR (Google Artifact Registry's Maven implementation, then feasible option is to extend maven source registry url with https://repo1.maven.org/maven2 as the first item, then `currentVersionTimestamp` via `last-modified` will be taken from maven central for public dependencies.
+
+    ```json
+    "registryUrls": [
+      "https://repo1.maven.org/maven2",
+      "https://europe-maven.pkg.dev/org-artifacts/maven-virtual"
+    ],
+    ```
+
+
+
 <!-- prettier-ignore -->
 !!! note
     Configuring this option will add a `renovate/stability-days` option to the status checks.
