@@ -1,6 +1,6 @@
-import { partial } from '../../../../../../test/util';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
 import { getPrUpdatesTable } from './updates-table';
+import { partial } from '~test/util';
 
 describe('workers/repository/update/pr/body/updates-table', () => {
   it('checks a case where prBodyColumns are undefined', () => {

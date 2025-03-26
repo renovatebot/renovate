@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { flattenUpdates, sanitizeDepName } from './flatten';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../util/git/semantic');
 
@@ -172,8 +172,8 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.every(
           (upgrade) =>
-            upgrade.isLockFileMaintenance ||
-            upgrade.isRemediation ||
+            upgrade.isLockFileMaintenance ??
+            upgrade.isRemediation ??
             is.number(upgrade.depIndex),
         ),
       ).toBeTrue();

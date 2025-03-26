@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { PixiConfigSchema } from '../pixi/schema';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -112,6 +113,7 @@ export const PyProjectSchema = z.object({
     .optional(),
   tool: z
     .object({
+      pixi: PixiConfigSchema.optional(),
       pdm: PdmSchema.optional(),
       hatch: HatchSchema.optional(),
       uv: UvSchema.optional(),

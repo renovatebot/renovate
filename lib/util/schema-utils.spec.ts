@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { z } from 'zod';
-import { logger } from '../../test/util';
 import {
   Json,
   Json5,
@@ -15,6 +14,7 @@ import {
   withDebugMessage,
   withTraceMessage,
 } from './schema-utils';
+import { logger } from '~test/util';
 
 describe('util/schema-utils', () => {
   describe('LooseArray', () => {

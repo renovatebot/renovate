@@ -1,12 +1,11 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
 

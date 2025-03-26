@@ -5,17 +5,16 @@ import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
 import type { Release, ReleaseResult } from '..';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { postprocessRelease } from '../postprocess-release';
 import { MAVEN_REPO } from './common';
 import { MavenDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-const googleAuth = mocked(_googleAuth);
+const googleAuth = vi.mocked(_googleAuth);
 vi.mock('google-auth-library');
 
 const datasource = MavenDatasource.id;

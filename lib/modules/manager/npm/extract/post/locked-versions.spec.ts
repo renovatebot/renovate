@@ -1,14 +1,14 @@
-import { logger, mocked } from '../../../../../../test/util';
 import type { PackageFile } from '../../../types';
 import type { NpmManagerData } from '../../types';
 import * as _npm from '../npm';
 import * as _pnpm from '../pnpm';
 import * as _yarn from '../yarn';
 import { getLockedVersions } from './locked-versions';
+import { logger } from '~test/util';
 
-const npm = mocked(_npm);
-const pnpm = mocked(_pnpm);
-const yarn = mocked(_yarn);
+const npm = vi.mocked(_npm);
+const pnpm = vi.mocked(_pnpm);
+const yarn = vi.mocked(_yarn);
 
 vi.mock('../npm');
 vi.mock('../yarn', async () => ({

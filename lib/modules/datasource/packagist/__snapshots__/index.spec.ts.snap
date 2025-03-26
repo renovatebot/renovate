@@ -2,7 +2,7 @@
 
 exports[`modules/datasource/packagist/index > getReleases > adds packagist source implicitly 1`] = `
 {
-  "registryUrl": "https://packagist.org",
+  "registryUrl": "https://repo.packagist.org",
   "releases": [
     {
       "gitRef": "v1.0",
@@ -106,7 +106,7 @@ exports[`modules/datasource/packagist/index > getReleases > adds packagist sourc
 
 exports[`modules/datasource/packagist/index > getReleases > processes real versioned data 1`] = `
 {
-  "registryUrl": "https://packagist.org",
+  "registryUrl": "https://repo.packagist.org",
   "releases": [
     {
       "gitRef": "v1.0",

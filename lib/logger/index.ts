@@ -124,7 +124,7 @@ export function removeMeta(fields: string[]): void {
 }
 
 export function withMeta<T>(obj: Record<string, unknown>, cb: () => T): T {
-  setMeta(obj);
+  addMeta(obj);
   try {
     return cb();
   } finally {
