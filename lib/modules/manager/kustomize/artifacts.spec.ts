@@ -227,7 +227,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('returns null if newVersion and currentVersion is the same', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -259,7 +258,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('inflates new version if old version is inflated and kustomizeInflateHelmCharts is not enabled', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(true);
@@ -301,7 +299,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-2.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
       {
@@ -320,7 +318,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('inflates new version if old version is not inflated but kustomizeInflateHelmCharts is enabled', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -353,7 +350,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-2.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
     ]);
@@ -366,7 +363,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('inflates current version if no new version and kustomizeInflateHelmCharts is enabled', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -399,7 +395,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
     ]);
@@ -412,7 +408,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('handles OCI repositories', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -445,7 +440,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
     ]);
@@ -459,7 +454,6 @@ describe('modules/manager/kustomize/artifacts', () => {
 
   it('installs binaries on install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -496,7 +490,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
     ]);
@@ -515,7 +509,6 @@ describe('modules/manager/kustomize/artifacts', () => {
       binarySource: 'docker',
       dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
     });
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -552,7 +545,7 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: null,
+          contents: undefined,
         },
       },
     ]);
@@ -581,7 +574,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('does not inflate current version if kustomizeInflateHelmCharts is not enabled', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockResolvedValueOnce(false);
@@ -618,7 +610,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockImplementationOnce(() => {
@@ -657,7 +648,6 @@ describe('modules/manager/kustomize/artifacts', () => {
   });
 
   it('throws on TEMPORARY_ERROR', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
 
     fs.localPathExists.mockImplementationOnce(() => {
