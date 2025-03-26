@@ -371,22 +371,18 @@ const isRelevantPr =
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)
-export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
+export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
-  // istanbul ignore next
-  if (!config.prList || refreshCache) {
-    config.prList = await BbsPrCache.getPrs(
-      bitbucketServerHttp,
-      config.projectKey,
-      config.repositorySlug,
-      config.ignorePrAuthor,
-      config.username,
-    );
-    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
-  } else {
-    logger.debug('returning cached PR list');
-  }
-  return config.prList;
+  const prs = await BbsPrCache.getPrs(
+    bitbucketServerHttp,
+    config.projectKey,
+    config.repositorySlug,
+    config.ignorePrAuthor,
+    config.username,
+  );
+  logger.debug(`Retrieved Pull Requests, count: ${prs.length}`);
+
+  return prs;
 }
 
 // TODO: coverage (#9624)
@@ -395,7 +391,6 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
-  refreshCache,
   includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
@@ -427,7 +422,7 @@ export async function findPr({
     return utils.prInfo(prs[0]);
   }
 
-  const prList = await getPrList(refreshCache);
+  const prList = await getPrList();
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -976,12 +971,6 @@ export async function createPr({
 
   // TODO #22198
   updatePrVersion(pr.number, pr.version!);
-
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
-
   await BbsPrCache.setPr(
     bitbucketServerHttp,
     config.projectKey,
@@ -1066,29 +1055,13 @@ export async function updatePr({
     }
 
     const bbsPr = utils.prInfo(updatedPr);
-
-    if (config.prList) {
-      const existingIndex = config.prList.findIndex(
-        (item) => item.number === prNo,
-      );
-      // istanbul ignore if: should never happen
-      if (existingIndex === -1) {
-        logger.warn(
-          { pr: bbsPr },
-          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-        );
-        config.prList.push({ ...bbsPr, state: finalState });
-      } else {
-        config.prList[existingIndex] = { ...bbsPr, state: finalState };
-      }
-    }
     await BbsPrCache.setPr(
       bitbucketServerHttp,
       config.projectKey,
       config.repositorySlug,
       config.ignorePrAuthor,
       config.username,
-      bbsPr,
+      { ...bbsPr, state: finalState },
     );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);

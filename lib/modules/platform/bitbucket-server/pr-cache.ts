@@ -24,7 +24,7 @@ export class BbsPrCache {
     repoCache.platform ??= {};
     repoCache.platform.bitbucketServer ??= {};
     let pullRequestCache = repoCache.platform.bitbucketServer
-      .pullRequestsCache as BbsPrCacheData | undefined;
+      .pullRequestsCache as BbsPrCacheData;
     if (!pullRequestCache || pullRequestCache.author !== author) {
       pullRequestCache = {
         items: {},
@@ -163,7 +163,6 @@ export class BbsPrCache {
         `./rest/api/1.0/projects/${this.projectKey}/repos/${this.repo}/pull-requests?${query}`,
         {
           memCache: false,
-          paginate: false,
         },
       );
 
