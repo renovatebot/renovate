@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
@@ -35,10 +34,6 @@ export class BbsPrCache {
     repoCache.platform.bitbucketServer.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
     this.updateItems();
-  }
-
-  static forceSync(): void {
-    memCache.set('bbs-pr-cache-synced', false);
   }
 
   private static async init(
@@ -103,7 +98,7 @@ export class BbsPrCache {
     prCache.setPr(item);
   }
 
-  private reconcile(rawItems: (BbsRestPr | null)[]): boolean {
+  private reconcile(rawItems: BbsRestPr[]): boolean {
     logger.debug('reconciled');
     const { items } = this.cache;
     let { updatedDate } = this.cache;
@@ -112,18 +107,9 @@ export class BbsPrCache {
     let needNextPage = true;
 
     for (const rawItem of rawItems) {
-      // istanbul ignore if: should not happen
-      if (!rawItem) {
-        logger.warn('Bitbucket Server PR is empty, throwing temporary error');
-        throw new Error(TEMPORARY_ERROR);
-      }
       const id = rawItem.id;
 
       const newItem = prInfo(rawItem);
-      // istanbul ignore if: should never happen
-      if (!newItem) {
-        continue;
-      }
 
       const oldItem = items[id];
       if (dequal(oldItem, newItem)) {
