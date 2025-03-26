@@ -1,10 +1,12 @@
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import type { StatusResult } from '../../../util/git/types';
+import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifactsConfig } from '../types';
@@ -12,6 +14,9 @@ import * as kustomize from '.';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
+
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -448,6 +453,115 @@ describe('modules/manager/kustomize/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example',
+      },
+    ]);
+  });
+
+  it('installs binaries on install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: undefined,
+        currentVersion: '1.0.0',
+        packageName: 'github.com/example/example/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2.7.0' }, { version: '3.17.0' }],
+    });
+
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.0.0/example/Chart.yaml',
+          contents: null,
+        },
+      },
+    ]);
+    expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool helm 3.17.0' },
+      {
+        cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example',
+      },
+    ]);
+  });
+
+  it('installs binaries on docker mode', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const execSnapshots = mockExecAll();
+
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        newVersion: undefined,
+        currentVersion: '1.0.0',
+        packageName: 'github.com/example/example/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2.7.0' }, { version: '3.17.0' }],
+    });
+
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps,
+        newPackageFileContent,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.0.0/example/Chart.yaml',
+          contents: null,
+        },
+      },
+    ]);
+    expect(fs.deleteLocalFile).not.toHaveBeenCalled();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm 3.17.0 && helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example"',
       },
     ]);
   });
