@@ -325,7 +325,7 @@ export async function initRepo({
   endpoint,
   includeMirrors,
 }: RepoParams): Promise<RepoResult> {
-  config = {} as any;
+  config ??= {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
