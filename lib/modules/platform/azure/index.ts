@@ -45,6 +45,7 @@ import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
+import { AzurePrCache } from './pr-cache';
 import type { AzurePr } from './types';
 import { AzurePrVote } from './types';
 import {
@@ -64,7 +65,6 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  prList: AzurePr[];
   fileList: null;
   repository: string;
   defaultBranch: string;
@@ -253,32 +253,10 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  if (!config.prList) {
-    const azureApiGit = await azureApi.gitApi();
-    let prs: GitPullRequest[] = [];
-    let fetchedPrs: GitPullRequest[];
-    let skip = 0;
-    do {
-      fetchedPrs = await azureApiGit.getPullRequests(
-        config.repoId,
-        {
-          status: 4,
-          // fetch only prs directly created on the repo and not by forks
-          sourceRepositoryId: config.project,
-        },
-        config.project,
-        0,
-        skip,
-        100,
-      );
-      prs = prs.concat(fetchedPrs);
-      skip += 100;
-    } while (fetchedPrs.length > 0);
-
-    config.prList = prs.map(getRenovatePRFormat);
-    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
-  }
-  return config.prList;
+  const prs =
+    (await AzurePrCache.getPrs(config.repoId, config.project, azureApi)) ?? [];
+  logger.debug(`Retrieved Pull Requests count: ${prs.length}`);
+  return prs;
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
@@ -546,9 +524,8 @@ export async function createPr({
   );
 
   const result = getRenovatePRFormat(pr);
-  if (config.prList) {
-    config.prList.push(result);
-  }
+  await AzurePrCache.setPr(config.repoId, config.project, azureApi, result);
+
   return result;
 }
 
@@ -607,22 +584,12 @@ export async function updatePr({
     config.repoId,
     prNo,
   );
-  if (config.prList) {
-    const prToCache = getRenovatePRFormat(updatedPr);
-    // We need to update the cached entry for this PR
-    const existingIndex = config.prList.findIndex(
-      (item) => item.number === prNo,
-    );
-    // istanbul ignore if: should not happen
-    if (existingIndex === -1) {
-      logger.warn({ prNo }, 'PR not found in cache');
-      // Add to cache
-      config.prList.push(prToCache);
-    } else {
-      // overwrite existing PR in cache
-      config.prList[existingIndex] = prToCache;
-    }
-  }
+  await AzurePrCache.setPr(
+    config.repoId,
+    config.project,
+    azureApi,
+    getRenovatePRFormat(updatedPr),
+  );
 }
 
 export async function ensureComment({
