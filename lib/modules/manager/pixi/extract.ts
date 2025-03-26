@@ -2,11 +2,12 @@ import is from '@sindresorhus/is';
 import { z } from 'zod';
 
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import { Toml } from '../../../util/schema-utils';
-import { ensureTrailingSlash } from '../../../util/url';
-import { defaultRegistryUrl as defaultCondaRegistryAPi } from '../../datasource/conda/common';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
+import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
 import { PyProjectSchema } from '../pep621/schema';
 import type { PackageFileContent } from '../types';
 import {
@@ -87,14 +88,14 @@ export async function extractPackageFile(
     conda.push(
       addRegistryUrls({
         ...item,
-        channels: [...(item.channels ?? []), ...project.channels],
+        channels: [...coerceArray(item.channels), ...project.channels],
       }),
     );
   }
 
   return {
     lockFiles,
-    deps: [...conda, ...val.pypi, ...val.feature.pypi],
+    deps: [conda, val.pypi, val.feature.pypi].flat(),
   };
 }
 
@@ -131,11 +132,11 @@ function addRegistryUrls(item: PixiPackageDependency): PixiPackageDependency {
 }
 
 function channelToRegistryUrl(channel: string): string {
-  if (looksLikeUrl(channel)) {
+  if (isHttpUrl(channel)) {
     return ensureTrailingSlash(channel);
   }
 
-  return `${defaultCondaRegistryAPi}${channel}/`;
+  return `${defaultCondaRegistryApi}${channel}/`;
 }
 
 function orderChannels(channels: Channels = []): string[] {
@@ -156,8 +157,4 @@ function orderChannels(channels: Channels = []): string[] {
       return a.index - b.index;
     })
     .map((c) => c.channel);
-}
-
-function looksLikeUrl(s: string): boolean {
-  return s.startsWith('https://') || s.startsWith('http://');
 }
