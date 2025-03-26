@@ -561,7 +561,21 @@ describe('modules/manager/kustomize/artifacts', () => {
       { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm 3.17.0 && helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example"',
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e HELM_REGISTRY_CONFIG ' +
+          '-e HELM_REPOSITORY_CONFIG ' +
+          '-e HELM_REPOSITORY_CACHE ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar ' +
+          'bash -l -c "' +
+          'install-tool helm 3.17.0' +
+          ' && ' +
+          'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example' +
+          '"',
       },
     ]);
   });
