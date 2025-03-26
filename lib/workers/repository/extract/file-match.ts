@@ -53,10 +53,10 @@ export function getMatchingFiles(
   allFiles: string[],
 ): string[] {
   const fileList = getFilteredFileList(config, allFiles);
-  const { filePatterns, manager } = config;
+  const { managerFilePatterns, manager } = config;
   let matchedFiles: string[] = [];
   // TODO: types (#22198)
-  for (const pattern of filePatterns!) {
+  for (const pattern of managerFilePatterns!) {
     logger.debug(`Using file pattern: ${pattern} for manager ${manager!}`);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => matchRegexOrGlob(file, pattern)),

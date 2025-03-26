@@ -11,7 +11,7 @@ export interface CustomManager
   extends Partial<RegexManagerConfig>,
     Partial<JSONataManagerConfig> {
   customType: CustomManagerName;
-  filePatterns: string[];
+  managerFilePatterns: string[];
 }
 
 // NOTE:

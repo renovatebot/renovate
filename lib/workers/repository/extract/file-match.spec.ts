@@ -51,7 +51,7 @@ describe('workers/repository/extract/file-match', () => {
       includePaths: [],
       ignorePaths: [],
       manager: 'npm',
-      filePatterns: ['/(^|/)package\\.json$/'],
+      managerFilePatterns: ['/(^|/)package\\.json$/'],
     };
 
     it('returns npm files', () => {
@@ -62,7 +62,7 @@ describe('workers/repository/extract/file-match', () => {
     });
 
     it('deduplicates', () => {
-      config.filePatterns?.push('package.json');
+      config.managerFilePatterns?.push('package.json');
       const res = fileMatch.getMatchingFiles(config, fileList);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);

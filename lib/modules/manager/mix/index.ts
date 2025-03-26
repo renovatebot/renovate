@@ -11,7 +11,7 @@ export const url = 'https://hexdocs.pm/mix/Mix.html';
 export const categories: Category[] = ['elixir'];
 
 export const defaultConfig = {
-  filePatterns: ['/(^|/)mix\\.exs$/'],
+  managerFilePatterns: ['/(^|/)mix\\.exs$/'],
 };
 
 export const supportedDatasources = [

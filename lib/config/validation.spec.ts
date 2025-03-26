@@ -571,13 +571,13 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors for unsafe filePatterns', async () => {
+    it('errors for unsafe managerFilePatterns', async () => {
       const config = {
         npm: {
-          filePatterns: ['/abc ([a-z]+) ([a-z]+))/'],
+          managerFilePatterns: ['/abc ([a-z]+) ([a-z]+))/'],
         },
         dockerfile: {
-          filePatterns: ['/x?+/'],
+          managerFilePatterns: ['/x?+/'],
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -589,12 +589,12 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('validates regEx for each filePatterns of format regex', async () => {
+    it('validates regEx for each managerFilePatterns of format regex', async () => {
       const config: RenovateConfig = {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['/js/', '/***$}{]][/'],
+            managerFilePatterns: ['/js/', '/***$}{]][/'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -611,12 +611,12 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if customManager has empty filePatterns', async () => {
+    it('errors if customManager has empty managerFilePatterns', async () => {
       const config = {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: [],
+            managerFilePatterns: [],
           },
         ],
       };
@@ -630,7 +630,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Custom Manager must contain a non-empty filePatterns array",
+            "message": "Each Custom Manager must contain a non-empty managerFilePatterns array",
             "topic": "Configuration Error",
           },
         ]
@@ -641,7 +641,7 @@ describe('config/validation', () => {
       const config = {
         customManagers: [
           {
-            filePatterns: ['some-file'],
+            managerFilePatterns: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -670,7 +670,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'unknown',
-            filePatterns: ['some-file'],
+            managerFilePatterns: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -699,7 +699,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['foo'],
+            managerFilePatterns: ['foo'],
             matchStrings: [],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -708,7 +708,7 @@ describe('config/validation', () => {
           {
             customType: 'jsonata',
             fileFormat: 'json',
-            filePatterns: ['foo'],
+            managerFilePatterns: ['foo'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             currentValueTemplate: 'baz',
@@ -736,7 +736,7 @@ describe('config/validation', () => {
       `);
     });
 
-    it('errors if no customManager filePatterns', async () => {
+    it('errors if no customManager managerFilePatterns', async () => {
       const config = {
         customManagers: [
           {
@@ -760,7 +760,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -782,7 +782,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'jsonata',
-            filePatterns: ['package.json'],
+            managerFilePatterns: ['package.json'],
             matchStrings: [
               'packages.{"depName": name, "currentValue": version, "datasource": "npm"}',
             ],
@@ -809,7 +809,7 @@ describe('config/validation', () => {
           {
             customType: 'jsonata',
             fileFormat: 'json',
-            filePatterns: ['package.json'],
+            managerFilePatterns: ['package.json'],
             matchStrings: ['packages.{'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -831,14 +831,14 @@ describe('config/validation', () => {
       ]);
     });
 
-    // testing if we get all errors at once or not (possible), this does not include customType or filePatterns
+    // testing if we get all errors at once or not (possible), this does not include customType or managerFilePatterns
     // since they are common to all custom managers
     it('validates all possible regex manager options', async () => {
       const config: RenovateConfig = {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
           },
         ],
@@ -857,7 +857,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -868,7 +868,7 @@ describe('config/validation', () => {
           {
             customType: 'jsonata',
             fileFormat: 'json',
-            filePatterns: ['package.json'],
+            managerFilePatterns: ['package.json'],
             matchStrings: [
               'packages.{"depName": depName, "currentValue": version, "datasource": "npm"}',
             ],
@@ -889,7 +889,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -912,7 +912,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -935,7 +935,7 @@ describe('config/validation', () => {
           {
             customType: 'jsonata',
             fileFormat: 'json',
-            filePatterns: ['package.json'],
+            managerFilePatterns: ['package.json'],
             matchStrings: ['packages'],
           },
         ],
@@ -1072,19 +1072,19 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if filePatterns has wrong parent', async () => {
+    it('errors if managerFilePatterns has wrong parent', async () => {
       const config: RenovateConfig = {
-        filePatterns: ['foo'],
+        managerFilePatterns: ['foo'],
         npm: {
-          filePatterns: ['package\\.json'],
+          managerFilePatterns: ['package\\.json'],
           minor: {
-            filePatterns: ['bar'],
+            managerFilePatterns: ['bar'],
           },
         },
         customManagers: [
           {
             customType: 'regex',
-            filePatterns: ['build.gradle'],
+            managerFilePatterns: ['build.gradle'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -1748,7 +1748,7 @@ describe('config/validation', () => {
           onboardingConfig: {
             extends: ['config:recommended'],
             binarySource: 'global', // should not allow globalOnly options inside onboardingConfig
-            filePatterns: ['somefile'], // invalid at top level
+            managerFilePatterns: ['somefile'], // invalid at top level
           },
         };
         const { warnings } = await configValidation.validateConfig(
@@ -1758,7 +1758,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              '"filePatterns" may not be defined at the top level of a config and must instead be within a manager block',
+              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
             topic: 'Config error',
           },
           {
@@ -1773,7 +1773,7 @@ describe('config/validation', () => {
           force: {
             extends: ['config:recommended'],
             binarySource: 'global',
-            filePatterns: ['somefile'], // invalid at top level
+            managerFilePatterns: ['somefile'], // invalid at top level
             constraints: {
               python: '2.7',
             },
@@ -1786,7 +1786,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              '"filePatterns" may not be defined at the top level of a config and must instead be within a manager block',
+              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
             topic: 'Config error',
           },
         ]);

@@ -2,18 +2,18 @@ Renovate uses the [Sveltos](https://projectsveltos.github.io/sveltos/) manager t
 
 Learn about Sveltos Helm-Charts by reading the [Sveltos documentation](https://projectsveltos.github.io/sveltos/addons/helm_charts/).
 
-### You must set a `filePatterns` pattern
+### You must set a `managerFilePatterns` pattern
 
-The `sveltos` manager has no default `filePatterns` pattern.
+The `sveltos` manager has no default `managerFilePatterns` pattern.
 This is because there is are no common filename or directory name conventions for Sveltos YAML files.
-You must set your own `filePatterns` rules, so Renovate knows which `*.yaml` files are Sveltos definitions.
+You must set your own `managerFilePatterns` rules, so Renovate knows which `*.yaml` files are Sveltos definitions.
 
-#### `filePatterns` pattern examples
+#### `managerFilePatterns` pattern examples
 
 ```json title="If most .yaml files in your repository are for Sveltos"
 {
   "sveltos": {
-    "filePatterns": ["/\\.yaml$/"]
+    "managerFilePatterns": ["/\\.yaml$/"]
   }
 }
 ```
@@ -21,7 +21,7 @@ You must set your own `filePatterns` rules, so Renovate knows which `*.yaml` fil
 ```json title="Sveltos YAML files are in a sveltos/ directory"
 {
   "sveltos": {
-    "filePatterns": ["/sveltos/.+\\.yaml$/"]
+    "managerFilePatterns": ["/sveltos/.+\\.yaml$/"]
   }
 }
 ```
@@ -29,7 +29,7 @@ You must set your own `filePatterns` rules, so Renovate knows which `*.yaml` fil
 ```json title="One Sveltos file in a directory"
 {
   "sveltos": {
-    "filePatterns": ["/^config/sveltos\\.yaml$/"]
+    "managerFilePatterns": ["/^config/sveltos\\.yaml$/"]
   }
 }
 ```

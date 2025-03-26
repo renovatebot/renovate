@@ -10,14 +10,14 @@ If you keep your Batect configuration in other files, you'll need to tell Renova
 Files included in your main configuration file with `include` don't need to be listed.
 
 You do this by creating a `"batect"` object in your `renovate.json` file.
-This object should have a `filePatterns` array with regular expressions that match the configuration file names.
+This object should have a `managerFilePatterns` array with regular expressions that match the configuration file names.
 
 For example:
 
 ```json
 {
   "batect": {
-    "filePatterns": [
+    "managerFilePatterns": [
       "/(^|/)batect(-bundle)?\\.yml$/",
       "/(^|/)my-other-batect-file\\.yml$/",
       "/^a-directory/[^/]*\\.yml$/"

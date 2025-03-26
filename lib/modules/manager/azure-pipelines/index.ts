@@ -7,7 +7,7 @@ export const url = 'https://learn.microsoft.com/azure/devops/pipelines';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  filePatterns: [
+  managerFilePatterns: [
     '/(^|/).azuredevops/.+\\.ya?ml$/',
     '/azure.*pipelines?.*\\.ya?ml$/',
   ],

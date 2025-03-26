@@ -2,7 +2,7 @@ import { matchRegexOrGlobList } from '../../../util/string-match';
 import { defaultConfig } from '.';
 
 describe('modules/manager/circleci/index', () => {
-  describe('file names match filePatterns', () => {
+  describe('file names match managerFilePatterns', () => {
     it.each`
       path                           | expected
       ${'.circleci/config.yml'}      | ${true}
@@ -18,9 +18,9 @@ describe('modules/manager/circleci/index', () => {
       ${'.circleci_foo/bar.yml'}     | ${false}
       ${'.circleci/foo.toml'}        | ${false}
     `('matchRegexOrGlobList("$path") === $expected', ({ path, expected }) => {
-      expect(matchRegexOrGlobList(path, defaultConfig.filePatterns)).toBe(
-        expected,
-      );
+      expect(
+        matchRegexOrGlobList(path, defaultConfig.managerFilePatterns),
+      ).toBe(expected);
     });
   });
 });

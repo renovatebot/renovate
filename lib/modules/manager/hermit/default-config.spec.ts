@@ -26,7 +26,7 @@ describe('modules/manager/hermit/default-config', () => {
     });
   });
 
-  describe('filePatterns', () => {
+  describe('managerFilePatterns', () => {
     it.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}
@@ -37,9 +37,9 @@ describe('modules/manager/hermit/default-config', () => {
       ${'nested/other'}             | ${false}
       ${'nested/module/other'}      | ${false}
     `('matchRegexOrGlobList("$path") === $expected', ({ path, expected }) => {
-      expect(matchRegexOrGlobList(path, defaultConfig.filePatterns)).toBe(
-        expected,
-      );
+      expect(
+        matchRegexOrGlobList(path, defaultConfig.managerFilePatterns),
+      ).toBe(expected);
     });
   });
 });

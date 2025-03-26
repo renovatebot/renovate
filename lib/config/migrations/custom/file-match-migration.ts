@@ -9,12 +9,12 @@ export class FileMatchMigration extends AbstractMigration {
     if (is.string(value) || is.array(value, is.string)) {
       const fileMatch = is.array(value) ? value : [value];
 
-      let filePatterns = this.get('filePatterns') ?? [];
-      filePatterns = filePatterns.concat(
+      let managerFilePatterns = this.get('managerFilePatterns') ?? [];
+      managerFilePatterns = managerFilePatterns.concat(
         fileMatch.map((match) => `/${match}/`),
       );
 
-      this.setHard('filePatterns', filePatterns);
+      this.setHard('managerFilePatterns', managerFilePatterns);
     }
   }
 }

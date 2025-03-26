@@ -1,10 +1,10 @@
 Can upgrade bundle definitions and GitRepo YAML manifests of Rancher Fleet.
 
 By default, only bundles with Helm references will be upgraded.
-To enable GitRepo updates you have to extend your [`filePatterns`](../../../configuration-options.md#filepatterns) configuration.
+To enable GitRepo updates you have to extend your [`managerFilePatterns`](../../../configuration-options.md#managerFilePatterns) configuration.
 
 ```json
 {
-  "filePatterns": ["/(^|/)fleet.ya?ml/", "/myGitRepoManifests\\.yaml/"]
+  "managerFilePatterns": ["/(^|/)fleet.ya?ml/", "/myGitRepoManifests\\.yaml/"]
 }
 ```

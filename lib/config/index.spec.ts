@@ -126,12 +126,12 @@ describe('config/index', () => {
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         [
-          'filePatterns',
+          'managerFilePatterns',
           ['/(^|/)package\\.json$/', '/(^|/)pnpm-workspace\\.yaml$/'],
         ],
       ]);
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
-        ['filePatterns', ['/\\.html?$/']],
+        ['managerFilePatterns', ['/\\.html?$/']],
       ]);
     });
 

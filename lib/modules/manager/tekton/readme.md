@@ -63,17 +63,17 @@ You can define Tekton Tasks within these Tekton resources:
 
 Renovate's Tekton manager supports all the image attributes for the Tekton resources mentioned above.
 
-### Set your own `filePatterns` pattern
+### Set your own `managerFilePatterns` pattern
 
-The `tekton` manager does not have a default `filePatterns` pattern.
-This means it won't match any files until you set a `filePatterns` pattern.
+The `tekton` manager does not have a default `managerFilePatterns` pattern.
+This means it won't match any files until you set a `managerFilePatterns` pattern.
 This is to avoid problems with unrelated YAML files since there is no well-established file name pattern for [Tekton](https://tekton.dev/) resources.
 As an example, the following config matches all the YAML files in a repository:
 
 ```json
 {
   "tekton": {
-    "filePatterns": ["/\\.yaml$/", "/\\.yml$/"]
+    "managerFilePatterns": ["/\\.yaml$/", "/\\.yml$/"]
   }
 }
 ```

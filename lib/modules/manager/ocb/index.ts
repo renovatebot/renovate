@@ -10,7 +10,7 @@ export const url =
 export const categories: Category[] = ['golang'];
 
 export const defaultConfig = {
-  filePatterns: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [GoDatasource.id];

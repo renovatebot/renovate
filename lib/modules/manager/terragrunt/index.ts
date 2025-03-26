@@ -16,7 +16,7 @@ export const categories: Category[] = ['iac', 'terraform'];
 
 export const defaultConfig = {
   commitMessageTopic: 'Terragrunt dependency {{depName}}',
-  filePatterns: ['/(^|/)terragrunt\\.hcl$/'],
+  managerFilePatterns: ['/(^|/)terragrunt\\.hcl$/'],
 };
 
 export const supportedDatasources = [

@@ -2385,7 +2385,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'filePatterns',
+    name: 'managerFilePatterns',
     description: 'RegEx (`re2`) and glob patterns for matching manager files.',
     type: 'array',
     subType: 'string',

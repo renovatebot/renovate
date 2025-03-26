@@ -54,7 +54,7 @@ export interface RenovateSharedConfig {
   enabled?: boolean;
   enabledManagers?: string[];
   extends?: string[];
-  filePatterns?: string[];
+  managerFilePatterns?: string[];
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;

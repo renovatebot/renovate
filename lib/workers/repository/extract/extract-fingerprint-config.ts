@@ -39,7 +39,7 @@ function getFilteredManagerConfig(
   return {
     ...(isCustomManager(config.manager) && getCustomManagerFields(config)),
     manager: config.manager,
-    filePatterns: config.filePatterns,
+    managerFilePatterns: config.managerFilePatterns,
     npmrc: config.npmrc,
     npmrcMerge: config.npmrcMerge,
     enabled: config.enabled,

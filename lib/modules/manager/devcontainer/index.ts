@@ -8,7 +8,7 @@ export const url =
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {
-  filePatterns: [
+  managerFilePatterns: [
     '/^.devcontainer/devcontainer.json$/',
     '/^.devcontainer.json$/',
   ],

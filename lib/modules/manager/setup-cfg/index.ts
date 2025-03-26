@@ -10,7 +10,7 @@ export const url =
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  filePatterns: ['/(^|/)setup\\.cfg$/'],
+  managerFilePatterns: ['/(^|/)setup\\.cfg$/'],
   versioning,
 };
 

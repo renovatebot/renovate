@@ -7,7 +7,7 @@ export const url = 'https://docs.meteor.com';
 export const categories: Category[] = ['js'];
 
 export const defaultConfig = {
-  filePatterns: ['/(^|/)package\\.js$/'],
+  managerFilePatterns: ['/(^|/)package\\.js$/'],
 };
 
 export const supportedDatasources = [NpmDatasource.id];

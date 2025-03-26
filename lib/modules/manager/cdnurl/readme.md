@@ -1,10 +1,10 @@
-To enable this manager, add the matching files to `cdnurl.filePatterns`.
+To enable this manager, add the matching files to `cdnurl.managerFilePatterns`.
 For example:
 
 ```json
 {
   "cdnurl": {
-    "filePatterns": ["/\\.html?$/"]
+    "managerFilePatterns": ["/\\.html?$/"]
   }
 }
 ```

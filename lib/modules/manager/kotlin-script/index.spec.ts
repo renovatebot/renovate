@@ -3,9 +3,9 @@ import { isRegexMatch } from '../../../util/string-match';
 import { defaultConfig } from '.';
 
 describe('modules/manager/kotlin-script/index', () => {
-  it('filePatterns regex is correct', () => {
-    expect(defaultConfig.filePatterns).toHaveLength(1);
-    defaultConfig.filePatterns.forEach((pattern) => {
+  it('managerFilePatterns regex is correct', () => {
+    expect(defaultConfig.managerFilePatterns).toHaveLength(1);
+    defaultConfig.managerFilePatterns.forEach((pattern) => {
       if (isRegexMatch(pattern)) {
         expect(() => regEx(pattern)).not.toThrow();
       }

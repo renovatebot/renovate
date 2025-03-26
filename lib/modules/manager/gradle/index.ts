@@ -13,7 +13,7 @@ export const url =
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  filePatterns: [
+  managerFilePatterns: [
     '/\\.gradle(\\.kts)?$/',
     '/(^|/)gradle\\.properties$/',
     '/(^|/)gradle/.+\\.toml$/',

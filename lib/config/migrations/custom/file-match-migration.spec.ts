@@ -7,7 +7,7 @@ describe('config/migrations/custom/file-match-migration', () => {
         fileMatch: 'filename',
       },
       {
-        filePatterns: ['/filename/'],
+        managerFilePatterns: ['/filename/'],
       },
     );
   });
@@ -18,19 +18,19 @@ describe('config/migrations/custom/file-match-migration', () => {
         fileMatch: ['filename1', 'filename2'],
       },
       {
-        filePatterns: ['/filename1/', '/filename2/'],
+        managerFilePatterns: ['/filename1/', '/filename2/'],
       },
     );
   });
 
-  it('concats fileMatch to filePatterns', () => {
+  it('concats fileMatch to managerFilePatterns', () => {
     expect(FileMatchMigration).toMigrate(
       {
         fileMatch: ['filename1', 'filename2'],
-        filePatterns: ['filename3'],
+        managerFilePatterns: ['filename3'],
       },
       {
-        filePatterns: ['/filename1/', '/filename2/', 'filename3'],
+        managerFilePatterns: ['/filename1/', '/filename2/', 'filename3'],
       },
     );
   });
@@ -38,10 +38,10 @@ describe('config/migrations/custom/file-match-migration', () => {
   it('does nothing if fileMatch not defined', () => {
     expect(FileMatchMigration).toMigrate(
       {
-        filePatterns: ['filename3'],
+        managerFilePatterns: ['filename3'],
       },
       {
-        filePatterns: ['filename3'],
+        managerFilePatterns: ['filename3'],
       },
       false,
     );

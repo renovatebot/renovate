@@ -338,7 +338,7 @@ exports[`config/migration > migrates customManagers 1`] = `
   "customManagers": [
     {
       "customType": "regex",
-      "filePatterns": [
+      "managerFilePatterns": [
         "/(^|/|\\.)Dockerfile$/",
         "/(^|/)Dockerfile[^/]*$/",
       ],
@@ -348,7 +348,7 @@ exports[`config/migration > migrates customManagers 1`] = `
     },
     {
       "customType": "regex",
-      "filePatterns": [
+      "managerFilePatterns": [
         "/(^|/|\\.)Dockerfile$/",
         "/(^|/)Dockerfile[^/]*$/",
       ],
@@ -365,7 +365,7 @@ exports[`config/migration > migrates gradle-lite 1`] = `
 {
   "gradle": {
     "enabled": true,
-    "filePatterns": [
+    "managerFilePatterns": [
       "/foo/",
     ],
   },

@@ -158,11 +158,11 @@ export function migrateConfig(
     }
     if (
       is.nonEmptyObject(migratedConfig['pip-compile']) &&
-      is.nonEmptyArray(migratedConfig['pip-compile'].filePatterns)
+      is.nonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
     ) {
-      migratedConfig['pip-compile'].filePatterns = migratedConfig[
+      migratedConfig['pip-compile'].managerFilePatterns = migratedConfig[
         'pip-compile'
-      ].filePatterns.map((filePattern) => {
+      ].managerFilePatterns.map((filePattern) => {
         const pattern = filePattern as string;
         if (pattern.endsWith('.in')) {
           return pattern.replace(/\.in$/, '.txt');

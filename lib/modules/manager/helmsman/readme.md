@@ -1,16 +1,16 @@
 The `helmsman` manager is currently limited and does not support the full feature set of [Helmsman](https://github.com/Praqma/helmsman), read about the limitations below.
 
-### Non-configured filePatterns
+### Non-configured managerFilePatterns
 
-By default the `helmsman` manager has an empty array for its `filePatterns` configuration option, because there is no convention for file naming in practice.
+By default the `helmsman` manager has an empty array for its `managerFilePatterns` configuration option, because there is no convention for file naming in practice.
 This means that `helmsman` won't search for any files, and you won't get any updates from the manager.
 
-To enable the `helmsman` manager, provide a valid `filePatterns` yourself, for example:
+To enable the `helmsman` manager, provide a valid `managerFilePatterns` yourself, for example:
 
 ```json
 {
   "helmsman": {
-    "filePatterns": ["/(^|/)desired_state\\.yaml$/"]
+    "managerFilePatterns": ["/(^|/)desired_state\\.yaml$/"]
   }
 }
 ```

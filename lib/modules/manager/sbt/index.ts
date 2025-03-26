@@ -13,7 +13,7 @@ export const url = 'https://www.scala-sbt.org';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  filePatterns: [
+  managerFilePatterns: [
     '/\\.sbt$/',
     '/project/[^/]*\\.scala$/',
     '/project/build\\.properties$/',

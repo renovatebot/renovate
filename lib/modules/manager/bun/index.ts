@@ -13,7 +13,7 @@ export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  filePatterns: ['/(^|/)bun\\.lockb?$/'],
+  managerFilePatterns: ['/(^|/)bun\\.lockb?$/'],
   digest: {
     prBodyDefinitions: {
       Change:

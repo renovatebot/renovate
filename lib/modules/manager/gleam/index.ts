@@ -8,7 +8,7 @@ export { getRangeStrategy } from './range';
 export const url = 'https://gleam.run/documentation';
 
 export const defaultConfig = {
-  filePatterns: ['/(^|/)gleam.toml$/'],
+  managerFilePatterns: ['/(^|/)gleam.toml$/'],
   versioning: hexVersioning.id,
 };
 
