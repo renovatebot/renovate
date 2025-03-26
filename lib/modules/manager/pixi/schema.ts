@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
 import { CondaDatasource } from '../../datasource/conda/';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as condaVersion from '../../versioning/conda/';
 import { id as gitRefVersionID } from '../../versioning/git';
@@ -62,14 +63,22 @@ const PypiGitDependency = z
   .transform(({ git, rev }) => {
     // empty ref default to HEAD, so do we not need to do anything
     if (!rev) {
-      return null;
+      return {
+        currentValue: rev,
+        packageName: git,
+        datasource: GitRefsDatasource.id,
+        depType: 'pypi-dependencies',
+        versioning: gitRefVersionID,
+        skipStage: 'extract',
+        skipReason: 'unspecified-version',
+      } satisfies PixiPackageDependency;
     }
 
     return {
       currentValue: rev,
-      sourceUrl: git,
+      packageName: git,
+      datasource: GitRefsDatasource.id,
       depType: 'pypi-dependencies',
-      gitRef: true,
       versioning: gitRefVersionID,
     } satisfies PixiPackageDependency;
   });
@@ -81,27 +90,20 @@ const PypiDependencies = LooseRecord(
   .catch({})
   .transform(collectNamedPackages);
 
-const CondaDependency = z.union([
-  z.string().transform((version) => {
+const CondaDependency = z
+  .union([
+    z.string().transform((version) => ({ version, channel: undefined })),
+    z.object({ version: z.string(), channel: z.optional(z.string()) }),
+  ])
+  .transform(({ version, channel }) => {
     return {
       currentValue: version,
       versioning: condaVersion.id,
       datasource: CondaDatasource.id,
       depType: 'dependencies',
+      channel,
     } satisfies PixiPackageDependency;
-  }),
-  z
-    .object({ version: z.string(), channel: z.optional(z.string()) })
-    .transform(({ version, channel }) => {
-      return {
-        currentValue: version,
-        versioning: condaVersion.id,
-        datasource: CondaDatasource.id,
-        depType: 'dependencies',
-        channel,
-      } satisfies PixiPackageDependency;
-    }),
-]);
+  });
 
 const CondaDependencies = LooseRecord(z.string(), CondaDependency)
   .catch({})
