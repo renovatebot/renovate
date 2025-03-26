@@ -21,9 +21,8 @@ export class GitlabPrCache {
     repoCache.platform ??= {};
     repoCache.platform.gitlab ??= {};
 
-    let pullRequestCache = repoCache.platform.gitlab.pullRequestsCache as
-      | GitlabPrCacheData
-      | undefined;
+    let pullRequestCache = repoCache.platform.gitlab
+      .pullRequestsCache as GitlabPrCacheData;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {
@@ -148,7 +147,6 @@ export class GitlabPrCache {
         `/projects/${this.repo}/merge_requests?${query}`,
         {
           memCache: false,
-          paginate: false,
         },
       );
 

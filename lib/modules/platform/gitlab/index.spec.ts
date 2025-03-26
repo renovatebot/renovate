@@ -15,7 +15,6 @@ import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
 import { toBase64 } from '../../../util/string';
-import { getPrBodyStruct } from '../pr-body';
 import * as prBodyModule from '../utils/pr-body';
 import * as gitlab from '.';
 import * as httpMock from '~test/http-mock';
@@ -3393,41 +3392,6 @@ describe('modules/platform/gitlab/index', () => {
           removeLabels: ['old_label'],
         }),
       ).toResolve();
-    });
-
-    it('updates runtime pr list when pr is updated', async () => {
-      await initPlatform('13.3.6-ee');
-      httpMock
-        .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
-        )
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            description: 'a merge request',
-            state: 'opened',
-          },
-        ])
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200, {
-          iid: 1,
-          source_branch: 'branch-a',
-          title: 'new_title',
-          description: 'body',
-          state: 'opened',
-        });
-      await gitlab.updatePr({
-        number: 1,
-        prTitle: 'new_title',
-        prBody: 'body',
-      });
-      const prList = await gitlab.getPrList();
-      const updatedPr = prList.find((pr) => pr.number === 1);
-      expect(updatedPr?.title).toBe('new_title');
-      expect(updatedPr?.bodyStruct).toMatchObject(getPrBodyStruct('body'));
     });
   });
 

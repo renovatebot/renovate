@@ -76,7 +76,6 @@ import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 let config: {
   repository: string;
   email: string;
-  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
@@ -108,6 +107,7 @@ let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
   endpoint,
+  username,
   token,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
@@ -164,6 +164,8 @@ export async function initPlatform({
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
+
+  config.author ??= username!;
 
   return platformConfig;
 }
@@ -371,7 +373,6 @@ export async function initRepo({
         res.body.squash_option === 'default_on';
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-    delete config.prList;
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
@@ -551,15 +552,12 @@ export async function getBranchStatus(
 // Pull Request
 
 export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await GitlabPrCache.getPrs(
-      gitlabApi,
-      config.repository,
-      config.author,
-      !!config.ignorePrAuthor,
-    );
-  }
-  return config.prList;
+  return await GitlabPrCache.getPrs(
+    gitlabApi,
+    config.repository,
+    config.author,
+    !!config.ignorePrAuthor,
+  );
 }
 
 async function ignoreApprovals(pr: number): Promise<void> {
@@ -748,11 +746,6 @@ export async function createPr({
   );
 
   const pr = prInfo(res.body);
-
-  // istanbul ignore if
-  if (config.prList) {
-    config.prList.push(pr);
-  }
   await GitlabPrCache.setPr(
     gitlabApi,
     config.repository,
@@ -831,21 +824,6 @@ export async function updatePr({
     updatedPr,
     !!config.ignorePrAuthor,
   );
-  if (config.prList) {
-    const existingIndex = config.prList.findIndex(
-      (pr) => pr.number === updatedPr.number,
-    );
-    // istanbul ignore if: should not happen
-    if (existingIndex === -1) {
-      logger.warn(
-        { pr: updatedPr },
-        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-      );
-      config.prList.push(updatedPr);
-    } else {
-      config.prList[existingIndex] = updatedPr;
-    }
-  }
 
   if (platformPrOptions?.autoApprove) {
     await approvePr(iid);
