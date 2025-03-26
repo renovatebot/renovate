@@ -299,7 +299,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-2.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
       {
@@ -350,7 +349,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-2.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
     ]);
@@ -395,7 +393,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
     ]);
@@ -440,7 +437,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
     ]);
@@ -490,7 +486,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
     ]);
@@ -545,7 +540,6 @@ describe('modules/manager/kustomize/artifacts', () => {
         file: {
           type: 'addition',
           path: 'charts/example-1.0.0/example/Chart.yaml',
-          contents: undefined,
         },
       },
     ]);
