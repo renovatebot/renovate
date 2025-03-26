@@ -24,6 +24,8 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
+process.env.CONTAINERBASE = 'true';
+
 const config: UpdateArtifactsConfig = {
   postUpdateOptions: ['kustomizeInflateHelmCharts'],
 };
