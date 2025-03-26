@@ -34,24 +34,19 @@ function collectNamedPackages(
     .filter((dep) => isNotNullOrUndefined(dep));
 }
 
-const PypiDependency = z.union([
-  z.string().transform((version) => {
+const PypiDependency = z
+  .union([
+    z.string().transform((version) => ({ version })),
+    z.object({ version: z.string() }),
+  ])
+  .transform(({ version }) => {
     return {
       currentValue: version,
       versioning: pep440VersionID,
       datasource: PypiDatasource.id,
       depType: 'pypi-dependencies',
     } satisfies PixiPackageDependency;
-  }),
-  z.object({ version: z.string() }).transform(({ version }) => {
-    return {
-      currentValue: version,
-      versioning: pep440VersionID,
-      datasource: PypiDatasource.id,
-      depType: 'pypi-dependencies',
-    } satisfies PixiPackageDependency;
-  }),
-]);
+  });
 
 const PypiGitDependency = z
   .object({ git: z.string(), rev: z.optional(z.string()) })
