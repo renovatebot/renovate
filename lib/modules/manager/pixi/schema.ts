@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils';
 import { CondaDatasource } from '../../datasource/conda/';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -22,16 +21,14 @@ export interface PixiPackageDependency extends PackageDependency {
 }
 
 function collectNamedPackages(
-  packages: Record<string, PackageDependency | null>,
+  packages: Record<string, PackageDependency>,
 ): PackageDependency[] {
-  return Object.entries(packages)
-    .map(([depName, config]) => {
-      return {
-        ...config,
-        depName,
-      };
-    })
-    .filter((dep) => isNotNullOrUndefined(dep));
+  return Object.entries(packages).map(([depName, config]) => {
+    return {
+      ...config,
+      depName,
+    };
+  });
 }
 
 const PypiDependency = z
