@@ -1,6 +1,5 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { GerritHttp } from '../../../util/http/gerrit';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
@@ -60,12 +59,8 @@ class GerritClient {
   async findChanges(
     repository: string,
     findPRConfig: GerritFindPRConfig,
-    refreshCache?: boolean,
   ): Promise<GerritChange[]> {
     const opts: HttpOptions = {};
-    if (!refreshCache) {
-      opts.cacheProvider = memCacheProvider;
-    }
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(

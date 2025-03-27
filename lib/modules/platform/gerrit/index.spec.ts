@@ -140,11 +140,10 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.findPr({ branchName: 'branch', state: 'open' }),
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        'test/repo',
-        { branchName: 'branch', state: 'open' },
-        undefined,
-      );
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: 'branch',
+        state: 'open',
+      });
     });
 
     it('findPr() - return the last change from search results', async () => {

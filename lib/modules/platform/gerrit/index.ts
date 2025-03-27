@@ -129,13 +129,10 @@ export async function initRepo({
   return repoConfig;
 }
 
-export async function findPr(
-  findPRConfig: FindPRConfig,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
+export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
   const change = (
-    await client.findChanges(config.repository!, findPRConfig, refreshCache)
-  ).pop();
+    await client.findChanges(config.repository!, findPRConfig)
+  ).at(-1);
   return change ? mapGerritChangeToPr(change) : null;
 }
 
@@ -175,16 +172,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     })`,
   );
   const pr = (
-    await client.findChanges(
-      config.repository!,
-      {
-        branchName: prConfig.sourceBranch,
-        targetBranch: prConfig.targetBranch,
-        state: 'open',
-      },
-      true,
-    )
-  ).pop();
+    await client.findChanges(config.repository!, {
+      branchName: prConfig.sourceBranch,
+      targetBranch: prConfig.targetBranch,
+      state: 'open',
+    })
+  ).at(-1);
   if (pr === undefined) {
     throw new Error(
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
@@ -204,7 +197,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   const change = (
     await client.findChanges(config.repository!, { branchName, state: 'open' })
-  ).pop();
+  ).at(-1);
   return change ? mapGerritChangeToPr(change) : null;
 }
 
@@ -241,11 +234,10 @@ export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  const changes = await client.findChanges(
-    config.repository!,
-    { state: 'open', branchName },
-    true,
-  );
+  const changes = await client.findChanges(config.repository!, {
+    state: 'open',
+    branchName,
+  });
   if (changes.length > 0) {
     const allSubmittable =
       changes.filter((change) => change.submittable === true).length ===
@@ -282,12 +274,11 @@ export async function getBranchStatusCheck(
   const label = config.labels[context];
   if (label) {
     const change = (
-      await client.findChanges(
-        config.repository!,
-        { branchName, state: 'open' },
-        true,
-      )
-    ).pop();
+      await client.findChanges(config.repository!, {
+        branchName,
+        state: 'open',
+      })
+    ).at(-1);
     if (change) {
       const labelRes = change.labels?.[context];
       if (labelRes) {
