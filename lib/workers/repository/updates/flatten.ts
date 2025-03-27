@@ -4,6 +4,7 @@ import {
   mergeChildConfig,
 } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
 import { detectSemanticCommits } from '../../../util/git/semantic';
@@ -216,8 +217,14 @@ export async function flattenUpdates(
       update.semanticCommits = semanticCommits;
     }
   }
-  return updates
-    .filter((update) => update.enabled)
+  const filteredUpdates = updates
+    .filter((update) => update.enabled !== false)
     .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
+  if (filteredUpdates.length < updates.length) {
+    logger.debug(
+      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
+    );
+  }
+  return filteredUpdates;
 }
