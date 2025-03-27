@@ -6,7 +6,6 @@ export interface BbsConfig {
   fileList: any[];
   mergeMethod: string;
   owner: string;
-  prList: BbsPr[];
   projectKey: string;
   repository: string;
   repositorySlug: string;

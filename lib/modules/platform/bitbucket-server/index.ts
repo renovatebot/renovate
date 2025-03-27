@@ -387,16 +387,13 @@ function isRelevantPr(
 // TODO: coverage (#9624)
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
-  const prs = await BbsPrCache.getPrs(
+  return await BbsPrCache.getPrs(
     bitbucketServerHttp,
     config.projectKey,
     config.repositorySlug,
     config.ignorePrAuthor,
     config.username,
   );
-  logger.debug(`Retrieved Pull Requests, count: ${prs.length}`);
-
-  return prs;
 }
 
 // TODO: coverage (#9624)
