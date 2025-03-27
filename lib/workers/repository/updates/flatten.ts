@@ -217,20 +217,13 @@ export async function flattenUpdates(
       update.semanticCommits = semanticCommits;
     }
   }
-  let filteredOutCount = 0;
   const filteredUpdates = updates
-    .filter((update) => {
-      if (update.enabled === false) {
-        filteredOutCount += 1;
-        return false;
-      }
-      return true;
-    })
+    .filter((update) => update.enabled !== false)
     .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
-  if (filteredOutCount) {
+  if (filteredUpdates.length < updates.length) {
     logger.debug(
-      `Filtered out ${filteredOutCount} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
+      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
     );
   }
   return filteredUpdates;
