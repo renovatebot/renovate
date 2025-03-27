@@ -18,7 +18,7 @@ export class GerritScm extends DefaultGitScm {
   override async branchExists(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
     if (change) {
       return true;
@@ -31,7 +31,7 @@ export class GerritScm extends DefaultGitScm {
   ): Promise<LongCommitSha | null> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
     if (change) {
       return change.current_revision as LongCommitSha;
@@ -49,7 +49,7 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: baseBranch,
     };
     const change = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions[change.current_revision];
@@ -83,7 +83,7 @@ export class GerritScm extends DefaultGitScm {
   override async isBranchModified(branchName: string): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions[change.current_revision];
@@ -102,7 +102,7 @@ export class GerritScm extends DefaultGitScm {
       targetBranch: commit.baseBranch,
     };
     const existingChange = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
 
     let hasChanges = true;
@@ -157,7 +157,7 @@ export class GerritScm extends DefaultGitScm {
   override async mergeToLocal(branchName: string): Promise<void> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(repository, searchConfig, true)
+      .findChanges(repository, searchConfig)
       .then((res) => res.pop());
     if (change) {
       return super.mergeToLocal(change.revisions[change.current_revision].ref);
