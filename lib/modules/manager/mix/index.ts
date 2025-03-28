@@ -14,6 +14,7 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)mix\\.exs$/'],
 };
 
+export const supportsLockFileMaintenance = true;
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,

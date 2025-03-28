@@ -224,10 +224,10 @@ const platform: Platform = {
       gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
-      // istanbul ignore if: experimental feature
+      /* v8 ignore start: experimental feature */
       if (semver.valid(process.env.RENOVATE_X_PLATFORM_VERSION)) {
         defaults.version = process.env.RENOVATE_X_PLATFORM_VERSION!;
-      } else {
+      } /* v8 ignore stop */ else {
         defaults.version = await helper.getVersion({ token });
       }
       if (defaults.version?.includes('gitea-')) {
@@ -459,10 +459,8 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
-      /* istanbul ignore next */ 'yellow'
-    );
+    /* v8 ignore next */
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
   async getBranchStatusCheck(
@@ -769,10 +767,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* v8 ignore start */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    }
+    } /* v8 ignore stop */
   },
 
   async findIssue(title: string): Promise<Issue | null> {

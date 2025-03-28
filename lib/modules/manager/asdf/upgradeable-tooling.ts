@@ -94,6 +94,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'aws/aws-cli',
     },
   },
+  'azure-cli': {
+    asdfPluginUrl: 'https://github.com/sourcesense/asdf-azure-cli',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'Azure/azure-cli',
+      extractVersion: '^azure-cli-(?<version>\\S+)',
+    },
+  },
   bun: {
     asdfPluginUrl: 'https://github.com/cometkim/asdf-bun',
     config: {
@@ -274,6 +282,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'gitleaks/gitleaks',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ginkgo: {
+    asdfPluginUrl: 'https://github.com/jimmidyson/asdf-ginkgo',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'onsi/ginkgo',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -554,6 +570,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  opa: {
+    asdfPluginUrl: 'https://github.com/tochukwuvictor/asdf-opa',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'open-policy-agent/opa',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
     config: {
@@ -702,7 +726,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   skaffold: {
     asdfPluginUrl: 'https://github.com/nklmilojevic/asdf-skaffold',
     config: {
-      datasource: GithubTagsDatasource.id,
+      datasource: GithubReleasesDatasource.id,
       packageName: 'GoogleContainerTools/skaffold',
       extractVersion: '^v(?<version>\\S+)',
     },
@@ -767,6 +791,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'gruntwork-io/terragrunt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  terramate: {
+    asdfPluginUrl: 'https://github.com/martinlindner/asdf-terramate',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'terramate-io/terramate',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

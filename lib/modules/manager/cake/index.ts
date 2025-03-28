@@ -1,6 +1,7 @@
 import moo from 'moo';
 import type { Category } from '../../../constants';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { NugetDatasource } from '../../datasource/nuget';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -34,7 +35,9 @@ function parseDependencyLine(line: string): PackageDependency | null {
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
 
-    const { origin, pathname, protocol, searchParams } = new URL(url);
+    const parsedUrl = new URL(url);
+    const { origin, pathname, searchParams } = parsedUrl;
+
     const registryUrl = `${origin}${pathname}`;
 
     const depName = searchParams.get('package')!;
@@ -47,7 +50,7 @@ function parseDependencyLine(line: string): PackageDependency | null {
     };
 
     if (!isEmptyHost) {
-      if (protocol.startsWith('http')) {
+      if (isHttpUrl(parsedUrl)) {
         result.registryUrls = [registryUrl];
       } else {
         result.skipReason = 'unsupported-url';
