@@ -30,7 +30,6 @@ exports[`modules/datasource/npm/index > should fetch package info from custom re
 
 exports[`modules/datasource/npm/index > should fetch package info from npm 1`] = `
 {
-  "isPrivate": false,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
