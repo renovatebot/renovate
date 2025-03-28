@@ -81,6 +81,7 @@ export type PackageCacheNamespace =
   | 'datasource-maven:head-requests-timeout'
   | 'datasource-maven:head-requests'
   | 'datasource-maven:metadata-xml'
+  | 'datasource-maven:cache-provider'
   | 'datasource-node-version'
   | 'datasource-npm:data'
   | 'datasource-nuget-v3'
