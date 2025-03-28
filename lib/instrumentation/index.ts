@@ -14,11 +14,12 @@ import type { Instrumentation } from '@opentelemetry/instrumentation';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BunyanInstrumentation } from '@opentelemetry/instrumentation-bunyan';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
   SimpleSpanProcessor,
+  type SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import {
@@ -42,8 +43,20 @@ export function init(): void {
     return;
   }
 
+  const spanProcessors: SpanProcessor[] = [];
+  // add processors
+  if (isTraceDebuggingEnabled()) {
+    spanProcessors.push(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  }
+
+  // OTEL specification environment variable
+  if (isTraceSendingEnabled()) {
+    const exporter = new OTLPTraceExporter();
+    spanProcessors.push(new BatchSpanProcessor(exporter));
+  }
+
   const traceProvider = new NodeTracerProvider({
-    resource: new Resource({
+    resource: resourceFromAttributes({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
       [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'renovate',
       // https://github.com/open-telemetry/opentelemetry-js/tree/main/semantic-conventions#unstable-semconv
@@ -52,20 +65,8 @@ export function init(): void {
         process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
       [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
+    spanProcessors,
   });
-
-  // add processors
-  if (isTraceDebuggingEnabled()) {
-    traceProvider.addSpanProcessor(
-      new SimpleSpanProcessor(new ConsoleSpanExporter()),
-    );
-  }
-
-  // OTEL specification environment variable
-  if (isTraceSendingEnabled()) {
-    const exporter = new OTLPTraceExporter();
-    traceProvider.addSpanProcessor(new BatchSpanProcessor(exporter));
-  }
 
   const contextManager = new AsyncLocalStorageContextManager();
   traceProvider.register({

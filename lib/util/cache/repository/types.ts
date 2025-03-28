@@ -149,6 +149,9 @@ export interface RepoCacheData {
     azure?: {
       pullRequestsCache?: unknown;
     };
+    bitbucketServer?: {
+      pullRequestsCache?: unknown;
+    };
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;
