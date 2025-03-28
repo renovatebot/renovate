@@ -20,9 +20,8 @@ export class AzurePrCache {
     repoCache.platform ??= {};
     repoCache.platform.azure ??= {};
 
-    let pullRequestCache = repoCache.platform.azure.pullRequestsCache as
-      | AzurePrCacheData
-      | undefined;
+    let pullRequestCache = repoCache.platform.azure
+      .pullRequestsCache as AzurePrCacheData;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {

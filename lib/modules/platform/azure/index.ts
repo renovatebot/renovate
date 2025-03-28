@@ -253,10 +253,7 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  const prs =
-    (await AzurePrCache.getPrs(config.repoId, config.project, azureApi)) ?? [];
-  logger.debug(`Retrieved Pull Requests count: ${prs.length}`);
-  return prs;
+  return await AzurePrCache.getPrs(config.repoId, config.project, azureApi);
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
