@@ -340,9 +340,10 @@ export async function getPr(
     return null;
   }
 
-  const opts: HttpOptions = refreshCache
-    ? { memCache: false }
-    : { cacheProvider: memCacheProvider };
+  const opts: HttpOptions = { memCache: false };
+  if (!refreshCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
 
   const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
