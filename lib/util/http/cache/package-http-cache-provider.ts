@@ -12,7 +12,7 @@ import type { HttpCache } from './schema';
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   ttlMinutes?: number;
-  checkCacheControl?: boolean;
+  checkCacheControlHeader?: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -21,12 +21,12 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private softTtlMinutes: number;
   private hardTtlMinutes: number;
 
-  checkCacheControl: boolean;
+  checkCacheControlHeader: boolean;
 
   constructor({
     namespace,
     ttlMinutes = 15,
-    checkCacheControl = true,
+    checkCacheControlHeader = true,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
@@ -36,7 +36,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     );
     this.softTtlMinutes = softTtlMinutes;
     this.hardTtlMinutes = hardTtlMinutes;
-    this.checkCacheControl = checkCacheControl;
+    this.checkCacheControlHeader = checkCacheControlHeader;
   }
 
   async load(url: string): Promise<unknown> {
@@ -72,32 +72,38 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     return cached.httpResponse as HttpResponse<T>;
   }
 
-  private preventCaching<T>(resp: HttpResponse<T>): boolean {
-    const cachePrivatePackages = GlobalConfig.get(
+  private cacheAllowed<T>(resp: HttpResponse<T>): boolean {
+    const allowedViaGlobalConfig = GlobalConfig.get(
       'cachePrivatePackages',
       false,
     );
-    if (cachePrivatePackages) {
+    if (allowedViaGlobalConfig) {
+      return true;
+    }
+
+    if (this.checkCacheControlHeader && resp.headers['cache-control']) {
+      const isPublic = resp.headers['cache-control']
+        .toLocaleLowerCase()
+        .split(regEx(/\s*,\s*/))
+        .includes('public');
+
+      if (!isPublic) {
+        return false;
+      }
+    }
+
+    if (resp.authorization) {
       return false;
     }
 
-    if (!this.checkCacheControl) {
-      return false;
-    }
-
-    const isPublic = resp.headers?.['cache-control']
-      ?.toLocaleLowerCase()
-      .split(regEx(/\s*,\s*/))
-      .includes('public');
-
-    return !isPublic;
+    return true;
   }
 
   override async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200 && this.preventCaching(resp)) {
+    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
       return resp;
     }
 

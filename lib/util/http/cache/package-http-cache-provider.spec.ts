@@ -130,6 +130,24 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.set).not.toHaveBeenCalled();
   });
 
+  it('prevents caching when the request contains authorization header', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: '_test-namespace',
+    });
+
+    httpMock.scope(url).get('').reply(200, 'private response');
+
+    const res = await http.get(url, {
+      cacheProvider,
+      headers: { authorization: 'foobar' },
+    });
+
+    expect(res.body).toBe('private response');
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
   it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
     GlobalConfig.set({ cachePrivatePackages: true });
 
@@ -137,7 +155,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      checkCacheControl: false,
+      checkCacheControlHeader: false,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response', {
@@ -151,12 +169,12 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(packageCache.set).toHaveBeenCalled();
   });
 
-  it('allows caching when cache-control is private but checkCacheControl=false', async () => {
+  it('allows caching when cache-control is private but checkCacheControlHeader=false', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      checkCacheControl: false,
+      checkCacheControlHeader: false,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response', {
