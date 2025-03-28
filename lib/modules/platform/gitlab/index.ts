@@ -1125,7 +1125,6 @@ export async function getIssue(
     /* v8 ignore start: temporary code */
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
-      delete opts.memCache;
     } else {
       opts.memCache = false;
     } /* v8 ignore stop */
