@@ -42,6 +42,7 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { BbsPrCache } from './pr-cache';
 import type {
   Comment,
   PullRequestActivity,
@@ -384,32 +385,16 @@ function isRelevantPr(
 } /* v8 ignore stop */
 
 // TODO: coverage (#9624)
-/* v8 ignore start */
-export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
+export async function getPrList(): Promise<Pr[]> {
   logger.debug(`getPrList()`);
-  if (!config.prList || refreshCache) {
-    const searchParams: Record<string, string> = {
-      state: 'ALL',
-    };
-    if (!config.ignorePrAuthor && config.username !== undefined) {
-      searchParams['role.1'] = 'AUTHOR';
-      searchParams['username.1'] = config.username;
-    }
-    const query = getQueryString(searchParams);
-    const values = (
-      await bitbucketServerHttp.getJsonUnchecked<BbsRestPr[]>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-        { paginate: true },
-      )
-    ).body;
-
-    config.prList = values.map(utils.prInfo);
-    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
-  } else {
-    logger.debug('returning cached PR list');
-  }
-  return config.prList;
-} /* v8 ignore stop */
+  return await BbsPrCache.getPrs(
+    bitbucketServerHttp,
+    config.projectKey,
+    config.repositorySlug,
+    config.ignorePrAuthor,
+    config.username,
+  );
+}
 
 // TODO: coverage (#9624)
 /* v8 ignore start */
@@ -417,7 +402,6 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
-  refreshCache,
   includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
@@ -449,7 +433,7 @@ export async function findPr({
     return utils.prInfo(prs[0]);
   }
 
-  const prList = await getPrList(refreshCache);
+  const prList = await getPrList();
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -1005,11 +989,14 @@ export async function createPr({
 
   // TODO #22198
   updatePrVersion(pr.number, pr.version!);
-
-  /* v8 ignore start */
-  if (config.prList) {
-    config.prList.push(pr);
-  } /* v8 ignore stop */
+  await BbsPrCache.setPr(
+    bitbucketServerHttp,
+    config.projectKey,
+    config.repositorySlug,
+    config.ignorePrAuthor,
+    config.username,
+    pr,
+  );
 
   return pr;
 }
@@ -1085,22 +1072,15 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
 
-    if (config.prList) {
-      const bbsPr = utils.prInfo(updatedPr);
-      const existingIndex = config.prList.findIndex(
-        (item) => item.number === prNo,
-      );
-      /* v8 ignore start: should never happen */
-      if (existingIndex === -1) {
-        logger.warn(
-          { pr: bbsPr },
-          'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-        );
-        config.prList.push({ ...bbsPr, state: finalState });
-      } /* v8 ignore stop */ else {
-        config.prList[existingIndex] = { ...bbsPr, state: finalState };
-      }
-    }
+    const bbsPr = utils.prInfo(updatedPr);
+    await BbsPrCache.setPr(
+      bitbucketServerHttp,
+      config.projectKey,
+      config.repositorySlug,
+      config.ignorePrAuthor,
+      config.username,
+      { ...bbsPr, state: finalState },
+    );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
     if (err.statusCode === 404) {
