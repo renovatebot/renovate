@@ -1,5 +1,9 @@
 import type { Category } from '../../../constants';
 import { CrateDatasource } from '../../datasource/crate';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
@@ -20,4 +24,10 @@ export const defaultConfig = {
   versioning: cargoVersioning.id,
 };
 
-export const supportedDatasources = [CrateDatasource.id];
+export const supportedDatasources = [
+  CrateDatasource.id,
+  GithubTagsDatasource.id,
+  GitlabTagsDatasource.id,
+  GitRefsDatasource.id,
+  GitTagsDatasource.id,
+];
