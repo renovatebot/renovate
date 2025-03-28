@@ -134,6 +134,7 @@ exports[`modules/platform/gitlab/index > initRepo > should fall back respecting 
 [
   [
     {
+      "author": "Renovate Bot",
       "cloneSubmodules": undefined,
       "cloneSubmodulesFilter": undefined,
       "defaultBranch": "master",
