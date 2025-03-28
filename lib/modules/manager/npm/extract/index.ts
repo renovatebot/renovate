@@ -46,6 +46,7 @@ export async function extractPackageFile(
       packageJson = parseSingleYaml(content);
     } catch {
       logger.debug({ packageFile }, `Invalid YAML`);
+      return null;
     }
   } else {
     try {

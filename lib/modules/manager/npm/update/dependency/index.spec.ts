@@ -39,6 +39,20 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(outputContent);
     });
 
+    it('replaces a dependency of a yaml value when the source do not have quotes', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'bower',
+        newValue: '~2.0.0',
+      };
+      const outputContent = readFixture('outputs/012.yaml');
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
+        upgrade,
+      });
+      expect(testContent).toEqual(outputContent);
+    });
+
     it('replaces a github dependency value', () => {
       const upgrade = {
         depType: 'dependencies',

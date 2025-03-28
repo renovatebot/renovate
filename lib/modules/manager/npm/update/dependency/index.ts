@@ -31,18 +31,6 @@ function renameObjKey(
   }, {} as DependenciesMeta);
 }
 
-function getStrValue(isYaml: boolean, text: string): string {
-  if (!isYaml) {
-    return `"${text}"`;
-  }
-  const simpleString = new RegExp(/^[a-z0-9]/i).exec(text);
-  if (simpleString) {
-    return text;
-  } else {
-    return `"${text}"`;
-  }
-}
-
 function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
@@ -90,8 +78,8 @@ function replaceAsString(
     parsedContents[depType]![depName] = newValue;
   }
   // Look for the old version number
-  const searchString = getStrValue(isYaml, oldValue);
-  let newString = getStrValue(isYaml, newValue);
+  const searchString = isYaml ? oldValue : `"${oldValue}"`;
+  let newString = isYaml ? newValue : `"${newValue}"`;
 
   const escapedDepName = escapeRegExp(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
@@ -99,7 +87,7 @@ function replaceAsString(
   if (match && depType === 'resolutions') {
     const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
     parsedContents[depType]![depName] = patch;
-    newString = getStrValue(isYaml, patch);
+    newString = isYaml ? patch : `"${patch}"`;
   }
 
   // Skip ahead to depType section
