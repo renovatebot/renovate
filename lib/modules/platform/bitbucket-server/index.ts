@@ -467,7 +467,9 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
-  const opts: HttpOptions = memCache ? { cacheProvider: memCacheProvider } : {};
+  const opts: HttpOptions = memCache
+    ? { cacheProvider: memCacheProvider }
+    : { memCache: false };
 
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
@@ -518,6 +520,8 @@ async function getStatusCheck(
   const opts: BitbucketServerHttpOptions = { paginate: true };
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
+  } else {
+    opts.memCache = false;
   }
 
   return (

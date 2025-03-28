@@ -63,7 +63,9 @@ class GerritClient {
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
     const opts: HttpOptions = {};
-    if (!refreshCache) {
+    if (refreshCache) {
+      opts.memCache = false;
+    } else {
       opts.cacheProvider = memCacheProvider;
     }
 

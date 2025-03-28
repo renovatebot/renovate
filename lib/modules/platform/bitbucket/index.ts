@@ -433,6 +433,8 @@ async function getStatus(
   const opts: BitbucketHttpOptions = { paginate: true };
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
+  } else {
+    opts.memCache = false;
   }
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
