@@ -299,7 +299,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.13.10",
+    "@types/node": "22.13.11",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/semver": "7.5.8",
