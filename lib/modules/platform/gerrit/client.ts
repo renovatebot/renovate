@@ -64,6 +64,7 @@ class GerritClient {
   ): Promise<GerritChange[]> {
     const opts: HttpOptions = {};
     /* v8 ignore start: temporary code */
+    // TODO: should refresh the cache rather than just ignore it
     if (refreshCache) {
       opts.memCache = false;
     } else {
