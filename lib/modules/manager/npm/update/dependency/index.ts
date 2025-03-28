@@ -160,11 +160,9 @@ export function updateDependency({
         parsedContents = parseSingleYaml(fileContent);
         isYaml = true;
       } catch (err) {
-        console.log(err);
         throw error;
       }
     }
-    console.log('Processing as yaml!', isYaml);
     let overrideDepParents: string[] | undefined = undefined;
     // Save the old version
     let oldVersion: string | undefined;
