@@ -13,6 +13,7 @@ import type {
 import type { NpmDepType, NpmManagerData } from '../../types';
 import { getNewGitValue, getNewNpmAliasValue } from './common';
 import { updatePnpmCatalogDependency } from './pnpm';
+import { parseSingleYaml } from '../../../../../util/yaml';
 
 function renameObjKey(
   oldObj: DependenciesMeta,
@@ -30,6 +31,18 @@ function renameObjKey(
   }, {} as DependenciesMeta);
 }
 
+function getStrValue(isYaml: boolean, text: string): string {
+  if (!isYaml) {
+    return `"${text}"`;
+  }
+  const simpleString = new RegExp(/^[a-z0-9]/i).exec(text);
+  if (simpleString) {
+    return text;
+  } else {
+    return `"${text}"`;
+  }
+}
+
 function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
@@ -41,6 +54,7 @@ function replaceAsString(
   depName: string,
   oldValue: string,
   newValue: string,
+  isYaml: boolean,
   parents?: string[],
 ): string {
   if (depType === 'packageManager') {
@@ -76,8 +90,8 @@ function replaceAsString(
     parsedContents[depType]![depName] = newValue;
   }
   // Look for the old version number
-  const searchString = `"${oldValue}"`;
-  let newString = `"${newValue}"`;
+  const searchString = getStrValue(isYaml, oldValue);
+  let newString = getStrValue(isYaml, newValue);
 
   const escapedDepName = escapeRegExp(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
@@ -85,11 +99,12 @@ function replaceAsString(
   if (match && depType === 'resolutions') {
     const patch = oldValue.replace(match[0], `${match[1]}${newValue}#`);
     parsedContents[depType]![depName] = patch;
-    newString = `"${patch}"`;
+    newString = getStrValue(isYaml, patch);
   }
 
   // Skip ahead to depType section
-  let searchIndex = fileContent.indexOf(`"${depType}"`) + depType.length;
+  let searchIndex =
+    fileContent.indexOf(isYaml ? depType : `"${depType}"`) + depType.length;
   logger.trace(`Starting search at index ${searchIndex}`);
   // Iterate through the rest of the file
   for (; searchIndex < fileContent.length; searchIndex += 1) {
@@ -104,7 +119,12 @@ function replaceAsString(
         newString,
       );
       // Compare the parsed JSON structure of old and new
-      if (dequal(parsedContents, JSON.parse(testContent))) {
+      if (
+        dequal(
+          parsedContents,
+          isYaml ? parseSingleYaml(testContent) : JSON.parse(testContent),
+        )
+      ) {
         return testContent;
       }
     }
@@ -129,8 +149,22 @@ export function updateDependency({
   newValue = getNewNpmAliasValue(newValue, upgrade) ?? newValue;
 
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
+
+  let isYaml = false;
   try {
-    const parsedContents: NpmPackage = JSON.parse(fileContent);
+    let parsedContents: NpmPackage;
+    try {
+      parsedContents = JSON.parse(fileContent);
+    } catch (error) {
+      try {
+        parsedContents = parseSingleYaml(fileContent);
+        isYaml = true;
+      } catch (err) {
+        console.log(err);
+        throw error;
+      }
+    }
+    console.log('Processing as yaml!', isYaml);
     let overrideDepParents: string[] | undefined = undefined;
     // Save the old version
     let oldVersion: string | undefined;
@@ -170,6 +204,7 @@ export function updateDependency({
         depName,
         oldVersion!,
         `npm:${upgrade.newName}@${newValue}`,
+        isYaml,
         overrideDepParents,
       );
     } else {
@@ -180,6 +215,7 @@ export function updateDependency({
         depName,
         oldVersion!,
         newValue!,
+        isYaml,
         overrideDepParents,
       );
       if (upgrade.newName) {
@@ -190,6 +226,7 @@ export function updateDependency({
           depName,
           depName,
           upgrade.newName,
+          isYaml,
           overrideDepParents,
         );
       }
@@ -231,6 +268,7 @@ export function updateDependency({
           parsedContents.resolutions[depKey]!,
           // TODO #22198
           newValue!,
+          isYaml,
         );
         if (upgrade.newName) {
           if (depKey === `**/${depName}`) {
@@ -244,6 +282,7 @@ export function updateDependency({
             depKey,
             depKey,
             upgrade.newName,
+            isYaml,
           );
         }
       }
@@ -259,6 +298,7 @@ export function updateDependency({
             depKey,
             // TODO: types (#22198)
             `${depName}@${newValue}`,
+            isYaml,
           );
         }
       }

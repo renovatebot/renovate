@@ -27,6 +27,7 @@ import {
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from './yarnrc';
+import { parseSingleYaml } from '../../../../util/yaml';
 
 function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
   return Object.values(lockFiles).filter(is.string).length > 1;
@@ -40,11 +41,19 @@ export async function extractPackageFile(
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
   let packageJson: NpmPackage;
-  try {
-    packageJson = JSON.parse(content);
-  } catch {
-    logger.debug({ packageFile }, `Invalid JSON`);
-    return null;
+  if (packageFile.endsWith('.yaml') || packageFile.endsWith('.yml')) {
+    try {
+      packageJson = parseSingleYaml(content);
+    } catch {
+      logger.debug({ packageFile }, `Invalid YAML`);
+    }
+  } else {
+    try {
+      packageJson = JSON.parse(content);
+    } catch {
+      logger.debug({ packageFile }, `Invalid JSON`);
+      return null;
+    }
   }
 
   const res = extractPackageJson(packageJson, packageFile);

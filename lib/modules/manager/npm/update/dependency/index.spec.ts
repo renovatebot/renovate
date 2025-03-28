@@ -5,6 +5,7 @@ import { Fixtures } from '~test/fixtures';
 const readFixture = (x: string): string => Fixtures.get(x, '../..');
 
 const input01Content = readFixture('inputs/01.json');
+const input01YamlContent = readFixture('inputs/01.yaml');
 const input01GlobContent = readFixture('inputs/01-glob.json');
 const input01PMContent = readFixture('inputs/01-package-manager.json');
 
@@ -19,6 +20,20 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        upgrade,
+      });
+      expect(testContent).toEqual(outputContent);
+    });
+
+    it('replaces a dependency of a yaml value', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'cheerio',
+        newValue: '0.22.1',
+      };
+      const outputContent = readFixture('outputs/011.yaml');
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01YamlContent,
         upgrade,
       });
       expect(testContent).toEqual(outputContent);

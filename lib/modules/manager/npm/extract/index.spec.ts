@@ -14,6 +14,7 @@ const defaultExtractConfig = {
 } satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
+const input01YamlContent = Fixtures.get('inputs/01.yaml', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
@@ -90,6 +91,33 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchSnapshot({
+        deps: [
+          { depName: 'autoprefixer', currentValue: '6.5.0' },
+          { depName: 'bower', currentValue: '~1.6.0' },
+          { depName: 'browserify', currentValue: '13.1.0' },
+          { depName: 'browserify-css', currentValue: '0.9.2' },
+          { depName: 'cheerio', currentValue: '=0.22.0' },
+          { depName: 'config', currentValue: '1.21.0' },
+          { depName: 'enabled', skipReason: 'invalid-value' },
+          { depName: 'angular', currentValue: '^1.5.8' },
+          { depName: 'angular-touch', currentValue: '1.5.8' },
+          { depName: 'angular-sanitize', currentValue: '1.5.8' },
+          { depName: '@angular/core', currentValue: '4.0.0-beta.1' },
+          { depName: 'config', currentValue: '1.21.0' },
+          { depName: '@angular/cli', currentValue: '8.0.0' },
+          { depName: 'angular', currentValue: '1.33.0' },
+          { depName: 'glob', currentValue: '1.0.0' },
+        ],
+      });
+    });
+
+    it('returns an array of dependencies when is a yaml version too', async () => {
+      const res = await npmExtract.extractPackageFile(
+        input01YamlContent,
+        'package.yaml',
         defaultExtractConfig,
       );
       expect(res).toMatchSnapshot({
