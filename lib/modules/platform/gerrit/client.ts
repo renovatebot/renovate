@@ -60,7 +60,7 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
   ): Promise<GerritChange[]> {
-    const opts: HttpOptions = {};
+    const opts: HttpOptions = { memCache: false };
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
