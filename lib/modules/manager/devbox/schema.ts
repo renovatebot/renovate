@@ -60,4 +60,4 @@ export const DevboxSchema = Jsonc.pipe(
   }),
 )
   .transform(({ packages }) => packages)
-  .catch(withDebugMessage([], 'Devbox: error parsing file'));
+  .catch(withDebugMessage([], 'Devbox: does not match schema'));
