@@ -1,4 +1,3 @@
-import { mocked, partial } from '../../../../test/util';
 import * as _cache from '../../../util/cache/repository';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
 import type { BranchConfig } from '../../types';
@@ -6,6 +5,7 @@ import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
 } from './reconfigure-cache';
+import { partial } from '~test/util';
 
 vi.mock('../../../util/cache/repository');
 

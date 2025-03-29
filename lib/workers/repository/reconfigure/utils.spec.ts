@@ -1,11 +1,11 @@
-import { fs, logger, mocked } from '../../../../test/util';
 import * as _merge from '../init/merge';
 import { getReconfigureBranchName, getReconfigureConfig } from './utils';
+import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 vi.mock('../init/merge');
 
-const merge = mocked(_merge);
+const merge = vi.mocked(_merge);
 const reconfigureBranch = 'renovate/reconfigure';
 
 describe('workers/repository/reconfigure/utils', () => {

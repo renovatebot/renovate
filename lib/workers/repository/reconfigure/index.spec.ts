@@ -1,12 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import {
-  git,
-  logger,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { type AllConfig } from '../../../config/types';
 import type { Pr } from '../../../modules/platform';
@@ -20,7 +11,7 @@ import * as _prComment from './comment';
 import * as _utils from './utils';
 import * as _validate from './validate';
 import { checkReconfigureBranch } from '.';
-import { logger, scm } from '~test/util';
+import { git, logger, partial, platform, scm } from '~test/util';
 import type { RenovateConfig } from '~test/util';
 
 vi.mock('./validate');
@@ -32,13 +23,13 @@ vi.mock('../init/inherited');
 vi.mock('../init/merge');
 vi.mock('../../../util/cache/repository');
 
-const validate = mocked(_validate);
-const utils = mocked(_utils);
-const process = mocked(_process);
-const prComment = mocked(_prComment);
-const inherited = mocked(_inherited);
-const merge = mocked(_merge);
-const cache = mocked(_cache);
+const validate = vi.mocked(_validate);
+const utils = vi.mocked(_utils);
+const process = vi.mocked(_process);
+const prComment = vi.mocked(_prComment);
+const inherited = vi.mocked(_inherited);
+const merge = vi.mocked(_merge);
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/reconfigure/index', () => {
   const config = partial<RenovateConfig>({
