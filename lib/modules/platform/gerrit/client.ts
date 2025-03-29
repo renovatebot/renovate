@@ -62,7 +62,10 @@ class GerritClient {
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
-    const opts: HttpOptions = {};
+    // Disables memCache (which is enabled by default) to be replaced by
+    // memCacheProvider.
+    const opts: HttpOptions = { memCache: false };
+    // TODO: should refresh the cache rather than just ignore it
     if (!refreshCache) {
       opts.cacheProvider = memCacheProvider;
     }
