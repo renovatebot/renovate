@@ -183,6 +183,21 @@ export async function getPR(
   return res.body;
 }
 
+export async function getPRByBranch(
+  repoPath: string,
+  base: string,
+  head: string,
+  options?: GiteaHttpOptions,
+): Promise<PR | null> {
+  const url = `${API_PATH}/repos/${repoPath}/pulls/${base}/${head}`;
+  try {
+    const res = await giteaHttp.getJsonUnchecked<PR>(url, options);
+    return res.body;
+  } catch {
+    return null;
+  }
+}
+
 export async function requestPrReviewers(
   repoPath: string,
   idx: number,
