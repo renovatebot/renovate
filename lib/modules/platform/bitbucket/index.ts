@@ -431,9 +431,12 @@ async function getStatus(
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   const opts: BitbucketHttpOptions = { paginate: true };
+  /* v8 ignore start: temporary code */
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
-  }
+  } else {
+    opts.memCache = false;
+  } /* v8 ignore stop */
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,

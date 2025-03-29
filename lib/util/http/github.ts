@@ -345,6 +345,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     const result = await super.requestJsonUnsafe<T>(method, opts);
     if (httpOptions.paginate) {
       delete httpOptions.cacheProvider;
+      httpOptions.memCache = false;
       // Check if result is paginated
       const pageLimit = httpOptions.pageLimit ?? 10;
       const linkHeader = parseLinkHeader(result?.headers?.link);

@@ -1121,12 +1121,13 @@ export async function getIssue(
   useCache = true,
 ): Promise<Issue | null> {
   try {
-    const opts: GitlabHttpOptions = { memCache: false };
-    /* v8 ignore next: temporary code */
+    const opts: GitlabHttpOptions = {};
+    /* v8 ignore start: temporary code */
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
-      delete opts.memCache;
-    }
+    } else {
+      opts.memCache = false;
+    } /* v8 ignore stop */
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,

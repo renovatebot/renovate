@@ -63,7 +63,7 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const opts: GithubHttpOptions = { paginate: false };
+      const opts: GithubHttpOptions = { paginate: false, memCache: false };
       if (pageIdx === 1) {
         opts.cacheProvider = repoCacheProvider;
         if (isInitial) {
