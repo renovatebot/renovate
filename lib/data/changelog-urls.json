@@ -24,6 +24,7 @@
     "uwsgi": "https://uwsgi-docs.readthedocs.io/en/latest/#release-notes"
   },
   "docker": {
+    "adminer": "https://github.com/vrana/adminer/blob/master/CHANGELOG.md",
     "gitlab/gitlab-ce": "https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/CHANGELOG.md",
     "gitlab/gitlab-runner": "https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md",
     "google/cloud-sdk": "https://cloud.google.com/sdk/docs/release-notes",
