@@ -4,6 +4,7 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { GerritHttp } from '../../../util/http/gerrit';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -83,10 +84,14 @@ class GerritClient {
     return changes.body;
   }
 
-  async getChange(changeNumber: number): Promise<GerritChange> {
+  async getChange(
+    changeNumber: number,
+    extraOptions?: string[],
+  ): Promise<GerritChange> {
+    const options = [...this.requestDetails, ...(extraOptions ?? [])];
+    const queryString = getQueryString({ o: options });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
-      `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&'),
+      `a/changes/${changeNumber}?${queryString}`,
     );
     return changes.body;
   }
@@ -207,15 +212,11 @@ class GerritClient {
   }
 
   async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels?.['Code-Review'];
-    return reviewLabels === undefined || reviewLabels.approved !== undefined;
-  }
-
-  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
+    const change = await client.getChange(changeId, ['DETAILED_LABELS']);
+    const reviewLabel = change?.labels?.['Code-Review'];
     return (
-      change.labels?.['Code-Review'].approved &&
-      change.labels['Code-Review'].approved.username === username
+      reviewLabel === undefined ||
+      reviewLabel.all?.some((label) => label.value === 2) === true
     );
   }
 
@@ -231,16 +232,7 @@ class GerritClient {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];
     if (searchConfig.branchName) {
-      filters.push(
-        ...[
-          '(',
-          `footer:Renovate-Branch=${searchConfig.branchName}`,
-          // for backwards compatibility
-          'OR',
-          `hashtag:sourceBranch-${searchConfig.branchName}`,
-          ')',
-        ],
-      );
+      filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
     }
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);
