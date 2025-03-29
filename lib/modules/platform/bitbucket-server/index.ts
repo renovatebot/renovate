@@ -340,9 +340,13 @@ export async function getPr(
     return null;
   }
 
-  const opts: HttpOptions = refreshCache
-    ? { memCache: false }
-    : { cacheProvider: memCacheProvider };
+  // Disables memCache (which is enabled by default) to be replaced by
+  // memCacheProvider.
+  const opts: HttpOptions = { memCache: false };
+  // TODO: should refresh the cache rather than just ignore it
+  if (!refreshCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
 
   const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
