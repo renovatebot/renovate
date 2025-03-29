@@ -7,7 +7,7 @@ export const url = 'https://github.com/Praqma/helmsman#readme';
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];

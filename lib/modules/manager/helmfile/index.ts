@@ -14,7 +14,7 @@ export const defaultConfig = {
     stable: 'https://charts.helm.sh/stable',
   },
   commitMessageTopic: 'helm chart {{depName}}',
-  fileMatch: ['(^|/)helmfile\\.ya?ml(?:\\.gotmpl)?$'],
+  managerFilePatterns: ['/(^|/)helmfile\\.ya?ml(?:\\.gotmpl)?$/'],
 };
 
 export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];

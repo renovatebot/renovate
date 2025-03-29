@@ -9,7 +9,7 @@ export const url = 'https://github.com/nodenv/nodenv#readme';
 export const categories: Category[] = ['js', 'node'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.node-version$'],
+  managerFilePatterns: ['/(^|/)\\.node-version$/'],
   versioning: nodeVersioning.id,
 };
 
