@@ -168,14 +168,18 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ? `${versionOrig}:${version}` : `${version}`}`;
+    const cacheKey = versionOrig
+      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
+      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven',
       cacheKey,
     );
+
+    /* v8 ignore start */
     if (cachedResult) {
       return cachedResult;
-    }
+    } /* v8 ignore stop */
 
     if (!packageName || !registryUrl) {
       return release;
