@@ -531,8 +531,22 @@ const platform: Platform = {
     prTitle: title,
     state = 'all',
     includeOtherAuthors,
+    targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
+    if (includeOtherAuthors && is.string(targetBranch)) {
+      // do not use pr cache as it only fetches prs created by the bot account
+      const pr = await helper.getPRByBranch(
+        config.repository,
+        targetBranch,
+        branchName,
+      );
+      if (!pr) {
+        return null;
+      }
+
+      return toRenovatePR(pr, null);
+    }
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>

@@ -153,6 +153,7 @@ export async function validateReconfigureBranch(
       branchName,
       state: 'open',
       includeOtherAuthors: true,
+      targetBranch: config.defaultBranch,
     });
 
     // add comment to reconfigure PR if it exists
