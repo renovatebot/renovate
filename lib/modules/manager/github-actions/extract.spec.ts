@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
-const runnerTestWorkflow = `
+const runnerTestWorkflow = codeBlock`
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -204,7 +204,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('maintains quotes', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
       jobs:
         build:
           steps:
@@ -286,7 +286,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('maintains spaces between hash and comment', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
       jobs:
         build:
           steps:
@@ -573,6 +573,278 @@ describe('modules/manager/github-actions/extract', () => {
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
       ).toHaveLength(7);
+    });
+
+    it('extracts x-version from actions/setup-x', () => {
+      const yamlContent = codeBlock`
+      jobs:
+        build:
+          steps:
+            - name: "Setup Node.js"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '16.x'
+            - name: "Setup Node.js with exact version"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '20.0.0'
+            - name: "Setup Go"
+              uses: actions/setup-go@v5
+              with:
+                go-version: '1.23'
+            - name: "Setup Python with range"
+              uses: actions/setup-python@v3
+              with:
+                python-version: '>=3.8.0 <3.10.0'
+            - name: "Setup Node.js with latest"
+              uses: actions/setup-node@v3
+              with:
+                node-version: 'latest'`;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v5',
+          datasource: 'github-tags',
+          depName: 'actions/setup-go',
+          depType: 'action',
+          replaceString: 'actions/setup-go@v5',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-python',
+          depType: 'action',
+          replaceString: 'actions/setup-python@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '16.x',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '20.0.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'go',
+          packageName: 'actions/go-versions',
+          currentValue: '1.23',
+          datasource: 'github-releases',
+          versioning: 'npm',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'python',
+          packageName: 'actions/python-versions',
+          currentValue: '>=3.8.0 <3.10.0',
+          datasource: 'github-releases',
+          versioning: 'npm',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
+    it('extracts x-version from actions/setup-x in composite action', () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: 'composite'
+          steps:
+            - name: "Setup Node.js"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '16.x'
+            - name: "Setup Node.js with exact version"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '20.0.0'
+            - name: "Setup Go"
+              uses: actions/setup-go@v5
+              with:
+                go-version: '1.23'
+            - name: "Setup Python with range"
+              uses: actions/setup-python@v3
+              with:
+                python-version: '>=3.8.0 <3.10.0'
+            - name: "Setup Node.js with latest"
+              uses: actions/setup-node@v3
+              with:
+                node-version: 'latest'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'action.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v5',
+          datasource: 'github-tags',
+          depName: 'actions/setup-go',
+          depType: 'action',
+          replaceString: 'actions/setup-go@v5',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-python',
+          depType: 'action',
+          replaceString: 'actions/setup-python@v3',
+          versioning: 'docker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v3',
+          datasource: 'github-tags',
+          depName: 'actions/setup-node',
+          depType: 'action',
+          replaceString: 'actions/setup-node@v3',
+          versioning: 'docker',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '16.x',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: '20.0.0',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'go',
+          packageName: 'actions/go-versions',
+          currentValue: '1.23',
+          datasource: 'github-releases',
+          versioning: 'npm',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'python',
+          packageName: 'actions/python-versions',
+          currentValue: '>=3.8.0 <3.10.0',
+          datasource: 'github-releases',
+          versioning: 'npm',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+        {
+          depName: 'node',
+          packageName: 'actions/node-versions',
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          versioning: 'node',
+          extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
+          depType: 'uses-with',
+        },
+      ]);
+    });
+
+    it('logs unknown schema', () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: 'node20'
+          main: 'index.js'
+        `;
+      expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
   });
 });

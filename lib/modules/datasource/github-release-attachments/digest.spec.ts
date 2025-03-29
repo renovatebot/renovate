@@ -1,9 +1,8 @@
-import * as httpMock from '../../../../test/http-mock';
 import type { GithubDigestFile } from '../../../util/github/types';
 import { toSha256 } from '../../../util/hash';
 import { GitHubReleaseAttachmentMocker } from './test';
-
 import { GithubReleaseAttachmentsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/github-release-attachments/digest', () => {
   const packageName = 'some/dep';

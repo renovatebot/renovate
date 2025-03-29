@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { logger } from '../../../../test/util';
 import { addLibYears } from '../../../instrumentation/reporting';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../instrumentation/reporting');
 
@@ -94,13 +94,13 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for some/image',
       );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No releaseTimestamp for dep1 update to 3.0.0',
       );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for dep3',
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(

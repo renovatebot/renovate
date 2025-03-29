@@ -9,7 +9,7 @@ import {
 
 vi.mock('../../../util/cache/repository');
 
-const cache = mocked(_cache);
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/reconfigure/reconfigure-cache', () => {
   describe('setReconfigureBranchCache()', () => {

@@ -1,12 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import {
-  fs,
-  logger,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
@@ -25,14 +16,15 @@ import {
   mergeStaticRepoEnvConfig,
   setNpmTokenInNpmrc,
 } from './merge';
+import { fs, logger, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../onboarding/branch/onboarding-branch-cache');
 
-const migrate = mocked(_migrate);
-const migrateAndValidate = mocked(_migrateAndValidate);
-const onboardingCache = mocked(_onboardingCache);
+const migrate = vi.mocked(_migrate);
+const migrateAndValidate = vi.mocked(_migrateAndValidate);
+const onboardingCache = vi.mocked(_onboardingCache);
 
 let config: RenovateConfig;
 

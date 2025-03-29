@@ -3,9 +3,6 @@ import { codeBlock } from 'common-tags';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import type { RenovateConfig } from '../../../test/util';
-import { logger, mockedFunction, platform } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
@@ -20,6 +17,9 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+import { Fixtures } from '~test/fixtures';
+import { logger, platform } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 const createVulnerabilitiesMock = vi.fn();
 vi.mock('./process/vulnerabilities', () => {
@@ -1104,11 +1104,11 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -1142,7 +1142,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = {};
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
@@ -1154,7 +1154,7 @@ None detected
 
 `,
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });

@@ -1,8 +1,6 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -29,6 +27,8 @@ import type {
 import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -38,7 +38,6 @@ vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http/queue');
 const hostRules = vi.mocked(_hostRules);
 
-vi.mock('../../../util/git');
 const git = vi.mocked(_git);
 
 describe('modules/platform/github/index', () => {

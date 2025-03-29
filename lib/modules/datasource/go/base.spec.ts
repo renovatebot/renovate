@@ -1,17 +1,16 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { BaseGoDatasource } from './base';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {

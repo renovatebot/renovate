@@ -193,7 +193,7 @@ export function generateBranchConfig(
     }
     if (upg.newDigest) {
       upg.newDigestShort =
-        upg.newDigestShort ||
+        upg.newDigestShort ??
         upg.newDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upg.isDigest || upg.isPinDigest) {
@@ -285,7 +285,6 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&

@@ -1,7 +1,9 @@
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
 import { get, set } from '../../cache/package'; // Import the package cache functions
 import { resolveTtlValues } from '../../cache/package/ttl';
 import type { PackageCacheNamespace } from '../../cache/package/types';
+import { regEx } from '../../regex';
 import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
@@ -10,6 +12,7 @@ import type { HttpCache } from './schema';
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   ttlMinutes?: number;
+  checkCacheControl?: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -18,7 +21,13 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private softTtlMinutes: number;
   private hardTtlMinutes: number;
 
-  constructor({ namespace, ttlMinutes = 15 }: PackageHttpCacheProviderOptions) {
+  checkCacheControl: boolean;
+
+  constructor({
+    namespace,
+    ttlMinutes = 15,
+    checkCacheControl = true,
+  }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
     const { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
@@ -27,6 +36,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     );
     this.softTtlMinutes = softTtlMinutes;
     this.hardTtlMinutes = hardTtlMinutes;
+    this.checkCacheControl = checkCacheControl;
   }
 
   async load(url: string): Promise<unknown> {
@@ -60,5 +70,37 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
     HttpCacheStats.incLocalHits(url);
     return cached.httpResponse as HttpResponse<T>;
+  }
+
+  private preventCaching<T>(resp: HttpResponse<T>): boolean {
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    if (cachePrivatePackages) {
+      return false;
+    }
+
+    if (!this.checkCacheControl) {
+      return false;
+    }
+
+    const isPublic = resp.headers?.['cache-control']
+      ?.toLocaleLowerCase()
+      .split(regEx(/\s*,\s*/))
+      .includes('public');
+
+    return !isPublic;
+  }
+
+  override async wrapServerResponse<T>(
+    url: string,
+    resp: HttpResponse<T>,
+  ): Promise<HttpResponse<T>> {
+    if (resp.statusCode === 200 && this.preventCaching(resp)) {
+      return resp;
+    }
+
+    return await super.wrapServerResponse(url, resp);
   }
 }

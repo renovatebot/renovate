@@ -6,8 +6,16 @@ import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import type { LongCommitSha } from '../../../util/git/types';
 import { validateReconfigureBranch } from './validate';
+import { fs, git, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../util/git');
+vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/fs');
+vi.mock('../init/merge');
+
+const cache = vi.mocked(_cache);
+const merge = vi.mocked(_merge);
 
 describe('workers/repository/reconfigure/validate', () => {
   const config: RenovateConfig = {

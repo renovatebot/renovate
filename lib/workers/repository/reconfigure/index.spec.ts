@@ -20,6 +20,8 @@ import * as _prComment from './comment';
 import * as _utils from './utils';
 import * as _validate from './validate';
 import { checkReconfigureBranch } from '.';
+import { logger, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('./validate');
 vi.mock('./utils');

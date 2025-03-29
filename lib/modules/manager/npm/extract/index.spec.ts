@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { extractAllPackageFiles } from '..';
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import { postExtract } from './post';
 import * as npmExtract from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../../util/fs');
 
