@@ -125,4 +125,76 @@ describe('modules/manager/bun/extract', () => {
       });
     });
   });
+
+  describe('workspaces', () => {
+    it('processes workspace package files when workspaces are detected', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with workspaces)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: ['packages/*'],
+          }),
+        )
+        // Second call: workspace package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { dep2: '2.0.0' },
+          }),
+        );
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const result = await extractAllPackageFiles({}, matchedFiles);
+
+      // We expect two package file objects: one for the main package.json and one for the workspace.
+      expect(result.length).toBe(2);
+
+      const mainPackage = result.find(
+        (pkg) => pkg.packageFile === 'package.json',
+      );
+      expect(mainPackage).toBeDefined();
+      expect(mainPackage?.packageFileVersion).toBe('0.0.1');
+      expect(mainPackage?.lockFiles).toEqual(['bun.lock']);
+
+      const workspacePackage = result.find(
+        (pkg) => pkg.packageFile === 'packages/pkg1/package.json',
+      );
+      expect(workspacePackage).toBeDefined();
+      expect(workspacePackage?.packageFileVersion).toBe('1.0.0');
+      expect(workspacePackage?.lockFiles).toEqual(['bun.lock']);
+    });
+
+    it('skips workspace processing when workspaces is not a valid array', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: 'invalid',
+        }),
+      );
+      // Only the main package.json file is processed
+      const result = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+      expect(result).toHaveLength(1);
+      expect(result[0].packageFile).toBe('package.json');
+    });
+  });
 });
