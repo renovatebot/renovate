@@ -27,7 +27,7 @@ describe('modules/datasource/postprocess-release', () => {
   it('returns original release for empty datasource field', async () => {
     const releaseOrig: Release = { version: '1.2.3' };
     const release = await postprocessRelease(
-      { packageName: 'some-package', registryUrl: 'https://example.com' },
+      { packageName: 'some-package' },
       releaseOrig,
     );
     expect(release).toBe(releaseOrig);
@@ -38,11 +38,7 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(null);
 
     const release = await postprocessRelease(
-      {
-        datasource: 'some-datasource',
-        packageName: 'some-package',
-        registryUrls: ['https://example.com'],
-      },
+      { datasource: 'some-datasource', packageName: 'some-package' },
       releaseOrig,
     );
 
@@ -97,7 +93,11 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource', packageName: 'some-package' },
+      {
+        datasource: 'some-datasource',
+        packageName: 'some-package',
+        registryUrl: 'https://example.com',
+      },
       releaseOrig,
     );
 
@@ -142,7 +142,11 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource', packageName: 'some-package' },
+      {
+        datasource: 'some-datasource',
+        packageName: 'some-package',
+        registryUrls: ['https://example.com'],
+      },
       releaseOrig,
     );
 
