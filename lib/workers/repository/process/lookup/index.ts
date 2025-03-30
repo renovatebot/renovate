@@ -323,7 +323,7 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = getTimestamp(
+      const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,
         currentVersion,
