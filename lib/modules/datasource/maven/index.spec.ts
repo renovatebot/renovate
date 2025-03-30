@@ -161,7 +161,12 @@ describe('modules/datasource/maven/index', () => {
       name: 'package',
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
-      releases: [{ version: '1.0.3-SNAPSHOT' }],
+      releases: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
+      ],
     });
   });
 
@@ -192,7 +197,12 @@ describe('modules/datasource/maven/index', () => {
       name: 'package',
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
-      releases: [{ version: '1.0.3-SNAPSHOT' }],
+      releases: [
+        {
+          version: '1.0.3-SNAPSHOT',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
+      ],
     });
   });
 
@@ -469,7 +479,10 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.3-SNAPSHOT' },
         { version: '1.0.4-SNAPSHOT' },
         { version: '1.0.5-SNAPSHOT' },
-        { version: '2.0.0' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
       ],
       isPrivate: true,
     });
@@ -514,7 +527,10 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.3-SNAPSHOT' },
         { version: '1.0.4-SNAPSHOT' },
         { version: '1.0.5-SNAPSHOT' },
-        { version: '2.0.0' },
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2021-01-01T00:00:00.000Z',
+        },
       ],
       isPrivate: true,
     });
