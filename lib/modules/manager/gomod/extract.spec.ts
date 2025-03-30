@@ -177,7 +177,7 @@ describe('modules/manager/gomod/extract', () => {
           {
             datasource: 'go',
             depName: 'github.com/oapi-codegen/oapi-codegen/v2',
-            depType: 'tool',
+            depType: 'indirect',
             currentValue: 'v2.4.1',
             managerData: { lineNumber: 0 },
           },
@@ -198,7 +198,7 @@ describe('modules/manager/gomod/extract', () => {
           {
             datasource: 'go',
             depName: 'github.com/oapi-codegen/oapi-codegen/v2',
-            depType: 'tool',
+            depType: 'indirect',
             currentValue: 'v2.4.1',
             managerData: { lineNumber: 0 },
           },
@@ -248,7 +248,7 @@ describe('modules/manager/gomod/extract', () => {
         {
           datasource: 'go',
           depName: 'github.com/foo/bar/sub1/sub2',
-          depType: 'tool',
+          depType: 'indirect',
           currentValue: 'v4.5.6',
           managerData: { lineNumber: 2, multiLine: true },
         },

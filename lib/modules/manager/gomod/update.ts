@@ -63,11 +63,7 @@ export function updateDependency({
           /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
       }
-    } else if (
-      depType === 'require' ||
-      depType === 'indirect' ||
-      depType === 'tool'
-    ) {
+    } else if (depType === 'require' || depType === 'indirect') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
@@ -152,7 +148,7 @@ export function updateDependency({
       return fileContent;
     }
 
-    if (depType === 'indirect' || depType === 'tool') {
+    if (depType === 'indirect') {
       newLine = newLine.replace(
         regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
         ' // indirect',

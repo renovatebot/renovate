@@ -46,10 +46,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   for (const tool of tools) {
     const match = findMatchingModule(tool, deps);
-    // Only promote `indirect` to `tool` depType,
-    // `require` should remain `require`
     if (match?.depType === 'indirect') {
-      match.depType = 'tool';
       delete match.enabled;
     }
   }
