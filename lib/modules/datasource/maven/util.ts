@@ -287,7 +287,7 @@ export async function downloadMaven(
 
   let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
 
-  if (isHttpUrl(protocol)) {
+  if (isHttpUrl(url)) {
     result = await downloadHttpProtocol(http, url);
   }
 
