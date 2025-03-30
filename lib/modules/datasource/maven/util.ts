@@ -66,6 +66,8 @@ function isUnsupportedHostError(err: HttpError): boolean {
 
 const cacheProvider = new PackageHttpCacheProvider({
   namespace: 'datasource-maven:cache-provider',
+  ttlMinutes: 7 * 24 * 60,
+  checkCacheControlHeader: false, // Maven doesn't respond with `cache-control` headers
 });
 
 export async function downloadHttpProtocol(
