@@ -176,7 +176,7 @@ export class MavenDatasource extends Datasource {
       cacheKey,
     );
 
-    /* v8 ignore start */
+    /* v8 ignore start: hard to test */
     if (cachedResult) {
       return cachedResult;
     } /* v8 ignore stop */
