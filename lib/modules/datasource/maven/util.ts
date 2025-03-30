@@ -11,7 +11,7 @@ import { Result } from '../../../util/result';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
@@ -287,7 +287,7 @@ export async function downloadMaven(
 
   let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
 
-  if (protocol === 'http:' || protocol === 'https:') {
+  if (isHttpUrl(protocol)) {
     result = await downloadHttpProtocol(http, url);
   }
 
