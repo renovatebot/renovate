@@ -62,13 +62,15 @@ class GerritClient {
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
-    // Disables memCache (which is enabled by default) to be replaced by
-    // memCacheProvider.
-    const opts: HttpOptions = { memCache: false };
+    const opts: HttpOptions = {};
+    /* v8 ignore start: temporary code */
     // TODO: should refresh the cache rather than just ignore it
-    if (!refreshCache) {
+    if (refreshCache) {
+      opts.memCache = false;
+    } else {
       opts.cacheProvider = memCacheProvider;
     }
+    /* v8 ignore stop */
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(

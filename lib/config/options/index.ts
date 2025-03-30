@@ -2413,7 +2413,7 @@ const options: RenovateOptions[] = [
       'gomodSkipVendor',
       'gomodVendor',
       'helmUpdateSubChartArchives',
-      'kustomizeInflateHelmArchives',
+      'kustomizeInflateHelmCharts',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',
