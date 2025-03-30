@@ -140,55 +140,52 @@ const Features = LooseRecord(
       channels: z.array(Channel).optional(),
     })
     .and(DependenciesMixin),
-)
-  .default({})
-  .transform(
-    (
-      features,
-    ): {
-      conda: PixiPackageDependency[];
-      pypi: PixiPackageDependency[];
-    } => {
-      const pypi: PixiPackageDependency[] = [];
-      const conda: PixiPackageDependency[] = [];
+).transform(
+  (
+    features,
+  ): {
+    conda: PixiPackageDependency[];
+    pypi: PixiPackageDependency[];
+  } => {
+    const pypi: PixiPackageDependency[] = [];
+    const conda: PixiPackageDependency[] = [];
 
-      for (const feature of Object.values(features)) {
-        conda.push(
-          ...feature.conda.map((item) => {
-            return {
-              ...item,
-              channels: feature.channels,
-            };
-          }),
-        );
+    for (const feature of Object.values(features)) {
+      conda.push(
+        ...feature.conda.map((item) => {
+          return {
+            ...item,
+            channels: feature.channels,
+          };
+        }),
+      );
 
-        pypi.push(...feature.pypi);
-      }
+      pypi.push(...feature.pypi);
+    }
 
-      return { pypi, conda };
-    },
-  );
+    return { pypi, conda };
+  },
+);
+
+const PixiWorkspace = z
+  .object({
+    workspace: Project,
+  })
+  .transform((val) => {
+    return { project: val.workspace };
+  });
+
+const PixiProject = z.object({
+  project: Project,
+});
 
 /**
  * `$` of `pixi.toml` or `$.tool.pixi` of `pyproject.toml`
  */
 export const PixiConfigSchema = z
-  .object({ feature: Features })
-  .and(DependenciesMixin)
-  .and(
-    z.union([
-      z
-        .object({
-          workspace: Project,
-        })
-        .transform((val) => {
-          return { project: val.workspace };
-        }),
-      z.object({
-        project: Project,
-      }),
-    ]),
-  );
+  .union([PixiWorkspace, PixiProject])
+  .and(z.object({ feature: Features.default({}) }))
+  .and(DependenciesMixin);
 
 export type PixiConfig = z.infer<typeof PixiConfigSchema>;
 
