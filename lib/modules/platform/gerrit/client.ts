@@ -63,9 +63,14 @@ class GerritClient {
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
     const opts: HttpOptions = {};
-    if (!refreshCache) {
+    /* v8 ignore start: temporary code */
+    // TODO: should refresh the cache rather than just ignore it
+    if (refreshCache) {
+      opts.memCache = false;
+    } else {
       opts.cacheProvider = memCacheProvider;
     }
+    /* v8 ignore stop */
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
