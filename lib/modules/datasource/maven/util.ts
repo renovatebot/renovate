@@ -12,7 +12,7 @@ import { Result } from '../../../util/result';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
@@ -288,19 +288,19 @@ export async function downloadMaven(
   http: Http,
   url: URL,
 ): Promise<MavenFetchResult> {
-  const protocol = url.protocol.slice(0, -1);
+  const protocol = url.protocol;
 
   let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
 
-  if (protocol === 'http' || protocol === 'https') {
+  if (isHttpUrl(url)) {
     result = await downloadHttpProtocol(http, url);
   }
 
-  if (protocol === 'artifactregistry') {
+  if (protocol === 'artifactregistry:') {
     result = await downloadArtifactRegistryProtocol(http, url);
   }
 
-  if (protocol === 's3') {
+  if (protocol === 's3:') {
     result = await downloadS3Protocol(url);
   }
 
@@ -383,10 +383,11 @@ async function getSnapshotFullVersion(
   const metadataXmlResult = await downloadMavenXml(http, metadataUrl);
 
   return metadataXmlResult
-    .transform(({ data }) => {
-      const nullErr = { type: 'snapshot-extract-error' };
-      return Result.wrapNullable(extractSnapshotVersion(data), nullErr);
-    })
+    .transform(({ data }) =>
+      Result.wrapNullable(extractSnapshotVersion(data), {
+        type: 'snapshot-extract-error',
+      }),
+    )
     .unwrapOrNull();
 }
 
