@@ -73,9 +73,7 @@ const PypiGitDependency = z
 const PypiDependencies = LooseRecord(
   z.string(),
   z.union([PypiDependency, PypiGitDependency]),
-)
-  .catch({})
-  .transform(collectNamedPackages);
+).transform(collectNamedPackages);
 
 const CondaDependency = z
   .union([
@@ -92,9 +90,9 @@ const CondaDependency = z
     } satisfies PixiPackageDependency;
   });
 
-const CondaDependencies = LooseRecord(z.string(), CondaDependency)
-  .catch({})
-  .transform(collectNamedPackages);
+const CondaDependencies = LooseRecord(z.string(), CondaDependency).transform(
+  collectNamedPackages,
+);
 
 const Targets = LooseRecord(
   z.string(),
