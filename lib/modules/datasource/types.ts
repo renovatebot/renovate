@@ -51,6 +51,7 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  strategy?: RegistryStrategy;
 }
 
 export interface Release {

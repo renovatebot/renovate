@@ -311,7 +311,8 @@ async function fetchReleases(
     config.additionalRegistryUrls,
   );
   let dep: ReleaseResult | null = null;
-  const registryStrategy = datasource.registryStrategy ?? 'hunt';
+  const registryStrategy =
+    config.strategy ?? datasource.registryStrategy ?? 'hunt';
   try {
     if (is.nonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {

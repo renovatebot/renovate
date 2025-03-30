@@ -16,6 +16,7 @@ import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
 import type { CustomExtractConfig } from './custom/types';
+import { RegistryStrategy } from '../datasource';
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -165,6 +166,11 @@ export interface PackageDependency<T = Record<string, any>>
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
+
+  /**
+   * override data source's default strategy.
+   */
+  registryStrategy?: RegistryStrategy;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
