@@ -15,8 +15,8 @@ import type {
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
+import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
-import { RegistryStrategy } from '../datasource';
 
 export type MaybePromise<T> = T | Promise<T>;
 
