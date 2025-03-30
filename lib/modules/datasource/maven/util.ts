@@ -283,19 +283,19 @@ export async function downloadMaven(
   http: Http,
   url: URL,
 ): Promise<MavenFetchResult> {
-  const protocol = url.protocol.slice(0, -1);
+  const protocol = url.protocol;
 
   let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
 
-  if (protocol === 'http' || protocol === 'https') {
+  if (protocol === 'http:' || protocol === 'https:') {
     result = await downloadHttpProtocol(http, url);
   }
 
-  if (protocol === 'artifactregistry') {
+  if (protocol === 'artifactregistry:') {
     result = await downloadArtifactRegistryProtocol(http, url);
   }
 
-  if (protocol === 's3') {
+  if (protocol === 's3:') {
     result = await downloadS3Protocol(url);
   }
 
@@ -378,10 +378,11 @@ async function getSnapshotFullVersion(
   const metadataXmlResult = await downloadMavenXml(http, metadataUrl);
 
   return metadataXmlResult
-    .transform(({ data }) => {
-      const nullErr = { type: 'snapshot-extract-error' };
-      return Result.wrapNullable(extractSnapshotVersion(data), nullErr);
-    })
+    .transform(({ data }) =>
+      Result.wrapNullable(extractSnapshotVersion(data), {
+        type: 'snapshot-extract-error',
+      }),
+    )
     .unwrapOrNull();
 }
 
