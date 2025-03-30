@@ -3,7 +3,6 @@ import type { XmlDocument } from 'xmldoc';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
-import { cache } from '../../../util/cache/package/decorator';
 import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import mavenVersion from '../../versioning/maven';
@@ -164,19 +163,24 @@ export class MavenDatasource extends Datasource {
     return result;
   }
 
-  @cache({
-    namespace: `datasource-maven`,
-    key: (
-      { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version, versionOrig }: Release,
-    ) =>
-      `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ? `${versionOrig}:${version}` : `${version}`}`,
-    ttlMinutes: 24 * 60,
-  })
   override async postprocessRelease(
     { packageName, registryUrl }: PostprocessReleaseConfig,
     release: Release,
   ): Promise<PostprocessReleaseResult> {
+    const { version, versionOrig } = release;
+    const cacheKey = versionOrig
+      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
+      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cachedResult = await packageCache.get<PostprocessReleaseResult>(
+      'datasource-maven',
+      cacheKey,
+    );
+
+    /* v8 ignore start: hard to test */
+    if (cachedResult) {
+      return cachedResult;
+    } /* v8 ignore stop */
+
     if (!packageName || !registryUrl) {
       return release;
     }
@@ -195,6 +199,7 @@ export class MavenDatasource extends Datasource {
     const res = await checkResource(this.http, artifactUrl);
 
     if (res === 'not-found' || res === 'error') {
+      await packageCache.set('datasource-maven', cacheKey, 'reject', 24 * 60);
       return 'reject';
     }
 
@@ -202,6 +207,7 @@ export class MavenDatasource extends Datasource {
       release.releaseTimestamp = asTimestamp(res.toISOString());
     }
 
+    await packageCache.set('datasource-maven', cacheKey, release, 7 * 24 * 60);
     return release;
   }
 }
