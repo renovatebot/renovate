@@ -63,7 +63,10 @@ describe('modules/datasource/maven/s3', () => {
           { version: '1.0.0' },
           { version: '1.0.1' },
           { version: '1.0.2' },
-          { version: '1.0.3' },
+          {
+            version: '1.0.3',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
         ],
         isPrivate: true,
       });
