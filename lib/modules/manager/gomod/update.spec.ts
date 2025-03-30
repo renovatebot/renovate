@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import type { UpdateType } from '../../../config/types';
 import { updateDependency } from '.';
 import { Fixtures } from '~test/fixtures';
@@ -413,6 +414,42 @@ describe('modules/manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod3, upgrade });
       expect(res).not.toEqual(gomod2);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
+
+    it('should perform single-line tool upgrades', () => {
+      const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+      const upgrade = {
+        depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+        managerData: { lineNumber: 0 },
+        newValue: 'v2.4.2',
+        depType: 'tool',
+      };
+      const res = updateDependency({ fileContent: goMod, upgrade });
+      expect(res).not.toBeNull();
+      expect(res).not.toEqual(goMod);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
+
+    it('should perform multi-line tool upgrades', () => {
+      const goMod = codeBlock`
+        require (
+          github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        )
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+      const upgrade = {
+        depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+        managerData: { lineNumber: 1, multiLine: true },
+        newValue: 'v2.4.2',
+        depType: 'tool',
+      };
+      const res = updateDependency({ fileContent: goMod, upgrade });
+      expect(res).not.toBeNull();
+      expect(res).not.toEqual(goMod);
       expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
   });
