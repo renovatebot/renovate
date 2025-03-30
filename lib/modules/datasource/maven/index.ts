@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { XmlDocument } from 'xmldoc';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
@@ -20,8 +19,8 @@ import type {
 import { MAVEN_REPO } from './common';
 import type { MavenDependency } from './types';
 import {
-  checkResource,
   createUrlForDependencyPom,
+  downloadMaven,
   downloadMavenXml,
   getDependencyInfo,
   getDependencyParts,
@@ -93,24 +92,29 @@ export class MavenDatasource extends Datasource {
       return cachedVersions;
     }
 
-    const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
-      this.http,
-      metadataUrl,
-    );
-    if (!mavenMetadata) {
-      return [];
-    }
+    const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
+    return metadataXmlResult
+      .transform(
+        async ({ isCacheable, data: mavenMetadata }): Promise<string[]> => {
+          const versions = extractVersions(mavenMetadata);
+          const cachePrivatePackages = GlobalConfig.get(
+            'cachePrivatePackages',
+            false,
+          );
 
-    const versions = extractVersions(mavenMetadata);
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || isCacheable) {
-      await packageCache.set(cacheNamespace, cacheKey, versions, 30);
-    }
+          if (cachePrivatePackages || isCacheable) {
+            await packageCache.set(cacheNamespace, cacheKey, versions, 30);
+          }
 
-    return versions;
+          return versions;
+        },
+      )
+      .onError((err) => {
+        logger.debug(
+          `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
+        );
+      })
+      .unwrapOr([]);
   }
 
   async getReleases({
@@ -195,16 +199,18 @@ export class MavenDatasource extends Datasource {
     );
 
     const artifactUrl = getMavenUrl(dependency, registryUrl, pomUrl);
+    const fetchResult = await downloadMaven(this.http, artifactUrl);
+    const { val, err } = fetchResult.unwrap();
 
-    const res = await checkResource(this.http, artifactUrl);
-
-    if (res === 'not-found' || res === 'error') {
-      await packageCache.set('datasource-maven', cacheKey, 'reject', 24 * 60);
-      return 'reject';
+    if (err) {
+      const result: PostprocessReleaseResult =
+        err.type === 'not-found' ? 'reject' : release;
+      await packageCache.set('datasource-maven', cacheKey, result, 24 * 60);
+      return result;
     }
 
-    if (is.date(res)) {
-      release.releaseTimestamp = asTimestamp(res.toISOString());
+    if (val.lastModified) {
+      release.releaseTimestamp = asTimestamp(val.lastModified);
     }
 
     await packageCache.set('datasource-maven', cacheKey, release, 7 * 24 * 60);
