@@ -11,8 +11,7 @@ import {
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
-import { partial } from '~test/util';
-import { hostRules } from '~test/util';
+import { hostRules, partial } from '~test/util';
 
 describe('modules/datasource/metadata', () => {
   beforeEach(() => {
