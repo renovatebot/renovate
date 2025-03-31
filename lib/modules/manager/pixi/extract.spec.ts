@@ -130,6 +130,16 @@ git = 'https://github.com/pytest-dev/pytest-github-actions-annotate-failures.git
 rev = "v0.3.0"
 `;
 
+const pixiChannelPriorityDisabled = `
+[project]
+channels = ["anaconda", "conda-forge"]
+platforms = ["win-64"]
+channel-priority = 'disabled'
+
+[dependencies]
+python = "3.12.*"
+`;
+
 describe('modules/manager/pixi/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty pyproject.toml', async () => {
@@ -697,5 +707,26 @@ describe('modules/manager/pixi/extract', () => {
 
   it('returns null for non-known config file', async () => {
     expect(await extractPackageFile(`{}`, 'unexpected.json')).toBe(null);
+  });
+
+  it(`set registryStrategy='merge' for channel-priority='disabled'"`, async () => {
+    expect(
+      await extractPackageFile(pixiChannelPriorityDisabled, 'pixi.toml'),
+    ).toMatchObject({
+      deps: [
+        {
+          channel: undefined,
+          channels: ['conda-forge'],
+          currentValue: '3.12.*',
+          datasource: 'conda',
+          depName: 'python',
+          depType: 'dependencies',
+          registryStrategy: 'merge',
+          registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
   });
 });

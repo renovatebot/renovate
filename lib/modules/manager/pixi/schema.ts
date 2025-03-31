@@ -114,6 +114,9 @@ const Targets = LooseRecord(
 
 const Project = z.object({
   channels: z.array(Channel).default([]),
+  'channel-priority': z
+    .union([z.literal('strict'), z.literal('disabled')])
+    .default('strict'),
 });
 
 const DependenciesMixin = z

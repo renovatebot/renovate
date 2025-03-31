@@ -16,6 +16,7 @@ import {
   type PixiPackageDependency,
   PixiToml,
 } from './schema';
+import { RegistryStrategy } from '../../datasource';
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
 
@@ -77,17 +78,32 @@ export async function extractPackageFile(
 
   const project = val.project;
 
+  const channelPriority = project['channel-priority'];
+
+  let registryStrategy: RegistryStrategy | undefined;
+
+  if (channelPriority === 'disabled') {
+    registryStrategy = 'merge';
+  }
+
   // resolve channels and build registry urls for each channel with order
   const conda: PixiPackageDependency[] = [];
 
   for (const item of val.conda) {
-    conda.push(addRegistryUrls({ ...item, channels: project.channels }));
+    conda.push(
+      addRegistryUrls({
+        ...item,
+        channels: project.channels,
+        registryStrategy,
+      }),
+    );
   }
 
   for (const item of val.feature.conda) {
     conda.push(
       addRegistryUrls({
         ...item,
+        registryStrategy,
         channels: [...coerceArray(item.channels), ...project.channels],
       }),
     );
