@@ -77,7 +77,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     return cached.httpResponse as HttpResponse<T>;
   }
 
-  private cacheAllowed<T>(resp: HttpResponse<T>): boolean {
+  cacheAllowed<T>(resp: HttpResponse<T>): boolean {
     const allowedViaGlobalConfig = GlobalConfig.get(
       'cachePrivatePackages',
       false,
