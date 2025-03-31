@@ -1,6 +1,6 @@
 import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { Http } from '..';
+import { Http, type HttpResponse } from '..';
 import { GlobalConfig } from '../../../config/global';
 import * as _packageCache from '../../cache/package';
 import { PackageHttpCacheProvider } from './package-http-cache-provider';
@@ -204,5 +204,56 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
+  });
+
+  describe('cacheAllowed', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    test.each`
+      cachePrivatePackages | checkCacheControlHeader | cacheControlPublic | authorization | cacheAllowed
+      ${true}              | ${true}                 | ${true}            | ${true}       | ${true}
+      ${true}              | ${false}                | ${false}           | ${false}      | ${true}
+      ${false}             | ${true}                 | ${true}            | ${true}       | ${false}
+      ${false}             | ${true}                 | ${true}            | ${false}      | ${true}
+      ${false}             | ${true}                 | ${false}           | ${true}       | ${false}
+      ${false}             | ${true}                 | ${false}           | ${false}      | ${false}
+      ${false}             | ${false}                | ${true}            | ${true}       | ${false}
+      ${false}             | ${false}                | ${false}           | ${true}       | ${false}
+      ${false}             | ${false}                | ${true}            | ${false}      | ${true}
+      ${false}             | ${false}                | ${false}           | ${false}      | ${true}
+      ${false}             | ${true}                 | ${null}            | ${true}       | ${false}
+      ${false}             | ${true}                 | ${null}            | ${false}      | ${true}
+    `(
+      'cachePrivatePackages=$cachePrivatePackages checkCacheControlHeader=$checkCacheControlHeader cacheControlPublic=$cacheControlPublic authorization=$authorization => cacheAllowed=$cacheAllowed',
+      ({
+        cachePrivatePackages,
+        checkCacheControlHeader,
+        cacheControlPublic,
+        authorization,
+        cacheAllowed,
+      }) => {
+        GlobalConfig.set({ cachePrivatePackages });
+
+        const cacheProvider = new PackageHttpCacheProvider({
+          namespace: '_test-namespace',
+          checkCacheControlHeader,
+        });
+
+        const response = { headers: {} } as HttpResponse;
+
+        // Set cache-control header if not null
+        if (cacheControlPublic !== null) {
+          response.headers['cache-control'] = cacheControlPublic
+            ? 'max-age=180, public'
+            : 'max-age=180, private';
+        }
+
+        response.authorization = authorization;
+
+        expect(cacheProvider.cacheAllowed(response)).toBe(cacheAllowed);
+      },
+    );
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const ReleasesConfig = z.object({
-  packageName: z.string(),
+  packageName: z.string().length(40),
   registryUrl: z.string(),
 });
 
