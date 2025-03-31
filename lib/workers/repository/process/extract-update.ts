@@ -131,6 +131,7 @@ export function isCacheExtractValid(
 
 export async function extract(
   config: RenovateConfig,
+  overwriteCache = true,
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
@@ -160,14 +161,18 @@ export async function extract(
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
-    // TODO: fix types (#22198)
-    cache.scan[baseBranch!] = {
-      revision: EXTRACT_CACHE_REVISION,
-      sha: baseBranchSha!,
-      configHash,
-      extractionFingerprints,
-      packageFiles,
-    };
+
+    if (overwriteCache) {
+      // TODO: fix types (#22198)
+      cache.scan[baseBranch!] = {
+        revision: EXTRACT_CACHE_REVISION,
+        sha: baseBranchSha!,
+        configHash,
+        extractionFingerprints,
+        packageFiles,
+      };
+    }
+
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
       ? config.baseBranches
