@@ -282,7 +282,7 @@
     "@types/clean-git-ref": "2.0.2",
     "@types/common-tags": "1.8.4",
     "@types/conventional-commits-detector": "1.0.2",
-    "@types/diff": "7.0.1",
+    "@types/diff": "7.0.2",
     "@types/eslint-config-prettier": "6.11.3",
     "@types/fs-extra": "11.0.4",
     "@types/git-url-parse": "9.0.3",
