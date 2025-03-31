@@ -122,6 +122,11 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   options: GotOptions,
   hostRule: HostRule,
 ): GotOptions {
+  if (hostRule.enabled === false) {
+    options.enabled = false;
+    return options;
+  }
+
   const { username, password, token, authType } = hostRule;
   const host = parseUrl(url)?.host;
   if (options.noAuth) {
@@ -153,10 +158,6 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.abortIgnoreStatusCodes) {
     options.abortIgnoreStatusCodes = hostRule.abortIgnoreStatusCodes;
-  }
-
-  if (hostRule.enabled === false) {
-    options.enabled = false;
   }
 
   if (hostRule.timeout) {
