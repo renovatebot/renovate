@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { getCustomEnv } from '../env';
+import { getCustomEnv, getUserEnv } from '../env';
 import { rawExec } from './common';
 import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import {
@@ -81,6 +81,7 @@ async function prepareRawExec(
   const { docker } = opts;
   const preCommands = opts.preCommands ?? [];
   const customEnvVariables = getCustomEnv();
+  const userConfiguredEnv = getUserEnv();
   const { containerbaseDir, binarySource } = GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
@@ -98,7 +99,7 @@ async function prepareRawExec(
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
-      ...opts.userConfiguredEnv,
+      ...userConfiguredEnv,
     };
     const childEnv = getChildEnv(opts);
     const envVars = [

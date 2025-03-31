@@ -219,7 +219,6 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
-export type UserEnv = Record<string, string>;
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -306,7 +305,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
-  env?: UserEnv;
+  env?: Record<string, string>;
   logLevelRemap?: LogLevelRemap[];
 
   branchTopic?: string;

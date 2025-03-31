@@ -77,7 +77,6 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {},
-    userConfiguredEnv: config.env,
     extraEnv: gitEnv,
     toolConstraints: [
       {
