@@ -913,14 +913,17 @@ describe('modules/datasource/index', () => {
       });
 
       describe('overruled by package config', () => {
-        datasources.set(
-          datasource,
-          new DummyDatasource({
-            'https://reg1.com': { releases: [{ version: '0.0.1' }] },
-            'https://reg2.com': { releases: [{ version: '0.0.2' }] },
-            'https://reg3.com': { releases: [{ version: '0.0.3' }] },
-          }),
-        );
+        beforeEach(() => {
+          datasources.set(
+            datasource,
+            new DummyDatasource({
+              'https://reg1.com': { releases: [{ version: '0.0.1' }] },
+              'https://reg2.com': { releases: [{ version: '0.0.2' }] },
+              'https://reg3.com': { releases: [{ version: '0.0.3' }] },
+            }),
+          );
+        });
+
         it('first', async () => {
           const res = await getPkgReleases({
             datasource,
