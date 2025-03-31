@@ -211,29 +211,64 @@ describe('util/http/cache/package-http-cache-provider', () => {
       GlobalConfig.reset();
     });
 
+    // Test matrix covering all combinations of:
+    // 1. cachePrivatePackages (true, false)
+    // 2. checkCacheControlHeader (true, false)
+    // 3. cache-control header (public, private, null, undefined, malformed)
+    // 4. checkAuthorizationHeader (true, false)
+    // 5. authorization header (true, false, undefined)
     test.each`
-      cachePrivatePackages | checkCacheControlHeader | checkAuthorizationHeader | cacheControlPublic | authorization | cacheAllowed
-      ${true}              | ${true}                 | ${true}                  | ${true}            | ${true}       | ${true}
-      ${true}              | ${false}                | ${false}                 | ${false}           | ${false}      | ${true}
-      ${false}             | ${true}                 | ${true}                  | ${true}            | ${true}       | ${false}
-      ${false}             | ${true}                 | ${true}                  | ${true}            | ${false}      | ${true}
-      ${false}             | ${true}                 | ${false}                 | ${false}           | ${true}       | ${false}
-      ${false}             | ${true}                 | ${false}                 | ${false}           | ${false}      | ${false}
-      ${false}             | ${false}                | ${true}                  | ${true}            | ${true}       | ${false}
-      ${false}             | ${false}                | ${true}                  | ${false}           | ${true}       | ${false}
-      ${false}             | ${false}                | ${false}                 | ${true}            | ${false}      | ${true}
-      ${false}             | ${false}                | ${false}                 | ${false}           | ${false}      | ${true}
-      ${false}             | ${true}                 | ${true}                  | ${null}            | ${true}       | ${false}
-      ${false}             | ${true}                 | ${true}                  | ${null}            | ${false}      | ${true}
+      cachePrivatePackages | checkCacheControlHeader | cacheControl              | checkAuthorizationHeader | authorization | expected
+      ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${true}       | ${true}
+      ${true}              | ${true}                 | ${undefined}              | ${true}                  | ${true}       | ${true}
+      ${true}              | ${true}                 | ${'malformed'}            | ${true}                  | ${true}       | ${true}
+      ${true}              | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${true}
+      ${true}              | ${false}                | ${'max-age=180, private'} | ${true}                  | ${true}       | ${true}
+      ${true}              | ${false}                | ${undefined}              | ${true}                  | ${true}       | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, public'}  | ${false}                 | ${true}       | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, private'} | ${false}                 | ${true}       | ${true}
+      ${true}              | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${false}      | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${false}      | ${true}
+      ${true}              | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${undefined}  | ${true}
+      ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${undefined}  | ${true}
+      ${false}             | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${false}
+      ${false}             | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${false}      | ${true}
+      ${false}             | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${undefined}  | ${true}
+      ${false}             | ${true}                 | ${'max-age=180, public'}  | ${false}                 | ${true}       | ${true}
+      ${false}             | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${true}       | ${false}
+      ${false}             | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${false}      | ${false}
+      ${false}             | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${undefined}  | ${false}
+      ${false}             | ${true}                 | ${'max-age=180, private'} | ${false}                 | ${true}       | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${true}       | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${true}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${undefined}  | ${true}
+      ${false}             | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${true}
+      ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${false}
+      ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${false}      | ${true}
+      ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${undefined}  | ${true}
+      ${false}             | ${false}                | ${'max-age=180, public'}  | ${false}                 | ${true}       | ${true}
+      ${false}             | ${false}                | ${'max-age=180, private'} | ${true}                  | ${true}       | ${false}
+      ${false}             | ${false}                | ${'max-age=180, private'} | ${true}                  | ${false}      | ${true}
+      ${false}             | ${false}                | ${'max-age=180, private'} | ${false}                 | ${true}       | ${true}
+      ${false}             | ${false}                | ${undefined}              | ${false}                 | ${false}      | ${true}
+      ${false}             | ${false}                | ${undefined}              | ${false}                 | ${undefined}  | ${true}
+      ${false}             | ${true}                 | ${''}                     | ${true}                  | ${false}      | ${false}
+      ${false}             | ${true}                 | ${'no-cache'}             | ${true}                  | ${false}      | ${false}
+      ${false}             | ${true}                 | ${'PUBLIC'}               | ${true}                  | ${false}      | ${true}
+      ${false}             | ${true}                 | ${'public, max-age=0'}    | ${true}                  | ${false}      | ${true}
+      ${false}             | ${true}                 | ${'public,max-age=0'}     | ${true}                  | ${false}      | ${true}
     `(
-      'cachePrivatePackages=$cachePrivatePackages checkCacheControlHeader=$checkCacheControlHeader checkAuthorizationHeader=$checkAuthorizationHeader cacheControlPublic=$cacheControlPublic authorization=$authorization => cacheAllowed=$cacheAllowed',
+      'cachePrivatePackages=$cachePrivatePackages, checkCacheControlHeader=$checkCacheControlHeader, cacheControl="$cacheControl", checkAuthorizationHeader=$checkAuthorizationHeader, authorization=$authorization => expected=$expected',
       ({
         cachePrivatePackages,
         checkCacheControlHeader,
+        cacheControl,
         checkAuthorizationHeader,
-        cacheControlPublic,
         authorization,
-        cacheAllowed,
+        expected,
       }) => {
         GlobalConfig.set({ cachePrivatePackages });
 
@@ -245,17 +280,32 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
         const response = { headers: {} } as HttpResponse;
 
-        // Set cache-control header if not null
-        if (cacheControlPublic !== null) {
-          response.headers['cache-control'] = cacheControlPublic
-            ? 'max-age=180, public'
-            : 'max-age=180, private';
+        // Set cache-control header if defined
+        if (cacheControl !== undefined) {
+          response.headers['cache-control'] = cacheControl;
         }
 
-        response.authorization = authorization;
+        // Only set authorization property if not undefined
+        if (authorization !== undefined) {
+          response.authorization = authorization;
+        }
 
-        expect(cacheProvider.cacheAllowed(response)).toBe(cacheAllowed);
+        expect(cacheProvider.cacheAllowed(response)).toBe(expected);
       },
     );
+
+    test('handles case-insensitive cache-control values', () => {
+      GlobalConfig.set({ cachePrivatePackages: false });
+
+      const cacheProvider = new PackageHttpCacheProvider({
+        namespace: '_test-namespace',
+      });
+
+      const response = {
+        headers: { 'cache-control': 'PUBLIC, max-age=300' },
+      } as HttpResponse;
+
+      expect(cacheProvider.cacheAllowed(response)).toBe(true);
+    });
   });
 });

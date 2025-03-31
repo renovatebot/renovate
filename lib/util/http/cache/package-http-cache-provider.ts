@@ -8,6 +8,7 @@ import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
+import is from '@sindresorhus/is';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
@@ -85,7 +86,10 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return true;
     }
 
-    if (this.checkCacheControlHeader && resp.headers['cache-control']) {
+    if (
+      this.checkCacheControlHeader &&
+      is.string(resp.headers['cache-control'])
+    ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()
         .split(regEx(/\s*,\s*/))
