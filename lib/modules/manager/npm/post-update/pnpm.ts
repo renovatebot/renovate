@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -10,7 +11,12 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../../util/exec/types';
-import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../../util/fs';
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
@@ -70,7 +76,25 @@ export async function generateLockFile(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
-    let args = '--recursive --lockfile-only';
+    const pnpmWorkspaceFilePath = getSiblingFileName(
+      lockFileName,
+      'pnpm-workspace.yaml',
+    );
+
+    let args = '--lockfile-only';
+
+    // pnpm v9+ is doing recursive automatically when it detects workspaces.
+    //
+    // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
+    // `--recursive` will install un-wanted project.
+    // we should avoid this.
+    if (
+      pnpmToolConstraint.constraint &&
+      !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
+      (await localPathExists(pnpmWorkspaceFilePath))
+    ) {
+      args += ' --recursive';
+    }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';

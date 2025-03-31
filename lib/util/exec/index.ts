@@ -3,6 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { getCustomEnv } from '../env';
 import { rawExec } from './common';
 import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import {
@@ -79,8 +80,8 @@ async function prepareRawExec(
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const preCommands = opts.preCommands ?? [];
-  const { customEnvVariables, containerbaseDir, binarySource } =
-    GlobalConfig.get();
+  const customEnvVariables = getCustomEnv();
+  const { containerbaseDir, binarySource } = GlobalConfig.get();
 
   if (binarySource === 'docker' || binarySource === 'install') {
     logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
