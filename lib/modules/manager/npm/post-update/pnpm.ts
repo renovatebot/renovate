@@ -82,6 +82,12 @@ export async function generateLockFile(
     );
 
     let args = '--lockfile-only';
+
+    // pnpm v9+ is doing recursive automatically when it detects workspaces.
+    //
+    // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
+    // `--recursive` will install un-wanted project.
+    // we should avoid this.
     if (
       pnpmToolConstraint.constraint &&
       !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
