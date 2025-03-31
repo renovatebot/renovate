@@ -124,6 +124,14 @@ Finally, when you're updating often, you'll start looking for ways to automate t
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
 Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](./presets-default.md#automergepatch) preset.
 
+#### Wait two weeks before automerging third-party dependencies
+
+If you `automerge` third-party dependencies, we recommend setting [`minimumReleaseAge`](./configuration-options.md#minimumreleaseage) to `"14 days"`.
+By waiting two weeks before automerging the dependencies, you give the upstream registries time to pull malicious dependencies, before Renovate merges them.
+If you want a third-party dependency update _now_, instead of waiting two weeks, you can request the update from the Dependency Dashboard.
+
+#### Use GitHub Pull Request Merge Queues
+
 You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
 Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
 
