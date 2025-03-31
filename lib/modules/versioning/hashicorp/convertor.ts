@@ -25,11 +25,7 @@ export function hashicorp2npm(input: string): string {
     .map((single) => {
       const r = single.match(
         regEx(
-          /^\s*(?<operator>(|=|!=|>|<|>=|<=|~>))\s*v?/.source +
-            '(?<version>' +
-            semverRegex.source +
-            ')' +
-            /\s*$/.source,
+          `^\\s*(?<operator>(|=|!=|>|<|>=|<=|~>))\\s*v?(?<version>${semverRegex.source})\\s*$`,
         ),
       );
       if (!r) {
@@ -84,11 +80,7 @@ export function npm2hashicorp(input: string): string {
     .map((single) => {
       const r = single.match(
         regEx(
-          /^(?<operator>(|>|<|>=|<=|~|\^))v?/.source +
-            '(?<version>' +
-            semverRegex.source +
-            ')' +
-            /$/.source,
+          `^(?<operator>(|>|<|>=|<=|~|\\^))v?(?<version>${semverRegex.source})$`,
         ),
       );
       if (!r) {
