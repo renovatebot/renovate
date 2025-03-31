@@ -312,7 +312,7 @@ async function fetchReleases(
   );
   let dep: ReleaseResult | null = null;
   const registryStrategy =
-    config.strategy ?? datasource.registryStrategy ?? 'hunt';
+    config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
   try {
     if (is.nonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
@@ -346,7 +346,7 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${packageName}${String(
+  const cacheKey = `${cacheNamespace}${datasource}${packageName}${config.registryStrategy}${String(
     registryUrls,
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
