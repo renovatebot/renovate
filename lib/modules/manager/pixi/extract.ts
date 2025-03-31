@@ -20,7 +20,7 @@ import {
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
 
-function getUserPixiConfig(
+export function getUserPixiConfig(
   content: string,
   packageFile: string,
 ): null | PixiConfig {

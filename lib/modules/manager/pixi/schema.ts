@@ -114,6 +114,7 @@ const Targets = LooseRecord(
 
 const Project = z.object({
   channels: z.array(Channel).default([]),
+  'requires-pixi': z.string().optional(),
   'channel-priority': z
     .union([z.literal('strict'), z.literal('disabled')])
     .default('strict'),

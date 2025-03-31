@@ -12,6 +12,7 @@ import {
 } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getUserPixiConfig } from './extract';
 import { pickConfig } from './lockfile';
 import { LockfileYaml } from './schema';
 
@@ -41,8 +42,12 @@ export async function updateArtifacts({
 
   const cmd = [commandLock];
 
+  const pixiConfig = getUserPixiConfig(newPackageFileContent, packageFileName);
+
   const constraint =
-    config.constraints?.pixi ?? getPixiConstraint(existingLockFileContent);
+    config.constraints?.pixi ??
+    pixiConfig?.project['requires-pixi'] ??
+    getPixiConstraint(existingLockFileContent);
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
