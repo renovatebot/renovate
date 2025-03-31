@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { get, set } from '../../cache/package'; // Import the package cache functions
@@ -8,7 +9,6 @@ import { HttpCacheStats } from '../../stats';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
-import is from '@sindresorhus/is';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
