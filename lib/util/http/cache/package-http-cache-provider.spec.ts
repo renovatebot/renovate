@@ -212,24 +212,25 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
 
     test.each`
-      cachePrivatePackages | checkCacheControlHeader | cacheControlPublic | authorization | cacheAllowed
-      ${true}              | ${true}                 | ${true}            | ${true}       | ${true}
-      ${true}              | ${false}                | ${false}           | ${false}      | ${true}
-      ${false}             | ${true}                 | ${true}            | ${true}       | ${false}
-      ${false}             | ${true}                 | ${true}            | ${false}      | ${true}
-      ${false}             | ${true}                 | ${false}           | ${true}       | ${false}
-      ${false}             | ${true}                 | ${false}           | ${false}      | ${false}
-      ${false}             | ${false}                | ${true}            | ${true}       | ${false}
-      ${false}             | ${false}                | ${false}           | ${true}       | ${false}
-      ${false}             | ${false}                | ${true}            | ${false}      | ${true}
-      ${false}             | ${false}                | ${false}           | ${false}      | ${true}
-      ${false}             | ${true}                 | ${null}            | ${true}       | ${false}
-      ${false}             | ${true}                 | ${null}            | ${false}      | ${true}
+      cachePrivatePackages | checkCacheControlHeader | checkAuthorizationHeader | cacheControlPublic | authorization | cacheAllowed
+      ${true}              | ${true}                 | ${true}                  | ${true}            | ${true}       | ${true}
+      ${true}              | ${false}                | ${false}                 | ${false}           | ${false}      | ${true}
+      ${false}             | ${true}                 | ${true}                  | ${true}            | ${true}       | ${false}
+      ${false}             | ${true}                 | ${true}                  | ${true}            | ${false}      | ${true}
+      ${false}             | ${true}                 | ${false}                 | ${false}           | ${true}       | ${false}
+      ${false}             | ${true}                 | ${false}                 | ${false}           | ${false}      | ${false}
+      ${false}             | ${false}                | ${true}                  | ${true}            | ${true}       | ${false}
+      ${false}             | ${false}                | ${true}                  | ${false}           | ${true}       | ${false}
+      ${false}             | ${false}                | ${false}                 | ${true}            | ${false}      | ${true}
+      ${false}             | ${false}                | ${false}                 | ${false}           | ${false}      | ${true}
+      ${false}             | ${true}                 | ${true}                  | ${null}            | ${true}       | ${false}
+      ${false}             | ${true}                 | ${true}                  | ${null}            | ${false}      | ${true}
     `(
-      'cachePrivatePackages=$cachePrivatePackages checkCacheControlHeader=$checkCacheControlHeader cacheControlPublic=$cacheControlPublic authorization=$authorization => cacheAllowed=$cacheAllowed',
+      'cachePrivatePackages=$cachePrivatePackages checkCacheControlHeader=$checkCacheControlHeader checkAuthorizationHeader=$checkAuthorizationHeader cacheControlPublic=$cacheControlPublic authorization=$authorization => cacheAllowed=$cacheAllowed',
       ({
         cachePrivatePackages,
         checkCacheControlHeader,
+        checkAuthorizationHeader,
         cacheControlPublic,
         authorization,
         cacheAllowed,
@@ -239,6 +240,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
         const cacheProvider = new PackageHttpCacheProvider({
           namespace: '_test-namespace',
           checkCacheControlHeader,
+          checkAuthorizationHeader,
         });
 
         const response = { headers: {} } as HttpResponse;

@@ -13,6 +13,7 @@ export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   ttlMinutes?: number;
   checkCacheControlHeader?: boolean;
+  checkAuthorizationHeader?: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -22,11 +23,13 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private hardTtlMinutes: number;
 
   checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 
   constructor({
     namespace,
     ttlMinutes = 15,
     checkCacheControlHeader = true,
+    checkAuthorizationHeader = true,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
@@ -37,6 +40,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     this.softTtlMinutes = softTtlMinutes;
     this.hardTtlMinutes = hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
+    this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
   async load(url: string): Promise<unknown> {
@@ -92,7 +96,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       }
     }
 
-    if (resp.authorization) {
+    if (this.checkAuthorizationHeader && resp.authorization) {
       return false;
     }
 
