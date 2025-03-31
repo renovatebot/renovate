@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { GiteaHttpOptions } from '../../../util/http/gitea';
 import { GiteaHttp } from '../../../util/http/gitea';
@@ -193,7 +194,11 @@ export async function getPRByBranch(
   try {
     const res = await giteaHttp.getJsonUnchecked<PR>(url, options);
     return res.body;
-  } catch {
+  } catch (err) {
+    logger.trace({ err }, 'Error while fetching PR');
+    if (err.statusCode !== 404) {
+      logger.debug({ err }, 'Error while fetching PR');
+    }
     return null;
   }
 }
