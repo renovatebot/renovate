@@ -716,13 +716,49 @@ describe('modules/manager/pixi/extract', () => {
       deps: [
         {
           channel: undefined,
-          channels: ['conda-forge'],
+          channels: ['anaconda', 'conda-forge'],
           currentValue: '3.12.*',
           datasource: 'conda',
           depName: 'python',
           depType: 'dependencies',
           registryStrategy: 'merge',
-          registryUrls: ['https://api.anaconda.org/package/conda-forge/'],
+          registryUrls: [
+            'https://api.anaconda.org/package/anaconda/',
+            'https://api.anaconda.org/package/conda-forge/',
+          ],
+          versioning: 'conda',
+        },
+      ],
+      lockFiles: [],
+    });
+  });
+  it(`use default registryStrategy for channel-priority='strict'"`, async () => {
+    expect(
+      await extractPackageFile(
+        codeBlock`
+        [project]
+        channels = ["anaconda", "conda-forge"]
+        platforms = ["win-64"]
+
+        [dependencies]
+        python = "3.12.*"
+        `,
+        'pixi.toml',
+      ),
+    ).toMatchObject({
+      deps: [
+        {
+          channel: undefined,
+          channels: ['anaconda', 'conda-forge'],
+          currentValue: '3.12.*',
+          datasource: 'conda',
+          depName: 'python',
+          depType: 'dependencies',
+          registryStrategy: undefined,
+          registryUrls: [
+            'https://api.anaconda.org/package/anaconda/',
+            'https://api.anaconda.org/package/conda-forge/',
+          ],
           versioning: 'conda',
         },
       ],
