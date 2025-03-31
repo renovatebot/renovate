@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { get, set } from '../../cache/package'; // Import the package cache functions
@@ -13,6 +14,7 @@ export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   ttlMinutes?: number;
   checkCacheControlHeader?: boolean;
+  checkAuthorizationHeader?: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -22,11 +24,13 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private hardTtlMinutes: number;
 
   checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 
   constructor({
     namespace,
     ttlMinutes = 15,
     checkCacheControlHeader = true,
+    checkAuthorizationHeader = true,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
@@ -37,6 +41,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     this.softTtlMinutes = softTtlMinutes;
     this.hardTtlMinutes = hardTtlMinutes;
     this.checkCacheControlHeader = checkCacheControlHeader;
+    this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
   async load(url: string): Promise<unknown> {
@@ -81,7 +86,10 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return true;
     }
 
-    if (this.checkCacheControlHeader && resp.headers['cache-control']) {
+    if (
+      this.checkCacheControlHeader &&
+      is.string(resp.headers['cache-control'])
+    ) {
       const isPublic = resp.headers['cache-control']
         .toLocaleLowerCase()
         .split(regEx(/\s*,\s*/))
@@ -92,7 +100,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       }
     }
 
-    if (resp.authorization) {
+    if (this.checkAuthorizationHeader && resp.authorization) {
       return false;
     }
 
