@@ -7,6 +7,7 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { Result } from '../../../util/result';
 import { Toml } from '../../../util/schema-utils';
 import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
+import type { RegistryStrategy } from '../../datasource';
 import { defaultRegistryUrl as defaultCondaRegistryApi } from '../../datasource/conda/common';
 import { PyProjectSchema } from '../pep621/schema';
 import type { PackageFileContent } from '../types';
@@ -16,7 +17,6 @@ import {
   type PixiPackageDependency,
   PixiToml,
 } from './schema';
-import { RegistryStrategy } from '../../datasource';
 
 const PyProjectToml = Toml.pipe(PyProjectSchema);
 
