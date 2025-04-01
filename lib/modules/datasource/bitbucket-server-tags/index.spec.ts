@@ -77,6 +77,14 @@ describe('modules/datasource/bitbucket-server-tags/index', () => {
       expect(res).toBeNull();
     });
 
+    it('returns null on missing registryUrl', async () => {
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'some-org/notexisting',
+      });
+      expect(res).toBeNull();
+    });
+
     it('handles not found', async () => {
       httpMock
         .scope(apiBaseUrl)
@@ -131,23 +139,6 @@ describe('modules/datasource/bitbucket-server-tags/index', () => {
         'v1.0.0',
       );
       expect(res).toBeNull();
-    });
-
-    it('fallback to invalid defaultRegistryUrl if none is provided', async () => {
-      httpMock
-        .scope('https://bitbucket.org/rest/api/1.0')
-        .get('/projects/some-org/repos/notexisting/tags/v1.0.0')
-        .reply(404);
-
-      await expect(
-        getDigest(
-          {
-            datasource,
-            packageName: 'some-org/notexisting',
-          },
-          'v1.0.0',
-        ),
-      ).rejects.toThrow(HttpError);
     });
   });
 
@@ -213,6 +204,14 @@ describe('modules/datasource/bitbucket-server-tags/index', () => {
         registryUrls: [baseUrl],
         datasource,
         packageName: 'some-org/empty',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('returns null on missing registryUrl', async () => {
+      const res = await getDigest({
+        datasource,
+        packageName: 'some-org/notexisting',
       });
       expect(res).toBeNull();
     });

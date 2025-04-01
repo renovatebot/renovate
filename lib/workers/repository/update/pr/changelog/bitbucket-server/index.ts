@@ -5,12 +5,7 @@ import { Files } from '../../../../../../modules/platform/bitbucket-server/schem
 import { BitbucketServerHttp } from '../../../../../../util/http/bitbucket-server';
 import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
 import { compareChangelogFilePath } from '../common';
-import type {
-  ChangeLogFile,
-  ChangeLogNotes,
-  ChangeLogProject,
-  ChangeLogRelease,
-} from '../types';
+import type { ChangeLogFile } from '../types';
 
 export const id = 'bitbucket-server-changelog';
 const http = new BitbucketServerHttp(id);
@@ -71,16 +66,4 @@ export async function getReleaseNotesMd(
   const changelogMd = `${fileRes.body}\n#\n##`;
 
   return { changelogFile, changelogMd };
-}
-
-export function getReleaseList(
-  _project: ChangeLogProject,
-  _release: ChangeLogRelease,
-): ChangeLogNotes[] {
-  logger.trace('bitbucketServer.getReleaseList()');
-  logger.debug(
-    'Unsupported Bitbucket Server feature. Skipping release fetching.',
-  );
-
-  return [];
 }

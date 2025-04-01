@@ -20,8 +20,6 @@ export class BitbucketServerTagsDatasource extends Datasource {
 
   override http = new BitbucketServerHttp(BitbucketServerTagsDatasource.id);
 
-  static readonly defaultRegistryUrls = ['https://bitbucket.org'];
-
   static readonly sourceUrlSupport = 'package';
   static readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
@@ -32,23 +30,20 @@ export class BitbucketServerTagsDatasource extends Datasource {
     super(BitbucketServerTagsDatasource.id);
   }
 
-  static getRegistryURL(registryUrl?: string): string {
-    return (
-      registryUrl?.replace(regEx(/\/rest\/api\/1.0$/), '') ??
-      this.defaultRegistryUrls[0]
-    );
+  static getRegistryURL(registryUrl: string): string {
+    return registryUrl?.replace(regEx(/\/rest\/api\/1.0$/), '');
   }
 
   static getSourceUrl(
     projectKey: string,
     repositorySlug: string,
-    registryUrl?: string,
+    registryUrl: string,
   ): string {
     const url = BitbucketServerTagsDatasource.getRegistryURL(registryUrl);
     return `${ensureTrailingSlash(url)}projects/${projectKey}/repos/${repositorySlug}`;
   }
 
-  static getApiUrl(registryUrl?: string): string {
+  static getApiUrl(registryUrl: string): string {
     const res = BitbucketServerTagsDatasource.getRegistryURL(registryUrl);
     return `${ensureTrailingSlash(res)}rest/api/1.0/`;
   }
@@ -58,7 +53,7 @@ export class BitbucketServerTagsDatasource extends Datasource {
     repo: string,
     type: string,
   ): string {
-    return `${BitbucketServerTagsDatasource.getRegistryURL(registryUrl)}:${repo}:${type}`;
+    return `${BitbucketServerTagsDatasource.getRegistryURL(registryUrl ?? '')}:${repo}:${type}`;
   }
 
   // getReleases fetches list of tags for the repository
@@ -74,6 +69,10 @@ export class BitbucketServerTagsDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryUrl, packageName } = config;
     const [projectKey, repositorySlug] = packageName.split('/');
+    if (!registryUrl) {
+      logger.debug('Missing registryUrl');
+      return null;
+    }
 
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ registryUrl }) => {
@@ -153,6 +152,10 @@ export class BitbucketServerTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const { registryUrl, packageName } = config;
     const [projectKey, repositorySlug] = packageName.split('/');
+    if (!registryUrl) {
+      logger.debug('Missing registryUrl');
+      return null;
+    }
 
     const baseUrl = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}`;
 

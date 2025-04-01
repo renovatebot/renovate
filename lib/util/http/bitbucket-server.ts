@@ -3,7 +3,7 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
 const MAX_LIMIT = 100;
-const MAX_PAGES = Number.MAX_SAFE_INTEGER;
+const MAX_PAGES = 100;
 
 let baseUrl: string;
 export const setBaseUrl = (url: string): void => {

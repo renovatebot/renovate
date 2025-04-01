@@ -46,7 +46,10 @@ export async function getReleaseList(
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
       case 'bitbucket-server':
-        return bitbucketServer.getReleaseList(project, release);
+        logger.trace(
+          'Unsupported Bitbucket Server feature. Skipping release fetching.',
+        );
+        return [];
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
