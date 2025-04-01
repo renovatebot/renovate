@@ -138,8 +138,12 @@ export function addMetaData(
           extraBaseUrls,
         }) || dep.sourceUrl;
       // prefer massaged URL to source URL if the latter does not start with http:// or https://
-      // (e.g. git@somehost.com). This allows to retrieve changelogs from git hosts other than Github
-      if (!isHttpUrl(dep.sourceUrl)) {
+      // (e.g. git@somehost.com) and the detected platform is gitlab.
+      // this allows to retrieve changelogs from git hosts other than Github
+      if (
+        !isHttpUrl(dep.sourceUrl) &&
+        detectPlatform(massagedUrl) === 'gitlab'
+      ) {
         dep.sourceUrl = massagedUrl;
       }
     }
