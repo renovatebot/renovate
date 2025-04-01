@@ -4,6 +4,7 @@ import { escapeRegExp, regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
+import * as condaVersioning from '../../versioning/conda';
 import * as npmVersioning from '../../versioning/npm';
 import * as pep440versioning from '../../versioning/pep440';
 
@@ -107,7 +108,7 @@ export const communityActions = z.union([
     .transform(({ with: val }): PackageDependency => {
       return {
         datasource: GithubReleasesDatasource.id,
-        versioning: pep440versioning.id,
+        versioning: condaVersioning.id,
         depName: 'prefix-dev/pixi',
         packageName: 'prefix-dev/pixi',
         currentValue: val['pixi-version'],
