@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../config/global';
+import { getCustomEnv } from '../env';
 import { getChildProcessEnv } from './env';
 import type { ExecOptions } from './types';
 
@@ -8,7 +8,7 @@ export function getChildEnv({
   userConfiguredEnv,
   env: forcedEnv = {},
 }: ExecOptions): Record<string, string> {
-  const globalConfigEnv = GlobalConfig.get('customEnvVariables');
+  const globalConfigEnv = getCustomEnv();
 
   const inheritedKeys: string[] = [];
   for (const [key, val] of Object.entries(extraEnv ?? {})) {

@@ -3,9 +3,6 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -15,13 +12,16 @@ import { toBase64 } from '../../../util/string';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmv3 from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, git, partial } from '~test/util';
 
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
-const datasource = mocked(_datasource);
+
+const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -573,7 +573,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
   });
 
-  it('sets repositories from registryAliases', async () => {
+  it('sets repositories from registryAliases ignoring not well formed URI', async () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -590,7 +590,11 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           isLockFileMaintenance: true,
-          registryAliases: { stable: 'the stable_url', repo1: 'the_repo1_url' },
+          registryAliases: {
+            stable: 'http://the_stable_url',
+            repo1: 'https://the_repo1_url',
+            $REGISTRY_ALIAS: 'my.registry.tld',
+          },
         },
       }),
     ).toMatchObject([
@@ -631,7 +635,11 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           isLockFileMaintenance: true,
-          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          registryAliases: {
+            stable: 'http://the_stable_url',
+            repo1: 'https://the_repo1_url',
+            $REGISTRY_ALIAS: 'my.registry.tld',
+          },
         },
       }),
     ).toMatchObject([
@@ -678,7 +686,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
           registryAliases: {
-            stable: 'the_stable_url',
+            stable: 'http://the_stable_url',
             oci: 'oci://registry.example.com/organization',
             repo1: 'https://the_repo1_url',
           },

@@ -17,7 +17,7 @@ let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = process.env): any {
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!is.string(value)) {
     return value;
   }

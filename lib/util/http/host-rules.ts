@@ -138,7 +138,12 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   options: GotOptions,
   hostRule: HostRule,
 ): GotOptions {
-  const { username, password, token, enabled, authType } = hostRule;
+  if (hostRule.enabled === false) {
+    options.enabled = false;
+    return options;
+  }
+
+  const { username, password, token, authType } = hostRule;
   const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
@@ -159,8 +164,6 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
     options.context = { ...options.context, authType };
-  } else if (enabled === false) {
-    options.enabled = false;
   } else {
     logger.once.debug(`hostRules: no authentication for ${host}`);
   }

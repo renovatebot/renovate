@@ -86,7 +86,6 @@ export class JavaVersionDatasource extends Datasource {
         releases = await this.getPageReleases(url, page);
       }
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);

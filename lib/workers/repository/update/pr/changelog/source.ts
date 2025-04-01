@@ -189,6 +189,7 @@ export abstract class ChangeLogSource {
         sourceUrl,
         sourceDirectory,
         packageName,
+        depName,
       },
       versions: changelogReleases,
     };

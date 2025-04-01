@@ -1,15 +1,14 @@
 import { codeBlock } from 'common-tags';
 import type { Indent } from 'detect-indent';
-import { Fixtures } from '../../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../../test/util';
-import { fs, partial, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { createConfigMigrationBranch } from './create';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { Fixtures } from '~test/fixtures';
+import { fs, partial, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/branch/create', () => {
   const raw = Fixtures.getJson('./renovate.json');

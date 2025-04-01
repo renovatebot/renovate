@@ -1,7 +1,7 @@
-import * as httpMock from '../../../test/http-mock';
 import * as hostRules from '../host-rules';
 import { range } from '../range';
 import { BitbucketServerHttp, setBaseUrl } from './bitbucket-server';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://git.example.com';
 

@@ -40,7 +40,7 @@ export async function postprocessRelease(
     return release;
   }
 
-  const registryUrl = config.registryUrl ?? null;
+  const registryUrl = config.registryUrl ?? config.registryUrls?.at(0) ?? null;
 
   try {
     const result = await ds.postprocessRelease(

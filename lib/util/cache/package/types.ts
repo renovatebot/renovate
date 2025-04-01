@@ -31,6 +31,7 @@ export type PackageCacheNamespace =
   | 'datasource-artifactory'
   | 'datasource-aws-machine-image'
   | 'datasource-aws-rds'
+  | 'datasource-aws-eks-addon'
   | 'datasource-azure-bicep-resource'
   | 'datasource-azure-pipelines-tasks'
   | 'datasource-bazel'
