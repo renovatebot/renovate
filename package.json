@@ -169,7 +169,7 @@
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.1.0",
     "@renovatebot/kbpgp": "4.0.1",
-    "@renovatebot/osv-offline": "1.6.3",
+    "@renovatebot/osv-offline": "1.6.4",
     "@renovatebot/pep440": "4.1.0",
     "@renovatebot/ruby-semver": "4.0.0",
     "@sindresorhus/is": "4.6.0",
