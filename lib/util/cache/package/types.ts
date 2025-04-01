@@ -82,7 +82,7 @@ export type PackageCacheNamespace =
   | 'datasource-maven:head-requests'
   | 'datasource-maven:metadata-xml'
   | 'datasource-node-version'
-  | 'datasource-npm:data-v1'
+  | 'datasource-npm:cache-provider'
   | 'datasource-nuget-v3'
   | 'datasource-orb'
   | 'datasource-packagist'

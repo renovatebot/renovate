@@ -77,7 +77,8 @@ export async function getDependency(
 
   try {
     const cacheProvider = new PackageHttpCacheProvider({
-      namespace: 'datasource-npm:data-v1',
+      namespace: 'datasource-npm:cache-provider',
+      checkAuthorizationHeader: false,
     });
     const options: HttpOptions = { cacheProvider };
 
