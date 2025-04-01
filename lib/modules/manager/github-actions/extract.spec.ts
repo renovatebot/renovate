@@ -995,7 +995,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'pep440',
+          versioning: 'conda',
         },
       ],
     },
