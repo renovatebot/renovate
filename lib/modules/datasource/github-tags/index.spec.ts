@@ -1,11 +1,11 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Timestamp } from '../../../util/timestamp';
 import { GithubTagsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const githubApiHost = 'https://api.github.com';
 

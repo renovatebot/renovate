@@ -119,7 +119,7 @@ export class GoDatasource extends Datasource {
   }
 }
 
-// istanbul ignore if
+/* v8 ignore next 3 -- hard to test */
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
   if (uri?.password) {

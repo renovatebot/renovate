@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { BuildpacksRegistryDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://registry.buildpacks.io/api/v1/buildpacks/';
 

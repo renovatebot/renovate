@@ -1,19 +1,26 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type {
+  Options,
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
-  ParseJsonFunction,
+  OptionsOfTextResponseBody,
+  RequestError,
 } from 'got';
+import type { ZodError } from 'zod';
 import type { HttpCacheProvider } from './cache/types';
+import type { EmptyResultError } from './errors';
 
 export type GotContextOptions = {
   authType?: string;
 } & Record<string, unknown>;
 
 // TODO: Move options to context
-export type GotOptions = GotBufferOptions | GotJSONOptions;
+export type GotOptions = GotBufferOptions | GotTextOptions | GotJSONOptions;
 export type GotBufferOptions = OptionsOfBufferResponseBody & GotExtraOptions;
+export type GotTextOptions = OptionsOfTextResponseBody & GotExtraOptions;
 export type GotJSONOptions = OptionsOfJSONResponseBody & GotExtraOptions;
+
+export type GotStreamOptions = Options & GotExtraOptions;
 
 export interface GotExtraOptions {
   abortOnError?: boolean;
@@ -24,14 +31,6 @@ export interface GotExtraOptions {
   memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
-}
-
-export interface RequestStats {
-  method: string;
-  url: string;
-  duration: number;
-  queueDuration: number;
-  statusCode: number;
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
@@ -69,16 +68,11 @@ export interface HttpOptions {
   readOnly?: boolean;
 }
 
-export interface InternalHttpOptions extends HttpOptions {
-  json?: HttpOptions['body'];
-  responseType?: 'json' | 'buffer';
-  method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
-  parseJson?: ParseJsonFunction;
-}
-
 export interface HttpHeaders extends IncomingHttpHeaders {
   link?: string | undefined;
 }
+
+export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 
 export interface HttpResponse<T = string> {
   statusCode: number;
@@ -88,7 +82,7 @@ export interface HttpResponse<T = string> {
 }
 
 export type Task<T> = () => Promise<T>;
-export type GotTask<T> = Task<HttpResponse<T>>;
+export type GotTask<T = unknown> = Task<HttpResponse<T>>;
 
 export interface ThrottleLimitRule {
   matchHost: string;
@@ -99,3 +93,5 @@ export interface ConcurrencyLimitRule {
   matchHost: string;
   concurrency: number;
 }
+
+export type SafeJsonError = RequestError | ZodError | EmptyResultError;

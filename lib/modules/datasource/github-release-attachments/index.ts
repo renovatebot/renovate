@@ -65,7 +65,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
       (a: GithubRestAsset) => a.size < 5 * 1024,
     );
     for (const asset of smallAssets) {
-      const res = await this.http.get(asset.browser_download_url);
+      const res = await this.http.getText(asset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
         const [lineDigest, lineFilename] = line.split(regEx(/\s+/), 2);
         if (lineDigest === digest) {
@@ -162,7 +162,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
         current,
         next,
       );
-      const res = await this.http.get(releaseAsset.browser_download_url);
+      const res = await this.http.getText(releaseAsset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
         const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
         if (lineFn === releaseFilename) {

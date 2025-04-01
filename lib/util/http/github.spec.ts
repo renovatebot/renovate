@@ -1,8 +1,5 @@
-import { Buffer } from 'node:buffer';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
-import * as httpMock from '../../../test/http-mock';
-import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -16,9 +13,10 @@ import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 import type { GraphqlPageCache } from './github';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../cache/repository');
-const repositoryCache = mocked(_repositoryCache);
+const repositoryCache = vi.mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -333,7 +331,10 @@ describe('util/http/github', () => {
 
       async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
-        httpMock.scope(githubApiHost).get(url).replyWithError(error);
+        httpMock
+          .scope(githubApiHost)
+          .get(url)
+          .replyWithError(httpMock.error(error));
         await githubApi.getJsonUnchecked(url);
       }
 
@@ -563,7 +564,7 @@ describe('util/http/github', () => {
         .scope('https://ghe.mycompany.com')
         .post('/api/graphql')
         .reply(200, { data: { repository } });
-      await githubApi.requestGraphql(graphqlQuery);
+      await githubApi.requestGraphql(graphqlQuery, { token: 'abc' });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.url).toBe('https://ghe.mycompany.com/api/graphql');
@@ -935,22 +936,6 @@ describe('util/http/github', () => {
       ).resolves.toMatchObject({
         body: 'test',
       });
-    });
-
-    it('throw error if a', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/foo/bar/contents/lore/ipsum.bin')
-        .matchHeader(
-          'accept',
-          'application/vnd.github.raw+json, application/vnd.github.v3+json',
-        )
-        .reply(200, Buffer.from('foo', 'binary'));
-      await expect(
-        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.bin`, {
-          responseType: 'buffer',
-        }),
-      ).rejects.toThrow();
     });
   });
 });

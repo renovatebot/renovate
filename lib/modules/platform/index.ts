@@ -54,7 +54,6 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(config.hostRules ?? []),
     ],
   };
-  // istanbul ignore else
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;

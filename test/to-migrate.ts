@@ -26,7 +26,7 @@ expect.extend({
   ) {
     // async load to avoid circular dependency
     const { MigrationsService } = await import(
-      './../lib/config/migrations/migrations-service'
+      './../lib/config/migrations/migrations-service.js'
     );
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(

@@ -1,6 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -8,6 +6,8 @@ import {
   extractRegistries,
   resolveParents,
 } from './extract';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 

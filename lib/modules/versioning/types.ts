@@ -126,6 +126,11 @@ export interface VersioningApi {
   subset?(subRange: string, superRange: string): boolean | undefined;
 
   /**
+   * Checks whether subRange intersects superRange.
+   */
+  intersects?(subRange: string, superRange: string): boolean;
+
+  /**
    * Return whether unstable-to-unstable upgrades within the same major version are allowed.
    */
   allowUnstableMajorUpgrades?: boolean;

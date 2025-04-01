@@ -68,6 +68,8 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+
+If you are using a template command, the regular expression should match the template itself, not the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:
@@ -501,6 +503,7 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
+- `RENOVATE_` prefix (at the moment this prefix optional, but usage of prefix will be required in the future)
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
 - `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
@@ -777,7 +780,7 @@ Possible values:
 
 ## githubTokenWarn
 
-By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 

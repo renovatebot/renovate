@@ -1,4 +1,3 @@
-import { hostRules, mocked, platform } from '../../../../test/util';
 import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import * as validation from '../../../config/validation';
@@ -9,10 +8,11 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
+import { hostRules, platform } from '~test/util';
 
 vi.mock('../../../config/presets');
 
-const presets = mocked(presets_);
+const presets = vi.mocked(presets_);
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;

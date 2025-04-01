@@ -1,14 +1,13 @@
 import type Request from 'got/dist/source/core';
-import { partial } from '../../../../test/util';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { Http, HttpError } from '../../../util/http';
 import type { MavenFetchError } from './types';
 import {
-  checkResource,
   downloadHttpProtocol,
   downloadMavenXml,
   downloadS3Protocol,
 } from './util';
+import { partial } from '~test/util';
 
 const http = new Http('test');
 
@@ -46,17 +45,36 @@ function httpError({
 
 describe('modules/datasource/maven/util', () => {
   describe('downloadMavenXml', () => {
-    it('returns empty object for unsupported protocols', async () => {
+    it('returns error for unsupported protocols', async () => {
       const res = await downloadMavenXml(
         http,
         new URL('unsupported://server.com/'),
       );
-      expect(res).toEqual({});
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'unsupported-protocol' } satisfies MavenFetchError,
+      });
+    });
+
+    it('returns error for xml parse error', async () => {
+      const http = partial<Http>({
+        getText: () =>
+          Promise.resolve({
+            statusCode: 200,
+            body: 'invalid xml',
+            headers: {},
+          }),
+      });
+      const res = await downloadMavenXml(http, new URL('https://example.com/'));
+      expect(res.unwrap()).toEqual({
+        ok: false,
+        err: { type: 'xml-parse-error', err: expect.any(Error) },
+      });
     });
   });
 
   describe('downloadS3Protocol', () => {
-    it('fails for non-S3 URLs', async () => {
+    it('returns error for non-S3 URLs', async () => {
       const res = await downloadS3Protocol(new URL('http://not-s3.com/'));
       expect(res.unwrap()).toEqual({
         ok: false,
@@ -68,7 +86,7 @@ describe('modules/datasource/maven/util', () => {
   describe('downloadHttpProtocol', () => {
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ message: HOST_DISABLED })),
+        getText: () => Promise.reject(httpError({ message: HOST_DISABLED })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -79,7 +97,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for host error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
+        getText: () => Promise.reject(httpError({ code: 'ETIMEDOUT' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -90,7 +108,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for temporary error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
+        getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -101,7 +119,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for connection error', async () => {
       const http = partial<Http>({
-        get: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
+        getText: () => Promise.reject(httpError({ code: 'ECONNREFUSED' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
       expect(res.unwrap()).toEqual({
@@ -112,7 +130,7 @@ describe('modules/datasource/maven/util', () => {
 
     it('returns empty for unsupported error', async () => {
       const http = partial<Http>({
-        get: () =>
+        getText: () =>
           Promise.reject(httpError({ name: 'UnsupportedProtocolError' })),
       });
       const res = await downloadHttpProtocol(http, 'some://');
@@ -120,18 +138,6 @@ describe('modules/datasource/maven/util', () => {
         ok: false,
         err: { type: 'unsupported-host' } satisfies MavenFetchError,
       });
-    });
-  });
-
-  describe('checkResource', () => {
-    it('returns not found for unsupported protocols', async () => {
-      const res = await checkResource(http, 'unsupported://server.com/');
-      expect(res).toBe('not-found');
-    });
-
-    it('returns error for invalid URLs', async () => {
-      const res = await checkResource(http, 'not-a-valid-url');
-      expect(res).toBe('error');
     });
   });
 });

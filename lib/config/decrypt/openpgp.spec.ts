@@ -1,8 +1,8 @@
-import { Fixtures } from '../../../test/fixtures';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig } from '../decrypt';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
+import { Fixtures } from '~test/fixtures';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const repository = 'abc/def';
@@ -130,8 +130,8 @@ describe('config/decrypt/openpgp', () => {
           throw new Error('openpgp error');
         },
       }));
-      const pgp = await import('./openpgp');
-      const { logger } = await import('../../logger');
+      const pgp = await import('./openpgp.js');
+      const { logger } = await import('../../logger/index.js');
       expect(
         await pgp.tryDecryptOpenPgp(
           '',

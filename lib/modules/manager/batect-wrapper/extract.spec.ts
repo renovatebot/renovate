@@ -1,8 +1,8 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { id as semverVersioning } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/batect-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
