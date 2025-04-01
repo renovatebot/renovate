@@ -75,6 +75,7 @@ flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
 gitleaks 8.21.1
+ginkgo 2.22.2
 gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.23.3
@@ -106,6 +107,7 @@ nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
 oci 3.50.0
+opa 1.2.0
 opentofu 1.6.0
 packer 1.11.2
 perl 5.37.5
@@ -355,6 +357,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '2.22.2',
+            datasource: 'github-releases',
+            packageName: 'onsi/ginkgo',
+            depName: 'ginkgo',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.3.1',
             datasource: 'github-tags',
             packageName: 'gleam-lang/gleam',
@@ -565,6 +574,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.2.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/opa',
+            depName: 'opa',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.0',
             datasource: 'github-releases',
             packageName: 'opentofu/opentofu',
@@ -681,7 +697,7 @@ dummy 1.2.3
           },
           {
             currentValue: '2.14.0',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'GoogleContainerTools/skaffold',
             depName: 'skaffold',
             extractVersion: '^v(?<version>\\S+)',

@@ -570,6 +570,7 @@
     "testcontainers-node": "https://github.com/testcontainers/testcontainers-node",
     "theme-ui": "https://github.com/system-ui/theme-ui",
     "tika": "https://github.com/apache/tika",
+    "timvir": "https://github.com/timvir/timvir",
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
