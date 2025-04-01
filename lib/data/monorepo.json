@@ -438,6 +438,7 @@
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly",
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
+    "njson-schema": "https://github.com/RicoSuter/NJsonSchema",
     "nswag": "https://github.com/RicoSuter/NSwag",
     "nuget": "https://github.com/NuGet/NuGet.Client",
     "nuke-build": "https://github.com/nuke-build/nuke",
