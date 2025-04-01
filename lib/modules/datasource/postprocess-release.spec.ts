@@ -93,7 +93,11 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource', packageName: 'some-package' },
+      {
+        datasource: 'some-datasource',
+        packageName: 'some-package',
+        registryUrl: 'https://example.com',
+      },
       releaseOrig,
     );
 
@@ -138,7 +142,11 @@ describe('modules/datasource/postprocess-release', () => {
     getDatasourceFor.mockReturnValueOnce(new SomeDatasource());
 
     const release = await postprocessRelease(
-      { datasource: 'some-datasource', packageName: 'some-package' },
+      {
+        datasource: 'some-datasource',
+        packageName: 'some-package',
+        registryUrls: ['https://example.com'],
+      },
       releaseOrig,
     );
 

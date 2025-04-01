@@ -19,6 +19,7 @@ import {
   getDatasourceFor,
   getDefaultVersioning,
 } from '../../../../modules/datasource/common';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
@@ -28,6 +29,7 @@ import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
+import type { Timestamp } from '../../../../util/timestamp';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -40,16 +42,28 @@ import {
   isReplacementRulesConfigured,
 } from './utils';
 
-function getTimestamp(
+async function getTimestamp(
+  config: LookupUpdateConfig,
   versions: Release[],
   version: string,
   versioningApi: allVersioning.VersioningApi,
-): string | null | undefined {
-  return versions.find(
+): Promise<Timestamp | null | undefined> {
+  const currentRelease = versions.find(
     (v) =>
       versioningApi.isValid(v.version) &&
       versioningApi.equals(v.version, version),
-  )?.releaseTimestamp;
+  );
+
+  if (!currentRelease) {
+    return null;
+  }
+
+  if (currentRelease.releaseTimestamp) {
+    return currentRelease.releaseTimestamp;
+  }
+
+  const remoteRelease = await postprocessRelease(config, currentRelease);
+  return remoteRelease?.releaseTimestamp;
 }
 
 export async function lookupUpdates(
@@ -309,7 +323,8 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = getTimestamp(
+      const currentVersionTimestamp = await getTimestamp(
+        config,
         allVersions,
         currentVersion,
         versioningApi,

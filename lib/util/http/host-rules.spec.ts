@@ -563,4 +563,19 @@ describe('util/http/host-rules', () => {
       },
     });
   });
+
+  it('enabled=false with noAuth', () => {
+    hostRules.add({
+      hostType: 'docker',
+      enabled: false,
+    });
+
+    const opts = { ...options, hostType: 'docker', noAuth: true };
+    const hostRule = findMatchingRule(url, opts);
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'docker',
+      noAuth: true,
+      enabled: false,
+    });
+  });
 });

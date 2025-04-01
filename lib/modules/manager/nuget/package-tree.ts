@@ -87,6 +87,11 @@ function recursivelyGetDependentPackageFiles(
   graph: Graph,
   deps: Map<string, boolean>,
 ): void {
+  if (deps.has(packageFileName)) {
+    // we have already visited this package file
+    return;
+  }
+
   const dependents = graph.adjacent(packageFileName);
 
   if (!dependents || dependents.size === 0) {

@@ -17,7 +17,8 @@ import type {
   PackageFileContent,
 } from '../types';
 import { communityActions } from './community';
-import { WorkflowJobsSchema } from './schema';
+import type { Steps } from './schema';
+import { WorkflowSchema } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -169,6 +170,48 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
+const versionedActions: Record<string, string> = {
+  go: npmVersioning.id,
+  node: nodeVersioning.id,
+  python: npmVersioning.id,
+  // Not covered yet because they use different datasources/packageNames:
+  // - dotnet
+  // - java
+};
+
+function extractSteps(
+  steps: Steps[],
+  deps: PackageDependency<Record<string, any>>[],
+): void {
+  for (const step of steps) {
+    if (step.uses) {
+      const val = Result.parse(step, communityActions).unwrapOrNull();
+      if (val) {
+        deps.push(val);
+      }
+    }
+
+    for (const [action, versioning] of Object.entries(versionedActions)) {
+      const actionName = `actions/setup-${action}`;
+      if (step.uses === actionName || step.uses?.startsWith(`${actionName}@`)) {
+        const fieldName = `${action}-version`;
+        const currentValue = step.with?.[fieldName];
+        if (currentValue) {
+          deps.push({
+            datasource: GithubReleasesDatasource.id,
+            depName: action,
+            packageName: `actions/${action}-versions`,
+            versioning,
+            extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
+            currentValue,
+            depType: 'uses-with',
+          });
+        }
+      }
+    }
+  }
+}
+
 function extractWithYAMLParser(
   content: string,
   packageFile: string,
@@ -177,72 +220,41 @@ function extractWithYAMLParser(
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
-  const jobs = withMeta({ packageFile }, () =>
-    WorkflowJobsSchema.parse(content),
-  );
+  const obj = withMeta({ packageFile }, () => WorkflowSchema.parse(content));
 
-  for (const job of jobs) {
-    if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
-      }
-    }
+  if (!obj) {
+    return deps;
+  }
 
-    for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
-      }
-    }
-
-    for (const runner of job['runs-on']) {
-      const dep = extractRunner(runner);
-      if (dep) {
-        deps.push(dep);
-      }
-    }
-
-    const versionedActions: Record<string, string> = {
-      go: npmVersioning.id,
-      node: nodeVersioning.id,
-      python: npmVersioning.id,
-      // Not covered yet because they use different datasources/packageNames:
-      // - dotnet
-      // - java
-    };
-
-    for (const step of job.steps) {
-      if (step.uses) {
-        const val = Result.parse(step, communityActions).unwrapOrNull();
-        if (val) {
-          deps.push(val);
+  // composite action
+  if ('runs' in obj && obj.runs.steps) {
+    extractSteps(obj.runs.steps, deps);
+  } else if ('jobs' in obj) {
+    for (const job of Object.values(obj.jobs)) {
+      if (job.container) {
+        const dep = getDep(job.container, true, config.registryAliases);
+        if (dep) {
+          dep.depType = 'container';
+          deps.push(dep);
         }
       }
 
-      for (const [action, versioning] of Object.entries(versionedActions)) {
-        const actionName = `actions/setup-${action}`;
-        if (
-          step.uses === actionName ||
-          step.uses?.startsWith(`${actionName}@`)
-        ) {
-          const fieldName = `${action}-version`;
-          const currentValue = step.with?.[fieldName];
-          if (currentValue) {
-            deps.push({
-              datasource: GithubReleasesDatasource.id,
-              depName: action,
-              packageName: `actions/${action}-versions`,
-              versioning,
-              extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$', // Actions release tags are like 1.24.1-13667719799
-              currentValue: currentValue.toString(),
-              depType: 'uses-with',
-            });
-          }
+      for (const service of job.services) {
+        const dep = getDep(service, true, config.registryAliases);
+        if (dep) {
+          dep.depType = 'service';
+          deps.push(dep);
         }
       }
+
+      for (const runner of job['runs-on']) {
+        const dep = extractRunner(runner);
+        if (dep) {
+          deps.push(dep);
+        }
+      }
+
+      extractSteps(job.steps, deps);
     }
   }
 

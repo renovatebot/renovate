@@ -1,4 +1,3 @@
-import type { XmlDocument } from 'xmldoc';
 import type { Result } from '../../../util/result';
 import type { ReleaseResult } from '../types';
 
@@ -8,13 +7,6 @@ export interface MavenDependency {
   name?: string;
   dependencyUrl: string;
 }
-
-export interface MavenXml {
-  isCacheable?: boolean;
-  xml?: XmlDocument;
-}
-
-export type HttpResourceCheckResult = 'found' | 'not-found' | 'error' | Date;
 
 export type DependencyInfo = Pick<
   ReleaseResult,
@@ -46,6 +38,7 @@ export type MavenFetchError =
   | { type: 'unsupported-protocol' }
   | { type: 'credentials-error' }
   | { type: 'missing-aws-region' }
+  | { type: 'xml-parse-error'; err: Error }
   | { type: 'unknown'; err: Error };
 
 export type MavenFetchResult<T = string> = Result<
