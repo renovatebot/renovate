@@ -242,8 +242,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       luxon:
-        specifier: 3.5.0
-        version: 3.5.0
+        specifier: 3.6.0
+        version: 3.6.0
       markdown-it:
         specifier: 14.1.0
         version: 14.1.0
@@ -4384,8 +4384,8 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
-  luxon@3.5.0:
-    resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
+  luxon@3.6.0:
+    resolution: {integrity: sha512-WE7p0p7W1xji9qxkLYsvcIxZyfP48GuFrWIBQZIsbjCyf65dG1rv4n83HcOyEyhvzxJCrUoObCRNFgRNIQ5KNA==}
     engines: {node: '>=12'}
 
   magic-string@0.30.17:
@@ -7946,7 +7946,7 @@ snapshots:
       adm-zip: 0.5.16
       fs-extra: 11.3.0
       got: 11.8.6
-      luxon: 3.5.0
+      luxon: 3.6.0
 
   '@renovatebot/pep440@4.1.0': {}
 
@@ -11128,7 +11128,7 @@ snapshots:
     dependencies:
       yallist: 4.0.0
 
-  luxon@3.5.0: {}
+  luxon@3.6.0: {}
 
   magic-string@0.30.17:
     dependencies:
