@@ -152,7 +152,7 @@ function channelToRegistryUrl(channel: string): string {
     return ensureTrailingSlash(channel);
   }
 
-  return `${defaultCondaRegistryApi}${channel}/`;
+  return ensureTrailingSlash(joinUrlParts(defaultCondaRegistryApi, channel));
 }
 
 function orderChannels(channels: Channels = []): string[] {
