@@ -1,6 +1,6 @@
-import escapeStringRegexp from 'escape-string-regexp';
 import { z } from 'zod';
 
+import { escapeRegExp, regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { NpmDatasource } from '../../datasource/npm';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -9,16 +9,25 @@ import * as pep440versioning from '../../versioning/pep440';
 
 import type { PackageDependency } from '../types';
 
-function matchAction(action: string): z.ZodString {
+function matchFullUrl(domain: string, action: string): z.ZodString {
   return z
     .string()
     .regex(
-      new RegExp(
-        String.raw`^(https://github\.com/)?` +
-          escapeStringRegexp(action) +
+      regEx(
+        escapeRegExp('https://' + domain + '/') +
+          escapeRegExp(action) +
           '(@.+)?$',
       ),
     );
+}
+
+function matchAction(action: string): z.Schema {
+  return z.union([
+    z.string().regex(regEx(escapeRegExp(action) + '(@.+)?$')),
+    matchFullUrl('github.com', action),
+    matchFullUrl('code.forgejo.org', action),
+    matchFullUrl('data.forgejo.org', action),
+  ]);
 }
 
 /**
@@ -48,9 +57,7 @@ export const communityActions = z.union([
     .object({
       uses: matchAction('pnpm/action-setup'),
       with: z.object({
-        version: z
-          .union([z.string(), z.number().transform((s) => s.toString())])
-          .refine((s) => s !== 'latest'),
+        version: z.string().refine((s) => s !== 'latest'),
       }),
     })
     .transform(({ with: val }): PackageDependency => {
