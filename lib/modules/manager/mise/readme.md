@@ -40,8 +40,8 @@ There are 2 ways to integrate versioning for a new tool:
 
 If `mise` adds support for more tools via its own [core tools](https://mise.jdx.dev/core-tools.html), you can create a PR to extend Renovate's `mise` manager to add support for the new core tools.
 
-If you are wanting to add support for an other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
-Even if the tool is not using `asdf` backend in the registry, the added short names to `asdf` manager will be used in the `mise` manager.
+If you want to add support for other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
+Even if the tool does not use the `asdf` backend in the registry, the short names added to the `asdf` manager will still be used in the `mise` manager.
 
 ### Backends support
 
