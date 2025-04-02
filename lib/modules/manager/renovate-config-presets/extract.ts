@@ -20,7 +20,7 @@ export function extractPackageFile(
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
   const config = RenovateJsonSchema.safeParse(content);
   if (!config.success) {
-    logger.debug({ packageFile, err: config.err }, 'Invalid Renovate Config');
+    logger.debug({ packageFile, err: config.error }, 'Invalid Renovate Config');
     return null;
   }
 
@@ -28,9 +28,7 @@ export function extractPackageFile(
 
   for (const preset of config.data.extends) {
     const parsedPreset = parsePreset(preset);
-    const datasource = supportedPresetSources.find(
-      (source) => source.source === parsedPreset.presetSource,
-    )?.datasource;
+    const datasource = supportedPresetSources[parsedPreset.presetSource];
 
     if (is.nullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
