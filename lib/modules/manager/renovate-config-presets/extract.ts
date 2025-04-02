@@ -7,23 +7,11 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { RenovateJsonSchema } from './schema';
 
-const supportedPresetSources: {
-  source: string;
-  datasource: string;
-}[] = [
-  {
-    source: 'github',
-    datasource: GithubTagsDatasource.id,
-  },
-  {
-    source: 'gitlab',
-    datasource: GitlabTagsDatasource.id,
-  },
-  {
-    source: 'gitea',
-    datasource: GiteaTagsDatasource.id,
-  },
-];
+const supportedPresetSources: Record<string, string> = {
+  github: GithubTagsDatasource.id,
+  gitlab: GitlabTagsDatasource.id,
+  gitea: GiteaTagsDatasource.id,
+};
 
 export function extractPackageFile(
   content: string,
