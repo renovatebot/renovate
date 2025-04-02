@@ -7,18 +7,14 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as conan from '.';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
-vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
-const hostRules = mocked(_hostRules);
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig = {
@@ -32,12 +28,6 @@ describe('modules/manager/conan/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
-    docker.resetPrefetchedImages();
-    hostRules.getAll.mockReturnValue([]);
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   it('returns null if updatedDeps are empty and lockFileMaintenance is turned off', async () => {
@@ -61,8 +51,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
-
     expect(
       await conan.updateArtifacts({
         packageFileName: 'conanfile.py',
@@ -82,7 +70,6 @@ describe('modules/manager/conan/artifacts', () => {
     ];
 
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
-    fs.readLocalFile.mockResolvedValueOnce(null);
 
     expect(
       await conan.updateArtifacts({
@@ -109,11 +96,9 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(null);
 
     expect(
       await conan.updateArtifacts({
@@ -141,7 +126,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
@@ -171,7 +155,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
@@ -208,7 +191,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
@@ -240,7 +222,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     const execSnapshots = mockExecAll();
@@ -272,7 +253,6 @@ describe('modules/manager/conan/artifacts', () => {
       },
     ];
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     mockExecAll(new Error(TEMPORARY_ERROR));
@@ -295,7 +275,6 @@ describe('modules/manager/conan/artifacts', () => {
     ];
     const errorMessage = 'conan.lock update execution failure message';
 
-    fs.statLocalFile.mockResolvedValueOnce({ name: 'conan.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('conan.lock');
     fs.readLocalFile.mockResolvedValueOnce('Original conan.lock');
     mockExecAll(new Error(errorMessage));
