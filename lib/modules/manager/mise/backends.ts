@@ -35,7 +35,7 @@ export function createAquaToolConfig(
     packageName: name,
     datasource: GithubTagsDatasource.id,
     // Trim the leading 'v' from both the current and extracted version
-    currentValue: version.replace(/^v/, ''),
+    currentValue: version.replace(regEx(/^v/), ''),
     extractVersion: '^v?(?<version>.+)',
   };
 }
