@@ -2304,7 +2304,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
-  it('go.mod file contains moder go full version without toolchain and constraint is present', async () => {
+  it('go.mod file contains modern go full version without toolchain and constraint is present', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
@@ -2585,6 +2585,61 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
+  });
+
+  it('with config constraint that does not result in any updates', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('Current go.sum')
+      .mockResolvedValueOnce(`someText\n\ngo 1.23.6\n\n${gomod1}`);
+
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.23.0' },
+        { version: '1.23.6' },
+        { version: '1.24.1' },
+      ],
+    });
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: `someText\n\ngo 1.23.6\n\n${gomod1}`,
+      config: {
+        updateType: 'minor',
+        constraints: {
+          go: '1.23',
+        },
+      },
+    });
+
+    expect(res).toEqual([
+      {
+        notice: {
+          file: 'go.mod',
+          message:
+            'Updates are constrained to go version 1.23 but the dependency required a more recent version.\nTherefore, the update was discarded.',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool golang 1.23.6',
+      },
+      {
+        cmd: 'go get -t ./... toolchain@none go@1.23.6',
+        // simulated to result in no changes since no more recent dependency version satisfies the constraint
+      },
+    ]);
   });
 
   it('returns artifact notices', async () => {

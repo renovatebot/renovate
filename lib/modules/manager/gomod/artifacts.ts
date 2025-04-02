@@ -238,6 +238,8 @@ export async function updateArtifacts({
           //       because the dependencies' go.mod is not in 'updatedDeps' to determine
           //       which highest version is actually required.
           extraGetArguments.push(`go@${goConstraint}`);
+          // TODO: if we are already at latest compatible version, then renovate still bumps it
+          //        instead the PR should be erroring out!!
         }
       }
     }
@@ -386,7 +388,25 @@ export async function updateArtifacts({
 
     await exec(execCommands, execOptions);
 
+    const res: UpdateArtifactsResult[] = [];
     const status = await getRepoStatus();
+    if (
+      status.modified.length === 0 &&
+      updatedDeps.length > 0 &&
+      config.constraints?.go
+    ) {
+      const downgradeNotice = `Updates are constrained to go version ${config.constraints.go} but the dependency required a more recent version.\nTherefore, the update was discarded.`;
+
+      logger.debug('Returning no update warning');
+      res.push({
+        notice: {
+          file: goModFileName,
+          message: downgradeNotice,
+        },
+      });
+
+      return res;
+    }
     if (
       !status.modified.includes(sumFileName) &&
       !status.modified.includes(goModFileName) &&
@@ -395,7 +415,6 @@ export async function updateArtifacts({
       return null;
     }
 
-    const res: UpdateArtifactsResult[] = [];
     if (status.modified.includes(sumFileName)) {
       logger.debug('Returning updated go.sum');
       res.push({
