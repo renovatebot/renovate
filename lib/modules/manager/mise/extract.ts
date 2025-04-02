@@ -51,9 +51,10 @@ export function extractPackageFile(
         optionsInName,
         is.nonEmptyObject(toolData) ? toolData : {},
       );
-      const toolConfig = is.null_(version)
-        ? null
-        : getToolConfig(backend, toolName, version, options);
+      const toolConfig =
+        version === null
+          ? null
+          : getToolConfig(backend, toolName, version, options);
       const dep = createDependency(depName, version, toolConfig);
       deps.push(dep);
     }
@@ -179,13 +180,13 @@ function createDependency(
   version: string | null,
   config: ToolingConfig | BackendToolingConfig | null,
 ): PackageDependency {
-  if (is.null_(version)) {
+  if (version === null) {
     return {
       depName: name,
       skipReason: 'unspecified-version',
     };
   }
-  if (is.null_(config)) {
+  if (config === null) {
     return {
       depName: name,
       skipReason: 'unsupported-datasource',
