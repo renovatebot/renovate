@@ -9,22 +9,21 @@ import * as npmVersioning from '../../versioning/npm';
 import * as pep440versioning from '../../versioning/pep440';
 
 import type { PackageDependency } from '../types';
+import { SkipReason, StageName } from '../../../types';
 
 function matchFullUrl(domain: string, action: string): z.ZodString {
   return z
     .string()
     .regex(
       regEx(
-        escapeRegExp('https://' + domain + '/') +
-          escapeRegExp(action) +
-          '(@.+)?$',
+        `${escapeRegExp(`https://${domain}/`)}${escapeRegExp(action)}(@.+)?$`,
       ),
     );
 }
 
 function matchAction(action: string): z.Schema {
   return z.union([
-    z.string().regex(regEx(escapeRegExp(action) + '(@.+)?$')),
+    z.string().regex(regEx(`${escapeRegExp(action)}(@.+)?$`)),
     matchFullUrl('github.com', action),
     matchFullUrl('code.forgejo.org', action),
     matchFullUrl('data.forgejo.org', action),
@@ -42,14 +41,28 @@ export const communityActions = z.union([
     .object({
       // https://github.com/astral-sh/setup-uv
       uses: matchAction('astral-sh/setup-uv'),
-      with: z.object({ version: z.string().refine((s) => s !== 'latest') }),
+      with: z.object({ version: z.string().optional() }),
     })
     .transform(({ with: val }): PackageDependency => {
+      let skipStage: StageName | undefined;
+      let skipReason: SkipReason | undefined;
+
+      if (!val.version) {
+        skipStage = 'extract';
+        skipReason = 'unspecified-version';
+      } else if (val.version === 'latest') {
+        // a special case of this action
+        skipStage = 'extract';
+        skipReason = 'unsupported-version';
+      }
+
       return {
         datasource: GithubReleasesDatasource.id,
         depName: 'astral-sh/uv',
         versioning: npmVersioning.id,
         packageName: 'astral-sh/uv',
+        skipReason,
+        skipStage,
         currentValue: val.version,
         depType: 'uses-with',
       };
@@ -58,15 +71,28 @@ export const communityActions = z.union([
     .object({
       uses: matchAction('pnpm/action-setup'),
       with: z.object({
-        version: z.string().refine((s) => s !== 'latest'),
+        version: z.string().optional(),
       }),
     })
     .transform(({ with: val }): PackageDependency => {
+      let skipStage: StageName | undefined;
+      let skipReason: SkipReason | undefined;
+      if (!val.version) {
+        skipStage = 'extract';
+        skipReason = 'unspecified-version';
+      } else if (val.version === 'latest') {
+        // a special case of this action
+        skipStage = 'extract';
+        skipReason = 'unsupported-version';
+      }
+
       return {
         datasource: NpmDatasource.id,
         depName: 'pnpm',
         versioning: npmVersioning.id,
         packageName: 'pnpm',
+        skipReason,
+        skipStage,
         currentValue: val.version,
         depType: 'uses-with',
       };
@@ -74,15 +100,28 @@ export const communityActions = z.union([
   z
     .object({
       uses: matchAction('pdm-project/setup-pdm'),
-      with: z.object({ version: z.string().refine((s) => s !== 'head') }),
+      with: z.object({ version: z.string().optional() }),
     })
     .transform(({ with: val }): PackageDependency => {
+      let skipStage: StageName | undefined;
+      let skipReason: SkipReason | undefined;
+      if (!val.version) {
+        skipStage = 'extract';
+        skipReason = 'unspecified-version';
+      } else if (val.version === 'head') {
+        // a special case of this action
+        skipStage = 'extract';
+        skipReason = 'unsupported-version';
+      }
+
       return {
         datasource: PypiDatasource.id,
         depName: 'pdm',
         versioning: pep440versioning.id,
         packageName: 'pdm',
         currentValue: val.version,
+        skipStage,
+        skipReason,
         depType: 'uses-with',
       };
     }),
