@@ -192,7 +192,6 @@ export async function generateLockFile(
     }
 
     const execOptions: ExecOptions = {
-      userConfiguredEnv: config.env,
       cwdFile: lockFileName,
       extraEnv,
       docker: {},

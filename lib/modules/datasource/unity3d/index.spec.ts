@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { Unity3dDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/unity3d/index', () => {
   const fixtures = Object.fromEntries(

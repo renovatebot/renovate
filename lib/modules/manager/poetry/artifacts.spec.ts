@@ -2,9 +2,6 @@ import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -13,6 +10,9 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs } from '~test/util';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
@@ -33,9 +33,9 @@ vi.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = mocked(_datasource);
-const hostRules = mocked(_hostRules);
-const googleAuth = mocked(_googleAuth);
+const datasource = vi.mocked(_datasource);
+const hostRules = vi.mocked(_hostRules);
+const googleAuth = vi.mocked(_googleAuth);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),

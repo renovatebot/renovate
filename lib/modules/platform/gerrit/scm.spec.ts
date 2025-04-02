@@ -1,4 +1,3 @@
-import { git, mocked, partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { client as _client } from './client';
 import { GerritScm, configureScm } from './scm';
@@ -7,10 +6,10 @@ import type {
   GerritChange,
   GerritRevisionInfo,
 } from './types';
+import { git, partial } from '~test/util';
 
-vi.mock('../../../util/git');
 vi.mock('./client');
-const clientMock = mocked(_client);
+const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
   const gerritScm = new GerritScm();

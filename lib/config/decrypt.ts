@@ -38,7 +38,7 @@ export async function tryDecrypt(
       );
     } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
-      /* v8 ignore start: not testable */
+      /* v8 ignore start -- not testable */
       if (is.string(decryptedStr)) {
         logger.warn(
           { keyName },

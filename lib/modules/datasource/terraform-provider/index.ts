@@ -62,7 +62,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -129,7 +129,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const latestVersion = dep.releases.find(
       (release) => res.version === release.version,
     );
-    // istanbul ignore else
     if (latestVersion) {
       latestVersion.releaseTimestamp = asTimestamp(res.published_at);
     }

@@ -44,6 +44,9 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
     const res = await super.requestJsonUnsafe<T>(method, opts);
     const pc = getPaginationContainer<T>(res.body);
     if (opts.httpOptions?.paginate && pc) {
+      delete opts.httpOptions.cacheProvider;
+      opts.httpOptions.memCache = false;
+
       delete opts.httpOptions.paginate;
       const total = parseInt(res.headers['x-total-count'] as string, 10);
       let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);

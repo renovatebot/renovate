@@ -166,7 +166,7 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    /* v8 ignore next 7: TODO: test me */
+    /* v8 ignore next 7 -- TODO: add test */
     if (key === '__proto__') {
       errors.push({
         topic: 'Config security error',
@@ -841,7 +841,7 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
-  /* v8 ignore next 5: not testable yet */
+  /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
     warnings.push({
       topic: 'Deprecation Warning',

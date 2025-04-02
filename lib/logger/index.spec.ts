@@ -1,7 +1,6 @@
 import type { WriteStream } from 'node:fs';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import type { RenovateLogger } from './renovate-logger';
@@ -21,8 +20,9 @@ import {
   setMeta,
   withMeta,
 } from '.';
+import { partial } from '~test/util';
 
-const initialContext = 'initial_context';
+const logContext = 'initial_context';
 
 vi.unmock('.');
 vi.mock('nanoid', () => ({
@@ -39,10 +39,7 @@ describe('logger/index', () => {
   it('uses an auto-generated log context', () => {
     logger.debug('');
 
-    expect(bunyanDebugSpy).toHaveBeenCalledWith(
-      { logContext: initialContext },
-      '',
-    );
+    expect(bunyanDebugSpy).toHaveBeenCalledWith({ logContext }, '');
   });
 
   it('sets and gets context', () => {
@@ -70,95 +67,127 @@ describe('logger/index', () => {
 
   describe('meta functions', () => {
     beforeEach(() => {
-      setContext(initialContext);
+      setContext(logContext);
+      setMeta({});
     });
 
     it('sets meta', () => {
-      const logMeta = { foo: 'foo' };
-      const meta = { bar: 'bar' };
-      setMeta(meta);
+      setMeta({ foo: 'foo' });
+      setMeta({ bar: 'bar' });
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
 
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...meta, ...logMeta },
-        '',
+        {
+          logContext,
+          // `foo` key was rewritten
+          bar: 'bar',
+          baz: 'baz',
+        },
+        'message',
       );
       expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
     });
 
     it('adds meta', () => {
-      const logMeta = { foo: 'foo' };
-      const meta = { bar: 'bar' };
-      addMeta(meta);
+      setMeta({ foo: 'foo' });
+      addMeta({ bar: 'bar' });
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
 
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...meta, ...logMeta },
-        '',
+        {
+          logContext,
+          foo: 'foo',
+          bar: 'bar',
+          baz: 'baz',
+        },
+        'message',
       );
       expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
     });
 
     it('removes meta', () => {
-      const logMeta = { foo: 'foo' };
-      const meta = { bar: 'bar' };
-      setMeta(meta);
+      setMeta({
+        foo: 'foo',
+        bar: 'bar',
+      });
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
 
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...meta, ...logMeta },
-        '',
+        {
+          logContext,
+          foo: 'foo',
+          bar: 'bar',
+          baz: 'baz',
+        },
+        'message',
       );
       expect(bunyanDebugSpy).toHaveBeenCalledTimes(1);
 
-      removeMeta(Object.keys(meta));
+      removeMeta(['bar']);
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
 
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...logMeta },
-        '',
+        {
+          logContext,
+          foo: 'foo',
+          baz: 'baz',
+        },
+        'message',
       );
       expect(bunyanDebugSpy).toHaveBeenCalledTimes(2);
     });
 
     it('withMeta adds and removes metadata correctly', () => {
-      const logMeta = { foo: 'foo' };
-      const tempMeta = { bar: 'bar' };
+      setMeta({ foo: 'foo' });
 
-      withMeta(tempMeta, () => {
-        logger.debug(logMeta, '');
+      withMeta({ bar: 'bar' }, () => {
+        logger.debug({ baz: 'baz' }, 'message');
         expect(bunyanDebugSpy).toHaveBeenCalledWith(
-          { logContext: initialContext, ...tempMeta, ...logMeta },
-          '',
+          {
+            logContext,
+            foo: 'foo',
+            bar: 'bar',
+            baz: 'baz',
+          },
+          'message',
         );
       });
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...logMeta },
-        '',
+        {
+          logContext,
+          foo: 'foo',
+          bar: 'bar',
+          baz: 'baz',
+        },
+        'message',
       );
     });
 
     it('withMeta handles cleanup when callback throws', () => {
-      const logMeta = { foo: 'foo' };
-      const tempMeta = { bar: 'bar' };
+      setMeta({ foo: 'foo' });
 
       expect(() =>
-        withMeta(tempMeta, () => {
-          logger.debug(logMeta, '');
+        withMeta({ bar: 'bar' }, () => {
+          logger.debug({ baz: 'baz' }, 'message');
           throw new Error('test error');
         }),
       ).toThrow('test error');
 
-      logger.debug(logMeta, '');
+      logger.debug({ baz: 'baz' }, 'message');
       expect(bunyanDebugSpy).toHaveBeenCalledWith(
-        { logContext: initialContext, ...logMeta },
-        '',
+        {
+          logContext,
+          foo: 'foo',
+          bar: 'bar',
+          baz: 'baz',
+        },
+        'message',
       );
     });
   });
