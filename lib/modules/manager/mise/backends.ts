@@ -50,10 +50,9 @@ export function createCargoToolConfig(
   name: string,
   version: string,
 ): BackendToolingConfig {
-  // Avoid narrowing the type of name to never
-  if (!(is.urlString as (value: unknown) => boolean)(name)) {
+  if (!(is.urlString(name)) {
     return {
-      packageName: name,
+      packageName: name as string, // `is.urlString` type issue
       datasource: CrateDatasource.id,
     };
   }
