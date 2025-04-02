@@ -123,7 +123,8 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    // sshPort can be an empty string, wrong type!
+    // sshPort is string, wrong type!
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
     // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
     if (!sshPort || is.emptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
