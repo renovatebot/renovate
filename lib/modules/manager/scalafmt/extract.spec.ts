@@ -22,6 +22,25 @@ describe('modules/manager/scalafmt/extract', () => {
       });
     });
 
+    it('extracts version correctly if enclosed in quotes', () => {
+      const scalafmtConf = codeBlock`
+      version = "3.8.0"
+    `;
+      const packages = extractPackageFile(scalafmtConf);
+      expect(packages).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'scalameta/scalafmt',
+            depName: 'scalafmt',
+            currentValue: '3.8.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
     it('ignore file if no version specified', () => {
       const scalafmtConf = codeBlock`
       maxColumn = 80
