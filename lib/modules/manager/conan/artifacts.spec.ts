@@ -11,7 +11,6 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as conan from '.';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/http');
 vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
