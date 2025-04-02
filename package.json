@@ -189,7 +189,7 @@
     "commander": "13.1.0",
     "conventional-commits-detector": "1.0.3",
     "croner": "9.0.0",
-    "cronstrue": "2.56.0",
+    "cronstrue": "2.57.0",
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",

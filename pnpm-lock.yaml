@@ -149,8 +149,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       cronstrue:
-        specifier: 2.56.0
-        version: 2.56.0
+        specifier: 2.57.0
+        version: 2.57.0
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
@@ -2921,8 +2921,8 @@ packages:
     resolution: {integrity: sha512-onMB0OkDjkXunhdW9htFjEhqrD54+M94i6ackoUkjHKbRnXdyEyKRelp4nJ1kAz32+s27jP1FsebpJCVl0BsvA==}
     engines: {node: '>=18.0'}
 
-  cronstrue@2.56.0:
-    resolution: {integrity: sha512-/YC3b4D/E/S8ToQ7f676A2fqoC3vVpXKjJ4SMsP0jYsvRYJdZ6h9+Fq/Y7FoFDEUFCqLTca+G2qTV227lyyFZg==}
+  cronstrue@2.57.0:
+    resolution: {integrity: sha512-gQOfxJa1RA9uDT4hx37NshhX4dW9t9zTCtIYu15LUziH+mkpuLXYcSEyM8ZewMJ2p8UVuHGjI3n4hGpu3HtCbg==}
     hasBin: true
 
   cross-spawn@7.0.6:
@@ -9519,7 +9519,7 @@ snapshots:
 
   croner@9.0.0: {}
 
-  cronstrue@2.56.0: {}
+  cronstrue@2.57.0: {}
 
   cross-spawn@7.0.6:
     dependencies:
