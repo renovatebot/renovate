@@ -188,6 +188,7 @@ function extractSteps(
       const val = Result.parse(step, communityActions).unwrapOrNull();
       if (val) {
         deps.push(val);
+        continue;
       }
     }
 
