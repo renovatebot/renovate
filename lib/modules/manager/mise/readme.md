@@ -2,13 +2,13 @@ Renovate can update the [mise](https://mise.jdx.dev/configuration.html#mise-toml
 
 ### Renovate only updates primary versions
 
-Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `.mise.toml` file.
+Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
 
 Secondary or fallback versions require manual updates.
 
 #### Example
 
-Given a `.mise.toml` entry like:
+Given a `mise.toml` entry like:
 
 ```toml
 [tools]
@@ -41,10 +41,7 @@ There are 2 ways to integrate versioning for a new tool:
 If `mise` adds support for more tools via its own [core tools](https://mise.jdx.dev/core-tools.html), you can create a PR to extend Renovate's `mise` manager to add support for the new core tools.
 
 If you are wanting to add support for an other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
-
-Note that some tools in the registry are not using the `asdf` backend. We are currently not supporting those tool short names.
-
-TODO: Change the registry lookup.
+Even if the tool is not using `asdf` backend in the registry, the added short names to `asdf` manager will be used in the `mise` manager.
 
 ### Backends support
 
@@ -66,8 +63,8 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 Renovate's `mise` manager does not support the following tool syntax:
 
 - `asdf` and `vfox` plugins
-  e.g. `asdf:asdf:mise-plugins/asdf-yarn` or `vfox:vfox:version-fox/vfox-elixir`
-  Short names with backends like `asdf:yarn` or `vfox:elixir` are supported if the short names are supported.
+  e.g. `asdf:mise-plugins/asdf-yarn` or `vfox:version-fox/vfox-elixir`
+  Short names with backends like `asdf:yarn` or `vfox:elixir` are supported if the short names (`yarn`, `elixir`) are supported.
 
 - `aqua` packages with `http` [package type](https://aquaproj.github.io/docs/reference/registry-config/#package-types).
   However if the short name using `aqua` backend is supported by Renovate, it will be updated.
@@ -88,9 +85,9 @@ Renovate's `mise` manager does not support the following tool syntax:
   }
   ```
 
-- `ubi` backend tools with [`tag_regex`](https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions) option.
+- Some of `ubi` backend tools with [`tag_regex`](https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions) option.
   The `tag_regex` option is used as `extractVersion`, but the regex engines are not the same between mise and Renovate.
-  If the version is not updated or updated incorrectly, override `extractVersion` manually in the renovate config.
+  If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
 ### Supported default registry tool short names
 
