@@ -92,9 +92,7 @@ function getAuthenticationRulesWithToken(
 ): AuthenticationRule[] {
   let token = authToken;
   let type = hostType;
-  if (!type) {
-    type = detectPlatform(url);
-  }
+  type ??= detectPlatform(url);
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
@@ -124,11 +122,9 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    if (!sshPort) {
-      // By default, bitbucket-server SSH port is 7999.
-      // For non-default port, the generated auth config will likely be incorrect.
-      sshPort = 7999;
-    }
+    // By default, bitbucket-server SSH port is 7999.
+    // For non-default port, the generated auth config will likely be incorrect.
+    sshPort ??= 7999;
   }
 
   const url = { ...insteadUrl };
