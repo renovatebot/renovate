@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import type { SkipReason, StageName } from '../../../types';
 import { escapeRegExp, regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { NpmDatasource } from '../../datasource/npm';
@@ -7,9 +8,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 import * as condaVersioning from '../../versioning/conda';
 import * as npmVersioning from '../../versioning/npm';
 import * as pep440versioning from '../../versioning/pep440';
-
 import type { PackageDependency } from '../types';
-import { SkipReason, StageName } from '../../../types';
 
 function matchFullUrl(domain: string, action: string): z.ZodString {
   return z

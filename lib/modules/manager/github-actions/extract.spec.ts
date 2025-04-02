@@ -857,7 +857,18 @@ describe('modules/manager/github-actions/extract', () => {
           version: 'latest',
         },
       },
-      expected: [],
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          packageName: 'astral-sh/uv',
+          skipReason: 'unsupported-version',
+          skipStage: 'extract',
+          versioning: 'npm',
+        },
+      ],
     },
     {
       step: {
@@ -866,7 +877,18 @@ describe('modules/manager/github-actions/extract', () => {
           version: 'latest',
         },
       },
-      expected: [],
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          skipReason: 'unsupported-version',
+          skipStage: 'extract',
+          versioning: 'npm',
+        },
+      ],
     },
     {
       step: {
