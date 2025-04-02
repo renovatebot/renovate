@@ -232,6 +232,7 @@ describe('modules/manager/gomod/extract', () => {
           github.com/foo/bar v1.2.3
           github.com/foo/bar/sub1/sub2 v4.5.6 // indirect
           github.com/foo/bar/sub1 v7.8.9 // indirect
+          github.com/foo/bar/sub1/sub2/cmd/hell v10.11.12 // indirect
         )
         tool github.com/foo/bar/sub1/sub2/cmd/hello
       `;
@@ -259,6 +260,33 @@ describe('modules/manager/gomod/extract', () => {
           currentValue: 'v7.8.9',
           enabled: false,
           managerData: { lineNumber: 3, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1/sub2/cmd/hell',
+          depType: 'indirect',
+          currentValue: 'v10.11.12',
+          enabled: false,
+          managerData: { lineNumber: 4, multiLine: true },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives with exact match', () => {
+    const goMod = codeBlock`
+        require github.com/foo/bar v1.2.3 // indirect
+        tool github.com/foo/bar
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar',
+          depType: 'indirect',
+          currentValue: 'v1.2.3',
+          managerData: { lineNumber: 0 },
         },
       ],
     });
