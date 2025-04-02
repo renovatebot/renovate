@@ -1,16 +1,12 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, PrState } from '../../../types';
+import type { PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
-import type {
-  GerritChange,
-  GerritChangeStatus,
-  GerritLabelTypeInfo,
-} from './types';
+import type { GerritChange, GerritLabelTypeInfo } from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
