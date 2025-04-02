@@ -165,5 +165,110 @@ describe('modules/manager/gomod/extract', () => {
         ],
       });
     });
+
+    it('extracts single-line tool directives', () => {
+      const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+            depType: 'indirect',
+            currentValue: 'v2.4.1',
+            managerData: { lineNumber: 0 },
+          },
+        ],
+      });
+    });
+
+    it('extracts multi-line tool directives', () => {
+      const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        tool (
+          github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+        )
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+            depType: 'indirect',
+            currentValue: 'v2.4.1',
+            managerData: { lineNumber: 0 },
+          },
+        ],
+      });
+    });
+  });
+
+  it('extracts tool directives with required modules', () => {
+    const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+          depType: 'require',
+          currentValue: 'v2.4.1',
+          managerData: { lineNumber: 0 },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives of sub-modules', () => {
+    const goMod = codeBlock`
+        require (
+          github.com/foo/bar v1.2.3
+          github.com/foo/bar/sub1/sub2 v4.5.6 // indirect
+          github.com/foo/bar/sub1 v7.8.9 // indirect
+        )
+        tool github.com/foo/bar/sub1/sub2/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar',
+          depType: 'require',
+          currentValue: 'v1.2.3',
+          managerData: { lineNumber: 1, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1/sub2',
+          depType: 'indirect',
+          currentValue: 'v4.5.6',
+          managerData: { lineNumber: 2, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1',
+          depType: 'indirect',
+          currentValue: 'v7.8.9',
+          enabled: false,
+          managerData: { lineNumber: 3, multiLine: true },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives with no matching dependencies', () => {
+    const goMod = codeBlock`
+        tool github.com/foo/bar/sub/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toBeNull();
   });
 });

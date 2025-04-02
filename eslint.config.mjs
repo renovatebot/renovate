@@ -44,7 +44,7 @@ export default tseslint.config(
   eslintContainerbase.configs.all,
   {
     linterOptions: {
-      reportUnusedDisableDirectives: true,
+      reportUnusedDisableDirectives: 'error',
     },
 
     languageOptions: {
