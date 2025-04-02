@@ -61,7 +61,6 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      userConfiguredEnv: config.env,
       toolConstraints: [{ toolName: 'pixi', constraint }],
     };
     await exec(cmd, execOptions);

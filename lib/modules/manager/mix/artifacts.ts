@@ -146,7 +146,6 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {},
-    userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'erlang',
