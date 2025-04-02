@@ -1,12 +1,16 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { PrState } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
-import type { GerritChange, GerritLabelTypeInfo } from './types';
+import type {
+  GerritChange,
+  GerritChangeStatus,
+  GerritLabelTypeInfo,
+} from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
@@ -74,7 +78,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
 }
 
 export function mapGerritChangeStateToPrState(
-  state: string, // suppress default path code removal
+  state: GerritChangeStatus | 'UNKNOWN', // suppress default path code removal
 ): PrState {
   switch (state) {
     case 'NEW':
@@ -116,7 +120,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
 }
 
 export function mapBranchStatusToLabel(
-  state: string, // suppress default path code removal
+  state: BranchStatus | 'UNKNOWN', // suppress default path code removal
   label: GerritLabelTypeInfo,
 ): number {
   const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
