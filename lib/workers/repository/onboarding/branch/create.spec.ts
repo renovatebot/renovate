@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
+import type { RenovateConfig } from '~test/util';
+import { scm } from '~test/util';
 
 vi.mock('./config', () => ({
   getOnboardingConfigContents: () =>

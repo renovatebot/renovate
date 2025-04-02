@@ -1,14 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from './artifacts';
+import { mockExecAll } from '~test/exec-util';
+import { fs, git, partial } from '~test/util';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 
 const globalConfig: RepoGlobalConfig = {

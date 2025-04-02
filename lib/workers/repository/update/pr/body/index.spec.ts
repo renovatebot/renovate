@@ -1,4 +1,3 @@
-import { mocked, platform } from '../../../../../../test/util';
 import type { PackageFile } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
@@ -10,30 +9,31 @@ import * as _header from './header';
 import * as _notes from './notes';
 import * as _table from './updates-table';
 import { getPrBody } from '.';
+import { platform } from '~test/util';
 
 vi.mock('./changelogs');
-const changelogs = mocked(_changelogs);
+const changelogs = vi.mocked(_changelogs);
 
 vi.mock('./config-description');
-const configDescription = mocked(_configDescription);
+const configDescription = vi.mocked(_configDescription);
 
 vi.mock('./controls');
-const controls = mocked(_controls);
+const controls = vi.mocked(_controls);
 
 vi.mock('./footer');
-const footer = mocked(_footer);
+const footer = vi.mocked(_footer);
 
 vi.mock('./header');
-const header = mocked(_header);
+const header = vi.mocked(_header);
 
 vi.mock('./notes');
-const notes = mocked(_notes);
+const notes = vi.mocked(_notes);
 
 vi.mock('./updates-table');
-const table = mocked(_table);
+const table = vi.mocked(_table);
 
 vi.mock('../../../../../util/template');
-const template = mocked(_template);
+const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {

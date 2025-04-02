@@ -1,14 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
-import {
-  extractFromImage,
-  extractFromJob,
-  extractFromServices,
-} from './extract';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 const config: ExtractConfig = {};
 
@@ -299,82 +294,6 @@ describe('modules/manager/gitlabci/extract', () => {
           replaceString: '$BUILD_IMAGES/image2:1.0.0',
         },
       ]);
-    });
-
-    it('extracts from image', () => {
-      let expectedRes = {
-        autoReplaceStringTemplate:
-          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-        currentDigest: undefined,
-        currentValue: 'test',
-        datasource: 'docker',
-        depName: 'image',
-        packageName: 'image',
-        depType: 'image',
-        replaceString: 'image:test',
-      };
-
-      expect(extractFromImage('image:test')).toEqual(expectedRes);
-
-      expectedRes = { ...expectedRes, depType: 'image-name' };
-      expect(
-        extractFromImage({
-          name: 'image:test',
-        }),
-      ).toEqual(expectedRes);
-
-      expect(extractFromImage(undefined)).toBeNull();
-    });
-
-    it('extracts from services', () => {
-      const expectedRes = [
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test',
-          datasource: 'docker',
-          depName: 'image',
-          packageName: 'image',
-          depType: 'service-image',
-          replaceString: 'image:test',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test2',
-          datasource: 'docker',
-          depName: 'image2',
-          packageName: 'image2',
-          depType: 'service-image',
-          replaceString: 'image2:test2',
-        },
-      ];
-      const services = ['image:test', 'image2:test2'];
-      expect(extractFromServices(undefined)).toBeEmptyArray();
-      expect(extractFromServices(services)).toEqual(expectedRes);
-      expect(
-        extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }]),
-      ).toEqual(expectedRes);
-    });
-
-    it('extracts from job object', () => {
-      const expectedRes = [
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test',
-          datasource: 'docker',
-          depName: 'image',
-          packageName: 'image',
-          depType: 'image',
-          replaceString: 'image:test',
-        },
-      ];
-      expect(extractFromJob(undefined)).toBeEmptyArray();
-      expect(extractFromJob({ image: 'image:test' })).toEqual(expectedRes);
     });
 
     it('extracts component references via registry aliases', () => {

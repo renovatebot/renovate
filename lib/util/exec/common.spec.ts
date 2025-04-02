@@ -1,12 +1,14 @@
 import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
-import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { DataListener, RawExecOptions } from './types';
+import { partial } from '~test/util';
 
 vi.mock('node:child_process');
-const spawn = mockedFunction(_spawn);
+vi.unmock('./common');
+
+const spawn = vi.mocked(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;

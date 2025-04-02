@@ -632,10 +632,10 @@
     Hi there,
 
 
-    You are seeing this message because someone - maybe you - has suggested that the documentation should be improved.
+    Someone (maybe even you) suggested the documentation should be improved.
 
 
-    The good news is that essentially all Renovate documentation is Open Source in this repository and can be improved by you too! If you have a suggestion for improvement, please consider opening a PR to improve the documentation, instead of just complaining about it (however subtlely or politely you intended it). Even if English isn't your first language or you're not _sure_ what to write, take a shot at it and we will guide you during the PR review. Documentation updates can be done easily in your browser on GitHub.com and do not require you to clone any code.
+    Good news, nearly all Renovate documentation is Open Source. This means you can improve the docs yourself! Please consider opening a PR to improve our documentation, instead of complaining (however subtly or politely). Even if English isn't your first language, or you're not _sure_ what to write, please open a PR anyway. We will help you to finish the PR. You can make changes to our docs in your browser on GitHub.com. You don't need to clone any code with Git.
 
 
     Thanks, the Renovate
@@ -668,6 +668,25 @@
 
 
     Your discussion can remain open indefinitely, but please be patient and do not nudge or bump this discussion just to get attention. Please also read [Getting more help](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) in our Code of Conduct.
+
+
+    Thanks, the Renovate team
+
+'auto:disputed-issue':
+  comment: >
+    Hi there,
+
+
+    In this repo, the purpose of Issues is to track clearly actionable (ready to be worked on) items. Discussions are a triaging ground for general questions, ideas, and other non-actionable items.
+
+
+    If an Issue like this one attracts many comments, it's an indication that its scope is disputed, and therefore it's not actionable. If this is the case, it should be converted back to a Discussion.
+
+
+    If you are commenting in this Issue because you disagree with its requirements or think they're unclear, then please let us know and we will convert this Issue back to a Discussion.
+
+
+    Otherwise, please be aware that excessive comments or debates inside Issue comments result in them being less likely to be worked on, not more likely.
 
 
     Thanks, the Renovate team

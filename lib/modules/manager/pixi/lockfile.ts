@@ -6,7 +6,7 @@
  *
  */
 const pixiGenerateLockFileVersion: Config[] = [
-  { lockVersion: 6, range: '>=0.39.2, <0.43.0' },
+  { lockVersion: 6, range: '>=0.40.0, <0.45.0a0' },
 ] as const;
 
 interface Config {

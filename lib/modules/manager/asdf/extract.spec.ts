@@ -51,6 +51,7 @@ argocd 2.5.4
 asdf-plugin-manager 1.1.1
 atmos 1.100.0
 awscli 2.8.6
+azure-cli 2.70.0
 bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
@@ -74,6 +75,7 @@ flux2 0.41.2
 gauche 0.9.12
 github-cli 2.32.1
 gitleaks 8.21.1
+ginkgo 2.22.2
 gleam 1.3.1
 gohugo extended_0.104.3
 golang 1.23.3
@@ -92,6 +94,7 @@ just 1.7.0
 k3s 1.31.2+k3s1
 kind 0.19.0
 kotlin 1.7.20
+kubebuilder 3.10.0
 kubectl 1.26.3
 kubetail 1.6.19
 kustomize 4.5.7
@@ -104,6 +107,7 @@ nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
 oci 3.50.0
+opa 1.2.0
 opentofu 1.6.0
 packer 1.11.2
 perl 5.37.5
@@ -128,6 +132,7 @@ terraform 1.3.3
 terraform-docs 0.16.0
 terraformer 0.8.21
 terragrunt 0.43.2
+terramate 0.12.1
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
@@ -192,6 +197,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'aws/aws-cli',
             depName: 'awscli',
+          },
+          {
+            currentValue: '2.70.0',
+            datasource: 'github-releases',
+            packageName: 'Azure/azure-cli',
+            depName: 'azure-cli',
+            extractVersion: '^azure-cli-(?<version>\\S+)',
           },
           {
             currentValue: '0.2.2',
@@ -345,6 +357,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '2.22.2',
+            datasource: 'github-releases',
+            packageName: 'onsi/ginkgo',
+            depName: 'ginkgo',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.3.1',
             datasource: 'github-tags',
             packageName: 'gleam-lang/gleam',
@@ -469,6 +488,13 @@ dummy 1.2.3
             extractVersion: '^(Kotlin |v)(?<version>\\S+)',
           },
           {
+            currentValue: '3.10.0',
+            datasource: 'github-tags',
+            packageName: 'kubernetes-sigs/kubebuilder',
+            depName: 'kubebuilder',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '1.26.3',
             datasource: 'github-tags',
             packageName: 'kubernetes/kubernetes',
@@ -545,6 +571,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'oracle/oci-cli',
             depName: 'oci',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.2.0',
+            datasource: 'github-releases',
+            packageName: 'open-policy-agent/opa',
+            depName: 'opa',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -664,7 +697,7 @@ dummy 1.2.3
           },
           {
             currentValue: '2.14.0',
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'GoogleContainerTools/skaffold',
             depName: 'skaffold',
             extractVersion: '^v(?<version>\\S+)',
@@ -708,6 +741,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'gruntwork-io/terragrunt',
             depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.12.1',
+            datasource: 'github-releases',
+            packageName: 'terramate-io/terramate',
+            depName: 'terramate',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

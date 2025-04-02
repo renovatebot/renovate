@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { readOnlyIssueBody } from './read-only-issue-body';
+import { Fixtures } from '~test/fixtures';
 
 const issueBody = Fixtures.get('issue-body.txt');
 
