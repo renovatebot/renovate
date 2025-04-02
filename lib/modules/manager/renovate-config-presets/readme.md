@@ -18,3 +18,4 @@ For example, `github>user/renovate-config#1.2.3` will be updated to `github>user
 - [HTTP URLs presets](../../../config-presets.md#fetching-presets-from-an-http-server)
 - [`package.json` file config](../../../configuration-options.md) (deprecated)
 - [`npm` hosted presets](../../../config-presets.md#npm-hosted-presets) (deprecated)
+- `extends` inside sub objects, like `packageRules`
