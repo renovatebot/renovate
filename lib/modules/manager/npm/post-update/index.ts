@@ -287,7 +287,6 @@ async function updateYarnOffline(
 
     if (resolvedPaths.length) {
       const status = await getRepoStatus();
-      logger.trace({ status }, 'git status result');
       for (const f of status.modified.concat(status.not_added)) {
         if (resolvedPaths.some((p) => f.startsWith(p))) {
           updatedArtifacts.push({
