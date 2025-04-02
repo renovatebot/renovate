@@ -122,9 +122,12 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    // By default, bitbucket-server SSH port is 7999.
-    // For non-default port, the generated auth config will likely be incorrect.
-    sshPort ??= 7999;
+    // sshPort will be zero, so no null coalescing allowed!
+    if (!sshPort || sshPort === 0) {
+      // By default, bitbucket-server SSH port is 7999.
+      // For non-default port, the generated auth config will likely be incorrect.
+      sshPort = 7999;
+    }
   }
 
   const url = { ...insteadUrl };
