@@ -32,7 +32,7 @@ export function extractPackageFile(
   logger.trace(`renovate-config-presets.extractPackageFile(${packageFile})`);
   const config = RenovateJsonSchema.safeParse(content);
   if (!config.success) {
-    logger.debug({ packageFile }, 'Invalid Renovate Config');
+    logger.debug({ packageFile, err: config.err }, 'Invalid Renovate Config');
     return null;
   }
 
