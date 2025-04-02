@@ -50,7 +50,7 @@ export function createCargoToolConfig(
   name: string,
   version: string,
 ): BackendToolingConfig {
-  if (!(is.urlString(name)) {
+  if (!is.urlString(name)) {
     return {
       packageName: name as string, // `is.urlString` type issue
       datasource: CrateDatasource.id,
