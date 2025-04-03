@@ -870,45 +870,6 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
-        uses: 'pnpm/action-setup@v4',
-        with: {
-          version: 'latest',
-        },
-      },
-      expected: [
-        {
-          currentValue: 'latest',
-          datasource: 'npm',
-          depName: 'pnpm',
-          depType: 'uses-with',
-          packageName: 'pnpm',
-          versioning: 'npm',
-        },
-      ],
-    },
-    {
-      step: {
-        name: 'Install gotestsum',
-        uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
-        with: {
-          repo: 'gotestyourself/gotestsum',
-          tag: 'v1.12.1',
-          platform: 'linux',
-          arch: 'amd64',
-        },
-      },
-      expected: [
-        {
-          currentValue: 'v1.12.1',
-          datasource: 'github-releases',
-          depName: 'gotestyourself/gotestsum',
-          depType: 'uses-with',
-          packageName: 'gotestyourself/gotestsum',
-        },
-      ],
-    },
-    {
-      step: {
         name: 'Pinning a minor version of uv',
         uses: 'astral-sh/setup-uv@v5',
         with: {
@@ -945,6 +906,81 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        name: 'Pinning a minor version of uv',
+        uses: 'https://github.com/astral-sh/setup-uv@v5',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'github-releases',
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          packageName: 'astral-sh/uv',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/action-setup@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+          versioning: 'npm',
+        },
+      ],
+    },
+    {
+      step: {
+        name: 'Install gotestsum',
+        uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
+        with: {
+          repo: 'gotestyourself/gotestsum',
+          tag: 'v1.12.1',
+          platform: 'linux',
+          arch: 'amd64',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.12.1',
+          datasource: 'github-releases',
+          depName: 'gotestyourself/gotestsum',
+          depType: 'uses-with',
+          packageName: 'gotestyourself/gotestsum',
+        },
+      ],
+    },
+
     {
       step: {
         uses: 'pnpm/action-setup@v4',
@@ -991,6 +1027,23 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '1.2.3',
+          datasource: 'pypi',
+          depName: 'pdm',
+          depType: 'uses-with',
+          packageName: 'pdm',
+          versioning: 'pep440',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pdm-project/setup-pdm@v4.2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
           datasource: 'pypi',
           depName: 'pdm',
           depType: 'uses-with',
