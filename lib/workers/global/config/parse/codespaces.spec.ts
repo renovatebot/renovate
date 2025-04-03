@@ -1,7 +1,7 @@
 import readline from 'node:readline';
 import type { Interface } from 'node:readline/promises';
-import { setConfig } from './codespaces';
 import { partial } from '../../../../../test/util';
+import { setConfig } from './codespaces';
 
 describe('workers/global/config/parse/codespaces', () => {
   beforeEach(() => {
