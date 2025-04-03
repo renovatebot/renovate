@@ -33,9 +33,7 @@ abstract class PrivateKey {
 
   async writeKey(): Promise<void> {
     try {
-      if (!this.keyId) {
-        this.keyId = await this.importKey();
-      }
+      this.keyId ??= await this.importKey();
       logger.debug('gitPrivateKey: imported');
     } catch (err) {
       logger.warn({ err }, 'gitPrivateKey: error importing');

@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
@@ -264,6 +265,61 @@ describe('modules/manager/pixi/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool pixi 0.41.4' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
+      ]);
+    });
+
+    it('returns pixi version defined in requires-pixi', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      // pixi.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('version: 5');
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      // pixi
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pixi.toml',
+          updatedDeps: [],
+          newPackageFileContent: codeBlock`
+                              [project]
+                              authors = []
+                              channels = ["conda-forge"]
+                              name = "data"
+                              platforms = ["win-64"]
+                              version = "0.1.0"
+                              requires-pixi = '>=0.40,<0.41'
+
+                              [tasks]
+
+                              [dependencies]
+                              python = "3.12.*"
+                              `,
+          config: {
+            ...config,
+            constraints: {},
+            isLockFileMaintenance: true,
+          },
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pixi.lock',
+            contents: 'New pixi.lock',
+          },
+        },
+      ]);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool pixi 0.40.1' },
         { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
