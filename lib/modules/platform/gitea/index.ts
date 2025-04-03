@@ -756,15 +756,13 @@ const platform: Platform = {
     if (config.hasIssuesEnabled === false) {
       return Promise.resolve([]);
     }
-    if (config.issueList === null) {
-      config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
-        .then((issues) => {
-          const issueList = issues.map(toRenovateIssue);
-          logger.debug(`Retrieved ${issueList.length} Issues`);
-          return issueList;
-        });
-    }
+    config.issueList ??= helper
+      .searchIssues(config.repository, { state: 'all' }, { memCache: false })
+      .then((issues) => {
+        const issueList = issues.map(toRenovateIssue);
+        logger.debug(`Retrieved ${issueList.length} Issues`);
+        return issueList;
+      });
 
     return config.issueList;
   },

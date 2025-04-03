@@ -232,9 +232,7 @@ function applyPropsInternal(
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
-        if (!sharedVariableName) {
-          sharedVariableName = propKey;
-        }
+        sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
         propSource =
           propValue.packageFile ??

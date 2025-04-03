@@ -1,14 +1,14 @@
 import is from '@sindresorhus/is';
-import { getCustomEnv } from '../env';
+import { getCustomEnv, getUserEnv } from '../env';
 import { getChildProcessEnv } from './env';
 import type { ExecOptions } from './types';
 
 export function getChildEnv({
   extraEnv,
-  userConfiguredEnv,
   env: forcedEnv = {},
 }: ExecOptions): Record<string, string> {
   const globalConfigEnv = getCustomEnv();
+  const userConfiguredEnv = getUserEnv();
 
   const inheritedKeys: string[] = [];
   for (const [key, val] of Object.entries(extraEnv ?? {})) {

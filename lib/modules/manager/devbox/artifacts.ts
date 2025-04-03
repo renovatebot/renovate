@@ -8,7 +8,7 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
-  config: { constraints, env, isLockFileMaintenance, updateType },
+  config: { constraints, isLockFileMaintenance, updateType },
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -32,7 +32,6 @@ export async function updateArtifacts({
       },
     ],
     docker: {},
-    userConfiguredEnv: env,
   };
 
   const cmd = [];

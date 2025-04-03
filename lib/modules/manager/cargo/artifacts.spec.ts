@@ -134,7 +134,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
@@ -407,7 +407,11 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, isLockFileMaintenance: true },
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          constraints: { rust: '1.65.0' },
+        },
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
