@@ -363,8 +363,8 @@ importers:
         specifier: 0.3.3
         version: 0.3.3
       '@ls-lint/ls-lint':
-        specifier: 2.2.3
-        version: 2.2.3
+        specifier: 2.3.0
+        version: 2.3.0
       '@openpgp/web-stream-tools':
         specifier: 0.1.3
         version: 0.1.3(typescript@5.8.2)
@@ -1207,9 +1207,9 @@ packages:
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
 
-  '@ls-lint/ls-lint@2.2.3':
-    resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
-    cpu: [x64, arm64, s390x]
+  '@ls-lint/ls-lint@2.3.0':
+    resolution: {integrity: sha512-lsT5/7SxtImOIjpefC9wcoXt2lkikKhCjd6U+Q9Z6X5h2HBU/71ggt+XStdodZ0HkJGO333zDUeec7JROMCPFw==}
+    cpu: [x64, arm64, s390x, ppc64le]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -7548,7 +7548,7 @@ snapshots:
 
   '@kwsites/promise-deferred@1.1.1': {}
 
-  '@ls-lint/ls-lint@2.2.3': {}
+  '@ls-lint/ls-lint@2.3.0': {}
 
   '@mswjs/interceptors@0.37.6':
     dependencies:
