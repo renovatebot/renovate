@@ -49,10 +49,6 @@ export const communityActions = z.union([
       if (!val.version) {
         skipStage = 'extract';
         skipReason = 'unspecified-version';
-      } else if (val.version === 'latest') {
-        // a special case of this action
-        skipStage = 'extract';
-        skipReason = 'unsupported-version';
       }
 
       return {
@@ -79,10 +75,6 @@ export const communityActions = z.union([
       if (!val.version) {
         skipStage = 'extract';
         skipReason = 'unspecified-version';
-      } else if (val.version === 'latest') {
-        // a special case of this action
-        skipStage = 'extract';
-        skipReason = 'unsupported-version';
       }
 
       return {
@@ -107,10 +99,6 @@ export const communityActions = z.union([
       if (!val.version) {
         skipStage = 'extract';
         skipReason = 'unspecified-version';
-      } else if (val.version === 'head') {
-        // a special case of this action
-        skipStage = 'extract';
-        skipReason = 'unsupported-version';
       }
 
       return {
