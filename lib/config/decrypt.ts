@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { logger } from '../logger';
+import { getEnv } from '../util/env';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
@@ -23,7 +24,7 @@ export async function tryDecrypt(
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr =
-      process.env.RENOVATE_X_USE_OPENPGP === 'true'
+      getEnv().RENOVATE_X_USE_OPENPGP === 'true'
         ? await tryDecryptOpenPgp(privateKey, encryptedStr)
         : await tryDecryptKbPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
@@ -191,12 +192,13 @@ export async function decryptConfig(
           }
         }
       } else {
-        if (process.env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
+        const env = getEnv();
+        if (env.RENOVATE_X_ENCRYPTED_STRICT === 'true') {
           const error = new Error(CONFIG_VALIDATION);
           error.validationSource = 'config';
           error.validationError = 'Encrypted config unsupported';
           error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
-          if (process.env.MEND_HOSTED === 'true') {
+          if (env.MEND_HOSTED === 'true') {
             error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
 Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
 

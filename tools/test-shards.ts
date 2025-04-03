@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { minimatch } from 'minimatch';
+import { getEnv } from '../lib/util/env';
 import { testShards } from './test/shards';
 import type { RunsOn, ShardGroup } from './test/types';
 
@@ -55,10 +56,11 @@ function scheduleItems<T>(items: T[], availableInstances: number): T[][] {
 }
 
 let shardKeys = Object.keys(testShards);
+const env = getEnv();
 
-if (process.env.FILTER_SHARDS === 'true' && process.env.CHANGED_FILES) {
+if (env.FILTER_SHARDS === 'true' && env.CHANGED_FILES) {
   try {
-    const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES);
+    const changedFiles: string[] = JSON.parse(env.CHANGED_FILES);
     const matchingShards = getMatchingShards(changedFiles);
     if (matchingShards.length === 0) {
       console.log(`test-matrix-empty=true`);
@@ -87,7 +89,7 @@ const shardGrouping: Record<string, string[][]> = {
   'ubuntu-latest': scheduleItems(shardKeys, 16),
 };
 
-if (process.env.ALL_PLATFORMS === 'true') {
+if (env.ALL_PLATFORMS === 'true') {
   // shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
   shardGrouping['macos-latest'] = scheduleItems(shardKeys, 4);
 }

@@ -17,3 +17,16 @@ export function setUserEnv(envObj: Record<string, string> | undefined): void {
 export function getUserEnv(): Record<string, string> {
   return memCache.get('userEnv') ?? {};
 }
+
+/**
+ * Combination of process.env, customEnvVariables and user configured env
+ *
+ * Precedence: userEnv > customEnvVariables > process.env
+ */
+export function getEnv(): Record<string, string | undefined> {
+  return {
+    ...process.env,
+    ...getCustomEnv(),
+    ...getUserEnv(),
+  };
+}

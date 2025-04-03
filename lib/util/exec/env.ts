@@ -39,6 +39,7 @@ const basicEnvVars = [
   'COREPACK_ROOT',
 ];
 
+// should I use the combined env here as well ?
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {

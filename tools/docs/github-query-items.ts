@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
 import { logger } from '../../lib/logger';
+import { getEnv } from '../../lib/util/env';
 import { exec } from '../../lib/util/exec';
 
 export interface ItemsEntity {
@@ -58,6 +59,7 @@ async function getIssuesByIssueType(
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
+  const env = getEnv();
   const result: RenovateOpenItems = {
     managers: {},
     platforms: {},
@@ -65,19 +67,19 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     versionings: {},
   };
 
-  if (process.env.SKIP_GITHUB_ISSUES) {
+  if (env.SKIP_GITHUB_ISSUES) {
     logger.warn('Skipping GitHub issues');
     return result;
   }
 
-  if (!process.env.GITHUB_TOKEN) {
+  if (!env.GITHUB_TOKEN) {
     logger.warn(
       'No GITHUB_TOKEN found in env, cannot fetch Github issues. Skipping...',
     );
     return result;
   }
 
-  if (process.env.CI) {
+  if (env.CI) {
     return result;
   }
 
@@ -94,7 +96,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return result;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
-    if (process.env.CI) {
+    if (env.CI) {
       throw err;
     }
     return result;
