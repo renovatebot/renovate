@@ -15,7 +15,7 @@ type RegExpEngineStatus =
 
 let status: RegExpEngineStatus;
 let RegEx: RegExpConstructor = RegExp;
-// istanbul ignore next
+/* v8 ignore next 2 */
 if (getEnv().RENOVATE_X_IGNORE_RE2) {
   status = { type: 'ignored' };
 } else {

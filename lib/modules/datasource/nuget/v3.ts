@@ -278,7 +278,7 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    // istanbul ignore if: experimental feature
+    /* v8 ignore next 4 */
     if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
