@@ -91,7 +91,10 @@ const noproxyLexer = moo.states({
 });
 
 export function parseNoproxy(
-  input: unknown = getEnv().GONOPROXY ?? getEnv().GOPRIVATE,
+  input: unknown = (() => {
+    const env = getEnv();
+    return env.GONOPROXY ?? env.GOPRIVATE;
+  })(),
 ): RegExp | null {
   if (!is.string(input)) {
     return null;

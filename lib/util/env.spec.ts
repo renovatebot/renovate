@@ -9,10 +9,6 @@ describe('util/env', () => {
 
   describe('getEnv', () => {
     it('return combined env', () => {
-      expect(getEnv()).toMatchObject({});
-    });
-
-    it('encodes aliases', () => {
       process.env.RENOVATE_MEND_HOSTED = 'true';
       setUserEnv({
         SOME_KEY: 'SOME_VALUE',
@@ -24,6 +20,19 @@ describe('util/env', () => {
         RENOVATE_MEND_HOSTED: 'true',
         SOME_KEY: 'SOME_VALUE',
         SOME_CUSTOM_ENV_KEY: 'SOME_CUSTOM_ENV_VALUE',
+      });
+    });
+
+    it('maintains precendence', () => {
+      process.env.SOME_KEY = 'processEnvValue';
+      setUserEnv({
+        SOME_KEY: 'userEnvValue',
+      });
+      setCustomEnv({
+        SOME_KEY: 'customValue',
+      });
+      expect(getEnv()).toMatchObject({
+        SOME_KEY: 'userEnvValue',
       });
     });
   });
