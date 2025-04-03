@@ -63,9 +63,7 @@ export async function getReleases(
       MaybeTimestamp.parse(file.createdAt);
 
     // if the version has not been marked as deprecated, check other releases packages of the same version
-    if (!releases[version].isDeprecated) {
-      releases[version].isDeprecated = isNotNullOrUndefined(file.yankedReason);
-    }
+    releases[version].isDeprecated ??= isNotNullOrUndefined(file.yankedReason);
   }
 
   return {

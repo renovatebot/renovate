@@ -583,9 +583,7 @@ async function fetchPrList(): Promise<Pr[]> {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await fetchPrList();
-  }
+  config.prList ??= await fetchPrList();
   return config.prList;
 }
 
@@ -1171,9 +1169,7 @@ export async function ensureIssue({
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);
-    if (!issue) {
-      issue = issueList.find((i) => i.title === reuseTitle);
-    }
+    issue ??= issueList.find((i) => i.title === reuseTitle);
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJsonUnchecked<{ description: string }>(
