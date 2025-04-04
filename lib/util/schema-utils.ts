@@ -1,5 +1,4 @@
 import JSON5 from 'json5';
-import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import {
@@ -11,6 +10,7 @@ import {
 } from 'zod';
 import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
+import { parseJsonc } from './common';
 import { parse as parseToml } from './toml';
 import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
@@ -226,13 +226,12 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const Jsonc = z.string().transform((str, ctx): JsonValue => {
-  const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(str, errors, { allowTrailingComma: true });
-  if (errors.length === 0) {
-    return value;
+  try {
+    return parseJsonc(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+    return z.NEVER;
   }
-  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
-  return z.NEVER;
 });
 
 export const UtcDate = z
