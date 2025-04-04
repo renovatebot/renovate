@@ -113,11 +113,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
@@ -136,11 +132,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
@@ -177,11 +169,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com/',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
           { RANDOM_VARIABLE: 'random' },
         ),
       ).toStrictEqual({
@@ -260,15 +248,10 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://gitlab.com/',
-          {
-            hostType: 'gitlab',
-            matchHost: 'gitlab.com',
-          },
+          { hostType: 'gitlab', matchHost: 'gitlab.com' },
           { env: 'value' },
         ),
-      ).toStrictEqual({
-        env: 'value',
-      });
+      ).toStrictEqual({ env: 'value' });
     });
 
     it('returns url with token for http hosts', () => {
@@ -331,11 +314,7 @@ describe('util/git/auth', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
           'https://github.com:89/org/repo.git',
-          {
-            token: 'token1234',
-            hostType: 'github',
-            matchHost: 'github.com',
-          },
+          { token: 'token1234', hostType: 'github', matchHost: 'github.com' },
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
@@ -369,6 +348,48 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
+    });
+
+    it('returns extra git config', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables(
+          'https://git.mycompany.com/',
+          {
+            token: 'token1234',
+            hostType: 'bitbucket-server',
+            matchHost: 'git.mycompany.com',
+          },
+          {
+            RENOVATE_GIT_EXTRA_CONFIG: JSON.stringify([
+              {
+                key: 'url.https://git.mycompany.com/scm/.insteadOf',
+                value: 'https://git.mycompany.com/scm/',
+              },
+              {
+                key: 'url.https://another.example.com/.insteadOf',
+                value: 'https://another.example.com/',
+              },
+            ]),
+          },
+        ),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '5',
+        GIT_CONFIG_KEY_0:
+          'url.https://ssh:token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://git:token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://token1234@git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_3: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_4: 'url.https://another.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
+        GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+        GIT_CONFIG_VALUE_3: 'https://git.mycompany.com/scm/',
+        GIT_CONFIG_VALUE_4: 'https://another.example.com/',
+        RENOVATE_GIT_EXTRA_CONFIG:
+          '[{"key":"url.https://git.mycompany.com/scm/.insteadOf","value":"https://git.mycompany.com/scm/"},{"key":"url.https://another.example.com/.insteadOf","value":"https://another.example.com/"}]',
       });
     });
   });
