@@ -23,7 +23,7 @@ export function isStable(version: string): boolean {
   }
 
   if (typeof schedule.support === 'string') {
-    return DateTime.now() < DateTime.fromISO(schedule.support);
+    return DateTime.local() < DateTime.fromISO(schedule.support);
   }
 
   return true;

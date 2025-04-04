@@ -16,9 +16,14 @@ await (async () => {
   /**
    * @type Array<RuntimeDefinition>
    */
-  const lambdas = await fetch(lambdaDataUrl).then((response) =>
-    response.json(),
-  );
+  const lambdas = await fetch(lambdaDataUrl).then((response) => {
+    if (!response.ok) {
+      console.error(`Failed to fetch ${lambdaDataUrl}`, response);
+      process.exit(1);
+    }
+
+    return response.json();
+  });
 
   /**
    * @type {{ [version: string]: RuntimeDefinition }}

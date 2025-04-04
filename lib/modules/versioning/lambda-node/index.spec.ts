@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
-import type { DataFile } from '../../../data-files.generated';
 import type { LambdaData } from './schedule';
 import { api as lambdaVer } from '.';
 
 vi.mock('../../../data-files.generated', async (importOriginal) => {
-  const dataFiles = (await importOriginal<{ default: Map<DataFile, string> }>())
-    .default;
+  const dataFiles = (
+    await importOriginal<typeof import('../../../data-files.generated')>()
+  ).default;
 
   const lambdaSchedule: LambdaData = JSON.parse(
     dataFiles.get('data/lambda-node-js-schedule.json')!,
@@ -36,13 +36,12 @@ vi.mock('../../../data-files.generated', async (importOriginal) => {
 });
 
 describe('modules/versioning/lambda-node/index', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(DateTime.fromISO('2021-03-20').valueOf());
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  beforeEach(() => {
+    vi.setSystemTime(DateTime.fromISO('2021-03-20').valueOf());
   });
 
   it.each`
