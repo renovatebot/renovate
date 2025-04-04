@@ -1656,7 +1656,7 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 ## gitLabReviewersFromApprovalRule
 
-There are cases where you want to automatically add reviewers to Renovate PRs based on existing GitLab approval rules (https://docs.gitlab.com/user/project/merge_requests/approvals/rules/)
+There are cases where you want to automatically add reviewers to Renovate PRs based on existing GitLab approval rules (<https://docs.gitlab.com/user/project/merge_requests/approvals/rules/>)
 Renovate can use a GitLab's project approval rule to determine who should review dependency updates.
 This is particularly useful for teams that already have well-defined approval processes in GitLab.
 

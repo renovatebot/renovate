@@ -64,7 +64,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
-import { LastPipelineId, GitLabApprovalRules } from './schema';
+import { GitLabApprovalRules, LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
@@ -787,7 +787,7 @@ export async function createPr({
         );
       }
       logger.debug(
-        { reviewerIds: reviewerIds },
+        { reviewerIds },
         'Extracted reviewer IDs from approval rules',
       );
     } catch (err) {
