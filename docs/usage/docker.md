@@ -351,6 +351,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
             "matchHost": "europe-docker.pkg.dev",
             "username": "_json_key_base64",
             "password": "<base64 service account>"
+            "authType": "Basic",
           }
         ]
       }
@@ -367,6 +368,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
             "encrypted": {
               "password": "<encrypted base64 service account>"
             }
+            "authType": "Basic",
           }
         ]
       }
