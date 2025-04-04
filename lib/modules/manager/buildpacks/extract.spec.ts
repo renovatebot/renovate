@@ -103,6 +103,7 @@ id = "not/valid"`,
           datasource: 'buildpacks-registry',
           currentValue: '1.0.0',
           packageName: 'example/foo',
+          depName: 'example/foo',
         },
         {
           autoReplaceStringTemplate:
@@ -110,6 +111,7 @@ id = "not/valid"`,
           datasource: 'buildpacks-registry',
           currentValue: '1.2.3',
           packageName: 'example/bar',
+          depName: 'example/bar',
         },
         {
           autoReplaceStringTemplate:

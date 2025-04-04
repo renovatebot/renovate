@@ -20,14 +20,14 @@ const profileSettingsContent = Fixtures.get('profile.settings.xml');
 describe('modules/manager/maven/extract', () => {
   describe('extractPackage', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage('', 'some-file')).toBeNull();
-      expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
-      expect(extractPackage('<foobar></foobar>', 'some-file')).toBeNull();
-      expect(extractPackage('<project></project>', 'some-file')).toBeNull();
+      expect(extractPackage('', 'some-file', {})).toBeNull();
+      expect(extractPackage('invalid xml content', 'some-file', {})).toBeNull();
+      expect(extractPackage('<foobar></foobar>', 'some-file', {})).toBeNull();
+      expect(extractPackage('<project></project>', 'some-file', {})).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractPackage(simpleContent, 'some-file');
+      const res = extractPackage(simpleContent, 'some-file', {});
       expect(res).toMatchObject({
         datasource: 'maven',
         deps: [
@@ -238,6 +238,7 @@ describe('modules/manager/maven/extract', () => {
       extractPackage(
         '<?xml version="1.0" encoding="UTF-8"?> \r\n',
         'some-file',
+        {},
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
@@ -245,7 +246,11 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
+      const res = extractPackage(
+        Fixtures.get('minimum.pom.xml'),
+        'some-file',
+        {},
+      );
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],
@@ -259,6 +264,7 @@ describe('modules/manager/maven/extract', () => {
       const res = extractPackage(
         Fixtures.get(`minimum_snapshot.pom.xml`),
         'some-file',
+        {},
       );
       expect(res).toEqual({
         datasource: 'maven',
@@ -268,6 +274,57 @@ describe('modules/manager/maven/extract', () => {
         packageFileVersion: '0.0.1-SNAPSHOT',
       });
     });
+
+    it('extracts builder and buildpack images from spring-boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('cnb.pom.xml'),
+        'cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 403,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.4.316',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/builder-jammy-base',
+          packageName: 'paketobuildpacks/builder-jammy-base',
+          replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
+          fileReplacePosition: 1271,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.0.28',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/run-noble-full',
+          packageName: 'paketobuildpacks/run-noble-full',
+          replaceString: 'paketobuildpacks/run-noble-full:0.0.28',
+          fileReplacePosition: 1341,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '12.1.0',
+          datasource: 'docker',
+          depName: 'paketo-buildpacks/java',
+          packageName: 'paketo-buildpacks/java',
+          replaceString: 'paketo-buildpacks/java:12.1.0',
+          fileReplacePosition: 1428,
+          registryUrls: [],
+        },
+      ]);
+    });
   });
 
   describe('resolveParents', () => {
@@ -275,6 +332,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -289,6 +347,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('multiple_usages_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -303,6 +362,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('infinite_recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
