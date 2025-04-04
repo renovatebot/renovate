@@ -137,7 +137,6 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       docker: {},
-      userConfiguredEnv: config.env,
       extraEnv: generateHelmEnvs(config),
       toolConstraints: [helmToolConstraint],
     };

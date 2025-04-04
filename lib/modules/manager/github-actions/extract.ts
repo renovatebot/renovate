@@ -218,36 +218,35 @@ function extractWithYAMLParser(
   }
 
   // composite action
-  if ('steps' in obj) {
-    extractSteps(obj.steps, deps);
-    return deps;
-  }
-
-  for (const job of obj) {
-    if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
+  if ('runs' in obj && obj.runs.steps) {
+    extractSteps(obj.runs.steps, deps);
+  } else if ('jobs' in obj) {
+    for (const job of Object.values(obj.jobs)) {
+      if (job.container) {
+        const dep = getDep(job.container, true, config.registryAliases);
+        if (dep) {
+          dep.depType = 'container';
+          deps.push(dep);
+        }
       }
-    }
 
-    for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
+      for (const service of job.services) {
+        const dep = getDep(service, true, config.registryAliases);
+        if (dep) {
+          dep.depType = 'service';
+          deps.push(dep);
+        }
       }
-    }
 
-    for (const runner of job['runs-on']) {
-      const dep = extractRunner(runner);
-      if (dep) {
-        deps.push(dep);
+      for (const runner of job['runs-on']) {
+        const dep = extractRunner(runner);
+        if (dep) {
+          deps.push(dep);
+        }
       }
-    }
 
-    extractSteps(job.steps, deps);
+      extractSteps(job.steps, deps);
+    }
   }
 
   return deps;
