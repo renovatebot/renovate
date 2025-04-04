@@ -760,7 +760,7 @@ export async function createPr({
 
   let reviewerIds;
   if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
-    logger.info(
+    logger.debug(
       `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
     );
     try {
