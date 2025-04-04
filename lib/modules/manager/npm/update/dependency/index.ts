@@ -121,10 +121,13 @@ function replaceAsString(
   throw new Error();
 }
 
-export function updateDependency({
-  fileContent,
-  upgrade,
-}: UpdateDependencyConfig): string | null {
+export function updateDependency(
+  { fileContent, upgrade }: UpdateDependencyConfig,
+  fileFormat?: string,
+): string | null {
+  const isYaml = fileFormat
+    ? fileFormat.endsWith('.yaml') || fileFormat.endsWith('.yml')
+    : false;
   if (upgrade.depType?.startsWith('pnpm.catalog')) {
     return updatePnpmCatalogDependency({ fileContent, upgrade });
   }
@@ -138,19 +141,10 @@ export function updateDependency({
 
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
 
-  let isYaml = false;
   try {
-    let parsedContents: NpmPackage;
-    try {
-      parsedContents = JSON.parse(fileContent);
-    } catch (error) {
-      try {
-        parsedContents = parseSingleYaml(fileContent);
-        isYaml = true;
-      } catch (err) {
-        throw error;
-      }
-    }
+    let parsedContents: NpmPackage = isYaml
+      ? parseSingleYaml(fileContent)
+      : JSON.parse(fileContent);
     let overrideDepParents: string[] | undefined = undefined;
     // Save the old version
     let oldVersion: string | undefined;

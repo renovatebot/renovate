@@ -32,10 +32,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '0.22.1',
       };
       const outputContent = readFixture('outputs/011.yaml');
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01YamlContent,
-        upgrade,
-      });
+      const testContent = npmUpdater.updateDependency(
+        {
+          fileContent: input01YamlContent,
+          upgrade,
+        },
+        'outputs/011.yaml',
+      );
       expect(testContent).toEqual(outputContent);
     });
 
@@ -46,10 +49,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '~2.0.0',
       };
       const outputContent = readFixture('outputs/012.yaml');
-      const testContent = npmUpdater.updateDependency({
-        fileContent: input01YamlContent,
-        upgrade,
-      });
+      const testContent = npmUpdater.updateDependency(
+        {
+          fileContent: input01YamlContent,
+          upgrade,
+        },
+        'outputs/012.yaml',
+      );
       expect(testContent).toEqual(outputContent);
     });
 
