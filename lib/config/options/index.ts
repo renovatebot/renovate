@@ -2743,6 +2743,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitLabReviewersFromApprovalRule',
+    description:
+      'Use an existing GitLab project approval rule to determine who should review dependency updates (GitLab only).',
+    type: 'string',
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'customManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',

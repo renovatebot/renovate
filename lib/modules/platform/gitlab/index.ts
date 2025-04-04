@@ -70,6 +70,7 @@ import type {
   GitlabComment,
   GitlabIssue,
   GitlabPr,
+  GitLabApprovalRule,
   MergeMethod,
   RepoResponse,
 } from './types';
@@ -757,6 +758,51 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
+
+  let reviewerIds;
+  if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
+    logger.info(
+      {
+        gitLabReviewersFromApprovalRule:
+          platformPrOptions.gitLabReviewersFromApprovalRule,
+      },
+      'Fetching reviewers from GitLab approval rule',
+    );
+    try {
+      const approvalRules = await gitlabApi.getJsonUnchecked<
+        GitLabApprovalRule[]
+      >(`projects/${config.repository}/approval_rules`);
+
+      const approvalRuleReviewerIds = new Set<number>();
+      const matchingApprovalRule = approvalRules.body.find(
+        (rule) =>
+          rule.name === platformPrOptions.gitLabReviewersFromApprovalRule,
+      );
+
+      if (matchingApprovalRule?.eligible_approvers?.length) {
+        logger.debug(
+          { ruleName: platformPrOptions.gitLabReviewersFromApprovalRule },
+          'Found matching approval rule',
+        );
+        for (const approver of matchingApprovalRule.eligible_approvers) {
+          approvalRuleReviewerIds.add(approver.id);
+        }
+        reviewerIds = Array.from(approvalRuleReviewerIds);
+      } else {
+        logger.debug(
+          { ruleName: platformPrOptions.gitLabReviewersFromApprovalRule },
+          'No matching approval rule found or rule has no eligible approvers',
+        );
+      }
+      logger.debug(
+        { reviewerIds: reviewerIds },
+        'Extracted reviewer IDs from approval rules',
+      );
+    } catch (err) {
+      logger.warn({ err }, 'Failed to fetch GitLab approval rules');
+    }
+  }
+
   const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
@@ -768,6 +814,7 @@ export async function createPr({
         description,
         labels: (labels ?? []).join(','),
         squash: config.squash,
+        reviewer_ids: reviewerIds,
       },
     },
   );

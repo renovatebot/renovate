@@ -44,6 +44,11 @@ export interface GitlabPr extends Pr {
   headPipelineSha?: string;
 }
 
+export interface GitLabApprovalRule {
+  name: string;
+  eligible_approvers?: GitLabUser[];
+}
+
 export interface UpdateMergeRequest {
   target_branch?: string;
   title?: string;
