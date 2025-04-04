@@ -64,13 +64,12 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
-import { LastPipelineId } from './schema';
+import { LastPipelineId, GitLabApprovalRules } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
   GitlabIssue,
   GitlabPr,
-  GitLabApprovalRule,
   MergeMethod,
   RepoResponse,
 } from './types';
@@ -762,16 +761,13 @@ export async function createPr({
   let reviewerIds;
   if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
     logger.info(
-      {
-        gitLabReviewersFromApprovalRule:
-          platformPrOptions.gitLabReviewersFromApprovalRule,
-      },
-      'Fetching reviewers from GitLab approval rule',
+      `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
     );
     try {
-      const approvalRules = await gitlabApi.getJsonUnchecked<
-        GitLabApprovalRule[]
-      >(`projects/${config.repository}/approval_rules`);
+      const approvalRules = await gitlabApi.getJson(
+        `projects/${config.repository}/approval_rules`,
+        GitLabApprovalRules,
+      );
 
       const approvalRuleReviewerIds = new Set<number>();
       const matchingApprovalRule = approvalRules.body.find(
@@ -780,17 +776,13 @@ export async function createPr({
       );
 
       if (matchingApprovalRule?.eligible_approvers?.length) {
-        logger.debug(
-          { ruleName: platformPrOptions.gitLabReviewersFromApprovalRule },
-          'Found matching approval rule',
-        );
+        logger.debug('Found matching approval rule');
         for (const approver of matchingApprovalRule.eligible_approvers) {
           approvalRuleReviewerIds.add(approver.id);
         }
         reviewerIds = Array.from(approvalRuleReviewerIds);
       } else {
         logger.debug(
-          { ruleName: platformPrOptions.gitLabReviewersFromApprovalRule },
           'No matching approval rule found or rule has no eligible approvers',
         );
       }
