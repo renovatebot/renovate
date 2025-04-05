@@ -30,7 +30,7 @@ export interface PR {
   merged?: boolean;
   created_at: string;
   updated_at: string;
-  closed_at: string;
+  closed_at: string | null;
   diff_url: string;
   base?: {
     ref: string;

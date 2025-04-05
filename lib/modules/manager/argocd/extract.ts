@@ -38,7 +38,7 @@ export function extractPackageFile(
   }
 
   const definitions = ApplicationDefinitionSchema.catch(
-    withDebugMessage([], `error parsing ${packageFile}`),
+    withDebugMessage([], `${packageFile} does not match schema`),
   ).parse(content);
 
   const deps = definitions.flatMap(processAppSpec);
