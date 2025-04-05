@@ -265,8 +265,13 @@ export async function updateArtifacts({
       }
     }
 
-    let args =
-      `get ${getFlags.join(' ')} ${goGetDirs ?? './...'} ${extraGetArguments.join(' ')}`.trimEnd();
+    let args = [
+      'get',
+      ...getFlags,
+      goGetDirs ?? './...',
+      ...extraGetArguments,
+    ].join(' ');
+
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
