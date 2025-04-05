@@ -190,8 +190,32 @@ export async function updateArtifacts({
       );
     }
   }
-  const goConstraints =
-    config.constraints?.go ?? getGoConstraints(newGoModContent);
+
+  const goMod = getGoConfig(newGoModContent);
+  const goConstraints = config.constraints?.go ?? `^${goMod.minimalGoVersion}`;
+
+  const getFlags = ['-t'];
+  if (!semver.satisfies(goMod.minimalGoVersion, '>=1.17.0')) {
+    getFlags.unshift('-d');
+  }
+
+  const extraGetArguments: string[] = [];
+  if (semver.satisfies(goMod.minimalGoVersion, '>=1.21.0')) {
+    extraGetArguments.push(`toolchain@${goMod.toolchainDirective ?? 'none'}`);
+    extraGetArguments.push(`go@${goMod.goDirective}`);
+    for (const pkg of updatedDeps) {
+      const name = pkg.packageName ?? pkg.depName ?? pkg.name;
+      if (!name) {
+        continue;
+      }
+
+      if (['go', 'toolchain'].includes(name)) {
+        continue;
+      }
+
+      extraGetArguments.push(`${name}@${pkg.newVersion}`);
+    }
+  }
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -241,7 +265,8 @@ export async function updateArtifacts({
       }
     }
 
-    let args = `get -d -t ${goGetDirs ?? './...'}`;
+    let args =
+      `get ${getFlags.join(' ')} ${goGetDirs ?? './...'} ${extraGetArguments.join(' ')}`.trimEnd();
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
@@ -442,37 +467,30 @@ export async function updateArtifacts({
   }
 }
 
-function getGoConstraints(content: string): string | undefined {
-  // prefer toolchain directive when go.mod has one
+function getGoConfig(content: string): {
+  toolchainDirective?: string;
+  minimalGoVersion: string;
+  goDirective: string;
+} {
   const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
     content,
   );
   const toolchainVer = toolchainMatch?.groups?.gover;
-  if (toolchainVer) {
-    logger.debug(
-      `Using go version ${toolchainVer} found in toolchain directive`,
-    );
-    return toolchainVer;
+
+  const goMatch = regEx(/^go\s*(?<gover>\d+(\.\d+)+)$/m).exec(content);
+
+  // go mod spec says if go directive is missing it's 1.16
+  const goDirective = goMatch?.groups?.gover ?? '1.16';
+  let goVersion = goDirective;
+
+  // partial semver version without patch
+  if (/^\d+\.\d+$/.test(goVersion)) {
+    goVersion = `${goVersion}.0`;
   }
 
-  // If go.mod doesn't have toolchain directive and has a full go version spec,
-  // for example `go 1.23.6`, pick this version, this doesn't match major.minor version spec.
-  //
-  // This is because when go.mod have same version defined in go directive and toolchain directive,
-  // go will remove toolchain directive from go.mod.
-  //
-  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5` by default,
-  // in this case, the go directive is the toolchain directive.
-  const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
-    ?.groups?.gover;
-  if (goFullVersion) {
-    return goFullVersion;
-  }
-
-  const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
-  const match = re.exec(content);
-  if (!match?.groups?.gover) {
-    return undefined;
-  }
-  return `^${match.groups.gover}`;
+  return {
+    toolchainDirective: toolchainVer,
+    minimalGoVersion: goVersion,
+    goDirective,
+  };
 }

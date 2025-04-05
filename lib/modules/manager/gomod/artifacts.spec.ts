@@ -2105,7 +2105,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ' bash -l -c "' +
           'install-tool golang 1.23.3' +
           ' && ' +
-          'go get -d -t ./...' +
+          'go get -t ./...' +
           ' && ' +
           'go install github.com/marwan-at-work/mod/cmd/mod@latest' +
           ' && ' +
@@ -2134,6 +2134,14 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
 
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.17.0' },
+        { version: '1.23.3' },
+        { version: '1.23.6' },
+      ],
+    });
+
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
@@ -2156,8 +2164,6 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'go get -d -t ./...',
       },
     ]);
-
-    expect(datasource.getPkgReleases).toBeCalledTimes(0);
   });
 
   it('go.mod file contains full go version without toolchain', async () => {
@@ -2174,9 +2180,21 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
 
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.17.0' },
+        { version: '1.23.3' },
+        { version: '1.24.1' },
+      ],
+    });
+
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      updatedDeps: [
+        { depName: 'golang.org/x/crypto', newVersion: 'v0.35.0' },
+        { depName: 'go', newVersion: '1.23.5' },
+        { newVersion: '1.23.5' },
+      ],
       newPackageFileContent: `someText\n\ngo 1.23.5\n\n${gomod1}`,
       config: {
         updateType: 'minor',
@@ -2190,14 +2208,58 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'install-tool golang 1.23.5',
+        cmd: 'install-tool golang 1.24.1',
       },
       {
-        cmd: 'go get -d -t ./...',
+        cmd: 'go get -t ./... toolchain@none go@1.23.5 golang.org/x/crypto@v0.35.0',
       },
     ]);
+  });
 
-    expect(datasource.getPkgReleases).toBeCalledTimes(0);
+  it('preserve go.mod file without toolchain', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.17.0' },
+        { version: '1.23.3' },
+        { version: '1.24.1' },
+      ],
+    });
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: 'v0.35.0' }],
+      newPackageFileContent: `someText\n\ngo 1.23\n\n${gomod1}`,
+      config: {
+        updateType: 'minor',
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool golang 1.24.1',
+      },
+      {
+        cmd: 'go get -t ./... toolchain@none go@1.23 golang.org/x/crypto@v0.35.0',
+      },
+    ]);
   });
 
   it('returns artifact notices', async () => {
