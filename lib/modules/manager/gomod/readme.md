@@ -2,7 +2,6 @@
 
 In `go.mod`, the `go` directive essentially means "Compatible with this version or later".
 It is generally recommended for Go projects to _not_ bump this version unless necessary, and therefore Renovate's default behavior is not to propose upgrades to it.
-However, a dependency may still enforce a version bump when it's `go` directive is newer. That can be controlled using a constraint (see below).
 If you need to update it once or irregularly, it's recommended to do it manually.
 If you are sure you want to always bump it to latest, then you need the following configuration:
 
@@ -19,22 +18,8 @@ If you are sure you want to always bump it to latest, then you need the followin
 }
 ```
 
-Even without automated `go` version bumping by renovate, a dependency may still cause a bump. Since go1.21 the `go` directive is then automatically updated.
-To limit that to an acceptable version range, you need to define a constraint.
-For example, if the module shall stay on the go1.22 release, the `go` directive would be `go 1.22.0` and the constraint:
-
-```json
-{
-  "constraints": {
-    "go": "1.22"
-  }
-}
-```
-
-If the constrained version is greater then that specified by the current `go` directive, renovate will bump the directive!
-
-In `go.mod`, the `toolchain` directive essentially means "Use this exact version of go" for module management and compilation.
-Unlike the `go` directive, it is valid to keep bumping this, and you should see updates to it proposed by default, unless the directive is not present.
+In `go.mod`, the `toolchain` directive essentially means "Use this exact version of go".
+Unlike the `go` directive, it's valid to keep bumping this, and you should see updates to it proposed by default.
 
 ### Post-Update Options
 

@@ -191,61 +191,29 @@ export async function updateArtifacts({
     }
   }
 
-  const goModDirectivesNew = getGoModDirectives(newGoModContent);
-  const goBootstrapToolchainRange =
-    config.constraints?.go ?? `^${goModDirectivesNew.goDirective}`; // any patch of configured constraint OR at least equal to go directive
+  const goMod = getGoConfig(newGoModContent);
+  const goConstraints = config.constraints?.go ?? `^${goMod.minimalGoVersion}`;
 
   const getFlags = ['-t'];
-  if (!semver.satisfies(goModDirectivesNew.goDirectiveMinimal, '>=1.17.0')) {
+  if (!semver.satisfies(goMod.minimalGoVersion, '>=1.17.0')) {
     getFlags.unshift('-d');
   }
 
   const extraGetArguments: string[] = [];
-  if (semver.satisfies(goModDirectivesNew.goDirectiveMinimal, '>=1.21.0')) {
-    // config.constraints.go defines the minimal bootstrap toolchain version (with binarySource='install|docker' @latest is installed)
-    // config.constraints.go also defines the maximal go version (unless the go directive is already at a greater version)
-    // that constraint is to be accounted for by the 'go get' command which eventually updates the go directive in go.mod
-    // if a dependency requires a greater version, it will be downgraded to satisfy the constraint
-    if (config.constraints?.go) {
-      const goConstraintMinor = semver.minVersion(config.constraints.go);
-      if (goConstraintMinor) {
-        const goConstraint = semver
-          .maxSatisfying(
-            [goModDirectivesNew.goDirective, goConstraintMinor.version],
-            `<${goConstraintMinor.inc('minor').version}`,
-          )
-          ?.toString();
-        if (
-          goConstraint &&
-          semver.satisfies(goModDirectivesNew.goDirective, `<=${goConstraint}`)
-        ) {
-          if (
-            goModDirectivesNew.toolchainDirective &&
-            semver.satisfies(
-              goModDirectivesNew.toolchainDirective,
-              `>=${goConstraint}`,
-            )
-          ) {
-            // if a toolchain directive that does support the constraint was present, do not modify it
-            extraGetArguments.push(
-              `toolchain@${goModDirectivesNew.toolchainDirective}`,
-            );
-          }
-
-          // if the go directive's minor is greater or equal to the constraint's minor, keep it
-          // if the go directive is lower than the constraint, bump it
-          // NOTE: Unfortunately there is no way to detect when the bump could be skipped
-          //       because the dependencies' go.mod is not in 'updatedDeps' to determine
-          //       which highest version is actually required.
-          extraGetArguments.push(`go@${goConstraint}`);
-        }
+  if (semver.satisfies(goMod.minimalGoVersion, '>=1.21.0')) {
+    extraGetArguments.push(`toolchain@${goMod.toolchainDirective ?? 'none'}`);
+    extraGetArguments.push(`go@${goMod.goDirective}`);
+    for (const pkg of updatedDeps) {
+      const name = pkg.packageName ?? pkg.depName ?? pkg.name;
+      if (!name) {
+        continue;
       }
-    }
 
-    // allow explicit and implicit toolchain and go upgrades
-    // but avoid writing the toolchain directive to go.mod if it was not present before
-    if (!goModDirectivesNew.toolchainDirective) {
-      extraGetArguments.unshift(`toolchain@none`);
+      if (['go', 'toolchain'].includes(name)) {
+        continue;
+      }
+
+      extraGetArguments.push(`${name}@v${pkg.newVersion}`);
     }
   }
 
@@ -264,9 +232,7 @@ export async function updateArtifacts({
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */
-        GOFLAGS: useModcacherw(goBootstrapToolchainRange)
-          ? '-modcacherw'
-          : null,
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -274,9 +240,7 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'golang',
-          // NOTE: the go toolchain, when >=1.22 installs newer toolchain versions on-the-fly
-          //       when required by a dependency and GOTOOLCHAIN=auto (default)
-          constraint: goBootstrapToolchainRange,
+          constraint: goConstraints,
         },
       ],
     };
@@ -503,30 +467,30 @@ export async function updateArtifacts({
   }
 }
 
-function getGoModDirectives(content: string): {
+function getGoConfig(content: string): {
   toolchainDirective?: string;
+  minimalGoVersion: string;
   goDirective: string;
-  goDirectiveMinimal: string;
 } {
-  const toolchainMatch = regEx(/^toolchain\s*go(?<gofull>\d+(\.\d+)+)$/m).exec(
+  const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
     content,
   );
-  const toolchainVer = toolchainMatch?.groups?.gofull;
+  const toolchainVer = toolchainMatch?.groups?.gover;
 
-  const goMatch = regEx(/^go\s*(?<gofull>(?<gover>\d+\.\d+)(\.\d+)?)$/m).exec(
-    content,
-  );
+  const goMatch = regEx(/^go\s*(?<gover>\d+(\.\d+)+)$/m).exec(content);
 
   // go mod spec says if go directive is missing it's 1.16
-  const goVer = goMatch?.groups?.gover ?? '1.16';
-  let goFull = goMatch?.groups?.gofull ?? '1.16.0';
-  if (goFull === goVer) {
-    goFull = `${goFull}.0`;
+  const goDirective = goMatch?.groups?.gover ?? '1.16';
+  let goVersion = goDirective;
+
+  // partial semver version without patch
+  if (/^\d+\.\d+$/.test(goVersion)) {
+    goVersion = `${goVersion}.0`;
   }
 
   return {
     toolchainDirective: toolchainVer,
-    goDirective: goFull,
-    goDirectiveMinimal: `${goVer}.0`,
+    minimalGoVersion: goVersion,
+    goDirective,
   };
 }
