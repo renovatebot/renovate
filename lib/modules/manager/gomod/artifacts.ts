@@ -213,7 +213,7 @@ export async function updateArtifacts({
         continue;
       }
 
-      extraGetArguments.push(`${name}@v${pkg.newVersion}`);
+      extraGetArguments.push(`${name}@${pkg.newVersion}`);
     }
   }
 
