@@ -8,7 +8,9 @@ import {
 
 const StepsSchema = z.object({
   uses: z.string(),
-  with: LooseRecord(z.string()),
+  with: LooseRecord(
+    z.union([z.string(), z.number().transform((s) => s.toString())]),
+  ),
 });
 export type Steps = z.infer<typeof StepsSchema>;
 
