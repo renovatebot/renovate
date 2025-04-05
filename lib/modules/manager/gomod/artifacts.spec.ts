@@ -2323,6 +2323,18 @@ describe('modules/manager/gomod/artifacts', () => {
           packageFile: 'go.mod',
           updateType: 'major',
         },
+        {
+          depName: 'github.com/some/lib',
+          packageName: 'github.com/some/lib',
+          datasource: 'go',
+          fixedVersion: 'v0.0.1',
+          currentVersion: 'v0.0.1',
+          currentValue: 'v0.0.1',
+          newVersion: 'v2.0.0',
+          newValue: 'v2.0.0',
+          packageFile: 'go.mod',
+          updateType: 'major',
+        },
       ],
       newPackageFileContent: `someText\n\ngo 1.23\n\n${gomod1}`,
       config: {
@@ -2340,7 +2352,7 @@ describe('modules/manager/gomod/artifacts', () => {
         cmd: 'install-tool golang 1.24.1',
       },
       {
-        cmd: 'go get -t ./... toolchain@none go@1.23 gopkg.in/yaml.v3@v3.0.1 github.com/google/go-github/v28@v28.0.0 github.com/renovatebot/renovate@v1.0.0',
+        cmd: 'go get -t ./... toolchain@none go@1.23 gopkg.in/yaml.v3@v3.0.1 github.com/google/go-github/v28@v28.0.0 github.com/renovatebot/renovate@v1.0.0 github.com/some/lib/v2@v2.0.0',
       },
     ]);
   });
