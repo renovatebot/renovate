@@ -203,6 +203,9 @@ export async function updateArtifacts({
   if (semver.satisfies(goMod.minimalGoVersion, '>=1.21.0')) {
     extraGetArguments.push(`toolchain@${goMod.toolchainDirective ?? 'none'}`);
     extraGetArguments.push(`go@${goMod.goDirective}`);
+    // add package@version to go get command to let golang check if it work with current go directive
+    // if some package requires a too new go version,
+    // the go get command will fail and user get a "artifact update problem" notice.
     for (const pkg of updatedDeps) {
       const name = pkg.packageName ?? pkg.depName ?? pkg.name;
       if (name === 'go' || !name) {
