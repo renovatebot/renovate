@@ -9,6 +9,8 @@ import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
+import { getDep as getDockerDep } from '../dockerfile/extract';
+import { isDockerRef, DOCKER_PREFIX } from '../buildpacks/extract';
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',
@@ -74,6 +76,75 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
 
 function containsPlaceholder(str: string | null | undefined): boolean {
   return !!str && regEx(/\${[^}]*?}/).test(str);
+}
+
+function getCNBDependencies(
+  nodes: XmlElement[],
+  config: ExtractConfig,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  nodes.forEach((node) => {
+    const depString = node.val.trim();
+    if (isDockerRef(depString)) {
+      const dep = getDockerDep(
+        depString.replace(DOCKER_PREFIX, ''),
+        true,
+        config.registryAliases,
+      );
+      dep.registryUrls = [];
+      dep.fileReplacePosition = node.position;
+      if (dep.currentValue || dep.currentDigest) {
+        deps.push(dep);
+      }
+    }
+  });
+  return deps;
+}
+
+function getAllCNBDependencies(
+  node: XmlDocument,
+  config: ExtractConfig,
+): PackageDependency[] | null {
+  const pluginNodes =
+    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
+    [];
+  pluginNodes.filter((pluginNode) => {
+    return (
+      pluginNode.valueWithPath('groupId')?.trim() ===
+        'org.springframework.boot' &&
+      pluginNode.valueWithPath('artifactId')?.trim() ===
+        'spring-boot-maven-plugin'
+    );
+  });
+  if (pluginNodes.length !== 1) {
+    return null;
+  }
+
+  const deps: PackageDependency[] = [];
+  const imageNode = pluginNodes[0]
+    .childNamed('configuration')
+    ?.childNamed('image');
+  if (!imageNode) {
+    return null;
+  }
+  const builder: PackageDependency[] = getCNBDependencies(
+    imageNode.childrenNamed('builder'),
+    config,
+  );
+  const runImage: PackageDependency[] = getCNBDependencies(
+    imageNode.childrenNamed('runImage'),
+    config,
+  );
+  const buildpacks: PackageDependency[] = getCNBDependencies(
+    imageNode.childNamed('buildpacks')?.childrenNamed('buildpack') ?? [],
+    config,
+  );
+  deps.push(...builder, ...runImage, ...buildpacks);
+
+  if (!deps.length) {
+    return null;
+  }
+  return deps;
 }
 
 function depFromNode(
@@ -293,6 +364,7 @@ interface MavenInterimPackageFile extends PackageFile {
 export function extractPackage(
   rawContent: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -310,6 +382,11 @@ export function extractPackage(
   };
 
   result.deps = deepExtract(project);
+
+  const CNBDependencies = getAllCNBDependencies(project, config);
+  if (CNBDependencies) {
+    result.deps.push(...CNBDependencies);
+  }
 
   const propsNode = project.childNamed('properties');
   const props: Record<string, MavenProp> = {};
@@ -504,7 +581,9 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
       //Add Registry From SuperPom
-      dep.registryUrls!.push(MAVEN_REPO);
+      if (dep.datasource === MavenDatasource.id) {
+        dep.registryUrls!.push(MAVEN_REPO);
+      }
     });
   });
   return packageFiles;
@@ -535,7 +614,7 @@ export function extractExtensions(
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
@@ -564,7 +643,7 @@ export async function extractAllPackageFiles(
         logger.trace({ packageFile }, 'can not read extensions');
       }
     } else {
-      const pkg = extractPackage(content, packageFile);
+      const pkg = extractPackage(content, packageFile, config);
       if (pkg) {
         packages.push(pkg);
       } else {

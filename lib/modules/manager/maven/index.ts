@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { DockerDatasource } from '../../datasource/docker';
 import { MavenDatasource } from '../../datasource/maven';
 import * as mavenVersioning from '../../versioning/maven';
 
@@ -17,4 +18,4 @@ export const defaultConfig = {
   versioning: mavenVersioning.id,
 };
 
-export const supportedDatasources = [MavenDatasource.id];
+export const supportedDatasources = [MavenDatasource.id, DockerDatasource.id];

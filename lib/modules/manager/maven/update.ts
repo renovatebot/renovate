@@ -69,6 +69,20 @@ export function updateAtPosition(
     // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
+  } else {
+    let replacedPart = version;
+    if (currentValue) {
+      replacedPart = version.replace(currentValue, newValue!);
+    }
+    if (upgrade.currentDigest) {
+      replacedPart = replacedPart.replace(
+        upgrade.currentDigest,
+        upgrade.newDigest!,
+      );
+    }
+    if (replacedPart !== version) {
+      return leftPart + replacedPart + restPart;
+    }
   }
   logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');
   return null;
