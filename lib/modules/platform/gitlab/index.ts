@@ -758,7 +758,7 @@ export async function createPr({
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
 
-  let reviewerIds;
+  let reviewerIds: number[];
   if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
     logger.debug(
       `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
