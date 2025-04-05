@@ -15,6 +15,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
+import * as repoCache from '../../../util/cache/repository';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
@@ -57,6 +58,7 @@ describe('modules/platform/azure/index', () => {
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
+    repoCache.resetCache();
   });
 
   // do we need the args?
@@ -465,14 +467,14 @@ describe('modules/platform/azure/index', () => {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
         createdAt: undefined,
-        number: 1,
-        pullRequestId: 1,
+        number: 2,
+        pullRequestId: 2,
         sourceBranch: 'branch-a',
         sourceRefName: 'refs/heads/branch-a',
         state: 'open',
         status: 1,
-        targetBranch: 'branch-b',
-        targetRefName: 'refs/heads/branch-b',
+        targetBranch: 'branch-c',
+        targetRefName: 'refs/heads/branch-c',
         title: 'branch a pr',
       });
     });
@@ -530,7 +532,7 @@ describe('modules/platform/azure/index', () => {
                 status: 1,
               },
             ])
-            .mockResolvedValueOnce([]),
+            .mockResolvedValue([]),
           getPullRequestLabels: vi.fn().mockResolvedValue([]),
         }),
       );
@@ -853,13 +855,14 @@ describe('modules/platform/azure/index', () => {
   describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
             createPullRequestLabel: vi.fn(() => ({})),
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       const pr = await azure.createPr({
@@ -874,13 +877,14 @@ describe('modules/platform/azure/index', () => {
 
     it('should create and return a PR object from base branch', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
             createPullRequestLabel: vi.fn(() => ({})),
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       const pr = await azure.createPr({
@@ -915,11 +919,12 @@ describe('modules/platform/azure/index', () => {
           },
         };
         const updateFn = vi.fn().mockResolvedValue(prUpdateResult);
-        azureApi.gitApi.mockResolvedValueOnce(
+        azureApi.gitApi.mockResolvedValue(
           partial<IGitApi>({
             createPullRequest: vi.fn().mockResolvedValue(prResult),
             createPullRequestLabel: vi.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
+            getPullRequests: vi.fn().mockResolvedValue([]),
           }),
         );
         const pr = await azure.createPr({
@@ -987,6 +992,7 @@ describe('modules/platform/azure/index', () => {
             createPullRequest: vi.fn(() => Promise.resolve(prResult.shift()!)),
             createPullRequestLabel: vi.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
+            getPullRequests: vi.fn().mockResolvedValue([]),
           }),
         );
         await azure.createPr({
@@ -1052,6 +1058,7 @@ describe('modules/platform/azure/index', () => {
               createPullRequest: vi.fn(() => Promise.resolve(prResult)),
               createPullRequestLabel: vi.fn().mockResolvedValue({}),
               updatePullRequest: updateFn,
+              getPullRequests: vi.fn().mockResolvedValue([]),
             }),
           );
           await azure.createPr({
@@ -1099,11 +1106,12 @@ describe('modules/platform/azure/index', () => {
             },
           };
           const updateFn = vi.fn().mockResolvedValue(prUpdateResult);
-          azureApi.gitApi.mockResolvedValueOnce(
+          azureApi.gitApi.mockResolvedValue(
             partial<IGitApi>({
               createPullRequest: vi.fn().mockResolvedValue(prResult),
               createPullRequestLabel: vi.fn().mockResolvedValue({}),
               updatePullRequest: updateFn,
+              getPullRequests: vi.fn().mockResolvedValue([]),
             }),
           );
           const pr = await azure.createPr({
@@ -1148,12 +1156,13 @@ describe('modules/platform/azure/index', () => {
       const updateFn = vi
         .fn(() => prUpdateResult)
         .mockName('createPullRequestReviewer');
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             createPullRequest: vi.fn(() => prResult),
             createPullRequestLabel: vi.fn(() => ({})),
             createPullRequestReviewer: updateFn,
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       const pr = await azure.createPr({
@@ -1173,10 +1182,11 @@ describe('modules/platform/azure/index', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest,
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       await azure.updatePr({
@@ -1227,10 +1237,11 @@ describe('modules/platform/azure/index', () => {
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest,
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       await azure.updatePr({
@@ -1243,10 +1254,11 @@ describe('modules/platform/azure/index', () => {
     it('should close the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest,
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       await azure.updatePr({
@@ -1261,10 +1273,11 @@ describe('modules/platform/azure/index', () => {
     it('should reopen the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest,
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       await azure.updatePr({
@@ -1292,11 +1305,12 @@ describe('modules/platform/azure/index', () => {
         isRequired: false,
       };
       const updateFn = vi.fn(() => prUpdateResult);
-      azureApi.gitApi.mockImplementationOnce(
+      azureApi.gitApi.mockImplementation(
         () =>
           ({
             updatePullRequest: vi.fn(() => prResult),
             createPullRequestReviewer: updateFn,
+            getPullRequests: vi.fn(() => []),
             getPullRequestById: vi.fn(() => ({
               pullRequestId: prResult.pullRequestId,
               createdBy: prResult.createdBy,
