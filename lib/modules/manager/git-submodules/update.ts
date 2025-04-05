@@ -2,6 +2,7 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { getEnv } from '../../../util/env';
 import { readLocalFile } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateDependencyConfig } from '../types';
@@ -17,7 +18,7 @@ export default async function updateDependency({
   ]);
   const gitEnv = {
     // pass all existing env variables
-    ...process.env,
+    ...getEnv(),
     // add all known git Variables
     ...gitSubmoduleAuthEnvironmentVariables,
   };

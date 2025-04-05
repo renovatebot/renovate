@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
@@ -58,7 +59,7 @@ export class GoProxyDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-    const goproxy = process.env.GOPROXY ?? 'https://proxy.golang.org,direct';
+    const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';
     if (goproxy === 'direct') {
       return this.direct.getReleases(config);
     }
@@ -283,7 +284,7 @@ export class GoProxyDatasource extends Datasource {
   }
 
   static getCacheKey({ packageName }: GetReleasesConfig): string {
-    const goproxy = process.env.GOPROXY;
+    const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
     // TODO: types (#22198)
     return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
