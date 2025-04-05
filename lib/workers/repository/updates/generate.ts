@@ -459,6 +459,11 @@ export function generateBranchConfig(
     }
   }
 
+  // Set skipInstalls to false if any upgrade in the branch has it false
+  config.skipInstalls = config.upgrades.every(
+    (upgrade) => upgrade.skipInstalls !== false,
+  );
+
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
