@@ -344,6 +344,11 @@ async function getUvIndexCredentials(
       continue;
     }
 
+    // If no name is provided for the index, authentication information must be passed through alternative methods
+    if (!name) {
+      continue;
+    }
+
     const { username, password } = await getUsernamePassword(parsedUrl);
 
     const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');

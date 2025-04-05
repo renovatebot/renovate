@@ -226,6 +226,48 @@ describe('modules/manager/pep621/processors/uv', () => {
     ]);
   });
 
+  it('index with optional name', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          index: [
+            {
+              url: 'https://foo.com/simple',
+              default: true,
+              explicit: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep2',
+      },
+    ]);
+  });
+
   it('override implicit default index', () => {
     const pyproject = {
       tool: {
