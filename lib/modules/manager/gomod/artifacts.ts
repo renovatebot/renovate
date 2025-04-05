@@ -516,8 +516,13 @@ function upgradePackageMajorVersion(name: string, newMajor: number): string {
 
   const s = name.split('/');
   const last = s.at(-1);
+
+  // there is no valid case that a go pakcage name doesn't contain slash.
+  /* v8 ignore next -- typescript strict null check */
   if (!last) {
-    throw new Error('unreadable');
+    throw new Error(
+      `unreadable: go package name ${name} doesn't contain any slash`,
+    );
   }
 
   if (/^v\d+$/.test(last)) {
