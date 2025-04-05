@@ -12,11 +12,11 @@ export const url = 'https://learn.microsoft.com/nuget';
 export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '\\.(?:cs|fs|vb)proj$',
-    '\\.(?:props|targets)$',
-    '(^|/)dotnet-tools\\.json$',
-    '(^|/)global\\.json$',
+  managerFilePatterns: [
+    '/\\.(?:cs|fs|vb)proj$/',
+    '/\\.(?:props|targets)$/',
+    '/(^|/)dotnet-tools\\.json$/',
+    '/(^|/)global\\.json$/',
   ],
 };
 

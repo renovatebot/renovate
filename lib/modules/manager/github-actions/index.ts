@@ -9,9 +9,9 @@ export const url = 'https://docs.github.com/en/actions';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$',
-    '(^|/)action\\.ya?ml$',
+  managerFilePatterns: [
+    '/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/',
+    '/(^|/)action\\.ya?ml$/',
   ],
 };
 

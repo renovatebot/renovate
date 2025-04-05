@@ -9,10 +9,10 @@ export const url = 'https://maven.apache.org';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/|\\.)pom\\.xml$',
-    '^(((\\.mvn)|(\\.m2))/)?settings\\.xml$',
-    '(^|/)\\.mvn/extensions\\.xml$',
+  managerFilePatterns: [
+    '/(^|/|\\.)pom\\.xml$/',
+    '/^(((\\.mvn)|(\\.m2))/)?settings\\.xml$/',
+    '/(^|/)\\.mvn/extensions\\.xml$/',
   ],
   versioning: mavenVersioning.id,
 };

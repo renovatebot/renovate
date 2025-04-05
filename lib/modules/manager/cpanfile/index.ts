@@ -10,7 +10,7 @@ export const url =
 export const categories: Category[] = ['perl'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)cpanfile$'],
+  managerFilePatterns: ['/(^|/)cpanfile$/'],
 };
 
 export const supportedDatasources = [
