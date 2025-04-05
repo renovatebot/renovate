@@ -504,7 +504,6 @@ function getGoConfig(content: string): {
 }
 
 function upgradePackageMajorVersion(name: string, newMajor: number): string {
-  console.log(name);
   if (name.startsWith('gopkg.in/')) {
     const s = name.split('.');
     return `${s.slice(0, -1).join('.')}.v${newMajor}`;
