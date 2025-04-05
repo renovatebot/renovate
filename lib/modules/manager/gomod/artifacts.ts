@@ -205,15 +205,18 @@ export async function updateArtifacts({
     extraGetArguments.push(`go@${goMod.goDirective}`);
     for (const pkg of updatedDeps) {
       const name = pkg.packageName ?? pkg.depName ?? pkg.name;
-      if (!name) {
+      if (name === 'go' || !name) {
         continue;
       }
 
-      if (['go', 'toolchain'].includes(name)) {
-        continue;
+      if (pkg.updateType === 'major') {
+        const newMajor = major(pkg.newVersion!);
+        extraGetArguments.push(
+          `${upgradePackageMajorVersion(name, newMajor)}@${pkg.newVersion}`,
+        );
+      } else {
+        extraGetArguments.push(`${name}@${pkg.newVersion}`);
       }
-
-      extraGetArguments.push(`${name}@${pkg.newVersion}`);
     }
   }
 
@@ -498,4 +501,29 @@ function getGoConfig(content: string): {
     minimalGoVersion: goVersion,
     goDirective,
   };
+}
+
+function upgradePackageMajorVersion(name: string, newMajor: number): string {
+  console.log(name);
+  if (name.startsWith('gopkg.in/')) {
+    const s = name.split('.');
+    return `${s.slice(0, -1).join('.')}.v${newMajor}`;
+  }
+
+  // v0 => v1, no need to handle it
+  if (newMajor === 1) {
+    return name;
+  }
+
+  const s = name.split('/');
+  const last = s.at(-1);
+  if (!last) {
+    throw new Error('unreadable');
+  }
+
+  if (/^v\d+$/.test(last)) {
+    return `${s.slice(0, -1).join('/')}/v${newMajor}`;
+  }
+
+  return `${name}/v${newMajor}`;
 }
