@@ -2240,7 +2240,7 @@ describe('modules/manager/gomod/artifacts', () => {
 
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: 'v0.35.0' }],
       newPackageFileContent: `someText\n\ngo 1.23\n\n${gomod1}`,
       config: {
         updateType: 'minor',
