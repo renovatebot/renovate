@@ -14,7 +14,7 @@ export const supportsRanges = false;
 
 class Unity3dPackagesVersioningApi extends GenericVersioningApi {
   private static readonly parsingRegex = regEx(
-    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-?(?<label>.+))/,
+    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-?(?<label>.*))/,
   );
   private static readonly unstableRegex = regEx(/^(exp.|pre.|preview.)/);
 
@@ -41,6 +41,11 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
   ): number {
     if (is.nonEmptyString(_left.suffix) && is.nonEmptyString(_right.suffix)) {
       return _left.suffix.localeCompare(_right.suffix);
+    } else if (
+      is.nonEmptyString(_left.suffix) &&
+      !is.nonEmptyString(_right.suffix)
+    ) {
+      return 1;
     }
 
     return super._compareOther(_left, _right);

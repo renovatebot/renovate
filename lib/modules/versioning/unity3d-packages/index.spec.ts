@@ -41,6 +41,8 @@ describe('modules/versioning/unity3d-packages/index', () => {
     a                | b                | expected
     ${'1.2.4'}       | ${'1.2.3'}       | ${true}
     ${'1.2.3-1'}     | ${'1.2.3'}       | ${true}
+    ${'1.2.3-2'}     | ${'1.2.3-1'}     | ${true}
+    ${'1.2.3'}       | ${'1.2.3-1'}     | ${false}
     ${'1.2.3-exp.2'} | ${'1.2.3-exp.1'} | ${true}
     ${'1.2.3-pre.1'} | ${'1.2.3-exp.2'} | ${true}
     ${'1.2.3-pre.2'} | ${'1.2.3-pre.1'} | ${true}

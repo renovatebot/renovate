@@ -8,7 +8,7 @@ import { UnityPackageReleasesJSON } from './schema';
 export class Unity3dPackagesDatasource extends Datasource {
   static readonly id = 'unity3d-packages';
 
-  static readonly defaultRegistryUrl = 'https://packages.unity.com/';
+  static readonly defaultRegistryUrl = 'https://packages.unity.com';
   static readonly homepage = 'https://unity.com/';
 
   override readonly defaultRegistryUrls = [
@@ -31,15 +31,15 @@ export class Unity3dPackagesDatasource extends Datasource {
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const response = await this.http.getJson(
-      `${registryUrl}${packageName}`,
+      `${registryUrl}/${packageName}`,
       UnityPackageReleasesJSON,
     );
 
     const result: ReleaseResult = {
       releases: [],
       homepage:
-        response.body.versions > 0
-          ? response.body.versions[0].downloadUrl
+        response.body.versions.length > 0
+          ? response.body.versions[0].documentationUrl
           : undefined,
       registryUrl,
     };
@@ -48,10 +48,13 @@ export class Unity3dPackagesDatasource extends Datasource {
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(response.body.time[release.version]),
-        changelogUrl: release.documentationUrl.replace(
-          'manual/index.html',
-          'changelog/CHANGELOG.html',
-        ),
+        changelogUrl:
+          registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl
+            ? release.documentationUrl.replace(
+                'manual/index.html',
+                'changelog/CHANGELOG.html',
+              )
+            : undefined,
         isStable: Unity3dPackagesVersioning.default.isStable(release.version),
         registryUrl,
       });
