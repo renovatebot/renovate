@@ -1,9 +1,8 @@
 // TODO #22198
+import { CVSS20, CVSS30, CVSS31, CVSS40 } from '@pandatix/js-cvss';
 import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
 import { OsvOffline } from '@renovatebot/osv-offline';
 import is from '@sindresorhus/is';
-import type { CvssScore } from 'vuln-vects';
-import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -504,12 +503,21 @@ export class Vulnerabilities {
     };
   }
 
-  private evaluateCvssVector(vector: string): [string, string] {
+  static evaluateCvssVector(vector: string): [string, string] {
     try {
-      const parsedCvss: CvssScore = parseCvssVector(vector);
-      const severityLevel = parsedCvss.cvss3OverallSeverityText;
+      let parsedCvssScore: number;
+      if (vector.startsWith('CVSS:4.0/')) {
+        parsedCvssScore = new CVSS40(vector).Score();
+      } else if (vector.startsWith('CVSS:3.1/')) {
+        parsedCvssScore = new CVSS31(vector).BaseScore();
+      } else if (vector.startsWith('CVSS:3.0/')) {
+        parsedCvssScore = new CVSS30(vector).BaseScore();
+      } else {
+        parsedCvssScore = new CVSS20(vector).BaseScore();
+      }
+      const severityLevel = CVSS40.Rating(parsedCvssScore);
 
-      return [parsedCvss.baseScore.toFixed(1), severityLevel];
+      return [parsedCvssScore.toFixed(1), severityLevel];
     } catch {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
@@ -592,12 +600,13 @@ export class Vulnerabilities {
     let score = 'Unknown';
 
     const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V4')?.score ??
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score ??
       (affected.database_specific?.cvss as string); // RUSTSEC
 
     if (cvssVector) {
-      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      const [baseScore, severity] =
+        Vulnerabilities.evaluateCvssVector(cvssVector);
       severityLevel = severity ? severity.toUpperCase() : 'UNKNOWN';
       score = baseScore
         ? `${baseScore} / 10 (${titleCase(severityLevel)})`
