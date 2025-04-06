@@ -33,6 +33,7 @@ describe('config/presets/internal/custom-managers', () => {
                   TERRAFORM_VERSION: 1.5.7
                   # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
                   KUSTOMIZE_VERSION: kustomize/v5.2.1
+
       `;
 
       const res = await extractPackageFile(
@@ -56,28 +57,28 @@ describe('config/presets/internal/custom-managers', () => {
           datasource: 'npm',
           depName: 'pnpm',
           replaceString:
-            '# renovate: datasource=npm depName=pnpm\n  PNPM_VERSION: "7.25.1"\n',
+            '# renovate: datasource=npm depName=pnpm\n          PNPM_VERSION: "7.25.1"\n',
         },
         {
           currentValue: '3.3.1',
           datasource: 'npm',
           depName: 'yarn',
           replaceString:
-            "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
+            "# renovate: datasource=npm depName=yarn\n          YARN_VERSION: '3.3.1'\n",
         },
         {
           currentValue: '1.3.1',
           datasource: 'custom.hashicorp',
           depName: 'consul',
           replaceString:
-            '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
+            '# renovate: datasource=custom.hashicorp depName=consul\n          CONSUL_VERSION: 1.3.1\n',
         },
         {
           currentValue: '1.5.7',
           datasource: 'github-releases',
           depName: 'hashicorp/terraform',
           replaceString:
-            '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
+            '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n          TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
           extractVersion: '^v(?<version>.+)$',
         },
@@ -86,7 +87,7 @@ describe('config/presets/internal/custom-managers', () => {
           datasource: 'github-releases',
           depName: 'kubernetes-sigs/kustomize',
           replaceString:
-            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n  KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
+            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n          KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
