@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
-// import * as azureApi from './azure-got-wrapper';
+import type * as AzureApi from './azure-got-wrapper';
 import type { AzurePr, AzurePrCacheData } from './types';
 import { getRenovatePRFormat } from './util';
 
@@ -111,7 +111,7 @@ export class AzurePrCache {
     return needNextPage;
   }
 
-  private async sync(azureApi: any): Promise<AzurePrCache> {
+  private async sync(azureApi: typeof AzureApi): Promise<AzurePrCache> {
     logger.debug('Syncing PR list');
     const azureApiGit = await azureApi.gitApi();
     let fetchedPrs: GitPullRequest[];

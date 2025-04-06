@@ -1,15 +1,16 @@
 import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import type { Mocked } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { reset as memCacheReset } from '../../../util/cache/memory';
 import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository';
+import * as _azureApi from './azure-got-wrapper';
 import { AzurePrCache } from './pr-cache';
 import { getRenovatePRFormat } from './util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
+const azureApi = vi.mocked(_azureApi);
 
 const pr1: GitPullRequest = {
   pullRequestId: 1,
@@ -33,16 +34,13 @@ const pr2: GitPullRequest = {
 };
 
 describe('modules/platform/azure/pr-cache', () => {
-  let azureApi: Mocked<typeof import('./azure-got-wrapper')>;
   let cache = getCache();
 
   beforeAll(() => {
     vi.useFakeTimers();
   });
 
-  beforeEach(async () => {
-    azureApi = await vi.importMock('./azure-got-wrapper');
-
+  beforeEach(() => {
     vi.setSystemTime(new Date('2025-01-30T10:50:00.000'));
     memCacheReset();
     repoCacheReset();
