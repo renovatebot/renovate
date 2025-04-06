@@ -48,7 +48,7 @@ describe('config/presets/internal/custom-managers', () => {
           datasource: 'node-version',
           depName: 'node',
           replaceString:
-            '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
+            '# renovate: datasource=node depName=node versioning=node\n          NODE_VERSION: 18.13.0\n',
           versioning: 'node',
         },
         {
