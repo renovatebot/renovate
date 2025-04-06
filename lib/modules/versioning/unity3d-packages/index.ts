@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { GenericVersion } from '../generic';
 import { GenericVersioningApi } from '../generic';
@@ -32,6 +33,17 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     const isStable = !Unity3dPackagesVersioningApi.unstableRegex.test(label);
 
     return { release, prerelease: isStable ? undefined : label, suffix: label };
+  }
+
+  protected override _compareOther(
+    _left: GenericVersion,
+    _right: GenericVersion,
+  ): number {
+    if (is.nonEmptyString(_left.suffix) && is.nonEmptyString(_right.suffix)) {
+      return _left.suffix.localeCompare(_right.suffix);
+    }
+
+    return super._compareOther(_left, _right);
   }
 }
 
