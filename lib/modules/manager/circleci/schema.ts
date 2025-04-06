@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray } from '../../../util/schema-utils';
 
 export const CircleCiDocker = z.object({
   image: z.string(),
@@ -26,7 +27,7 @@ export const CircleCiOrb: z.ZodType<Orb> = baseOrb.extend({
 export type CircleCiOrb = z.infer<typeof CircleCiOrb>;
 
 export const CircleCiFile = z.object({
-  aliases: z.array(CircleCiDocker).optional(),
+  aliases: LooseArray(CircleCiDocker).catch([]),
   executors: z.record(z.string(), CircleCiJob).optional(),
   jobs: z.record(z.string(), CircleCiJob).optional(),
   orbs: z.record(z.string(), z.union([z.string(), CircleCiOrb])).optional(),
