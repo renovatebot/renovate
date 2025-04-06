@@ -33,7 +33,8 @@ describe('config/presets/internal/custom-managers', () => {
                   TERRAFORM_VERSION: 1.5.7
                   # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
                   KUSTOMIZE_VERSION: kustomize/v5.2.1
-
+              - script: echo Hello, world!
+                displayName: 'Run a one-line script'
       `;
 
       const res = await extractPackageFile(
