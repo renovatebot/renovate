@@ -587,6 +587,21 @@ describe('util/schema-utils', () => {
       });
     });
 
+    it('allows objects reuse', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      const reused = { value: 42 };
+      const obj = {
+        foo: reused,
+        bar: reused,
+      };
+
+      expect(Schema.parse(obj)).toEqual({
+        foo: { value: 42 },
+        bar: { value: 42 },
+      });
+    });
+
     it('rejects circular objects', () => {
       const Schema = NotCircular.pipe(z.any());
 

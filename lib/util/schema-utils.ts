@@ -328,11 +328,12 @@ function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
     return true;
   }
 
-  visited.add(value);
+  const downstreamVisited = new Set(visited);
+  downstreamVisited.add(value);
 
   if (Array.isArray(value)) {
     for (const childValue of value) {
-      if (isCircular(childValue, visited)) {
+      if (isCircular(childValue, downstreamVisited)) {
         return true;
       }
     }
@@ -342,7 +343,7 @@ function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
 
   const values = Object.values(value);
   for (const ov of values) {
-    if (isCircular(ov, visited)) {
+    if (isCircular(ov, downstreamVisited)) {
       return true;
     }
   }
