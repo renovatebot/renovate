@@ -16,6 +16,7 @@ const Channel = z.union([
 ]);
 
 export interface PixiPackageDependency extends PackageDependency {
+  feature?: string;
   channel?: string;
   channels?: Channels;
 }
@@ -41,7 +42,6 @@ const PypiDependency = z
       currentValue: version,
       versioning: pep440VersionID,
       datasource: PypiDatasource.id,
-      depType: 'pypi-dependencies',
     } satisfies PixiPackageDependency;
   });
 
@@ -54,7 +54,6 @@ const PypiGitDependency = z
         currentValue: rev,
         packageName: git,
         datasource: GitRefsDatasource.id,
-        depType: 'pypi-dependencies',
         versioning: gitRefVersionID,
         skipStage: 'extract',
         skipReason: 'unspecified-version',
@@ -65,7 +64,6 @@ const PypiGitDependency = z
       currentValue: rev,
       packageName: git,
       datasource: GitRefsDatasource.id,
-      depType: 'pypi-dependencies',
       versioning: gitRefVersionID,
     } satisfies PixiPackageDependency;
   });
@@ -85,7 +83,6 @@ const CondaDependency = z
       currentValue: version,
       versioning: condaVersion.id,
       datasource: CondaDatasource.id,
-      depType: 'dependencies',
       channel,
     } satisfies PixiPackageDependency;
   });
@@ -154,17 +151,23 @@ const Features = LooseRecord(
     const pypi: PixiPackageDependency[] = [];
     const conda: PixiPackageDependency[] = [];
 
-    for (const feature of Object.values(features)) {
+    for (const [name, feature] of Object.entries(features)) {
       conda.push(
         ...feature.conda.map((item) => {
           return {
             ...item,
+            feature: name,
             channels: feature.channels,
           };
         }),
       );
 
-      pypi.push(...feature.pypi);
+      pypi.push(
+        ...feature.pypi.map((item) => ({
+          feature: name,
+          ...item,
+        })),
+      );
     }
 
     return { pypi, conda };
