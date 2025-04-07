@@ -526,6 +526,7 @@ const staticGroups = {
       'group:springStatemachine',
       'group:springWebflow',
       'group:springWs',
+      'group:stackExchangeRedisExtensions',
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
@@ -800,6 +801,15 @@ const staticGroups = {
       {
         groupName: 'spring ws',
         matchPackageNames: ['org.springframework.ws:**'],
+      },
+    ],
+  },
+  stackExchangeRedisExtensions: {
+    description: 'Group StackExchange.Redis.Extensions packages.',
+    packageRules: [
+      {
+        groupName: 'StackExchange.Redis.Extensions',
+        matchPackageNames: ['StackExchange.Redis.Extensions.**'],
       },
     ],
   },
