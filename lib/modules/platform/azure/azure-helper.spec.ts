@@ -4,7 +4,7 @@ import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/Gi
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 import type { MockedObject } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { partial } from '../../../../test/util';
+import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 

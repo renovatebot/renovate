@@ -33,9 +33,7 @@ abstract class PrivateKey {
 
   async writeKey(): Promise<void> {
     try {
-      if (!this.keyId) {
-        this.keyId = await this.importKey();
-      }
+      this.keyId ??= await this.importKey();
       logger.debug('gitPrivateKey: imported');
     } catch (err) {
       logger.warn({ err }, 'gitPrivateKey: error importing');
@@ -87,7 +85,7 @@ class SSHKey extends PrivateKey {
     if (await this.hasPassphrase(keyFileName)) {
       throw new Error('SSH key must have an empty passhprase');
     }
-    await fs.outputFile(keyFileName, this.key);
+    await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
     process.on('exit', () => fs.removeSync(keyFileName));
     await fs.chmod(keyFileName, 0o600);
     // HACK: `git` calls `ssh-keygen -Y sign ...` internally for SSH-based

@@ -58,13 +58,11 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
-    const parsed = parseSingleYaml(content, {
-      customSchema: CircleCiFile,
-    });
+    const parsed = CircleCiFile.parse(parseSingleYaml(content));
 
     deps.push(...extractDefinition(parsed, config));
 
-    for (const alias of coerceArray(parsed.aliases)) {
+    for (const alias of parsed.aliases) {
       deps.push({
         ...getDep(alias.image, true, config?.registryAliases),
         depType: 'docker',

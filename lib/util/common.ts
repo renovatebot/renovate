@@ -1,4 +1,6 @@
 import JSON5 from 'json5';
+import * as JSONC from 'jsonc-parser';
+import type { JsonValue } from 'type-fest';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
@@ -80,21 +82,27 @@ export function noLeadingAtSymbol(input: string): string {
   return input.startsWith('@') ? input.slice(1) : input;
 }
 
-export function parseJson(content: string | null, filename: string): unknown {
+export function parseJson(content: string | null, filename: string): JsonValue {
   if (!content) {
     return null;
   }
 
-  return filename.endsWith('.json5')
-    ? JSON5.parse(content)
-    : parseJsonWithFallback(content, filename);
+  if (filename.endsWith('.jsonc')) {
+    return parseJsonc(content);
+  }
+
+  if (filename.endsWith('.json5')) {
+    return JSON5.parse(content);
+  }
+
+  return parseJsonWithFallback(content, filename);
 }
 
 export function parseJsonWithFallback(
   content: string,
   context: string,
-): unknown {
-  let parsedJson: unknown;
+): JsonValue {
+  let parsedJson: JsonValue;
 
   try {
     parsedJson = JSON.parse(content);
@@ -107,4 +115,13 @@ export function parseJsonWithFallback(
   }
 
   return parsedJson;
+}
+
+export function parseJsonc(content: string): JsonValue {
+  const errors: JSONC.ParseError[] = [];
+  const value = JSONC.parse(content, errors, { allowTrailingComma: true });
+  if (errors.length === 0) {
+    return value;
+  }
+  throw new Error('Invalid JSONC');
 }

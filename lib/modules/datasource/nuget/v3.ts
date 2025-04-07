@@ -11,6 +11,7 @@ import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
@@ -52,8 +53,11 @@ export class NugetV3Api {
         responseCacheKey,
       );
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
-          .body;
+        servicesIndexRaw = (
+          await http.getJsonUnchecked<ServicesIndexRaw>(url, {
+            cacheProvider: memCacheProvider,
+          })
+        ).body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,

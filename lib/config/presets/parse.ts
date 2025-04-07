@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../util/regex';
+import { isHttpUrl } from '../../util/url';
 import type { ParsedPreset } from './types';
 import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util';
 
@@ -30,7 +31,7 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
-  } else if (str.startsWith('http://') || str.startsWith('https://')) {
+  } else if (isHttpUrl(str)) {
     presetSource = 'http';
   } else if (
     !str.startsWith('@') &&

@@ -1,6 +1,4 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../test/util';
-import { logger, mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -22,15 +20,16 @@ import {
   syncBranchState,
   writeUpdates,
 } from './write';
+import { logger, partial, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/cache/repository');
 vi.mock('./limits');
 vi.mock('../update/branch');
 
-const branchWorker = mocked(_branchWorker);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const branchWorker = vi.mocked(_branchWorker);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 let config: RenovateConfig;
 
@@ -181,9 +180,6 @@ describe('workers/repository/process/write', () => {
           upgrades: [
             partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
-              env: {
-                SOME_VAR: 'SOME_VALUE',
-              },
             }),
           ],
         },

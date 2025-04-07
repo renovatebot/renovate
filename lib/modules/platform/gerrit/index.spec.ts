@@ -1,7 +1,5 @@
-import { git, mocked, partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
 import { repoFingerprint } from '../util';
 import { client as _client } from './client';
 import type {
@@ -16,6 +14,7 @@ import type {
 import { TAG_PULL_REQUEST_BODY, mapGerritChangeToPr } from './utils';
 import { writeToConfig } from '.';
 import * as gerrit from '.';
+import { git, hostRules, partial } from '~test/util';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -31,10 +30,8 @@ const codeReviewLabel: GerritLabelTypeInfo = {
 };
 
 vi.mock('../../../util/host-rules');
-vi.mock('../../../util/git');
 vi.mock('./client');
-const clientMock = mocked(_client);
-const hostRules = mocked(_hostRules);
+const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
   beforeEach(async () => {

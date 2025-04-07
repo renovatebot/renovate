@@ -11,9 +11,9 @@ describe('util/yaml', () => {
     it('should parse content with single document', () => {
       expect(
         parseYaml(codeBlock`
-      myObject:
-        aString: value
-      `),
+          myObject:
+            aString: value
+        `),
       ).toEqual([
         {
           myObject: {
@@ -27,9 +27,9 @@ describe('util/yaml', () => {
       expect(
         parseYaml(
           codeBlock`
-      myObject:
-        aString: value
-      `,
+            myObject:
+              aString: value
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -50,11 +50,11 @@ describe('util/yaml', () => {
     it('should parse content with multiple documents', () => {
       expect(
         parseYaml(codeBlock`
-      myObject:
-        aString: value
-      ---
-      foo: bar
-      `),
+          myObject:
+            aString: value
+          ---
+          foo: bar
+        `),
       ).toEqual([
         {
           myObject: {
@@ -71,12 +71,12 @@ describe('util/yaml', () => {
       expect(
         parseYaml(
           codeBlock`
-      myObject:
-        aString: foo
-      ---
-      myObject:
-        aString: bar
-      `,
+            myObject:
+              aString: foo
+            ---
+            myObject:
+              aString: bar
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -103,11 +103,11 @@ describe('util/yaml', () => {
       expect(() =>
         parseYaml(
           codeBlock`
-      myObject:
-        aString: foo
-      ---
-      aString: bar
-      `,
+            myObject:
+              aString: foo
+            ---
+            aString: bar
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -123,11 +123,11 @@ describe('util/yaml', () => {
       expect(() =>
         parseYaml(
           codeBlock`
-      myObject:
-        aString: foo
-      ---
-      aString: bar
-      `,
+            myObject:
+              aString: foo
+            ---
+            aString: bar
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -144,11 +144,11 @@ describe('util/yaml', () => {
       expect(
         parseYaml(
           codeBlock`
-      myObject:
-        aString: foo
-      ---
-      aString: bar
-      `,
+            myObject:
+              aString: foo
+            ---
+            aString: bar
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -171,11 +171,11 @@ describe('util/yaml', () => {
       expect(
         parseYaml(
           codeBlock`
-      myObject:
-        aString: {{ value }}
-      ---
-      foo: {{ foo.bar }}
-      `,
+            myObject:
+              aString: {{ value }}
+            ---
+            foo: {{ foo.bar }}
+          `,
           { removeTemplates: true },
         ),
       ).toEqual([
@@ -199,9 +199,9 @@ describe('util/yaml', () => {
     it('should parse content with single document', () => {
       expect(
         parseSingleYaml(codeBlock`
-      myObject:
-        aString: value
-      `),
+          myObject:
+            aString: value
+        `),
       ).toEqual({
         myObject: {
           aString: 'value',
@@ -212,13 +212,13 @@ describe('util/yaml', () => {
     it('should parse invalid content using strict=false', () => {
       expect(
         parseSingleYaml(codeBlock`
-version: '2.1'
+          version: '2.1'
 
-services:
-  rtl_433:
-    image: ubuntu:oracular-20240918
-    # inserting a space before the hash on the next line makes Renovate work.
-    command: "echo some text"# a comment
+          services:
+            rtl_433:
+              image: ubuntu:oracular-20240918
+              # inserting a space before the hash on the next line makes Renovate work.
+              command: "echo some text"# a comment
       `),
       ).not.toBeNull();
     });
@@ -227,9 +227,9 @@ services:
       expect(
         parseSingleYaml(
           codeBlock`
-      myObject:
-        aString: value
-      `,
+            myObject:
+              aString: value
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -249,8 +249,8 @@ services:
       expect(() =>
         parseSingleYaml(
           codeBlock`
-      myObject: foo
-      `,
+            myObject: foo
+          `,
           {
             customSchema: z.object({
               myObject: z.object({
@@ -265,11 +265,11 @@ services:
     it('should parse content with multiple documents', () => {
       expect(() =>
         parseSingleYaml(codeBlock`
-      myObject:
-        aString: value
-      ---
-      foo: bar
-      `),
+          myObject:
+            aString: value
+          ---
+          foo: bar
+        `),
       ).toThrow();
     });
 
@@ -277,13 +277,13 @@ services:
       expect(
         parseSingleYaml(
           codeBlock`
-      myObject:
-        aString: {{value}}
-        {% if test.enabled %}
-        myNestedObject:
-          aNestedString: {{value}}
-        {% endif %}
-      `,
+            myObject:
+              aString: {{value}}
+              {% if test.enabled %}
+              myNestedObject:
+                aNestedString: {{value}}
+              {% endif %}
+          `,
           { removeTemplates: true },
         ),
       ).toEqual({
@@ -300,10 +300,10 @@ services:
       expect(
         parseSingleYaml(
           codeBlock`
-      myObject:
-        aString: value
-        aStringWithTag: !reset null
-      `,
+            myObject:
+              aString: value
+              aStringWithTag: !reset null
+          `,
           { removeTemplates: true },
         ),
       ).toEqual({

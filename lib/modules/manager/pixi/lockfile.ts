@@ -1,12 +1,13 @@
 /**
- * There is no way to know which version we should pick based on `pixi.toml` and `pixi.lock`
- * so we need to maintain a mapping from pixi version and it's generated lock file version.
+ * For project without `requires-pixi` in `pixi.toml`, we pick pixi version based on `pixi.lock`.
  *
- * it should support lock version < 6 but old version of pixi doesn't release the binary we need, so just skip them and support only lock file version >=6
+ * So we need to maintain a mapping from pixi version and it's generated lock file version.
+ *
+ * We do not support pixi<0.40.0 so version<6 is ignored.
  *
  */
 const pixiGenerateLockFileVersion: Config[] = [
-  { lockVersion: 6, range: '>=0.39.2, <0.43.0' },
+  { lockVersion: 6, range: '>=0.40.0, <0.45.0a0' },
 ] as const;
 
 interface Config {
