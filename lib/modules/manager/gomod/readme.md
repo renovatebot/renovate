@@ -41,7 +41,7 @@ You might be interested in the following `postUpdateOptions`:
 When Renovate is running using `binarySource=docker` (such as in the Mend Renovate App) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
 Even if the `go.mod` has a version like `go 1.22`, Renovate will treat it as a `^1.22` constraint and not `=1.22`.
 
-Indirect updates are disabled by default. To enable them, add a package rule such as:
+Unless matching `tool` directives exist, indirect updates are disabled by default. To enable them, add a package rule such as:
 
 ```json
 {

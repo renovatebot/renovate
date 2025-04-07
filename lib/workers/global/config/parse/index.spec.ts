@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
@@ -61,6 +62,19 @@ describe('workers/global/config/parse/index', () => {
         ['force', null],
       ]);
       expect(parsedConfig).not.toContainKey('configFile');
+    });
+
+    it('sets customEnvVariables', async () => {
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_TOKEN: 'abc',
+        RENOVATE_CUSTOM_ENV_VARIABLES: '{"customKey": "customValue"}',
+      };
+      await configParser.parseConfigs(env, defaultArgv);
+      const customEnvVars = getCustomEnv();
+      expect(customEnvVars).toEqual({
+        customKey: 'customValue',
+      });
     });
 
     it('supports config.force', async () => {

@@ -368,6 +368,7 @@ const staticGroups = {
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
+          '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
         ],
       },
@@ -446,6 +447,16 @@ const staticGroups = {
       },
     ],
   },
+  puppeteer: {
+    description: 'Group Puppeteer packages together.',
+    packageRules: [
+      {
+        groupName: 'Puppeteer',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['puppeteer', 'puppeteer-core'],
+      },
+    ],
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
@@ -485,6 +496,7 @@ const staticGroups = {
       'group:micrometer',
       'group:phpstan',
       'group:polymer',
+      'group:puppeteer',
       'group:react',
       'group:remark',
       'group:resilience4j',
