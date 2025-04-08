@@ -369,7 +369,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'conda',
             depName: 'scipy',
             depType: 'feature-scipy',
-            feature: 'scipy',
             registryUrls: [
               'https://api.anaconda.org/package/channel of scipy/',
             ],
@@ -381,7 +380,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'conda',
             depName: 'matplotlib',
             depType: 'feature-scipy',
-            feature: 'scipy',
             registryUrls: [
               'https://api.anaconda.org/package/cuda/',
               'https://api.anaconda.org/package/anaconda/',
@@ -396,7 +394,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'conda',
             depName: 'ruff',
             depType: 'feature-lint',
-            feature: 'lint',
             registryUrls: [
               'https://api.anaconda.org/package/conda-forge/',
               'https://api.anaconda.org/package/conda-not-forge/',
@@ -426,7 +423,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'pypi',
             depName: 'flake8',
             depType: 'feature-lint',
-            feature: 'lint',
             versioning: 'pep440',
           },
           {
@@ -434,7 +430,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'pypi',
             depName: 'black',
             depType: 'feature-lint',
-            feature: 'lint',
             versioning: 'pep440',
           },
           {
@@ -442,7 +437,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'pypi',
             depName: 'black',
             depType: 'feature-test',
-            feature: 'test',
             versioning: 'pep440',
           },
           {
@@ -450,7 +444,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'git-refs',
             depName: 'pytest',
             depType: 'feature-test',
-            feature: 'test',
             packageName: 'https://github.com/pytest-dev/pytest.git',
             skipReason: 'unspecified-version',
             skipStage: 'extract',
@@ -461,7 +454,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'git-refs',
             depName: 'requests',
             depType: 'feature-test',
-            feature: 'test',
             packageName: 'https://github.com/psf/requests.git',
             versioning: 'git',
           },
@@ -470,7 +462,6 @@ describe('modules/manager/pixi/extract', () => {
             datasource: 'git-refs',
             depName: 'pytest-github-actions-annotate-failures',
             depType: 'feature-test',
-            feature: 'test',
             packageName:
               'https://github.com/pytest-dev/pytest-github-actions-annotate-failures.git',
             versioning: 'git',
