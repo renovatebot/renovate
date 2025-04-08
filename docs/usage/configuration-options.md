@@ -2352,6 +2352,7 @@ Supported lock files:
 - `Cargo.lock`
 - `Chart.lock`
 - `composer.lock`
+- `conan.lock`
 - `flake.lock`
 - `Gemfile.lock`
 - `gradle.lockfile`
