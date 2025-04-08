@@ -7,9 +7,9 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: [
-          '(^|/).azuredevops/.+\\.ya?ml$',
-          'azure.*pipelines?.*\\.ya?ml$',
+        managerFilePatterns: [
+          '/(^|/).azuredevops/.+\\.ya?ml$/',
+          '/azure.*pipelines?.*\\.ya?ml$/',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
