@@ -160,7 +160,6 @@ async function readFile(
       logger.debug(`Skipping non-local .bazelrc import ${importFile}`);
     }
   }
-
   return results;
 }
 
