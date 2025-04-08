@@ -11,17 +11,10 @@ import {
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
-import { hostRules, partial } from '~test/util';
+import { hostRules } from '~test/host-rules';
+import { partial } from '~test/util';
 
 describe('modules/datasource/metadata', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('Should handle manualChangelogUrls', () => {
     const dep: ReleaseResult = {
       releases: [
