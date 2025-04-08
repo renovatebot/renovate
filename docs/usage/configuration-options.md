@@ -564,6 +564,10 @@ Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-p
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
 The Composer output should inform you about the reasons the update failed.
 
+## composerUpdateWithAllDependencies
+
+By default, Renovate will invoke `composer update` with the `--with-dependencies` option. Set this option to `true` in order to use `--with-all-dependencies` instead.
+
 ## confidential
 
 If enabled, all issues created by Renovate are set as confidential, even in a public repository.
