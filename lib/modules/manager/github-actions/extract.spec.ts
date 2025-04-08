@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';
 
-const runnerTestWorkflow = `
+const runnerTestWorkflow = codeBlock`
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -204,7 +204,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('maintains quotes', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
       jobs:
         build:
           steps:
@@ -286,7 +286,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('maintains spaces between hash and comment', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
       jobs:
         build:
           steps:
@@ -576,7 +576,7 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts x-version from actions/setup-x', () => {
-      const yamlContent = `
+      const yamlContent = codeBlock`
       jobs:
         build:
           steps:
@@ -707,28 +707,31 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('extracts x-version from actions/setup-x in composite action', () => {
-      const yamlContent = `
-        steps:
-          - name: "Setup Node.js"
-            uses: actions/setup-node@v3
-            with:
-              node-version: '16.x'
-          - name: "Setup Node.js with exact version"
-            uses: actions/setup-node@v3
-            with:
-              node-version: '20.0.0'
-          - name: "Setup Go"
-            uses: actions/setup-go@v5
-            with:
-              go-version: '1.23'
-          - name: "Setup Python with range"
-            uses: actions/setup-python@v3
-            with:
-              python-version: '>=3.8.0 <3.10.0'
-          - name: "Setup Node.js with latest"
-            uses: actions/setup-node@v3
-            with:
-              node-version: 'latest'`;
+      const yamlContent = codeBlock`
+        runs:
+          using: 'composite'
+          steps:
+            - name: "Setup Node.js"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '16.x'
+            - name: "Setup Node.js with exact version"
+              uses: actions/setup-node@v3
+              with:
+                node-version: '20.0.0'
+            - name: "Setup Go"
+              uses: actions/setup-go@v5
+              with:
+                go-version: '1.23'
+            - name: "Setup Python with range"
+              uses: actions/setup-python@v3
+              with:
+                python-version: '>=3.8.0 <3.10.0'
+            - name: "Setup Node.js with latest"
+              uses: actions/setup-node@v3
+              with:
+                node-version: 'latest'
+        `;
 
       const res = extractPackageFile(yamlContent, 'action.yml');
       expect(res?.deps).toMatchObject([
@@ -833,6 +836,15 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'uses-with',
         },
       ]);
+    });
+
+    it('logs unknown schema', () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: 'node20'
+          main: 'index.js'
+        `;
+      expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
   });
 });

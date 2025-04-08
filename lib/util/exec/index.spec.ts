@@ -2,6 +2,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { setCustomEnv } from '../env';
 import * as dockerModule from './docker';
 import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
@@ -48,6 +49,7 @@ describe('util/exec/index', () => {
     vi.restoreAllMocks();
     processEnvOrig = process.env;
     GlobalConfig.reset();
+    setCustomEnv({});
   });
 
   afterEach(() => {
@@ -795,6 +797,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
+    setCustomEnv(adminConfig.customEnvVariables);
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }

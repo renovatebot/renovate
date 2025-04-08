@@ -27,6 +27,14 @@ const onlyJson5parsableString = `
   "isMarried": false,
 }
 `;
+const validJsoncString = `
+{
+  // This is a comment
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York"
+}
+`;
 
 describe('util/common', () => {
   beforeEach(() => hostRules.clear());
@@ -106,7 +114,7 @@ describe('util/common', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
     });
 
-    it('catches and warns if content parsing faield with JSON.parse but not with JSON5.parse', () => {
+    it('catches and warns if content parsing failed with JSON.parse but not with JSON5.parse', () => {
       expect(parseJson(onlyJson5parsableString, 'renovate.json')).toEqual({
         name: 'Bob',
         age: 35,
@@ -117,6 +125,30 @@ describe('util/common', () => {
         { context: 'renovate.json' },
         'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
       );
+    });
+
+    it('does not warn if filename ends with .jsonc', () => {
+      parseJson(validJsoncString, 'renovate.jsonc');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not warn if filename ends with .json5', () => {
+      parseJson(onlyJson5parsableString, 'renovate.json5');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('parseJsonc', () => {
+    it('returns parsed jsonc', () => {
+      expect(parseJson(validJsoncString, 'renovate.jsonc')).toEqual({
+        name: 'John Doe',
+        age: 30,
+        city: 'New York',
+      });
+    });
+
+    it('throws error for invalid jsonc', () => {
+      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
     });
   });
 });

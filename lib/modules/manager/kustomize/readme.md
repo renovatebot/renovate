@@ -25,7 +25,7 @@ This manager uses three `depType`s to allow fine-grained control of which depend
 Renovate will inflate helm charts referenced in a kustomization if any of the following is true:
 
 1. The version Renovate is upgrading from was inflated, OR
-1. The `kustomizeInflateHelmArchives` option in `postUpdateOptions` is enabled
+1. The `kustomizeInflateHelmCharts` option in `postUpdateOptions` is enabled
 
 **Note:** To prevent Renovate from updating dependencies in the expanded charts, you'll need to manually exclude the folders from Helm managers.
 For example:

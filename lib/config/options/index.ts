@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.8',
+    default: 'ghcr.io/containerbase/sidecar:13.8.11',
     globalOnly: true,
   },
   {
@@ -2413,7 +2413,7 @@ const options: RenovateOptions[] = [
       'gomodSkipVendor',
       'gomodVendor',
       'helmUpdateSubChartArchives',
-      'kustomizeInflateHelmArchives',
+      'kustomizeInflateHelmCharts',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',
