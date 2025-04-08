@@ -178,12 +178,12 @@ export async function removeDanglingContainers(): Promise<void> {
     logger.debug(
       `Removing dangling child containers with label ${containerLabel}`,
     );
-    //const res = await rawExec(
-    //  `docker ps --filter label=${containerLabel} -aq`,
-    //  {
-    //    encoding: 'utf-8',
-    //  },
-    //);
+    const res = await rawExec(
+      `docker ps --filter label=${containerLabel} -aq`,
+      {
+        encoding: 'utf-8',
+      },
+    );
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
@@ -191,9 +191,9 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      //await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
-      //  encoding: 'utf-8',
-      //});
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
+        encoding: 'utf-8',
+      });
     } else {
       logger.debug('No dangling containers to remove');
     }

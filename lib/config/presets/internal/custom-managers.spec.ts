@@ -121,7 +121,9 @@ describe('config/presets/internal/custom-managers', () => {
         ${'foo.yml'}                       | ${false}
         ${'foo.yaml'}                      | ${false}
       `('$path', ({ path, expected }) => {
-        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
       });
     });
   });
