@@ -189,7 +189,10 @@ export async function updateArtifacts({
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')
-        ).trim() + (config.composerUpdateWithAllDependencies ? ' --with-all-dependencies' : ' --with-dependencies');
+        ).trim() +
+        (config.composerUpdateWithAllDependencies
+          ? ' --with-all-dependencies'
+          : ' --with-dependencies');
     }
     args += getComposerUpdateArguments(config, composerToolConstraint);
     logger.trace({ cmd, args }, 'composer command');
