@@ -70,6 +70,8 @@ export function updateAtPosition(
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
   } else {
+    // In contrast to maven dependencies, cloud native buildpacks are not contained in specific version tags.
+    // Instead they are contained in the value of the buildpack tag and we have to update it differently.
     let replacedPart = version;
     if (currentValue) {
       replacedPart = version.replace(currentValue, newValue!);

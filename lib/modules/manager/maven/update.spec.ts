@@ -8,6 +8,7 @@ const simpleContent = Fixtures.get(`simple.pom.xml`);
 const minimumContent = Fixtures.get(`minimum.pom.xml`);
 const minimumSnapshotContent = Fixtures.get(`minimum_snapshot.pom.xml`);
 const prereleaseContent = Fixtures.get(`prerelease.pom.xml`);
+const cnbContent = Fixtures.get(`cnb.pom.xml`);
 
 describe('modules/manager/maven/update', () => {
   describe('updateDependency', () => {
@@ -140,6 +141,26 @@ describe('modules/manager/maven/update', () => {
       });
 
       expect(res).toBe(simpleContent);
+    });
+
+    it('should update a cloud native buildpack version', () => {
+      const res = updateDependency({
+        fileContent: cnbContent,
+        upgrade: {
+          updateType: 'patch',
+          depName: 'paketo-buildpacks/nodejs',
+          currentValue: '6.1.1',
+          fileReplacePosition: 1428,
+          newValue: '6.1.2',
+        },
+      });
+
+      const project = new XmlDocument(res!);
+      expect(
+        project.valueWithPath(
+          'build.plugins.plugin.configuration.image.buildpacks.buildpack',
+        ),
+      ).toBe('paketo-buildpacks/nodejs@6.1.2');
     });
   });
 

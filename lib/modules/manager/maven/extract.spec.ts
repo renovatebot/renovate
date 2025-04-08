@@ -287,7 +287,7 @@ describe('modules/manager/maven/extract', () => {
           datasource: 'maven',
           depName: 'org.springframework.boot:spring-boot-starter-parent',
           depType: 'parent',
-          fileReplacePosition: 403,
+          fileReplacePosition: 404,
           registryUrls: [],
         },
         {
@@ -298,7 +298,7 @@ describe('modules/manager/maven/extract', () => {
           depName: 'paketobuildpacks/builder-jammy-base',
           packageName: 'paketobuildpacks/builder-jammy-base',
           replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
-          fileReplacePosition: 1271,
+          fileReplacePosition: 1273,
           registryUrls: [],
         },
         {
@@ -309,18 +309,52 @@ describe('modules/manager/maven/extract', () => {
           depName: 'paketobuildpacks/run-noble-full',
           packageName: 'paketobuildpacks/run-noble-full',
           replaceString: 'paketobuildpacks/run-noble-full:0.0.28',
-          fileReplacePosition: 1341,
+          fileReplacePosition: 1343,
           registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '6.1.1',
+          datasource: 'buildpacks-registry',
+          depName: 'paketo-buildpacks/nodejs',
+          fileReplacePosition: 1430,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.8.0',
+          datasource: 'docker',
+          depName: 'gcr.io/paketo-buildpacks/nodejs',
+          fileReplacePosition: 1566,
+          packageName: 'gcr.io/paketo-buildpacks/nodejs',
+          registryUrls: [],
+          replaceString: 'gcr.io/paketo-buildpacks/nodejs:1.8.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
+          currentValue: '2.22.1',
+          datasource: 'docker',
+          depName: 'docker.io/paketobuildpacks/python',
+          fileReplacePosition: 1634,
+          packageName: 'docker.io/paketobuildpacks/python',
+          registryUrls: [],
+          replaceString:
+            'docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
         },
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentValue: '12.1.0',
           datasource: 'docker',
-          depName: 'paketo-buildpacks/java',
-          packageName: 'paketo-buildpacks/java',
-          replaceString: 'paketo-buildpacks/java:12.1.0',
-          fileReplacePosition: 1428,
+          depName: 'paketobuildpacks/java',
+          packageName: 'paketobuildpacks/java',
+          replaceString: 'paketobuildpacks/java:12.1.0',
+          fileReplacePosition: 1849,
           registryUrls: [],
         },
       ]);

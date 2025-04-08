@@ -7,10 +7,16 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
+import {
+  BUILDPACK_REGISTRY_PREFIX,
+  DOCKER_PREFIX,
+  getDep as getBuildpackDep,
+  isBuildpackRegistryRef,
+  isDockerRef,
+} from '../buildpacks/extract';
+import { getDep as getDockerDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
-import { getDep as getDockerDep } from '../dockerfile/extract';
-import { isDockerRef, DOCKER_PREFIX } from '../buildpacks/extract';
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',
@@ -96,6 +102,16 @@ function getCNBDependencies(
       if (dep.currentValue || dep.currentDigest) {
         deps.push(dep);
       }
+    } else if (isBuildpackRegistryRef(depString)) {
+      const dep = getBuildpackDep(
+        depString.replace(BUILDPACK_REGISTRY_PREFIX, ''),
+      );
+
+      if (dep && (dep.currentValue || dep.currentDigest)) {
+        dep.registryUrls = [];
+        dep.fileReplacePosition = node.position;
+        deps.push(dep);
+      }
     }
   });
   return deps;
@@ -108,7 +124,7 @@ function getAllCNBDependencies(
   const pluginNodes =
     node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
     [];
-  pluginNodes.filter((pluginNode) => {
+  pluginNodes.find((pluginNode) => {
     return (
       pluginNode.valueWithPath('groupId')?.trim() ===
         'org.springframework.boot' &&

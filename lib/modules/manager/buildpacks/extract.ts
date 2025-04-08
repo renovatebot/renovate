@@ -27,7 +27,7 @@ export function isDockerRef(ref: string): boolean {
   }
   return false;
 }
-const buildpackRegistryPrefix = 'urn:cnb:registry:';
+export const BUILDPACK_REGISTRY_PREFIX = 'urn:cnb:registry:';
 const buildpackRegistryId = regEx(
   /^[a-z0-9\-.]+\/[a-z0-9\-.]+(?:@(?<version>.+))?$/,
 );
@@ -42,8 +42,10 @@ function isBuildpackRegistryId(ref: string): boolean {
   return isVersion(bpRegistryMatch.groups.version);
 }
 
-function isBuildpackRegistryRef(ref: string): boolean {
-  return isBuildpackRegistryId(ref) || ref.startsWith(buildpackRegistryPrefix);
+export function isBuildpackRegistryRef(ref: string): boolean {
+  return (
+    isBuildpackRegistryId(ref) || ref.startsWith(BUILDPACK_REGISTRY_PREFIX)
+  );
 }
 
 function parseProjectToml(
@@ -118,7 +120,7 @@ export function extractPackageFile(
 
         deps.push(dep);
       } else if (isBuildpackByURI(group) && isBuildpackRegistryRef(group.uri)) {
-        const dep = getDep(group.uri.replace(buildpackRegistryPrefix, ''));
+        const dep = getDep(group.uri.replace(BUILDPACK_REGISTRY_PREFIX, ''));
         if (dep) {
           deps.push(dep);
         }
@@ -129,7 +131,7 @@ export function extractPackageFile(
           const dep: PackageDependency = {
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
-            packageName: group.id,
+            depName: group.id,
           };
           deps.push(dep);
         }
@@ -147,7 +149,6 @@ export function getDep(currentFrom: string): PackageDependency | null {
   if (currentFrom.includes('@')) {
     const dep: PackageDependency = {
       datasource: BuildpacksRegistryDatasource.id,
-      packageName: currentFrom.split('@')[0],
       depName: currentFrom.split('@')[0],
       autoReplaceStringTemplate:
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
