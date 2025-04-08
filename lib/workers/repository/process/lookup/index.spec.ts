@@ -4911,7 +4911,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - can template replacement version without a replacement name', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror_some_org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
       config.datasource = DockerDatasource.id;
@@ -4941,7 +4941,7 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'major',
         },
         {
-          newName: 'mirror.some.org/library/openjdk',
+          newName: 'mirror_some_org/library/openjdk',
           newValue: '17',
           updateType: 'replacement',
         },
@@ -4949,7 +4949,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - can template replacement version with a replacement name', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror_some_org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementName = 'eclipse-temurin';
       config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
@@ -4988,9 +4988,9 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - can template replacement version with a template replacement name', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror_some_org/library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
+      config.replacementNameTemplate = `{{{replace 'mirror_some_org/' 'new.registry.io/' packageName}}}`;
       config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
@@ -5027,7 +5027,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - replacementVersion takes precedence over replacementVersionTemplate', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageName = 'mirror_some_org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
       config.replacementVersion = '18.0.0';
@@ -5058,7 +5058,7 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'major',
         },
         {
-          newName: 'mirror.some.org/library/openjdk',
+          newName: 'mirror_some_org/library/openjdk',
           newValue: '18.0.0',
           updateType: 'replacement',
         },
