@@ -16,7 +16,6 @@ const Channel = z.union([
 ]);
 
 export interface PixiPackageDependency extends PackageDependency {
-  feature?: string;
   channel?: string;
   channels?: Channels;
 }
@@ -156,7 +155,7 @@ const Features = LooseRecord(
         ...feature.conda.map((item) => {
           return {
             ...item,
-            feature: name,
+            depType: `feature-${name}`,
             channels: feature.channels,
           };
         }),
@@ -164,7 +163,7 @@ const Features = LooseRecord(
 
       pypi.push(
         ...feature.pypi.map((item) => ({
-          feature: name,
+          depType: `feature-${name}`,
           ...item,
         })),
       );

@@ -107,25 +107,15 @@ export async function extractPackageFile(
     conda.push(
       addRegistryUrls({
         ...item,
-        depType: `feature-${item.feature}`,
         registryStrategy,
         channels: [...coerceArray(item.channels), ...project.channels],
       }),
     );
   }
 
-  const pypi = [...val.pypi];
-
-  for (const item of val.feature.pypi) {
-    pypi.push({
-      ...item,
-      depType: `feature-${item.feature}`,
-    });
-  }
-
   return {
     lockFiles,
-    deps: [conda, pypi].flat(),
+    deps: [conda, val.pypi, val.feature.pypi].flat(),
   };
 }
 
