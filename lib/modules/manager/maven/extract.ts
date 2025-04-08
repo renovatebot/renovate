@@ -124,7 +124,8 @@ function getAllCNBDependencies(
   const pluginNodes =
     node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
     [];
-  pluginNodes.find((pluginNode) => {
+
+  const pluginNode = pluginNodes.find((pluginNode) => {
     return (
       pluginNode.valueWithPath('groupId')?.trim() ===
         'org.springframework.boot' &&
@@ -132,14 +133,12 @@ function getAllCNBDependencies(
         'spring-boot-maven-plugin'
     );
   });
-  if (pluginNodes.length !== 1) {
+  if (!pluginNode) {
     return null;
   }
 
   const deps: PackageDependency[] = [];
-  const imageNode = pluginNodes[0]
-    .childNamed('configuration')
-    ?.childNamed('image');
+  const imageNode = pluginNode.childNamed('configuration')?.childNamed('image');
   if (!imageNode) {
     return null;
   }
