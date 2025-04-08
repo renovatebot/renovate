@@ -757,6 +757,54 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with helm value image/repository prefix replacement', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+            repository: example.org/securecodebox/parser-nmap
+            tag: 3.14.3
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'example.org/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'docker.example.org/securecodebox/parser-nmap';
+      upgrade.newValue = 'v5.1.0';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue),
+      );
+    });
+
+    it('updates with helm value image/repository version prefix replacement', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+            tag: 3.14.3
+            repository: docker.io/securecodebox/parser-nmap
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'docker.io/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'iteratec/juice-balancer';
+      upgrade.newValue = 'v3.14.3';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue),
+      );
+    });
+
     it('updates with jenkins plugin replacement', async () => {
       const txt = 'script-security:1175\n';
       upgrade.manager = 'jenkins';
