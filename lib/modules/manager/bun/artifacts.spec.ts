@@ -316,7 +316,6 @@ describe('modules/manager/bun/artifacts', () => {
                 toolName: 'bun',
               },
             ],
-            userConfiguredEnv: undefined,
           });
 
           exec.mockClear();
