@@ -162,6 +162,44 @@ describe('modules/manager/maven/update', () => {
         ),
       ).toBe('paketo-buildpacks/nodejs@6.1.2');
     });
+
+    it('should update a cloud native buildpack digest', () => {
+      const res = updateDependency({
+        fileContent: cnbContent,
+        upgrade: {
+          updateType: 'patch',
+          currentDigest:
+            'sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
+          currentValue: '2.22.1',
+          newDigest:
+            'sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1',
+          newValue: '2.24.3',
+          datasource: 'docker',
+          depName: 'docker.io/paketobuildpacks/python',
+          fileReplacePosition: 1634,
+        },
+      });
+
+      const project = new XmlDocument(res!);
+      const buildpacks = project
+        .childNamed('build')!
+        .childNamed('plugins')!
+        .childNamed('plugin')!
+        .childNamed('configuration')!
+        .childNamed('image')!
+        .childNamed('buildpacks')!
+        .childrenNamed('buildpack');
+      let buildpackWithDigest = '';
+      for (const buildpack of buildpacks) {
+        const buildpackValue = buildpack.val;
+        if (buildpackValue.includes('docker://')) {
+          buildpackWithDigest = buildpackValue;
+        }
+      }
+      expect(buildpackWithDigest).toEqual(
+        'docker://docker.io/paketobuildpacks/python:2.24.3@sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1',
+      );
+    });
   });
 
   describe('bumpPackageVersion', () => {

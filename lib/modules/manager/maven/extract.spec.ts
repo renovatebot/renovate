@@ -359,6 +359,42 @@ describe('modules/manager/maven/extract', () => {
         },
       ]);
     });
+
+    it('returns no buildpack dependencies when image tag is missing in spring boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('empty_config.cnb.pom.xml'),
+        'empty_config.cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 404,
+          registryUrls: [],
+        },
+      ]);
+    });
+
+    it('returns no buildpack dependencies when dependencies are invalid in spring boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('invalid_cnb.pom.xml'),
+        'invalid_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 404,
+          registryUrls: [],
+        },
+      ]);
+    });
   });
 
   describe('resolveParents', () => {
