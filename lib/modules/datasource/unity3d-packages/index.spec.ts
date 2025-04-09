@@ -19,6 +19,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
         "etag": "18855-eQZPc3Nb+IhUvhXerfZyyDG0KZc"
       }
     `;
+
     httpMock
       .scope('https://packages.unity.com')
       .get('/com.unity.xr.openxr')
