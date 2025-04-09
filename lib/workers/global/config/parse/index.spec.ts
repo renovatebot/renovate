@@ -205,5 +205,28 @@ describe('workers/global/config/parse/index', () => {
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
     });
+
+    it('apply secrets to global config', async () => {
+      vi.doMock('../../../../../config.js', () => ({
+        default: {
+          secrets: {
+            SECRET_TOKEN: 'secret_token',
+          },
+          customEnvVariables: {
+            TOKEN: '{{ secrets.SECRET_TOKEN }}',
+          },
+        },
+      }));
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchObject({
+        secrets: {
+          SECRET_TOKEN: 'secret_token',
+        },
+        customEnvVariables: {
+          TOKEN: 'secret_token',
+        },
+      });
+    });
   });
 });
