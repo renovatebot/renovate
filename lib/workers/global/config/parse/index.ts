@@ -112,10 +112,12 @@ export async function parseConfigs(
 
   // do not add these secrets to repoSecrets and,
   //  do not delete the secrets object after applying on global config as it needs to be re-used for repo config
-  config = applySecretsToConfig(config, undefined, false);
-  // add these secrets to the globalSecerets set so that they can be redacted from logs
-  for (const secret of Object.values(config.secrets ?? {})) {
-    addSecretForSanitizing(secret, 'global');
+  if (is.nonEmptyObject(config.secrets)) {
+    config = applySecretsToConfig(config, undefined, false);
+    // add these secrets to the globalSecerets set so that they can be redacted from logs
+    for (const secret of Object.values(config.secrets ?? {})) {
+      addSecretForSanitizing(secret, 'global');
+    }
   }
 
   if (is.nonEmptyObject(config.customEnvVariables)) {
