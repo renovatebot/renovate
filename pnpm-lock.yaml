@@ -498,8 +498,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.17)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.1))
       '@vitest/eslint-plugin':
-        specifier: 1.1.38
-        version: 1.1.38(@typescript-eslint/utils@8.28.0(eslint@9.23.0)(typescript@5.8.2))(eslint@9.23.0)(typescript@5.8.2)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.17)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.1))
+        specifier: 1.1.39
+        version: 1.1.39(@typescript-eslint/utils@8.28.0(eslint@9.23.0)(typescript@5.8.2))(eslint@9.23.0)(typescript@5.8.2)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.17)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.1))
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
@@ -2395,8 +2395,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.1.38':
-    resolution: {integrity: sha512-KcOTZyVz8RiM5HyriiDVrP1CyBGuhRxle+lBsmSs6NTJEO/8dKVAq+f5vQzHj1/Kc7bYXSDO6yBe62Zx0t5iaw==}
+  '@vitest/eslint-plugin@1.1.39':
+    resolution: {integrity: sha512-l5/MUFCYI8nxwr62JHlWwXfeQNS8E7xy71lSLGQ3CrjGjBdWLs1Rtee+BvYwy2m4YVPwYqUwdcAIOaZOwPUpfg==}
     peerDependencies:
       '@typescript-eslint/utils': ^8.24.0
       eslint: '>= 8.57.0'
@@ -2631,6 +2631,7 @@ packages:
 
   bignumber.js@9.2.0:
     resolution: {integrity: sha512-JocpCSOixzy5XFJi2ub6IMmV/G9i8Lrm2lZvwBv9xPdglmZM0ufDVBbjbrfU/zuLvBfD7Bv2eYxz9i+OHTgkew==}
+    deprecated: pkg version number incorrect
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
@@ -9087,7 +9088,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.38(@typescript-eslint/utils@8.28.0(eslint@9.23.0)(typescript@5.8.2))(eslint@9.23.0)(typescript@5.8.2)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.17)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.1))':
+  '@vitest/eslint-plugin@1.1.39(@typescript-eslint/utils@8.28.0(eslint@9.23.0)(typescript@5.8.2))(eslint@9.23.0)(typescript@5.8.2)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.17)(jsdom@26.0.0)(tsx@4.19.3)(yaml@2.7.1))':
     dependencies:
       '@typescript-eslint/utils': 8.28.0(eslint@9.23.0)(typescript@5.8.2)
       eslint: 9.23.0
