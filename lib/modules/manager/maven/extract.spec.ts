@@ -277,8 +277,8 @@ describe('modules/manager/maven/extract', () => {
 
     it('extracts builder and buildpack images from spring-boot plugin', () => {
       const res = extractPackage(
-        Fixtures.get('cnb.pom.xml'),
-        'cnb.pom.xml',
+        Fixtures.get('full_cnb.pom.xml'),
+        'full_cnb.pom.xml',
         {},
       );
       expect(res?.deps).toEqual([
@@ -360,10 +360,39 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
+    it('extracts only builder if defaults are used in spring-boot plugin', () => {
+      const res = extractPackage(
+        Fixtures.get('basic_cnb.pom.xml'),
+        'basic_cnb.pom.xml',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '3.2.2',
+          datasource: 'maven',
+          depName: 'org.springframework.boot:spring-boot-starter-parent',
+          depType: 'parent',
+          fileReplacePosition: 404,
+          registryUrls: [],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '0.4.316',
+          datasource: 'docker',
+          depName: 'paketobuildpacks/builder-jammy-base',
+          packageName: 'paketobuildpacks/builder-jammy-base',
+          replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
+          fileReplacePosition: 1273,
+          registryUrls: [],
+        },
+      ]);
+    });
+
     it('returns no buildpack dependencies when image tag is missing in spring boot plugin', () => {
       const res = extractPackage(
-        Fixtures.get('empty_config.cnb.pom.xml'),
-        'empty_config.cnb.pom.xml',
+        Fixtures.get('empty_cnb.pom.xml'),
+        'empty_cnb.pom.xml',
         {},
       );
       expect(res?.deps).toEqual([

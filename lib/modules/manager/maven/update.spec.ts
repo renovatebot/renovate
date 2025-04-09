@@ -8,7 +8,7 @@ const simpleContent = Fixtures.get(`simple.pom.xml`);
 const minimumContent = Fixtures.get(`minimum.pom.xml`);
 const minimumSnapshotContent = Fixtures.get(`minimum_snapshot.pom.xml`);
 const prereleaseContent = Fixtures.get(`prerelease.pom.xml`);
-const cnbContent = Fixtures.get(`cnb.pom.xml`);
+const cnbContent = Fixtures.get(`full_cnb.pom.xml`);
 
 describe('modules/manager/maven/update', () => {
   describe('updateDependency', () => {
