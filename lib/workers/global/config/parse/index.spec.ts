@@ -219,13 +219,11 @@ describe('workers/global/config/parse/index', () => {
       }));
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toMatchObject({
-        secrets: {
-          SECRET_TOKEN: 'secret_token',
-        },
-        customEnvVariables: {
-          TOKEN: 'secret_token',
-        },
+      expect(parsedConfig.secrets).toMatchObject({
+        SECRET_TOKEN: 'secret_token',
+      });
+      expect(parsedConfig.customEnvVariables).toMatchObject({
+        TOKEN: 'secret_token',
       });
     });
   });
