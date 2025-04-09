@@ -339,7 +339,7 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toMatchObject({
+      expect(result).toStrictEqual({
         datasource: 'helm',
         deps: [
           {
@@ -347,6 +347,7 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
+            registryUrls: ['ghcr.io/example/oci-repo'],
           },
           {
             currentValue: '3.3.0',
@@ -355,9 +356,10 @@ describe('modules/manager/helmfile/extract', () => {
           },
           {
             currentValue: '0.4.2',
-            depName: 'url-example',
+            depName: 'ghcr.io/example/oci-repo/url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
+            registryUrls: [],
           },
         ],
       });
@@ -529,7 +531,7 @@ describe('modules/manager/helmfile/extract', () => {
           {
             currentValue: '0.4.2',
             datasource: 'docker',
-            depName: 'subgroup',
+            depName: 'gitlab.example.com:5000/group/subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
             registryUrls: [],
           },
