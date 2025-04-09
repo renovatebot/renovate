@@ -1490,6 +1490,7 @@ But if you're embedding changelogs in commit information, you may use `fetchChan
 Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
+- Bitbucket Server / Data Center
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
@@ -2739,7 +2740,7 @@ To read the changelogs you must use the link.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can fetch changelogs from Bitbucket, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
