@@ -115,7 +115,7 @@ export async function parseConfigs(
   if (is.nonEmptyObject(config.secrets)) {
     config = applySecretsToConfig(config, undefined, false);
     // add these secrets to the globalSecerets set so that they can be redacted from logs
-    for (const secret of Object.values(config.secrets ?? {})) {
+    for (const secret of Object.values(config.secrets!)) {
       addSecretForSanitizing(secret, 'global');
     }
   }
