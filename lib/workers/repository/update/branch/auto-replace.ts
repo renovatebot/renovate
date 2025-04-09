@@ -142,7 +142,11 @@ function firstIndexOf(
 ): number {
   const depIndex = existingContent.indexOf(depName, position);
   const valIndex = existingContent.indexOf(currentValue, position);
-  return depIndex < valIndex ? depIndex : valIndex;
+  const index = depIndex < valIndex ? depIndex : valIndex;
+  if (index < 0) {
+    return position === 0 ? -1 : existingContent.length;
+  }
+  return index;
 }
 
 export async function checkBranchDepsMatchBaseDeps(
