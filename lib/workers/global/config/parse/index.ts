@@ -117,6 +117,7 @@ export async function parseConfigs(
   for (const secret of Object.values(config.secrets ?? {})) {
     addSecretForSanitizing(secret, 'global');
   }
+
   if (is.nonEmptyObject(config.customEnvVariables)) {
     setCustomEnv(config.customEnvVariables);
   }

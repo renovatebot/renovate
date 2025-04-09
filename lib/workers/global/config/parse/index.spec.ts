@@ -208,31 +208,24 @@ describe('workers/global/config/parse/index', () => {
 
     it('apply secrets to global config', async () => {
       vi.doMock('../../../../../config.js', () => ({
-        default: {
-          secrets: {
-            SECRET_TOKEN: 'secret_token',
-          },
-          customEnvVariables: {
-            TOKEN: '{{ secrets.SECRET_TOKEN }}',
-          },
-        },
+        default: {},
       }));
-      const env: NodeJS.ProcessEnv = {};
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_SECRETS: '{"SECRET_TOKEN": "secret_token"}',
+        RENOVATE_CUSTOM_ENV_VARIABLES:
+          '{"TOKEN": "{{ secrets.SECRET_TOKEN }}"}',
+      };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([
-        [
-          'secrets',
-          {
-            SECRET_TOKEN: 'secret_token',
-          },
-        ],
-        [
-          'customEnvVariables',
-          {
-            TOKEN: 'secret_token',
-          },
-        ],
-      ]);
+      expect(parsedConfig).toMatchObject({
+        secrets: {
+          SECRET_TOKEN: 'secret_token',
+        },
+
+        customEnvVariables: {
+          TOKEN: 'secret_token',
+        },
+      });
     });
   });
 });
