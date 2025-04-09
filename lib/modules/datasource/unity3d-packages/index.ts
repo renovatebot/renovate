@@ -38,19 +38,19 @@ export class Unity3dPackagesDatasource extends Datasource {
     const result: ReleaseResult = {
       releases: [],
       homepage:
-        response.body.versions.length > 0
-          ? response.body.versions[0].documentationUrl
+        Object.keys(response.body.versions).length > 0
+          ? Object.values(response.body.versions)[0].documentationUrl
           : undefined,
       registryUrl,
     };
 
-    for (const release of response.body.versions) {
+    for (const release of Object.values(response.body.versions)) {
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(response.body.time[release.version]),
         changelogUrl:
           registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl
-            ? release.documentationUrl.replace(
+            ? release.documentationUrl?.replace(
                 'manual/index.html',
                 'changelog/CHANGELOG.html',
               )
