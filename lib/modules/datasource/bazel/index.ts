@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { readLocalFile } from '../../../util/fs';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id as bazelVersioningId } from '../../versioning/bazel-module';
@@ -8,7 +9,6 @@ import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BazelModuleMetadata } from './schema';
-import { readLocalFile } from '../../../util/fs';
 
 export class BazelDatasource extends Datasource {
   static readonly id = 'bazel';
@@ -44,8 +44,9 @@ export class BazelDatasource extends Datasource {
     const result: ReleaseResult = { releases: [] };
     try {
       let metadata;
-      if (url.startsWith('file://')) {
-        const filePath = url.slice(7);
+      const FILE_PREFIX = 'file://';
+      if (url.startsWith(FILE_PREFIX)) {
+        const filePath = url.slice(FILE_PREFIX.length);
         const fileContent = await readLocalFile(filePath, 'utf8');
         if (!fileContent) {
           return null;
