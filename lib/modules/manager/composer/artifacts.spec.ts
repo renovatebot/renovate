@@ -1233,5 +1233,5 @@ describe('modules/manager/composer/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
-  })
+  });
 });
