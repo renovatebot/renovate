@@ -132,7 +132,7 @@ export class GerritScm extends DefaultGitScm {
       if (hasChanges || commit.force) {
         const pushOptions = ['notify=NONE'];
         if (commit.autoApprove) {
-          pushOptions.push('l=Code-Review+2');
+          pushOptions.push('label=Code-Review+2');
         }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
