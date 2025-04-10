@@ -1,3 +1,4 @@
+import upath from 'upath';
 import { minimatch } from '../../../util/minimatch.js';
 
 export function fileMatchesWorkspaces(
@@ -8,9 +9,8 @@ export function fileMatchesWorkspaces(
   if (!fileName.startsWith(pwd)) {
     return false;
   }
-  const relativeFile = fileName
-    .slice(pwd.length)
-    .replace(/^\//, '')
+  const relativeFile = upath
+    .relative(pwd, fileName)
     .replace(/\/package\.json$/, '');
   return workspaces.some((pattern) =>
     // minimatch will also return true for an exact match
