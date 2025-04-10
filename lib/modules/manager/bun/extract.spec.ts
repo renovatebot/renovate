@@ -43,7 +43,8 @@ describe('modules/manager/bun/extract', () => {
             },
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toMatchObject([
+        const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+        expect(packageFiles).toMatchObject([
           {
             deps: [
               {
@@ -87,7 +88,8 @@ describe('modules/manager/bun/extract', () => {
             _from: 1,
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+        expect(packageFiles).toEqual([]);
       });
 
       it('parses valid package.json file', async () => {
@@ -157,24 +159,20 @@ describe('modules/manager/bun/extract', () => {
         'packages/pkg1/package.json',
       ];
 
-      const result = await extractAllPackageFiles({}, matchedFiles);
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
 
-      // We expect two package file objects: one for the main package.json and one for the workspace.
-      expect(result.length).toBe(2);
-
-      const mainPackage = result.find(
-        (pkg) => pkg.packageFile === 'package.json',
-      );
-      expect(mainPackage).toBeDefined();
-      expect(mainPackage?.packageFileVersion).toBe('0.0.1');
-      expect(mainPackage?.lockFiles).toEqual(['bun.lock']);
-
-      const workspacePackage = result.find(
-        (pkg) => pkg.packageFile === 'packages/pkg1/package.json',
-      );
-      expect(workspacePackage).toBeDefined();
-      expect(workspacePackage?.packageFileVersion).toBe('1.0.0');
-      expect(workspacePackage?.lockFiles).toEqual(['bun.lock']);
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          packageFileVersion: '1.0.0',
+          lockFiles: ['bun.lock'],
+        },
+      ]);
     });
 
     it('skips workspace processing when workspaces is not a valid array', async () => {
@@ -188,13 +186,13 @@ describe('modules/manager/bun/extract', () => {
         }),
       );
       // Only the main package.json file is processed
-      const result = await extractAllPackageFiles({}, [
+      const packageFiles = await extractAllPackageFiles({}, [
         'bun.lock',
         'package.json',
         'packages/pkg1/package.json',
       ]);
-      expect(result).toHaveLength(1);
-      expect(result[0].packageFile).toBe('package.json');
+      expect(packageFiles).toHaveLength(1);
+      expect(packageFiles[0].packageFile).toBe('package.json');
     });
   });
 });
