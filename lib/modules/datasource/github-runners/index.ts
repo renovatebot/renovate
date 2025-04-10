@@ -42,7 +42,7 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '10.15', isDeprecated: true },
     ],
     windows: [
-      { version: '2025', isStable: false },
+      { version: '2025' },
       { version: '2022' },
       { version: '2019' },
       { version: '2016', isDeprecated: true },
