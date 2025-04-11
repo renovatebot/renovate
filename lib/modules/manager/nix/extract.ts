@@ -115,6 +115,7 @@ export async function extractPackageFile(
           currentDigest: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'gitlab':
@@ -124,6 +125,7 @@ export async function extractPackageFile(
           currentDigest: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'git':
@@ -133,6 +135,7 @@ export async function extractPackageFile(
           currentDigest: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: flakeOriginal.url,
+          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'sourcehut':
@@ -142,6 +145,7 @@ export async function extractPackageFile(
           currentDigest: flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'tarball':
@@ -160,6 +164,7 @@ export async function extractPackageFile(
             currentDigest: rev,
             datasource: GitRefsDatasource.id,
             packageName: 'https://github.com/NixOS/nixpkgs',
+            rangeStrategy: 'update-lockfile',
           });
         } else {
           deps.push({
@@ -172,6 +177,7 @@ export async function extractPackageFile(
               lockableHTTPTarballProtocol,
               'https://$<domain>/$<owner>/$<repo>',
             ),
+            rangeStrategy: 'update-lockfile',
           });
         }
         break;
