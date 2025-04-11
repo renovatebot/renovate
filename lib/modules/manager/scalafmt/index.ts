@@ -8,7 +8,7 @@ export const url =
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.scalafmt.conf$'],
+  managerFilePatterns: ['/(^|/)\\.scalafmt.conf$/'],
 };
 
 export const supportedDatasources = [GithubReleasesDatasource.id];

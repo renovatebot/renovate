@@ -7,9 +7,9 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: [
-          '(^|/).azuredevops/.+\\.ya?ml$',
-          'azure.*pipelines?.*\\.ya?ml$',
+        managerFilePatterns: [
+          '/(^|/).azuredevops/.+\\.ya?ml$/',
+          '/azure.*pipelines?.*\\.ya?ml$/',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
@@ -26,7 +26,7 @@ export const presets: Record<string, Preset> = {
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
         fileFormat: 'json',
-        fileMatch: ['(^|/)biome.jsonc?$'],
+        managerFilePatterns: ['/(^|/)biome.jsonc?$/'],
         matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
@@ -37,7 +37,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: ['(^|/)bitbucket-pipelines\\.ya?ml$'],
+        managerFilePatterns: ['/(^|/)bitbucket-pipelines\\.ya?ml$/'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -49,9 +49,9 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: [
-          '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
-          '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+        managerFilePatterns: [
+          '/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/',
+          '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG)\\s+[A-Za-z0-9_]+?_VERSION[ =]["\']?(?<currentValue>.+?)["\']?\\s',
@@ -64,9 +64,9 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: [
-          '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$',
-          '(^|/)action\\.ya?ml$',
+        managerFilePatterns: [
+          '/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/',
+          '/(^|/)action\\.ya?ml$/',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
@@ -80,7 +80,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
+        managerFilePatterns: ['/\\.gitlab-ci\\.ya?ml$/'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -94,7 +94,7 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         datasourceTemplate: 'docker',
-        fileMatch: ['(^|/)Chart\\.yaml$'],
+        managerFilePatterns: ['/(^|/)Chart\\.yaml$/'],
         matchStrings: [
           '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*["\']?(?<currentValue>[\\w+\\.\\-]*)',
         ],
@@ -106,11 +106,11 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: [
-          '(^|/)Makefile$',
-          '(^|/)makefile$',
-          '(^|/)GNUMakefile$',
-          '\\.mk$',
+        managerFilePatterns: [
+          '/(^|/)Makefile$/',
+          '/(^|/)makefile$/',
+          '/(^|/)GNUMakefile$/',
+          '/\\.mk$/',
         ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:*\\??=\\s*["\']?(?<currentValue>.+?)["\']?\\s',
@@ -125,7 +125,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         datasourceTemplate:
           '{{#if datasource}}{{{datasource}}}{{else}}maven{{/if}}',
-        fileMatch: ['(^|/)pom\\.xml$'],
+        managerFilePatterns: ['/(^|/)pom\\.xml$/'],
         matchStrings: [
           '<!--\\s?renovate:( datasource=(?<datasource>[a-zA-Z0-9-._]+?))? depName=(?<depName>[^\\s]+?)(?: packageName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+-->\\s+<.+\\.version>(?<currentValue>.+)<\\/.+\\.version>',
         ],
@@ -138,7 +138,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: ['.+\\.tfvars$'],
+        managerFilePatterns: ['/.+\\.tfvars$/'],
         matchStrings: [
           '#\\s*renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?(?: extractVersion=(?<extractVersion>.*?))?\\s.*?_version\\s*=\\s*"(?<currentValue>.*)"',
         ],

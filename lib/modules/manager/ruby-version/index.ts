@@ -8,7 +8,7 @@ export const displayName = '.ruby-version';
 export const categories: Category[] = ['ruby'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.ruby-version$'],
+  managerFilePatterns: ['/(^|/)\\.ruby-version$/'],
   versioning: rubyVersioning.id,
 };
 

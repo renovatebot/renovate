@@ -75,7 +75,7 @@ Here's an example of using the custom manager to configure this datasource:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [".*\\.tf"],
+      "managerFilePatterns": ["/.*\\.tf/"],
       "matchStrings": [
         ".*# renovate: eksAddonsFilter=(?<packageName>.*?)\n.*?[a-zA-Z0-9-_:]*[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>[a-zA-Z0-9-_.]+)[\"|']?.*"
       ],

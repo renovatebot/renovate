@@ -6,7 +6,7 @@ export const url = 'https://docs.ansible.com';
 export const categories: Category[] = ['ansible', 'iac'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)tasks/[^/]+\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)tasks/[^/]+\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

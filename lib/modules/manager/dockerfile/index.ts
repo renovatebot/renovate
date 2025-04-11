@@ -8,9 +8,9 @@ export const url = 'https://docs.docker.com/build/concepts/dockerfile';
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
-    '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+  managerFilePatterns: [
+    '/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/',
+    '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/',
   ],
 };
 
