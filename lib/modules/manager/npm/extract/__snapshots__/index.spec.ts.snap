@@ -870,6 +870,139 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an 
 }
 `;
 
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies when is a yaml version too 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6.5.0",
+      "datasource": "npm",
+      "depName": "autoprefixer",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "~1.6.0",
+      "datasource": "npm",
+      "depName": "bower",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "13.1.0",
+      "datasource": "npm",
+      "depName": "browserify",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "0.9.2",
+      "datasource": "npm",
+      "depName": "browserify-css",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "=0.22.0",
+      "datasource": "npm",
+      "depName": "cheerio",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "currentValue": "1.21.0",
+      "datasource": "npm",
+      "depName": "config",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+    },
+    {
+      "depName": "enabled",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+      "skipReason": "invalid-value",
+    },
+    {
+      "currentValue": "^1.5.8",
+      "datasource": "npm",
+      "depName": "angular",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    {
+      "currentValue": "1.5.8",
+      "datasource": "npm",
+      "depName": "angular-touch",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    {
+      "currentValue": "1.5.8",
+      "datasource": "npm",
+      "depName": "angular-sanitize",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    {
+      "currentValue": "4.0.0-beta.1",
+      "datasource": "npm",
+      "depName": "@angular/core",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+    },
+    {
+      "currentValue": "1.21.0",
+      "datasource": "npm",
+      "depName": "config",
+      "depType": "resolutions",
+      "prettyDepType": "resolutions",
+    },
+    {
+      "currentValue": "8.0.0",
+      "datasource": "npm",
+      "depName": "@angular/cli",
+      "depType": "resolutions",
+      "managerData": {
+        "key": "**/@angular/cli",
+      },
+      "prettyDepType": "resolutions",
+    },
+    {
+      "currentValue": "1.33.0",
+      "datasource": "npm",
+      "depName": "angular",
+      "depType": "resolutions",
+      "managerData": {
+        "key": "**/angular",
+      },
+      "prettyDepType": "resolutions",
+    },
+    {
+      "currentValue": "1.0.0",
+      "datasource": "npm",
+      "depName": "glob",
+      "depType": "resolutions",
+      "managerData": {
+        "key": "config/glob",
+      },
+      "prettyDepType": "resolutions",
+    },
+  ],
+  "extractedConstraints": {},
+  "managerData": {
+    "hasPackageManager": false,
+    "npmLock": undefined,
+    "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
+    "workspacesPackages": undefined,
+    "yarnLock": undefined,
+    "yarnZeroInstall": false,
+  },
+  "npmrc": undefined,
+  "packageFileVersion": "1.0.0",
+  "skipInstalls": true,
+}
+`;
+
 exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies with resolution comments 1`] = `
 {
   "deps": [
