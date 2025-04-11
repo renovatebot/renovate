@@ -16,6 +16,8 @@ const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';
 const BUILT_IN_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-builtin-tasks.json`;
 const MARKETPLACE_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-marketplace-tasks.json`;
+const BUILT_IN_TASKS_CHANGELOG_URL =
+  'https://github.com/microsoft/azure-pipelines-tasks/releases';
 
 export class AzurePipelinesTasksDatasource extends Datasource {
   static readonly id = 'azure-pipelines-tasks';
@@ -68,6 +70,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
           result.releases.push({
             version: `${task.version!.major}.${task.version!.minor}.${task.version!.patch}`,
             isDeprecated: task.deprecated,
+            changelogUrl: task.serverOwned
+              ? BUILT_IN_TASKS_CHANGELOG_URL
+              : undefined,
           });
         });
 
