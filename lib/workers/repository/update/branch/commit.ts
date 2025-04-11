@@ -7,6 +7,7 @@ import { scm } from '../../../../modules/platform/scm';
 import type { LongCommitSha } from '../../../../util/git/types';
 import { minimatch } from '../../../../util/minimatch';
 import { sanitize } from '../../../../util/sanitize';
+import { incLimitedValue } from '../../../global/limits';
 import type { BranchConfig } from '../../../types';
 
 export function commitFilesToBranch(
@@ -38,6 +39,7 @@ export function commitFilesToBranch(
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    incLimitedValue('Commits');
     return Promise.resolve(null);
   }
   // istanbul ignore if
