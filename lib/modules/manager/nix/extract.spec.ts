@@ -72,17 +72,18 @@ describe('modules/manager/nix/extract', () => {
 
   it('includes nixpkgs input with no explicit ref', async () => {
     fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
-    expect(await extractPackageFile(flake4Nix, 'flake.nix')).toEqual({
-      deps: [
-        {
-          currentValue: undefined,
-          datasource: 'git-refs',
-          depName: 'nixpkgs',
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          versioning: 'nixpkgs',
-        },
-      ],
-    });
+    expect(await extractPackageFile(flake4Nix, 'flake.nix')).toBeNull();
+  });
+
+  const flake5Nix = `{
+    inputs = {
+      nixpkgs-lib.url = "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz";
+    };
+  }`;
+
+  it('includes nixpkgs input with only ref', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake1Lock);
+    expect(await extractPackageFile(flake5Nix, 'flake.nix')).toBeNull();
   });
 
   it('returns null when no inputs', async () => {
@@ -124,10 +125,11 @@ describe('modules/manager/nix/extract', () => {
       deps: [
         {
           depName: 'nixpkgs',
-          currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           currentValue: 'nixos-unstable',
+          currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -169,6 +171,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -228,6 +231,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'patchelf',
           packageName: 'https://github.com/NixOS/patchelf.git',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -270,6 +274,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'ijq',
           packageName: 'https://git.sr.ht/~gpanders/ijq',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -312,6 +317,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'home-manager',
           packageName: 'https://gitlab.com/rycee/home-manager',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -368,6 +374,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -496,6 +503,7 @@ describe('modules/manager/nix/extract', () => {
           depName: 'nixpkgs-extra-pkgs',
           packageName:
             'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -598,6 +606,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'data-mesher',
           packageName: 'https://git.clan.lol/clan/data-mesher',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -639,6 +648,159 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'subgroup-project',
           packageName: 'https://gitlab.com/group/sub-group/subgroup-project',
+          rangeStrategy: 'update-lockfile',
+        },
+      ],
+    });
+  });
+
+  const flake13Lock = `{
+  "nodes": {
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1738452942,
+        "narHash": "sha256-vJzFZGaCpnmo7I6i416HaBLpC+hvcURh/BQwROcGIp8=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/072a6db25e947df2f31aab9eccd0ab75d5b2da11.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}`;
+
+  it('includes flake with only tarball type', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake13Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  const flake14Lock = `{
+  "nodes": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1734649271,
+        "narHash": "sha256-4EVBRhOjMDuGtMaofAIqzJbg4Ql7Ai0PSeuVZTHjyKQ=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d70bd19e0a38ad4790d3913bf08fcbfc9eeca507",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1733096140,
+        "narHash": "sha256-1qRH7uAUsyQI7R1Uwl4T+XvdNv778H0Nb5njNrqvylY=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/5487e69da40cbd611ab2cadee0b4637225f7cfae.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}`;
+
+  it('includes flake with nixpkgs-lib as tarball type', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake14Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: '205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9',
+          currentValue: undefined,
+          datasource: 'git-refs',
+          depName: 'flake-parts',
+          packageName: 'https://github.com/hercules-ci/flake-parts',
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          currentDigest: 'd70bd19e0a38ad4790d3913bf08fcbfc9eeca507',
+          currentValue: 'nixos-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/nixos/nixpkgs',
+          rangeStrategy: 'update-lockfile',
+        },
+      ],
+    });
+  });
+
+  const flake15Lock = `{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 315532800,
+        "narHash": "sha256-OBkwS4XoKsUwM8ykjEN1JLg/SI/SHOVJbrwMfK64BJo=",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.05pre766138.b62d2a95c72f/nixexprs.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}`;
+
+  it('includes flake with nixpkgs channel as tarball type', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake15Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: 'b62d2a95c72f',
+          currentValue: 'nixpkgs-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
