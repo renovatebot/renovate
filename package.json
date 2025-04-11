@@ -273,7 +273,7 @@
     "@smithy/util-stream": "3.3.4",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
-    "@types/better-sqlite3": "7.6.12",
+    "@types/better-sqlite3": "7.6.13",
     "@types/breejs__later": "4.1.5",
     "@types/bunyan": "1.8.11",
     "@types/cacache": "17.0.2",
