@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { readLocalFile } from '../../../util/fs';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id as bazelVersioningId } from '../../versioning/bazel-module';
@@ -40,17 +41,26 @@ export class BazelDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const path = BazelDatasource.packageMetadataPath(packageName);
     const url = joinUrlParts(registryUrl!, path);
-
     const result: ReleaseResult = { releases: [] };
     try {
-      const { body: metadata } = await this.http.getJson(
-        url,
-        BazelModuleMetadata,
-      );
+      let metadata;
+      const FILE_PREFIX = 'file://';
+      if (url.startsWith(FILE_PREFIX)) {
+        const filePath = url.slice(FILE_PREFIX.length);
+        const fileContent = await readLocalFile(filePath, 'utf8');
+        if (!fileContent) {
+          return null;
+        }
+        metadata = JSON.parse(fileContent);
+      } else {
+        const response = await this.http.getJson(url, BazelModuleMetadata);
+        metadata = response.body;
+      }
+
       result.releases = metadata.versions
-        .map((v) => new BzlmodVersion(v))
+        .map((v: string) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
-        .map((bv) => {
+        .map((bv: BzlmodVersion) => {
           const release: Release = { version: bv.original };
           if (is.truthy(metadata.yanked_versions?.[bv.original])) {
             release.isDeprecated = true;
