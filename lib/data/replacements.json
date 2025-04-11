@@ -1,6 +1,11 @@
 {
   "$schema": "../../tools/schemas/replacements-schema.json",
   "all": {
+    "description": "Apply all replacement rules.",
+    "extends": ["replacements:drop-in", "replacements:breaking"],
+    "ignoreDeps": []
+  },
+  "drop-in": {
     "description": "Apply crowd-sourced package replacement rules.",
     "extends": [
       "replacements:airbnb-prop-types-to-prop-types-tools",
@@ -49,6 +54,11 @@
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
+    "ignoreDeps": []
+  },
+  "breaking": {
+    "description": "Apply breaking package replacement rules.",
+    "extends": ["replacements:mvdan-sh-to-sh-syntax"],
     "ignoreDeps": []
   },
   "airbnb-prop-types-to-prop-types-tools": {
@@ -761,6 +771,16 @@
         "matchPackageNames": ["middie"],
         "replacementName": "@fastify/middie",
         "replacementVersion": "8.0.0"
+      }
+    ]
+  },
+  "mvdan-sh-to-sh-syntax": {
+    "description": "`mvdan-sh` uses unmaintained `gopherjs` so it is very outdated, and now `mvdan-sh` is deprecated and `sh-syntax` is recommended by the original author.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["mvdan-sh"],
+        "replacementName": "sh-syntax"
       }
     ]
   },

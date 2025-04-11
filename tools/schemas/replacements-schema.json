@@ -16,6 +16,36 @@
         }
       },
       "required": ["description", "extends"]
+    },
+    "breaking": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "extends": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ignoreDeps": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["description", "extends"]
+    },
+    "drop-in": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "extends": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ignoreDeps": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["description", "extends"]
     }
   },
   "patternProperties": {
