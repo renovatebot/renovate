@@ -129,6 +129,7 @@ describe('modules/manager/nix/extract', () => {
           currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
           datasource: GitRefsDatasource.id,
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -170,6 +171,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -229,6 +231,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'patchelf',
           packageName: 'https://github.com/NixOS/patchelf.git',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -271,6 +274,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'ijq',
           packageName: 'https://git.sr.ht/~gpanders/ijq',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -313,6 +317,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'home-manager',
           packageName: 'https://gitlab.com/rycee/home-manager',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -369,6 +374,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -497,6 +503,7 @@ describe('modules/manager/nix/extract', () => {
           depName: 'nixpkgs-extra-pkgs',
           packageName:
             'https://github.corp.example.com/my-org/nixpkgs-extra-pkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -599,6 +606,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'data-mesher',
           packageName: 'https://git.clan.lol/clan/data-mesher',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -640,6 +648,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'subgroup-project',
           packageName: 'https://gitlab.com/group/sub-group/subgroup-project',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -743,6 +752,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'flake-parts',
           packageName: 'https://github.com/hercules-ci/flake-parts',
+          rangeStrategy: 'update-lockfile',
         },
         {
           currentDigest: 'd70bd19e0a38ad4790d3913bf08fcbfc9eeca507',
@@ -750,6 +760,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/nixos/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
@@ -789,6 +800,7 @@ describe('modules/manager/nix/extract', () => {
           datasource: 'git-refs',
           depName: 'nixpkgs',
           packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
         },
       ],
     });
