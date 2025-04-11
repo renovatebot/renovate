@@ -93,6 +93,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  bumpedAt?: Timestamp;
 }
 
 export interface PostprocessReleaseConfig {
