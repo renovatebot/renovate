@@ -80,7 +80,7 @@ const UvSchema = z.object({
   index: z
     .array(
       z.object({
-        name: z.string(),
+        name: z.string().optional(),
         url: z.string(),
         default: z.boolean().default(false),
         explicit: z.boolean().default(false),
