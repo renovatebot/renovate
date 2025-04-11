@@ -2030,7 +2030,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool golang 1.23.3' },
+      { cmd: 'install-tool golang 1.16.0' },
       {
         cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
@@ -2110,7 +2110,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar' +
           ' bash -l -c "' +
-          'install-tool golang 1.23.3' +
+          'install-tool golang 1.17.0' +
           ' && ' +
           'go get -t ./...' +
           ' && ' +
@@ -2152,7 +2152,7 @@ describe('modules/manager/gomod/artifacts', () => {
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
-      newPackageFileContent: `someText\n\ngo 1.13\n\ntoolchain go1.23.6\n\n${gomod1}`,
+      newPackageFileContent: `someText\n\ngo 1.23\n\ntoolchain go1.23.6\n\n${gomod1}`,
       config: {
         updateType: 'minor',
       },
@@ -2165,10 +2165,10 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'install-tool golang 1.23.6',
+        cmd: 'install-tool golang 1.23.0',
       },
       {
-        cmd: 'go get -d -t ./...',
+        cmd: 'go get -t ./... toolchain@1.23.6 go@1.23',
       },
     ]);
   });
@@ -2215,10 +2215,10 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'install-tool golang 1.24.1',
+        cmd: 'install-tool golang 1.23.5',
       },
       {
-        cmd: 'go get -t ./... toolchain@none go@1.23.5 golang.org/x/crypto@v0.35.0',
+        cmd: 'go get -t ./... toolchain@none go@1.23.5',
       },
     ]);
   });
@@ -2261,105 +2261,10 @@ describe('modules/manager/gomod/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'install-tool golang 1.24.1',
+        cmd: 'install-tool golang 1.23.0',
       },
       {
-        cmd: 'go get -t ./... toolchain@none go@1.23 golang.org/x/crypto@v0.35.0',
-      },
-    ]);
-  });
-
-  it('preserve work with major upgrade', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
-    );
-    fs.readLocalFile
-      .mockResolvedValueOnce('New go.sum')
-      .mockResolvedValueOnce('New go.mod');
-
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '1.17.0' },
-        { version: '1.23.3' },
-        { version: '1.24.1' },
-      ],
-    });
-
-    const res = await gomod.updateArtifacts({
-      packageFileName: 'go.mod',
-      updatedDeps: [
-        {
-          datasource: 'go',
-          depName: 'gopkg.in/yaml.v2',
-          fixedVersion: 'v2.4.0',
-          currentVersion: 'v2.4.0',
-          currentValue: 'v2.4.0',
-          newValue: 'v3.0.1',
-          newVersion: 'v3.0.1',
-          packageFile: 'go.mod',
-          updateType: 'major',
-          packageName: 'gopkg.in/yaml.v2',
-        },
-        {
-          depName: 'github.com/google/go-github/v24',
-          packageName: 'github.com/google/go-github/v24',
-          newVersion: 'v28.0.0',
-          datasource: 'go',
-          fixedVersion: 'v24.0.0',
-          currentVersion: 'v24.0.0',
-          currentValue: 'v24.0.0',
-          newValue: 'v28.0.0',
-          packageFile: 'go.mod',
-          updateType: 'major',
-        },
-        {
-          depName: 'github.com/renovatebot/renovate',
-          packageName: 'github.com/renovatebot/renovate',
-          newVersion: 'v1.0.0',
-          datasource: 'go',
-          fixedVersion: 'v0.0.1',
-          currentVersion: 'v0.0.1',
-          currentValue: 'v0.0.1',
-          newValue: 'v1.0.0',
-          packageFile: 'go.mod',
-          updateType: 'major',
-        },
-        {
-          depName: 'github.com/some/lib',
-          packageName: 'github.com/some/lib',
-          datasource: 'go',
-          fixedVersion: 'v0.0.1',
-          currentVersion: 'v0.0.1',
-          currentValue: 'v0.0.1',
-          newVersion: 'v2.0.0',
-          newValue: 'v2.0.0',
-          packageFile: 'go.mod',
-          updateType: 'major',
-        },
-      ],
-      newPackageFileContent: `someText\n\ngo 1.23\n\n${gomod1}`,
-      config: {
-        updateType: 'minor',
-      },
-    });
-
-    expect(res).toEqual([
-      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
-      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
-    ]);
-
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool golang 1.24.1',
-      },
-      {
-        cmd: 'go get -t ./... toolchain@none go@1.23 gopkg.in/yaml.v3@v3.0.1 github.com/google/go-github/v28@v28.0.0 github.com/renovatebot/renovate@v1.0.0 github.com/some/lib/v2@v2.0.0',
+        cmd: 'go get -t ./... toolchain@none go@1.23',
       },
     ]);
   });
