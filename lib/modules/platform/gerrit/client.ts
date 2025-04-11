@@ -4,6 +4,7 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { GerritHttp } from '../../../util/http/gerrit';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -86,9 +87,9 @@ class GerritClient {
   }
 
   async getChange(changeNumber: number): Promise<GerritChange> {
+    const queryString = getQueryString({ o: this.requestDetails });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
-      `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&'),
+      `a/changes/${changeNumber}?${queryString}`,
     );
     return changes.body;
   }
@@ -199,26 +200,6 @@ class GerritClient {
       )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
-  }
-
-  async approveChange(changeId: number): Promise<void> {
-    const isApproved = await this.checkIfApproved(changeId);
-    if (!isApproved) {
-      await this.setLabel(changeId, 'Code-Review', +2);
-    }
-  }
-
-  async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels?.['Code-Review'];
-    return reviewLabels === undefined || reviewLabels.approved !== undefined;
-  }
-
-  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
-    return (
-      change.labels?.['Code-Review'].approved &&
-      change.labels['Code-Review'].approved.username === username
-    );
   }
 
   normalizeMessage(message: string): string {

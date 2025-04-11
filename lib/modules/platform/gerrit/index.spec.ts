@@ -184,28 +184,6 @@ describe('modules/platform/gerrit/index', () => {
       gerrit.writeToConfig({ labels: {} });
     });
 
-    it('updatePr() - auto approve enabled', async () => {
-      const change = partial<GerritChange>({
-        current_revision: 'some-revision',
-        revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message',
-            },
-          }),
-        },
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      await gerrit.updatePr({
-        number: 123456,
-        prTitle: 'subject',
-        platformPrOptions: {
-          autoApprove: true,
-        },
-      });
-      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
-    });
-
     it('updatePr() - closed => abandon the change', async () => {
       const change = partial<GerritChange>({});
       clientMock.getChange.mockResolvedValueOnce(change);
@@ -306,7 +284,7 @@ describe('modules/platform/gerrit/index', () => {
       ]);
     });
 
-    it('createPr() - update body WITHOUT approve', async () => {
+    it('createPr() - update body', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -322,26 +300,6 @@ describe('modules/platform/gerrit/index', () => {
         'body',
         TAG_PULL_REQUEST_BODY,
       );
-      expect(clientMock.approveChange).not.toHaveBeenCalled();
-    });
-
-    it('createPr() - update body and approve', async () => {
-      const pr = await gerrit.createPr({
-        sourceBranch: 'source',
-        targetBranch: 'target',
-        prTitle: change.subject,
-        prBody: 'body',
-        platformPrOptions: {
-          autoApprove: true,
-        },
-      });
-      expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY,
-      );
-      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
   });
 
