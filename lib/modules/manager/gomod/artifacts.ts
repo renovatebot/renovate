@@ -192,7 +192,8 @@ export async function updateArtifacts({
   }
 
   const goMod = getGoConfig(newGoModContent);
-  const goConstraints = config.constraints?.go ?? `^${goMod.minimalGoVersion}`;
+  // we pick minimal supported go version and disable the toolchain switching
+  const goConstraints = config.constraints?.go ?? `${goMod.minimalGoVersion}`;
 
   const getFlags = ['-t'];
   if (!semver.satisfies(goMod.minimalGoVersion, '>=1.17.0')) {
