@@ -64,7 +64,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
-import { LastPipelineId } from './schema';
+import { GitLabApprovalRules, LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
   GitlabComment,
@@ -757,6 +757,44 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
+
+  let reviewerIds: number[] = [];
+  if (platformPrOptions?.gitLabReviewersFromApprovalRule) {
+    logger.debug(
+      `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
+    );
+    try {
+      const approvalRules = await gitlabApi.getJson(
+        `projects/${config.repository}/approval_rules`,
+        GitLabApprovalRules,
+      );
+
+      const approvalRuleReviewerIds = new Set<number>();
+      const matchingApprovalRule = approvalRules.body.find(
+        (rule) =>
+          rule.name === platformPrOptions.gitLabReviewersFromApprovalRule,
+      );
+
+      if (matchingApprovalRule?.eligible_approvers?.length) {
+        logger.debug('Found matching approval rule');
+        for (const approver of matchingApprovalRule.eligible_approvers) {
+          approvalRuleReviewerIds.add(approver.id);
+        }
+        reviewerIds = Array.from(approvalRuleReviewerIds);
+      } else {
+        logger.debug(
+          'No matching approval rule found or rule has no eligible approvers',
+        );
+      }
+      logger.debug(
+        { reviewerIds },
+        'Extracted reviewer IDs from approval rules',
+      );
+    } catch (err) {
+      logger.warn({ err }, 'Failed to fetch GitLab approval rules');
+    }
+  }
+
   const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
@@ -768,6 +806,7 @@ export async function createPr({
         description,
         labels: (labels ?? []).join(','),
         squash: config.squash,
+        reviewer_ids: reviewerIds,
       },
     },
   );
