@@ -244,9 +244,7 @@ export const ComposerExtract = z
               .pipe(Json)
               .pipe(Lockfile)
               .nullable()
-              .catch(
-                withDebugMessage(null, 'Composer: lockfile parsing error'),
-              ),
+              .catch(withDebugMessage(null, 'Composer: does not match schema')),
           ]),
         ),
     }),

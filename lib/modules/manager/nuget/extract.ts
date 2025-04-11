@@ -118,6 +118,17 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           datasource: NugetDatasource.id,
         });
       }
+    } else if (name === 'Import') {
+      const depName = attr?.Sdk;
+      const version = attr?.Version;
+      if (depName && version) {
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
+      }
     } else {
       if (name === 'Project') {
         if (attr?.Sdk) {

@@ -1,7 +1,5 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -12,15 +10,16 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 const config: UpdateArtifactsConfig = {
   composerIgnorePlatformReqs: [],

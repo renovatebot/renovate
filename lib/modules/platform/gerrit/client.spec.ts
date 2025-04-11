@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import type { FindPRConfig } from '../types';
@@ -10,6 +8,8 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
@@ -102,7 +102,6 @@ describe('modules/platform/gerrit/client', () => {
         'footer:Renovate-Branch=dependency-xyz',
         { branchName: 'dependency-xyz' },
       ],
-      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }], // for backwards compatibility
       ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
       [
         'branch:otherTarget',

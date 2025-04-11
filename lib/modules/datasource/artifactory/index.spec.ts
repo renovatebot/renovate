@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { joinUrlParts } from '../../../util/url';
 import { ArtifactoryDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const datasource = ArtifactoryDatasource.id;
 

@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import type { ReleaseResult } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as condaVersioningId } from '../../modules/versioning/conda';
 import { id as gradleVersioningId } from '../../modules/versioning/gradle';
 import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
@@ -174,7 +175,8 @@ const allToolConfig: Record<string, ToolConfig> = {
   pixi: {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
-    versioning: pep440VersioningId,
+    versioning: condaVersioningId,
+    extractVersion: '^v(?<version>.*)$',
   },
   poetry: {
     datasource: 'pypi',
@@ -234,9 +236,7 @@ let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =
 async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
-  if (_getPkgReleases === null) {
-    _getPkgReleases = import('../../modules/datasource/index.js');
-  }
+  _getPkgReleases ??= import('../../modules/datasource/index.js');
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
 }

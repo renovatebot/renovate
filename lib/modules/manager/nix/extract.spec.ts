@@ -1,7 +1,7 @@
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import { extractPackageFile } from '.';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -605,6 +605,47 @@ describe('modules/manager/nix/extract', () => {
   });
 
   const flake12Lock = `{
+    "nodes": {
+      "subgroup-project": {
+        "locked": {
+          "lastModified": 1739792862,
+          "narHash": "sha256-n0MrSIZZknq2OqOYgNS0iMp2yVRekpBFGhrhsT7aXGg=",
+          "owner": "group%2Fsub-group",
+          "repo": "subgroup-project",
+          "rev": "24b560624f154c9e962d146217b2a964faaf2055",
+          "type": "gitlab"
+        },
+        "original": {
+          "owner": "group%2Fsub-group",
+          "repo": "subgroup-project",
+          "type": "gitlab"
+        }
+      },
+      "root": {
+        "inputs": {
+          "subgroup-project": "subgroup-project"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+
+  it('uri decode gitlab subgroup', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake12Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [
+        {
+          currentDigest: '24b560624f154c9e962d146217b2a964faaf2055',
+          datasource: 'git-refs',
+          depName: 'subgroup-project',
+          packageName: 'https://gitlab.com/group/sub-group/subgroup-project',
+        },
+      ],
+    });
+  });
+
+  const flake13Lock = `{
   "nodes": {
     "nixpkgs-lib": {
       "locked": {
@@ -629,11 +670,11 @@ describe('modules/manager/nix/extract', () => {
 }`;
 
   it('includes flake with only tarball type', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake12Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake13Lock);
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  const flake13Lock = `{
+  const flake14Lock = `{
   "nodes": {
     "flake-parts": {
       "inputs": {
@@ -693,7 +734,7 @@ describe('modules/manager/nix/extract', () => {
 }`;
 
   it('includes flake with nixpkgs-lib as tarball type', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake13Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake14Lock);
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
@@ -714,7 +755,7 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
-  const flake14Lock = `{
+  const flake15Lock = `{
   "nodes": {
     "nixpkgs": {
       "locked": {
@@ -739,7 +780,7 @@ describe('modules/manager/nix/extract', () => {
 }`;
 
   it('includes flake with nixpkgs channel as tarball type', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake14Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake15Lock);
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {

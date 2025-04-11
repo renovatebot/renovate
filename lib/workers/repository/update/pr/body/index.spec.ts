@@ -1,4 +1,3 @@
-import { mocked, platform } from '../../../../../../test/util';
 import type { PackageFile } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
@@ -10,30 +9,31 @@ import * as _header from './header';
 import * as _notes from './notes';
 import * as _table from './updates-table';
 import { getPrBody } from '.';
+import { platform } from '~test/util';
 
 vi.mock('./changelogs');
-const changelogs = mocked(_changelogs);
+const changelogs = vi.mocked(_changelogs);
 
 vi.mock('./config-description');
-const configDescription = mocked(_configDescription);
+const configDescription = vi.mocked(_configDescription);
 
 vi.mock('./controls');
-const controls = mocked(_controls);
+const controls = vi.mocked(_controls);
 
 vi.mock('./footer');
-const footer = mocked(_footer);
+const footer = vi.mocked(_footer);
 
 vi.mock('./header');
-const header = mocked(_header);
+const header = vi.mocked(_header);
 
 vi.mock('./notes');
-const notes = mocked(_notes);
+const notes = vi.mocked(_notes);
 
 vi.mock('./updates-table');
-const table = mocked(_table);
+const table = vi.mocked(_table);
 
 vi.mock('../../../../../util/template');
-const template = mocked(_template);
+const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {
@@ -98,12 +98,27 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
+      const upgradeBitbucketServer = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://bitbucket.domain.org/projects/foo/repos/bar',
+        sourceDirectory: '/baz',
+        homepage: 'https://example.com',
+        changelogUrl:
+          'https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md',
+      };
+
       getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [upgrade, upgrade1, upgradeBitbucket],
+          upgrades: [
+            upgrade,
+            upgrade1,
+            upgradeBitbucket,
+            upgradeBitbucketServer,
+          ],
         },
         {
           debugData: {
@@ -145,6 +160,15 @@ describe('workers/repository/update/pr/body/index', () => {
           '[homepage](https://example.com), [source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md)',
         homepage: 'https://example.com',
         sourceUrl: 'https://bitbucket.org/foo/bar',
+      });
+      expect(upgradeBitbucketServer).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://bitbucket.domain.org/projects/foo/repos/bar/browse/baz), [changelog](https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md))',
+        references:
+          '[homepage](https://example.com), [source](https://bitbucket.domain.org/projects/foo/repos/bar/browse/baz), [changelog](https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md)',
+        homepage: 'https://example.com',
+        sourceUrl: 'https://bitbucket.domain.org/projects/foo/repos/bar',
       });
     });
 

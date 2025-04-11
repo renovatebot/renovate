@@ -89,7 +89,6 @@ export async function getExecOptions(
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
-    userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'python',

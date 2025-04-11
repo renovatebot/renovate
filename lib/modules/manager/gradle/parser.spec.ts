@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
 import {
   parseGradle,
   parseJavaToolchainVersion,
@@ -13,6 +11,8 @@ import {
   GRADLE_TEST_SUITES,
   REGISTRY_URLS,
 } from './parser/common';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 

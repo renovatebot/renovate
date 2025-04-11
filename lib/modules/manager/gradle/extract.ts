@@ -255,19 +255,15 @@ export async function extractAllPackageFiles(
         };
       }
 
-      if (!dep.datasource) {
-        dep.datasource = mavenDatasource;
-      }
+      dep.datasource ??= mavenDatasource;
 
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
-        if (!dep.depType) {
-          dep.depType =
-            key.startsWith('buildSrc') && !kotlinSourceFiles.length
-              ? 'devDependencies'
-              : 'dependencies';
-        }
+        dep.depType ??=
+          key.startsWith('buildSrc') && !kotlinSourceFiles.length
+            ? 'devDependencies'
+            : 'dependencies';
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(

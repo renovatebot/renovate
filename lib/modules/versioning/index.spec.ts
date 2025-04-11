@@ -109,7 +109,6 @@ describe('modules/versioning/index', () => {
     }
 
     for (const supportedScheme of supportedSchemes ?? []) {
-      // eslint-disable-next-line vitest/valid-title
       it(supportedScheme, async () => {
         const schemeKeys = getAllPropertyNames(
           allVersioning.get(supportedScheme),

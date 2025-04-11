@@ -78,7 +78,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
 }
 
 export function mapGerritChangeStateToPrState(
-  state: GerritChangeStatus,
+  state: GerritChangeStatus | 'UNKNOWN', // suppress default path code removal
 ): PrState {
   switch (state) {
     case 'NEW':
@@ -101,13 +101,6 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
     }
   }
 
-  // for backwards compatibility
-  if (!sourceBranch) {
-    sourceBranch = change.hashtags
-      ?.find((tag) => tag.startsWith('sourceBranch-'))
-      ?.replace('sourceBranch-', '');
-  }
-
   return sourceBranch ?? undefined;
 }
 
@@ -122,7 +115,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
 }
 
 export function mapBranchStatusToLabel(
-  state: BranchStatus,
+  state: BranchStatus | 'UNKNOWN', // suppress default path code removal
   label: GerritLabelTypeInfo,
 ): number {
   const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
@@ -133,6 +126,6 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  // istanbul ignore next
+  /* v8 ignore next */
   return label.default_value;
 }
