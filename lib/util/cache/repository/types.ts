@@ -146,6 +146,9 @@ export interface RepoCacheData {
     bitbucket?: {
       pullRequestsCache?: unknown;
     };
+    azure?: {
+      pullRequestsCache?: unknown;
+    };
     bitbucketServer?: {
       pullRequestsCache?: unknown;
     };
