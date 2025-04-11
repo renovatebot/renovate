@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import { isOCIRegistry } from '../helmv3/oci';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -87,9 +87,7 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        const v = dep.chart.substring(6).split('/');
-        depName = v.pop()!;
-        repoName = v.join('/');
+        depName = removeOCIPrefix(dep.chart);
       } else if (dep.chart.includes('/')) {
         const v = dep.chart.split('/');
         repoName = v.shift()!;
@@ -109,9 +107,11 @@ export async function extractPackageFile(
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: [registryData[repoName]?.url]
-          .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string),
+        registryUrls: repoName
+          ? [registryData[repoName]?.url]
+              .concat([config.registryAliases?.[repoName]] as string[])
+              .filter(is.string)
+          : [],
       };
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
@@ -119,10 +119,10 @@ export async function extractPackageFile(
 
       if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
-        res.packageName = `${repoName}/${depName}`;
-      } else if (registryData[repoName]?.oci) {
+        res.packageName = depName;
+      } else if (registryData[repoName!]?.oci) {
         res.datasource = DockerDatasource.id;
-        const alias = registryData[repoName]?.url;
+        const alias = registryData[repoName!]?.url;
         if (alias) {
           res.packageName = `${alias}/${depName}`;
         }
@@ -132,8 +132,10 @@ export async function extractPackageFile(
       // However helmfile support templating of that field
       if (
         !isValidChartName(
-          res.depName,
-          isOCIRegistry(dep.chart) || (registryData[repoName]?.oci ?? false),
+          isOCIRegistry(dep.chart)
+            ? res.depName?.slice(res.depName.lastIndexOf('/') + 1)
+            : res.depName,
+          isOCIRegistry(dep.chart) || (registryData[repoName!]?.oci ?? false),
         )
       ) {
         res.skipReason = 'unsupported-chart-type';
