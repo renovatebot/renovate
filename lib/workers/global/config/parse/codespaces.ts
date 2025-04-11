@@ -24,4 +24,4 @@ export async function setConfig(config: AllConfig): Promise<AllConfig> {
 
   return config;
 }
-/* v8 ignore start */
+/* v8 ignore stop */
