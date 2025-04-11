@@ -15,6 +15,7 @@ import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
+  REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../constants/error-messages';
@@ -405,12 +406,47 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      await resetToBranch(await getDefaultBranch(git));
-      const fetchStart = Date.now();
-      await gitRetry(() => git.pull());
-      await gitRetry(() => git.fetch());
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
+      await resetToBranch(config.currentBranch);
+      const fetchStart = Date.now();
+      await gitRetry(async () => {
+        const res = await git.fetch();
+
+        if (process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT) {
+          const customGit = simpleGit(localDir, {
+            ...simpleGitConfig(),
+            errors(error, result) {
+              // pass through any errors reported before this plugin runs
+              if (error) {
+                return error;
+              }
+
+              // consider any non zero exit code as error
+              if (result.exitCode !== 0) {
+                return new Error(
+                  `${REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT} '${process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT}'`,
+                );
+              }
+            },
+          }).env({
+            ...process.env,
+            LANG: 'C.UTF-8',
+            LC_ALL: 'C.UTF-8',
+          });
+
+          await customGit.raw([
+            'merge-base',
+            '--is-ancestor',
+            process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT,
+            `origin/${config.currentBranch}`,
+          ]);
+
+          delete process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT;
+        }
+
+        return res;
+      });
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
       await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
@@ -422,6 +458,15 @@ export async function syncGit(): Promise<void> {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
+
+      if (
+        err.message.includes(
+          REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT,
+        )
+      ) {
+        throw err;
+      }
+
       logger.info({ err }, 'git fetch error');
     }
   }

@@ -70,3 +70,6 @@ export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 
 // Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
+
+export const REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT =
+  'git fetch after automerge is missing commit';
