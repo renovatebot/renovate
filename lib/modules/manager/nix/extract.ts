@@ -117,30 +117,47 @@ export async function extractPackageFile(
 
     switch (flakeLocked.type) {
       case 'github':
-        // set to nixpkgs if it is a nixpkgs reference
-        if (
-          flakeOriginal.owner?.toLowerCase() === 'nixos' &&
-          flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
-        ) {
-          dep.packageName = 'https://github.com/NixOS/nixpkgs';
-          dep.currentValue = flakeOriginal.ref;
-          dep.versioning = nixpkgsVersioning;
-          break;
-        }
-
-        dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
+        });
         break;
 
       case 'gitlab':
-        dep.packageName = `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`;
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
+        });
         break;
 
       case 'git':
-        dep.packageName = flakeOriginal.url;
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: flakeOriginal.url,
+          rangeStrategy: 'update-lockfile',
+        });
         break;
 
       case 'sourcehut':
-        dep.packageName = `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
+        deps.push({
+          depName,
+          currentValue: flakeOriginal.ref,
+          currentDigest: flakeLocked.rev,
+          datasource: GitRefsDatasource.id,
+          packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
+          rangeStrategy: 'update-lockfile',
+        });
         break;
 
       case 'tarball':
@@ -159,6 +176,7 @@ export async function extractPackageFile(
             currentDigest: rev,
             datasource: GitRefsDatasource.id,
             packageName: 'https://github.com/NixOS/nixpkgs',
+            rangeStrategy: 'update-lockfile',
           });
         } else {
           deps.push({
@@ -171,6 +189,7 @@ export async function extractPackageFile(
               lockableHTTPTarballProtocol,
               'https://$<domain>/$<owner>/$<repo>',
             ),
+            rangeStrategy: 'update-lockfile',
           });
         }
         break;
