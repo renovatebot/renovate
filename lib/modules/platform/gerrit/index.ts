@@ -220,6 +220,13 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
   );
   try {
     const change = await client.submitChange(config.id);
+
+    if (change.status === 'MERGED') {
+      const mergedChange = await client.getChange(config.id);
+      process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT =
+        mergedChange.current_revision;
+    }
+
     return change.status === 'MERGED';
   } catch (err) {
     if (err.statusCode === 409) {

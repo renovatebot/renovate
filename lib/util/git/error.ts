@@ -1,4 +1,7 @@
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { FileChange } from './types';
@@ -22,6 +25,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
     'early EOF',
     'fatal: bad config', // .gitmodules problem
     'expected flush after ref listing',
+    REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT,
   ];
   for (const errorStr of externalHostFailureStrings) {
     if (err.message.includes(errorStr)) {

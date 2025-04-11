@@ -402,6 +402,9 @@ describe('modules/platform/gerrit/index', () => {
       clientMock.submitChange.mockResolvedValueOnce(
         partial<GerritChange>({ status: 'MERGED' }),
       );
+      clientMock.getChange.mockResolvedValueOnce(
+        partial<GerritChange>({ status: 'MERGED', current_revision: '123' }),
+      );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
     });
 
