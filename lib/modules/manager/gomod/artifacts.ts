@@ -231,6 +231,9 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
+        // disable go toolchain switch by default,
+        // but user can override it in self-hosted app.
+        GOTOOLCHAIN: process.env.GOTOOLCHAIN ?? 'local',
         GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
         GOPRIVATE: process.env.GOPRIVATE,
