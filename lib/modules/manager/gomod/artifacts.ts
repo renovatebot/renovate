@@ -192,7 +192,9 @@ export async function updateArtifacts({
   }
 
   const goMod = getGoConfig(newGoModContent);
-  // we pick minimal supported go version and disable the toolchain switching
+  // we pick minimal supported go version and disable the toolchain switching.
+  // so then some updated package requires "go 1.23.4",
+  //  go still preserve the directive "go 1.23"
   const goConstraints = config.constraints?.go ?? `${goMod.minimalGoVersion}`;
 
   const getFlags = ['-t'];
