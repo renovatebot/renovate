@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
@@ -15,6 +16,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { communityActions } from './community';
 import type { Steps } from './schema';
 import { WorkflowSchema } from './schema';
 
@@ -182,6 +184,14 @@ function extractSteps(
   deps: PackageDependency<Record<string, any>>[],
 ): void {
   for (const step of steps) {
+    if (step.uses) {
+      const val = Result.parse(step, communityActions).unwrapOrNull();
+      if (val) {
+        deps.push(val);
+        continue;
+      }
+    }
+
     for (const [action, versioning] of Object.entries(versionedActions)) {
       const actionName = `actions/setup-${action}`;
       if (step.uses === actionName || step.uses?.startsWith(`${actionName}@`)) {
