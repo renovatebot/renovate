@@ -751,6 +751,15 @@
       }
     ]
   },
+  "mvdan-sh": {
+    "description": "`mvdan-sh` uses unmaintained `gopherjs` so itself is very outdated",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "replacementName": "sh-syntax"
+      }
+    ]
+  },
   "now-to-vercel": {
     "description": "`now` was renamed to `vercel`.",
     "packageRules": [
