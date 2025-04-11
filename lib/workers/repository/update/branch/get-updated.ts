@@ -180,11 +180,7 @@ export async function getUpdatedPackageFiles(
       if (status === 'update-failed' || status === 'unsupported') {
         upgrade.remediationNotPossible = true;
       }
-    } else if (
-      upgrade.isLockfileUpdate ||
-      // properly force lock file updates for nix
-      manager === 'nix'
-    ) {
+    } else if (upgrade.isLockfileUpdate) {
       if (updateLockedDependency) {
         const { status, files } = await updateLockedDependency({
           ...upgrade,
