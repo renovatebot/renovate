@@ -2,7 +2,6 @@ import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import * as _presets from '../../config/presets';
-import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
@@ -106,17 +105,6 @@ describe('workers/global/index', () => {
       extends: [':pinVersions'],
     });
     expect(parseConfigs).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws if global presets could not be resolved', async () => {
-    presets.resolveConfigPresets.mockImplementationOnce(() => {
-      throw new Error('some-error');
-    });
-    await expect(
-      globalWorker.resolveGlobalExtends(['some-preset']),
-    ).rejects.toThrow(CONFIG_PRESETS_INVALID);
-    expect(presets.resolveConfigPresets).toHaveBeenCalled();
-    expect(parseConfigs).not.toHaveBeenCalled();
   });
 
   it('handles zero repos', async () => {

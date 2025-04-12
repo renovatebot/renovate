@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
+import { resolveConfigPresets } from '../../../../config/presets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { logger, setContext } from '../../../../logger';
@@ -14,6 +16,21 @@ import * as codespaces from './codespaces';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { hostRulesFromEnv } from './host-rules-from-env';
+
+export async function resolveGlobalExtends(
+  globalExtends: string[],
+  ignorePresets?: string[],
+): Promise<AllConfig> {
+  try {
+    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
+    const config = { extends: globalExtends, ignorePresets };
+    const resolvedConfig = await resolveConfigPresets(config);
+    return resolvedConfig;
+  } catch (err) {
+    logger.error({ err }, 'Error resolving config preset');
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
@@ -31,6 +48,18 @@ export async function parseConfigs(
   config = mergeChildConfig(config, cliConfig);
 
   config = await codespaces.setConfig(config);
+
+  let resolvedGlobalExtends: AllConfig | undefined;
+
+  if (is.nonEmptyArray(config?.globalExtends)) {
+    // resolve global presets immediately
+    resolvedGlobalExtends = await resolveGlobalExtends(
+      config.globalExtends,
+      config.ignorePresets,
+    );
+    config = mergeChildConfig(resolvedGlobalExtends, config);
+    delete config.globalExtends;
+  }
 
   const combinedConfig = config;
 
@@ -72,6 +101,7 @@ export async function parseConfigs(
   logger.debug({ config: fileConfig }, 'File config');
   logger.debug({ config: cliConfig }, 'CLI config');
   logger.debug({ config: envConfig }, 'Env config');
+  logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
   logger.debug({ config: combinedConfig }, 'Combined config');
 
   if (config.detectGlobalManagerConfig) {
