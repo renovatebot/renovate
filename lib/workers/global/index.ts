@@ -136,13 +136,20 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (is.nonEmptyArray(config?.globalExtends)) {
         // resolve global presets immediately
-        config = mergeChildConfig(
-          await resolveGlobalExtends(
-            config.globalExtends,
-            config.ignorePresets,
-          ),
-          config,
+        const globalExtends = await resolveGlobalExtends(
+          config.globalExtends,
+          config.ignorePresets,
         );
+        if (is.nonEmptyArray(globalExtends.repositories)) {
+          if (is.nonEmptyArray(config.repositories)) {
+            logger.info(
+              'Repositories list found in both config and globalExtends - config takes priority',
+            );
+          } else {
+            delete config.repositories;
+          }
+        }
+        config = mergeChildConfig(globalExtends, config);
       }
 
       // Set allowedHeaders in case hostRules headers are configured in file config
