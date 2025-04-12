@@ -20,15 +20,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)
- * Due to guarantee that an update of package version will result in its usage by the next restore + build operation,
- * only following constrained versions make sense
- * 1.3.4, [1.3.4], [1.3.4, ], [1.3.4, )
- * The update of the right boundary does not make sense regarding to the lowest version restore rule,
- * so we don't include it in the extracting regexp
  */
-const checkVersion = regEx(
-  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
-);
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
