@@ -752,7 +752,7 @@
     ]
   },
   "mvdan-sh": {
-    "description": "`mvdan-sh` uses unmaintained `gopherjs` so itself is very outdated",
+    "description": "`mvdan-sh` uses unmaintained `gopherjs` so it is very outdated.",
     "packageRules": [
       {
         "matchDatasources": ["npm"],
