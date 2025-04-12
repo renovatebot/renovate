@@ -83,28 +83,24 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       currentValue = currentValue
         ?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+          sharedVariableName = key;
           const val = vars.get(key);
           if (val) {
-            sharedVariableName = key;
             return val;
           }
           return match;
         });
 
       if (sharedVariableName) {
-        dep.sharedVariableName = sharedVariableName;
+        if (currentValue === `$(${sharedVariableName})`) {
+          // this means that be failed to find/replace the variable
+          dep.skipReason = 'contains-variable';
+        } else {
+          dep.sharedVariableName = sharedVariableName;
+        }
       }
 
-      currentValue = checkVersion
-        .exec(currentValue)
-        ?.groups?.currentValue?.trim();
-
-      if (currentValue) {
-        dep.currentValue = currentValue;
-      } else {
-        dep.skipReason = 'invalid-version';
-      }
-
+      dep.currentValue = currentValue;
       results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
