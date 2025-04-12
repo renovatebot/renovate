@@ -124,6 +124,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         renovateJsonPresent: true,
         warnings: [],
       };
+      delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
