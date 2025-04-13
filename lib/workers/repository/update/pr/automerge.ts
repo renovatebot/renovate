@@ -140,6 +140,9 @@ export async function checkAutoMerge(
   });
   if (res) {
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
+    if (pr.sha) {
+      process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT = pr.sha;
+    }
     if (!pruneBranchAfterAutomerge) {
       logger.info('Skipping pruning of merged branch');
       return { automerged: true, branchRemoved: false };

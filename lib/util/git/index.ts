@@ -406,48 +406,27 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      config.currentBranch =
-        config.currentBranch || (await getDefaultBranch(git));
-      await resetToBranch(config.currentBranch);
+      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
       await gitRetry(async () => {
-        const res = await git.fetch();
+        await git.fetch();
+        config.currentBranch =
+          config.currentBranch || (await getDefaultBranch(git));
+        await resetToBranch(config.currentBranch);
 
         if (process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT) {
-          const customGit = simpleGit(localDir, {
-            ...simpleGitConfig(),
-            errors(error, result) {
-              // pass through any errors reported before this plugin runs
-              if (error) {
-                return error;
-              }
-
-              // consider any non zero exit code as error
-              if (result.exitCode !== 0) {
-                return new Error(
-                  `${REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT} '${process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT}'`,
-                );
-              }
-            },
-          }).env({
-            ...process.env,
-            LANG: 'C.UTF-8',
-            LC_ALL: 'C.UTF-8',
-          });
-
-          await customGit.raw([
-            'merge-base',
-            '--is-ancestor',
+          const present = await isCommitPresent(
             process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT,
-            `origin/${config.currentBranch}`,
-          ]);
-
-          delete process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT;
+          );
+          if (present) {
+            delete process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT;
+          } else {
+            throw new Error(
+              `${REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT} '${process.env.RENOVATE_X_FETCH_EXPECTED_COMMIT}'`,
+            );
+          }
         }
-
-        return res;
       });
-      await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
       await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
@@ -460,7 +439,7 @@ export async function syncGit(): Promise<void> {
       }
 
       if (
-        err.message.includes(
+        err.message.startsWith(
           REPOSITORY_GIT_FETCH_AFTER_AUTOMERGE_IS_MISSING_COMMIT,
         )
       ) {
@@ -1442,4 +1421,15 @@ export async function listCommitTree(
     }
   }
   return result;
+}
+
+async function isCommitPresent(commit: string): Promise<boolean> {
+  try {
+    await git.raw(['cherry-pick', '-n', commit]);
+  } catch {
+    return false;
+  }
+  const diff = await git.diff(['--staged']);
+  await git.raw(['reset', '--hard', 'HEAD']);
+  return diff.trim().length === 0;
 }
