@@ -138,7 +138,7 @@ export default tseslint.config(
             {
               target: 'lib/**/*.ts',
               from: 'tools/**/*.ts',
-              message: 'Importing from tools/ in lib/ files is not allowed',
+              message: 'Importing the `tools/*` files is not allowed',
             },
           ],
         },
