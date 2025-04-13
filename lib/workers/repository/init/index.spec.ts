@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
+import * as _variables from '../../../config/variables';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
 import * as _config from './config';
@@ -14,6 +15,7 @@ vi.mock('../init/apis');
 vi.mock('../init/config');
 vi.mock('../init/merge');
 vi.mock('../../../config/secrets');
+vi.mock('../../../config/variables');
 vi.mock('../../../modules/platform', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
@@ -24,6 +26,7 @@ const config = vi.mocked(_config);
 const merge = vi.mocked(_merge);
 const onboarding = vi.mocked(_onboarding);
 const secrets = vi.mocked(_secrets);
+const variables = vi.mocked(_variables);
 
 describe('workers/repository/init/index', () => {
   beforeEach(() => {
@@ -43,6 +46,9 @@ describe('workers/repository/init/index', () => {
       secrets.applySecretsToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
+      variables.applyVariablesToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>(),
+      );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
     });
@@ -56,6 +62,9 @@ describe('workers/repository/init/index', () => {
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>(),
+      );
+      variables.applyVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       await initRepo({});

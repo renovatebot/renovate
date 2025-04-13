@@ -13,6 +13,7 @@ import type {
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
+import { validateConfigVariables } from '../../config/variables';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
@@ -165,8 +166,9 @@ export async function start(): Promise<number> {
 
       checkEnv();
 
-      // validate secrets. Will throw and abort if invalid
+      // validate secrets and variables. Will throw and abort if invalid
       validateConfigSecrets(config);
+      validateConfigVariables(config);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
