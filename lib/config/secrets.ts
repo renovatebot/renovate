@@ -4,19 +4,18 @@ import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
 } from '../util/interpolators';
-import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import type { AllConfig, RenovateConfig } from './types';
 
 const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
-
-const secretNameRegex = regEx(`^${secretNamePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
+const secretTemplatePattern = `{{ secrets\\.(${secretNamePattern}) }}`;
+// const secretNameRegex = regEx(`^${secretNamePattern}$`);
+// const secretTemplateRegex = regEx(
 
 const options: InterpolatorOptions = {
   name: 'secrets',
-  nameRegex: secretNameRegex,
-  templateRegex: secretTemplateRegex,
+  nameRegexPattern: secretNamePattern,
+  templateRegexPattern: secretTemplatePattern,
 };
 
 export function validateConfigSecrets(config: AllConfig): void {
