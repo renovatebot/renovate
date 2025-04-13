@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { capitalize } from '../../tools/docs/utils';
 import type { RenovateConfig } from '../config/types';
 import {
   CONFIG_SECRETS_INVALID,
@@ -7,6 +6,7 @@ import {
   CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages';
 import { logger } from '../logger';
+import { capitalize } from './string';
 
 export interface InterpolatorOptions {
   name: 'secrets' | 'variables';
