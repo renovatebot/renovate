@@ -4,16 +4,19 @@ import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
 } from '../util/interpolators';
+import { regEx } from '../util/regex';
 import type { AllConfig, RenovateConfig } from './types';
 
 const variableNamePattern = '[A-Za-z][A-Za-z0-9_]*';
-// const variableNameRegex = regEx(`^${variableNamePattern}$`);
-const variableTemplatePattern = `{{ variables\\.(${variableNamePattern}) }}`;
+const variableNameRegex = regEx(`^${variableNamePattern}$`);
+const variableTemplateRegex = regEx(
+  `{{ variables\\.(${variableNamePattern}) }}`,
+);
 
 const options: InterpolatorOptions = {
   name: 'variables',
-  nameRegexPattern: variableNamePattern,
-  templateRegexPattern: variableTemplatePattern,
+  nameRegex: variableNameRegex,
+  templateRegex: variableTemplateRegex,
 };
 
 export function validateConfigVariables(config: AllConfig): void {

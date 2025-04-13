@@ -7,12 +7,11 @@ import {
   CONFIG_VARIABLES_INVALID,
 } from '../constants/error-messages';
 import { logger } from '../logger';
-import { regEx } from './regex';
 
 export interface InterpolatorOptions {
   name: 'secrets' | 'variables';
-  templateRegexPattern: string;
-  nameRegexPattern: string;
+  templateRegex: RegExp;
+  nameRegex: RegExp;
 }
 
 export function validateInterpolatedValues(
@@ -23,8 +22,7 @@ export function validateInterpolatedValues(
     return;
   }
 
-  const { name, nameRegexPattern } = options;
-  const nameRegex = regEx(`^${nameRegexPattern}`);
+  const { name, nameRegex } = options;
 
   const validationErrors: string[] = [];
   if (is.plainObject(input)) {
@@ -57,8 +55,7 @@ function replaceInterpolatedValuesInString(
   input: Record<string, string>,
   options: InterpolatorOptions,
 ): string {
-  const { name, templateRegexPattern } = options;
-  const templateRegex = regEx(templateRegexPattern);
+  const { name, templateRegex } = options;
   // do nothing if no interpolator template found
   if (!templateRegex.test(value)) {
     return value;
