@@ -1490,6 +1490,7 @@ But if you're embedding changelogs in commit information, you may use `fetchChan
 Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
+- Bitbucket Server / Data Center
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
@@ -2352,6 +2353,7 @@ Supported lock files:
 - `Cargo.lock`
 - `Chart.lock`
 - `composer.lock`
+- `conan.lock`
 - `flake.lock`
 - `Gemfile.lock`
 - `gradle.lockfile`
@@ -2738,7 +2740,7 @@ To read the changelogs you must use the link.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can fetch changelogs from Bitbucket, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
@@ -3368,6 +3370,27 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
       "matchPackageNames": ["jade"],
       "replacementName": "pug",
       "replacementVersion": "2.0.0"
+    }
+  ]
+}
+```
+
+### replacementVersionTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementVersion` will take precedence if used within the same package rule.
+
+Use the `replacementVersionTemplate` config option to control the replacement version.
+
+For example, the following package rule can be used to replace version with major-only version (17.0.1 -> 17):
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "replacementVersionTemplate": "{{ lookup (split currentValue '.') 0 }}"
     }
   ]
 }
