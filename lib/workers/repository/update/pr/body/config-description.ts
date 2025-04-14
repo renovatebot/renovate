@@ -1,7 +1,7 @@
 import { CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
-import { capitalize } from '../../../../../../tools/docs/utils';
 import { emojify } from '../../../../../util/emoji';
+import { capitalize } from '../../../../../util/string';
 import type { BranchConfig } from '../../../../types';
 
 export function getPrConfigDescription(config: BranchConfig): string {
