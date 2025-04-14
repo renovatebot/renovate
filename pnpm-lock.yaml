@@ -417,8 +417,8 @@ importers:
         specifier: 11.0.4
         version: 11.0.4
       '@types/git-url-parse':
-        specifier: 9.0.3
-        version: 9.0.3
+        specifier: 16.0.0
+        version: 16.0.0
       '@types/github-url-from-git':
         specifier: 1.5.3
         version: 1.5.3
@@ -2126,8 +2126,12 @@ packages:
   '@types/fs-extra@11.0.4':
     resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
 
-  '@types/git-url-parse@9.0.3':
-    resolution: {integrity: sha512-Wrb8zeghhpKbYuqAOg203g+9YSNlrZWNZYvwxJuDF4dTmerijqpnGbI79yCuPtHSXHPEwv1pAFUB4zsSqn82Og==}
+  '@types/git-up@8.1.0':
+    resolution: {integrity: sha512-dKq6FQmhuWVxjvKkhGNgIx1ZthVWClz6RhgONzQXHuHFEVmDbTcy0vAIvdAEKRpBvGOPiHSxoWFKryTTLvgFvQ==}
+    deprecated: This is a stub types definition. git-up provides its own type definitions, so you do not need this installed.
+
+  '@types/git-url-parse@16.0.0':
+    resolution: {integrity: sha512-l1xqqjwYTk0Wz8AwEezpUvns0LhTBV7RV/DOeDfIf1rbrob8Lne4ooYa2K30wJw95s1MJGXAXzx021922rUStg==}
 
   '@types/github-url-from-git@1.5.3':
     resolution: {integrity: sha512-0vnjtdEpqLTRBlgkzXsRaAQ0T8Nx48fW7qWl/Y5a4MTXEL2mXFV8rNPiFPCYrJFPOeyUJRzNzcs91MgJd+fFSA==}
@@ -8831,7 +8835,13 @@ snapshots:
       '@types/jsonfile': 6.1.4
       '@types/node': 22.14.0
 
-  '@types/git-url-parse@9.0.3': {}
+  '@types/git-up@8.1.0':
+    dependencies:
+      git-up: 8.1.0
+
+  '@types/git-url-parse@16.0.0':
+    dependencies:
+      '@types/git-up': 8.1.0
 
   '@types/github-url-from-git@1.5.3': {}
 
