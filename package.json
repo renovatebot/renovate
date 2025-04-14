@@ -285,7 +285,7 @@
     "@types/diff": "7.0.2",
     "@types/eslint-config-prettier": "6.11.3",
     "@types/fs-extra": "11.0.4",
-    "@types/git-url-parse": "9.0.3",
+    "@types/git-url-parse": "16.0.0",
     "@types/github-url-from-git": "1.5.3",
     "@types/global-agent": "3.0.0",
     "@types/ini": "4.1.1",
