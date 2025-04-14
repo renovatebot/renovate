@@ -349,11 +349,13 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
-          labels: { 'Code-Review': 2 },
+          labels: { 'Renovate-Merge-Confidence': 1 },
           notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
+      await expect(
+        client.setLabel(123456, 'Renovate-Merge-Confidence', +1),
+      ).toResolve();
     });
   });
 
