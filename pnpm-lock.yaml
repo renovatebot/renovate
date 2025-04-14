@@ -149,8 +149,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       cronstrue:
-        specifier: 2.57.0
-        version: 2.57.0
+        specifier: 2.58.0
+        version: 2.58.0
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
@@ -561,8 +561,8 @@ importers:
         specifier: 4.17.0
         version: 4.17.0
       nock:
-        specifier: 14.0.2
-        version: 14.0.2
+        specifier: 14.0.3
+        version: 14.0.3
       npm-run-all2:
         specifier: 7.0.2
         version: 7.0.2
@@ -2964,8 +2964,8 @@ packages:
     resolution: {integrity: sha512-onMB0OkDjkXunhdW9htFjEhqrD54+M94i6ackoUkjHKbRnXdyEyKRelp4nJ1kAz32+s27jP1FsebpJCVl0BsvA==}
     engines: {node: '>=18.0'}
 
-  cronstrue@2.57.0:
-    resolution: {integrity: sha512-gQOfxJa1RA9uDT4hx37NshhX4dW9t9zTCtIYu15LUziH+mkpuLXYcSEyM8ZewMJ2p8UVuHGjI3n4hGpu3HtCbg==}
+  cronstrue@2.58.0:
+    resolution: {integrity: sha512-5P3esL5URj/u1h7N1zYl33V9XHNh15DQVGQITdIq7kAY78rP9tMYxXgi8kCXGoFqbyXFMMQRvzthHTYxUtp9Fw==}
     hasBin: true
 
   cross-spawn@7.0.6:
@@ -4816,8 +4816,8 @@ packages:
   nise@6.1.1:
     resolution: {integrity: sha512-aMSAzLVY7LyeM60gvBS423nBmIPP+Wy7St7hsb+8/fc1HmeoHJfLO8CKse4u3BtOZvQLJghYPI2i/1WZrEj5/g==}
 
-  nock@14.0.2:
-    resolution: {integrity: sha512-jDUBpCNY7KLyOF2FTiT4mLRxV2kpjo4YrcGtv3IMCIwqFKxOQFrmeXefvuEiWvS3ApPWQHAkakkkVpoOrDNCVg==}
+  nock@14.0.3:
+    resolution: {integrity: sha512-sJ9RNmCuYBqXDmGZZHgZ1D1441MqFOU4T5aeLGVGEB4OWI/2LM0mZlkfBQzQKdOfJypL+2nPPBugXKjixBn4kQ==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.74.0:
@@ -9715,7 +9715,7 @@ snapshots:
 
   croner@9.0.0: {}
 
-  cronstrue@2.57.0: {}
+  cronstrue@2.58.0: {}
 
   cross-spawn@7.0.6:
     dependencies:
@@ -11879,7 +11879,7 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 8.2.0
 
-  nock@14.0.2:
+  nock@14.0.3:
     dependencies:
       '@mswjs/interceptors': 0.38.1
       json-stringify-safe: 5.0.1
