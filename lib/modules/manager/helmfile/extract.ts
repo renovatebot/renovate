@@ -135,9 +135,9 @@ export async function extractPackageFile(
       if (
         !isValidChartName(
           isOCIRegistry(dep.chart)
-            ? res.depName?.slice(res.depName.lastIndexOf('/') + 1)
-            : res.depName,
-          isOCIRegistry(dep.chart) || (registryData[repoName!]?.oci ?? false),
+            ? depName.slice(depName.lastIndexOf('/') + 1)
+            : depName,
+          !!packageName,
         )
       ) {
         res.skipReason = 'unsupported-chart-type';
