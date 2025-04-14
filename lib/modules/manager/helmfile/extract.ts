@@ -69,6 +69,7 @@ export async function extractPackageFile(
 
     for (const dep of coerceArray(doc.releases)) {
       let depName = dep.chart;
+      let packageName: string | null = null;
       let repoName: string | null = null;
 
       // If it starts with ./ ../ or / then it's a local path
@@ -87,13 +88,22 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        depName = removeOCIPrefix(dep.chart);
-      } else if (dep.chart.includes('/')) {
-        const v = dep.chart.split('/');
-        repoName = v.shift()!;
-        depName = v.join('/');
+        packageName = depName = removeOCIPrefix(dep.chart);
       } else {
-        repoName = dep.chart;
+        if (dep.chart.includes('/')) {
+          const v = dep.chart.split('/');
+          repoName = v.shift()!;
+          depName = v.join('/');
+        } else {
+          repoName = dep.chart;
+        }
+        if (registryData[repoName]?.oci) {
+          const alias = registryData[repoName]?.url;
+          if (alias) {
+            packageName = `${alias}/${depName}`;
+          }
+          repoName = null;
+        }
       }
 
       if (!is.string(dep.version)) {
@@ -107,25 +117,17 @@ export async function extractPackageFile(
       const res: PackageDependency = {
         depName,
         currentValue: dep.version,
-        registryUrls: repoName
-          ? [registryData[repoName]?.url]
-              .concat([config.registryAliases?.[repoName]] as string[])
-              .filter(is.string)
-          : [],
       };
       if (kustomizationsKeysUsed(dep)) {
         needKustomize = true;
       }
-
-      if (isOCIRegistry(dep.chart)) {
+      if (packageName) {
         res.datasource = DockerDatasource.id;
-        res.packageName = depName;
-      } else if (registryData[repoName!]?.oci) {
-        res.datasource = DockerDatasource.id;
-        const alias = registryData[repoName!]?.url;
-        if (alias) {
-          res.packageName = `${alias}/${depName}`;
-        }
+        res.packageName = packageName;
+      } else if (repoName) {
+        res.registryUrls = [registryData[repoName]?.url]
+          .concat([config.registryAliases?.[repoName]] as string[])
+          .filter(is.string);
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
