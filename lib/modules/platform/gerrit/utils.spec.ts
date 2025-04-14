@@ -84,6 +84,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
+        created: '2025-04-14 16:33:37.000000000',
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
           REMOVED: [],
@@ -120,6 +121,7 @@ describe('modules/platform/gerrit/utils', () => {
         number: 123456,
         state: 'open',
         title: 'Fix for',
+        createdAt: '2025-04-14T16:33:37.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: ['username'],
