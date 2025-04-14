@@ -74,10 +74,11 @@ class GerritClient {
     /* v8 ignore stop */
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
+    const queryString = getQueryString({
+      o: this.requestDetails,
+    });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
-      `a/changes/?q=` +
-        filters.join('+') +
-        this.requestDetails.map((det) => `&o=${det}`).join(''),
+      `a/changes/?q=${filters.join('+')}&${queryString}`,
       opts,
     );
     logger.trace(
