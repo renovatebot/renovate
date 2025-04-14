@@ -3375,6 +3375,27 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 }
 ```
 
+### replacementVersionTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementVersion` will take precedence if used within the same package rule.
+
+Use the `replacementVersionTemplate` config option to control the replacement version.
+
+For example, the following package rule can be used to replace version with major-only version (17.0.1 -> 17):
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "replacementVersionTemplate": "{{ lookup (split currentValue '.') 0 }}"
+    }
+  ]
+}
+```
+
 ### sourceDirectory
 
 Use this field to set the directory in which the package is present at the source of the package.
