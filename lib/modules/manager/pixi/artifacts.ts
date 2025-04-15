@@ -13,7 +13,6 @@ import {
 import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { getUserPixiConfig } from './extract';
-import { pickConfig } from './lockfile';
 import { LockfileYaml } from './schema';
 
 export const commandLock = 'pixi lock --no-progress --color=never --quiet';
@@ -45,9 +44,7 @@ export async function updateArtifacts({
   const pixiConfig = getUserPixiConfig(newPackageFileContent, packageFileName);
 
   const constraint =
-    config.constraints?.pixi ??
-    pixiConfig?.project['requires-pixi'] ??
-    getPixiConstraint(existingLockFileContent);
+    config.constraints?.pixi ?? pixiConfig?.project['requires-pixi'];
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -98,13 +95,4 @@ export async function updateArtifacts({
       },
     ];
   }
-}
-
-function getPixiConstraint(
-  existingLockFileContent: string,
-): string | undefined {
-  const { val } = Result.parse(existingLockFileContent, LockfileYaml).unwrap();
-  const cfg = pickConfig(val?.version);
-
-  return cfg?.range ?? undefined;
 }
