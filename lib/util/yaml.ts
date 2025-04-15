@@ -77,7 +77,7 @@ export function parseYaml<ResT = unknown>(
     if (errors?.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
-        logger.debug(`Failed to parse YAML file: ${error.message}`);
+        logger.debug(`Failed to parse YAML file`);
         continue;
       }
       throw error;
