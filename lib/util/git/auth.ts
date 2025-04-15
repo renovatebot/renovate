@@ -129,7 +129,7 @@ export function getAuthenticationRules(
     if (!sshPort || is.emptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
-      sshPort = 7999;
+      sshPort = '7999';
     }
   }
 

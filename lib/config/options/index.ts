@@ -1466,6 +1466,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementVersionTemplate',
+    description:
+      'Template field for the version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementApproach',
     description:
       'Select whether to perform a direct replacement or alias replacement.',
