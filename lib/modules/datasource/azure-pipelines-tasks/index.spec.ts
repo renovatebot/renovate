@@ -99,8 +99,8 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     ).toEqual({
       releases: [
         {
-          changelogUrl:
-            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
           version: '5.248.3',
         },
       ],
@@ -206,8 +206,8 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
           version: '1.2.3',
         },
         {
-          changelogUrl:
-            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          changelogContent:
+            'Script task consistency. Added support for macOS and Linux.',
           version: '2.247.1',
         },
       ],
