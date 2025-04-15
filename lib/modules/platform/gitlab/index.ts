@@ -787,11 +787,12 @@ export async function createPr({
           approvalRuleReviewerIds.add(approver.id);
         }
         reviewerIds = Array.from(approvalRuleReviewerIds);
+
+        logger.debug(
+          { reviewerIds },
+          'Extracted reviewer IDs from approval rules',
+        );
       }
-      logger.debug(
-        { reviewerIds },
-        'Extracted reviewer IDs from approval rules',
-      );
     } catch (err) {
       logger.warn({ err }, 'Failed to fetch GitLab approval rules');
     }
