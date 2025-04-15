@@ -26,6 +26,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     toolConstraints: [
+      // we are required to install nix because devbox spawns nix commands internally
       {
         toolName: 'nix',
         constraint: constraints?.nix,
