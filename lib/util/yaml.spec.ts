@@ -207,12 +207,12 @@ describe('util/yaml', () => {
         {
           myObject: {
             aString: null,
-            anotherString: 'value'
+            anotherString: 'value',
           },
         },
         {
           foo: null,
-          bar: 'value:v2'
+          bar: 'value:v2',
         },
       ]);
     });
@@ -344,7 +344,7 @@ describe('util/yaml', () => {
           anotherString: 'value',
           myNestedObject: {
             aNestedString: null,
-            anotherNestedString: 'value:v2'
+            anotherNestedString: 'value:v2',
           },
         },
       });
