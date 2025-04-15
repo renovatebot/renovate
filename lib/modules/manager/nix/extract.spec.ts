@@ -406,6 +406,36 @@ describe('modules/manager/nix/extract', () => {
 
   const flake10Lock = `{
     "nodes": {
+      "nixpkgs": {
+        "locked": {
+          "lastModified": 1687274257,
+          "narHash": "sha256-TutzPriQcZ8FghDhEolnHcYU2oHIG5XWF+/SUBNnAOE=",
+          "path": "/nix/store/22qgs3skscd9bmrxv9xv4q5d4wwm5ppx-source",
+          "rev": "2c9ecd1f0400076a4d6b2193ad468ff0a7e7fdc5",
+          "type": "path"
+        },
+        "original": {
+          "id": "nixpkgs",
+          "type": "indirect"
+        }
+      },
+      "root": {
+        "inputs": {
+          "nixpkgs": "nixpkgs"
+        }
+      }
+    },
+    "root": "root",
+    "version": 7
+  }`;
+
+  it('includes nixpkgs but using indirect type and path locked type that cannot be updated', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(flake10Lock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
+  const flake11Lock = `{
+    "nodes": {
       "flake-utils": {
         "inputs": {
           "systems": "systems"
@@ -487,7 +517,7 @@ describe('modules/manager/nix/extract', () => {
   }`;
 
   it('includes flake from GitHub Enterprise', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake10Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake11Lock);
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
@@ -501,7 +531,7 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
-  const flake11Lock = `{
+  const flake12Lock = `{
     "nodes": {
       "data-mesher": {
         "inputs": {
@@ -590,7 +620,7 @@ describe('modules/manager/nix/extract', () => {
   }`;
 
   it('includes flake with tarball type', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake11Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake12Lock);
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
@@ -603,7 +633,7 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
-  const flake12Lock = `{
+  const flake13Lock = `{
     "nodes": {
       "subgroup-project": {
         "locked": {
@@ -631,7 +661,7 @@ describe('modules/manager/nix/extract', () => {
   }`;
 
   it('uri decode gitlab subgroup', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(flake12Lock);
+    fs.readLocalFile.mockResolvedValueOnce(flake13Lock);
     expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
       deps: [
         {
