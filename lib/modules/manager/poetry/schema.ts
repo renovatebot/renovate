@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
+import { getEnv } from '../../../util/env';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import {
@@ -225,7 +226,7 @@ export const PoetrySources = LooseArray(PoetrySource, {
   },
 })
   .transform((sources) => {
-    const pypiUrl = process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+    const pypiUrl = getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
     const result: PoetrySource[] = [];
 
     let overridesPyPi = false;

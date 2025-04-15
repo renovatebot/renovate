@@ -9,6 +9,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
+import { getEnv } from '../env';
 import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
@@ -350,19 +351,17 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const pageLimit = httpOptions.pageLimit ?? 10;
       const linkHeader = parseLinkHeader(result?.headers?.link);
       const next = linkHeader?.next;
+      const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
         let lastPage = parseInt(linkHeader.last.page, 10);
-        if (
-          !process.env.RENOVATE_PAGINATE_ALL &&
-          httpOptions.paginate !== 'all'
-        ) {
+        if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
         const parsedUrl = new URL(next.url, baseUrl);
         const rebasePagination =
           !!baseUrl &&
-          !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+          !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
           // Preserve github.com URLs for use cases like release notes
           parsedUrl.origin !== 'https://api.github.com';
         const firstPageUrl = rebasePagination

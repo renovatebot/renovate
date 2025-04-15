@@ -27,6 +27,7 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { pkg } from '../expose.cjs';
+import { getEnv } from '../util/env';
 import {
   isTraceDebuggingEnabled,
   isTraceSendingEnabled,
@@ -55,15 +56,15 @@ export function init(): void {
     spanProcessors.push(new BatchSpanProcessor(exporter));
   }
 
+  const env = getEnv();
   const traceProvider = new NodeTracerProvider({
     resource: resourceFromAttributes({
       // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value
-      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'renovate',
+      [ATTR_SERVICE_NAME]: env.OTEL_SERVICE_NAME ?? 'renovate',
       // https://github.com/open-telemetry/opentelemetry-js/tree/main/semantic-conventions#unstable-semconv
       // https://github.com/open-telemetry/opentelemetry-js/blob/e9d3c71918635d490b6a9ac9f8259265b38394d0/semantic-conventions/src/experimental_attributes.ts#L7688
-      ['service.namespace']:
-        process.env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
-      [ATTR_SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION ?? pkg.version,
+      ['service.namespace']: env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
+      [ATTR_SERVICE_VERSION]: env.OTEL_SERVICE_VERSION ?? pkg.version,
     }),
     spanProcessors,
   });
