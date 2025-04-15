@@ -2441,6 +2441,7 @@ const options: RenovateOptions[] = [
       'poetry',
       'pixi',
     ],
+    freeChoice: true,
     additionalProperties: {
       type: 'string',
     },
