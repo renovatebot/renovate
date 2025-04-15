@@ -775,16 +775,18 @@ export async function createPr({
           rule.name === platformPrOptions.gitLabReviewersFromApprovalRule,
       );
 
-      if (matchingApprovalRule?.eligible_approvers?.length) {
+      if (!matchingApprovalRule) {
+        logger.debug('No matching approval rule found');
+      } else if (!matchingApprovalRule.eligible_approvers?.length) {
+        logger.debug(
+          'Matching approval rule found but has no eligible approvers',
+        );
+      } else {
         logger.debug('Found matching approval rule');
         for (const approver of matchingApprovalRule.eligible_approvers) {
           approvalRuleReviewerIds.add(approver.id);
         }
         reviewerIds = Array.from(approvalRuleReviewerIds);
-      } else {
-        logger.debug(
-          'No matching approval rule found or rule has no eligible approvers',
-        );
       }
       logger.debug(
         { reviewerIds },
