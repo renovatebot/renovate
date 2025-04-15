@@ -203,8 +203,8 @@ importers:
         specifier: 11.3.0
         version: 11.3.0
       git-url-parse:
-        specifier: 16.0.1
-        version: 16.0.1
+        specifier: 16.1.0
+        version: 16.1.0
       github-url-from-git:
         specifier: 1.5.0
         version: 1.5.0
@@ -429,8 +429,8 @@ importers:
         specifier: 11.0.4
         version: 11.0.4
       '@types/git-url-parse':
-        specifier: 16.0.0
-        version: 16.0.0
+        specifier: 16.0.2
+        version: 16.0.2
       '@types/github-url-from-git':
         specifier: 1.5.3
         version: 1.5.3
@@ -2161,12 +2161,9 @@ packages:
   '@types/fs-extra@11.0.4':
     resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
 
-  '@types/git-up@8.1.0':
-    resolution: {integrity: sha512-dKq6FQmhuWVxjvKkhGNgIx1ZthVWClz6RhgONzQXHuHFEVmDbTcy0vAIvdAEKRpBvGOPiHSxoWFKryTTLvgFvQ==}
-    deprecated: This is a stub types definition. git-up provides its own type definitions, so you do not need this installed.
-
-  '@types/git-url-parse@16.0.0':
-    resolution: {integrity: sha512-l1xqqjwYTk0Wz8AwEezpUvns0LhTBV7RV/DOeDfIf1rbrob8Lne4ooYa2K30wJw95s1MJGXAXzx021922rUStg==}
+  '@types/git-url-parse@16.0.2':
+    resolution: {integrity: sha512-STa+QaJtPbqwtioDIncRyft1xXrsTIYW0KkS6RS6l++NiDaQxqgsIkNp2Jf9nJ1KnCGPOvWaR1iO+B7LkM8+ew==}
+    deprecated: This is a stub types definition. git-url-parse provides its own type definitions, so you do not need this installed.
 
   '@types/github-url-from-git@1.5.3':
     resolution: {integrity: sha512-0vnjtdEpqLTRBlgkzXsRaAQ0T8Nx48fW7qWl/Y5a4MTXEL2mXFV8rNPiFPCYrJFPOeyUJRzNzcs91MgJd+fFSA==}
@@ -3695,8 +3692,8 @@ packages:
   git-up@8.1.0:
     resolution: {integrity: sha512-cT2f5ERrhFDMPS5wLHURcjRiacC8HonX0zIAWBTwHv1fS6HheP902l6pefOX/H9lNmvCHDwomw0VeN7nhg5bxg==}
 
-  git-url-parse@16.0.1:
-    resolution: {integrity: sha512-mcD36GrhAzX5JVOsIO52qNpgRyFzYWRbU1VSRFCvJt1IJvqfvH427wWw/CFqkWvjVPtdG5VTx4MKUeC5GeFPDQ==}
+  git-url-parse@16.1.0:
+    resolution: {integrity: sha512-cPLz4HuK86wClEW7iDdeAKcCVlWXmrLpb2L+G9goW0Z1dtpNS6BXXSOckUTlJT/LDQViE1QZKstNORzHsLnobw==}
 
   github-from-package@0.0.0:
     resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
@@ -8899,13 +8896,9 @@ snapshots:
       '@types/jsonfile': 6.1.4
       '@types/node': 22.14.0
 
-  '@types/git-up@8.1.0':
+  '@types/git-url-parse@16.0.2':
     dependencies:
-      git-up: 8.1.0
-
-  '@types/git-url-parse@16.0.0':
-    dependencies:
-      '@types/git-up': 8.1.0
+      git-url-parse: 16.1.0
 
   '@types/github-url-from-git@1.5.3': {}
 
@@ -10616,7 +10609,7 @@ snapshots:
       is-ssh: 1.4.1
       parse-url: 9.2.0
 
-  git-url-parse@16.0.1:
+  git-url-parse@16.1.0:
     dependencies:
       git-up: 8.1.0
 
