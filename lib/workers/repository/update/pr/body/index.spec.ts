@@ -71,6 +71,8 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('massages upgrades', () => {
+      template.compile.mockImplementation((x) => x);
+
       const upgrade = {
         manager: 'some-manager',
         branchName: 'some-branch',
