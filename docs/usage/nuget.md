@@ -70,7 +70,7 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
     `registryUrls` set in other files are **not** passed to the NuGet commands.
 
 <!-- prettier-ignore -->
-!!! warning
+!!! note
     Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the catalog entry.
 
 ### Protocol versions
