@@ -27,6 +27,10 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     toolConstraints: [
       {
+        toolName: 'nix',
+        constraint: constraints?.nix,
+      },
+      {
         toolName: 'devbox',
         constraint: constraints?.devbox,
       },
