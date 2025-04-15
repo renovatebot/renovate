@@ -632,10 +632,10 @@ describe('modules/manager/nix/extract', () => {
             "rev": "24b560624f154c9e962d146217b2a964faaf2055",
             "type": "gitlab"
           },
-          "root": {
-            "inputs": {
-              "subgroup-project": "subgroup-project"
-            }
+          "original": {
+            "owner": "group%2Fsub-group",
+            "repo": "subgroup-project",
+            "type": "gitlab"
           }
         },
         "root": {
