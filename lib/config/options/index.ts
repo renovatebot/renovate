@@ -2439,7 +2439,11 @@ const options: RenovateOptions[] = [
       'pep621',
       'pipenv',
       'poetry',
+      'pixi',
     ],
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'hostRules',
