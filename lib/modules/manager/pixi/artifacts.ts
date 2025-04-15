@@ -10,10 +10,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { getUserPixiConfig } from './extract';
-import { LockfileYaml } from './schema';
 
 export const commandLock = 'pixi lock --no-progress --color=never --quiet';
 
