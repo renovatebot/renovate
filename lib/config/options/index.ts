@@ -2439,7 +2439,6 @@ const options: RenovateOptions[] = [
       'pep621',
       'pipenv',
       'poetry',
-      'pixi',
     ],
     freeChoice: true,
     additionalProperties: {
