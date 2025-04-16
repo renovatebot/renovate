@@ -113,8 +113,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@yarnpkg/core':
-        specifier: 4.3.1
-        version: 4.3.1(typanion@3.14.0)
+        specifier: 4.4.0
+        version: 4.4.0(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 3.0.3
         version: 3.0.3
@@ -2466,16 +2466,16 @@ packages:
   '@vitest/utils@3.1.1':
     resolution: {integrity: sha512-1XIjflyaU2k3HMArJ50bwSh3wKWPD6Q47wz/NUSmRV0zNywPc4w79ARjg/i/aNINHwA+mIALhUVqD9/aUvZNgg==}
 
-  '@yarnpkg/core@4.3.1':
-    resolution: {integrity: sha512-1C/Tw1SmUbC+82gL7BvOl0mpaacfu3MEwm6KWU4BaZWVFfz2OVFcAs/eKyljrv4IxJZ/fNyEU30sBLBpgkBDGA==}
+  '@yarnpkg/core@4.4.0':
+    resolution: {integrity: sha512-ZT+dPniRDJEyH+z0oOXS+nNkrssJ2jsmqoKDP5y8wQpbHlG+bxqEq8Ri1uDQGLh+43LkEh1Brih9QMs9p3f5/A==}
     engines: {node: '>=18.12.0'}
 
   '@yarnpkg/fslib@3.1.2':
     resolution: {integrity: sha512-FpB2F1Lrm43F94klS9UN0ceOpe/PHZSpJB7bIkvReF/ba890bSdu1NokSKr998yaFee7yqeD9Wkid5ye7azF3A==}
     engines: {node: '>=18.12.0'}
 
-  '@yarnpkg/libzip@3.1.1':
-    resolution: {integrity: sha512-KNgpRq0w/az6nOLQDbRhX24m18Jk7YNieN8gw1FP9hSmW7141U8dhY7e8nfwvnu7P0XHvwj2MpAPVGfeaKTE+A==}
+  '@yarnpkg/libzip@3.2.1':
+    resolution: {integrity: sha512-xPdiZxwCXGXxc1GDEyPjRQ5KqkgoOmieDNszLozbqghaeXIaokRbMKLUNx0Mr0LAnzII64kN3gl5qVyzfMxnIg==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
       '@yarnpkg/fslib': ^3.1.2
@@ -9192,13 +9192,13 @@ snapshots:
       loupe: 3.1.3
       tinyrainbow: 2.0.0
 
-  '@yarnpkg/core@4.3.1(typanion@3.14.0)':
+  '@yarnpkg/core@4.4.0(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.7.0
       '@types/treeify': 1.0.3
       '@yarnpkg/fslib': 3.1.2
-      '@yarnpkg/libzip': 3.1.1(@yarnpkg/fslib@3.1.2)
+      '@yarnpkg/libzip': 3.2.1(@yarnpkg/fslib@3.1.2)
       '@yarnpkg/parsers': 3.0.3
       '@yarnpkg/shell': 4.1.2(typanion@3.14.0)
       camelcase: 5.3.1
@@ -9227,7 +9227,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@yarnpkg/libzip@3.1.1(@yarnpkg/fslib@3.1.2)':
+  '@yarnpkg/libzip@3.2.1(@yarnpkg/fslib@3.1.2)':
     dependencies:
       '@types/emscripten': 1.40.1
       '@yarnpkg/fslib': 3.1.2
