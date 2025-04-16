@@ -71,7 +71,7 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 
 <!-- prettier-ignore -->
 !!! note
-    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the catalog entry.
+    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 
