@@ -2738,6 +2738,19 @@ To read the changelogs you must use the link.
 }
 ```
 
+`changelogUrl` supports template compilation.
+
+```json title="Setting the changelog URL for the dummy package using a template"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "changelogUrl": "https://github.com/org/monorepo/blob/{{{sourceDirectory}}}/my-custom-changelog.txt"
+    }
+  ]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
