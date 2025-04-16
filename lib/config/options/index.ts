@@ -2450,6 +2450,10 @@ const options: RenovateOptions[] = [
       'pipenv',
       'poetry',
     ],
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'hostRules',
