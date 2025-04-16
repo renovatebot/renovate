@@ -2958,6 +2958,83 @@ describe('modules/platform/gitlab/index', () => {
         title: 'some title',
       });
     });
+    it('should not add reviewers if an existing approval rule does not exist when gitlabReviewersFromApprovalRule is set', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/approval_rules')
+        .reply(200, [
+          {
+            name: 'testRule',
+            eligible_approvers: [
+              { id: 123, name: 'User 1' },
+              { id: 456, name: 'User 2' },
+            ],
+          },
+        ]);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            gitLabReviewersFromApprovalRule: 'nonExistingRule',
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+    it('should not add reviewers if an existing approval rule exists but has no eligible_approvers when gitlabReviewersFromApprovalRule is set', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/approval_rules')
+        .reply(200, [
+          {
+            name: 'testRule',
+            eligible_approvers: [],
+          },
+        ]);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            gitLabReviewersFromApprovalRule: 'testRule',
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
   });
 
   describe('getPr(prNo)', () => {
