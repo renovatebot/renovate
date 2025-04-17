@@ -317,7 +317,7 @@ describe('modules/manager/maven/extract', () => {
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentValue: '6.1.1',
           datasource: 'buildpacks-registry',
-          depName: 'paketo-buildpacks/nodejs',
+          packageName: 'paketo-buildpacks/nodejs',
           fileReplacePosition: 1430,
           registryUrls: [],
         },

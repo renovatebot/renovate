@@ -131,7 +131,7 @@ export function extractPackageFile(
           const dep: PackageDependency = {
             datasource: BuildpacksRegistryDatasource.id,
             currentValue: version,
-            depName: group.id,
+            packageName: group.id,
           };
           deps.push(dep);
         }
@@ -149,7 +149,7 @@ export function getDep(currentFrom: string): PackageDependency | null {
   if (currentFrom.includes('@')) {
     const dep: PackageDependency = {
       datasource: BuildpacksRegistryDatasource.id,
-      depName: currentFrom.split('@')[0],
+      packageName: currentFrom.split('@')[0],
       autoReplaceStringTemplate:
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
     };

@@ -102,14 +102,14 @@ id = "not/valid"`,
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           datasource: 'buildpacks-registry',
           currentValue: '1.0.0',
-          depName: 'example/foo',
+          packageName: 'example/foo',
         },
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           datasource: 'buildpacks-registry',
           currentValue: '1.2.3',
-          depName: 'example/bar',
+          packageName: 'example/bar',
         },
         {
           autoReplaceStringTemplate:
@@ -137,7 +137,7 @@ id = "not/valid"`,
         {
           datasource: 'buildpacks-registry',
           currentValue: '2.3.4',
-          depName: 'example/tee',
+          packageName: 'example/tee',
         },
       ]);
     });

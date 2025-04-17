@@ -305,7 +305,11 @@ function applyPropsInternal(
       return substr;
     });
 
-  const depName = replaceAll(dep.depName!);
+  const depName = dep.depName;
+  if (dep.depName) {
+    replaceAll(dep.depName);
+  }
+
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
