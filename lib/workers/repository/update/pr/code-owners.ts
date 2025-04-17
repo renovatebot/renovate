@@ -56,8 +56,8 @@ interface OwnerFileScore {
 function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
   const userFileMap = new Map<string, Map<string, number>>();
 
-  for (const fileMatch of filesWithOwners) {
-    for (const [username, score] of fileMatch.userScoreMap.entries()) {
+  for (const fileName of filesWithOwners) {
+    for (const [username, score] of fileName.userScoreMap.entries()) {
       // Get / create user file score
       const fileMap = userFileMap.get(username) ?? new Map<string, number>();
       if (!userFileMap.has(username)) {
@@ -65,7 +65,7 @@ function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
       }
 
       // Add file to user
-      fileMap.set(fileMatch.file, (fileMap.get(fileMatch.file) ?? 0) + score);
+      fileMap.set(fileName.file, (fileMap.get(fileName.file) ?? 0) + score);
     }
   }
 
@@ -127,14 +127,14 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         .map((file) => matchFileToOwners(file, fileOwnerRules))
 
         // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
-        .map((fileMatch) => {
+        .map((matchedFile) => {
           const matchEmpty = emptyRules.find((rule) =>
-            rule.match(fileMatch.file),
+            rule.match(matchedFile.file),
           );
           if (matchEmpty) {
-            return { ...fileMatch, userScoreMap: new Map<string, number>() };
+            return { ...matchedFile, userScoreMap: new Map<string, number>() };
           }
-          return fileMatch;
+          return matchedFile;
         });
 
     logger.debug(

@@ -221,16 +221,16 @@ export async function validateConfig(
         });
       }
     }
-    if (key === 'fileMatch') {
+    if (key === 'managerFilePatterns') {
       if (parentPath === undefined) {
         errors.push({
           topic: 'Config error',
-          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
+          message: `"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block`,
         });
       } else if (!isManagerPath(parentPath)) {
         warnings.push({
           topic: 'Config warning',
-          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
+          message: `"managerFilePatterns" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
@@ -488,7 +488,7 @@ export async function validateConfig(
                 'customType',
                 'description',
                 'fileFormat',
-                'fileMatch',
+                'managerFilePatterns',
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
@@ -520,7 +520,7 @@ export async function validateConfig(
                   is.nonEmptyString(customManager.customType) &&
                   isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                  if (is.nonEmptyArray(customManager.managerFilePatterns)) {
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
@@ -540,7 +540,7 @@ export async function validateConfig(
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty managerFilePatterns array`,
                     });
                   }
                 } else {
@@ -575,18 +575,6 @@ export async function validateConfig(
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                     });
                   }
-                }
-              }
-            }
-            if (key === 'fileMatch') {
-              for (const fileMatch of val as string[]) {
-                try {
-                  regEx(fileMatch);
-                } catch {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
-                  });
                 }
               }
             }

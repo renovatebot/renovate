@@ -13,11 +13,11 @@ export const url = 'https://www.scala-sbt.org';
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '\\.sbt$',
-    'project/[^/]*\\.scala$',
-    'project/build\\.properties$',
-    '(^|/)repositories$',
+  managerFilePatterns: [
+    '/\\.sbt$/',
+    '/project/[^/]*\\.scala$/',
+    '/project/build\\.properties$/',
+    '/(^|/)repositories$/',
   ],
   versioning: ivyVersioning.id,
 };

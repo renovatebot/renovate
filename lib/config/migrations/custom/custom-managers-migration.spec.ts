@@ -8,14 +8,14 @@ describe('config/migrations/custom/custom-managers-migration', () => {
       {
         customManagers: partial<CustomManager>([
           {
-            fileMatch: ['js', '***$}{]]['],
+            managerFilePatterns: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
           },
           {
             customType: 'regex',
-            fileMatch: ['js', '***$}{]]['],
+            managerFilePatterns: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -26,14 +26,14 @@ describe('config/migrations/custom/custom-managers-migration', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['js', '***$}{]]['],
+            managerFilePatterns: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
           },
           {
             customType: 'regex',
-            fileMatch: ['js', '***$}{]]['],
+            managerFilePatterns: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',

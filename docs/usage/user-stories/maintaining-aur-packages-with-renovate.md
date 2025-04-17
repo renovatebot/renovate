@@ -46,7 +46,7 @@ I can create a `renovate.json` configuration with the following custom manager c
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["(^|/)PKGBUILD$"],
+      "managerFilePatterns": ["/(^|/)PKGBUILD$/"],
       "matchStrings": [
         "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
       ],
@@ -58,7 +58,7 @@ I can create a `renovate.json` configuration with the following custom manager c
 
 Breaking that down:
 
-- The `fileMatch` setting tells Renovate to look for any `PKGBUILD` files in a repository
+- The `managerFilePatterns` setting tells Renovate to look for any `PKGBUILD` files in a repository
 - The `matchStrings` is the regex format to extract the version, datasource, and dependency name from the `PKGBUILD`
 - The `extractVersionTemplate` is to handle a “v” in front of any version number that is sometimes added to Git tags
 

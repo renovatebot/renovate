@@ -11,7 +11,7 @@ export const url = 'https://circleci.com/docs/configuration-reference';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.circleci/.+\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)\\.circleci/.+\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];
