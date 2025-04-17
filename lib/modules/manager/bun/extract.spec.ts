@@ -185,14 +185,34 @@ describe('modules/manager/bun/extract', () => {
           workspaces: 'invalid',
         }),
       );
-      // Only the main package.json file is processed
+
       const packageFiles = await extractAllPackageFiles({}, [
         'bun.lock',
         'package.json',
         'packages/pkg1/package.json',
       ]);
-      expect(packageFiles).toHaveLength(1);
-      expect(packageFiles[0].packageFile).toBe('package.json');
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+          deps: [
+            {
+              depName: 'dep1',
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            packageJsonName: 'test',
+          },
+        },
+      ]);
     });
   });
 });
