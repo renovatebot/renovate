@@ -69,7 +69,7 @@ describe('workers/repository/init/index', () => {
       );
     });
 
-    it.only('detects multiple base branches', async () => {
+    it('detects multiple base branches', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValue({});
       config.getRepoConfig
