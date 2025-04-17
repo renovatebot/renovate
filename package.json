@@ -323,7 +323,7 @@
     "emojibase-data": "16.0.2",
     "esbuild": "0.25.2",
     "eslint": "9.24.0",
-    "eslint-config-prettier": "10.1.1",
+    "eslint-config-prettier": "10.1.2",
     "eslint-formatter-gha": "1.5.2",
     "eslint-import-resolver-typescript": "4.3.2",
     "eslint-plugin-import": "2.31.0",
