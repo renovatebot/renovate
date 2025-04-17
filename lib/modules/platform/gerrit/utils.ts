@@ -67,6 +67,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     sourceBranch: extractSourceBranch(change) ?? change.branch,
     targetBranch: change.branch,
     title: change.subject,
+    createdAt: change.created?.replace(' ', 'T'),
     reviewers:
       change.reviewers?.REVIEWER?.filter(
         (reviewer) => typeof reviewer.username === 'string',
@@ -100,11 +101,6 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
       sourceBranch = re.exec(message)?.[1];
     }
   }
-
-  // for backwards compatibility
-  sourceBranch ??= change.hashtags
-    ?.find((tag) => tag.startsWith('sourceBranch-'))
-    ?.replace('sourceBranch-', '');
 
   return sourceBranch ?? undefined;
 }
