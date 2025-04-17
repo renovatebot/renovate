@@ -68,7 +68,7 @@ export async function extractAllPackageFiles(
     // Check if package.json contains workspaces
     const workspaces = res?.managerData?.workspaces;
 
-    if (!is.array(workspaces) || !workspaces.every(is.string)) {
+    if (!is.array(workspaces, is.string)) {
       continue;
     }
 
