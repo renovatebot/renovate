@@ -68,5 +68,36 @@ describe('workers/repository/init/index', () => {
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
       );
     });
+
+    it.only('detects multiple base branches', async () => {
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      onboarding.checkOnboardingBranch.mockResolvedValue({});
+      config.getRepoConfig
+        .mockResolvedValueOnce({ baseBranches: ['one'] })
+        .mockResolvedValueOnce({ baseBranches: ['/one/'] })
+        .mockResolvedValueOnce({ baseBranches: ['one', 'two'] })
+        .mockResolvedValueOnce({});
+      merge.mergeRenovateConfig.mockResolvedValue({});
+      secrets.applySecretsToConfig.mockImplementation(
+        (config: RenovateConfig) => {
+          return config;
+        },
+      );
+      expect(await initRepo({})).toEqual({
+        baseBranches: ['one'],
+        multipleBaseBranches: false,
+      });
+      expect(await initRepo({})).toEqual({
+        baseBranches: ['/one/'],
+        multipleBaseBranches: true,
+      });
+      expect(await initRepo({})).toEqual({
+        baseBranches: ['one', 'two'],
+        multipleBaseBranches: true,
+      });
+      expect(await initRepo({})).toEqual({
+        multipleBaseBranches: false,
+      });
+    });
   });
 });

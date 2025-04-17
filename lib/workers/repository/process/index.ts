@@ -76,7 +76,7 @@ async function getBaseBranchConfig(
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.baseBranches!.length > 1) {
+  if (config.multipleBaseBranches) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
