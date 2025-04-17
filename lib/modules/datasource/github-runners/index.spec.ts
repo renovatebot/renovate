@@ -58,7 +58,7 @@ describe('modules/datasource/github-runners/index', () => {
       expect(res).toMatchObject({
         releases: [
           { version: '2016', isDeprecated: true },
-          { version: '2019' },
+          { version: '2019', isDeprecated: true },
           { version: '2022' },
           { version: '2025' },
         ],
