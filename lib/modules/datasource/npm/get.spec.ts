@@ -1,4 +1,3 @@
-import { DateTime, Settings } from 'luxon';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as _packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
@@ -567,8 +566,7 @@ describe('modules/datasource/npm/get', () => {
 
   describe('cache', () => {
     const mockTime = (time: string) => {
-      const value = DateTime.fromISO(time).valueOf();
-      Settings.now = () => value;
+      vi.setSystemTime(new Date(time));
     };
 
     const httpResponse: HttpResponse<unknown> = {
