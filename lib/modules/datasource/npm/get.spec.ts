@@ -565,10 +565,6 @@ describe('modules/datasource/npm/get', () => {
   });
 
   describe('cache', () => {
-    const mockTime = (time: string) => {
-      vi.setSystemTime(new Date(time));
-    };
-
     const httpResponse: HttpResponse<unknown> = {
       statusCode: 200,
       body: {
@@ -585,7 +581,7 @@ describe('modules/datasource/npm/get', () => {
     };
 
     it('returns unexpired cache', async () => {
-      mockTime('2024-06-15T00:14:59.999Z');
+      vi.setSystemTime('2024-06-15T00:14:59.999Z');
       packageCache.get.mockResolvedValue({
         etag: 'some-etag',
         timestamp: '2024-06-15T00:00:00.000Z',
@@ -609,7 +605,7 @@ describe('modules/datasource/npm/get', () => {
     });
 
     it('returns soft expired cache if revalidated', async () => {
-      mockTime('2024-06-15T00:15:00.000Z');
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
       packageCache.get.mockResolvedValue({
         etag: 'some-etag',
         timestamp: '2024-06-15T00:00:00.000Z',
@@ -635,7 +631,7 @@ describe('modules/datasource/npm/get', () => {
     });
 
     it('returns soft expired cache on npmjs error', async () => {
-      mockTime('2024-06-15T00:15:00.000Z');
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
       packageCache.get.mockResolvedValue({
         etag: 'some-etag',
         timestamp: '2024-06-15T00:00:00.000Z',
