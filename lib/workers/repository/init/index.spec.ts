@@ -76,7 +76,8 @@ describe('workers/repository/init/index', () => {
         .mockResolvedValueOnce({ baseBranches: ['one'] })
         .mockResolvedValueOnce({ baseBranches: ['/one/'] })
         .mockResolvedValueOnce({ baseBranches: ['one', 'two'] })
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({ baseBranches: ['!/^rELEasE/.*$/i'] });
       merge.mergeRenovateConfig.mockResolvedValue({});
       secrets.applySecretsToConfig.mockImplementation(
         (config: RenovateConfig) => {
@@ -97,6 +98,10 @@ describe('workers/repository/init/index', () => {
       });
       expect(await initRepo({})).toEqual({
         multipleBaseBranches: false,
+      });
+      expect(await initRepo({})).toEqual({
+        baseBranches: ['!/^rELEasE/.*$/i'],
+        multipleBaseBranches: true,
       });
     });
   });

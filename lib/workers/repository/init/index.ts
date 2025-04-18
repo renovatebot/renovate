@@ -8,6 +8,7 @@ import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
+import { isRegexMatch } from '../../../util/string-match';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import type { WorkerPlatformConfig } from './apis';
@@ -51,8 +52,8 @@ function expectMultipleBaseBranches(config: RenovateConfig): RenovateConfig {
     if (config.baseBranches.length > 1) {
       multipleBaseBranches = true;
     } else {
-      multipleBaseBranches = config.baseBranches?.some((baseBranch) =>
-        baseBranch.startsWith('/'),
+      multipleBaseBranches = config.baseBranches.some((baseBranch) =>
+        isRegexMatch(baseBranch),
       );
     }
   }
