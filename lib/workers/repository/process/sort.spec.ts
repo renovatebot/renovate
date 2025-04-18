@@ -15,7 +15,15 @@ describe('workers/repository/process/sort', () => {
         },
         {
           updateType: 'minor' as UpdateType,
-          prTitle: 'a minor update',
+          prTitle: 'a minor update 1.10',
+        },
+        {
+          updateType: 'minor' as UpdateType,
+          prTitle: 'a minor update 1.2',
+        },
+        {
+          updateType: 'minor' as UpdateType,
+          prTitle: 'a minor update 1.1',
         },
         {
           updateType: 'pin' as UpdateType,
@@ -31,7 +39,9 @@ describe('workers/repository/process/sort', () => {
         { prTitle: 'some other other pin', updateType: 'pin' },
         { prTitle: 'some other pin', updateType: 'pin' },
         { prTitle: 'some pin', updateType: 'pin' },
-        { prTitle: 'a minor update', updateType: 'minor' },
+        { prTitle: 'a minor update 1.1', updateType: 'minor' },
+        { prTitle: 'a minor update 1.2', updateType: 'minor' },
+        { prTitle: 'a minor update 1.10', updateType: 'minor' },
         { prTitle: 'some major update', updateType: 'major' },
       ]);
     });
