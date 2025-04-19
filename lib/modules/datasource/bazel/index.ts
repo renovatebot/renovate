@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, isValidLocalPath } from '../../../util/fs';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id as bazelVersioningId } from '../../versioning/bazel-module';
@@ -47,6 +47,9 @@ export class BazelDatasource extends Datasource {
       const FILE_PREFIX = 'file://';
       if (url.startsWith(FILE_PREFIX)) {
         const filePath = url.slice(FILE_PREFIX.length);
+        if (!isValidLocalPath(filePath)) {
+          return null;
+        }
         const fileContent = await readLocalFile(filePath, 'utf8');
         if (!fileContent) {
           return null;
@@ -58,9 +61,9 @@ export class BazelDatasource extends Datasource {
       }
 
       result.releases = metadata.versions
-        .map((v: string) => new BzlmodVersion(v))
+        .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
-        .map((bv: BzlmodVersion) => {
+        .map((bv) => {
           const release: Release = { version: bv.original };
           if (is.truthy(metadata.yanked_versions?.[bv.original])) {
             release.isDeprecated = true;
