@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
+import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { BazelDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
-import { GlobalConfig } from '../../../config/global';
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
