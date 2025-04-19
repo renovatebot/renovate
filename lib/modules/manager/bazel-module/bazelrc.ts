@@ -96,6 +96,33 @@ function createEntry(line: string): BazelrcEntries | undefined {
   return undefined;
 }
 
+function expandWorkspacePath(
+  value: string,
+  workspaceDir: string,
+): string | null {
+  if (!value.includes('%workspace%')) {
+    return value;
+  }
+  const absolutePath = upath.resolve(workspaceDir);
+  const expandedPath = value.replace('%workspace%', absolutePath);
+  return fs.isValidLocalPath(expandedPath) ? expandedPath : null;
+}
+
+function sanitizeOptions(
+  options: BazelOption[],
+  workspaceDir: string,
+): BazelOption[] {
+  return options
+    .map((option) => {
+      if (!option.value) {
+        return option;
+      }
+      const expandedPath = expandWorkspacePath(option.value, workspaceDir);
+      return expandedPath ? new BazelOption(option.name, expandedPath) : option;
+    })
+    .filter((option) => option.value !== null);
+}
+
 export function parse(contents: string): BazelrcEntries[] {
   return contents
     .split('\n')
@@ -124,29 +151,10 @@ async function readFile(
   const results: CommandEntry[] = [];
   for (const entry of entries) {
     if (entry.entryType === 'command') {
-      const sanitizedOptions: BazelOption[] = [];
-      for (const option of entry.options) {
-        if (option.value?.includes('%workspace%')) {
-          const absolutePath = upath.resolve(workspaceDir);
-          const optionWorkspacePath = option.value.replace(
-            '%workspace%',
-            absolutePath,
-          );
-          if (fs.isValidLocalPath(optionWorkspacePath)) {
-            sanitizedOptions.push(
-              new BazelOption(option.name, optionWorkspacePath),
-            );
-          }
-        } else {
-          sanitizedOptions.push(option);
-        }
-      }
-      const newEntry = new CommandEntry(
-        entry.command,
-        sanitizedOptions,
-        entry.config,
+      const sanitizedOptions = sanitizeOptions(entry.options, workspaceDir);
+      results.push(
+        new CommandEntry(entry.command, sanitizedOptions, entry.config),
       );
-      results.push(newEntry);
       continue;
     }
 
