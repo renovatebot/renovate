@@ -320,7 +320,7 @@
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "8.0.0",
-    "emojibase-data": "16.0.2",
+    "emojibase-data": "16.0.3",
     "esbuild": "0.25.2",
     "eslint": "9.24.0",
     "eslint-config-prettier": "10.1.2",
