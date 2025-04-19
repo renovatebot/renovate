@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
-import { readLocalFile, isValidLocalPath } from '../../../util/fs';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id as bazelVersioningId } from '../../versioning/bazel-module';
@@ -43,7 +43,7 @@ export class BazelDatasource extends Datasource {
     const url = joinUrlParts(registryUrl!, path);
     const result: ReleaseResult = { releases: [] };
     try {
-      let metadata;
+      let metadata: BazelModuleMetadata;
       const FILE_PREFIX = 'file://';
       if (url.startsWith(FILE_PREFIX)) {
         const filePath = url.slice(FILE_PREFIX.length);
@@ -54,7 +54,7 @@ export class BazelDatasource extends Datasource {
         if (!fileContent) {
           return null;
         }
-        metadata = JSON.parse(fileContent);
+        metadata = BazelModuleMetadata.parse(JSON.parse(fileContent));
       } else {
         const response = await this.http.getJson(url, BazelModuleMetadata);
         metadata = response.body;

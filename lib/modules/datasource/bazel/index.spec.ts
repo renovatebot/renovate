@@ -13,6 +13,14 @@ const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
 const packageName = 'rules_foo';
 const path = BazelDatasource.packageMetadataPath(packageName);
 
+const mockMetadata = {
+  versions: ['0.14.8', '0.14.9', '0.15.0', '0.16.0'],
+  yanked_versions: {
+    '0.15.0': 'yanked for security reasons',
+  },
+  homepage: 'https://github.com/foo/bar',
+};
+
 describe('modules/datasource/bazel/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
@@ -86,28 +94,27 @@ describe('modules/datasource/bazel/index', () => {
   });
 
   describe('local file handling', () => {
-    it('should handle local file correctly', async () => {
-      const mockFs: Record<string, string> = {
-        [`/tmp/mock-registry/modules/${packageName}/metadata.json`]:
-          Fixtures.get('metadata-with-yanked-versions.json'),
-      };
-      fs.readLocalFile.mockImplementation(
-        (file: string): Promise<string | null> => {
-          if (file in mockFs) {
-            return Promise.resolve(mockFs[file]);
-          }
-          return Promise.resolve(null);
-        },
-      );
+    const mockFilePath = `/tmp/mock-registry/modules/${packageName}/metadata.json`;
+    const localRegistryUrl = `file:///tmp/mock-registry`;
 
-      fs.isValidLocalPath.mockImplementation((file: string): boolean => {
-        return file in mockFs;
-      });
-
+    beforeEach(() => {
       GlobalConfig.set({
         localDir: '/tmp/mock-registry',
       });
-      const localRegistryUrl = `file:///tmp/mock-registry`;
+    });
+
+    it('should handle local file correctly', async () => {
+      vi.mocked(fs.readLocalFile).mockImplementation((file: string) => {
+        if (file === mockFilePath) {
+          return Promise.resolve(JSON.stringify(mockMetadata));
+        }
+        return Promise.resolve(null);
+      });
+
+      vi.mocked(fs.isValidLocalPath).mockImplementation((file: string) => {
+        return file === mockFilePath;
+      });
+
       const res = await getPkgReleases({
         datasource,
         packageName,
@@ -121,7 +128,39 @@ describe('modules/datasource/bazel/index', () => {
           { version: '0.15.0', isDeprecated: true },
           { version: '0.16.0' },
         ],
+        sourceUrl: 'https://github.com/foo/bar',
       });
+    });
+
+    it('should return null for invalid file path', async () => {
+      vi.mocked(fs.isValidLocalPath).mockImplementation(() => false);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [localRegistryUrl],
+      });
+      expect(res).toBeNull();
+    });
+
+    it('should return null for empty file content', async () => {
+      vi.mocked(fs.readLocalFile).mockImplementation((file: string) => {
+        if (file === mockFilePath) {
+          return Promise.resolve(null);
+        }
+        return Promise.resolve(null);
+      });
+
+      vi.mocked(fs.isValidLocalPath).mockImplementation((file: string) => {
+        return file === mockFilePath;
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [localRegistryUrl],
+      });
+      expect(res).toBeNull();
     });
   });
 });
