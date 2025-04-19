@@ -19,7 +19,7 @@ import type { ExtractResult } from './extract-update';
 import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
-async function getBaseBranchConfig(
+export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
 ): Promise<RenovateConfig> {

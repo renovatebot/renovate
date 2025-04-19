@@ -5,7 +5,7 @@ import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
-import { extractDependencies, updateRepo } from '.';
+import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
 import { git, logger, platform, scm } from '~test/util';
 import type { RenovateConfig } from '~test/util';
 
@@ -29,7 +29,6 @@ describe('workers/repository/process/index', () => {
     it('processes baseBranches', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
-      config.multipleBaseBranches = true; // for coverage
       scm.branchExists.mockResolvedValueOnce(false);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(false);
@@ -169,6 +168,17 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
       expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'master' });
+    });
+  });
+
+  describe('getBaseBranchConfig', () => {
+    it('adds branchPrefix if multiple baseBranches expected', async () => {
+      config.multipleBaseBranches = true;
+      const res = await getBaseBranchConfig('main', config);
+      expect(res.baseBranch).toBe('main');
+      expect(res.multipleBaseBranches).toBeTrue();
+      expect(res.hasBaseBranches).toBeTrue();
+      expect(res.branchPrefix).toBe('renovate/main-');
     });
   });
 });

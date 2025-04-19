@@ -52,9 +52,7 @@ function expectMultipleBaseBranches(config: RenovateConfig): RenovateConfig {
     if (config.baseBranches.length > 1) {
       multipleBaseBranches = true;
     } else {
-      multipleBaseBranches = config.baseBranches.some((baseBranch) =>
-        isRegexMatch(baseBranch),
-      );
+      multipleBaseBranches = config.baseBranches.some(isRegexMatch);
     }
   }
 
