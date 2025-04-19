@@ -97,6 +97,12 @@ const bitbucketProject = partial<ChangeLogProject>({
   baseUrl: 'https://bitbucket.org/',
 });
 
+const bitbucketServerProject = partial<ChangeLogProject>({
+  type: 'bitbucket-server',
+  apiBaseUrl: 'https://bitbucket.domain.org/rest/api/1.0/',
+  baseUrl: 'https://bitbucket\\.domain.org/',
+});
+
 const githubProject = partial<ChangeLogProject>({
   type: 'github',
   apiBaseUrl: 'https://api.github.com/',
@@ -360,6 +366,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://my.custom.domain/some/yet-other-repository/-/releases/v1.0.1',
         },
       ]);
+    });
+
+    it('should return empty release list for self-hosted bitbucket-server', async () => {
+      const res = await getReleaseList(
+        {
+          ...bitbucketServerProject,
+          repository: 'some/yet-other-repository',
+        },
+        partial<ChangeLogRelease>(),
+      );
+      expect(res).toBeEmptyArray();
     });
   });
 
@@ -1147,6 +1164,35 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         notesSourceUrl:
           'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md',
         url: 'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
+      });
+    });
+
+    it('handles bitbucket-server release notes link', async () => {
+      httpMock
+        .scope(bitbucketServerProject.apiBaseUrl)
+        .get('/projects/some-org/repos/some-repo/files?limit=100')
+        .reply(200, {
+          isLastPage: true,
+          values: ['CHANGELOG.md'],
+        })
+        .get('/projects/some-org/repos/some-repo/raw/CHANGELOG.md')
+        .reply(200, angularJsChangelogMd);
+
+      const res = await getReleaseNotesMd(
+        {
+          ...bitbucketServerProject,
+          repository: 'some-org/some-repo',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.6.9',
+          gitRef: '1.6.9',
+        }),
+      );
+
+      const notesSourceUrl = `${bitbucketServerProject.baseUrl}projects/some-org/repos/some-repo/browse/CHANGELOG.md?at=HEAD`;
+      expect(res).toMatchObject({
+        notesSourceUrl,
+        url: `${notesSourceUrl}#169-fiery-basilisk-2018-02-02`,
       });
     });
 
