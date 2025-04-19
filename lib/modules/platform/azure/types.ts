@@ -11,3 +11,8 @@ export const AzurePrVote = {
   ApprovedWithSuggestions: 5,
   Approved: 10,
 } as const;
+
+export interface AzurePrCacheData {
+  items: Record<number, AzurePr>;
+  updated_at: string | null;
+}
