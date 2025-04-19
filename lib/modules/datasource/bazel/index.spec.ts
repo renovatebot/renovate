@@ -3,6 +3,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { BazelDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
+import { GlobalConfig } from '../../../config/global';
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
@@ -71,6 +72,29 @@ describe('modules/datasource/bazel/index', () => {
       expect(res).toEqual({
         registryUrl:
           'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main',
+        releases: [
+          { version: '0.14.8' },
+          { version: '0.14.9' },
+          { version: '0.15.0', isDeprecated: true },
+          { version: '0.16.0' },
+        ],
+      });
+    });
+  });
+
+  describe('local file handling', () => {
+    it('should handle local file correctly', async () => {
+      GlobalConfig.set({
+        localDir: Fixtures.getPath('registry/'),
+      });
+      const localRegistryUrl = `file://${Fixtures.getPath('registry/')}`;
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [localRegistryUrl],
+      });
+      expect(res).toEqual({
+        registryUrl: localRegistryUrl,
         releases: [
           { version: '0.14.8' },
           { version: '0.14.9' },
