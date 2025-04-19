@@ -4,6 +4,9 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { BazelDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
+import { fs } from '~test/util';
+
+vi.mock('../../../util/fs');
 
 const datasource = BazelDatasource.id;
 const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
@@ -84,10 +87,27 @@ describe('modules/datasource/bazel/index', () => {
 
   describe('local file handling', () => {
     it('should handle local file correctly', async () => {
-      GlobalConfig.set({
-        localDir: Fixtures.getPath('registry/'),
+      const mockFs: Record<string, string> = {
+        [`/tmp/mock-registry/modules/${packageName}/metadata.json`]:
+          Fixtures.get('metadata-with-yanked-versions.json'),
+      };
+      fs.readLocalFile.mockImplementation(
+        (file: string): Promise<string | null> => {
+          if (file in mockFs) {
+            return Promise.resolve(mockFs[file]);
+          }
+          return Promise.resolve(null);
+        },
+      );
+
+      fs.isValidLocalPath.mockImplementation((file: string): boolean => {
+        return file in mockFs;
       });
-      const localRegistryUrl = `file://${Fixtures.getPath('registry/')}`;
+
+      GlobalConfig.set({
+        localDir: '/tmp/mock-registry',
+      });
+      const localRegistryUrl = `file:///tmp/mock-registry`;
       const res = await getPkgReleases({
         datasource,
         packageName,
