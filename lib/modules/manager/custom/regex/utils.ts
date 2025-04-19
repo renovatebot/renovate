@@ -66,6 +66,7 @@ export function createDependency(
     }
   }
   dependency.replaceString = replaceString;
+  dependency.matchStringsCaptureGroups = groups;
   return dependency;
 }
 

@@ -164,6 +164,7 @@ export interface PackageDependency<T = Record<string, any>>
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
+  matchStringsCaptureGroups?: object;
 
   /**
    * override data source's default strategy.

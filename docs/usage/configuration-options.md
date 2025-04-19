@@ -781,6 +781,9 @@ This will lead to following update where `1.21-alpine` is the newest version of 
 image: my.new.registry/aRepository/andImage:1.21-alpine
 ```
 
+When a value from a capture group is required in the `autoReplaceStringTemplate`
+it can be accessed via `{{{ matchStringsCaptureGroups.<captureGroupName>}}}`.
+
 <!-- prettier-ignore -->
 !!! note
     Can only be used with the custom regex manager.
