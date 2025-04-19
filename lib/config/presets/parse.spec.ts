@@ -332,6 +332,18 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('returns scope with repo and params with quote and default', () => {
+      expect(
+        parsePreset('@somescope/somepackagename("param1, param2", param3)'),
+      ).toEqual({
+        repo: '@somescope/somepackagename',
+        params: ['param1, param2', 'param3'],
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+      });
+    });
+
     it('returns scope with presetName', () => {
       expect(parsePreset('@somescope:somePresetName')).toEqual({
         repo: '@somescope/renovate-config',
