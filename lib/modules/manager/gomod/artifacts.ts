@@ -21,10 +21,10 @@ import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { regEx } from '../../../util/regex';
 import { isValid } from '../../versioning/semver';
 import type {
-  Upgrade,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
 
@@ -53,7 +53,7 @@ function getUpdateImportPathCmds(
         valid(newVersion) && !newVersion!.endsWith('+incompatible'),
     )
     .map(({ depName, newVersion, newName }) => ({
-      depName: newName || depName!,
+      depName: newName ?? depName!,
       newMajor: major(newVersion!),
     }))
     // Skip path updates going from v0 to v1
@@ -248,7 +248,7 @@ export async function updateArtifacts({
     // Update import paths on major updates, or when performing replacements
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
-      (config.updateType === 'major' || config.updateType == 'replacement');
+      (config.updateType === 'major' || config.updateType === 'replacement');
 
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
