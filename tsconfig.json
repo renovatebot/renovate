@@ -6,7 +6,8 @@
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
     "target": "es2022",
-    "module": "commonjs",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -16,14 +17,17 @@
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for esbuild */,
-    "lib": ["es2022"],
-    "types": ["node", "jest-extended", "expect-more-jest"],
+    "lib": ["es2023"],
+    "types": ["node", "vitest/globals"],
     "allowJs": true,
     "checkJs": true,
-    "importsNotUsedAsValues": "error",
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
+    "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
+    "paths": {
+      "~test/*": ["./test/*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
+  "include": ["**/*.mts", "**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
     "node_modules",
     "./.cache",
@@ -31,11 +35,11 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp"
+    "tmp",
+    "tools/mkdocs/site"
   ],
   "ts-node": {
     "transpileOnly": true,
-    "esm": false,
-    "swc": false
+    "esm": false
   }
 }

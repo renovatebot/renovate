@@ -105,6 +105,147 @@ export class PackageCacheStats {
   }
 }
 
+interface DatasourceCacheDataPoint {
+  datasource: string;
+  registryUrl: string;
+  packageName: string;
+  action: 'hit' | 'miss' | 'set' | 'skip';
+}
+
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
+export interface DatasourceCacheReport {
+  long: {
+    [datasource in string]: {
+      [registryUrl in string]: {
+        [packageName in string]: {
+          read?: 'hit' | 'miss';
+          write?: 'set' | 'skip';
+        };
+      };
+    };
+  };
+  short: {
+    [datasource in string]: {
+      [registryUrl in string]: {
+        hit: number;
+        miss: number;
+        set: number;
+        skip: number;
+      };
+    };
+  };
+}
+/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
+
+export class DatasourceCacheStats {
+  private static getData(): DatasourceCacheDataPoint[] {
+    return (
+      memCache.get<DatasourceCacheDataPoint[]>('datasource-cache-stats') ?? []
+    );
+  }
+
+  private static setData(data: DatasourceCacheDataPoint[]): void {
+    memCache.set('datasource-cache-stats', data);
+  }
+
+  static hit(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, registryUrl, packageName, action: 'hit' });
+    this.setData(data);
+  }
+
+  static miss(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, registryUrl, packageName, action: 'miss' });
+    this.setData(data);
+  }
+
+  static set(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, registryUrl, packageName, action: 'set' });
+    this.setData(data);
+  }
+
+  static skip(
+    datasource: string,
+    registryUrl: string,
+    packageName: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, registryUrl, packageName, action: 'skip' });
+    this.setData(data);
+  }
+
+  static getReport(): DatasourceCacheReport {
+    const data = this.getData();
+    const result: DatasourceCacheReport = { long: {}, short: {} };
+    for (const { datasource, registryUrl, packageName, action } of data) {
+      result.long[datasource] ??= {};
+      result.long[datasource][registryUrl] ??= {};
+      result.long[datasource][registryUrl] ??= {};
+      result.long[datasource][registryUrl][packageName] ??= {};
+
+      result.short[datasource] ??= {};
+      result.short[datasource][registryUrl] ??= {
+        hit: 0,
+        miss: 0,
+        set: 0,
+        skip: 0,
+      };
+
+      if (action === 'hit') {
+        result.long[datasource][registryUrl][packageName].read = 'hit';
+        result.short[datasource][registryUrl].hit += 1;
+        continue;
+      }
+
+      if (action === 'miss') {
+        result.long[datasource][registryUrl][packageName].read = 'miss';
+        result.short[datasource][registryUrl].miss += 1;
+        continue;
+      }
+
+      if (action === 'set') {
+        result.long[datasource][registryUrl][packageName].write = 'set';
+        result.short[datasource][registryUrl].set += 1;
+        continue;
+      }
+
+      if (action === 'skip') {
+        result.long[datasource][registryUrl][packageName].write = 'skip';
+        result.short[datasource][registryUrl].skip += 1;
+        continue;
+      }
+    }
+
+    return result;
+  }
+
+  static report(): void {
+    const { long, short } = this.getReport();
+
+    if (Object.keys(short).length > 0) {
+      logger.debug(short, 'Datasource cache statistics');
+    }
+
+    if (Object.keys(long).length > 0) {
+      logger.trace(long, 'Datasource cache detailed statistics');
+    }
+  }
+}
+
 export interface HttpRequestStatsDataPoint {
   method: string;
   url: string;
@@ -232,7 +373,8 @@ export class HttpStats {
     const { urls, rawRequests, hostRequests, hosts, requests } =
       HttpStats.getReport();
     logger.trace({ rawRequests, hostRequests }, 'HTTP full statistics');
-    logger.debug({ urls, hosts, requests }, 'HTTP statistics');
+    logger.debug({ hosts, requests }, 'HTTP statistics');
+    logger.trace({ urls }, 'HTTP URL statistics');
   }
 }
 
@@ -346,3 +488,64 @@ export class HttpCacheStats {
     logger.debug(report, 'HTTP cache statistics');
   }
 }
+
+type ObsoleteCacheStats = Record<
+  string,
+  {
+    callsite?: string;
+    count: number;
+  }
+>;
+
+/* v8 ignore start: temporary code */
+export class ObsoleteCacheHitLogger {
+  static getData(): ObsoleteCacheStats {
+    return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
+  }
+
+  private static getCallsite(): string | undefined {
+    const _prepareStackTrace = Error.prepareStackTrace;
+    try {
+      let result: string | undefined;
+      Error.prepareStackTrace = (_, stack) => {
+        result = stack
+          .find((frame) => {
+            const callsite = frame.toString();
+            return (
+              !callsite.includes('lib/util/http') &&
+              !callsite.includes('lib/util/stats') &&
+              !callsite.includes('(node:')
+            );
+          })
+          ?.toString()
+          ?.replace(/:\d+(?::\d+)?\)$/, ')');
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      new Error().stack;
+
+      return result;
+    } finally {
+      Error.prepareStackTrace = _prepareStackTrace;
+    }
+  }
+
+  static write(url: string): void {
+    const data = this.getData();
+    if (!data[url]) {
+      const callsite = this.getCallsite();
+      data[url] = { callsite, count: 0 };
+    }
+    data[url].count++;
+    memCache.set('obsolete-cache-stats', data);
+  }
+
+  static report(): void {
+    const hits = this.getData();
+    logger.debug(
+      { count: Object.keys(hits).length, hits },
+      'Cache fallback URLs',
+    );
+  }
+}
+/* v8 ignore stop: temporary code */

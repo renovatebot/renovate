@@ -17,7 +17,7 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
-import { getProblems, logger, setMeta } from '../../logger';
+import { getProblems, logLevel, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
@@ -71,7 +71,6 @@ function haveReachedLimits(): boolean {
 /* istanbul ignore next */
 function checkEnv(): void {
   const range = pkg.engines!.node!;
-  const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
@@ -81,14 +80,6 @@ function checkEnv(): void {
     logger.error(
       { versions: process.versions, range },
       'Unsupported node environment detected. Please update your node version.',
-    );
-  } else if (
-    rangeNext &&
-    !semver.satisfies(process.versions?.node, rangeNext)
-  ) {
-    logger.warn(
-      { versions: process.versions },
-      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
   }
 }
@@ -105,10 +96,11 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 
 export async function resolveGlobalExtends(
   globalExtends: string[],
+  ignorePresets?: string[],
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalExtends };
+    const config = { extends: globalExtends, ignorePresets };
     const resolvedConfig = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
@@ -142,33 +134,31 @@ export async function start(): Promise<number> {
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
-      if (config?.globalExtends) {
+      if (is.nonEmptyArray(config?.globalExtends)) {
         // resolve global presets immediately
-        if (process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS) {
-          config = mergeChildConfig(
-            await resolveGlobalExtends(config.globalExtends),
-            config,
-          );
-        } else {
-          config = mergeChildConfig(
-            config,
-            await resolveGlobalExtends(config.globalExtends),
-          );
-        }
+        config = mergeChildConfig(
+          await resolveGlobalExtends(
+            config.globalExtends,
+            config.ignorePresets,
+          ),
+          config,
+        );
       }
 
-      // Set allowedHeaders in case hostRules headers are configured in file config
+      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint and allowedHeaders in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        userAgent: config.userAgent,
       });
 
       await validatePresets(config);
@@ -233,9 +223,12 @@ export async function start(): Promise<number> {
     await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
-      logger.fatal(err.message.substring(6));
+      logger.fatal(
+        { errorMessage: err.message.substring(6) },
+        'Initialization error',
+      );
     } else {
-      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
+      logger.fatal({ err }, 'Unknown error');
     }
     if (!config!) {
       // return early if we can't parse config options
@@ -244,10 +237,9 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
-    const logLevel = process.env.LOG_LEVEL ?? 'info';
-    if (logLevel === 'info') {
+    if (logLevel() === 'info') {
       logger.info(
-        `Renovate was run at log level "${logLevel}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
+        `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
       );
     }
   }

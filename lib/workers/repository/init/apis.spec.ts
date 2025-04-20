@@ -1,10 +1,11 @@
-import { RenovateConfig, platform } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
+import { platform } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {

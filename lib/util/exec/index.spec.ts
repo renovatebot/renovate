@@ -1,21 +1,21 @@
-import { mockDeep } from 'jest-mock-extended';
-import { exec as cpExec, envMock } from '../../../test/exec-util';
-import { mockedFunction } from '../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../config/global';
 import type { RepoGlobalConfig } from '../../config/types';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
+import { setCustomEnv } from '../env';
 import * as dockerModule from './docker';
 import { getHermitEnvs } from './hermit';
 import type { ExecOptions, RawExecOptions, VolumeOption } from './types';
 import { exec } from '.';
+import { exec as cpExec, envMock } from '~test/exec-util';
 
-const getHermitEnvsMock = mockedFunction(getHermitEnvs);
+const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
-jest.mock('./hermit', () => ({
-  ...jest.requireActual<typeof import('./hermit')>('./hermit'),
-  getHermitEnvs: jest.fn(),
+vi.mock('./hermit', async () => ({
+  ...(await vi.importActual<typeof import('./hermit')>('./hermit')),
+  getHermitEnvs: vi.fn(),
 }));
-jest.mock('../../modules/datasource', () => mockDeep());
+vi.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -46,9 +46,10 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
     processEnvOrig = process.env;
     GlobalConfig.reset();
+    setCustomEnv({});
   });
 
   afterEach(() => {
@@ -796,6 +797,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
+    setCustomEnv(adminConfig.customEnvVariables);
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
@@ -878,7 +880,7 @@ describe('util/exec/index', () => {
       throw new Error('some error occurred');
     });
 
-    const removeDockerContainerSpy = jest.spyOn(
+    const removeDockerContainerSpy = vi.spyOn(
       dockerModule,
       'removeDockerContainer',
     );
@@ -893,14 +895,14 @@ describe('util/exec/index', () => {
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });
-    jest
-      .spyOn(dockerModule, 'generateDockerCommand')
-      .mockImplementation((): any => 'asdf');
+    vi.spyOn(dockerModule, 'generateDockerCommand').mockImplementation(
+      (): any => 'asdf',
+    );
 
     // The `removeDockerContainer` function is called once before it's used in the `catch` block.
     // We want it to fail in the catch block so we can assert the error is wrapped.
     let calledOnce = false;
-    const removeDockerContainerSpy = jest.spyOn(
+    const removeDockerContainerSpy = vi.spyOn(
       dockerModule,
       'removeDockerContainer',
     );
@@ -931,7 +933,7 @@ describe('util/exec/index', () => {
       error.signal = 'SIGTERM';
       throw error;
     });
-    const removeDockerContainerSpy = jest.spyOn(
+    const removeDockerContainerSpy = vi.spyOn(
       dockerModule,
       'removeDockerContainer',
     );

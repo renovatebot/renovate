@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { GalaxyDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://galaxy.ansible.com/';
 
@@ -85,6 +85,31 @@ describe('modules/datasource/galaxy/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+    });
+
+    it('handles multiple results when one user matches exactly', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=datadog&name=datadog')
+        .reply(200, Fixtures.get('datadog.json'));
+      const res = await getPkgReleases({
+        datasource: GalaxyDatasource.id,
+        packageName: 'datadog.datadog',
+      });
+      expect(res).not.toBeNull();
+      expect(res?.releases).toHaveLength(11);
+    });
+
+    it('rejects multiple results when no user matches exactly', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=nope&name=nope')
+        .reply(200, Fixtures.get('datadog.json'));
+      const res = await getPkgReleases({
+        datasource: GalaxyDatasource.id,
+        packageName: 'nope.nope',
+      });
+      expect(res).toBeNull();
     });
 
     it('return null if searching random username and project name', async () => {

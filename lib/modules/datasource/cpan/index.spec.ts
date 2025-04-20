@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { CpanDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://fastapi.metacpan.org/';
 
@@ -86,6 +86,7 @@ describe('modules/datasource/cpan/index', () => {
         releaseTimestamp: '2020-11-30T00:21:36.000Z',
         version: '1.0048',
       });
+      expect(res?.tags?.latest).toBe('1.0048');
     });
   });
 });

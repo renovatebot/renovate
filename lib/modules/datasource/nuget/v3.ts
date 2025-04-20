@@ -9,9 +9,12 @@ import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
-import { Http, HttpError } from '../../../util/http';
+import type { Http } from '../../../util/http';
+import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
@@ -24,7 +27,7 @@ import type {
 } from './types';
 
 export class NugetV3Api {
-  static readonly cacheNamespace = 'datasource-nuget';
+  static readonly cacheNamespace = 'datasource-nuget-v3';
 
   async getResourceUrl(
     http: Http,
@@ -38,7 +41,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -49,9 +52,12 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
-      // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
+        servicesIndexRaw = (
+          await http.getJsonUnchecked<ServicesIndexRaw>(url, {
+            cacheProvider: memCacheProvider,
+          })
+        ).body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,
@@ -131,7 +137,7 @@ export class NugetV3Api {
     let items = catalogPage.items;
     if (!items) {
       const url = catalogPage['@id'];
-      const catalogPageFull = await http.getJson<CatalogPage>(url);
+      const catalogPageFull = await http.getJsonUnchecked<CatalogPage>(url);
       items = catalogPageFull.body.items;
     }
     return items.map(({ catalogEntry }) => catalogEntry);
@@ -145,7 +151,8 @@ export class NugetV3Api {
   ): Promise<ReleaseResult | null> {
     const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
     const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
-    const packageRegistration = await http.getJson<PackageRegistration>(url);
+    const packageRegistration =
+      await http.getJsonUnchecked<PackageRegistration>(url);
     const catalogPages = packageRegistration.body.items || [];
     const catalogPagesQueue = catalogPages.map(
       (page) => (): Promise<CatalogEntry[]> => this.getCatalogEntry(http, page),
@@ -158,14 +165,9 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({
-        version,
-        published: releaseTimestamp,
-        projectUrl,
-        listed,
-        packageContent,
-      }) => {
+      ({ version, published, projectUrl, listed, packageContent }) => {
         const release: Release = { version: removeBuildMeta(version) };
+        const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
@@ -210,7 +212,7 @@ export class NugetV3Api {
           // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.get(nuspecUrl);
+        const metaresult = await http.getText(nuspecUrl);
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
@@ -240,16 +242,14 @@ export class NugetV3Api {
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,
         );
-        return dep;
+      } else {
+        logger.debug(
+          { err, registryUrl, pkgName, pkgVersion: latestStable },
+          `Cannot obtain sourceUrl`,
+        );
       }
-      logger.debug(
-        { err, registryUrl, pkgName, pkgVersion: latestStable },
-        `Cannot obtain sourceUrl`,
-      );
-      return dep;
     }
 
-    // istanbul ignore else: not easy testable
     if (homepage) {
       // only assign if not assigned
       dep.sourceUrl ??= homepage;

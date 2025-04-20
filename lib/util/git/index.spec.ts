@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
@@ -14,21 +13,22 @@ import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+import { logger } from '~test/util';
 
-jest.mock('./conflicts-cache');
-jest.mock('./behind-base-branch-cache');
-jest.mock('./modified-cache');
-jest.mock('timers/promises');
-jest.mock('../cache/repository');
-const behindBaseCache = mocked(_behindBaseCache);
-const conflictsCache = mocked(_conflictsCache);
-const modifiedCache = mocked(_modifiedCache);
+vi.mock('./conflicts-cache');
+vi.mock('./behind-base-branch-cache');
+vi.mock('./modified-cache');
+vi.mock('timers/promises');
+vi.mock('../cache/repository');
+vi.unmock('.');
+
+const behindBaseCache = vi.mocked(_behindBaseCache);
+const conflictsCache = vi.mocked(_conflictsCache);
+const modifiedCache = vi.mocked(_modifiedCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
-describe('util/git/index', () => {
-  jest.setTimeout(60000);
-
+describe('util/git/index', { timeout: 10000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -87,7 +87,18 @@ describe('util/git/index', () => {
 
     await repo.checkoutBranch('renovate/equal_branch', defaultBranch);
 
+    await repo.checkoutBranch(
+      'renovate/branch_with_multiple_authors',
+      defaultBranch,
+    );
+    await repo.addConfig('user.email', 'author1@example.com');
+    await repo.commit('first commit', undefined, { '--allow-empty': null });
+    await repo.addConfig('user.email', 'author2@example.com');
+    await repo.commit('second commit', undefined, { '--allow-empty': null });
+
     await repo.checkout(defaultBranch);
+
+    expect(git.getBranchList()).toBeEmptyArray();
   });
 
   let tmpDir: tmp.DirectoryResult;
@@ -118,7 +129,7 @@ describe('util/git/index', () => {
   afterEach(async () => {
     await tmpDir?.cleanup();
     await origin?.cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -128,7 +139,7 @@ describe('util/git/index', () => {
 
   describe('gitRetry', () => {
     it('returns result if git returns successfully', async () => {
-      const gitFunc = jest.fn().mockImplementation((args) => {
+      const gitFunc = vi.fn().mockImplementation((args) => {
         if (args === undefined) {
           return 'some result';
         } else {
@@ -142,7 +153,7 @@ describe('util/git/index', () => {
 
     it('retries the func call if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest
+      const gitFunc = vi
         .fn()
         .mockImplementationOnce(() => {
           throw new Error('The remote end hung up unexpectedly');
@@ -157,7 +168,7 @@ describe('util/git/index', () => {
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest.fn().mockImplementation(() => {
+      const gitFunc = vi.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
@@ -167,7 +178,7 @@ describe('util/git/index', () => {
     });
 
     it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
-      const gitFunc = jest.fn().mockImplementationOnce(() => {
+      const gitFunc = vi.fn().mockImplementationOnce(() => {
         throw new Error('some error');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
@@ -262,8 +273,10 @@ describe('util/git/index', () => {
       await repo.commit('Add submodules');
       await git.initRepo({
         cloneSubmodules: true,
+        cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
+      expect(git.isCloned()).toBeFalse();
       await git.syncGit();
       expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toEqual([
@@ -327,28 +340,64 @@ describe('util/git/index', () => {
     });
 
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/not_found', defaultBranch),
+      ).toBeFalse();
     });
 
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeFalse();
     });
 
     it('should return false when author is ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return true when non-ignored authors commit followed by an ignored author', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['author1@example.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/branch_with_multiple_authors',
+          defaultBranch,
+        ),
+      ).toBeTrue();
+    });
+
+    it('should return false with multiple authors that are each ignored', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/branch_with_multiple_authors',
+          defaultBranch,
+        ),
+      ).toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeTrue();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
-      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeTrue();
     });
   });
 
@@ -405,7 +454,7 @@ describe('util/git/index', () => {
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
       expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
@@ -426,7 +475,7 @@ describe('util/git/index', () => {
     });
 
     it('should add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
         'push',
@@ -437,7 +486,7 @@ describe('util/git/index', () => {
     });
 
     it('should not add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       setNoVerify(['push']);
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
@@ -630,8 +679,8 @@ describe('util/git/index', () => {
     });
 
     it('does not pass --no-verify', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -660,8 +709,8 @@ describe('util/git/index', () => {
     });
 
     it('passes --no-verify to commit', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -691,8 +740,8 @@ describe('util/git/index', () => {
     });
 
     it('passes --no-verify to push', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -1038,10 +1087,10 @@ describe('util/git/index', () => {
     it('creates custom section for renovate ref', async () => {
       const commit = git.getBranchCommit('develop')!;
 
-      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar/baz');
 
       const renovateRefs = await lsRenovateRefs();
-      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
+      expect(renovateRefs).toContain('refs/renovate/branches/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -1058,13 +1107,18 @@ describe('util/git/index', () => {
     it('clears remote Renovate refs', async () => {
       const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
-      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
-      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+      await tmpGit.raw(['update-ref', 'refs/renovate/branches/aaa', commit]);
+      await tmpGit.raw([
+        'push',
+        '--force',
+        'origin',
+        'refs/renovate/branches/aaa',
+      ]);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
-      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+      await git.pushCommitToRenovateRef(commit, 'ccc');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
@@ -1087,7 +1141,7 @@ describe('util/git/index', () => {
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
       pushSpy.mockImplementationOnce(() => {
         throw new Error(
           'remote: Repository policies do not allow pushes that update more than 2 branches or tags.',

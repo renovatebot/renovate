@@ -1,0 +1,27 @@
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  annotations:
+    packages.glasskube.dev/default-repository: "true"
+  name: glasskube
+spec:
+  url: https://packages.dl.glasskube.dev/packages
+
+---
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  name: local
+spec:
+  url: http://localhost:9090/packages
+
+---
+apiVersion: packages.glasskube.dev/v1alpha1
+kind: ClusterPackage
+metadata:
+  name: argo-cd
+spec:
+  packageInfo:
+    name: argo-cd
+    repositoryName: glasskube
+    version: v2.11.7+1

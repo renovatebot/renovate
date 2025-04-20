@@ -3,9 +3,8 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
-import { configMigration } from '../config-migration';
 import { PackageFiles } from '../package-files';
-import { validateReconfigureBranch } from '../reconfigure';
+import { checkReconfigureBranch } from '../reconfigure';
 import { pruneStaleBranches } from './prune';
 import {
   runBranchSummary,
@@ -17,8 +16,7 @@ export async function finalizeRepo(
   config: RenovateConfig,
   branchList: string[],
 ): Promise<void> {
-  await validateReconfigureBranch(config);
-  await configMigration(config, branchList);
+  await checkReconfigureBranch(config);
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
   await ensureIssuesClosing();

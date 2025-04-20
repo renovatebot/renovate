@@ -75,7 +75,7 @@ export function getPrBodyStruct(
   if (debugPayload) {
     try {
       result.debugData = JSON.parse(fromBase64(debugPayload));
-    } catch (e) {
+    } catch {
       logger.warn('Unable to read and parse debugData from the PR');
     }
   }

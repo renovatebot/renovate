@@ -1,23 +1,30 @@
 import type { S3Client } from '@aws-sdk/client-s3';
-import { mockDeep } from 'jest-mock-extended';
-import { s3 } from '../../test/s3';
-import { fs, logger } from '../../test/util';
+import { mock, mockDeep } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../config/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
 import {
   addBranchStats,
   addExtractionStats,
+  addLibYears,
   exportStats,
   finalizeReport,
   getReport,
+  resetReport,
 } from './reporting';
+import type { Report } from './types';
+import { s3 } from '~test/s3';
+import { fs, logger } from '~test/util';
 
-jest.mock('../util/fs', () => mockDeep());
-jest.mock('../util/s3', () => mockDeep());
-jest.mock('../logger', () => mockDeep());
+vi.mock('../util/fs', () => mockDeep());
+vi.mock('../util/s3', () => mockDeep());
+vi.mock('../logger', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
+  beforeEach(() => {
+    resetReport();
+  });
+
   const branchInformation: Partial<BranchCache>[] = [
     {
       branchName: 'a-branch-name',
@@ -53,7 +60,7 @@ describe('instrumentation/reporting', () => {
     ],
   };
 
-  const expectedReport = {
+  const expectedReport: Report = {
     problems: [],
     repositories: {
       'myOrg/myRepo': {
@@ -72,6 +79,7 @@ describe('instrumentation/reporting', () => {
       branches: [],
       packageFiles: {},
     });
+    addLibYears(config, {}, 0, 0, 0);
 
     expect(getReport()).toEqual({
       problems: [],
@@ -125,9 +133,8 @@ describe('instrumentation/reporting', () => {
   });
 
   it('send report to an S3 bucket if reportType is s3', async () => {
-    const mockClient = mockDeep<S3Client>();
+    const mockClient = mock<S3Client>();
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
-    // @ts-expect-error TS2589
     s3.getS3Client.mockReturnValue(mockClient);
 
     const config: RenovateConfig = {
@@ -223,5 +230,33 @@ describe('instrumentation/reporting', () => {
     finalizeReport();
 
     expect(getReport()).toEqual(expectedReport);
+  });
+
+  it('should handle libyears addition', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+    addLibYears(config, { npm: 1 }, 1, 1, 1);
+
+    expect(getReport()).toEqual({
+      problems: [],
+      repositories: {
+        'myOrg/myRepo': {
+          problems: [],
+          branches: branchInformation,
+          packageFiles,
+          libYears: {
+            managerLibYears: { npm: 1 },
+            totalLibYears: 1,
+            totalDepsCount: 1,
+            outdatedDepsCount: 1,
+          },
+        },
+      },
+    });
   });
 });

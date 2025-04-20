@@ -15,7 +15,7 @@ export function parseFileConfig(
   if (fileType === '.json5') {
     try {
       return { success: true, parsedContents: JSON5.parse(fileContents) };
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.debug({ fileName, fileContents }, 'Error parsing JSON5 file');
       const validationError = 'Invalid JSON5 (parsing failed)';
       const validationMessage = `JSON5.parse error: \`${err.message.replaceAll(
@@ -62,7 +62,7 @@ export function parseFileConfig(
         success: true,
         parsedContents: parseJson(fileContents, fileName),
       };
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       logger.debug({ fileContents }, 'Error parsing renovate config');
       const validationError = 'Invalid JSON (parsing failed)';
       const validationMessage = `JSON.parse error:  \`${err.message.replaceAll(

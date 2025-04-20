@@ -55,15 +55,11 @@ export function extractPackageFileFlags(
     res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
   }
   if (additionalRequirementsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
+    res.managerData ??= {};
     res.managerData.requirementsFiles = additionalRequirementsFiles;
   }
   if (additionalConstraintsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
+    res.managerData ??= {};
     res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;

@@ -1,7 +1,8 @@
-import { Decorator, decorate } from '.';
+import type { Decorator } from '.';
+import { decorate } from '.';
 
 interface WrapParameters {
-  mock: jest.Mock;
+  mock: (_: string) => string;
 }
 
 function wrap<T>({ mock }: WrapParameters): Decorator<T> {
@@ -14,7 +15,7 @@ function wrap<T>({ mock }: WrapParameters): Decorator<T> {
 
 describe('util/decorator/index', () => {
   it('wraps a function', async () => {
-    const mock = jest.fn();
+    const mock = vi.fn();
     class MyClass {
       @wrap({ mock })
       async underTest() {

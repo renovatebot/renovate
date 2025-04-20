@@ -3,10 +3,12 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import {
+import type {
   GetDigestInputConfig,
   Release,
   ReleaseResult,
+} from '../../../../modules/datasource';
+import {
   applyDatasourceFilters,
   getDigest,
   getRawPkgReleases,
@@ -17,35 +19,52 @@ import {
   getDatasourceFor,
   getDefaultVersioning,
 } from '../../../../modules/datasource/common';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { assignKeys } from '../../../../util/assign-keys';
+import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
+import type { Timestamp } from '../../../../util/timestamp';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
+import { calculateLatestReleaseBump } from './timestamps';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils';
 
-function getTimestamp(
+async function getTimestamp(
+  config: LookupUpdateConfig,
   versions: Release[],
   version: string,
-  versioning: allVersioning.VersioningApi,
-): string | null | undefined {
-  return versions.find(
+  versioningApi: allVersioning.VersioningApi,
+): Promise<Timestamp | null | undefined> {
+  const currentRelease = versions.find(
     (v) =>
-      versioning.isValid(v.version) && versioning.equals(v.version, version),
-  )?.releaseTimestamp;
+      versioningApi.isValid(v.version) &&
+      versioningApi.equals(v.version, version),
+  );
+
+  if (!currentRelease) {
+    return null;
+  }
+
+  if (currentRelease.releaseTimestamp) {
+    return currentRelease.releaseTimestamp;
+  }
+
+  const remoteRelease = await postprocessRelease(config, currentRelease);
+  return remoteRelease?.releaseTimestamp;
 }
 
 export async function lookupUpdates(
@@ -54,9 +73,7 @@ export async function lookupUpdates(
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 
-  const versioning = allVersioning.get(config.versioning);
-  const unconstrainedValue =
-    !!config.lockedVersion && is.undefined(config.currentValue);
+  const versioningApi = allVersioning.get(config.versioning);
 
   let dependency: ReleaseResult | null = null;
   const res: UpdateResult = {
@@ -120,13 +137,18 @@ export async function lookupUpdates(
         );
       }
     }
-    const isValid = is.string(compareValue) && versioning.isValid(compareValue);
 
-    if (unconstrainedValue || isValid) {
+    const isValid =
+      is.string(compareValue) && versioningApi.isValid(compareValue);
+
+    const unconstrainedValue =
+      !!config.lockedVersion && is.undefined(config.currentValue);
+
+    if (isValid || unconstrainedValue) {
       if (
         !config.updatePinnedDependencies &&
         // TODO #22198
-        versioning.isSingleVersion(compareValue!)
+        versioningApi.isSingleVersion(compareValue!)
       ) {
         res.skipReason = 'is-pinned';
         return Result.ok(res);
@@ -135,6 +157,7 @@ export async function lookupUpdates(
       const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
         config,
       )
+        .transform((res) => calculateLatestReleaseBump(versioningApi, res))
         .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 
@@ -183,7 +206,7 @@ export async function lookupUpdates(
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
       let allVersions = dependency.releases.filter((release) =>
-        versioning.isVersion(release.version),
+        versioningApi.isVersion(release.version),
       );
       // istanbul ignore if
       if (allVersions.length === 0) {
@@ -200,7 +223,10 @@ export async function lookupUpdates(
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
-      config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
+      config = await applyPackageRules(
+        { ...config, sourceUrl: res.sourceUrl },
+        'source-url',
+      );
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
@@ -214,14 +240,14 @@ export async function lookupUpdates(
           (v) =>
             v.version === taggedVersion ||
             (v.version === compareValue &&
-              versioning.isGreaterThan(taggedVersion, compareValue)),
+              versioningApi.isGreaterThan(taggedVersion, compareValue)),
         );
       }
       // Check that existing constraint can be satisfied
       const allSatisfyingVersions = allVersions.filter(
         (v) =>
           // TODO #22198
-          unconstrainedValue || versioning.matches(v.version, compareValue!),
+          unconstrainedValue || versioningApi.matches(v.version, compareValue!),
       );
       if (!allSatisfyingVersions.length) {
         logger.debug(
@@ -230,7 +256,7 @@ export async function lookupUpdates(
       }
 
       if (config.rollbackPrs && !allSatisfyingVersions.length) {
-        const rollback = getRollbackUpdate(config, allVersions, versioning);
+        const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
           res.warnings.push({
@@ -274,7 +300,7 @@ export async function lookupUpdates(
         getCurrentVersion(
           compareValue!,
           config.lockedVersion!,
-          versioning,
+          versioningApi,
           rangeStrategy!,
           latestVersion!,
           nonDeprecatedVersions,
@@ -282,7 +308,7 @@ export async function lookupUpdates(
         getCurrentVersion(
           compareValue!,
           config.lockedVersion!,
-          versioning,
+          versioningApi,
           rangeStrategy!,
           latestVersion!,
           allVersions.map((v) => v.version),
@@ -299,21 +325,27 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = getTimestamp(
+      const currentVersionTimestamp = await getTimestamp(
+        config,
         allVersions,
         currentVersion,
-        versioning,
+        versioningApi,
       );
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
+        res.currentVersionAgeInDays = getElapsedDays(currentVersionTimestamp);
+
         if (
-          config.packageRules?.some((rules) =>
-            is.nonEmptyString(rules.matchCurrentAge),
+          config.packageRules?.some((rule) =>
+            is.nonEmptyString(rule.matchCurrentAge),
           )
         ) {
           // Reapply package rules to check matches for matchCurrentAge
-          config = applyPackageRules({ ...config, currentVersionTimestamp });
+          config = await applyPackageRules(
+            { ...config, currentVersionTimestamp },
+            'current-timestamp',
+          );
         }
       }
 
@@ -321,20 +353,20 @@ export async function lookupUpdates(
         compareValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
-        !versioning.isSingleVersion(compareValue)
+        !versioningApi.isSingleVersion(compareValue)
       ) {
         res.updates.push({
           updateType: 'pin',
           isPin: true,
           // TODO: newValue can be null! (#22198)
-          newValue: versioning.getNewValue({
+          newValue: versioningApi.getNewValue({
             currentValue: compareValue,
             rangeStrategy,
             currentVersion,
             newVersion: currentVersion,
           })!,
           newVersion: currentVersion,
-          newMajor: versioning.getMajor(currentVersion)!,
+          newMajor: versioningApi.getMajor(currentVersion)!,
         });
       }
       if (rangeStrategy === 'pin') {
@@ -342,7 +374,7 @@ export async function lookupUpdates(
         rangeStrategy = 'replace';
       }
       // istanbul ignore if
-      if (!versioning.isVersion(currentVersion!)) {
+      if (!versioningApi.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
         return Result.ok(res);
       }
@@ -355,19 +387,74 @@ export async function lookupUpdates(
         config.rangeStrategy === 'in-range-only'
           ? allSatisfyingVersions
           : allVersions,
-        versioning,
+        versioningApi,
       ).filter(
         (v) =>
           // Leave only compatible versions
           unconstrainedValue ||
-          versioning.isCompatible(v.version, compareValue),
+          versioningApi.isCompatible(v.version, compareValue),
       );
+      let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
-        filteredReleases = filteredReleases.slice(0, 1);
-        logger.debug(
-          { filteredReleases },
-          'Vulnerability alert found: limiting results to a single release',
-        );
+        if (config.vulnerabilityFixVersion) {
+          res.vulnerabilityFixVersion = config.vulnerabilityFixVersion;
+          res.vulnerabilityFixStrategy = config.vulnerabilityFixStrategy;
+          if (versioningApi.isValid(config.vulnerabilityFixVersion)) {
+            let fixedFilteredReleases;
+            if (versioningApi.isVersion(config.vulnerabilityFixVersion)) {
+              // Retain only releases greater than or equal to the fix version
+              fixedFilteredReleases = filteredReleases.filter(
+                (release) =>
+                  !versioningApi.isGreaterThan(
+                    config.vulnerabilityFixVersion!,
+                    release.version,
+                  ),
+              );
+            } else {
+              // Retain only releases which max the fix constraint
+              fixedFilteredReleases = filteredReleases.filter((release) =>
+                versioningApi.matches(
+                  release.version,
+                  config.vulnerabilityFixVersion!,
+                ),
+              );
+            }
+            // Warn if this filtering results caused zero releases
+            if (fixedFilteredReleases.length === 0 && filteredReleases.length) {
+              logger.warn(
+                {
+                  releases: filteredReleases,
+                  vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                  packageName: config.packageName,
+                },
+                'No releases satisfy vulnerabilityFixVersion',
+              );
+            }
+            // Use the additionally filtered releases
+            filteredReleases = fixedFilteredReleases;
+          } else {
+            logger.warn(
+              {
+                vulnerabilityFixVersion: config.vulnerabilityFixVersion,
+                packageName: config.packageName,
+              },
+              'vulnerabilityFixVersion is not valid',
+            );
+          }
+        }
+        if (config.vulnerabilityFixStrategy === 'highest') {
+          // Don't shrink the list of releases - let Renovate use its normal logic
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=highest for ${config.packageName}`,
+          );
+        } else {
+          // Shrink the list of releases to the lowest fixed version
+          logger.once.debug(
+            `Using vulnerabilityFixStrategy=lowest for ${config.packageName}`,
+          );
+          filteredReleases = filteredReleases.slice(0, 1);
+          shrinkedViaVulnerability = true;
+        }
       }
       const buckets: Record<string, [Release]> = {};
       for (const release of filteredReleases) {
@@ -376,7 +463,7 @@ export async function lookupUpdates(
           // TODO #22198
           currentVersion!,
           release.version,
-          versioning,
+          versioningApi,
         );
         if (is.string(bucket)) {
           if (buckets[bucket]) {
@@ -389,12 +476,12 @@ export async function lookupUpdates(
       const depResultConfig = mergeChildConfig(config, res);
       for (const [bucket, releases] of Object.entries(buckets)) {
         const sortedReleases = releases.sort((r1, r2) =>
-          versioning.sortVersions(r1.version, r2.version),
+          versioningApi.sortVersions(r1.version, r2.version),
         );
         const { release, pendingChecks, pendingReleases } =
           await filterInternalChecks(
             depResultConfig,
-            versioning,
+            versioningApi,
             bucket,
             sortedReleases,
           );
@@ -406,7 +493,7 @@ export async function lookupUpdates(
         const update = await generateUpdate(
           config,
           compareValue,
-          versioning,
+          versioningApi,
           // TODO #22198
 
           rangeStrategy!,
@@ -454,16 +541,16 @@ export async function lookupUpdates(
         }
         res.isSingleVersion ??=
           is.string(update.newValue) &&
-          versioning.isSingleVersion(update.newValue);
+          versioningApi.isSingleVersion(update.newValue);
         // istanbul ignore if
         if (
           config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
-          versioning.isVersion(update.newValue) &&
+          versioningApi.isVersion(update.newValue) &&
           compareValue &&
-          versioning.isVersion(compareValue) &&
-          versioning.isGreaterThan(compareValue, update.newValue)
+          versioningApi.isVersion(compareValue) &&
+          versioningApi.isGreaterThan(compareValue, update.newValue)
         ) {
           logger.warn(
             {
@@ -474,6 +561,7 @@ export async function lookupUpdates(
               update,
               allVersionsLength: allVersions.length,
               filteredReleaseVersions: filteredReleases.map((r) => r.version),
+              shrinkedViaVulnerability,
             },
             'Unexpected downgrade detected: skipping',
           );
@@ -500,13 +588,19 @@ export async function lookupUpdates(
 
     if (isReplacementRulesConfigured(config)) {
       addReplacementUpdateIfValid(res.updates, config);
+    } else if (dependency?.replacementName && dependency.replacementVersion) {
+      res.updates.push({
+        updateType: 'replacement',
+        newName: dependency.replacementName,
+        newValue: dependency.replacementVersion,
+      });
     }
 
     // Record if the dep is fixed to a version
     if (config.lockedVersion) {
       res.currentVersion = config.lockedVersion;
       res.fixedVersion = config.lockedVersion;
-    } else if (compareValue && versioning.isSingleVersion(compareValue)) {
+    } else if (compareValue && versioningApi.isSingleVersion(compareValue)) {
       res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
 
@@ -548,12 +642,12 @@ export async function lookupUpdates(
           });
         }
       }
-      if (versioning.valueToVersion) {
+      if (versioningApi.valueToVersion) {
         // TODO #22198
-        res.currentVersion = versioning.valueToVersion(res.currentVersion!);
+        res.currentVersion = versioningApi.valueToVersion(res.currentVersion!);
         for (const update of res.updates || /* istanbul ignore next*/ []) {
           // TODO #22198
-          update.newVersion = versioning.valueToVersion(update.newVersion!);
+          update.newVersion = versioningApi.valueToVersion(update.newVersion!);
         }
       }
       if (res.registryUrl) {
@@ -683,7 +777,6 @@ export async function lookupUpdates(
         rollbackPrs: config.rollbackPrs,
         isVulnerabilityAlert: config.isVulnerabilityAlert,
         updatePinnedDependencies: config.updatePinnedDependencies,
-        unconstrainedValue,
         err,
       },
       'lookupUpdates error',

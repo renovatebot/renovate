@@ -19,13 +19,13 @@ export function updateDependency({
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType } = upgrade;
     const currentName = upgrade.depName;
-    // istanbul ignore if: should never happen
+    /* v8 ignore next 3 -- should never happen */
     if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    // istanbul ignore if: hard to test
+    /* v8 ignore next 4 -- hard to test */
     if (lines.length <= upgrade.managerData.lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;

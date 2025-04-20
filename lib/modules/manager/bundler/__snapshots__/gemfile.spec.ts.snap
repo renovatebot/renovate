@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/bundler/gemfile matches the expected output 1`] = `
+exports[`modules/manager/bundler/gemfile > matches the expected output 1`] = `
 Map {
   "activerecord-jdbc-adapter" => "52.1-java",
   "activerecord-jdbcmysql-adapter" => "52.1-java",

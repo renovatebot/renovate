@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > extracts dependencies 1`] = `
 {
   "deps": [
     {
@@ -8,23 +8,27 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts 
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
+      "packageName": "some-package",
     },
     {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
+      "packageName": "some-other-package",
     },
     {
       "currentValue": undefined,
       "datasource": "pypi",
       "depName": "sphinx",
+      "packageName": "sphinx",
     },
     {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
+      "packageName": "not-semver",
     },
   ],
   "registryUrls": [
@@ -33,54 +37,61 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts 
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > extracts multiple dependencies 1`] = `
 [
   {
     "currentValue": "==1",
     "currentVersion": "1",
     "datasource": "pypi",
     "depName": "Django",
+    "packageName": "django",
   },
   {
     "currentValue": "==0.6.27",
     "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
+    "packageName": "distribute",
   },
   {
     "currentValue": "==0.2",
     "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
+    "packageName": "dj-database-url",
   },
   {
     "currentValue": "==2.4.5",
     "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
+    "packageName": "psycopg2",
   },
   {
     "currentValue": "==0.1.2",
     "currentVersion": "0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
+    "packageName": "wsgiref",
   },
 ]
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles comments and commands 1`] = `
 [
   {
     "currentValue": "==1.11.23",
     "currentVersion": "1.11.23",
     "datasource": "pypi",
     "depName": "Django",
+    "packageName": "django",
   },
   {
     "currentValue": "==0.6.27",
     "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
+    "packageName": "distribute",
     "skipReason": "ignored",
   },
   {
@@ -88,23 +99,26 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles c
     "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
+    "packageName": "dj-database-url",
   },
   {
     "currentValue": "==2.4.5",
     "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
+    "packageName": "psycopg2",
   },
   {
     "currentValue": "==0.1.2",
     "currentVersion": "0.1.2",
     "datasource": "pypi",
     "depName": "wsgiref",
+    "packageName": "wsgiref",
   },
 ]
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -115,36 +129,42 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
+      "packageName": "celery",
     },
     {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
+      "packageName": "foo",
     },
     {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
+      "packageName": "some-package",
     },
     {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
+      "packageName": "some-other-package",
     },
     {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
+      "packageName": "not-semver",
     },
   ],
   "registryUrls": [
@@ -153,7 +173,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url and defaults without index to config 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -164,42 +184,48 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
+      "packageName": "celery",
     },
     {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
+      "packageName": "foo",
     },
     {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
+      "packageName": "some-package",
     },
     {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
+      "packageName": "some-other-package",
     },
     {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
+      "packageName": "not-semver",
     },
   ],
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra index url and defaults without index to pypi 1`] = `
 {
   "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
@@ -210,42 +236,48 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
+      "packageName": "celery",
     },
     {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
+      "packageName": "foo",
     },
     {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
+      "packageName": "some-package",
     },
     {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
+      "packageName": "some-other-package",
     },
     {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
+      "packageName": "not-semver",
     },
   ],
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extra spaces around pinned dependency equal signs 1`] = `
 {
   "deps": [
     {
@@ -253,18 +285,21 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
+      "packageName": "celery",
     },
     {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
+      "packageName": "foo",
     },
   ],
   "registryUrls": [
@@ -273,7 +308,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > handles extras and complex index url 1`] = `
 {
   "deps": [
     {
@@ -281,18 +316,21 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
+      "packageName": "celery",
     },
     {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
+      "packageName": "foo",
     },
   ],
   "registryUrls": [
@@ -301,7 +339,7 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() handles e
 }
 `;
 
-exports[`modules/manager/pip_requirements/extract extractPackageFile() should handle hashes 1`] = `
+exports[`modules/manager/pip_requirements/extract > extractPackageFile() > should handle hashes 1`] = `
 {
   "deps": [
     {
@@ -309,18 +347,21 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() should ha
       "currentVersion": "1.9.1",
       "datasource": "pypi",
       "depName": "Django",
+      "packageName": "django",
     },
     {
       "currentValue": "==0.22.1",
       "currentVersion": "0.22.1",
       "datasource": "pypi",
       "depName": "bgg",
+      "packageName": "bgg",
     },
     {
       "currentValue": "==2016.1.8",
       "currentVersion": "2016.1.8",
       "datasource": "pypi",
       "depName": "html2text",
+      "packageName": "html2text",
     },
   ],
 }

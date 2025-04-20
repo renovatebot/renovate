@@ -13,6 +13,10 @@ Options:
 | format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
+<!-- prettier-ignore -->
+!!! tip
+    Use [JSONata Exerciser](https://try.jsonata.org/) to test your JSONata rules.
+
 Available template variables:
 
 - `packageName`
@@ -83,10 +87,14 @@ All available options:
 
 ### Debugging
 
-Renovate writes tracing log entries before transformation starts and after if Renovate finds an unexpected data format.
-To surface this data you can use `logLevelRemap` to surface this data on the App or run Renovate in dryRun mode and log level set to `trace` locally.
+Renovate writes tracing logs entries before transformation.
+If Renovate finds an unexpected dataformat, it also writes a tracing log _after_ transformation.
 
-```json
+#### Getting trace level logs on hosted app
+
+If you use the Mend Renovate app, use the [`logLevelRemap` config option](../../../configuration-options.md#loglevelremap) to get the trace log.
+
+```json title="Getting trace logs from the Mend Renovate app"
 {
   "logLevelRemap": [
     {
@@ -96,6 +104,13 @@ To surface this data you can use `logLevelRemap` to surface this data on the App
   ]
 }
 ```
+
+#### Getting trace level logs when self-hosting
+
+If you self-host Renovate, follow these steps to get the trace logs:
+
+1. Set the [`LOG_FILE_LEVEL` env var](../../../config-overview.md#logging-variables) to `trace`
+1. Run Renovate in [`dryRun` mode](../../../self-hosted-configuration.md#dryrun)
 
 ### Formats
 

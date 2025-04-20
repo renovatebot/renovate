@@ -1,26 +1,28 @@
 import is from '@sindresorhus/is';
-import { mock } from 'jest-mock-extended';
-import { Response, SimpleGit, SimpleGitFactory, simpleGit } from 'simple-git';
+import type { Response, SimpleGit } from 'simple-git';
+import Git from 'simple-git';
+import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { extractPackageFile } from '.';
 
-jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
-const Git = jest.requireActual<SimpleGitFactory>('simple-git');
+vi.mock('simple-git', () => ({ default: vi.fn() }));
+const simpleGitFactoryMock = vi.mocked(Git);
 
 const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/extract', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    const { simpleGit: Git } =
+      await vi.importActual<typeof import('simple-git')>('simple-git');
     GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
     // clear host rules
     hostRules.clear();
     // clear environment variables
     process.env = {};
 
-    simpleGitFactoryMock.mockImplementation((basePath: string) => {
-      const git = Git(basePath);
+    simpleGitFactoryMock.mockImplementation((...args: any[]) => {
+      const git = Git(...args);
 
       gitMock.env.mockImplementation(() => gitMock);
       gitMock.subModule.mockResolvedValue(
@@ -118,6 +120,7 @@ describe('modules/manager/git-submodules/extract', () => {
     it('default to master if no branch can be detected', async () => {
       const res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].versioning).toBeUndefined();
       expect(res?.deps[0].currentValue).toBe('master');
     });
 
@@ -332,6 +335,35 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'staging',
             depName: 'PowerShell-Docs',
             packageName: 'https://github.com/PowerShell/PowerShell-Docs',
+          },
+        ],
+      });
+    });
+
+    it('given semver version is extracted from branch and versioning is set to semver', async () => {
+      const res = await extractPackageFile('', '.gitmodules.8', {});
+      expect(res).toEqual({
+        datasource: 'git-refs',
+        deps: [
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'v0.0.1',
+            depName: 'deps/renovate1',
+            packageName: 'https://github.com/renovatebot/renovate.git',
+            versioning: 'semver',
+          },
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: '0.0.1',
+            depName: 'deps/renovate2',
+            packageName: 'https://github.com/renovatebot/renovate.git',
+            versioning: 'semver',
+          },
+          {
+            currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            currentValue: 'not-a-semver',
+            packageName: 'https://github.com/renovatebot/renovate.git',
+            depName: 'deps/renovate3',
           },
         ],
       });

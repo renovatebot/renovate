@@ -1,3 +1,4 @@
+import type { PlatformCommitOptions } from '../../config/types';
 import type { GitOptions } from '../../types/git';
 
 export type { DiffResult, StatusResult } from 'simple-git';
@@ -20,6 +21,7 @@ export interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
 }
 
@@ -81,7 +83,11 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string | string[];
   force?: boolean;
-  platformCommit?: boolean;
+  platformCommit?: PlatformCommitOptions;
+  /** Only needed by Gerrit platform */
+  prTitle?: string;
+  /** Only needed by Gerrit platform */
+  autoApprove?: boolean;
 }
 
 export interface PushFilesConfig {

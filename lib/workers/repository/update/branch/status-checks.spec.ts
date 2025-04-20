@@ -1,12 +1,12 @@
-import { RenovateConfig, partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
+import type { ConfidenceConfig, StabilityConfig } from './status-checks';
 import {
-  ConfidenceConfig,
-  StabilityConfig,
   resolveBranchStatus,
   setConfidence,
   setStability,
 } from './status-checks';
+import { partial, platform } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/update/branch/status-checks', () => {
   describe('setStability', () => {
@@ -20,8 +20,6 @@ describe('workers/repository/update/branch/status-checks', () => {
         }),
       });
     });
-
-    afterEach(() => {});
 
     it('returns if not configured', async () => {
       await setStability(config);

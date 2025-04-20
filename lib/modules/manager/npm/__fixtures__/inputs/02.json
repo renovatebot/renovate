@@ -13,6 +13,11 @@
     "@babel/core": "7.0.0",
     "config": "1.21.0"
   },
+  "pnpm": {
+    "overrides": {
+      "express>cookie": "0.7.0"
+    }
+  },
   "homepage": "https://keylocation.sg",
   "keywords": [
     "Key Location",

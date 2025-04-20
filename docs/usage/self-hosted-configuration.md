@@ -17,17 +17,13 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## allowCustomCrateRegistries
-
-## allowPlugins
-
-## allowPostUpgradeCommandTemplating
+## allowCommandTemplating
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
 ```javascript
 module.exports = {
-  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
@@ -58,10 +54,33 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
-If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
+If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
+
+This configuration option was previously named `allowPostUpgradeCommandTemplating`.
+
+## allowCustomCrateRegistries
+
+## allowPlugins
 
 ## allowScripts
+
+## allowedCommands
+
+A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+
+If you are using a template command, the regular expression should match the template itself, not the final resolved value.
+If this list is empty then no tasks will be executed.
+
+For example:
+
+```json
+{
+  "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+}
+```
+
+This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## allowedEnv
 
@@ -127,19 +146,6 @@ Or with custom `allowedHeaders`:
 module.exports = {
   allowedHeaders: ['custom-header'],
 };
-```
-
-## allowedPostUpgradeCommands
-
-A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
-If this list is empty then no tasks will be executed.
-
-For example:
-
-```json
-{
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
-}
 ```
 
 ## autodiscover
@@ -344,6 +350,92 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 }
 ```
 
+Valid codes for namespaces are as follows:
+
+- `changelog-bitbucket-notes@v2`
+- `changelog-bitbucket-release`
+- `changelog-gitea-notes@v2`
+- `changelog-gitea-release`
+- `changelog-github-notes@v2`
+- `changelog-github-release`
+- `changelog-gitlab-notes@v2`
+- `changelog-gitlab-release`
+- `datasource-artifactory`
+- `datasource-aws-machine-image`
+- `datasource-aws-rds`
+- `datasource-azure-bicep-resource`
+- `datasource-azure-pipelines-tasks`
+- `datasource-bazel`
+- `datasource-bitbucket-tags`
+- `datasource-bitrise`
+- `datasource-cdnjs`
+- `datasource-conan`
+- `datasource-conda`
+- `datasource-cpan`
+- `datasource-crate-metadata`
+- `datasource-crate`
+- `datasource-deb`
+- `datasource-deno`
+- `datasource-docker-architecture`
+- `datasource-docker-hub-cache`
+- `datasource-docker-digest`
+- `datasource-docker-hub-tags`
+- `datasource-docker-imageconfig`
+- `datasource-docker-labels`
+- `datasource-docker-releases-v2`
+- `datasource-docker-tags`
+- `datasource-dotnet-version`
+- `datasource-endoflife-date`
+- `datasource-galaxy-collection`
+- `datasource-galaxy`
+- `datasource-git-refs`
+- `datasource-git-tags`
+- `datasource-git`
+- `datasource-gitea-releases`
+- `datasource-gitea-tags`
+- `datasource-github-release-attachments`
+- `datasource-gitlab-packages`
+- `datasource-gitlab-releases`
+- `datasource-gitlab-tags`
+- `datasource-glasskube-packages`
+- `datasource-go-direct`
+- `datasource-go-proxy`
+- `datasource-go`
+- `datasource-golang-version`
+- `datasource-gradle-version`
+- `datasource-helm`
+- `datasource-hermit`
+- `datasource-hex`
+- `datasource-hexpm-bob`
+- `datasource-java-version`
+- `datasource-jenkins-plugins`
+- `datasource-maven`
+- `datasource-maven:head-requests-timeout`
+- `datasource-maven:head-requests`
+- `datasource-maven:metadata-xml`
+- `datasource-node-version`
+- `datasource-npm:data`
+- `datasource-nuget-v3`
+- `datasource-orb`
+- `datasource-packagist`
+- `datasource-pod`
+- `datasource-python-version`
+- `datasource-releases`
+- `datasource-repology`
+- `datasource-ruby-version`
+- `datasource-rubygems`
+- `datasource-sbt-package`
+- `datasource-terraform-module`
+- `datasource-terraform-provider`
+- `datasource-terraform`
+- `datasource-unity3d`
+- `github-releases-datasource-v2`
+- `github-tags-datasource-v2`
+- `merge-confidence`
+- `preset`
+- `terraform-provider-hash`
+- `url-sha256`
+
 ## checkedBranches
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
@@ -388,6 +480,16 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## deleteConfigFile
+
+If set to `true` Renovate tries to delete the self-hosted config file after reading it.
+
+The process that runs Renovate must have the correct permissions to delete the config file.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can tell Renovate where to find your config file with the `RENOVATE_CONFIG_FILE` environment variable.
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
@@ -401,9 +503,10 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
+- `RENOVATE_` prefix (at the moment this prefix optional, but usage of prefix will be required in the future)
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
-- `matchHost`
+- `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
 - Underscore (`_`)
 - Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
@@ -504,6 +607,11 @@ You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar 
 For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+
+## dockerMaxPages
+
+If set to an positive integer, Renovate will use this value as the maximum page number.
+Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
 
 ## dockerSidecarImage
 
@@ -638,7 +746,9 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 
 ## gitPrivateKey
 
-This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
+This is a private PGP or SSH key for signing Git commits.
+
+For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
 <!-- prettier-ignore -->
@@ -648,8 +758,8 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before)
-1. Run `git config user.signingkey` and `git config commit.gpgsign true`
+1. Run `gpg import` (if you haven't before) when using PGP
+1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
@@ -661,7 +771,6 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 
@@ -671,7 +780,7 @@ Possible values:
 
 ## githubTokenWarn
 
-By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
@@ -761,10 +870,6 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
-## logFile
-
-## logFileLevel
-
 ## mergeConfidenceDatasources
 
 This feature is applicable only if you have an access token for Mend's Merge Confidence API.
@@ -850,8 +955,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to `true` if you want Renovate to create an onboarding PR even if no dependencies are found.
-Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
@@ -1043,6 +1152,28 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Only supported in file configuration (not via CLI or environment).
+
 ## productLinks
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
@@ -1065,6 +1196,10 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+Renovate also supports connecting to Redis clusters as well. In order to connect to a cluster, provide the connection string using the `redis+cluster` or `rediss+cluster` schema as appropriate.
+
+Example URL structure: `redis+cluster://[[username]:[password]]@redis.cluster.local:6379/0`
+
 ## reportPath
 
 `reportPath` describes the location where the report is written to.
@@ -1082,15 +1217,16 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovate_x_s3_endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovate_x_s3_path_style)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define more settings:
+Elements in the `repositories` array can be an object if you wish to define more settings.
+Example:
 
 ```js
 {
-  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
+  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
 }
 ```
 
@@ -1139,6 +1275,23 @@ The combinations of `requireConfig` and `onboarding` are:
 | `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
 | `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
 | `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+
+## s3Endpoint
+
+If set, Renovate will use this string as the `endpoint` when creating the AWS S3 client instance.
+
+## s3PathStyle
+
+If set, Renovate will enable `forcePathStyle` when creating the AWS S3 client instance.
+
+For example:
+
+| `s3PathStyle` | Path                               |
+| ------------- | ---------------------------------- |
+| `off`         | `https://bucket.s3.amazonaws.com/` |
+| `on`          | `https://s3.amazonaws.com/bucket/` |
+
+Read the [AWS S3 docs, Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html) to learn more about path-style URLs.
 
 ## secrets
 
@@ -1202,12 +1355,9 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 
 ## username
 
-You may need to set a `username` if you:
-
-- use the Bitbucket platform, or
-- use a self-hosted GitHub App with CLI (required)
-
-If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
+The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
+You don't need to configure `username` directly if you have already configured `token`.
+Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
 
 ## writeDiscoveredRepos
 

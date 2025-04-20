@@ -8,6 +8,7 @@ import { id as semverId } from '../../versioning/semver';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -48,7 +49,7 @@ export class GoDatasource extends Datasource {
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#22198)
-    key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.goproxy.getReleases(config);
@@ -65,12 +66,13 @@ export class GoDatasource extends Datasource {
    *  - Call the respective getDigest in github to retrieve the commit hash
    */
   @cache({
-    namespace: GoDatasource.id,
-    key: ({ packageName }: DigestConfig) => `${packageName}-digest`,
+    namespace: `datasource-${GoDatasource.id}`,
+    key: ({ packageName }: DigestConfig, newValue?: string) =>
+      `getDigest:${packageName}:${newValue}`,
   })
   override async getDigest(
     { packageName }: DigestConfig,
-    value?: string | null,
+    newValue?: string,
   ): Promise<string | null> {
     if (parseGoproxy().some(({ url }) => url === 'off')) {
       logger.debug(
@@ -87,13 +89,18 @@ export class GoDatasource extends Datasource {
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
-        ? value
+      newValue &&
+      !GoDatasource.pversionRegexp.test(newValue) &&
+      newValue !== 'v0.0.0'
+        ? newValue
         : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
         return this.direct.git.getDigest(source, tag);
+      }
+      case GiteaTagsDatasource.id: {
+        return this.direct.gitea.getDigest(source, tag);
       }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
@@ -112,7 +119,7 @@ export class GoDatasource extends Datasource {
   }
 }
 
-// istanbul ignore if
+/* v8 ignore next 3 -- hard to test */
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
   if (uri?.password) {

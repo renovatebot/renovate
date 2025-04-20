@@ -1,4 +1,5 @@
-import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
+import type { ECRClientConfig } from '@aws-sdk/client-ecr';
+import { ECR } from '@aws-sdk/client-ecr';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { HttpError } from '../../../util/http';
@@ -57,7 +58,7 @@ export function isECRMaxResultsError(err: HttpError): boolean {
     resp?.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    resp.body?.['errors']?.[0]?.message?.includes(
+    resp.body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',
     )
   );

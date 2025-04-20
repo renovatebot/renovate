@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/flutter-version/index getReleases processes real data 1`] = `
+exports[`modules/datasource/flutter-version/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://flutter.dev",
   "registryUrl": "https://storage.googleapis.com",

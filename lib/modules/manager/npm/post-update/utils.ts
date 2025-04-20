@@ -3,7 +3,8 @@ import upath from 'upath';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { Lazy } from '../../../../util/lazy';
-import { PackageJson, PackageJsonSchema } from '../schema';
+import type { PackageJsonSchema } from '../schema';
+import { PackageJson } from '../schema';
 
 export function lazyLoadPackageJson(
   lockFileDir: string,

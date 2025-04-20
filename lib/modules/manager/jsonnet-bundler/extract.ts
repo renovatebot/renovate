@@ -12,7 +12,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
-  if (packageFile.match(/vendor\//)) {
+  if (packageFile.includes('vendor/')) {
     return null;
   }
 
@@ -20,7 +20,7 @@ export function extractPackageFile(
   let jsonnetFile: JsonnetFile;
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }

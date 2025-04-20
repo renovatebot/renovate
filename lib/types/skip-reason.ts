@@ -46,3 +46,15 @@ export type SkipReason =
   | 'recursive-placeholder'
   | 'github-token-required'
   | 'inherited-dependency';
+
+export type StageName =
+  | 'current-timestamp'
+  | 'datasource-merge'
+  | 'extract'
+  | 'lock-file-maintenance-merge'
+  | 'lock-file-maintenance-merge-2'
+  | 'lookup'
+  | 'pre-lookup'
+  | 'source-url'
+  | 'update-type'
+  | 'update-type-merge';

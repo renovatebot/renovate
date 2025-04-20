@@ -76,7 +76,7 @@ export async function checkYarnrc(
         );
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     // not found
   }
   return { offlineMirror, yarnPath };
@@ -192,7 +192,6 @@ export async function generateLockFile(
     }
 
     const execOptions: ExecOptions = {
-      userConfiguredEnv: config.env,
       cwdFile: lockFileName,
       extraEnv,
       docker: {},

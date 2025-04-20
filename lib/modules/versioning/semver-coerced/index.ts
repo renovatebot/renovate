@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import semver, { SemVer } from 'semver';
+import type { SemVer } from 'semver';
+import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -21,10 +22,10 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const major = m.groups['major'];
-  const newMinor = m.groups['minor'] ?? '.0';
-  const newPatch = m.groups['patch'] ?? '.0';
-  const others = m.groups['others'] ?? '';
+  const major = m.groups.major;
+  const newMinor = m.groups.minor ?? '.0';
+  const newPatch = m.groups.patch ?? '.0';
+  const others = m.groups.others ?? '';
   const fixed = major + newMinor + newPatch + others;
   return stable.is(fixed);
 }

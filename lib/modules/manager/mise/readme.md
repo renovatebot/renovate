@@ -7,7 +7,7 @@ Renovate's `mise` manager can version these tools:
 
 ### Renovate only updates primary versions
 
-Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
+Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `.mise.toml` file.
 
 Secondary or fallback versions require manual updates.
 

@@ -121,7 +121,7 @@ export function getNewValue({
     if (!ranges.length) {
       // an empty string is an allowed value for PEP440 range
       // it means get any version
-      logger.warn('Empty currentValue: ' + currentValue);
+      logger.warn({ currentValue }, 'Empty currentValue');
       return currentValue;
     }
   } catch (err) {
@@ -245,7 +245,7 @@ export function isLessThanRange(input: string, range: string): boolean {
     const result = results.every((res) => res === true);
 
     return invertResult ? !result : result;
-  } catch (err) /* istanbul ignore next */ {
+  } catch /* istanbul ignore next */ {
     return false;
   }
 }

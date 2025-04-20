@@ -4,6 +4,7 @@ import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
+import { GiteaTagsDatasource } from '../gitea-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -60,6 +61,7 @@ export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
   git: GitTagsDatasource;
+  readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
   gitlab: GitlabTagsDatasource;
   bitbucket: BitbucketTagsDatasource;
@@ -108,6 +110,10 @@ export class GoDirectDatasource extends Datasource {
         res = await this.git.getReleases(source);
         break;
       }
+      case GiteaTagsDatasource.id: {
+        res = await this.gitea.getReleases(source);
+        break;
+      }
       case GithubTagsDatasource.id: {
         res = await this.github.getReleases(source);
         break;
@@ -120,21 +126,23 @@ export class GoDirectDatasource extends Datasource {
         res = await this.bitbucket.getReleases(source);
         break;
       }
-      /* istanbul ignore next: can never happen, makes lint happy */
+      /* v8 ignore next 3 -- should never happen */
       default: {
         return null;
       }
     }
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (!res) {
       return null;
     }
 
     const sourceUrl = getSourceUrl(source) ?? null;
 
-    res.releases = filterByPrefix(packageName, res.releases);
-
-    return { ...res, sourceUrl };
+    return {
+      ...res,
+      releases: filterByPrefix(packageName, res.releases),
+      sourceUrl,
+    };
   }
 }

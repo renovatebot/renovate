@@ -85,6 +85,13 @@ export class GithubIssueCache {
     }
   }
 
+  static deleteIssue(number: number): void {
+    const cacheData = this.data;
+    if (cacheData) {
+      delete cacheData[number];
+    }
+  }
+
   /**
    * At the moment of repo initialization, repository cache is not available.
    * What we can do is to store issues for later reconciliation.

@@ -3,11 +3,8 @@ import { logger } from '../../../logger';
 import type { ToolingConfig } from '../asdf/upgradeable-tooling';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { MiseToolSchema } from './schema';
-import {
-  ToolingDefinition,
-  asdfTooling,
-  miseTooling,
-} from './upgradeable-tooling';
+import type { ToolingDefinition } from './upgradeable-tooling';
+import { asdfTooling, miseTooling } from './upgradeable-tooling';
 import { parseTomlFile } from './utils';
 
 export function extractPackageFile(
@@ -48,7 +45,7 @@ function parseVersion(toolData: MiseToolSchema): string | null {
     // e.g. 'erlang = ["23.3", "24.0"]'
     return toolData.length ? toolData[0] : null; // Get the first version in the array
   }
-  if (is.nonEmptyString(toolData.version)) {
+  if (is.object(toolData) && is.nonEmptyString(toolData.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
     return toolData.version;

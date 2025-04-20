@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { filterMap } from '../../../util/filter-map';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
 export const MarshalledVersionInfo = LooseArray(
@@ -36,7 +37,7 @@ export const GemVersions = LooseArray(
   z
     .object({
       number: z.string(),
-      created_at: z.string(),
+      created_at: MaybeTimestamp,
       platform: z.string().optional().catch(undefined),
       ruby_version: z.string().optional().catch(undefined),
       rubygems_version: z.string().optional().catch(undefined),

@@ -30,12 +30,18 @@ spec:
     repoURL: gs://helm-charts-internal
     targetRevision: 0.0.2
 ---
+# application with kustomize image overrides
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 spec:
   source:
     repoURL: https://git.example.com/foo/bar.git
     targetRevision: v1.2.0
+    kustomize:
+      images:
+        - someImage=somecontainer.registry.io/someContainer:v2.3.4
+        - otherImage=othercontainer.registry.io/other/container@sha256:8be5de38826b494a8ad1565b8d1eb49183d736d0277a89191bd1100d78479a42
+        - notActuallyValidAndShouldBeIgnored
 ---
 # malformed application as the source section is missing
 apiVersion: argoproj.io/v1alpha1

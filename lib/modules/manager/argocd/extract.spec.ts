@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const validApplication = Fixtures.get('validApplication.yml');
 const malformedApplication = Fixtures.get('malformedApplications.yml');
@@ -107,6 +107,26 @@ spec:
             currentValue: 'v1.2.0',
             datasource: 'git-tags',
             depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentValue: 'v2.3.4',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/someContainer',
+            packageName: 'somecontainer.registry.io/someContainer',
+            replaceString: 'somecontainer.registry.io/someContainer:v2.3.4',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest:
+              'sha256:8be5de38826b494a8ad1565b8d1eb49183d736d0277a89191bd1100d78479a42',
+            datasource: 'docker',
+            depName: 'othercontainer.registry.io/other/container',
+            packageName: 'othercontainer.registry.io/other/container',
+            replaceString:
+              'othercontainer.registry.io/other/container@sha256:8be5de38826b494a8ad1565b8d1eb49183d736d0277a89191bd1100d78479a42',
           },
           {
             currentValue: '1.2.0',

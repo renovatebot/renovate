@@ -1,14 +1,14 @@
-import { partial } from '../../../../../../test/util';
 import * as datasource from '../../../../../modules/datasource';
 import * as dockerVersioning from '../../../../../modules/versioning/docker';
 import * as npmVersioning from '../../../../../modules/versioning/npm';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as releases from './releases';
+import { partial } from '~test/util';
 
 describe('workers/repository/update/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
-      jest.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({
+      vi.spyOn(datasource, 'getPkgReleases').mockResolvedValueOnce({
         releases: [
           {
             version: '1.0.0',

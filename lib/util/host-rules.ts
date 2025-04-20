@@ -77,7 +77,7 @@ export interface HostRuleSearch {
   readOnly?: boolean;
 }
 
-function matchesHost(url: string, matchHost: string): boolean {
+export function matchesHost(url: string, matchHost: string): boolean {
   if (isHttpUrl(url) && isHttpUrl(matchHost)) {
     return url.startsWith(matchHost);
   }
@@ -110,7 +110,6 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
 }
 
 function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if ((hostType || readOnly) && matchHost) {
     return 3;
   }

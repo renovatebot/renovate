@@ -1,12 +1,14 @@
 import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
-import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
-import type { RawExecOptions } from './types';
+import type { DataListener, RawExecOptions } from './types';
+import { partial } from '~test/util';
 
-jest.mock('node:child_process');
-const spawn = mockedFunction(_spawn);
+vi.mock('node:child_process');
+vi.unmock('./common');
+
+const spawn = vi.mocked(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;
@@ -45,7 +47,7 @@ function getReadable(
     /*do nothing*/
   };
 
-  readable.destroy = (error?: Error | undefined): Readable => {
+  readable.destroy = (error?: Error): Readable => {
     return readable;
   };
 
@@ -116,7 +118,7 @@ function getSpawnStub(args: StubArgs): any {
     /* do nothing*/
   };
 
-  const kill = (signal?: number | NodeJS.Signals | undefined): boolean => {
+  const kill = (signal?: number | NodeJS.Signals): boolean => {
     /* do nothing*/
     return true;
   };
@@ -147,6 +149,10 @@ function getSpawnStub(args: StubArgs): any {
   };
 }
 
+function stringify(list: Buffer[]): string {
+  return Buffer.concat(list).toString('utf8');
+}
+
 describe('util/exec/common', () => {
   const cmd = 'ls -l';
   const stdout = 'out message';
@@ -172,6 +178,48 @@ describe('util/exec/common', () => {
         stderr,
         stdout,
       });
+    });
+
+    it('should invoke the output listeners', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      spawn.mockImplementationOnce((cmd, opts) => stub);
+
+      const stdoutListenerBuffer: Buffer[] = [];
+      const stdoutListener: DataListener = (chunk: Buffer) => {
+        stdoutListenerBuffer.push(chunk);
+      };
+
+      const stderrListenerBuffer: Buffer[] = [];
+      const stderrListener: DataListener = (chunk: Buffer) => {
+        stderrListenerBuffer.push(chunk);
+      };
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            encoding: 'utf8',
+            shell: 'bin/bash',
+            outputListeners: {
+              stdout: [stdoutListener],
+              stderr: [stderrListener],
+            },
+          }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+
+      expect(stringify(stdoutListenerBuffer)).toEqual(stdout);
+      expect(stringify(stderrListenerBuffer)).toEqual(stderr);
     });
 
     it('command exits with code 1', async () => {
@@ -284,11 +332,11 @@ describe('util/exec/common', () => {
   });
 
   describe('handle gpid', () => {
-    const killSpy = jest.spyOn(process, 'kill');
+    const killSpy = vi.spyOn(process, 'kill');
 
     afterEach(() => {
       delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {

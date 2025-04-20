@@ -1,18 +1,17 @@
 import is from '@sindresorhus/is';
-import {
+import type {
   ArgumentNode,
   DefinitionNode,
   DocumentNode,
   FieldNode,
-  Kind,
   OperationDefinitionNode,
   SelectionNode,
   SelectionSetNode,
   TypeNode,
   ValueNode,
   VariableDefinitionNode,
-  parse,
 } from 'graphql/language';
+import { Kind, parse } from 'graphql/language';
 
 function isOperationDefinitionNode(
   def: DefinitionNode,
@@ -84,7 +83,7 @@ function getArguments(key: string, val: ValueNode): Arguments {
 }
 
 function simplifyArguments(
-  argNodes?: ReadonlyArray<ArgumentNode>,
+  argNodes?: readonly ArgumentNode[],
 ): Arguments | null {
   if (argNodes) {
     let result: Arguments = {};
@@ -151,7 +150,7 @@ function getTypeName(typeNode: TypeNode): string {
 }
 
 function simplifyVariableDefinitions(
-  varNodes: ReadonlyArray<VariableDefinitionNode> | null,
+  varNodes: readonly VariableDefinitionNode[] | null,
 ): Variables {
   const result: Variables = {};
   if (varNodes) {
@@ -199,7 +198,7 @@ export function makeGraphqlSnapshot(
       return { variables, ...queryTree };
     }
     return queryTree;
-  } catch (ex) {
+  } catch {
     return null;
   }
 }

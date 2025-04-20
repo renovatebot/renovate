@@ -1,7 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
-import { EndoflifeDatePackagesource } from '../endoflife-date';
+import { EndoflifeDateDatasource } from '../endoflife-date';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
 import { GithubReleasesDatasource } from '../github-releases';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -11,12 +11,12 @@ import { PythonRelease } from './schema';
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
   pythonPrebuildDatasource: GithubReleasesDatasource;
-  pythonEolDatasource: EndoflifeDatePackagesource;
+  pythonEolDatasource: EndoflifeDateDatasource;
 
   constructor() {
     super(datasource);
     this.pythonPrebuildDatasource = new GithubReleasesDatasource();
-    this.pythonEolDatasource = new EndoflifeDatePackagesource();
+    this.pythonEolDatasource = new EndoflifeDateDatasource();
   }
 
   override readonly customRegistrySupport = false;
@@ -48,7 +48,7 @@ export class PythonVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

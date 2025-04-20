@@ -1,91 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`config/migration it migrates customManagers 1`] = `
-{
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "(^|/|\\.)Dockerfile$",
-        "(^|/)Dockerfile[^/]*$",
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s",
-      ],
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "(^|/|\\.)Dockerfile$",
-        "(^|/)Dockerfile[^/]*$",
-      ],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s",
-      ],
-      "packageNameTemplate": "{{{holder}}}",
-    },
-  ],
-}
-`;
-
-exports[`config/migration it migrates gradle-lite 1`] = `
-{
-  "gradle": {
-    "enabled": true,
-    "fileMatch": [
-      "foo",
-    ],
-  },
-  "packageRules": [
-    {
-      "matchManagers": [
-        "gradle",
-      ],
-      "separateMinorPatch": true,
-    },
-  ],
-}
-`;
-
-exports[`config/migration it migrates nested packageRules 1`] = `
-{
-  "packageRules": [
-    {
-      "enabled": false,
-      "matchDepTypes": [
-        "devDependencies",
-      ],
-    },
-    {
-      "automerge": true,
-      "excludePackageNames": [
-        "@types/react-table",
-      ],
-      "groupName": "definitelyTyped",
-      "matchPackagePrefixes": [
-        "@types/",
-      ],
-    },
-    {
-      "automerge": false,
-      "excludePackageNames": [
-        "@types/react-table",
-      ],
-      "matchDepTypes": [
-        "dependencies",
-      ],
-    },
-  ],
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > does not migrate multi days 1`] = `
 {
   "schedule": "after 5:00pm on wednesday and thursday",
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > migrates before and after schedules 1`] = `
 {
   "major": {
     "schedule": [
@@ -102,7 +23,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates before an
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > migrates config 1`] = `
 {
   "additionalBranchPrefix": "{{parentDir}}-",
   "allowCustomCrateRegistries": true,
@@ -190,23 +111,23 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
       ],
     },
     {
-      "excludePackageNames": "foo",
       "groupName": "angular packages",
-      "matchPackagePatterns": "^(@angular|typescript)",
+      "matchPackageNames": [
+        "/^(@angular|typescript)/",
+        "!foo",
+      ],
     },
     {
       "groupName": "foo",
-      "matchPackagePatterns": [
-        "^foo",
+      "matchPackageNames": [
+        "/^foo/",
       ],
     },
     {
       "enabled": false,
       "matchPackageNames": [
         "angular",
-      ],
-      "matchPackagePatterns": [
-        "ang",
+        "/ang/",
       ],
     },
     {
@@ -299,7 +220,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates more packageFiles 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > migrates more packageFiles 1`] = `
 {
   "includePaths": [
     "package.json",
@@ -327,7 +248,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates more pack
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates packageFiles 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > migrates packageFiles 1`] = `
 {
   "includePaths": [
     "package.json",
@@ -370,7 +291,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates packageFi
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > migrates subconfig 1`] = `
 {
   "lockFileMaintenance": {
     "packageRules": [
@@ -385,7 +306,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) overrides existing automerge setting 1`] = `
+exports[`config/migration > migrateConfig(config, parentConfig) > overrides existing automerge setting 1`] = `
 {
   "major": {
     "automerge": false,
@@ -398,13 +319,92 @@ exports[`config/migration migrateConfig(config, parentConfig) overrides existing
       "major": {
         "automerge": false,
       },
-      "matchPackagePatterns": "^(@angular|typescript)",
+      "matchPackageNames": [
+        "/^(@angular|typescript)/",
+      ],
       "minor": {
         "automerge": false,
       },
       "patch": {
         "automerge": true,
       },
+    },
+  ],
+}
+`;
+
+exports[`config/migration > migrates customManagers 1`] = `
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "(^|/|\\.)Dockerfile$",
+        "(^|/)Dockerfile[^/]*$",
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s",
+      ],
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "(^|/|\\.)Dockerfile$",
+        "(^|/)Dockerfile[^/]*$",
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s",
+      ],
+      "packageNameTemplate": "{{{holder}}}",
+    },
+  ],
+}
+`;
+
+exports[`config/migration > migrates gradle-lite 1`] = `
+{
+  "gradle": {
+    "enabled": true,
+    "fileMatch": [
+      "foo",
+    ],
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gradle",
+      ],
+      "separateMinorPatch": true,
+    },
+  ],
+}
+`;
+
+exports[`config/migration > migrates nested packageRules 1`] = `
+{
+  "packageRules": [
+    {
+      "enabled": false,
+      "matchDepTypes": [
+        "devDependencies",
+      ],
+    },
+    {
+      "automerge": true,
+      "groupName": "definitelyTyped",
+      "matchPackageNames": [
+        "!@types/react-table",
+        "@types/**",
+      ],
+    },
+    {
+      "automerge": false,
+      "matchDepTypes": [
+        "dependencies",
+      ],
+      "matchPackageNames": [
+        "!@types/react-table",
+      ],
     },
   ],
 }

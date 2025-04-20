@@ -23,7 +23,7 @@ export function extractPackageFile(
   let config: WoodpeckerConfig;
   try {
     // TODO: use schema (#9610)
-    config = parseSingleYaml(content, { json: true });
+    config = parseSingleYaml(content);
     if (!config) {
       logger.debug(
         { packageFile },

@@ -1,4 +1,5 @@
-import { parser, query as q } from 'good-enough-parser';
+import type { parser } from 'good-enough-parser';
+import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
@@ -74,7 +75,7 @@ const qGroovySingleMapOfVarAssignment = q.alt(
   q.begin<Ctx>().join(qGroovyMapNotationDependencies).end(),
   // foo: "1.2.3"
   q
-    .sym(storeVarToken)
+    .alt(q.sym(storeVarToken), q.str(storeVarToken))
     .handler(prependNestingDepth)
     .handler(coalesceVariable)
     .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
@@ -90,7 +91,7 @@ const qGroovyMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
-    q.sym(storeVarToken).op(':').tree({
+    q.alt(q.sym(storeVarToken), q.str(storeVarToken)).op(':').tree({
       type: 'wrapped-tree',
       maxDepth: 1,
       startsWith: '[',

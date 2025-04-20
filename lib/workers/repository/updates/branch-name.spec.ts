@@ -3,9 +3,22 @@ import { generateBranchName } from './branch-name';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
-    it('uses groupName if no slug defined', () => {
+    it('falls back to sharedVariableName if no groupName', () => {
+      const upgrade: RenovateConfig = {
+        sharedVariableName: 'some variable name',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('some-variable-name-grouptopic');
+    });
+
+    it('uses groupName if no slug defined, ignores sharedVariableName', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
+        sharedVariableName: 'some variable name',
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
           branchTopic: 'grouptopic',
@@ -211,6 +224,22 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('renovate/jest-42-x');
+    });
+
+    it('removes slashes from the non-suffix part', () => {
+      const upgrade: RenovateConfig = {
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: '@foo/jest',
+        newMajor: '42',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/foo-jest-42-x');
     });
 
     it('hashedBranchLength hashing', () => {

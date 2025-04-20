@@ -5,7 +5,7 @@ export const presets: Record<string, Preset> = {
     description: 'Show OpenSSF badge on pull requests.',
     packageRules: [
       {
-        matchSourceUrlPrefixes: ['https://github.com/'],
+        matchSourceUrls: ['https://github.com/**'],
         prBodyDefinitions: {
           OpenSSF:
             '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{{sourceRepo}})',
@@ -28,7 +28,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         enabled: false,
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
       },
     ],
     vulnerabilityAlerts: {

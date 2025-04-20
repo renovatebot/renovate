@@ -7,7 +7,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, registryUrl } from './common';
 import { EndoflifeDateVersions } from './schema';
 
-export class EndoflifeDatePackagesource extends Datasource {
+export class EndoflifeDateDatasource extends Datasource {
   static readonly id = datasource;
 
   override readonly defaultRegistryUrls = [registryUrl];
@@ -19,7 +19,7 @@ export class EndoflifeDatePackagesource extends Datasource {
     'The release timestamp is determined from the `releaseDate` field in the results.';
 
   constructor() {
-    super(EndoflifeDatePackagesource.id);
+    super(EndoflifeDateDatasource.id);
   }
 
   @cache({

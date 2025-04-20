@@ -131,7 +131,7 @@ RUN chmod +x /usr/local/bin/composer
 RUN apt-get update && apt-get install -y bzr mercurial && \
   rm -rf /var/lib/apt/lists/*
 
-ENV GOLANG_VERSION=1.13.4
+ENV GOLANG_VERSION=1.23.3
 
 # Disable GOPROXY and GOSUMDB until we offer a solid solution to configure
 # private repositories.

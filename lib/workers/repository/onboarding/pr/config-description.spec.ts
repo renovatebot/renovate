@@ -1,6 +1,7 @@
-import { RenovateConfig, partial } from '../../../../../test/util';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
+import type { RenovateConfig } from '~test/util';
+import { partial } from '~test/util';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {

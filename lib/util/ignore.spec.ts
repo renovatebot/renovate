@@ -1,9 +1,9 @@
 import { logger } from '../logger';
 import { isSkipComment } from './ignore';
 
-jest.mock('../logger', () => ({
+vi.mock('../logger', () => ({
   logger: {
-    debug: jest.fn(),
+    debug: vi.fn(),
   },
 }));
 

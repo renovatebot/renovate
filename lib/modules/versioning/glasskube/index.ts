@@ -1,5 +1,6 @@
 import { SemVer } from 'semver';
-import { GenericVersion, GenericVersioningApi } from '../generic';
+import type { GenericVersion } from '../generic';
+import { GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
 export const id = 'glasskube';
@@ -12,7 +13,7 @@ export class GlasskubeVersioningApi extends GenericVersioningApi {
     let parsedVersion: SemVer;
     try {
       parsedVersion = new SemVer(version);
-    } catch (error) {
+    } catch {
       return null;
     }
     const result: GenericVersion = {
@@ -26,7 +27,7 @@ export class GlasskubeVersioningApi extends GenericVersioningApi {
     if (build) {
       try {
         result.release.push(parseInt(build));
-      } catch (error) {
+      } catch {
         /* noop */
       }
     }

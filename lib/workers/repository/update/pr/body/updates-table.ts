@@ -3,10 +3,10 @@ import { regEx } from '../../../../../util/regex';
 import * as template from '../../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
 
-type TableDefinition = {
+interface TableDefinition {
   header: string;
   value: string | undefined;
-};
+}
 
 function getRowDefinition(
   prBodyColumns: string[],
@@ -130,7 +130,11 @@ function compareTableValues(
     }
 
     if (a[header] !== b[header]) {
-      a[header].length < b[header].length ? score++ : score--;
+      if (a[header].length < b[header].length) {
+        score++;
+      } else {
+        score--;
+      }
     }
   }
   return score > 0 ? b : a;

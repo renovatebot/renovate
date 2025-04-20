@@ -9,6 +9,7 @@ nav:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Presets': 'config-presets.md'
       - 'Validation': 'config-validation.md'
+  - ... | mend-hosted
   - ... | key-concepts
   - ... | modules
   - Language Support:

@@ -32,7 +32,7 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped pyproject.toml version');
     }
-  } catch (err) {
+  } catch {
     logger.warn(
       {
         content,

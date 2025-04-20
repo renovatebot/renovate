@@ -1,10 +1,9 @@
 import { Readable } from 'node:stream';
-import {
-  GetObjectCommand,
+import type {
   GetObjectCommandInput,
-  PutObjectCommand,
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { outputCacheFile } from '../../../fs';
@@ -42,7 +41,8 @@ export class RepoCacheS3 extends RepoCacheBase {
         return await streamToString(res);
       }
       logger.warn(
-        `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`,
+        { returnType: typeof res },
+        'RepoCacheS3.read() - failure - got unexpected return type',
       );
     } catch (err) {
       // https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html

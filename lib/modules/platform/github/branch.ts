@@ -1,34 +1,33 @@
-import { HttpError } from '../../../util/http';
-import { Result } from '../../../util/result';
+import { z } from 'zod';
+import { regEx } from '../../../util/regex';
 import { githubApi } from './common';
 
-function headRef(repo: string, branchName: string): Promise<boolean> {
-  return Result.wrap(
-    githubApi.headJson(`/repos/${repo}/git/refs/heads/${branchName}`, {
-      memCache: false,
-    }),
-  )
-    .transform(() => true)
-    .catch((err) => {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
-        return Result.ok(false);
-      }
+const MatchingRef = z
+  .object({ ref: z.string() })
+  .transform(({ ref }) => ref.replace(regEx(/^refs\/heads\//), ''))
+  .array();
 
-      return Result.err(err);
-    })
-    .unwrapOrThrow();
+async function matchingBranches(
+  repo: string,
+  branchName: string,
+): Promise<string[]> {
+  const { body: branches } = await githubApi.getJson(
+    `/repos/${repo}/git/matching-refs/heads/${branchName}`,
+    { memCache: false },
+    MatchingRef,
+  );
+  return branches;
 }
 
 export async function remoteBranchExists(
   repo: string,
   branchName: string,
 ): Promise<boolean> {
-  const refNested = `${branchName}/`;
-  const isNested = await headRef(repo, refNested);
-  if (isNested) {
+  const branches = await matchingBranches(repo, branchName);
+  if (branches.some((branch) => branch.startsWith(`${branchName}/`))) {
     const message = `Trying to create a branch '${branchName}' while it's the part of nested branch`;
     throw new Error(message);
   }
 
-  return headRef(repo, branchName);
+  return branches.includes(branchName);
 }

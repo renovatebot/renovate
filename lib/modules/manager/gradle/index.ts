@@ -8,6 +8,10 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
+export const url =
+  'https://docs.gradle.org/current/userguide/getting_started_dep_man.html';
+export const categories: Category[] = ['java'];
+
 export const defaultConfig = {
   fileMatch: [
     '\\.gradle(\\.kts)?$',
@@ -22,7 +26,5 @@ export const defaultConfig = {
   timeout: 600,
   versioning: gradleVersioning.id,
 };
-
-export const categories: Category[] = ['java'];
 
 export const supportedDatasources = [MavenDatasource.id];

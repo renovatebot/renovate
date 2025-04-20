@@ -1,4 +1,5 @@
-import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';
@@ -12,6 +13,15 @@ const report: Report = {
   problems: [],
   repositories: {},
 };
+
+/**
+ * Reset the report
+ * Should only be used for testing
+ */
+export function resetReport(): void {
+  report.problems = [];
+  report.repositories = {};
+}
 
 export function addBranchStats(
   config: RenovateConfig,
@@ -36,6 +46,26 @@ export function addExtractionStats(
   coerceRepo(config.repository!);
   report.repositories[config.repository!].packageFiles =
     extractResult.packageFiles;
+}
+
+export function addLibYears(
+  config: RenovateConfig,
+  managerLibYears: Record<string, number>,
+  totalLibYears: number,
+  totalDepsCount: number,
+  outdatedDepsCount: number,
+): void {
+  if (is.nullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  report.repositories[config.repository!].libYears = {
+    managerLibYears,
+    totalLibYears,
+    totalDepsCount,
+    outdatedDepsCount,
+  };
 }
 
 export function finalizeReport(): void {
@@ -89,7 +119,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
         ContentType: 'application/json',
       };
 
-      const client = getS3Client();
+      const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
     }

@@ -17,7 +17,7 @@ async function getNodeFile(filename: string): Promise<string | null> {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;
     }
-  } catch (err) {
+  } catch {
     // do nothing
   }
   return null;
