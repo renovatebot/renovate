@@ -11,6 +11,7 @@ import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
+import { expectMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
@@ -76,7 +77,7 @@ export async function getBaseBranchConfig(
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.multipleBaseBranches) {
+  if (expectMultipleBaseBranches()) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }

@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
+import { setMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, getBaseBranchConfig, updateRepo } from '.';
@@ -173,10 +174,9 @@ describe('workers/repository/process/index', () => {
 
   describe('getBaseBranchConfig', () => {
     it('adds branchPrefix if multiple baseBranches expected', async () => {
-      config.multipleBaseBranches = true;
+      setMultipleBaseBranches({ baseBranches: ['/test/'] });
       const res = await getBaseBranchConfig('main', config);
       expect(res.baseBranch).toBe('main');
-      expect(res.multipleBaseBranches).toBeTrue();
       expect(res.hasBaseBranches).toBeTrue();
       expect(res.branchPrefix).toBe('renovate/main-');
     });

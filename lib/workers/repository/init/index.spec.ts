@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
+import { expectMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
 import * as _config from './config';
@@ -69,7 +70,7 @@ describe('workers/repository/init/index', () => {
       );
     });
 
-    it('detects multiple base branches', async () => {
+    it('sets expected multiple base branches', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
       onboarding.checkOnboardingBranch.mockResolvedValue({});
       config.getRepoConfig
@@ -79,30 +80,22 @@ describe('workers/repository/init/index', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({ baseBranches: ['!/^rELEasE/.*$/i'] });
       merge.mergeRenovateConfig.mockResolvedValue({});
-      secrets.applySecretsToConfig.mockImplementation(
-        (config: RenovateConfig) => {
-          return config;
-        },
-      );
-      expect(await initRepo({})).toEqual({
-        baseBranches: ['one'],
-        multipleBaseBranches: false,
-      });
-      expect(await initRepo({})).toEqual({
-        baseBranches: ['/one/'],
-        multipleBaseBranches: true,
-      });
-      expect(await initRepo({})).toEqual({
-        baseBranches: ['one', 'two'],
-        multipleBaseBranches: true,
-      });
-      expect(await initRepo({})).toEqual({
-        multipleBaseBranches: false,
-      });
-      expect(await initRepo({})).toEqual({
-        baseBranches: ['!/^rELEasE/.*$/i'],
-        multipleBaseBranches: true,
-      });
+      secrets.applySecretsToConfig.mockImplementation((c) => c);
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeFalse();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeFalse();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
     });
   });
 });

@@ -8,7 +8,7 @@ import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
-import { isRegexMatch } from '../../../util/string-match';
+import { setMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import type { WorkerPlatformConfig } from './apis';
@@ -46,20 +46,6 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
   }
 }
 
-function expectMultipleBaseBranches(config: RenovateConfig): RenovateConfig {
-  let multipleBaseBranches = false;
-  if (config.baseBranches) {
-    if (config.baseBranches.length > 1) {
-      multipleBaseBranches = true;
-    } else {
-      multipleBaseBranches = config.baseBranches.some(isRegexMatch);
-    }
-  }
-
-  config.multipleBaseBranches = multipleBaseBranches;
-  return config;
-}
-
 export async function initRepo(
   config_: RenovateConfig,
 ): Promise<RenovateConfig> {
@@ -71,7 +57,7 @@ export async function initRepo(
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
-  config = expectMultipleBaseBranches(config);
+  setMultipleBaseBranches(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   if (config.mode === 'silent') {
     logger.info(
