@@ -3,9 +3,9 @@ import {
   BazelOption,
   CommandEntry,
   ImportEntry,
+  expandWorkspacePath,
   parse,
   read,
-  expandWorkspacePath,
   sanitizeOptions,
 } from './bazelrc';
 import { fs } from '~test/util';
