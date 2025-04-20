@@ -6,6 +6,7 @@ on:
 
 jobs:
   check_undesirable_code:
+    if: "!contains(github.event.pull_request.labels.*.name, 'ci:allow-undesirable')"
     runs-on: ubuntu-latest
 
     steps:
