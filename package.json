@@ -346,7 +346,7 @@
     "tsx": "4.19.3",
     "type-fest": "4.39.1",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.29.1",
+    "typescript-eslint": "8.30.0",
     "unified": "9.2.2",
     "vite": "6.2.6",
     "vite-tsconfig-paths": "5.1.4",
