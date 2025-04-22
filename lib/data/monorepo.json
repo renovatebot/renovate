@@ -471,6 +471,7 @@
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
     "percy-cli": "https://github.com/percy/cli",
+    "php-enqueue": "https://github.com/php-enqueue",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
       "https://github.com/pixijs/pixi.js",
