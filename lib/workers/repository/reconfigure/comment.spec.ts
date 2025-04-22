@@ -1,5 +1,4 @@
 import { logger, partial, platform } from '../../../../test/util';
-import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -17,7 +16,6 @@ describe('workers/repository/reconfigure/comment', () => {
 
     beforeEach(() => {
       config = {
-        ...getConfig(),
         errors: [],
         warnings: [],
         description: [],
