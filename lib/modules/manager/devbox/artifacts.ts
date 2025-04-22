@@ -8,7 +8,7 @@ import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
-  config: { constraints, env, isLockFileMaintenance, updateType },
+  config: { constraints, isLockFileMaintenance, updateType },
   packageFileName,
   updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -26,13 +26,19 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     toolConstraints: [
+      // we are required to install nix because devbox spawns nix commands internally
+      // https://github.com/renovatebot/renovate/discussions/35382
+      // https://github.com/jetify-com/devbox/issues/2585
+      {
+        toolName: 'nix',
+        constraint: constraints?.nix,
+      },
       {
         toolName: 'devbox',
         constraint: constraints?.devbox,
       },
     ],
     docker: {},
-    userConfiguredEnv: env,
   };
 
   const cmd = [];

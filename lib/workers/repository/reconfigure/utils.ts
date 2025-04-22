@@ -7,6 +7,8 @@ import type { BranchStatus } from '../../../types/branch-status';
 import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import { detectConfigFile } from '../init/merge';
+import { platform } from '../../../modules/platform';
+import type { BranchStatus } from '../../../types';
 
 export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;

@@ -6,6 +6,9 @@ import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
+import { scm } from '../../../modules/platform/scm';
+import { getCache } from '../../../util/cache/repository';
+import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { setReconfigureBranchCache } from './reconfigure-cache';
@@ -52,6 +55,13 @@ export async function validateReconfigureBranch(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
       'Validation Errors',
     );
+
+    const reconfigurePr = await platform.findPr({
+      branchName,
+      state: 'open',
+      includeOtherAuthors: true,
+      targetBranch: config.defaultBranch,
+    });
 
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {

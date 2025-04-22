@@ -179,7 +179,6 @@ describe('modules/platform/bitbucket-server/index', () => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
 
-    // eslint-disable-next-line vitest/valid-title
     describe(scenarioName, () => {
       const username = 'abc';
       const password = '123';
