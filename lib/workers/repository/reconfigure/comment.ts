@@ -9,7 +9,7 @@ import { ensureComment } from '../../../modules/platform/comment';
 import { emojify } from '../../../util/emoji';
 import type { BranchConfig } from '../../types';
 import {
-  getDepWarningsOnboardingPR as getDepsWarnings,
+  getDepWarningsOnboardingPR,
   getErrors,
   getWarnings,
 } from '../errors-warnings';
@@ -77,7 +77,7 @@ If you need any further assistance then you can also [request help here](${
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
     '{{WARNINGS}}\n',
-    getWarnings(config) + getDepsWarnings(packageFiles!, config),
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));

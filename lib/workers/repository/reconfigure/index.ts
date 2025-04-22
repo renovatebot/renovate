@@ -48,6 +48,7 @@ export async function checkReconfigureBranch(
     branchName: reconfigureBranch,
     state: 'open',
     includeOtherAuthors: true,
+    targetBranch: config.defaultBranch,
   });
   const branchSha = getBranchCommit(reconfigureBranch)!;
   const cache = getCache();

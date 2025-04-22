@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import type { BranchStatus } from '../../../types/branch-status';
+import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import { detectConfigFile } from '../init/merge';
 
@@ -41,21 +41,21 @@ export async function getReconfigureConfig(branchName: string): Promise<{
   await scm.checkoutBranch(branchName);
   const configFileName = await detectConfigFile();
 
-  if (is.null_(configFileName)) {
+  if (configFileName === null) {
     logger.debug('No config file found in reconfigure branch');
     errMessage = 'Validation Failed - No config file found';
     return { config: null, errMessage };
   }
 
   const configFileRaw = await readLocalFile(configFileName, 'utf8');
-  if (is.null_(configFileRaw)) {
+  if (configFileRaw === null) {
     errMessage = 'Validation Failed - Invalid config file';
     return { config: null, errMessage, configFileName };
   }
 
   let configFileParsed: any;
   try {
-    configFileParsed = JSON5.parse(configFileRaw);
+    configFileParsed = parseJson(configFileRaw, configFileName);
     // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
     if (configFileName === 'package.json') {
       configFileParsed = configFileParsed.renovate;
