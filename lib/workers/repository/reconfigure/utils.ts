@@ -3,12 +3,10 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
-import type { BranchStatus } from '../../../types/branch-status';
+import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import { detectConfigFile } from '../init/merge';
-import { platform } from '../../../modules/platform';
-import type { BranchStatus } from '../../../types';
 
 export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;
