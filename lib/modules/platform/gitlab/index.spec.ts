@@ -2957,6 +2957,13 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Fetching reviewers from GitLab approval rule: testRule',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { reviewerIds: [123, 456] },
+        'Extracted reviewer IDs from approval rules',
+      );
     });
 
     it('should not add reviewers if an existing approval rule does not exist when gitlabReviewersFromApprovalRule is set', async () => {
@@ -2998,6 +3005,12 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Fetching reviewers from GitLab approval rule: nonExistingRule',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No matching approval rule found',
+      );
     });
 
     it('should not add reviewers if an existing approval rule exists but has no eligible_approvers when gitlabReviewersFromApprovalRule is set', async () => {
@@ -3036,6 +3049,12 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Fetching reviewers from GitLab approval rule: testRule',
+      );
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Matching approval rule found but has no eligible approvers',
+      );
     });
 
     it('should swallow an error if there is a problem fetching existing approval rules when gitlabReviewersFromApprovalRule is set', async () => {
@@ -3069,6 +3088,10 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ err: expect.any(Error) }),
+        'Failed to fetch GitLab approval rules',
+      );
     });
   });
 
