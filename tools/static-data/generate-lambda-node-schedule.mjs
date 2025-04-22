@@ -1,34 +1,32 @@
+import { z } from 'zod';
 import { updateJsonFile } from './utils.mjs';
 
-/**
- * @typedef RuntimeDefinition
- * @type {object}
- * @property {string} cycle - The ID of the Runtime.
- * @property {boolean|string} support - Either `true` if in support or a string denoting when support for this Runtime
- *                                      will end. 0.10.x is a sole exception which has `false` and will be filtered out.
- */
+const RuntimesSchema = z.array(
+  z.object({
+    cycle: z.string().describe('The ID of the Runtime'),
+    support: z
+      .union([z.boolean(), z.string()])
+      .describe(
+        'Either `true` if in support, or a string denoting when support for this Runtime will end. 0.10.x is a sole exception which has a value of `false` and will be filtered out',
+      ),
+  }),
+);
 
 const lambdaDataUrl = 'https://endoflife.date/api/aws-lambda.json';
 
 await (async () => {
   console.log('Generating node schedule');
 
-  /**
-   * @type Array<RuntimeDefinition>
-   */
-  const lambdas = await fetch(lambdaDataUrl).then((response) => {
+  const lambdas = await fetch(lambdaDataUrl).then(async (response) => {
     if (!response.ok) {
       console.error(`Failed to fetch ${lambdaDataUrl}`, response);
       process.exit(1);
     }
 
-    return response.json();
+    return RuntimesSchema.parseAsync(await response.json());
   });
 
-  /**
-   * @type {{ [version: string]: RuntimeDefinition }}
-   */
-  const nodeRuntimes = {};
+  const nodeRuntimes = z.record(z.string(), RuntimesSchema.element).parse({});
 
   for (let lambda of lambdas) {
     if (!lambda.cycle.startsWith('nodejs')) {

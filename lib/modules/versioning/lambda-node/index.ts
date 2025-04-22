@@ -1,12 +1,5 @@
 import { DateTime } from 'luxon';
-import {
-  getNewValue,
-  getSatisfyingVersion,
-  isValid,
-  matches,
-  minSatisfyingVersion,
-} from '../node';
-import npm from '../npm';
+import { api as nodeApi } from '../node';
 import type { VersioningApi } from '../types';
 import { findLambdaScheduleForVersion } from './schedule';
 
@@ -30,14 +23,8 @@ export function isStable(version: string): boolean {
 }
 
 export const api: VersioningApi = {
-  ...npm,
+  ...nodeApi,
   isStable,
-  getNewValue,
-  isValid,
-  matches,
-  getSatisfyingVersion,
-  minSatisfyingVersion,
-  allowUnstableMajorUpgrades: false,
 };
 
 export default api;

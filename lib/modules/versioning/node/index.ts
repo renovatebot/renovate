@@ -18,7 +18,7 @@ function normalizeValue(value: string): string {
   return value;
 }
 
-export function getNewValue({
+function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
