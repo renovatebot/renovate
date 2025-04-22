@@ -19,6 +19,11 @@ describe('workers/repository/reconfigure/comment', () => {
         errors: [],
         warnings: [],
         description: [],
+        productLinks: {
+          documentation: 'https://docs.renovatebot.com/',
+          help: 'https://github.com/renovatebot/renovate/discussions',
+          homepage: 'https://github.com/renovatebot/renovate',
+        },
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];

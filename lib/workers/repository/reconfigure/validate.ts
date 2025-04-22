@@ -53,13 +53,6 @@ export async function validateReconfigureBranch(
       'Validation Errors',
     );
 
-    const reconfigurePr = await platform.findPr({
-      branchName,
-      state: 'open',
-      includeOtherAuthors: true,
-      targetBranch: config.defaultBranch,
-    });
-
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;

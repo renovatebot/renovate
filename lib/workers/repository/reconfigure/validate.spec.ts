@@ -14,6 +14,7 @@ describe('workers/repository/reconfigure/validate', () => {
   const config: RenovateConfig = {
     branchPrefix: 'prefix/',
     baseBranch: 'base',
+    defaultBranch: 'base',
     statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
       configValidation: 'renovate/config-validation',
     }),
