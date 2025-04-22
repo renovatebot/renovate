@@ -13,6 +13,11 @@ export class RepoCacheNull implements RepoCache {
     return Promise.resolve();
   }
 
+  // istanbul ignore next
+  cleanup(): Promise<void> {
+    return Promise.resolve();
+  }
+
   getData(): RepoCacheData {
     return this.data;
   }

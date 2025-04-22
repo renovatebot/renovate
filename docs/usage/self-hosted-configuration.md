@@ -1238,6 +1238,14 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
+```ts title="Set repositoryCacheType to a Redis URI to enable Redis backed repository cache"
+{
+  repositoryCacheType: 'redis://[[username]:[password]]@localhost:6379/0';
+}
+```
+
+For more information about the supported Redis URLs, please refer to the [Redis URL](#redisurl) documentation.
+
 ```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
   repositoryCacheType: 's3://bucket-name';
@@ -1252,10 +1260,6 @@ Read more about the default credential provider chain for AWS SDK for JavaScript
 !!! tip
     If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
-
-<!-- prettier-ignore -->
-!!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
