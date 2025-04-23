@@ -249,7 +249,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
 
 async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
-  await git.raw(['reset', '--hard', 'HEAD']);
+  await git.raw(['reset', '--hard']);
   await gitRetry(() => git.checkout(branchName));
   await git.raw(['reset', '--hard', `origin/${branchName}`]);
   await git.raw(['clean', '-fd']);
