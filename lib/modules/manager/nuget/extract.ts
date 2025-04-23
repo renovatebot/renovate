@@ -3,7 +3,6 @@ import type { XmlNode } from 'xmldoc';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
