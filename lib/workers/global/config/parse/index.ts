@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
+import { resolveConfigPresets } from '../../../../config/presets';
+import { applySecretsToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
