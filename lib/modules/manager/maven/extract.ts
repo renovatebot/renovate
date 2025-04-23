@@ -305,9 +305,9 @@ function applyPropsInternal(
       return substr;
     });
 
-  const depName = dep.depName;
+  let depName = dep.depName;
   if (dep.depName) {
-    replaceAll(dep.depName);
+    depName = replaceAll(dep.depName);
   }
 
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
