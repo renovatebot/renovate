@@ -251,7 +251,7 @@ async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
   await git.raw(['reset', '--hard']);
   await gitRetry(() => git.checkout(branchName));
-  await git.raw(['reset', '--hard', `origin/${branchName}`]);
+  await git.raw(['reset', '--hard', 'origin/' + branchName]);
   await git.raw(['clean', '-fd']);
 }
 
