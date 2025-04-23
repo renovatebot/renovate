@@ -160,9 +160,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(prConfig.number);
-  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -195,9 +192,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(pr._number);
-  }
   return getPr(pr._number);
 }
 
