@@ -27,6 +27,10 @@ export async function saveCache(): Promise<void> {
   }
 }
 
+export async function cleanup(): Promise<void> {
+  await repoCache.cleanup();
+}
+
 export function isCacheModified(): boolean | undefined {
   return repoCache.isModified();
 }
