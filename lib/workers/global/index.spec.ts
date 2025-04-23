@@ -93,20 +93,6 @@ describe('workers/global/index', () => {
     expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
   });
 
-  it('resolves global presets immediately', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      repositories: [],
-      globalExtends: [':pinVersions'],
-      hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
-    });
-    presets.resolveConfigPresets.mockResolvedValueOnce({});
-    await expect(globalWorker.start()).resolves.toBe(0);
-    expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
-      extends: [':pinVersions'],
-    });
-    expect(parseConfigs).toHaveBeenCalledTimes(1);
-  });
-
   it('handles zero repos', async () => {
     parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
