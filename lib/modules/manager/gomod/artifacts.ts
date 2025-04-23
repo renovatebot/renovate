@@ -199,7 +199,6 @@ export async function updateArtifacts({
     const cmd = 'go';
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
-      userConfiguredEnv: config.env,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,

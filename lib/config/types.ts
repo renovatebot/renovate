@@ -219,8 +219,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
-export type UserEnv = Record<string, string>;
-
+type UserEnv = Record<string, string>;
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -306,6 +305,9 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  /**
+   * User configured environment variables that Renovate uses when executing package manager commands
+   */
   env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
 
