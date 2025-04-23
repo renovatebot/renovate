@@ -1,7 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
-import * as _presets from '../../config/presets';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
@@ -36,9 +35,6 @@ vi.mock('fs-extra', async () => {
 
 // TODO: why do we need git here?
 vi.unmock('../../util/git');
-
-// imports are readonly
-const presets = vi.mocked(_presets);
 
 const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
