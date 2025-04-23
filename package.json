@@ -142,7 +142,7 @@
   },
   "volta": {
     "node": "22.14.0",
-    "pnpm": "10.8.0"
+    "pnpm": "10.8.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.777.0",
@@ -177,7 +177,7 @@
     "@renovatebot/pep440": "4.1.0",
     "@renovatebot/ruby-semver": "4.0.0",
     "@sindresorhus/is": "4.6.0",
-    "@yarnpkg/core": "4.4.0",
+    "@yarnpkg/core": "4.4.1",
     "@yarnpkg/parsers": "3.0.3",
     "agentkeepalive": "4.6.0",
     "aggregate-error": "3.1.0",
@@ -239,7 +239,7 @@
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "3.5.3",
-    "protobufjs": "7.4.0",
+    "protobufjs": "7.5.0",
     "punycode": "2.3.1",
     "redis": "4.7.0",
     "remark": "13.0.0",
@@ -344,16 +344,16 @@
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
     "tsx": "4.19.3",
-    "type-fest": "4.39.1",
+    "type-fest": "4.40.0",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.29.1",
+    "typescript-eslint": "8.30.1",
     "unified": "9.2.2",
     "vite": "6.2.6",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.1.1",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.8.0",
+  "packageManager": "pnpm@10.8.1",
   "files": [
     "dist",
     "renovate-schema.json"
