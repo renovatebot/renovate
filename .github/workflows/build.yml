@@ -605,7 +605,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
