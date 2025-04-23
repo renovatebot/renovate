@@ -269,8 +269,7 @@ async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
     .split(newlineRegex)
     .map((branch) => branch.trim())
-    .filter((branch) => branch.length)
-    .filter((branch) => !branch.startsWith('* '));
+    .filter((branch) => branch.length > 0 && !branch.startsWith('* '));
   logger.debug({ existingBranches });
   for (const branchName of existingBranches) {
     await deleteLocalBranch(branchName);
@@ -405,15 +404,12 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await gitRetry(() => git.pull());
-      await gitRetry(() => git.fetch());
+      await gitRetry(() => git.fetch(['--prune', 'origin']));
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
-      await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
