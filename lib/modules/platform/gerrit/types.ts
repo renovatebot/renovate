@@ -37,6 +37,7 @@ export interface GerritChange {
   change_id: string;
   subject: string;
   status: GerritChangeStatus;
+  created: string;
   submittable?: boolean;
   _number: number;
   labels?: Record<string, GerritLabelInfo>;

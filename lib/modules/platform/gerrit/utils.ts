@@ -67,6 +67,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     sourceBranch: extractSourceBranch(change) ?? change.branch,
     targetBranch: change.branch,
     title: change.subject,
+    createdAt: change.created?.replace(' ', 'T'),
     reviewers:
       change.reviewers?.REVIEWER?.filter(
         (reviewer) => typeof reviewer.username === 'string',

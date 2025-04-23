@@ -119,18 +119,20 @@ export async function start(): Promise<number> {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
-      // Set allowedHeaders in case hostRules headers are configured in file config
+      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint and allowedHeaders in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        userAgent: config.userAgent,
       });
 
       await validatePresets(config);

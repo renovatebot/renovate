@@ -349,11 +349,13 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
-          labels: { 'Code-Review': 2 },
+          labels: { 'Renovate-Merge-Confidence': 1 },
           notify: 'NONE',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
+      await expect(
+        client.setLabel(123456, 'Renovate-Merge-Confidence', +1),
+      ).toResolve();
     });
   });
 
@@ -393,101 +395,6 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.getFile('test/repo', 'base/branch', 'renovate.json'),
       ).resolves.toBe('{}');
-    });
-  });
-
-  describe('approveChange()', () => {
-    it('already approved - do nothing', async () => {
-      const change = partial<GerritChange>({});
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.approveChange(123456)).toResolve();
-    });
-
-    it('label not available - do nothing', async () => {
-      const change = partial<GerritChange>({ labels: {} });
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-
-      await expect(client.approveChange(123456)).toResolve();
-    });
-
-    it('not already approved - approve now', async () => {
-      const change = partial<GerritChange>({ labels: { 'Code-Review': {} } });
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(change), jsonResultHeader);
-      const approveMock = httpMock
-        .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/revisions/current/review', {
-          labels: { 'Code-Review': +2 },
-          notify: 'NONE',
-        })
-        .reply(200, gerritRestResponse(''), jsonResultHeader);
-      await expect(client.approveChange(123456)).toResolve();
-      expect(approveMock.isDone()).toBeTrue();
-    });
-  });
-
-  describe('wasApprovedBy()', () => {
-    it('label not exists', () => {
-      expect(
-        client.wasApprovedBy(partial<GerritChange>({}), 'user'),
-      ).toBeUndefined();
-    });
-
-    it('not approved by anyone', () => {
-      expect(
-        client.wasApprovedBy(
-          partial<GerritChange>({
-            labels: {
-              'Code-Review': {},
-            },
-          }),
-          'user',
-        ),
-      ).toBeUndefined();
-    });
-
-    it('approved by given user', () => {
-      expect(
-        client.wasApprovedBy(
-          partial<GerritChange>({
-            labels: {
-              'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'user',
-                },
-              },
-            },
-          }),
-          'user',
-        ),
-      ).toBeTrue();
-    });
-
-    it('approved by given other', () => {
-      expect(
-        client.wasApprovedBy(
-          partial<GerritChange>({
-            labels: {
-              'Code-Review': {
-                approved: {
-                  _account_id: 1,
-                  username: 'other',
-                },
-              },
-            },
-          }),
-          'user',
-        ),
-      ).toBeFalse();
     });
   });
 });
