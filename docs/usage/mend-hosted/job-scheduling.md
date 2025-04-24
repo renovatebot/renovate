@@ -8,7 +8,7 @@ When the scheduler runs, selected repositories are added to the Job Queue, and e
 There are four types of job schedulers, each with a different frequency and selection of repositories.
 
 | Job Scheduler | Frequency    | Renovate statuses                                      |
-|---------------|--------------|--------------------------------------------------------|
+| ------------- | ------------ | ------------------------------------------------------ |
 | Active jobs   | 4-hourly (1) | new, activated                                         |
 | Inactive jobs | Daily        | onboarded, onboarding, silent, failed                  |
 | Blocked       | Weekly       | timeout, resource-limit, kernel-out-of-memory, unknown |
@@ -24,7 +24,7 @@ The status appears in the list of repositories shown on the Org page of the Deve
 The table below describes all the Renovate statuses.
 
 | Renovate Status      | Description                                           | Schedule |
-|----------------------|-------------------------------------------------------|----------|
+| -------------------- | ----------------------------------------------------- | -------- |
 | <-blank->            | New repo. Renovate has never run on this repo.        | Hourly   |
 | onboarding           | Onboarding PR has not been merged                     | Daily    |
 | onboarded            | Onboarding PR has been merged. No Renovate PRs merged | Daily    |
