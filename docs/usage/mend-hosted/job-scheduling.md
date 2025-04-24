@@ -16,7 +16,7 @@ There are four types of job schedulers, each with a different frequency and sele
 
 (1) Renovate Enterprise jobs are scheduled every hour for repositories on GitHub and Azure DevOps.
 
-## Renovate Statuses
+## Renovate Status
 
 Each repository installed with Renovate Cloud has a Renovate Status. The Renovate Status is used by the job scheduler to determine which repositories will be selected.
 The status appears in the list of repositories shown on the Org page of the Developer Portal.
