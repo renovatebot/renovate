@@ -1,3 +1,4 @@
+import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { mockDeep } from 'vitest-mock-extended';
 import { reset as memCacheReset } from '../../../util/cache/memory';
@@ -8,6 +9,7 @@ import {
 import * as _azureApi from './azure-got-wrapper';
 import { AzurePrCache } from './pr-cache';
 import { getRenovatePRFormat } from './util';
+import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 const azureApi = vi.mocked(_azureApi);
@@ -48,11 +50,10 @@ describe('modules/platform/azure/pr-cache', () => {
   });
 
   it('fetches cache', async () => {
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getPullRequests: vi.fn(() => [pr1]),
-        }) as any,
+    azureApi.gitApi.mockResolvedValue(
+      partial<IGitApi>({
+        getPullRequests: vi.fn().mockResolvedValue([pr1]),
+      }),
     );
 
     const res = await AzurePrCache.getPrs('repo', 'project', azureApi);
@@ -89,11 +90,10 @@ describe('modules/platform/azure/pr-cache', () => {
       },
     };
 
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getPullRequests: vi.fn(() => [pr2, pr1]),
-        }) as any,
+    azureApi.gitApi.mockResolvedValue(
+      partial<IGitApi>({
+        getPullRequests: vi.fn().mockResolvedValue([pr2, pr1]),
+      }),
     );
 
     const res = await AzurePrCache.getPrs('repo', 'project', azureApi);
