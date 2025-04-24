@@ -5,23 +5,29 @@ description: Learn all about Renovate's automerge functionality here
 
 # Introduction
 
-Automerging is a Renovate feature that you can use to automate upgrading dependencies.
-When enabled, Renovate tries to merge the proposed update once the tests pass.
+You can choose to automate some dependency updates by letting Renovate automerge its PR.
+Renovate will wait for the required tests to pass before it automerges.
 
-Keep in mind that Renovate automerges take a bit of time, do not expect Renovate to automerge a PR the second it opens and passes tests.
-Wait for at least an hour or two before troubleshooting to ensure that Renovate has had the time to run once in a state where tests have passed and the branch is up-to-date with its base branch.
+## Renovate automerges take time
+
+Renovate automerges take time, so Renovate can't automerge a PR the second it passes your required tests.
+Before you start troubleshooting, wait!
+Give Renovate about two hours, so Renovate can run in a state where your tests have passed, and the PR branch is up-to-date with the base branch.
 If you or others keep committing to the default branch then Renovate cannot find a suitable gap to automerge into!
 
-Once a branch is automerged, the "Git state" needs to be recalculated for every remaining branch.
-At times, merging one branch could result in another branch's updates being changed or even removed as unnecessary.
-Renovate's approach is to ensure that automerging branches are up-to-date with their target branch before automerging.
-This means merging multiple branches in a row won't work reliably, so we prefer not to do that.
-What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
+After Renovate automerges a branch, Renovate must calculate the "Git state" again, for all remaining branches.
+Merging one branch may result in another branch's updates being changed, or even removed as no longer needed.
+Renovate requires automerging branches to be up-to-date with their target branch, _before_ automerging.
+As merging more than one branch in a row does not work _reliably_, Renovate will only automerge one branch/PR, per target branch, per run.
+Then you'll have to wait for the next time Renovate runs.
 
-As a general guide, we recommend that you enable automerge for any type of dependency updates where you would select "merge" anyway.
-For any updates where you want to review the changelogs - or code - before you merge, you can keep automerge disabled.
+## Recommendations from the Renovate maintainers
 
-Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
+In general, we recommend you enable automerge for any dependency update where you would select "merge" anyway.
+Keep automerge _disabled_ for updates where you want to read the changelogs or code before the merge.
+
+Automerge often works well for `devDependencies`.
+It can work for production `dependencies` too, but your project should have good test coverage.
 
 For example, if you have Jest or Mocha as a development dependency, and it has an upgrade with passing tests... automerge them!
 If you have a linter like ESLint or TSLint and its update passes... automerge them!
@@ -34,7 +40,8 @@ If you have an API with 100% test coverage and Express is updated... automerge i
 ### Automerge lock file maintenance
 
 The lowest risk type of update to automerge is probably `lockFileMaintenance`.
-When Renovate performs lock file maintenance, it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that the latest versions according to the package file constraints are installed.
+When Renovate performs lock file maintenance, it leaves the project dependency definitions unchanged, but refreshes the lock file completely.
+This means Renovate installs the latest versions, that match the package file constraints.
 
 ```json title="Example of automerging lock file maintenance"
 {
@@ -48,8 +55,11 @@ When Renovate performs lock file maintenance, it leaves the project dependency d
 ### Automerge lint tool updates
 
 Automerging lint tool updates can be a real time-saver.
-Sometimes an update to a lint tool or plugin definition causes tests to fail, and that is usually deliberate/intentional because the lint authors have added a new rule that you need to adhere to.
-But in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
+Often a new lint tool version pass the updated tests, without any code changes on your end.
+If the tests pass you may as well automerge the PR.
+
+In cases where you need to make changes to your code, the Renovate PR will fail the linter check.
+You can then make the necessary code changes directly in the Renovate branch for that PR, confirm the tests pass with your changes, and manually merge the PR.
 
 ```json title="Example of automerging lint and Prettier development packages"
 {

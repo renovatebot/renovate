@@ -625,6 +625,7 @@
     "ngrx": "https://github.com/ngrx/",
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
+    "php-enqueue": "https://github.com/php-enqueue/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/",
     "twig": "https://github.com/twigphp/"
