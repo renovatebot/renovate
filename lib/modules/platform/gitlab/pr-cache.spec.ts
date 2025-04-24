@@ -190,7 +190,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
     });
   });
 
-  it.only('syncs cache for different repo url', async () => {
+  it('syncs cache - GITLAB_IGNORE_REPO_URL:true', async () => {
     process.env.GITLAB_IGNORE_REPO_URL = 'true';
     const selfHostedUrl = 'http://mycompany.com/gitlab';
     setBaseUrl(selfHostedUrl);
