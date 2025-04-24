@@ -1,8 +1,16 @@
+import semver from 'semver';
+import stable from 'semver-stable';
+
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
+import { getPatch } from '../conan/range';
+
+const { is: isStable } = stable;
+
+const { major: getMajor, minor: getMinor } = semver;
 
 export const id = 'cargo';
 export const displayName = 'Cargo';
@@ -149,9 +157,28 @@ function getNewValue({
   return newCargo;
 }
 
+function isBreaking(current: string, version: string): boolean {
+  // The change may be breaking if either version is unstable
+  if (!isStable(version) || !isStable(current)) {
+    return true;
+  }
+  const currentMajor = getMajor(current);
+  if (currentMajor === 0) {
+    if (getMinor(current) === 0) {
+      // This can only be non-breaking if they're the same version
+      return current !== version;
+    }
+    // v0.x updates are breaking if x changes
+    return getMinor(current) !== getMinor(version);
+  }
+  // Otherwise, only major updates are breaking
+  return currentMajor !== getMajor(version);
+}
+
 export const api: VersioningApi = {
   ...npm,
   getNewValue,
+  isBreaking,
   isLessThanRange,
   isSingleVersion,
   isValid,
