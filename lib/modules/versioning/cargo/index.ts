@@ -6,7 +6,6 @@ import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
-import { getPatch } from '../conan/range';
 
 const { is: isStable } = stable;
 
