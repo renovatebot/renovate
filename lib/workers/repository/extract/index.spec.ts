@@ -1,15 +1,14 @@
-import { mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
+import { partial, scm } from '~test/util';
 
-jest.mock('./manager-files');
-jest.mock('../../../util/git');
+vi.mock('./manager-files');
 
-const managerFiles = mocked(_managerFiles);
+const managerFiles = vi.mocked(_managerFiles);
 
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {

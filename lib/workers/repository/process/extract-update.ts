@@ -13,6 +13,7 @@ import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { fetchUpdates } from './fetch';
+import { calculateLibYears } from './libyear';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
@@ -136,7 +137,7 @@ export async function extract(
   const baseBranchSha = await scm.getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
-  cache.scan ||= {};
+  cache.scan ??= {};
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
@@ -211,6 +212,7 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,
@@ -228,7 +230,6 @@ export async function update(
   branches: BranchConfig[],
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
-  // istanbul ignore else
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, branches);
   }

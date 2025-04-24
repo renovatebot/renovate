@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/extract/yarn .getYarnLock() extracts yarn 1 1`] = `
+exports[`modules/manager/npm/extract/yarn > .getYarnLock() > extracts yarn 1 1`] = `
 {
   "ansi-styles@^3.2.1": "3.2.1",
   "chalk@^2.4.1": "2.4.1",
@@ -12,7 +12,7 @@ exports[`modules/manager/npm/extract/yarn .getYarnLock() extracts yarn 1 1`] = `
 }
 `;
 
-exports[`modules/manager/npm/extract/yarn .getYarnLock() extracts yarn 2 1`] = `
+exports[`modules/manager/npm/extract/yarn > .getYarnLock() > extracts yarn 2 1`] = `
 {
   "ansi-styles@^3.2.1": "3.2.1",
   "chalk@^2.4.1": "2.4.2",
@@ -25,7 +25,7 @@ exports[`modules/manager/npm/extract/yarn .getYarnLock() extracts yarn 2 1`] = `
 }
 `;
 
-exports[`modules/manager/npm/extract/yarn .getYarnLock() extracts yarn 2 cache version 1`] = `
+exports[`modules/manager/npm/extract/yarn > .getYarnLock() > extracts yarn 2 cache version 1`] = `
 {
   "@babel/runtime@^7.11.2": "7.11.2",
   "ansi-styles@^3.2.1": "3.2.1",

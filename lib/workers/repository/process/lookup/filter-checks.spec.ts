@@ -1,4 +1,3 @@
-import { mocked } from '../../../../../test/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -13,17 +12,18 @@ import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import { toMs } from '../../../../util/pretty-time';
+import type { Timestamp } from '../../../../util/timestamp';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
-jest.mock('../../../../util/date');
-const dateUtil = mocked(_dateUtil);
+vi.mock('../../../../util/date');
+const dateUtil = vi.mocked(_dateUtil);
 
-jest.mock('../../../../util/merge-confidence');
-const mergeConfidence = mocked(_mergeConfidence);
+vi.mock('../../../../util/merge-confidence');
+const mergeConfidence = vi.mocked(_mergeConfidence);
 
-jest.mock('../../../../modules/datasource/common');
-const { getDatasourceFor } = mocked(_datasourceCommon);
+vi.mock('../../../../modules/datasource/common');
+const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
   constructor() {
@@ -42,19 +42,19 @@ const versioning = allVersioning.get('semver');
 const releases: Release[] = [
   {
     version: '1.0.1',
-    releaseTimestamp: '2021-01-01T00:00:01.000Z',
+    releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
   },
   {
     version: '1.0.2',
-    releaseTimestamp: '2021-01-03T00:00:00.000Z',
+    releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
   },
   {
     version: '1.0.3',
-    releaseTimestamp: '2021-01-05T00:00:00.000Z',
+    releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
   },
   {
     version: '1.0.4',
-    releaseTimestamp: '2021-01-07T00:00:00.000Z',
+    releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
   },
 ];
 

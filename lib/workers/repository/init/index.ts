@@ -30,7 +30,8 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
-      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`,
+      { platform },
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform.`,
     );
   }
 
@@ -38,7 +39,8 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
-      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform '${platform}'.`,
+      { platform },
+      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.`,
     );
   }
 }
@@ -72,6 +74,6 @@ export async function initRepo(
       'Full resolved config and hostRules including presets',
     );
   }
-  await cloneSubmodules(!!config.cloneSubmodules);
+  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
   return config;
 }

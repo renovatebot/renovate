@@ -1,17 +1,21 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/loose';
 import type { RepologyPackage } from './types';
 import { RepologyDatasource } from './index';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const datasource = RepologyDatasource.id;
 
 const repologyHost = 'https://repology.org/';
 
-type ResponseMock = { status?: number; body?: string; code?: string };
+interface ResponseMock {
+  status?: number;
+  body?: string;
+  code?: string;
+}
 
 const mockApiCall = (name: string, response: ResponseMock) => {
   const interceptor = httpMock
@@ -20,7 +24,7 @@ const mockApiCall = (name: string, response: ResponseMock) => {
   if (response.status) {
     interceptor.reply(response.status, response.body);
   } else {
-    interceptor.replyWithError({ code: response.code });
+    interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
 };
 
@@ -45,7 +49,7 @@ const mockResolverCall = (
   if (response.status) {
     interceptor.reply(response.status, response.body);
   } else {
-    interceptor.replyWithError({ code: response.code });
+    interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
 };
 

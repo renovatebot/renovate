@@ -1,9 +1,8 @@
-import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getPrFooter } from './footer';
 
-jest.mock('../../../../../util/template');
-const template = mocked(_template);
+vi.mock('../../../../../util/template');
+const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/footer', () => {
   it('renders empty footer', () => {

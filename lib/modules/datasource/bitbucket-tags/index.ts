@@ -1,6 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { RepoInfo } from '../../platform/bitbucket/schema';
 import type { PagedResult } from '../../platform/bitbucket/types';
@@ -65,9 +66,12 @@ export class BitbucketTagsDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
     const bitbucketTags = (
-      await this.bitbucketHttp.getJson<PagedResult<BitbucketTag>>(url, {
-        paginate: true,
-      })
+      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketTag>>(
+        url,
+        {
+          paginate: true,
+        },
+      )
     ).body.values;
 
     const dependency: ReleaseResult = {
@@ -76,7 +80,7 @@ export class BitbucketTagsDatasource extends Datasource {
       releases: bitbucketTags.map(({ name, target }) => ({
         version: name,
         gitRef: name,
-        releaseTimestamp: target?.date,
+        releaseTimestamp: asTimestamp(target?.date),
       })),
     };
 
@@ -96,8 +100,9 @@ export class BitbucketTagsDatasource extends Datasource {
   ): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
-    const bitbucketTag = (await this.bitbucketHttp.getJson<BitbucketTag>(url))
-      .body;
+    const bitbucketTag = (
+      await this.bitbucketHttp.getJsonUnchecked<BitbucketTag>(url)
+    ).body;
 
     return bitbucketTag.target?.hash ?? null;
   }
@@ -136,7 +141,9 @@ export class BitbucketTagsDatasource extends Datasource {
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
     const bitbucketCommits = (
-      await this.bitbucketHttp.getJson<PagedResult<BitbucketCommit>>(url)
+      await this.bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketCommit>>(
+        url,
+      )
     ).body;
 
     if (bitbucketCommits.values.length === 0) {

@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import { logger } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   EXTERNAL_HOST_ERROR,
@@ -24,6 +23,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from '.';
+import { logger } from '~test/util';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -118,7 +118,7 @@ class DummyDatasource5 extends Datasource {
   }
 }
 
-jest.mock('./metadata-manual', () => ({
+vi.mock('./metadata-manual', () => ({
   manualChangelogUrls: {
     dummy: {
       package: 'https://foo.bar/package/CHANGELOG.md',
@@ -131,8 +131,8 @@ jest.mock('./metadata-manual', () => ({
   },
 }));
 
-jest.mock('../../util/cache/package');
-const packageCache = _packageCache as jest.Mocked<typeof _packageCache>;
+vi.mock('../../util/cache/package');
+const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
   afterEach(() => {
@@ -159,7 +159,7 @@ describe('modules/datasource/index', () => {
       expect(getDatasourceList()).toEqual(managerList);
     });
 
-    it('validates datasource', () => {
+    it('validates datasource', async () => {
       function validateDatasource(
         module: DatasourceApi,
         name: string,
@@ -182,7 +182,7 @@ describe('modules/datasource/index', () => {
         }
       }
 
-      const loadedDs = loadModules(
+      const loadedDs = await loadModules(
         __dirname,
         validateDatasource,
         filterClassBasedDatasources,
@@ -908,6 +908,61 @@ describe('modules/datasource/index', () => {
           });
           expect(res).toMatchObject({
             releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
+          });
+        });
+      });
+
+      describe('overruled by package config', () => {
+        beforeEach(() => {
+          datasources.set(
+            datasource,
+            new DummyDatasource({
+              'https://reg1.com': { releases: [{ version: '0.0.1' }] },
+              'https://reg2.com': { releases: [{ version: '0.0.2' }] },
+              'https://reg3.com': { releases: [{ version: '0.0.3' }] },
+            }),
+          );
+        });
+
+        it('first', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'first',
+            defaultRegistryUrls: ['https://reg1.com', 'https://reg2.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }],
+          });
+        });
+        it('hunt', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'hunt',
+            defaultRegistryUrls: ['https://foo.bar', 'https://reg1.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }],
+          });
+        });
+        it('merge', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'merge',
+            defaultRegistryUrls: [
+              'https://reg1.com',
+              'https://reg2.com',
+              'https://reg3.com',
+            ],
+          });
+          expect(res).toMatchObject({
+            releases: [
+              { version: '0.0.1' },
+              { version: '0.0.2' },
+              { version: '0.0.3' },
+            ],
           });
         });
       });

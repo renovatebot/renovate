@@ -1,7 +1,7 @@
 import type { PackageFile } from '../../../types';
 import { detectMonorepos } from './monorepo';
 
-jest.mock('../pnpm');
+vi.mock('../pnpm');
 
 describe('modules/manager/npm/extract/post/monorepo', () => {
   describe('.extractPackageFile()', () => {

@@ -1,4 +1,3 @@
-import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compressToBase64 } from '../../../compress';
@@ -8,8 +7,9 @@ import type { RepoCacheRecord } from '../schema';
 import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';
+import { fs } from '~test/util';
 
-jest.mock('../../../fs');
+vi.mock('../../../fs');
 
 async function createCacheRecord(
   data: RepoCacheData,
@@ -57,6 +57,20 @@ describe('util/cache/repository/impl/local', () => {
     await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
     expect(logger.debug).toHaveBeenCalledWith(
       "RepoCacheBase.load() - expecting data of type 'string' received 'undefined' instead - skipping",
+    );
+    expect(localRepoCache.isModified()).toBeUndefined();
+  });
+
+  it('should not load empty repository cache files', async () => {
+    fs.readCacheFile.mockResolvedValue('');
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      'local',
+    );
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).toHaveBeenCalledWith(
+      'RepoCacheBase.load() - cache file is empty - skipping',
     );
     expect(localRepoCache.isModified()).toBeUndefined();
   });

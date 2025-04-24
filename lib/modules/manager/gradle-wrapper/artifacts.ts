@@ -63,7 +63,7 @@ function getDistributionUrl(newPackageFileContent: string): string | null {
 }
 
 async function getDistributionChecksum(url: string): Promise<string> {
-  const { body } = await http.get(`${url}.sha256`);
+  const { body } = await http.getText(`${url}.sha256`);
   return body;
 }
 
@@ -171,7 +171,6 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
-      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         {

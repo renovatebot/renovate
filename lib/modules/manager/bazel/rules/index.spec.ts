@@ -90,7 +90,7 @@ describe('modules/manager/bazel/rules/index', () => {
         }),
       ).toEqual([
         {
-          datasource: 'github-releases',
+          datasource: 'github-tags',
           depType: 'git_repository',
           depName: 'foo_bar',
           packageName: 'foo/bar',

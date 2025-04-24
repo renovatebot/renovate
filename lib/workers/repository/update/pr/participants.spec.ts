@@ -1,16 +1,16 @@
-import { mocked, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import type { Pr } from '../../../../modules/platform/types';
 import * as _util from '../../../../util/sample';
 import * as _codeOwners from './code-owners';
 import { addParticipants } from './participants';
+import { partial, platform } from '~test/util';
 
-jest.mock('../../../../util/sample');
-const util = mocked(_util);
+vi.mock('../../../../util/sample');
+const util = vi.mocked(_util);
 
-jest.mock('./code-owners');
-const codeOwners = mocked(_codeOwners);
+vi.mock('./code-owners');
+const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
   const config: RenovateConfig = {
@@ -39,7 +39,7 @@ describe('workers/repository/update/pr/participants', () => {
     });
 
     it('filters assignees', async () => {
-      platform.filterUnavailableUsers = jest
+      platform.filterUnavailableUsers = vi
         .fn()
         .mockResolvedValueOnce(['a', 'b']);
       await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
@@ -52,7 +52,7 @@ describe('workers/repository/update/pr/participants', () => {
         '@group',
         'u@email.com',
       ]);
-      platform.expandGroupMembers = jest
+      platform.expandGroupMembers = vi
         .fn()
         .mockResolvedValueOnce(['u@email.com', 'user', 'group.user']);
       await addParticipants(
@@ -81,7 +81,7 @@ describe('workers/repository/update/pr/participants', () => {
 
     it('does not expand group code owners assignees when assigneesFromCodeOwners disabled', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
-      platform.expandGroupMembers = jest
+      platform.expandGroupMembers = vi
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants(config, pr);
@@ -92,7 +92,7 @@ describe('workers/repository/update/pr/participants', () => {
 
     it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
-      platform.expandGroupMembers = jest
+      platform.expandGroupMembers = vi
         .fn()
         .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);

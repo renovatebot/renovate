@@ -18,8 +18,13 @@ import {
   localChartHasKustomizationsYaml,
 } from './utils';
 
-const isValidChartName = (name: string | undefined): boolean =>
-  !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+function isValidChartName(name: string | undefined, oci: boolean): boolean {
+  if (oci) {
+    return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
+  } else {
+    return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+  }
+}
 
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
@@ -46,8 +51,15 @@ export async function extractPackageFile(
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
       registryData = {};
-      for (let i = 0; i < doc.repositories.length; i += 1) {
-        registryData[doc.repositories[i].name] = doc.repositories[i];
+      for (const repo of doc.repositories) {
+        if (repo.url?.startsWith('git+')) {
+          logger.debug(
+            { repo, packageFile },
+            `Skipping unsupported helm-git repository.`,
+          );
+          continue;
+        }
+        registryData[repo.name] = repo;
       }
       logger.debug(
         { registryAliases: registryData, packageFile },
@@ -118,7 +130,12 @@ export async function extractPackageFile(
 
       // By definition on helm the chart name should be lowercase letter + number + -
       // However helmfile support templating of that field
-      if (!isValidChartName(res.depName)) {
+      if (
+        !isValidChartName(
+          res.depName,
+          isOCIRegistry(dep.chart) || (registryData[repoName]?.oci ?? false),
+        )
+      ) {
         res.skipReason = 'unsupported-chart-type';
       }
 

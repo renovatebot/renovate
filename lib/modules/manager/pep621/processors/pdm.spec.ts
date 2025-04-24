@@ -1,6 +1,4 @@
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -9,11 +7,13 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -279,7 +279,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
@@ -329,7 +329,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },

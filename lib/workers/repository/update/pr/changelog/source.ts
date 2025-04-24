@@ -26,6 +26,7 @@ export abstract class ChangeLogSource {
     private readonly platform: ChangeLogPlatform,
     private readonly datasource:
       | 'bitbucket-tags'
+      | 'bitbucket-server-tags'
       | 'gitea-tags'
       | 'github-tags'
       | 'gitlab-tags',
@@ -188,6 +189,7 @@ export abstract class ChangeLogSource {
         sourceUrl,
         sourceDirectory,
         packageName,
+        depName,
       },
       versions: changelogReleases,
     };

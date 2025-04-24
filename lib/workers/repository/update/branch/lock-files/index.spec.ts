@@ -1,25 +1,18 @@
-import { fs, git, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm';
 import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm';
 import * as yarn from '../../../../../modules/manager/npm/post-update/yarn';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types';
-import * as _hostRules from '../../../../../util/host-rules';
+import { fs, git, hostRules } from '~test/util';
 
 const config: PostUpdateConfig = {
   upgrades: [],
   branchName: 'some-branch',
 };
 
-const hostRules = mocked(_hostRules);
-
-jest.mock('../../../../../util/git');
-jest.mock('../../../../../util/fs');
-
-hostRules.find = jest.fn((_) => ({
-  token: 'abc',
-}));
+vi.mock('../../../../../util/fs');
+vi.mock('../../../../../util/host-rules');
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
@@ -29,6 +22,9 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
+      hostRules.find.mockImplementation((_) => ({
+        token: 'abc',
+      }));
     });
 
     it('returns if no updated packageFiles', async () => {
@@ -79,16 +75,16 @@ describe('workers/repository/update/branch/lock-files/index', () => {
         localDir: 'some-tmp-dir',
       });
       git.getFile.mockResolvedValueOnce('some lock file contents');
-      jest.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(npm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(yarn, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
+      vi.spyOn(pnpm, 'generateLockFile').mockResolvedValueOnce({
         lockFile: 'some lock file contents',
       });
-      jest.spyOn(lockFiles, 'determineLockFileDirs');
+      vi.spyOn(lockFiles, 'determineLockFileDirs');
     });
 
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {

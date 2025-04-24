@@ -1,6 +1,4 @@
 import { ZodError, z } from 'zod';
-import * as httpMock from '../../../test/http-mock';
-import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
@@ -12,6 +10,8 @@ import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
 import { Http, HttpError } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 const baseUrl = 'http://renovate.com';
 
@@ -28,7 +28,7 @@ describe('util/http/index', () => {
 
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
-    expect(await http.get('http://renovate.com/test')).toEqual({
+    expect(await http.getText('http://renovate.com/test')).toEqual({
       authorization: false,
       body: '',
       headers: {},
@@ -80,7 +80,7 @@ describe('util/http/index', () => {
       .get('/')
       .reply(200, '{ "test": true }', { etag: 'abc123' });
 
-    const res = await http.getJson('http://renovate.com');
+    const res = await http.getJsonUnchecked('http://renovate.com');
 
     expect(res).toEqual({
       authorization: false,
@@ -155,10 +155,12 @@ describe('util/http/index', () => {
   });
 
   it('headJson', async () => {
-    httpMock.scope(baseUrl).head('/').reply(200, {});
+    httpMock.scope(baseUrl).head('/').reply(200, undefined, {
+      'content-type': 'application/json',
+    });
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
       authorization: false,
-      body: {},
+      body: '',
       headers: {
         'content-type': 'application/json',
       },
@@ -342,6 +344,172 @@ describe('util/http/index', () => {
       memCache.reset();
     });
 
+    describe('getPlain', () => {
+      it('gets plain text with correct headers', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'plain text response', {
+          'content-type': 'text/plain',
+        });
+
+        const res = await http.getPlain('http://renovate.com');
+        expect(res.body).toBe('plain text response');
+        expect(res.headers['content-type']).toBe('text/plain');
+      });
+
+      it('works with custom options', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'plain text response');
+
+        const res = await http.getPlain('http://renovate.com', {
+          headers: { custom: 'header' },
+        });
+        expect(res.body).toBe('plain text response');
+      });
+    });
+
+    describe('getYamlUnchecked', () => {
+      it('parses yaml response without schema', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYamlUnchecked('http://renovate.com');
+        expect(res.body).toEqual({ x: 2, y: 2 });
+      });
+
+      it('parses yaml with options', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYamlUnchecked('http://renovate.com', {
+          headers: { custom: 'header' },
+        });
+        expect(res.body).toEqual({ x: 2, y: 2 });
+      });
+
+      it('throws on invalid yaml', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
+
+        await expect(
+          http.getYamlUnchecked('http://renovate.com'),
+        ).rejects.toThrow('Failed to parse YAML file');
+      });
+    });
+
+    describe('getYaml', () => {
+      it('parses yaml with schema validation', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYaml('http://renovate.com', SomeSchema);
+        expect(res.body).toBe('2 + 2 = 4');
+      });
+
+      it('parses yaml with options and schema', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const res = await http.getYaml(
+          'http://renovate.com',
+          { headers: { custom: 'header' } },
+          SomeSchema,
+        );
+        expect(res.body).toBe('2 + 2 = 4');
+      });
+
+      it('throws on schema validation failure', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, 'foo: bar');
+
+        await expect(
+          http.getYaml('http://renovate.com', SomeSchema),
+        ).rejects.toThrow(z.ZodError);
+      });
+
+      it('throws on invalid yaml', async () => {
+        httpMock.scope(baseUrl).get('/').reply(200, '!@#$%^');
+
+        await expect(
+          http.getYaml('http://renovate.com', SomeSchema),
+        ).rejects.toThrow('Failed to parse YAML file');
+      });
+    });
+
+    describe('getYamlSafe', () => {
+      it('returns successful result with schema validation', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, 'x: 2\ny: 2');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
+
+      it('returns schema error result', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .reply(200, 'x: "2"\ny: "2"');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(ZodError);
+      });
+
+      it('returns error result for invalid yaml', async () => {
+        httpMock.scope('http://example.com').get('/').reply(200, '!@#$%^');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeDefined();
+      });
+
+      it('returns error result for network errors', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .replyWithError('network error');
+
+        const { val, err } = await http
+          .getYamlSafe('http://example.com', SomeSchema)
+          .unwrap();
+
+        expect(val).toBeUndefined();
+        expect(err).toBeInstanceOf(HttpError);
+      });
+
+      it('works with options and schema', async () => {
+        httpMock
+          .scope('http://example.com')
+          .get('/')
+          .matchHeader('custom', 'header')
+          .reply(200, 'x: 2\ny: 2');
+
+        const { val, err } = await http
+          .getYamlSafe(
+            'http://example.com',
+            { headers: { custom: 'header' } },
+            SomeSchema,
+          )
+          .unwrap();
+
+        expect(val).toBe('2 + 2 = 4');
+        expect(err).toBeUndefined();
+      });
+    });
+
     describe('getJson', () => {
       it('uses schema for response body', async () => {
         httpMock
@@ -451,11 +619,11 @@ describe('util/http/index', () => {
 
   describe('Throttling', () => {
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('works without throttling', async () => {
-      jest.useFakeTimers({ advanceTimers: 1 });
+      vi.useFakeTimers({ shouldAdvanceTime: true, advanceTimeDelta: 1 });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
 
       const t1 = Date.now();
@@ -467,13 +635,13 @@ describe('util/http/index', () => {
     });
 
     it('limits request rate by host', async () => {
-      jest.useFakeTimers({ advanceTimers: true });
+      vi.useFakeTimers({ shouldAdvanceTime: true });
       httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
       hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
 
       const t1 = Date.now();
       await http.get('http://renovate.com/foo');
-      jest.advanceTimersByTime(4000);
+      vi.advanceTimersByTime(4000);
       await http.get('http://renovate.com/foo');
       const t2 = Date.now();
 

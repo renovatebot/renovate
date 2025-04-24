@@ -9,7 +9,7 @@ export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
 export const urls = ['https://pvp.haskell.org'];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['auto'];
+export const supportedRangeStrategies: RangeStrategy[] = ['widen'];
 
 const digitsAndDots = regEx(/^[\d.]+$/);
 
@@ -112,7 +112,7 @@ function getNewValue({
   newVersion,
   rangeStrategy,
 }: NewValueConfig): string | null {
-  if (rangeStrategy !== 'auto') {
+  if (rangeStrategy !== 'widen') {
     logger.info(
       { rangeStrategy, currentValue, newVersion },
       `PVP can't handle this range strategy.`,

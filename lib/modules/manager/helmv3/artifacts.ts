@@ -93,7 +93,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`helmv3.updateArtifacts(${packageFileName})`);
 
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
   const isUpdateOptionAddChartArchives = config.postUpdateOptions?.includes(
     'helmUpdateSubChartArchives',
   );
@@ -142,7 +142,6 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       docker: {},
-      userConfiguredEnv: config.env,
       extraEnv: generateHelmEnvs(),
       toolConstraints: [helmToolConstraint],
     };

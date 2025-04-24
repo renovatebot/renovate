@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { depTypes } from './utils';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -604,6 +604,26 @@ describe('modules/manager/pep621/extract', () => {
           },
         ],
       });
+    });
+
+    it('should resolve dependencies with template', async () => {
+      const content = codeBlock`
+            [project]
+            name = "{{ name }}"
+            dynamic = ["version"]
+            requires-python = ">=3.7"
+            license = {text = "MIT"}
+            {# comment #}
+            dependencies = [
+              "blinker",
+              {% if foo %}
+              "packaging>=20.9,!=22.0",
+              {% endif %}
+            ]
+            readme = "README.md"
+          `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toHaveLength(2);
     });
   });
 });

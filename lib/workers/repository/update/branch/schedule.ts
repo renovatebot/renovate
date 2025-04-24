@@ -46,7 +46,7 @@ export function hasValidSchedule(
     if (parsedCron !== undefined) {
       if (
         parsedCron.minute.filter((v) => v !== 1).length !== 0 ||
-        scheduleText.indexOf(minutesChar) !== 0
+        !scheduleText.startsWith(minutesChar)
       ) {
         message = `Invalid schedule: "${scheduleText}" has cron syntax, but doesn't have * as minutes`;
         return true;
@@ -108,7 +108,10 @@ export function cronMatches(
   const nextRun = parsedCron.nextRun();
   // istanbul ignore if: should not happen
   if (!nextRun) {
-    logger.warn(`Invalid cron schedule ${cron}. No next run is possible`);
+    logger.warn(
+      { schedule: cron },
+      'Invalid cron schedule. No next run is possible',
+    );
     return false;
   }
 
@@ -144,7 +147,8 @@ export function isScheduledNow(
   }
   if (!is.array(configSchedule)) {
     logger.warn(
-      `config schedule is not an array: ${JSON.stringify(configSchedule)}`,
+      { schedule: configSchedule },
+      'config schedule is not an array',
     );
     configSchedule = [configSchedule];
   }

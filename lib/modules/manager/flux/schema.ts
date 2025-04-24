@@ -16,21 +16,32 @@ export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),
   kind: z.literal('HelmRelease'),
   spec: z.object({
-    chart: z.object({
-      spec: z.object({
-        chart: z.string(),
-        version: z.string().optional(),
-        sourceRef: z
-          .object({
-            kind: z.string().optional(),
-            name: z.string().optional(),
-            namespace: z.string().optional(),
-          })
-          .optional(),
-      }),
-    }),
+    chart: z
+      .object({
+        spec: z.object({
+          chart: z.string(),
+          version: z.string().optional(),
+          sourceRef: z
+            .object({
+              kind: z.string().optional(),
+              name: z.string().optional(),
+              namespace: z.string().optional(),
+            })
+            .optional(),
+        }),
+      })
+      .optional(),
+    chartRef: z
+      .object({
+        kind: z.string().optional(),
+        name: z.string().optional(),
+        namespace: z.string().optional(),
+      })
+      .optional(),
+    values: z.record(z.unknown()).optional(),
   }),
 });
+export type HelmRelease = z.infer<typeof HelmRelease>;
 
 export const HelmRepository = KubernetesResource.extend({
   apiVersion: z.string().startsWith('source.toolkit.fluxcd.io/'),
@@ -41,6 +52,20 @@ export const HelmRepository = KubernetesResource.extend({
   }),
 });
 export type HelmRepository = z.infer<typeof HelmRepository>;
+
+export const HelmChart = KubernetesResource.extend({
+  apiVersion: z.string().startsWith('source.toolkit.fluxcd.io/'),
+  kind: z.literal('HelmChart'),
+  spec: z.object({
+    chart: z.string(),
+    version: z.string().optional(),
+    sourceRef: z.object({
+      kind: z.string().optional(),
+      name: z.string().optional(),
+    }),
+  }),
+});
+export type HelmChart = z.infer<typeof HelmChart>;
 
 export const GitRepository = KubernetesResource.extend({
   apiVersion: z.string().startsWith('source.toolkit.fluxcd.io/'),
@@ -88,6 +113,7 @@ export const Kustomization = KubernetesResource.extend({
 });
 
 export const FluxResource = HelmRelease.or(HelmRepository)
+  .or(HelmChart)
   .or(GitRepository)
   .or(OCIRepository)
   .or(Kustomization);

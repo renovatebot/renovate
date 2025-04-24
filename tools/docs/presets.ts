@@ -70,7 +70,10 @@ export async function generatePresets(dist: string): Promise<void> {
       if (presetDescription) {
         body += `\n\n${presetDescription}\n`;
       } else {
-        logger.warn(`Preset ${name}:${preset} has no description`);
+        logger.warn(
+          { preset: `${name}:${preset}` },
+          'Preset has no description',
+        );
       }
       body += '\n```json\n';
       body += JSON.stringify(value, null, 2);

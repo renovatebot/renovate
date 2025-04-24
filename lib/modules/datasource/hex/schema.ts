@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release, ReleaseResult } from '../types';
 
 export const HexRelease = z
@@ -29,7 +30,7 @@ export const HexRelease = z
     releases: LooseArray(
       z.object({
         version: z.string(),
-        inserted_at: z.string().optional(),
+        inserted_at: MaybeTimestamp,
       }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
     retirements: z

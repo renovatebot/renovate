@@ -4,7 +4,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   safeEnv: {
-    allowedEnv: ['GO*'],
+    allowedEnv: ['GO*', 'GRADLE_OPTS', 'RUSTC_BOOTSTRAP'],
     description:
       'Hopefully safe environment variables to allow users to configure.',
   },

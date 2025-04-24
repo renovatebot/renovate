@@ -1,6 +1,3 @@
-import { mockDeep } from 'jest-mock-extended';
-import { mockExecAll, mockExecSequence } from '../../../../test/exec-util';
-import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -15,8 +12,10 @@ import {
   resetPrefetchedImages,
   sideCarImage,
 } from '.';
+import { mockExecAll, mockExecSequence } from '~test/exec-util';
+import { partial } from '~test/util';
 
-jest.mock('../../../modules/datasource', () => mockDeep());
+vi.mock('../../../modules/datasource', () => ({ getPkgReleases: vi.fn() }));
 
 describe('util/exec/docker/index', () => {
   describe('prefetchDockerImage', () => {
@@ -52,8 +51,7 @@ describe('util/exec/docker/index', () => {
     });
 
     it('returns "latest" for bad release results', async () => {
-      jest
-        .spyOn(modulesDatasource, 'getPkgReleases')
+      vi.spyOn(modulesDatasource, 'getPkgReleases')
         .mockResolvedValueOnce(undefined as never)
         .mockResolvedValueOnce(partial<modulesDatasource.ReleaseResult>())
         .mockResolvedValueOnce(
@@ -85,11 +83,9 @@ describe('util/exec/docker/index', () => {
         { version: '2.1.1' },
         { version: '2.1.2' },
       ];
-      jest
-        .spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases }),
-        );
+      vi.spyOn(modulesDatasource, 'getPkgReleases').mockResolvedValueOnce(
+        partial<modulesDatasource.ReleaseResult>({ releases }),
+      );
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
 
@@ -100,11 +96,9 @@ describe('util/exec/docker/index', () => {
         { version: '14.0.2' },
         { version: '15.0.2' },
       ];
-      jest
-        .spyOn(modulesDatasource, 'getPkgReleases')
-        .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases }),
-        );
+      vi.spyOn(modulesDatasource, 'getPkgReleases').mockResolvedValueOnce(
+        partial<modulesDatasource.ReleaseResult>({ releases }),
+      );
       expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
     });
   });
@@ -181,7 +175,7 @@ describe('util/exec/docker/index', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('handles empty container list ', async () => {
+    it('handles empty container list', async () => {
       const execSnapshots = mockExecAll({ stdout: '\n\n\n', stderr: '' });
       await removeDanglingContainers();
       expect(execSnapshots).toMatchObject([
@@ -316,7 +310,7 @@ describe('util/exec/docker/index', () => {
 
     // TODO: it('handles tag constraint', async () => {
     //   mockExecAll();
-    // jest
+    // vi
     // .spyOn(modulesDatasource, 'getPkgReleases')
     // .mockResolvedValue(
     //   partial<modulesDatasource.ReleaseResult>({

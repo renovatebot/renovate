@@ -1,13 +1,13 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as presets from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { getOnboardingConfig, getOnboardingConfigContents } from './config';
+import { partial } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../../config/presets/local');
+vi.mock('../../../../config/presets/local');
 
-const mockedPresets = presets as jest.Mocked<typeof presets>;
+const mockedPresets = vi.mocked(presets);
 
 describe('workers/repository/onboarding/branch/config', () => {
   let config: RenovateConfig;

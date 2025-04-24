@@ -1,4 +1,3 @@
-import { mocked } from '../../../../test/util';
 import * as _cache from '../../../util/cache/repository';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
 import {
@@ -6,9 +5,9 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/cache/repository');
 
-const cache = mocked(_cache);
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/reconfigure/reconfigure-cache', () => {
   describe('setReconfigureBranchCache()', () => {

@@ -11,7 +11,7 @@ import { find } from '../../../../util/host-rules';
 import { Result } from '../../../../util/result';
 import { parseUrl } from '../../../../util/url';
 import { PypiDatasource } from '../../../datasource/pypi';
-import { getGoogleAuthTokenRaw } from '../../../datasource/util';
+import { getGoogleAuthHostRule } from '../../../datasource/util';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -147,7 +147,7 @@ export class UvProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
-    const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+    const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
@@ -177,7 +177,6 @@ export class UvProcessor implements PyProjectProcessor {
         cwdFile: packageFileName,
         extraEnv,
         docker: {},
-        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, uvConstraint],
       };
 
@@ -265,12 +264,9 @@ async function getUsernamePassword(
   }
 
   if (url.hostname.endsWith('.pkg.dev')) {
-    const accessToken = await getGoogleAuthTokenRaw();
-    if (accessToken) {
-      return {
-        username: 'oauth2accesstoken',
-        password: accessToken,
-      };
+    const hostRule = await getGoogleAuthHostRule();
+    if (hostRule) {
+      return hostRule;
     } else {
       logger.once.debug({ url }, 'Could not get Google access token');
     }
@@ -288,7 +284,8 @@ async function getUvExtraIndexUrl(
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
-      return !sources || !(dep.packageName! in sources);
+      const packageName = dep.packageName!;
+      return !sources || !(packageName in sources);
     })
     .flatMap((dep) => dep.registryUrls)
     .filter(is.string)
