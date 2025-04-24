@@ -5,7 +5,7 @@ import type { UpdateDependencyConfig } from '../types';
 
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
-  let nameNoVersion = name.replace(/\/v\d+$/, '');
+  let nameNoVersion = name.replace(regEx(/\/v\d+$/), '');
   // gopkg.in is a special case where the major version is added with a dot rather than a slash
   if (nameNoVersion.startsWith('gopkg.in')) {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
