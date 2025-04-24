@@ -5067,6 +5067,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          isBreaking: true,
           newMajor: 18,
           newMinor: 0,
           newPatch: 0,
@@ -5106,6 +5107,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          isBreaking: true,
           newMajor: 18,
           newMinor: 0,
           newPatch: 0,
@@ -5145,6 +5147,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          isBreaking: true,
           newMajor: 18,
           newMinor: 0,
           newPatch: 0,
@@ -5184,6 +5187,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(updates).toEqual([
         {
           bucket: 'major',
+          isBreaking: true,
           newMajor: 18,
           newMinor: 0,
           newPatch: 0,
