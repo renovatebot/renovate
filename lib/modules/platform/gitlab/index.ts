@@ -106,6 +106,7 @@ const defaults = {
 export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
+let botUserName: string;
 
 export async function initPlatform({
   endpoint,
@@ -140,6 +141,7 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
       config.author = user.name;
+      botUserName = user.name;
     }
     /* v8 ignore start: experimental feature */
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
@@ -168,6 +170,7 @@ export async function initPlatform({
     : DRAFT_PREFIX;
 
   config.author ??= username!;
+  botUserName ??= username!;
 
   return platformConfig;
 }
@@ -325,7 +328,7 @@ export async function initRepo({
   endpoint,
   includeMirrors,
 }: RepoParams): Promise<RepoResult> {
-  config ??= {} as any;
+  config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
@@ -561,7 +564,7 @@ export async function getPrList(): Promise<Pr[]> {
   return await GitlabPrCache.getPrs(
     gitlabApi,
     config.repository,
-    config.author,
+    botUserName,
     !!config.ignorePrAuthor,
   );
 }
@@ -755,7 +758,7 @@ export async function createPr({
   await GitlabPrCache.setPr(
     gitlabApi,
     config.repository,
-    config.author,
+    botUserName,
     pr,
     !!config.ignorePrAuthor,
   );
@@ -1140,9 +1143,7 @@ export async function ensureIssue({
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);
-    if (!issue) {
-      issue = issueList.find((i) => i.title === reuseTitle);
-    }
+    issue ??= issueList.find((i) => i.title === reuseTitle);
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJsonUnchecked<{ description: string }>(
