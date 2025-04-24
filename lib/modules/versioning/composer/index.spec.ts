@@ -275,19 +275,19 @@ describe('modules/versioning/composer/index', () => {
 
   // isBreaking
   it.each`
-    version    | currentVersion | expected
-    ${'0.0.2'} | ${'0.0.1'}     | ${true}
-    ${'0.2.0'} | ${'0.0.1'}     | ${true}
-    ${'1.0.0'} | ${'0.0.1'}     | ${true}
-    ${'1.0.0'} | ${'1.0.0'}     | ${false}
-    ${'2.0.0'} | ${'1.0.0'}     | ${true}
-    ${'1.0.0'} | ${'2.0.0'}     | ${true}
-    ${'2.0.1'} | ${'2.0.0'}     | ${false}
-    ${'2.1.0'} | ${'2.0.0'}     | ${false}
+    currentVersion | newVersion | expected
+    ${'0.0.1'}     | ${'0.0.2'} | ${true}
+    ${'0.0.1'}     | ${'0.2.0'} | ${true}
+    ${'0.0.1'}     | ${'1.0.0'} | ${true}
+    ${'1.0.0'}     | ${'1.0.0'} | ${false}
+    ${'1.0.0'}     | ${'2.0.0'} | ${true}
+    ${'2.0.0'}     | ${'1.0.0'} | ${true}
+    ${'2.0.0'}     | ${'2.0.1'} | ${false}
+    ${'2.0.0'}     | ${'2.1.0'} | ${false}
   `(
-    'isBreaking("$version", "$currentVersion") === $expected',
-    ({ version, currentVersion, expected }) => {
-      expect(semver.isBreaking!(version, currentVersion)).toBe(expected);
+    'isBreaking("$currentVersion", "$newVersion") === $expected',
+    ({ newVersion, currentVersion, expected }) => {
+      expect(semver.isBreaking!(currentVersion, newVersion)).toBe(expected);
     },
   );
 });

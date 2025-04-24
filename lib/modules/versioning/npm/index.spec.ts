@@ -96,7 +96,7 @@ describe('modules/versioning/npm/index', () => {
   });
 
   it.each`
-    currentVersion | version    | expected
+    currentVersion | newVersion | expected
     ${'0.0.1'}     | ${'0.0.2'} | ${true}
     ${'0.0.1'}     | ${'0.2.0'} | ${true}
     ${'0.0.1'}     | ${'1.0.0'} | ${true}
@@ -106,9 +106,9 @@ describe('modules/versioning/npm/index', () => {
     ${'2.0.0'}     | ${'2.0.1'} | ${false}
     ${'2.0.0'}     | ${'2.1.0'} | ${false}
   `(
-    'isBreaking("$currentVersion", "$version") === $expected',
-    ({ currentVersion, version, expected }) => {
-      expect(semver.isBreaking!(currentVersion, version)).toBe(expected);
+    'isBreaking("$currentVersion", "$newVersion") === $expected',
+    ({ currentVersion, newVersion, expected }) => {
+      expect(semver.isBreaking!(currentVersion, newVersion)).toBe(expected);
     },
   );
 

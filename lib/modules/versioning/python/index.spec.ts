@@ -181,14 +181,14 @@ it.each`
 
 // isBreaking
 it.each`
-  current    | version    | expected
-  ${'3.7'}   | ${'3.8'}   | ${true}
-  ${'3.7.0'} | ${'3.8.0'} | ${true}
-  ${'3.8.0'} | ${'3.8.1'} | ${false}
-  ${'3.8.0'} | ${'4.0.0'} | ${true}
+  currentVersion | newVersion | expected
+  ${'3.7'}       | ${'3.8'}   | ${true}
+  ${'3.7.0'}     | ${'3.8.0'} | ${true}
+  ${'3.8.0'}     | ${'3.8.1'} | ${false}
+  ${'3.8.0'}     | ${'4.0.0'} | ${true}
 `(
-  'isBreaking("$current", "$version") === $expected',
-  ({ current, version, expected }) => {
-    expect(versioning.isBreaking!(current, version)).toBe(expected);
+  'isBreaking("$currentVersion", "$newVersion") === $expected',
+  ({ currentVersion, newVersion, expected }) => {
+    expect(versioning.isBreaking!(currentVersion, newVersion)).toBe(expected);
   },
 );
