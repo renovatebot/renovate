@@ -176,7 +176,7 @@ describe('workers/global/config/parse/index', () => {
       httpMock
         .scope('http://example.com/')
         .get('/config.json')
-        .reply(200, { repositories: ['g/r1', 'g/r2'], druRun: 'full' });
+        .reply(200, { repositories: ['g/r1', 'g/r2'], dryRun: 'full' });
 
       const parsedConfig = await configParser.parseConfigs({}, defaultArgv);
 
