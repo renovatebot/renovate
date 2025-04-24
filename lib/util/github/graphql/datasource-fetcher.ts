@@ -163,11 +163,9 @@ export class GithubGraphqlDatasourceFetcher<
 
     this.queryCount += 1;
 
-    if (this.isPersistent === undefined) {
-      // For values other than explicit `false`,
-      // we assume that items can not be cached.
-      this.isPersistent = data.repository.isRepoPrivate === false;
-    }
+    // For values other than explicit `false`,
+    // we assume that items can not be cached.
+    this.isPersistent ??= data.repository.isRepoPrivate === false;
 
     const res = data.repository.payload;
     return [res, null];

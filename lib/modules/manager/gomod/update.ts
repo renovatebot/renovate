@@ -4,7 +4,9 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getNameWithNoVersion(name: string): string {
-  let nameNoVersion = name.split('/').slice(0, 3).join('/');
+  // remove version suffixes like /v1 or /v2
+  let nameNoVersion = name.replace(/\/v\d+$/, '');
+  // gopkg.in is a special case where the major version is added with a dot rather than a slash
   if (nameNoVersion.startsWith('gopkg.in')) {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }

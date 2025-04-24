@@ -81,9 +81,7 @@ export class CpanDatasource extends Datasource {
     let latestVersion: string | null = null;
     if (releases) {
       for (const release of releases) {
-        if (!latestDistribution) {
-          latestDistribution = release.distribution;
-        }
+        latestDistribution ??= release.distribution;
         if (!latestVersion && release.isLatest) {
           latestVersion = release.version;
         }
