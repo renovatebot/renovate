@@ -7,12 +7,12 @@ When the scheduler runs, selected repositories are added to the Job Queue, and e
 
 There are four types of job schedulers, each with a different frequency and selection of repositories.
 
-|                            | Frequency    | Renovate statuses             |
-|----------------------------|--------------|-------------------------------|
-| Active jobs (Hot)          | 4-hourly (1) | new, activated                |
-| Inactive jobs (Cold)       | Daily        | onboarded, onboarding, failed |
-| Blocked                    | Weekly       | resource-limit, timeout       |
-| All repos                  | Monthly      | All enabled repos             |
+| Job Scheduler        | Frequency    | Renovate statuses             |
+|----------------------|--------------|-------------------------------|
+| Active jobs (Hot)    | 4-hourly (1) | new, activated                |
+| Inactive jobs (Cold) | Daily        | onboarded, onboarding, failed |
+| Blocked              | Weekly       | resource-limit, timeout       |
+| All repos            | Monthly      | All enabled repos             |
 
 (1) Renovate Enterprise jobs are scheduled every hour for repositories on GitHub and Azure DevOps.
 
