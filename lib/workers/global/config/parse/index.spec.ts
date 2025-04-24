@@ -3,6 +3,7 @@ import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
@@ -163,6 +164,33 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat(['--dry-run=true']);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed).toContainEntries([['dryRun', 'full']]);
+    });
+
+    it('resolves global presets', async () => {
+      vi.doMock('../../../../../config.js', () => ({
+        default: {
+          globalExtends: ['http://example.com/config.json', ':pinVersions'],
+          dryRun: 'extract', // This should overwrite the one from the globalExtends
+        },
+      }));
+      httpMock
+        .scope('http://example.com/')
+        .get('/config.json')
+        .reply(200, { repositories: ['g/r1', 'g/r2'], druRun: 'full' });
+
+      const parsedConfig = await configParser.parseConfigs({}, defaultArgv);
+
+      // Remote preset in globalExtends should be resolved
+      expect(parsedConfig).toContainEntries([
+        ['repositories', ['g/r1', 'g/r2']],
+      ]);
+      // :pinVersion in globalExtends should be resolved
+      expect(parsedConfig).toContainEntries([['rangeStrategy', 'pin']]);
+      // `globalExtends` should be an empty array after merging
+      expect(parsedConfig).toContainEntries([['globalExtends', []]]);
+      // `dryRun` from globalExtends should be overwritten
+      expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
+      vi.unmock('./__fixtures__/default.js');
     });
 
     it('cli dryRun replaced to full', async () => {
