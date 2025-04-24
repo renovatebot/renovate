@@ -12,7 +12,7 @@ There are four types of job schedulers, each with a different frequency and sele
 | Active jobs   | 4-hourly (1) | new, activated                                         |
 | Inactive jobs | Daily        | onboarded, onboarding, silent, failed                  |
 | Blocked       | Weekly       | timeout, resource-limit, kernel-out-of-memory, unknown |
-| All repos     | Monthly      | All installed repos                                    |
+| All repos     | Monthly      | All installed repos (including disabled)               |
 
 (1) Renovate Enterprise jobs are scheduled every hour for repositories on GitHub and Azure DevOps.
 
@@ -30,9 +30,9 @@ The table below describes all the Renovate statuses.
 | onboarded            | Onboarding PR has been merged. No Renovate PRs merged | Daily    |
 | activated            | At least one Renovate PR has been merged              | Hourly   |
 | silent               | Renovate will run, but not deliver PRs or issues      | Daily    |
-| disabled             | Renovate will not run on this repository              | Monthly  |
 | failed               | An error occurred while running the last job          | Daily    |
 | timeout              | A timeout occurred while running the last job         | Weekly   |
 | kernel-out-of-memory | An OOM error occurred while running the last job      | Weekly   |
 | resource-limit       | A resource limit was hit while running the last job   | Weekly   |
 | unknown              | An unknown error occurred while running the last job  | Weekly   |
+| disabled             | Renovate will not run on this repository              | Monthly  |
