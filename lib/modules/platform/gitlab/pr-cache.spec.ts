@@ -5,7 +5,7 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
-import { GitlabHttp } from '../../../util/http/gitlab';
+import { GitlabHttp, setBaseUrl } from '../../../util/http/gitlab';
 import { GitlabPrCache } from './pr-cache';
 import type { GitLabMergeRequest } from './types';
 import { prInfo } from './utils';
@@ -30,6 +30,20 @@ const pr1: GitLabMergeRequest = {
 
 const pr2: GitLabMergeRequest = {
   iid: 2,
+  title: 'title',
+  state: 'opened',
+  source_branch: 'branch',
+  target_branch: 'master',
+  updated_at: '2023-01-01T00:00:00.000Z',
+  diverged_commits_count: 5,
+  labels: [],
+  merge_status: 'cannot_be_merged',
+  description: 'a merge request',
+  sha: 'defg' as LongCommitSha,
+};
+
+const pr3: GitLabMergeRequest = {
+  iid: 3,
   title: 'title',
   state: 'opened',
   source_branch: 'branch',
@@ -167,6 +181,60 @@ describe('modules/platform/gitlab/pr-cache', () => {
             items: {
               '1': prInfo(pr1),
               '2': prInfo(pr2),
+            },
+            author: 'some-author',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        },
+      },
+    });
+  });
+
+  it.only('syncs cache for different repo url', async () => {
+    process.env.GITLAB_IGNORE_REPO_URL = 'true';
+    const selfHostedUrl = 'http://mycompany.com/gitlab';
+    setBaseUrl(selfHostedUrl);
+    httpMock
+      .scope(selfHostedUrl)
+      .get(`/projects/repo/merge_requests?per_page=20&scope=created_by_me`)
+      .reply(200, [pr2, { ...pr1, title: 'new title' }], {
+        link: '<https://api.github.com/projects/repo/merge_requests?page=2&per_page=20>; rel="next",',
+      })
+      .get(`/projects/repo/merge_requests?page=2&per_page=20`)
+      .reply(200, [pr3]);
+
+    cache.platform = {
+      gitlab: {
+        pullRequestsCache: {
+          items: {
+            '1': prInfo(pr1),
+          },
+          author: 'some-author',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      },
+    };
+
+    const res = await GitlabPrCache.getPrs(
+      http,
+      'repo',
+      'some-author',
+      ignorePrAuthor,
+    );
+
+    expect(res).toMatchObject([
+      { number: 3, title: 'title' },
+      { number: 2, title: 'title' },
+      { number: 1, title: 'new title' },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        gitlab: {
+          pullRequestsCache: {
+            items: {
+              '1': prInfo({ ...pr1, title: 'new title' }),
+              '2': prInfo(pr2),
+              '3': prInfo(pr3),
             },
             author: 'some-author',
             updated_at: '2023-01-01T00:00:00.000Z',
