@@ -13,6 +13,7 @@ There are four types of job schedulers, each with a different frequency and sele
 | Inactive jobs (Cold)       | Daily        | onboarded, onboarding, failed |
 | Blocked                    | Weekly       | resource-limit, timeout       |
 | All repos                  | Monthly      | All enabled repos             |
+
 (1) Renovate Enterprise jobs are scheduled every hour for repositories on GitHub and Azure DevOps.
 
 ## Renovate Statuses
