@@ -10,23 +10,10 @@ import * as npmVersioning from '../../versioning/npm';
 import * as pep440versioning from '../../versioning/pep440';
 import type { PackageDependency } from '../types';
 
-function matchFullUrl(domain: string, action: string): z.ZodString {
+function matchAction(action: string): z.Schema {
   return z
     .string()
-    .regex(
-      regEx(
-        `${escapeRegExp(`https://${domain}/`)}${escapeRegExp(action)}(@.+)?$`,
-      ),
-    );
-}
-
-function matchAction(action: string): z.Schema {
-  return z.union([
-    z.string().regex(regEx(`${escapeRegExp(action)}(@.+)?$`)),
-    matchFullUrl('github.com', action),
-    matchFullUrl('code.forgejo.org', action),
-    matchFullUrl('data.forgejo.org', action),
-  ]);
+    .regex(regEx(`(?:https://[^/]+/)?${escapeRegExp(action)}(@.+)?$`));
 }
 
 /**
@@ -114,7 +101,10 @@ export const communityActions = z.union([
     }),
   z
     .object({
-      uses: matchAction('jaxxstorm/action-install-gh-release'),
+      uses: z.union([
+        matchAction('jaxxstorm/action-install-gh-release'),
+        matchAction('sigoden/install-binary'),
+      ]),
       with: z.object({ repo: z.string(), tag: z.string() }),
     })
     .transform(({ with: val }): PackageDependency => {
