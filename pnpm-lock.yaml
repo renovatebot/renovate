@@ -507,8 +507,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1))
       '@vitest/eslint-plugin':
-        specifier: 1.1.42
-        version: 1.1.42(@typescript-eslint/utils@8.30.1(eslint@9.24.0)(typescript@5.8.3))(eslint@9.24.0)(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1))
+        specifier: 1.1.43
+        version: 1.1.43(@typescript-eslint/utils@8.30.1(eslint@9.24.0)(typescript@5.8.3))(eslint@9.24.0)(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1))
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
@@ -2436,8 +2436,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.1.42':
-    resolution: {integrity: sha512-dTGNbh/angh+hoqp5L5A8YO/29mOXDXmDQ/1fzt/jiYzLvU6FvrMqJpGqMqh5g+Fz6MDoZi0AlxefnFUg93Q5A==}
+  '@vitest/eslint-plugin@1.1.43':
+    resolution: {integrity: sha512-OLoUMO67Yg+kr7E6SjF5+Qvl2f6uNJ7ImQYnXT8WgnPiZE41ZQBsnzn70jehXrhFVadphHs2smk+yl0TFKLV5Q==}
     peerDependencies:
       '@typescript-eslint/utils': '>= 8.24.0'
       eslint: '>= 8.57.0'
@@ -2445,6 +2445,8 @@ packages:
       vitest: '*'
     peerDependenciesMeta:
       typescript:
+        optional: true
+      vitest:
         optional: true
 
   '@vitest/expect@3.1.1':
@@ -9141,13 +9143,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.42(@typescript-eslint/utils@8.30.1(eslint@9.24.0)(typescript@5.8.3))(eslint@9.24.0)(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1))':
+  '@vitest/eslint-plugin@1.1.43(@typescript-eslint/utils@8.30.1(eslint@9.24.0)(typescript@5.8.3))(eslint@9.24.0)(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1))':
     dependencies:
       '@typescript-eslint/utils': 8.30.1(eslint@9.24.0)(typescript@5.8.3)
       eslint: 9.24.0
-      vitest: 3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1)
     optionalDependencies:
       typescript: 5.8.3
+      vitest: 3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jsdom@26.1.0)(tsx@4.19.3)(yaml@2.7.1)
 
   '@vitest/expect@3.1.1':
     dependencies:
