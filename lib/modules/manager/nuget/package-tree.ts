@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { Graph } from 'graph-data-structure';
+import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { minimatchFilter } from '../../../util/minimatch';
@@ -18,7 +18,7 @@ export async function getDependentPackageFiles(
   isCentralManagement = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
-  const graph: ReturnType<typeof Graph> = Graph();
+  const graph = new Graph();
 
   if (isCentralManagement) {
     graph.addNode(packageFileName);
@@ -48,7 +48,7 @@ export async function getDependentPackageFiles(
       .childrenNamed('ItemGroup')
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
-      .map((pf) => pf.attr['Include'])
+      .map((pf) => pf.attr.Include)
       .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
@@ -62,7 +62,7 @@ export async function getDependentPackageFiles(
       graph.addEdge(ref, f);
     }
 
-    if (graph.hasCycle()) {
+    if (hasCycle(graph)) {
       throw new Error('Circular reference detected in NuGet package files');
     }
   }
@@ -84,12 +84,17 @@ export async function getDependentPackageFiles(
  */
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
-  graph: ReturnType<typeof Graph>,
+  graph: Graph,
   deps: Map<string, boolean>,
 ): void {
+  if (deps.has(packageFileName)) {
+    // we have already visited this package file
+    return;
+  }
+
   const dependents = graph.adjacent(packageFileName);
 
-  if (dependents.length === 0) {
+  if (!dependents || dependents.size === 0) {
     deps.set(packageFileName, true);
     return;
   }

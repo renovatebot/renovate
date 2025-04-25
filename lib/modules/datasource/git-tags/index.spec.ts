@@ -1,12 +1,14 @@
 import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
+import type { MockProxy } from 'vitest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
 import { add, clear } from '../../../util/host-rules';
 import { GitTagsDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
 
-jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
+vi.mock('simple-git');
+const simpleGitFactoryMock = vi.mocked(simpleGit);
 
 const packageName = 'https://github.com/example/example.git';
 
@@ -16,7 +18,7 @@ const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
 
 describe('modules/datasource/git-tags/index', () => {
-  let gitMock: jest.MockedObject<Pick<SimpleGit, 'env' | 'listRemote'>>;
+  let gitMock: MockProxy<SimpleGit>;
 
   beforeEach(() => {
     // clear host rules
@@ -26,13 +28,13 @@ describe('modules/datasource/git-tags/index', () => {
     process.env = {};
 
     // reset git mock
-    gitMock = {
-      env: jest.fn(),
-      listRemote: jest.fn(),
-    };
+    gitMock = mock<SimpleGit>({
+      env: vi.fn(),
+      listRemote: vi.fn(),
+    });
 
     simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockImplementation(() => gitMock as unknown as SimpleGit);
+    gitMock.env.mockReturnValue(gitMock);
   });
 
   describe('getReleases', () => {

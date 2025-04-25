@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
 const validFleetYamlWithCustom = Fixtures.get(
@@ -14,7 +14,7 @@ const configMapYaml = Fixtures.get('configmap.yaml', '../kubernetes');
 
 describe('modules/manager/fleet/extract', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('extractPackageFile()', () => {

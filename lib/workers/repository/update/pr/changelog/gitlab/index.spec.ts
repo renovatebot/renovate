@@ -1,10 +1,11 @@
 import { getChangeLogJSON } from '..';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import * as semverVersioning from '../../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../../util/host-rules';
+import type { Timestamp } from '../../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { GitLabChangeLogSource } from './source';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -20,10 +21,13 @@ const upgrade = partial<BranchUpgradeConfig>({
     { version: '5.2.0' },
     {
       version: '5.4.0',
-      releaseTimestamp: '2018-08-24T14:23:00.000Z',
+      releaseTimestamp: '2018-08-24T14:23:00.000Z' as Timestamp,
     },
     { version: '5.5.0', gitRef: 'eba303e91c930292198b2fc57040145682162a1b' },
-    { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
+    {
+      version: '5.6.0',
+      releaseTimestamp: '2020-02-13T15:37:00.000Z' as Timestamp,
+    },
     { version: '5.6.1' },
   ],
 });
@@ -86,6 +90,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -128,6 +133,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -163,6 +169,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
@@ -198,6 +205,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
+          depName: undefined,
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,

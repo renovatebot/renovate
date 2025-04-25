@@ -33,7 +33,7 @@ export async function migrateAndValidate(
       warnings: ValidationMessage[];
       errors: ValidationMessage[];
     } = await configValidation.validateConfig('repo', massagedConfig);
-    // istanbul ignore if
+    /* v8 ignore start -- hard to test */
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');
     }
@@ -45,7 +45,8 @@ export async function migrateAndValidate(
       massagedConfig.warnings = (config.warnings ?? []).concat(warnings);
     }
     return massagedConfig;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch (err) {
     logger.debug({ config: input }, 'migrateAndValidate error');
     throw err;
   }

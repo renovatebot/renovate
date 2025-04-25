@@ -3,8 +3,8 @@
 // TODO: fix, should only allow `Error` type
 
 import { z } from 'zod';
-import { logger } from '../../test/util';
 import { AsyncResult, Result } from './result';
+import { logger } from '~test/util';
 
 describe('util/result', () => {
   describe('Result', () => {
@@ -31,16 +31,27 @@ describe('util/result', () => {
     });
 
     describe('Wrapping', () => {
-      it('wraps callback', () => {
+      it('wraps callback returning value', () => {
         const res = Result.wrap(() => 42);
         expect(res).toEqual(Result.ok(42));
       });
 
-      it('handles callback error', () => {
+      it('handles throw in callback', () => {
         const res = Result.wrap(() => {
           throw 'oops';
         });
         expect(res).toEqual(Result.err('oops'));
+      });
+
+      it('wraps callback returning promise', () => {
+        const res = Result.wrap(() => Promise.resolve(42));
+        expect(res).toEqual(AsyncResult.ok(42));
+      });
+
+      it('wraps callback returning failed promise', () => {
+        const err = new Error('unknown');
+        const res = Result.wrap(() => Promise.reject(err));
+        expect(res).toEqual(AsyncResult.err(err));
       });
 
       it('wraps nullable callback', () => {
@@ -124,22 +135,22 @@ describe('util/result', () => {
 
       it('skips fallback for successful value', () => {
         const res: Result<number> = Result.ok(42);
-        expect(res.unwrapOrElse(-1)).toBe(42);
+        expect(res.unwrapOr(-1)).toBe(42);
       });
 
       it('uses fallback for error value', () => {
         const res: Result<number, string> = Result.err('oops');
-        expect(res.unwrapOrElse(42)).toBe(42);
+        expect(res.unwrapOr(42)).toBe(42);
       });
 
-      it('unwrapOrElse throws uncaught transform error', () => {
+      it('unwrapOr throws uncaught transform error', () => {
         const res = Result.ok(42);
         expect(() =>
           res
             .transform(() => {
               throw 'oops';
             })
-            .unwrapOrElse(0),
+            .unwrapOr(0),
         ).toThrow('oops');
       });
 
@@ -201,7 +212,7 @@ describe('util/result', () => {
 
       it('skips transform for error Result', () => {
         const res: Result<number, string> = Result.err('oops');
-        const fn = jest.fn((x: number) => x + 1);
+        const fn = vi.fn((x: number) => x + 1);
         expect(res.transform(fn)).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -240,9 +251,8 @@ describe('util/result', () => {
       });
 
       it('converts error to Result', () => {
-        const result = Result.err<string>('oops').catch(() =>
-          Result.ok<number>(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = error.catch((_err) => Result.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -306,13 +316,13 @@ describe('util/result', () => {
 
     describe('Handlers', () => {
       it('supports value handlers', () => {
-        const cb = jest.fn();
+        const cb = vi.fn();
         Result.ok(42).onValue(cb);
         expect(cb).toHaveBeenCalledWith(42);
       });
 
       it('supports error handlers', () => {
-        const cb = jest.fn();
+        const cb = vi.fn();
         Result.err('oops').onError(cb);
         expect(cb).toHaveBeenCalledWith('oops');
       });
@@ -409,12 +419,12 @@ describe('util/result', () => {
 
       it('skips fallback for successful AsyncResult', async () => {
         const res = Result.wrap(Promise.resolve(42));
-        await expect(res.unwrapOrElse(0)).resolves.toBe(42);
+        await expect(res.unwrapOr(0)).resolves.toBe(42);
       });
 
       it('uses fallback for error AsyncResult', async () => {
         const res = Result.wrap(Promise.reject('oops'));
-        await expect(res.unwrapOrElse(42)).resolves.toBe(42);
+        await expect(res.unwrapOr(42)).resolves.toBe(42);
       });
 
       it('returns ok-value for unwrapOrThrow', async () => {
@@ -469,7 +479,7 @@ describe('util/result', () => {
 
       it('skips transform for failed promises', async () => {
         const res = AsyncResult.err('oops');
-        const fn = jest.fn((x: number) => x + 1);
+        const fn = vi.fn((x: number) => x + 1);
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -504,7 +514,7 @@ describe('util/result', () => {
 
       it('skips async transform for error Result', async () => {
         const input: Result<number, string> = Result.err('oops');
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
         const res = await input.transform(fn);
         expect(res).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
@@ -512,7 +522,7 @@ describe('util/result', () => {
 
       it('skips async transform for rejected promise', async () => {
         const res: AsyncResult<number, string> = AsyncResult.err('oops');
-        const fn = jest.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -600,15 +610,15 @@ describe('util/result', () => {
 
     describe('Catch', () => {
       it('converts error to AsyncResult', async () => {
-        const result = await Result.err<string>('oops').catch(() =>
-          AsyncResult.ok(42),
-        );
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok(42));
         expect(result).toEqual(Result.ok(42));
       });
 
       it('converts error to Promise', async () => {
         const fallback = Promise.resolve(Result.ok(42));
-        const result = await Result.err<string>('oops').catch(() => fallback);
+        const error: Result<number, string> = Result.err<string>('oops');
+        const result = await error.catch(() => fallback);
         expect(result).toEqual(Result.ok(42));
       });
 
@@ -619,9 +629,9 @@ describe('util/result', () => {
       });
 
       it('converts AsyncResult error to Result', async () => {
-        const result = await AsyncResult.err<string>('oops').catch(() =>
-          AsyncResult.ok<number>(42),
-        );
+        const error: AsyncResult<number, string> =
+          AsyncResult.err<string>('oops');
+        const result = await error.catch(() => AsyncResult.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
     });
@@ -656,13 +666,13 @@ describe('util/result', () => {
 
   describe('Handlers', () => {
     it('supports value handlers', async () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       await AsyncResult.ok(42).onValue(cb);
       expect(cb).toHaveBeenCalledWith(42);
     });
 
     it('supports error handlers', async () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       await AsyncResult.err('oops').onError(cb);
       expect(cb).toHaveBeenCalledWith('oops');
     });

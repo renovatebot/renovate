@@ -5,7 +5,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 export async function updateArtifacts(
   artifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  if (artifact.config.updateType !== 'lockFileMaintenance') {
+  if (!artifact.config.isLockFileMaintenance) {
     logger.debug(
       `UpdateType ${
         artifact.config.updateType as string

@@ -28,7 +28,7 @@ import {
 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
-import { getPrList } from './pr-list';
+import { getExpectedPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -135,7 +135,7 @@ If you need any further assistance then you can also [request help here](${
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
-  prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
+  prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
   if (is.string(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }

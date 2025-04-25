@@ -300,14 +300,14 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
 ```yaml title="Example for Workload Identity plus Renovate host rules"
 - name: authenticate to google cloud
   id: auth
-  uses: google-github-actions/auth@v2.1.5
+  uses: google-github-actions/auth@v2.1.8
   with:
     token_format: 'access_token'
     workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v40.2.7
+  uses: renovatebot/github-action@v41.0.20
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -478,7 +478,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:38.52.3
+FROM renovate/renovate:39.233.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
@@ -501,7 +501,7 @@ hostRules: [
 One way to give Renovate the short-lived Google Access Token is to:
 
 1. Write a script that generates a `config.js` file, with the token, in your `gitlab-ci.yml` file
-1. Run the `config.js` creation scrip just before you start Renovate
+1. Run the `config.js` creation script just before you start Renovate
 
 For example:
 

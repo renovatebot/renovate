@@ -1,9 +1,13 @@
-import type { ZodEffects, ZodType, ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import {
+  LooseArray,
+  LooseRecord,
+  Toml,
+  withDepType,
+} from '../../../util/schema-utils';
 import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -16,6 +20,15 @@ import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { dependencyPattern } from '../pip_requirements/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
+
+const PoetryOptionalDependencyMixin = z
+  .object({
+    optional: z.boolean().optional().catch(false),
+  })
+  .transform(
+    ({ optional }): PackageDependency =>
+      optional ? { depType: 'extras' } : {},
+  );
 
 const PoetryPathDependency = z
   .object({
@@ -33,7 +46,8 @@ const PoetryPathDependency = z
     }
 
     return dep;
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryGitDependency = z
   .object({
@@ -84,7 +98,8 @@ const PoetryGitDependency = z
       packageName: git,
       skipReason: 'git-dependency',
     };
-  });
+  })
+  .and(PoetryOptionalDependencyMixin);
 
 const PoetryPypiDependency = z.union([
   z
@@ -96,10 +111,14 @@ const PoetryPypiDependency = z.union([
 
       return {
         datasource: PypiDatasource.id,
-        managerData: { nestedVersion: true, sourceName: source?.toLowerCase() },
+        managerData: {
+          nestedVersion: true,
+          ...(source ? { sourceName: source.toLowerCase() } : {}),
+        },
         currentValue,
       };
-    }),
+    })
+    .and(PoetryOptionalDependencyMixin),
   z.string().transform(
     (version): PackageDependency => ({
       datasource: PypiDatasource.id,
@@ -169,18 +188,6 @@ export const PoetryDependencies = LooseRecord(
   return deps;
 });
 
-function withDepType<
-  Output extends PackageDependency[],
-  Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string): ZodEffects<Schema> {
-  return schema.transform((deps) => {
-    for (const dep of deps) {
-      dep.depType = depType;
-    }
-    return deps;
-  });
-}
-
 export const PoetryGroupDependencies = LooseRecord(
   z.string(),
   z
@@ -188,9 +195,9 @@ export const PoetryGroupDependencies = LooseRecord(
     .transform(({ dependencies }) => dependencies),
 ).transform((record) => {
   const deps: PackageDependency[] = [];
-  for (const [groupName, group] of Object.entries(record)) {
-    for (const dep of Object.values(group)) {
-      dep.depType = groupName;
+  for (const [name, val] of Object.entries(record)) {
+    for (const dep of Object.values(val)) {
+      dep.depType = name;
       deps.push(dep);
     }
   }
@@ -264,12 +271,15 @@ export const PoetrySources = LooseArray(PoetrySource, {
 export const PoetrySectionSchema = z
   .object({
     version: z.string().optional().catch(undefined),
-    dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
+    dependencies: withDepType(
+      PoetryDependencies,
+      'dependencies',
+      false,
+    ).optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
       'dev-dependencies',
     ).optional(),
-    extras: withDepType(PoetryDependencies, 'extras').optional(),
     group: PoetryGroupDependencies.optional(),
     source: PoetrySources,
   })
@@ -278,14 +288,12 @@ export const PoetrySectionSchema = z
       version,
       dependencies = [],
       'dev-dependencies': devDependencies = [],
-      extras: extraDependencies = [],
       group: groupDependencies = [],
       source: sourceUrls,
     }) => {
       const deps: PackageDependency[] = [
         ...dependencies,
         ...devDependencies,
-        ...extraDependencies,
         ...groupDependencies,
       ];
 

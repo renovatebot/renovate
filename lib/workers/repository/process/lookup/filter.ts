@@ -9,8 +9,11 @@ import * as poetryVersioning from '../../../../modules/versioning/poetry';
 import { getRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
-function isReleaseStable(release: Release, versioning: VersioningApi): boolean {
-  if (!versioning.isStable(release.version)) {
+function isReleaseStable(
+  release: Release,
+  versioningApi: VersioningApi,
+): boolean {
+  if (!versioningApi.isStable(release.version)) {
     return false;
   }
 
@@ -26,7 +29,7 @@ export function filterVersions(
   currentVersion: string,
   latestVersion: string,
   releases: Release[],
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
@@ -39,17 +42,17 @@ export function filterVersions(
   // Leave only versions greater than current
   let filteredReleases = releases.filter(
     (r) =>
-      versioning.isVersion(r.version) &&
-      versioning.isGreaterThan(r.version, currentVersion),
+      versioningApi.isVersion(r.version) &&
+      versioningApi.isGreaterThan(r.version, currentVersion),
   );
 
   const currentRelease = releases.find(
     (r) =>
-      versioning.isValid(r.version) &&
-      versioning.isVersion(r.version) &&
-      versioning.isValid(currentVersion) &&
-      versioning.isVersion(currentVersion) &&
-      versioning.equals(r.version, currentVersion),
+      versioningApi.isValid(r.version) &&
+      versioningApi.isVersion(r.version) &&
+      versioningApi.isValid(currentVersion) &&
+      versioningApi.isVersion(currentVersion) &&
+      versioningApi.equals(r.version, currentVersion),
   );
 
   // Don't upgrade from non-deprecated to deprecated
@@ -71,9 +74,9 @@ export function filterVersions(
       filteredReleases = filteredReleases.filter(({ version }) =>
         isAllowedPred(version),
       );
-    } else if (versioning.isValid(allowedVersions)) {
+    } else if (versioningApi.isValid(allowedVersions)) {
       filteredReleases = filteredReleases.filter((r) =>
-        versioning.matches(r.version, allowedVersions),
+        versioningApi.matches(r.version, allowedVersions),
       );
     } else if (
       config.versioning !== npmVersioning.id &&
@@ -122,10 +125,10 @@ export function filterVersions(
   if (
     respectLatest &&
     latestVersion &&
-    !versioning.isGreaterThan(currentVersion, latestVersion)
+    !versioningApi.isGreaterThan(currentVersion, latestVersion)
   ) {
     filteredReleases = filteredReleases.filter(
-      (r) => !versioning.isGreaterThan(r.version, latestVersion),
+      (r) => !versioningApi.isGreaterThan(r.version, latestVersion),
     );
   }
 
@@ -133,31 +136,31 @@ export function filterVersions(
     return filteredReleases;
   }
 
-  if (currentRelease && isReleaseStable(currentRelease, versioning)) {
-    return filteredReleases.filter((r) => isReleaseStable(r, versioning));
+  if (currentRelease && isReleaseStable(currentRelease, versioningApi)) {
+    return filteredReleases.filter((r) => isReleaseStable(r, versioningApi));
   }
 
-  const currentMajor = versioning.getMajor(currentVersion);
-  const currentMinor = versioning.getMinor(currentVersion);
-  const currentPatch = versioning.getPatch(currentVersion);
+  const currentMajor = versioningApi.getMajor(currentVersion);
+  const currentMinor = versioningApi.getMinor(currentVersion);
+  const currentPatch = versioningApi.getPatch(currentVersion);
 
   return filteredReleases.filter((r) => {
-    if (isReleaseStable(r, versioning)) {
+    if (isReleaseStable(r, versioningApi)) {
       return true;
     }
 
-    const major = versioning.getMajor(r.version);
+    const major = versioningApi.getMajor(r.version);
 
     if (major !== currentMajor) {
       return false;
     }
 
-    if (versioning.allowUnstableMajorUpgrades) {
+    if (versioningApi.allowUnstableMajorUpgrades) {
       return true;
     }
 
-    const minor = versioning.getMinor(r.version);
-    const patch = versioning.getPatch(r.version);
+    const minor = versioningApi.getMinor(r.version);
+    const patch = versioningApi.getPatch(r.version);
 
     return minor === currentMinor && patch === currentPatch;
   });

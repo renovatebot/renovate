@@ -8,6 +8,7 @@ import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { clone } from '../../util/clone';
+import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
 import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
@@ -161,53 +162,63 @@ async function mergeRegistries(
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
-  let caughtError: Error | undefined;
+  let lastErr: Error | undefined;
+  let commonRegistryUrl = true;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
       if (!res) {
         continue;
       }
-      if (combinedRes) {
-        for (const existingRelease of coerceArray(combinedRes.releases)) {
-          existingRelease.registryUrl ??= combinedRes.registryUrl;
-        }
-        for (const additionalRelease of coerceArray(res.releases)) {
-          additionalRelease.registryUrl = res.registryUrl;
-        }
-        combinedRes = { ...res, ...combinedRes };
-        delete combinedRes.registryUrl;
-        combinedRes.releases = [...combinedRes.releases, ...res.releases];
-      } else {
+
+      if (!combinedRes) {
         combinedRes = res;
+        continue;
       }
+
+      if (commonRegistryUrl) {
+        for (const release of coerceArray(combinedRes.releases)) {
+          release.registryUrl ??= combinedRes.registryUrl;
+        }
+        commonRegistryUrl = false;
+      }
+
+      const releases = coerceArray(res.releases);
+      for (const release of releases) {
+        release.registryUrl ??= res.registryUrl;
+      }
+
+      combinedRes.releases.push(...releases);
+      combinedRes = { ...res, ...combinedRes };
+      delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      // We'll always save the last-thrown error
-      caughtError = err;
+
+      lastErr = err;
       logger.trace({ err }, 'datasource merge failure');
     }
   }
-  // De-duplicate releases
-  if (combinedRes?.releases?.length) {
-    const seenVersions = new Set<string>();
-    combinedRes.releases = combinedRes.releases.filter((release) => {
-      if (seenVersions.has(release.version)) {
-        return false;
-      }
-      seenVersions.add(release.version);
-      return true;
-    });
+
+  if (!combinedRes) {
+    if (lastErr) {
+      throw lastErr;
+    }
+
+    return null;
   }
-  if (combinedRes) {
-    return combinedRes;
-  }
-  if (caughtError) {
-    throw caughtError;
-  }
-  return null;
+
+  const seenVersions = new Set<string>();
+  combinedRes.releases = filterMap(combinedRes.releases, (release) => {
+    if (seenVersions.has(release.version)) {
+      return null;
+    }
+    seenVersions.add(release.version);
+    return release;
+  });
+
+  return combinedRes;
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
@@ -276,7 +287,7 @@ async function fetchReleases(
   let { registryUrls } = config;
   // istanbul ignore if: need test
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
-    logger.warn('Unknown datasource: ' + datasourceName);
+    logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
   if (datasourceName === 'npm') {
@@ -300,7 +311,8 @@ async function fetchReleases(
     config.additionalRegistryUrls,
   );
   let dep: ReleaseResult | null = null;
-  const registryStrategy = datasource.registryStrategy ?? 'hunt';
+  const registryStrategy =
+    config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
   try {
     if (is.nonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
@@ -334,7 +346,7 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${packageName}${String(
+  const cacheKey = `${cacheNamespace}${datasource}${packageName}${config.registryStrategy}${String(
     registryUrls,
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once

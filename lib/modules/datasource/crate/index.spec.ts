@@ -5,18 +5,20 @@ import _simpleGit from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
+import type { MockedFunction } from 'vitest';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
 import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
-jest.mock('simple-git');
-const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+vi.mock('simple-git');
+const simpleGit = vi.mocked(_simpleGit);
 
 const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
 
@@ -25,8 +27,10 @@ const baseUrl =
 
 const datasource = CrateDatasource.id;
 
-function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
-  const mockClone = jest
+function setupGitMocks(delayMs?: number): {
+  mockClone: MockedFunction<SimpleGit['clone']>;
+} {
+  const mockClone = vi
     .fn()
     .mockName('clone')
     .mockImplementation(
@@ -41,24 +45,25 @@ function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
       },
     );
 
-  simpleGit.mockReturnValue({
-    clone: mockClone,
-  });
-
+  simpleGit.mockReturnValue(partial<SimpleGit>({ clone: mockClone }));
   return { mockClone };
 }
 
-function setupErrorGitMock(): { mockClone: jest.Mock<any, any> } {
-  const mockClone = jest
+function setupErrorGitMock(): {
+  mockClone: MockedFunction<SimpleGit['clone']>;
+} {
+  const mockClone = vi
     .fn()
     .mockName('clone')
     .mockImplementation((_registryUrl: string, _clonePath: string, _opts) =>
       Promise.reject(new Error('mocked error')),
     );
 
-  simpleGit.mockReturnValue({
-    clone: mockClone,
-  });
+  simpleGit.mockReturnValue(
+    partial<SimpleGit>({
+      clone: mockClone,
+    }),
+  );
 
   return { mockClone };
 }
@@ -387,6 +392,48 @@ describe('modules/datasource/crate/index', () => {
       await expect(
         crateDatasource.fetchCrateRecordsPayload(info, 'benedict'),
       ).toReject();
+    });
+  });
+
+  describe('postprocessRelease', () => {
+    const datasource = new CrateDatasource();
+
+    it('no-op for registries other than crates.io', async () => {
+      const releaseOrig = { version: '4.5.17' };
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://example.com',
+        },
+        releaseOrig,
+      );
+
+      expect(res).toBe(releaseOrig);
+    });
+
+    it('fetches releaseTimestamp', async () => {
+      httpMock
+        .scope(API_BASE_URL)
+        .get('/crates/clap/4.5.17')
+        .reply(200, {
+          version: {
+            created_at: '2024-09-04T19:16:41.355243+00:00',
+          },
+        });
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://crates.io',
+        },
+        { version: '4.5.17' },
+      );
+
+      expect(res).toEqual({
+        version: '4.5.17',
+        releaseTimestamp: '2024-09-04T19:16:41.355Z',
+      });
     });
   });
 });

@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { getGitEnvironmentVariables } from '../../../../util/git/auth';
 import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
@@ -14,13 +15,17 @@ import type {
   Upgrade,
 } from '../../types';
 import { PdmLockfileSchema, type PyProject } from '../schema';
+import type { Pep621ManagerData } from '../types';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 const pdmUpdateCMD = 'pdm update --no-sync --update-eager';
 
 export class PdmProcessor implements PyProjectProcessor {
-  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
+  process(
+    project: PyProject,
+    deps: PackageDependency[],
+  ): PackageDependency<Pep621ManagerData>[] {
     const pdm = project.tool?.pdm;
     if (is.nullOrUndefined(pdm)) {
       return deps;
@@ -72,7 +77,7 @@ export class PdmProcessor implements PyProjectProcessor {
       const lockFileMapping = Result.parse(
         lockFileContent,
         PdmLockfileSchema.transform(({ lock }) => lock),
-      ).unwrapOrElse({});
+      ).unwrapOr({});
 
       for (const dep of deps) {
         const packageName = dep.packageName;
@@ -91,7 +96,7 @@ export class PdmProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
-    const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+    const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
@@ -112,10 +117,13 @@ export class PdmProcessor implements PyProjectProcessor {
         constraint: config.constraints?.pdm,
       };
 
+      const extraEnv = {
+        ...getGitEnvironmentVariables(['pep621']),
+      };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
+        extraEnv,
         docker: {},
-        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
@@ -164,26 +172,39 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 }
 
-function generateCMDs(updatedDeps: Upgrade[]): string[] {
+function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
   const cmds: string[] = [];
   const packagesByCMD: Record<string, string[]> = {};
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        const [group, name] = dep.depName!.split('/');
+        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+          logger.once.warn(
+            { dep: dep.depName },
+            'Unexpected optional dependency without group',
+          );
+          continue;
+        }
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -G ${quote(group)}`,
-          name,
+          `${pdmUpdateCMD} -G ${quote(dep.managerData.depGroup)}`,
+          dep.packageName!,
         );
         break;
       }
+      case depTypes.dependencyGroups:
       case depTypes.pdmDevDependencies: {
-        const [group, name] = dep.depName!.split('/');
+        if (is.nullOrUndefined(dep.managerData?.depGroup)) {
+          logger.once.warn(
+            { dep: dep.depName },
+            'Unexpected dev dependency without group',
+          );
+          continue;
+        }
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -dG ${quote(group)}`,
-          name,
+          `${pdmUpdateCMD} -dG ${quote(dep.managerData.depGroup)}`,
+          dep.packageName!,
         );
         break;
       }

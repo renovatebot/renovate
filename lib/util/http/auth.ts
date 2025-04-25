@@ -109,7 +109,6 @@ export function removeAuthorization(options: Options): void {
     // if there is no port in the redirect URL string, then delete it from the redirect options.
     // This can be evaluated for removal after upgrading to Got v10
     const portInUrl = options.href?.split?.('/')?.[2]?.split(':')?.[1];
-    // istanbul ignore next
     if (!portInUrl) {
       delete options.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
     }

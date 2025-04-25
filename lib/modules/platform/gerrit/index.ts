@@ -96,7 +96,7 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo(${repository}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${gitUrl})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -153,14 +153,6 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  const change = await client.getChange(prConfig.number);
-  if (change.subject !== prConfig.prTitle) {
-    await client.updateChangeSubject(
-      prConfig.number,
-      change.revisions[change.current_revision].commit.message,
-      prConfig.prTitle,
-    );
-  }
   if (prConfig.prBody) {
     await client.addMessageIfNotAlreadyExists(
       prConfig.number,
@@ -196,14 +188,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   if (pr === undefined) {
     throw new Error(
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
-    );
-  }
-  //Workaround for "Known Problems.1"
-  if (pr.subject !== prConfig.prTitle) {
-    await client.updateChangeSubject(
-      pr._number,
-      pr.revisions[pr.current_revision].commit.message,
-      prConfig.prTitle,
     );
   }
   await client.addMessageIfNotAlreadyExists(
@@ -274,6 +258,13 @@ export async function getBranchStatus(
     if (hasProblems) {
       return 'red';
     }
+    const hasBlockingLabels =
+      changes.filter((change) =>
+        Object.values(change.labels ?? {}).some((label) => label.blocking),
+      ).length > 0;
+    if (hasBlockingLabels) {
+      return 'red';
+    }
   }
   return 'yellow';
 }
@@ -300,11 +291,12 @@ export async function getBranchStatusCheck(
     if (change) {
       const labelRes = change.labels?.[context];
       if (labelRes) {
-        if (labelRes.approved) {
-          return 'green';
-        }
+        // Check for rejected first, as a label could have both rejected and approved
         if (labelRes.rejected) {
           return 'red';
+        }
+        if (labelRes.approved) {
+          return 'green';
         }
       }
     }
@@ -356,9 +348,7 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  for (const reviewer of reviewers) {
-    await client.addReviewer(number, reviewer);
-  }
+  await client.addReviewers(number, reviewers);
 }
 
 /**

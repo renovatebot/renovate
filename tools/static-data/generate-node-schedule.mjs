@@ -1,4 +1,3 @@
-import got from 'got';
 import { updateJsonFile } from './utils.mjs';
 
 const dataUrl =
@@ -6,6 +5,10 @@ const dataUrl =
 
 await (async () => {
   console.log('Generating node schedule');
-  const { body } = await got(dataUrl);
-  await updateJsonFile('./data/node-js-schedule.json', body);
+  const res = await fetch(dataUrl);
+  if (!res.ok) {
+    console.error(`Failed to fetch ${dataUrl}`, res);
+    process.exit(1);
+  }
+  await updateJsonFile('./data/node-js-schedule.json', await res.text());
 })();

@@ -10,6 +10,7 @@ import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string-match';
+import { asTimestamp } from '../../../util/timestamp';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -97,7 +98,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     tag: string,
-    mode: 'head' | 'get' = 'get',
+    mode: 'head' | 'getText' = 'getText',
   ): Promise<HttpResponse | null> {
     logger.debug(
       `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`,
@@ -198,7 +199,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -243,7 +244,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -290,7 +291,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -526,7 +527,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          // istanbul ignore if: should never happen
+          /* v8 ignore next 3 -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -629,7 +630,7 @@ export class DockerDatasource extends Datasource {
 
       // typescript issue :-/
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const res = (await this.http.getJson<QuayRestDockerTags>(
+      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
@@ -671,7 +672,7 @@ export class DockerDatasource extends Datasource {
     do {
       let res: HttpResponse<{ tags: string[] }>;
       try {
-        res = await this.http.getJson<{ tags: string[] }>(url, {
+        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
           headers,
           noAuth: true,
         });
@@ -831,7 +832,7 @@ export class DockerDatasource extends Datasource {
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
-    const newTag = newValue ?? 'latest';
+    const newTag = is.nonEmptyString(newValue) ? newValue : 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
@@ -975,8 +976,10 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    let needNextPage: boolean = true;
-    while (needNextPage) {
+    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    let page = 0,
+      needNextPage = true;
+    while (needNextPage && page < maxPages) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
         .unwrap();
@@ -985,7 +988,7 @@ export class DockerDatasource extends Datasource {
         logger.debug({ err }, `Docker: error fetching data from DockerHub`);
         return null;
       }
-
+      page++;
       const { results, next, count } = val;
 
       needNextPage = cache.reconcile(results, count);
@@ -1001,13 +1004,10 @@ export class DockerDatasource extends Datasource {
 
     const items = cache.getItems();
     return items.map(
-      ({
-        name: version,
-        tag_last_pushed: releaseTimestamp,
-        digest: newDigest,
-      }) => {
+      ({ name: version, tag_last_pushed, digest: newDigest }) => {
         const release: Release = { version };
 
+        const releaseTimestamp = asTimestamp(tag_last_pushed);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
@@ -1099,7 +1099,7 @@ export class DockerDatasource extends Datasource {
       ? 'latest'
       : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
-    // istanbul ignore if: needs test
+    /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {
       return ret;
     }

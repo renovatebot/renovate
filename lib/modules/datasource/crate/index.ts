@@ -11,7 +11,14 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
+  Release,
+  ReleaseResult,
+} from '../types';
+import { ReleaseTimestampSchema } from './schema';
 import type {
   CrateMetadata,
   CrateRecord,
@@ -51,7 +58,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 6 -- should never happen */
     if (!registryUrl) {
       logger.warn(
         'crate datasource: No registryUrl specified, cannot perform getReleases',
@@ -148,8 +155,10 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      type Response = { crate: CrateMetadata };
-      const response = await this.http.getJson<Response>(crateUrl);
+      interface Response {
+        crate: CrateMetadata;
+      }
+      const response = await this.http.getJsonUnchecked<Response>(crateUrl);
       return response.body.crate;
     } catch (err) {
       logger.warn(
@@ -184,7 +193,7 @@ export class CrateDatasource extends Datasource {
       );
       const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
-        return (await this.http.get(crateUrl)).body;
+        return (await this.http.getText(crateUrl)).body;
       } catch (err) {
         this.handleGenericErrors(err);
       }
@@ -245,7 +254,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -370,5 +379,32 @@ export class CrateDatasource extends Datasource {
     }
 
     return [packageName.slice(0, 2), packageName.slice(2, 4), packageName];
+  }
+
+  @cache({
+    namespace: `datasource-crate`,
+    key: (
+      { registryUrl, packageName }: PostprocessReleaseConfig,
+      { version }: Release,
+    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+    ttlMinutes: 7 * 24 * 60,
+    cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
+      registryUrl === 'https://crates.io',
+  })
+  override async postprocessRelease(
+    { packageName, registryUrl }: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    if (registryUrl !== 'https://crates.io') {
+      return release;
+    }
+
+    const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
+    const { body: releaseTimestamp } = await this.http.getJson(
+      url,
+      ReleaseTimestampSchema,
+    );
+    release.releaseTimestamp = releaseTimestamp;
+    return release;
   }
 }

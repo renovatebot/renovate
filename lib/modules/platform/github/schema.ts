@@ -18,7 +18,7 @@ const PackageSchema = z.object({
 
 const SecurityVulnerabilitySchema = z
   .object({
-    first_patched_version: z.object({ identifier: z.string() }).optional(),
+    first_patched_version: z.object({ identifier: z.string() }).nullish(),
     package: PackageSchema,
     vulnerable_version_range: z.string(),
   })
@@ -45,12 +45,14 @@ export const VulnerabilityAlertSchema = LooseArray(
     }),
   }),
   {
-    onError: /* istanbul ignore next */ ({ error }) => {
+    /* v8 ignore start */
+    onError: ({ error }) => {
       logger.debug(
         { error },
         'Vulnerability Alert: Failed to parse some alerts',
       );
     },
+    /* v8 ignore stop */
   },
 );
 

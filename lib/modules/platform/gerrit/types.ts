@@ -34,10 +34,6 @@ export type GerritReviewersType = 'REVIEWER' | 'CC' | 'REMOVED';
 
 export interface GerritChange {
   branch: string;
-  /**
-   * for backwards compatibility
-   */
-  hashtags?: string[];
   change_id: string;
   subject: string;
   status: GerritChangeStatus;
@@ -77,6 +73,8 @@ export interface GerritChangeMessageInfo {
 export interface GerritLabelInfo {
   approved?: GerritAccountInfo;
   rejected?: GerritAccountInfo;
+  /** If true, the label blocks submit operation. If not set, the default is false. */
+  blocking?: boolean;
 }
 
 export interface GerritActionInfo {

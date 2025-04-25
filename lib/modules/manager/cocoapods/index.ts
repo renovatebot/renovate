@@ -10,13 +10,12 @@ export { updateArtifacts } from './artifacts';
 
 export const displayName = 'CocoaPods';
 export const url = 'https://cocoapods.org';
+export const categories: Category[] = ['swift'];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Podfile$'],
   versioning: rubyVersioning.id,
 };
-
-export const categories: Category[] = ['swift'];
 
 export const supportedDatasources = [
   GitTagsDatasource.id,

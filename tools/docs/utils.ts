@@ -1,15 +1,13 @@
 import { logger } from '../../lib/logger';
 import type { ModuleApi } from '../../lib/types';
+import { regEx } from '../../lib/util/regex';
+import { capitalize } from '../../lib/util/string';
 import { readFile } from '../utils';
 
 const replaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
 const replaceStop = '<!-- Autogenerate end -->';
-
-export function capitalize(input: string): string {
-  // console.log(input);
-  return input[0].toUpperCase() + input.slice(1);
-}
+const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
 
 export function formatName(input: string): string {
   return input.split('-').map(capitalize).join(' ');
@@ -51,7 +49,12 @@ export function replaceContent(content: string, txt: string): string {
 export function formatUrls(urls: string[] | null | undefined): string {
   if (Array.isArray(urls) && urls.length) {
     return `## References\n\n${urls
-      .map((url) => ` - [${url}](${url})`)
+      .map((url) => {
+        if (goodUrlRegex.test(url)) {
+          return ` - ${url}`;
+        }
+        return ` - [${url}](${url})`;
+      })
       .join('\n')}\n\n`;
   }
   return '';

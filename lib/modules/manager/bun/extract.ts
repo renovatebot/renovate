@@ -18,7 +18,12 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
   for (const matchedFile of matchedFiles) {
-    if (!matchesFileName(matchedFile, 'bun.lockb')) {
+    if (
+      !(
+        matchesFileName(matchedFile, 'bun.lockb') ||
+        matchesFileName(matchedFile, 'bun.lock')
+      )
+    ) {
       logger.warn({ matchedFile }, 'Invalid bun lockfile match');
       continue;
     }

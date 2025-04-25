@@ -1,9 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -12,19 +10,32 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs } from '~test/util';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
+const pyproject13toml = `[[tool.poetry.source]]
+name = "some-gar-repo"
+url = "https://someregion-python.pkg.dev/some-project/some-repo/simple/"
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/host-rules', () => mockDeep());
+[build-system]
+requires = ["poetry_core>=1.0", "wheel"]
+build-backend = "poetry.masonry.api"
+`;
+
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
 
-const datasource = mocked(_datasource);
-const hostRules = mocked(_hostRules);
+const datasource = vi.mocked(_datasource);
+const hostRules = vi.mocked(_hostRules);
+const googleAuth = vi.mocked(_googleAuth);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
@@ -198,7 +209,100 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(5);
+      expect(hostRules.find.mock.calls).toHaveLength(7);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              POETRY_HTTP_BASIC_ONE_PASSWORD: 'passwordOne',
+              POETRY_HTTP_BASIC_ONE_USERNAME: 'usernameOne',
+              POETRY_HTTP_BASIC_TWO_USERNAME: 'usernameTwo',
+              POETRY_HTTP_BASIC_FOUR_OH_FOUR_PASSWORD: 'passwordFour',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('passes Google Artifact Registry credentials environment vars', async () => {
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      googleAuth.mockImplementationOnce(
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        })),
+      );
+      hostRules.find.mockReturnValue({});
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject13toml,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pyproject.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(hostRules.find.mock.calls).toHaveLength(3);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          options: {
+            env: {
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_USERNAME: 'oauth2accesstoken',
+              POETRY_HTTP_BASIC_SOME_GAR_REPO_PASSWORD: 'some-token',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('continues if Google auth is not configured', async () => {
+      // poetry.lock
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      // pyproject.lock
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      googleAuth.mockImplementation(
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
+        })),
+      );
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject13toml,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pyproject.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(hostRules.find.mock.calls).toHaveLength(3);
       expect(execSnapshots).toMatchObject([
         { cmd: 'poetry update --lock --no-interaction dep1' },
       ]);
@@ -572,7 +676,7 @@ describe('modules/manager/poetry/artifacts', () => {
           newPackageFileContent: '{}',
           config: {
             ...config,
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
         }),
       ).toEqual([

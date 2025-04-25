@@ -7,6 +7,10 @@ export { bumpPackageVersion } from './update';
 
 export const supportsLockFileMaintenance = true;
 
+export const displayName = 'Helm v3';
+export const url = 'https://helm.sh/docs';
+export const categories: Category[] = ['helm', 'kubernetes'];
+
 export const defaultConfig = {
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',
@@ -14,7 +18,5 @@ export const defaultConfig = {
   commitMessageTopic: 'helm chart {{depName}}',
   fileMatch: ['(^|/)Chart\\.ya?ml$'],
 };
-
-export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];

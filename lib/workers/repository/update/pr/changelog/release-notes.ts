@@ -9,9 +9,10 @@ import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
-import { isHttpUrl } from '../../../../../util/url';
+import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as bitbucketServer from './bitbucket-server';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -44,6 +45,11 @@ export async function getReleaseList(
         return await github.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
+      case 'bitbucket-server':
+        logger.trace(
+          'Unsupported Bitbucket Server feature. Skipping release fetching.',
+        );
+        return [];
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -280,6 +286,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory,
         );
+      case 'bitbucket-server':
+        return await bitbucketServer.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -358,8 +370,12 @@ export async function getReleaseNotesMd(
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              // TODO: fix url
-              const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
+              const notesSourceUrl = getNotesSourceUrl(
+                baseUrl,
+                repository,
+                project,
+                changelogFile,
+              );
               const mdHeadingLink = title
                 .filter((word) => !isHttpUrl(word))
                 .join('-')
@@ -478,4 +494,33 @@ export async function addReleaseNotes(
  */
 export function shouldSkipChangelogMd(repository: string): boolean {
   return repositoriesToSkipMdFetching.includes(repository);
+}
+
+function getNotesSourceUrl(
+  baseUrl: string,
+  repository: string,
+  project: ChangeLogProject,
+  changelogFile: string,
+): string {
+  if (project.type === 'bitbucket-server') {
+    const [projectKey, repositorySlug] = repository.split('/');
+    return joinUrlParts(
+      baseUrl,
+      'projects',
+      projectKey,
+      'repos',
+      repositorySlug,
+      'browse',
+      changelogFile,
+      '?at=HEAD',
+    );
+  }
+
+  return joinUrlParts(
+    baseUrl,
+    repository,
+    project.type === 'bitbucket' ? 'src' : 'blob',
+    'HEAD',
+    changelogFile,
+  );
 }

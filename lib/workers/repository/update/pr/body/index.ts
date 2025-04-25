@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../../config/types';
 import type { PrDebugData } from '../../../../../modules/platform';
 import { platform } from '../../../../../modules/platform';
+import { detectPlatform } from '../../../../../util/common';
 import { regEx } from '../../../../../util/regex';
 import { toBase64 } from '../../../../../util/string';
 import * as template from '../../../../../util/template';
@@ -31,14 +32,20 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
 
+    let sourceRootPath = 'tree/HEAD';
+    if (sourceUrl) {
+      const sourcePlatform = detectPlatform(sourceUrl);
+      if (sourcePlatform === 'bitbucket') {
+        sourceRootPath = 'src/HEAD';
+      } else if (sourcePlatform === 'bitbucket-server') {
+        sourceRootPath = 'browse';
+      }
+    }
+
     const otherLinks = [];
     if (sourceUrl && (!!sourceDirectory || homepage)) {
       otherLinks.push(
-        `[source](${
-          sourceDirectory
-            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
-            : sourceUrl
-        })`,
+        `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );
     }
     if (changelogUrl) {
@@ -53,17 +60,28 @@ function massageUpdateMetadata(config: BranchConfig): void {
       references.push(`[homepage](${homepage})`);
     }
     if (sourceUrl) {
-      let fullUrl = sourceUrl;
-      if (sourceDirectory) {
-        fullUrl = joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory);
-      }
-      references.push(`[source](${fullUrl})`);
+      references.push(
+        `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
+      );
     }
     if (changelogUrl) {
       references.push(`[changelog](${changelogUrl})`);
     }
     upgrade.references = references.join(', ');
   });
+}
+
+function getFullSourceUrl(
+  sourceUrl: string,
+  sourceRootPath: string,
+  sourceDirectory?: string,
+): string {
+  let fullUrl = sourceUrl;
+  if (sourceDirectory) {
+    fullUrl = joinUrlParts(sourceUrl, sourceRootPath, sourceDirectory);
+  }
+
+  return fullUrl;
 }
 
 interface PrBodyConfig {

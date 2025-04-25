@@ -4,6 +4,7 @@ import { DistroInfo } from '../distro';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   getDatedContainerImageCodename,
+  getDatedContainerImageSuffix,
   getDatedContainerImageVersion,
   isDatedCodeName,
 } from './common';
@@ -65,7 +66,7 @@ function isStable(version: string): boolean {
 
 function getVersionByCodename(version: string): string {
   const datedImgVersion = getDatedContainerImageCodename(version);
-  const getVersion = datedImgVersion ? datedImgVersion : version;
+  const getVersion = datedImgVersion ?? version;
   return di.getVersionByCodename(getVersion);
 }
 
@@ -105,6 +106,12 @@ function equals(version: string, other: string): boolean {
     return false;
   }
 
+  const verSuffix = getDatedContainerImageSuffix(version);
+  const otherSuffix = getDatedContainerImageSuffix(other);
+  if (verSuffix !== otherSuffix) {
+    return false;
+  }
+
   const ver = getVersionByCodename(version);
   const otherVer = getVersionByCodename(other);
   return isVersion(ver) && isVersion(otherVer) && ver === otherVer;
@@ -135,6 +142,15 @@ function isGreaterThan(version: string, other: string): boolean {
     return true;
   }
   if (xImageVersion < yImageVersion) {
+    return false;
+  }
+
+  const xSuffixVersion = getDatedContainerImageSuffix(version) ?? 0;
+  const ySuffixVersion = getDatedContainerImageSuffix(other) ?? 0;
+  if (xSuffixVersion > ySuffixVersion) {
+    return true;
+  }
+  if (xSuffixVersion < ySuffixVersion) {
     return false;
   }
 

@@ -67,16 +67,16 @@ By default, Renovate will keep up with the latest version of the `go` binary.
 
 You can force Renovate to use a specific version of Go by setting a constraint.
 
-```json title="Getting Renovate to use the latest patch version of the 1.16 Go binary"
+```json title="Getting Renovate to use the latest patch version of the 1.23 Go binary"
 {
   "constraints": {
-    "go": "1.16"
+    "go": "1.23"
   }
 }
 ```
 
 We do not support patch level versions for the minimum `go` version.
-This means you cannot use `go 1.16.6`, but you can use `go 1.16` as a constraint.
+This means you cannot use `go 1.23.3`, but you can use `go 1.23` as a constraint.
 
 ### Custom registry support, and authentication
 

@@ -3,9 +3,12 @@ import * as semverVersioning from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [FlutterVersionDatasource.id];
+export const displayName = 'FVM';
+export const url = 'https://fvm.app';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.fvm/fvm_config\\.json$', '(^|/)\\.fvmrc$'],
   versioning: semverVersioning.id,
 };
+
+export const supportedDatasources = [FlutterVersionDatasource.id];

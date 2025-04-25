@@ -51,6 +51,10 @@ export async function autodiscoverRepositories(
   }
 
   logger.debug(`Autodiscovered ${discovered.length} repositories`);
+  logger.trace(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
 
   if (autodiscoverFilter) {
     logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
@@ -116,5 +120,5 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       matched.add(repository);
     }
   }
-  return [...matched];
+  return repos.filter((repository) => matched.has(repository));
 }

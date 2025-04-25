@@ -96,7 +96,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         automerge: true,
-        matchCurrentVersion: '>= 1.0.0',
+        matchCurrentVersion: '!/^0/',
         matchUpdateTypes: ['minor', 'patch'],
       },
     ],
@@ -124,6 +124,10 @@ export const presets: Record<string, Preset> = {
       'Do not separate `patch` and `minor` upgrades into separate PRs for the same dependency.',
     separateMinorPatch: false,
   },
+  configMigration: {
+    configMigration: true,
+    description: 'Enable Renovate configuration migration PRs when needed.',
+  },
   dependencyDashboard: {
     dependencyDashboard: true,
     description: 'Enable Renovate Dependency Dashboard creation.',
@@ -137,11 +141,11 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not update `devDependencies` versions/ranges.',
+    description: 'Do not update development dependencies.',
     packageRules: [
       {
         enabled: false,
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
       },
     ],
   },
@@ -293,7 +297,7 @@ export const presets: Record<string, Preset> = {
   },
   ignoreModulesAndTests: {
     description:
-      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories.',
+      'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests (except for nuget) directories.',
     ignorePaths: [
       '**/node_modules/**',
       '**/bower_components/**',
@@ -304,6 +308,15 @@ export const presets: Record<string, Preset> = {
       '**/tests/**',
       '**/__fixtures__/**',
     ],
+    nuget: {
+      ignorePaths: [
+        '**/node_modules/**',
+        '**/bower_components/**',
+        '**/vendor/**',
+        '**/examples/**',
+        '**/__fixtures__/**',
+      ],
+    },
   },
   ignoreUnstable: {
     description:
@@ -395,10 +408,10 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinDevDependencies: {
-    description: 'Pin dependency versions for `devDependencies`.',
+    description: 'Pin dependency versions for development dependencies.',
     packageRules: [
       {
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
         rangeStrategy: 'pin',
       },
     ],
@@ -409,14 +422,14 @@ export const presets: Record<string, Preset> = {
   },
   pinOnlyDevDependencies: {
     description:
-      'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
+      'Pin dependency versions for development dependencies and retain SemVer ranges for others.',
     packageRules: [
       {
         matchPackageNames: ['*'],
         rangeStrategy: 'replace',
       },
       {
-        matchDepTypes: ['devDependencies'],
+        matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
         rangeStrategy: 'pin',
       },
       {
@@ -559,6 +572,19 @@ export const presets: Record<string, Preset> = {
           'import',
           'parent',
         ],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: [
+          'project.dependencies',
+          'project.optional-dependencies',
+        ],
+        matchManagers: ['pep621'],
+        semanticCommitType: 'fix',
+      },
+      {
+        matchDepTypes: ['dependencies', 'extras'],
+        matchManagers: ['poetry'],
         semanticCommitType: 'fix',
       },
     ],

@@ -47,6 +47,7 @@ export interface RepoParams {
   forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
+  cloneSubmodulesFilter?: string[];
   ignorePrAuthor?: boolean;
   bbUseDevelopmentBranch?: boolean;
   includeMirrors?: boolean;
@@ -96,15 +97,16 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-export type PlatformPrOptions = {
+export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
+  bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-};
+}
 
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -273,12 +275,14 @@ export interface Platform {
     internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
+  tryReuseAutoclosedPr?(pr: Pr): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 
   maxBodyLength(): number;
+  labelCharLimit?(): number;
 }
 
 export interface PlatformScm {

@@ -10,20 +10,24 @@ import { get } from '../../../../../modules/versioning';
 import { coerceArray } from '../../../../../util/array';
 import type { BranchUpgradeConfig } from '../../../../types';
 
-function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
+function matchesMMP(
+  versioningApi: VersioningApi,
+  v1: string,
+  v2: string,
+): boolean {
   return (
-    version.getMajor(v1) === version.getMajor(v2) &&
-    version.getMinor(v1) === version.getMinor(v2) &&
-    version.getPatch(v1) === version.getPatch(v2)
+    versioningApi.getMajor(v1) === versioningApi.getMajor(v2) &&
+    versioningApi.getMinor(v1) === versioningApi.getMinor(v2) &&
+    versioningApi.getPatch(v1) === versioningApi.getPatch(v2)
   );
 }
 
 function matchesUnstable(
-  version: VersioningApi,
+  versioningApi: VersioningApi,
   v1: string,
   v2: string,
 ): boolean {
-  return !version.isStable(v1) && matchesMMP(version, v1, v2);
+  return !versioningApi.isStable(v1) && matchesMMP(versioningApi, v1, v2);
 }
 
 export async function getInRangeReleases(

@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');
@@ -46,7 +46,7 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts replace directives from multi-line and single line', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
-        go 1.18
+        go 1.23
         replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
         replace (
               k8s.io/client-go => k8s.io/client-go v0.21.9
@@ -66,7 +66,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'golang',
-            currentValue: '1.18',
+            currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
           },
@@ -127,8 +127,8 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts the toolchain directive', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
-        go 1.21
-        toolchain go1.21.7
+        go 1.23
+        toolchain go1.23.3
         replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
       `;
       const res = extractPackageFile(goMod);
@@ -140,7 +140,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'golang',
-            currentValue: '1.21',
+            currentValue: '1.23',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
           },
@@ -150,7 +150,7 @@ describe('modules/manager/gomod/extract', () => {
             },
             depName: 'go',
             depType: 'toolchain',
-            currentValue: '1.21.7',
+            currentValue: '1.23.3',
             datasource: 'golang-version',
           },
           {
@@ -165,5 +165,138 @@ describe('modules/manager/gomod/extract', () => {
         ],
       });
     });
+
+    it('extracts single-line tool directives', () => {
+      const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+            depType: 'indirect',
+            currentValue: 'v2.4.1',
+            managerData: { lineNumber: 0 },
+          },
+        ],
+      });
+    });
+
+    it('extracts multi-line tool directives', () => {
+      const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1 // indirect
+        tool (
+          github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+        )
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'go',
+            depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+            depType: 'indirect',
+            currentValue: 'v2.4.1',
+            managerData: { lineNumber: 0 },
+          },
+        ],
+      });
+    });
+  });
+
+  it('extracts tool directives with required modules', () => {
+    const goMod = codeBlock`
+        require github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
+        tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/oapi-codegen/oapi-codegen/v2',
+          depType: 'require',
+          currentValue: 'v2.4.1',
+          managerData: { lineNumber: 0 },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives of sub-modules', () => {
+    const goMod = codeBlock`
+        require (
+          github.com/foo/bar v1.2.3
+          github.com/foo/bar/sub1/sub2 v4.5.6 // indirect
+          github.com/foo/bar/sub1 v7.8.9 // indirect
+          github.com/foo/bar/sub1/sub2/cmd/hell v10.11.12 // indirect
+        )
+        tool github.com/foo/bar/sub1/sub2/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar',
+          depType: 'require',
+          currentValue: 'v1.2.3',
+          managerData: { lineNumber: 1, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1/sub2',
+          depType: 'indirect',
+          currentValue: 'v4.5.6',
+          managerData: { lineNumber: 2, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1',
+          depType: 'indirect',
+          currentValue: 'v7.8.9',
+          enabled: false,
+          managerData: { lineNumber: 3, multiLine: true },
+        },
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar/sub1/sub2/cmd/hell',
+          depType: 'indirect',
+          currentValue: 'v10.11.12',
+          enabled: false,
+          managerData: { lineNumber: 4, multiLine: true },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives with exact match', () => {
+    const goMod = codeBlock`
+        require github.com/foo/bar v1.2.3 // indirect
+        tool github.com/foo/bar
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toEqual({
+      deps: [
+        {
+          datasource: 'go',
+          depName: 'github.com/foo/bar',
+          depType: 'indirect',
+          currentValue: 'v1.2.3',
+          managerData: { lineNumber: 0 },
+        },
+      ],
+    });
+  });
+
+  it('extracts tool directives with no matching dependencies', () => {
+    const goMod = codeBlock`
+        tool github.com/foo/bar/sub/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toBeNull();
   });
 });

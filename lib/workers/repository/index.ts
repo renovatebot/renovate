@@ -24,6 +24,7 @@ import {
   HttpCacheStats,
   HttpStats,
   LookupStats,
+  ObsoleteCacheHitLogger,
   PackageCacheStats,
 } from '../../util/stats';
 import { setBranchCache } from './cache';
@@ -102,8 +103,13 @@ export async function renovateRepository(
         }
         logger.debug(`Automerged but already retried once`);
       } else {
-        await configMigration(config, branchList);
-        await ensureDependencyDashboard(config, branches, packageFiles);
+        const configMigrationRes = await configMigration(config, branchList);
+        await ensureDependencyDashboard(
+          config,
+          branches,
+          packageFiles,
+          configMigrationRes,
+        );
       }
       await finalizeRepo(config, branchList);
       // TODO #22198
@@ -142,6 +148,7 @@ export async function renovateRepository(
   HttpStats.report();
   HttpCacheStats.report();
   LookupStats.report();
+  ObsoleteCacheHitLogger.report();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   resetRepositoryLogLevelRemaps();

@@ -112,6 +112,7 @@ interface DatasourceCacheDataPoint {
   action: 'hit' | 'miss' | 'set' | 'skip';
 }
 
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 export interface DatasourceCacheReport {
   long: {
     [datasource in string]: {
@@ -134,6 +135,7 @@ export interface DatasourceCacheReport {
     };
   };
 }
+/* eslint-enable @typescript-eslint/consistent-indexed-object-style */
 
 export class DatasourceCacheStats {
   private static getData(): DatasourceCacheDataPoint[] {
@@ -486,3 +488,64 @@ export class HttpCacheStats {
     logger.debug(report, 'HTTP cache statistics');
   }
 }
+
+type ObsoleteCacheStats = Record<
+  string,
+  {
+    callsite?: string;
+    count: number;
+  }
+>;
+
+/* v8 ignore start: temporary code */
+export class ObsoleteCacheHitLogger {
+  static getData(): ObsoleteCacheStats {
+    return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
+  }
+
+  private static getCallsite(): string | undefined {
+    const _prepareStackTrace = Error.prepareStackTrace;
+    try {
+      let result: string | undefined;
+      Error.prepareStackTrace = (_, stack) => {
+        result = stack
+          .find((frame) => {
+            const callsite = frame.toString();
+            return (
+              !callsite.includes('lib/util/http') &&
+              !callsite.includes('lib/util/stats') &&
+              !callsite.includes('(node:')
+            );
+          })
+          ?.toString()
+          ?.replace(/:\d+(?::\d+)?\)$/, ')');
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      new Error().stack;
+
+      return result;
+    } finally {
+      Error.prepareStackTrace = _prepareStackTrace;
+    }
+  }
+
+  static write(url: string): void {
+    const data = this.getData();
+    if (!data[url]) {
+      const callsite = this.getCallsite();
+      data[url] = { callsite, count: 0 };
+    }
+    data[url].count++;
+    memCache.set('obsolete-cache-stats', data);
+  }
+
+  static report(): void {
+    const hits = this.getData();
+    logger.debug(
+      { count: Object.keys(hits).length, hits },
+      'Cache fallback URLs',
+    );
+  }
+}
+/* v8 ignore stop: temporary code */

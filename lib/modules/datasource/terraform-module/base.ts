@@ -22,7 +22,7 @@ export abstract class TerraformDatasource extends Datasource {
   ): Promise<ServiceDiscoveryResult> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
     const serviceDiscovery = (
-      await this.http.getJson<ServiceDiscoveryResult>(discoveryURL)
+      await this.http.getJsonUnchecked<ServiceDiscoveryResult>(discoveryURL)
     ).body;
     return serviceDiscovery;
   }

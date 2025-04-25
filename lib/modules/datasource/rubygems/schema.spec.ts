@@ -97,7 +97,7 @@ describe('modules/datasource/rubygems/schema', () => {
         releases: [
           {
             version: '1.0.0',
-            releaseTimestamp: '2021-01-01',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
             changelogUrl: 'https://example.com',
             sourceUrl: 'https://example.com',
             constraints: {
@@ -108,7 +108,7 @@ describe('modules/datasource/rubygems/schema', () => {
           },
           {
             version: '2.0.0',
-            releaseTimestamp: '2022-01-01',
+            releaseTimestamp: '2022-01-01T00:00:00.000Z',
             changelogUrl: 'https://example.com',
             sourceUrl: 'https://example.com',
             constraints: {
@@ -119,7 +119,7 @@ describe('modules/datasource/rubygems/schema', () => {
           },
           {
             version: '3.0.0',
-            releaseTimestamp: '2023-01-01',
+            releaseTimestamp: '2023-01-01T00:00:00.000Z',
             changelogUrl: 'https://example.com',
             sourceUrl: 'https://example.com',
             constraints: {

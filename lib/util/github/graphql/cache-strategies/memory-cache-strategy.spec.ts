@@ -1,6 +1,7 @@
 import { DateTime, Settings } from 'luxon';
 import * as memCache from '../../../cache/memory';
 import { clone } from '../../../clone';
+import type { Timestamp } from '../../../timestamp';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
 
@@ -21,7 +22,7 @@ const isoTs = (t: string) => {
   } else {
     throw new Error('Unrecognized date-time string. ' + t);
   }
-  return iso;
+  return iso as Timestamp;
 };
 
 const mockTime = (input: string): void => {

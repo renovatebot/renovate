@@ -43,7 +43,7 @@ export class GithubTagsDatasource extends Datasource {
     let digest: string | null = null;
     try {
       const url = `${apiBaseUrl}repos/${githubRepo}/commits?per_page=1`;
-      const res = await this.http.getJson<{ sha: string }[]>(url);
+      const res = await this.http.getJsonUnchecked<{ sha: string }[]>(url);
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(

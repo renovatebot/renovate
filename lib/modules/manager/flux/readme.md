@@ -1,8 +1,8 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
-1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
-1. ['OCIRepository'](https://fluxcd.io/flux/components/source/ocirepositories/) resources
+1. [`GitRepository`](https://fluxcd.io/flux/components/source/gitrepositories/) resources
+1. [`OCIRepository`](https://fluxcd.io/flux/components/source/ocirepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
@@ -10,17 +10,21 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 Extracts `helm` dependencies from `HelmRelease` resources.
 
 The `flux` manager extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
+`HelmRepository` resources can be referenced via `spec.chart` or indirectly via a `HelmChart` when
+using [`spec.chartRef`](https://fluxcd.io/flux/components/helm/helmreleases/#chart-reference).
 Renovate supports OCI `HelmRepository` sources, those with `type: oci`.
 Renovate will then extract the `docker` dependencies for the referenced `HelmRelease` resources.
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
-1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` property set
-2. The referenced `HelmRepository` resource must have its `metadata.namespace` property set
+1. The `HelmRelease` resource must either have its `metadata.namespace` property set or its `spec.chart.spec.sourceRef.namespace` property (when not using `chartRef`) set
+2. The referenced `HelmRepository` and `HelmChart` (when using `chartRef`) resources must have their `metadata.namespace` property set
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
 
 Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
+
+Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
 
 ### GitRepository support
 

@@ -14,7 +14,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | undefined,
+  tag?: string,
 ): Promise<Preset> {
   let ref = '';
   if (is.nonEmptyString(tag)) {
@@ -24,9 +24,8 @@ export async function fetchJSONFile(
   logger.trace({ url }, `Preset URL`);
   let res: { body: { content: string } };
   try {
-    res = await http.getJson(url);
+    res = await http.getJsonUnchecked(url);
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -42,7 +41,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | undefined,
+  tag?: string,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,
