@@ -13,7 +13,7 @@ import type { PackageDependency } from '../types';
 function matchAction(action: string): z.Schema {
   return z
     .string()
-    .regex(regEx(`(?:https://[^/]+/)?${escapeRegExp(action)}(@.+)?$`));
+    .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(@.+)?$`));
 }
 
 /**
