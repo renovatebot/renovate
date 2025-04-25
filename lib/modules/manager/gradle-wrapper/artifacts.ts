@@ -194,6 +194,48 @@ export async function updateArtifacts({
       );
     }
 
+    let writeLocksCmd = await prepareGradleCommand(gradlewFile);
+    if (!writeLocksCmd) {
+      logger.info('No gradlew found - skipping Artifacts update');
+      return null;
+    }
+    writeLocksCmd += ' :wrapper --write-locks';
+
+    logger.debug(`Downloading the new gradle wrapper and updating the locks: "${writeLocksCmd}"`);
+    try {
+      await exec(writeLocksCmd, execOptions);
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.warn(
+        { err },
+        'Error executing gradle wrapper download and lock update command. It can be not a critical one though.',
+      );
+    }
+
+    let updateWrapperCmd = await prepareGradleCommand(gradlewFile);
+    if (!updateWrapperCmd) {
+      logger.info('No gradlew found - skipping Artifacts update');
+      return null;
+    }
+    updateWrapperCmd += ' :wrapper';
+
+    logger.debug(`Updating the gradle wrapper files: "${writeLocksCmd}"`);
+    try {
+      await exec(updateWrapperCmd, execOptions);
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.warn(
+        { err },
+        'Error executing gradle wrapper update wrapper files. It can be not a critical one though.',
+      );
+    }
+
     const buildFileName = await updateBuildFile(localGradleDir, {
       gradleVersion: config.newValue,
       distributionSha256Sum: checksum,
