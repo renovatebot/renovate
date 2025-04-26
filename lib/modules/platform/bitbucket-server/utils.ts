@@ -6,6 +6,7 @@ import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { GitOptions, GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
+import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
@@ -151,11 +152,12 @@ export function getExtraCloneOpts(opts: HostRule): GitOptions {
 
 // https://docs.atlassian.com/bitbucket-server/rest/5.1.0/bitbucket-rest.html#idm45588158982432
 export async function resolveEmailToUsername(
+  http: BitbucketServerHttp,
   email: string,
 ): Promise<string | null> {
   // GET /rest/api/1.0/admin/users?filter={filter}
   const users = (
-    await bitbucketServerHttp.getJson<{ values: { name: string }[] }>(
+    await http.getJsonUnchecked<{ values: { name: string }[] }>(
       `./rest/api/1.0/admin/users?filter=${email}`,
     )
   ).body;

@@ -842,7 +842,6 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .twice()
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
               `${urlPath}/rest/api/1.0/admin/users?filter=name@renovatebot.com`,
@@ -851,7 +850,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               isLastPage: true,
               values: [
                 {
-                  name: 'name',
+                  name: 'resolvedUserName',
                   emailAddress: 'name@renovatebot.com',
                 },
               ],
@@ -863,9 +862,13 @@ describe('modules/platform/bitbucket-server/index', () => {
                 version: 1,
                 reviewers: [
                   { user: { name: 'userName2' } },
-                  { user: { name: 'name' } },
+                  { user: { name: 'resolvedUserName' } },
                 ],
               },
+            )
+            .reply(200)
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
