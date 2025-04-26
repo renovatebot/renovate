@@ -757,9 +757,9 @@ const options: RenovateOptions[] = [
   {
     name: 'configWarningReuseIssue',
     description:
-      'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',
+      'Set this to `true` to make Renovate reuse/reopen an existing closed Config Warning issue, instead of opening a new one each time.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
 
   // encryption
