@@ -143,6 +143,7 @@ export function extractPackageJson(
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager,
       ),
+      workspaces: packageJson.workspaces,
     },
   };
 }

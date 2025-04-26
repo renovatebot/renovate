@@ -2,5 +2,6 @@ title: Mend-hosted Apps
 nav:
   - 'Overview': 'overview.md'
   - 'Configuration': 'hosted-apps-config.md'
+  - 'Job Scheduling': 'job-scheduling.md'
   - 'Credentials': 'credentials.md'
   - 'Migrating Secrets': 'migrating-secrets.md'
