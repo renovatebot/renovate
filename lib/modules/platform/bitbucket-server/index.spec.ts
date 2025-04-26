@@ -844,7 +844,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/admin/users?filter=name@renovatebot.com`,
+              `${urlPath}/rest/api/1.0/admin/users?filter=name@renovatebot.com&limit=100`,
             )
             .reply(200, {
               isLastPage: true,

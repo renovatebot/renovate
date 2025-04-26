@@ -11,6 +11,7 @@ import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
+import { RestDetailedUser } from './schema';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
@@ -157,10 +158,11 @@ export async function resolveEmailToUsername(
 ): Promise<string | null> {
   // GET /rest/api/1.0/admin/users?filter={filter}
   const users = (
-    await http.getJsonUnchecked<{ values: { name: string }[] }>(
+    await http.getJsonUnchecked<RestDetailedUser[]>(
       `./rest/api/1.0/admin/users?filter=${email}`,
+      { paginate: true },
     )
   ).body;
 
-  return users.values?.[0].name ?? null;
+  return users[0].name ?? null;
 }
