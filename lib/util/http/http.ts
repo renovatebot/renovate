@@ -183,8 +183,14 @@ export abstract class HttpBase<
     }
 
     try {
-      const res = await resPromise;
-      res.authorization = !!options?.headers?.authorization;
+      const { body, statusCode, headers } = await resPromise;
+      const authorization = !!options?.headers?.authorization;
+      const res = {
+        statusCode,
+        headers,
+        body,
+        authorization,
+      } as HttpResponse<unknown>;
 
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(url, res);
