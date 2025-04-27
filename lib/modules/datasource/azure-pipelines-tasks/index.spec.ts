@@ -96,7 +96,15 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'AzurePowerShell',
       }),
-    ).toEqual({ releases: [{ version: '5.248.3' }] });
+    ).toEqual({
+      releases: [
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
   });
 
   it('identifies task based on task id', async () => {
@@ -191,8 +199,17 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       }),
     ).toEqual({
       releases: [
-        { isDeprecated: true, version: '1.2.3' },
-        { isDeprecated: undefined, version: '2.247.1' },
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          isDeprecated: true,
+          version: '1.2.3',
+        },
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '2.247.1',
+        },
       ],
     });
   });

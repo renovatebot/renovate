@@ -451,6 +451,33 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles COPY --from with digest', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM scratch
+          COPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d \
+            /usr/bin/skaffold /usr/bin/skaffold
+          `,
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d',
+          currentValue: 'v0.11.0',
+          datasource: 'docker',
+          depName: 'gcr.io/k8s-skaffold/skaffold',
+          packageName: 'gcr.io/k8s-skaffold/skaffold',
+          depType: 'final',
+          replaceString:
+            'gcr.io/k8s-skaffold/skaffold:v0.11.0@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d',
+        },
+      ]);
+    });
+
     it('handles COPY --link --from', () => {
       const res = extractPackageFile(
         codeBlock`

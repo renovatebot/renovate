@@ -176,6 +176,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
     versioning: condaVersioningId,
+    extractVersion: '^v(?<version>.*)$',
   },
   poetry: {
     datasource: 'pypi',

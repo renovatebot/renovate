@@ -20,7 +20,7 @@
      5. Fill out the information in your repository's `README.md`.
      6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
 
-    If you need help with running renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
+    If you need help with running Renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
 
     Good luck,
 

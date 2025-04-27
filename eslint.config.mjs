@@ -131,6 +131,19 @@ export default tseslint.config(
         },
       ],
 
+      'import/no-restricted-paths': [
+        2,
+        {
+          zones: [
+            {
+              target: 'lib/**/*.ts',
+              from: 'tools/**/*.ts',
+              message: 'Importing the `tools/*` files is not allowed',
+            },
+          ],
+        },
+      ],
+
       'no-restricted-imports': [
         2,
         {

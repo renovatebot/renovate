@@ -134,6 +134,21 @@ function getDepsSignature(deps: PackageDependency[]): string {
     .join(',');
 }
 
+function firstIndexOf(
+  existingContent: string,
+  depName: string,
+  currentValue: string,
+  position = 0,
+): number {
+  const depIndex = existingContent.indexOf(depName, position);
+  const valIndex = existingContent.indexOf(currentValue, position);
+  const index = depIndex < valIndex ? depIndex : valIndex;
+  if (index < 0) {
+    return position === 0 ? -1 : existingContent.length;
+  }
+  return index;
+}
+
 export async function checkBranchDepsMatchBaseDeps(
   upgrade: BranchUpgradeConfig,
   branchContent: string,
@@ -218,9 +233,7 @@ export async function doAutoReplace(
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {
-    const depIndex = existingContent.indexOf(depName!);
-    const valIndex = existingContent.indexOf(currentValue!);
-    searchIndex = depIndex < valIndex ? depIndex : valIndex;
+    searchIndex = firstIndexOf(existingContent, depName!, currentValue!);
   } else {
     searchIndex = existingContent.indexOf(replaceString!);
   }
@@ -317,8 +330,13 @@ export async function doAutoReplace(
             `Found depName at index ${searchIndex}`,
           );
           if (nameReplaced) {
-            startIndex += 1;
-            searchIndex = startIndex;
+            startIndex = firstIndexOf(
+              existingContent,
+              depName!,
+              currentValue!,
+              startIndex + 1,
+            );
+            searchIndex = startIndex - 1;
             await writeLocalFile(upgrade.packageFile!, existingContent);
             newContent = existingContent;
             nameReplaced = false;
@@ -329,6 +347,7 @@ export async function doAutoReplace(
           newContent = replaceAt(newContent, searchIndex, depName!, newName);
           await writeLocalFile(upgrade.packageFile!, newContent);
           nameReplaced = true;
+          searchIndex += newName.length - 1;
         } else if (
           newValue &&
           matchAt(newContent, searchIndex, currentValue!)
@@ -337,6 +356,20 @@ export async function doAutoReplace(
             { packageFile, currentValue },
             `Found currentValue at index ${searchIndex}`,
           );
+          if (valueReplaced) {
+            startIndex = firstIndexOf(
+              existingContent,
+              depName!,
+              currentValue!,
+              startIndex + 1,
+            );
+            searchIndex = startIndex - 1;
+            await writeLocalFile(upgrade.packageFile!, existingContent);
+            newContent = existingContent;
+            nameReplaced = false;
+            valueReplaced = false;
+            continue;
+          }
           // Now test if the result matches
           newContent = replaceAt(
             newContent,
@@ -346,11 +379,19 @@ export async function doAutoReplace(
           );
           await writeLocalFile(upgrade.packageFile!, newContent);
           valueReplaced = true;
+          searchIndex += newValue.length - 1;
         }
         if (nameReplaced && valueReplaced) {
           if (await confirmIfDepUpdated(upgrade, newContent)) {
             return newContent;
           }
+          startIndex = firstIndexOf(
+            existingContent,
+            depName!,
+            currentValue!,
+            startIndex + 1,
+          );
+          searchIndex = startIndex - 1;
           await writeLocalFile(upgrade.packageFile!, existingContent);
           newContent = existingContent;
           nameReplaced = false;

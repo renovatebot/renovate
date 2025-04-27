@@ -127,15 +127,25 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
+    // try massaging it
     const massagedUrl = massageUrl(dep.sourceUrl);
     if (is.emptyString(massagedUrl)) {
       delete dep.sourceUrl;
     } else {
-      // try massaging it
+      // parse from github-url-from-git only supports Github URLs as its name implies
       dep.sourceUrl =
         parse(massagedUrl, {
           extraBaseUrls,
         }) || dep.sourceUrl;
+      // prefer massaged URL to source URL if the latter does not start with http:// or https://
+      // (e.g. git@somehost.com) and the detected platform is gitlab.
+      // this allows to retrieve changelogs from git hosts other than Github
+      if (
+        !isHttpUrl(dep.sourceUrl) &&
+        detectPlatform(massagedUrl) === 'gitlab'
+      ) {
+        dep.sourceUrl = massagedUrl;
+      }
     }
   }
   if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {

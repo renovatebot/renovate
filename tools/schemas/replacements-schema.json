@@ -40,7 +40,8 @@
               "replacementName": { "type": "string" },
               "replacementVersion": { "type": "string" },
               "description": { "type": "string" },
-              "replacementNameTemplate": { "type": "string" }
+              "replacementNameTemplate": { "type": "string" },
+              "replacementVersionTemplate": { "type": "string" }
             },
             "required": ["matchDatasources", "matchPackageNames"]
           },

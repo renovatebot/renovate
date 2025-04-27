@@ -138,6 +138,46 @@ describe('modules/manager/nuget/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('extracts msbuild sdk from the Import element', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project>
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+        <Import Project="Sdk.props" Sdk="My.Custom.Sdk" Version="1.2.3" />
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'My.Custom.Sdk',
+          depType: 'msbuild-sdk',
+          currentValue: '1.2.3',
+          datasource: 'nuget',
+        },
+      ]);
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('does not extract msbuild sdk from the Import element if version is missing', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = `
+      <Project>
+        <PropertyGroup>
+          <TargetFramework>net7.0</TargetFramework> <!-- this is a dummy value -->
+          <NuspecFile>$(MSBuildThisFileDirectory)\tdlib.native.nuspec</NuspecFile>
+          <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+        </PropertyGroup>
+        <Import Project="Sdk.props" Sdk="My.Custom.Sdk" />
+      </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res).toBeNull();
+    });
+
     it('extracts dependency with lower-case Version attribute', async () => {
       const contents = codeBlock`
         <Project Sdk="Microsoft.NET.Sdk">

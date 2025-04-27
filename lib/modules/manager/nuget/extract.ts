@@ -3,7 +3,6 @@ import type { XmlNode } from 'xmldoc';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
@@ -20,15 +19,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)
- * Due to guarantee that an update of package version will result in its usage by the next restore + build operation,
- * only following constrained versions make sense
- * 1.3.4, [1.3.4], [1.3.4, ], [1.3.4, )
- * The update of the right boundary does not make sense regarding to the lowest version restore rule,
- * so we don't include it in the extracting regexp
  */
-const checkVersion = regEx(
-  /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/,
-);
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
@@ -83,33 +74,40 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       currentValue = currentValue
         ?.trim()
         ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+          sharedVariableName = key;
           const val = vars.get(key);
           if (val) {
-            sharedVariableName = key;
             return val;
           }
           return match;
         });
 
       if (sharedVariableName) {
-        dep.sharedVariableName = sharedVariableName;
+        if (currentValue === `$(${sharedVariableName})`) {
+          // this means that be failed to find/replace the variable
+          dep.skipReason = 'contains-variable';
+        } else {
+          dep.sharedVariableName = sharedVariableName;
+        }
       }
 
-      currentValue = checkVersion
-        .exec(currentValue)
-        ?.groups?.currentValue?.trim();
-
-      if (currentValue) {
-        dep.currentValue = currentValue;
-      } else {
-        dep.skipReason = 'invalid-version';
-      }
-
+      dep.currentValue = currentValue;
       results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
       // if sdk element is present it will always have the Name field but the Version is an optional field
+      if (depName && version) {
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
+      }
+    } else if (name === 'Import') {
+      const depName = attr?.Sdk;
+      const version = attr?.Version;
       if (depName && version) {
         results.push({
           depName,

@@ -795,6 +795,7 @@ describe('modules/manager/gradle/parser', () => {
         expect(urls).toStrictEqual([
           {
             registryUrl: 'https://foo.bar/baz',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'exclude', matcher: 'simple', groupId: 'baz.qux' },
@@ -802,6 +803,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: REGISTRY_URLS.mavenCentral,
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'include', matcher: 'simple', groupId: 'foo.bar' },
@@ -809,6 +811,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: 'https://foo.bar/deps',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'include', matcher: 'subgroup', groupId: 'foo.bar' },
@@ -816,6 +819,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: 'https://some.foo',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               {
@@ -906,6 +910,75 @@ describe('modules/manager/gradle/parser', () => {
           );
         });
       });
+    });
+
+    it('exclusiveContent', () => {
+      const input = codeBlock`
+        pluginManagement {
+          repositories {
+            exclusiveContent {
+              forRepository {
+                maven {
+                  name = "some maven registry"
+                  setUrl("https://foo.bar.com/repository/public/")
+                }
+              }
+              filter {
+                includeGroup("com.foo.bar")
+                includeModule("foo", "bar")
+              }
+            }
+            gradlePluginPortal()
+          }
+        }
+        exclusiveContent {
+          filter {
+            includeGroup("foo")
+          }
+          forRepository {
+            mavenCentral()
+          }
+        }
+      `;
+
+      const { urls } = parseGradle(input);
+      expect(urls).toMatchObject([
+        {
+          registryUrl: 'https://foo.bar.com/repository/public/',
+          registryType: 'exclusive',
+          scope: 'plugin',
+          content: [
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'com.foo.bar',
+            },
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'foo',
+              artifactId: 'bar',
+            },
+          ],
+        },
+        {
+          registryUrl: REGISTRY_URLS.gradlePluginPortal,
+          registryType: 'regular',
+          scope: 'plugin',
+        },
+        {
+          registryUrl: REGISTRY_URLS.mavenCentral,
+          registryType: 'exclusive',
+          scope: 'dep',
+          content: [
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'foo',
+            },
+          ],
+        },
+      ]);
     });
   });
 

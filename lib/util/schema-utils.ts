@@ -318,3 +318,47 @@ export function withTraceMessage<Input, Output>(
     return value;
   };
 }
+
+function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+
+  if (visited.has(value)) {
+    return true;
+  }
+
+  const downstreamVisited = new Set(visited);
+  downstreamVisited.add(value);
+
+  if (Array.isArray(value)) {
+    for (const childValue of value) {
+      if (isCircular(childValue, downstreamVisited)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  const values = Object.values(value);
+  for (const ov of values) {
+    if (isCircular(ov, downstreamVisited)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const NotCircular = z.unknown().superRefine((val, ctx) => {
+  if (isCircular(val)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'values cannot be circular data structures',
+      fatal: true,
+    });
+
+    return z.NEVER;
+  }
+});

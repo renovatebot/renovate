@@ -1,17 +1,13 @@
 import { logger } from '../../lib/logger';
 import type { ModuleApi } from '../../lib/types';
 import { regEx } from '../../lib/util/regex';
+import { capitalize } from '../../lib/util/string';
 import { readFile } from '../utils';
 
 const replaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
 const replaceStop = '<!-- Autogenerate end -->';
 const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
-
-export function capitalize(input: string): string {
-  // console.log(input);
-  return input[0].toUpperCase() + input.slice(1);
-}
 
 export function formatName(input: string): string {
   return input.split('-').map(capitalize).join(' ');

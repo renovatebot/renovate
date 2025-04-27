@@ -80,6 +80,7 @@ export interface ContentDescriptorSpec {
 
 export interface PackageRegistry {
   registryUrl: string;
+  registryType: 'regular' | 'exclusive';
   scope: 'dep' | 'plugin';
   content?: ContentDescriptorSpec[];
 }

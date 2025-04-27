@@ -16,7 +16,7 @@ export function getHttpUrl(url: string, token?: string): string {
 
   // Convert non-https URLs to https and strip port
   if (!regEx(/^https?$/).test(protocol)) {
-    parsedUrl.port = 443;
+    parsedUrl.port = '443';
     protocol = 'https';
   }
 

@@ -19,6 +19,7 @@ const PackageRuleSchema = z.object({
   replacementVersion: z.string().optional(),
   description: z.string().optional(),
   replacementNameTemplate: z.string().optional(),
+  replacementVersionTemplate: z.string().optional(),
 });
 
 const RuleSetSchema = z.object({

@@ -12,3 +12,6 @@ replace github.com/pkg/errors => ../errors
 replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
 
 require github.com/caarlos0/env v3.5.0+incompatible
+
+require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
+require github.com/cucumber/common/messages/go/v18 v18.0.0
