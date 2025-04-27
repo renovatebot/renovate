@@ -184,13 +184,15 @@ export abstract class HttpBase<
 
     try {
       const { body, statusCode, headers } = await resPromise;
-      const authorization = !!options?.headers?.authorization;
       const res = {
         statusCode,
         headers,
         body,
-        authorization,
       } as HttpResponse<unknown>;
+
+      if (options?.headers?.authorization) {
+        res.authorization = true;
+      }
 
       if (body instanceof Buffer) {
         return res;

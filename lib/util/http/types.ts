@@ -76,7 +76,7 @@ export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
   headers: HttpHeaders;
-  authorization?: boolean;
+  authorization?: true;
 }
 
 export type Task<T> = () => Promise<T>;

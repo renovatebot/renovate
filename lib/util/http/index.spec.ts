@@ -29,7 +29,6 @@ describe('util/http/index', () => {
   it('get', async () => {
     httpMock.scope(baseUrl).get('/test').reply(200);
     expect(await http.getText('http://renovate.com/test')).toEqual({
-      authorization: false,
       body: '',
       headers: {},
       statusCode: 200,
@@ -83,7 +82,6 @@ describe('util/http/index', () => {
     const res = await http.getJsonUnchecked('http://renovate.com');
 
     expect(res).toEqual({
-      authorization: false,
       body: {
         test: true,
       },
@@ -99,7 +97,6 @@ describe('util/http/index', () => {
     expect(
       await http.postJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
@@ -114,7 +111,6 @@ describe('util/http/index', () => {
     expect(
       await http.putJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
@@ -129,7 +125,6 @@ describe('util/http/index', () => {
     expect(
       await http.patchJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
@@ -144,7 +139,6 @@ describe('util/http/index', () => {
     expect(
       await http.deleteJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
@@ -159,7 +153,6 @@ describe('util/http/index', () => {
       'content-type': 'application/json',
     });
     expect(await http.headJson('http://renovate.com', { baseUrl })).toEqual({
-      authorization: false,
       body: '',
       headers: {
         'content-type': 'application/json',
@@ -320,7 +313,6 @@ describe('util/http/index', () => {
         .head('/')
         .reply(200, undefined, { 'x-some-header': 'abc' });
       expect(await http.head('http://renovate.com')).toEqual({
-        authorization: false,
         body: '',
         headers: {
           'x-some-header': 'abc',

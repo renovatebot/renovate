@@ -45,7 +45,6 @@ describe('util/http/bitbucket', () => {
 
     setBaseUrl(customBaseUrl);
     expect(await api.postJson('some-url')).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
