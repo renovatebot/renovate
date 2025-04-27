@@ -359,7 +359,8 @@
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
       "https://github.com/FasterXML/jackson-jaxrs-providers",
-      "https://github.com/FasterXML/jackson-module-kotlin"
+      "https://github.com/FasterXML/jackson-module-kotlin",
+      "https://github.com/FasterXML/jackson-module-scala"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
