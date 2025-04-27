@@ -21,6 +21,7 @@ export interface StorageConfig {
   url: string;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
+  cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
 }
 
@@ -85,6 +86,8 @@ export interface CommitFilesConfig {
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */
   prTitle?: string;
+  /** Only needed by Gerrit platform */
+  autoApprove?: boolean;
 }
 
 export interface PushFilesConfig {

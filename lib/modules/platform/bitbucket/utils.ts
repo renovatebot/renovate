@@ -9,12 +9,13 @@ import type {
   PrResponse,
 } from './types';
 
-const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
-  new Map([
+const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
+  [
     ['squash', 'squash'],
     ['merge-commit', 'merge_commit'],
     ['fast-forward', 'fast_forward'],
-  ]);
+  ],
+);
 
 export function mergeBodyTransformer(
   mergeStrategy: MergeStrategy | undefined,
@@ -52,9 +53,9 @@ export function prInfo(pr: PrResponse): Pr {
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
-    state: prStates.closed?.includes(pr.state)
-      ? /* istanbul ignore next */ 'closed'
-      : pr.state?.toLowerCase(),
+    state: /* v8 ignore start */ prStates.closed?.includes(pr.state)
+      ? 'closed'
+      : pr.state?.toLowerCase() /* v8 ignore stop */,
     createdAt: pr.created_on,
   };
 }

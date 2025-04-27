@@ -1,10 +1,18 @@
 import JSON5 from 'json5';
-import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
-import { type ZodEffects, type ZodType, type ZodTypeDef, z } from 'zod';
+import {
+  type ZodEffects,
+  type ZodString,
+  type ZodType,
+  type ZodTypeDef,
+  z,
+} from 'zod';
+import { logger } from '../logger';
 import type { PackageDependency } from '../modules/manager/types';
+import { parseJsonc } from './common';
 import { parse as parseToml } from './toml';
+import type { YamlOptions } from './yaml';
 import { parseSingleYaml, parseYaml } from './yaml';
 
 interface ErrorContext<T> {
@@ -218,13 +226,12 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const Jsonc = z.string().transform((str, ctx): JsonValue => {
-  const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(str, errors);
-  if (errors.length === 0) {
-    return value;
+  try {
+    return parseJsonc(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+    return z.NEVER;
   }
-  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
-  return z.NEVER;
 });
 
 export const UtcDate = z
@@ -256,6 +263,19 @@ export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   }
 });
 
+export function multidocYaml(
+  opts?: Omit<YamlOptions, 'customSchema'>,
+): ZodEffects<ZodString, JsonArray, string> {
+  return z.string().transform((str, ctx): JsonArray => {
+    try {
+      return parseYaml(str, opts) as JsonArray;
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
+      return z.NEVER;
+    }
+  });
+}
+
 export const Toml = z.string().transform((str, ctx) => {
   try {
     return parseToml(str);
@@ -268,7 +288,7 @@ export const Toml = z.string().transform((str, ctx) => {
 export function withDepType<
   Output extends PackageDependency[],
   Schema extends ZodType<Output, ZodTypeDef, unknown>,
->(schema: Schema, depType: string, force: boolean = true): ZodEffects<Schema> {
+>(schema: Schema, depType: string, force = true): ZodEffects<Schema> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {
@@ -278,3 +298,67 @@ export function withDepType<
     return deps;
   });
 }
+
+export function withDebugMessage<Input, Output>(
+  value: Output,
+  msg: string,
+): (ctx: { error: z.ZodError; input: Input }) => Output {
+  return ({ error: err }) => {
+    logger.debug({ err }, msg);
+    return value;
+  };
+}
+
+export function withTraceMessage<Input, Output>(
+  value: Output,
+  msg: string,
+): (ctx: { error: z.ZodError; input: Input }) => Output {
+  return ({ error: err }) => {
+    logger.trace({ err }, msg);
+    return value;
+  };
+}
+
+function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+
+  if (visited.has(value)) {
+    return true;
+  }
+
+  const downstreamVisited = new Set(visited);
+  downstreamVisited.add(value);
+
+  if (Array.isArray(value)) {
+    for (const childValue of value) {
+      if (isCircular(childValue, downstreamVisited)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  const values = Object.values(value);
+  for (const ov of values) {
+    if (isCircular(ov, downstreamVisited)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const NotCircular = z.unknown().superRefine((val, ctx) => {
+  if (isCircular(val)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'values cannot be circular data structures',
+      fatal: true,
+    });
+
+    return z.NEVER;
+  }
+});

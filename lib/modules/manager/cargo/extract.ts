@@ -124,7 +124,7 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
 function resolveRegistryIndex(
   registryName: string,
   config: CargoConfig,
-  originalNames: Set<string> = new Set(),
+  originalNames = new Set<string>(),
 ): CargoRegistryUrl {
   // if we have a source replacement, follow that.
   // https://doc.rust-lang.org/cargo/reference/source-replacement.html
@@ -134,7 +134,7 @@ function resolveRegistryIndex(
       `Replacing index of cargo registry ${registryName} with ${replacementName}`,
     );
     if (originalNames.has(replacementName)) {
-      logger.warn(`${registryName} cargo registry resolves to itself`);
+      logger.warn({ registryName }, 'cargo registry resolves to itself');
       return null;
     }
     return resolveRegistryIndex(

@@ -17,6 +17,8 @@ const replaceRegex = regEx(
   /^(?<keyword>replace)?\s+(?<module>[^\s]+\/[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
+const toolRegex = regEx(/^(?<keyword>tool)?\s+(?<module>[^\s]+\/?[^\s]+)\s*$/);
+
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
@@ -145,6 +147,26 @@ export function parseLine(input: string): PackageDependency | null {
 
     if (depName.startsWith('/') || depName.startsWith('.')) {
       dep.skipReason = 'local-dependency';
+    }
+
+    return dep;
+  }
+
+  const toolMatches = toolRegex.exec(input)?.groups;
+  if (toolMatches) {
+    const { keyword, module } = toolMatches;
+
+    const depName = trimQuotes(module);
+
+    const dep: PackageDependency = {
+      datasource: GoDatasource.id,
+      depType: 'tool',
+      depName,
+      skipReason: 'unversioned-reference',
+    };
+
+    if (!keyword) {
+      dep.managerData = { multiLine: true };
     }
 
     return dep;

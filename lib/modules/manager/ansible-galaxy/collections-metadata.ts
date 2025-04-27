@@ -8,9 +8,7 @@ export function extractCollectionsMetaDataFile(
   const deps: PackageDependency[] = [];
   // in a galaxy.yml the dependency map is inside a `dependencies:` block
   let foundDependencyBlock = false;
-  for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-    const line = lines[lineNumber];
-
+  for (const line of lines) {
     if (dependencyRegex.exec(line)) {
       foundDependencyBlock = true;
     } else if (foundDependencyBlock) {

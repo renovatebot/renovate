@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
-import { flattenUpdates } from './flatten';
+import { flattenUpdates, sanitizeDepName } from './flatten';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../util/git/semantic');
+vi.mock('../../../util/git/semantic');
 
 let config: RenovateConfig;
 
@@ -14,6 +14,14 @@ beforeEach(() => {
 });
 
 describe('workers/repository/updates/flatten', () => {
+  describe('sanitizeDepName()', () => {
+    it('sanitizes urls', () => {
+      expect(sanitizeDepName('https://some.host.name/a/path/to.git')).toBe(
+        'https-some.host.name-a-path-to.git',
+      );
+    });
+  });
+
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       // TODO #22198
@@ -164,23 +172,23 @@ describe('workers/repository/updates/flatten', () => {
       expect(
         res.every(
           (upgrade) =>
-            upgrade.isLockFileMaintenance ||
-            upgrade.isRemediation ||
+            upgrade.isLockFileMaintenance ??
+            upgrade.isRemediation ??
             is.number(upgrade.depIndex),
         ),
       ).toBeTrue();
-      expect(
-        res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug,
-      ).toBe('org-repo');
-      expect(res.filter((update) => update.sourceRepo)[0].sourceRepo).toBe(
+      expect(res.find((update) => update.sourceRepoSlug)!.sourceRepoSlug).toBe(
+        'org-repo',
+      );
+      expect(res.find((update) => update.sourceRepo)!.sourceRepo).toBe(
         'org/repo',
       );
-      expect(
-        res.filter((update) => update.sourceRepoOrg)[0].sourceRepoOrg,
-      ).toBe('org');
-      expect(
-        res.filter((update) => update.sourceRepoName)[0].sourceRepoName,
-      ).toBe('repo');
+      expect(res.find((update) => update.sourceRepoOrg)!.sourceRepoOrg).toBe(
+        'org',
+      );
+      expect(res.find((update) => update.sourceRepoName)!.sourceRepoName).toBe(
+        'repo',
+      );
       expect(
         res.filter((update) => update.sourceRepoSlug)[1].sourceRepoSlug,
       ).toBe('org-repo');
@@ -194,7 +202,7 @@ describe('workers/repository/updates/flatten', () => {
         res.filter((update) => update.sourceRepoName)[1].sourceRepoName,
       ).toBe('repo');
       expect(
-        res.filter((update) => update.depName === '@monorepo/package')[0],
+        res.find((update) => update.depName === '@monorepo/package'),
       ).toEqual(
         expect.objectContaining({
           depName: '@monorepo/package',

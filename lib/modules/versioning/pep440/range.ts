@@ -121,7 +121,7 @@ export function getNewValue({
     if (!ranges.length) {
       // an empty string is an allowed value for PEP440 range
       // it means get any version
-      logger.warn('Empty currentValue: ' + currentValue);
+      logger.warn({ currentValue }, 'Empty currentValue');
       return currentValue;
     }
   } catch (err) {

@@ -1,7 +1,10 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { GerritHttp } from '../../../util/http/gerrit';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -30,7 +33,7 @@ class GerritClient {
   private gerritHttp = new GerritHttp();
 
   async getRepos(): Promise<string[]> {
-    const res = await this.gerritHttp.getJson<string[]>(
+    const res = await this.gerritHttp.getJsonUnchecked<string[]>(
       'a/projects/?type=CODE&state=ACTIVE',
       {},
     );
@@ -38,9 +41,10 @@ class GerritClient {
   }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
-    const projectInfo = await this.gerritHttp.getJson<GerritProjectInfo>(
-      `a/projects/${encodeURIComponent(repository)}`,
-    );
+    const projectInfo =
+      await this.gerritHttp.getJsonUnchecked<GerritProjectInfo>(
+        `a/projects/${encodeURIComponent(repository)}`,
+      );
     if (projectInfo.body.state !== 'ACTIVE') {
       throw new Error(REPOSITORY_ARCHIVED);
     }
@@ -48,7 +52,7 @@ class GerritClient {
   }
 
   async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
-    const branchInfo = await this.gerritHttp.getJson<GerritBranchInfo>(
+    const branchInfo = await this.gerritHttp.getJsonUnchecked<GerritBranchInfo>(
       `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
     );
     return branchInfo.body;
@@ -59,12 +63,23 @@ class GerritClient {
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
+    const opts: HttpOptions = {};
+    /* v8 ignore start: temporary code */
+    // TODO: should refresh the cache rather than just ignore it
+    if (refreshCache) {
+      opts.memCache = false;
+    } else {
+      opts.cacheProvider = memCacheProvider;
+    }
+    /* v8 ignore stop */
+
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
-    const changes = await this.gerritHttp.getJson<GerritChange[]>(
-      `a/changes/?q=` +
-        filters.join('+') +
-        this.requestDetails.map((det) => `&o=${det}`).join(''),
-      { memCache: !refreshCache },
+    const queryString = getQueryString({
+      o: this.requestDetails,
+    });
+    const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
+      `a/changes/?q=${filters.join('+')}&${queryString}`,
+      opts,
     );
     logger.trace(
       `findChanges(${filters.join(', ')}) => ${changes.body.length}`,
@@ -73,17 +88,18 @@ class GerritClient {
   }
 
   async getChange(changeNumber: number): Promise<GerritChange> {
-    const changes = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&'),
+    const queryString = getQueryString({ o: this.requestDetails });
+    const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
+      `a/changes/${changeNumber}?${queryString}`,
     );
     return changes.body;
   }
 
   async getMergeableInfo(change: GerritChange): Promise<GerritMergeableInfo> {
-    const mergeable = await this.gerritHttp.getJson<GerritMergeableInfo>(
-      `a/changes/${change._number}/revisions/current/mergeable`,
-    );
+    const mergeable =
+      await this.gerritHttp.getJsonUnchecked<GerritMergeableInfo>(
+        `a/changes/${change._number}/revisions/current/mergeable`,
+      );
     return mergeable.body;
   }
 
@@ -99,10 +115,9 @@ class GerritClient {
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
-    const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
-      `a/changes/${changeNumber}/messages`,
-      { memCache: false },
-    );
+    const messages = await this.gerritHttp.getJsonUnchecked<
+      GerritChangeMessageInfo[]
+    >(`a/changes/${changeNumber}/messages`, { memCache: false });
     return messages.body;
   }
 
@@ -180,32 +195,12 @@ class GerritClient {
     branch: string,
     fileName: string,
   ): Promise<string> {
-    const base64Content = await this.gerritHttp.get(
+    const base64Content = await this.gerritHttp.getText(
       `a/projects/${encodeURIComponent(
         repo,
       )}/branches/${encodeURIComponent(branch)}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
-  }
-
-  async approveChange(changeId: number): Promise<void> {
-    const isApproved = await this.checkIfApproved(changeId);
-    if (!isApproved) {
-      await this.setLabel(changeId, 'Code-Review', +2);
-    }
-  }
-
-  async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
-    const reviewLabels = change?.labels?.['Code-Review'];
-    return reviewLabels === undefined || reviewLabels.approved !== undefined;
-  }
-
-  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
-    return (
-      change.labels?.['Code-Review'].approved &&
-      change.labels['Code-Review'].approved.username === username
-    );
   }
 
   normalizeMessage(message: string): string {
@@ -220,16 +215,7 @@ class GerritClient {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];
     if (searchConfig.branchName) {
-      filters.push(
-        ...[
-          '(',
-          `footer:Renovate-Branch=${searchConfig.branchName}`,
-          // for backwards compatibility
-          'OR',
-          `hashtag:sourceBranch-${searchConfig.branchName}`,
-          ')',
-        ],
-      );
+      filters.push(`footer:Renovate-Branch=${searchConfig.branchName}`);
     }
     if (searchConfig.targetBranch) {
       filters.push(`branch:${searchConfig.targetBranch}`);

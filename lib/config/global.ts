@@ -3,12 +3,12 @@ import type { RenovateConfig, RepoGlobalConfig } from './types';
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
+    'allowedCommands',
     'allowedEnv',
+    'allowCommandTemplating',
     'allowCustomCrateRegistries',
     'allowedHeaders',
-    'allowedPostUpgradeCommands',
     'allowPlugins',
-    'allowPostUpgradeCommandTemplating',
     'allowScripts',
     'binarySource',
     'cacheDir',

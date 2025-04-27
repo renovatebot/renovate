@@ -309,5 +309,12 @@
     "created": "2024-10-10",
     "release": "2025-04-17",
     "eol": "2026-01-15"
+  },
+  "v25.10": {
+    "codename": "Questing Quokka",
+    "series": "questing",
+    "created": "2025-04-17",
+    "release": "2025-10-09",
+    "eol": "2026-07-09"
   }
 }

@@ -13,9 +13,9 @@ To use a Debian repository with the datasource, you must set a properly formatte
 
 - `components`: Comma-separated list of repository components (e.g., `main,contrib,non-free`).
 - `binaryArch`: Architecture of the binary packages (e.g., `amd64`,`all`).
-- Either `suite` or `release`:
-  - `suite`: A rolling release alias like `stable`.
-  - `release`: A fixed release name such as `bullseye` or `buster`.
+- `suite`:
+  - A rolling release alias like `stable`.
+  - A fixed release name such as `bullseye` or `buster`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -45,9 +45,9 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
       "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
-        "#\\s*renovate:\\s*?(release=(?<release>.*?))?\\s*depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\""
+        "#\\s*renovate:\\s*?(suite=(?<suite>.*?))?\\s*depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\""
       ],
-      "registryUrlTemplate": "https://deb.debian.org/debian?{{#if release }}release={{release}}{{else}}suite=stable{{/if}}&components=main,contrib,non-free&binaryArch=amd64",
+      "registryUrlTemplate": "https://deb.debian.org/debian?suite={{#if suite }}{{suite}}{{else}}stable{{/if}}&components=main,contrib,non-free&binaryArch=amd64",
       "datasourceTemplate": "deb"
     }
   ]
@@ -59,7 +59,7 @@ Then you would put comments in your Dockerfile, to tell Renovate where to find t
 ```dockerfile
 FROM debian:bullseye
 
-# renovate: release=bullseye depName=gcc-11
+# renovate: suite=bullseye depName=gcc-11
 ENV GCC_VERSION="11.2.0-19"
 
 RUN apt-get update && \
@@ -101,8 +101,8 @@ The `debian` datasource supports these repository types:
 To use Artifactory, first configure the `deb` datasource by setting the `registryUrl`.
 
 ```title="Example of valid registryUrl format"
-https://<host>:<port>/artifactory/<repository-slug>?release=<release>&components=<components>&binaryArch=<binaryArch>
-https://artifactory.example.com:443/artifactory/debian?release=bookworm&components=main,contrib,non-free&binaryArch=amd64
+https://<host>:<port>/artifactory/<repository-slug>?suite=<suite>&components=<components>&binaryArch=<binaryArch>
+https://artifactory.example.com:443/artifactory/debian?suite=bookworm&components=main,contrib,non-free&binaryArch=amd64
 ```
 
 ### Authenticating to Artifactory

@@ -159,6 +159,32 @@ describe('modules/platform/github/issue', () => {
       });
     });
 
+    it('removes particular issue from the cache', () => {
+      cache.platform = {
+        github: {
+          issuesCache: {
+            '1': {
+              number: 1,
+              body: 'body-1',
+              state: 'open',
+              title: 'title-1',
+              lastModified: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      };
+
+      GithubIssueCache.deleteIssue(1);
+
+      expect(cache).toEqual({
+        platform: {
+          github: {
+            issuesCache: {},
+          },
+        },
+      });
+    });
+
     it('reconciles cache', () => {
       cache.platform = {
         github: {

@@ -1,19 +1,19 @@
-import { mock } from 'jest-mock-extended';
 import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
-import { fs } from '../../../../test/util';
+import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
-jest.mock('../../../util/fs');
+import { fs } from '~test/util';
+vi.mock('../../../util/fs');
 
-jest.mock('simple-git');
-const simpleGitFactoryMock = simpleGit as jest.Mock<Partial<SimpleGit>>;
+vi.mock('simple-git');
+const simpleGitFactoryMock = vi.mocked(simpleGit);
 const gitMock = mock<SimpleGit>();
 
 describe('modules/manager/git-submodules/update', () => {
@@ -25,7 +25,7 @@ describe('modules/manager/git-submodules/update', () => {
     process.env = {};
 
     simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockImplementation(() => gitMock);
+    gitMock.env.mockReturnValue(gitMock);
   });
 
   describe('updateDependency', () => {

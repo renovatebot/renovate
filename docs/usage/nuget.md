@@ -47,13 +47,16 @@ You can set alternative feeds:
 
 ```json
 {
-  "nuget": {
-    "registryUrls": [
-      "https://api.nuget.org/v3/index.json",
-      "https://example1.com/nuget/",
-      "https://example2.com/nuget/v3/index.json"
-    ]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["nuget"],
+      "registryUrls": [
+        "https://api.nuget.org/v3/index.json",
+        "https://example1.com/nuget/",
+        "https://example2.com/nuget/v3/index.json"
+      ]
+    }
+  ]
 }
 ```
 
@@ -65,6 +68,10 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 !!! warning
     If your project has lockfile(s), for example a `package.lock.json` file, then you must set alternate feed settings in the `NuGet.config` file only.
     `registryUrls` set in other files are **not** passed to the NuGet commands.
+
+<!-- prettier-ignore -->
+!!! note
+    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 
@@ -93,9 +100,12 @@ If a `v3` feed URL does not end with `index.json`, you must specify the version 
 
   ```json
   {
-    "nuget": {
-      "registryUrls": ["http://myV3feed#protocolVersion=3"]
-    }
+    "packageRules": [
+      {
+        "matchDatasources": ["nuget"],
+        "registryUrls": ["https://example1.com/nuget/#protocolVersion=3"]
+      }
+    ]
   }
   ```
 

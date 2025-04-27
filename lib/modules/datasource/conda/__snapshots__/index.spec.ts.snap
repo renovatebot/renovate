@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/conda/index getReleases processes real data 1`] = `
+exports[`modules/datasource/conda/index > getReleases > processes real data 1`] = `
 {
   "homepage": "http://anaconda.org/anaconda/pytest",
   "registryUrl": "https://api.anaconda.org/package",
@@ -156,6 +156,7 @@ exports[`modules/datasource/conda/index getReleases processes real data 1`] = `
       "version": "3.9.3",
     },
     {
+      "releaseTimestamp": "2020-02-28T11:46:01.948Z",
       "version": "3.10.0",
     },
     {

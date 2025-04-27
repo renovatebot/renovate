@@ -43,10 +43,11 @@ export abstract class Datasource implements DatasourceApi {
 
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
 
-  handleHttpErrors(err: HttpError): void {}
+  handleHttpErrors(_err: HttpError): void {
+    // intentionally empty
+  }
 
   protected handleGenericErrors(err: Error): never {
-    // istanbul ignore if: not easy testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }

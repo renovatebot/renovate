@@ -2,13 +2,19 @@ import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
   UpdateType,
-  UserEnv,
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
-import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
+import type {
+  ModuleApi,
+  RangeStrategy,
+  SkipReason,
+  StageName,
+} from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
+import type { Timestamp } from '../../util/timestamp';
+import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -40,7 +46,6 @@ export interface UpdateArtifactsConfig {
   newMajor?: number;
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
-  env?: UserEnv;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -65,6 +70,7 @@ export interface PackageFileContent<T = Record<string, any>>
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+  fileFormat?: string;
 }
 
 export interface PackageFile<T = Record<string, any>>
@@ -98,9 +104,10 @@ export interface LookupUpdate {
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
-  releaseTimestamp?: any;
+  releaseTimestamp?: Timestamp;
   newVersionAgeInDays?: number;
   registryUrl?: string;
+  libYears?: number;
 }
 
 /**
@@ -114,7 +121,7 @@ export interface PackageDependency<T = Record<string, any>>
   depName?: string;
   depType?: string;
   fileReplacePosition?: number;
-  groupName?: string;
+  sharedVariableName?: string;
   lineNumber?: number;
   packageName?: string;
   target?: string;
@@ -139,11 +146,13 @@ export interface PackageDependency<T = Record<string, any>>
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
+  currentVersionTimestamp?: string;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
   skipReason?: SkipReason;
+  skipStage?: StageName;
   sourceLine?: number;
   newVersion?: string;
   updates?: LookupUpdate[];
@@ -155,6 +164,11 @@ export interface PackageDependency<T = Record<string, any>>
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
+
+  /**
+   * override data source's default strategy.
+   */
+  registryStrategy?: RegistryStrategy;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
@@ -182,6 +196,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   registryUrls?: string[] | null;
   currentVersion?: string;
   replaceString?: string;
+  replacementApproach?: 'replace' | 'alias';
 }
 
 export interface ArtifactNotice {
@@ -306,4 +321,6 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
+
+  isLockFileMaintenance?: boolean;
 }

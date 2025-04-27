@@ -65,7 +65,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
       (a: GithubRestAsset) => a.size < 5 * 1024,
     );
     for (const asset of smallAssets) {
-      const res = await this.http.get(asset.browser_download_url);
+      const res = await this.http.getText(asset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
         const [lineDigest, lineFilename] = line.split(regEx(/\s+/), 2);
         if (lineDigest === digest) {
@@ -162,7 +162,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
         current,
         next,
       );
-      const res = await this.http.get(releaseAsset.browser_download_url);
+      const res = await this.http.getText(releaseAsset.browser_download_url);
       for (const line of res.body.split(newlineRegex)) {
         const [lineDigest, lineFn] = line.split(regEx(/\s+/), 2);
         if (lineFn === releaseFilename) {
@@ -210,9 +210,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const { body: currentRelease } = await this.http.getJson<GithubRestRelease>(
-      `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
-    );
+    const { body: currentRelease } =
+      await this.http.getJsonUnchecked<GithubRestRelease>(
+        `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
+      );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
       currentDigest,
@@ -221,9 +222,10 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
     if (!digestAsset || newValue === currentValue) {
       newDigest = currentDigest;
     } else {
-      const { body: newRelease } = await this.http.getJson<GithubRestRelease>(
-        `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
-      );
+      const { body: newRelease } =
+        await this.http.getJsonUnchecked<GithubRestRelease>(
+          `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
+        );
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
     }
     return newDigest;

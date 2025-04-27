@@ -61,7 +61,7 @@ export async function getReleaseNotesMd(
     );
   }
 
-  const fileRes = await bitbucketHttp.get(
+  const fileRes = await bitbucketHttp.getText(
     joinUrlParts(
       apiBaseUrl,
       '2.0/repositories',

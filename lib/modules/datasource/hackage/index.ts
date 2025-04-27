@@ -28,12 +28,14 @@ export class HackageDatasource extends Datasource {
       `${massagedPackageName}.json`,
     );
     const res = await this.http.getJson(url, HackagePackageMetadata);
-    const keys = Object.keys(res.body);
-    return {
-      releases: keys.map((version) =>
-        versionToRelease(version, packageName, registryUrl),
-      ),
-    };
+    const releases = [];
+    for (const [version, versionStatus] of Object.entries(res.body)) {
+      const isDeprecated = versionStatus === 'deprecated';
+      releases.push(
+        versionToRelease(version, packageName, registryUrl, isDeprecated),
+      );
+    }
+    return { releases };
   }
 }
 
@@ -41,6 +43,7 @@ export function versionToRelease(
   version: string,
   packageName: string,
   registryUrl: string,
+  isDeprecated: boolean,
 ): Release {
   return {
     version,
@@ -50,5 +53,6 @@ export function versionToRelease(
       `${packageName}-${version}`,
       'changelog',
     ),
+    isDeprecated,
   };
 }

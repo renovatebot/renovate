@@ -15,7 +15,7 @@ export function parseRange(input: string): Range | null {
     }
   }
   return {
-    lower: m.groups['lower'],
-    upper: m.groups['upper'],
+    lower: m.groups.lower,
+    upper: m.groups.upper,
   };
 }

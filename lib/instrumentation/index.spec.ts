@@ -41,7 +41,9 @@ describe('instrumentation/index', () => {
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
-      _registeredSpanProcessors: [{ _exporter: {} }],
+      _activeSpanProcessor: {
+        _spanProcessors: [{ _exporter: {} }],
+      },
     });
   });
 
@@ -56,19 +58,23 @@ describe('instrumentation/index', () => {
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
-      _registeredSpanProcessors: [
-        {
-          _exporter: {
-            _transport: {
-              _transport: {
-                _parameters: {
-                  url: 'https://collector.example.com/v1/traces',
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          {
+            _exporter: {
+              _delegate: {
+                _transport: {
+                  _transport: {
+                    _parameters: {
+                      url: 'https://collector.example.com/v1/traces',
+                    },
+                  },
                 },
               },
             },
           },
-        },
-      ],
+        ],
+      },
     });
   });
 
@@ -84,20 +90,24 @@ describe('instrumentation/index', () => {
     expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
-      _registeredSpanProcessors: [
-        { _exporter: {} },
-        {
-          _exporter: {
-            _transport: {
-              _transport: {
-                _parameters: {
-                  url: 'https://collector.example.com/v1/traces',
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          { _exporter: {} },
+          {
+            _exporter: {
+              _delegate: {
+                _transport: {
+                  _transport: {
+                    _parameters: {
+                      url: 'https://collector.example.com/v1/traces',
+                    },
+                  },
                 },
               },
             },
           },
-        },
-      ],
+        ],
+      },
     });
   });
 

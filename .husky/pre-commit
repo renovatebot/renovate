@@ -1,6 +1,7 @@
 #!/bin/sh
 
-pnpm ls-lint
+ls-lint
+lint-staged
 
 BRANCH_NAME=$(git branch --show-current)
 

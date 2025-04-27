@@ -3,7 +3,7 @@ import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
 import { escapeRegExp, regEx } from '../../../../util/regex';
-import { parse as parseToml } from '../../../../util/toml';
+import { massage, parse as parseToml } from '../../../../util/toml';
 import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
@@ -188,7 +188,7 @@ function extractDependency({
   versionSubContent: string;
 }): PackageDependency<GradleManagerData> {
   if (is.string(descriptor)) {
-    const [groupName, name, currentValue] = descriptor.split(':');
+    const [group, name, currentValue] = descriptor.split(':');
     if (!currentValue) {
       return {
         depName,
@@ -196,7 +196,7 @@ function extractDependency({
       };
     }
     return {
-      depName: `${groupName}:${name}`,
+      depName: `${group}:${name}`,
       currentValue,
       managerData: {
         fileReplacePosition:
@@ -236,7 +236,7 @@ function extractDependency({
   }
 
   if (isVersionPointer(descriptor.version)) {
-    dependency.groupName = normalizeAlias(descriptor.version.ref);
+    dependency.sharedVariableName = normalizeAlias(descriptor.version.ref);
   }
 
   return dependency;
@@ -246,7 +246,7 @@ export function parseCatalog(
   packageFile: string,
   content: string,
 ): PackageDependency<GradleManagerData>[] {
-  const tomlContent = parseToml(content) as GradleCatalog;
+  const tomlContent = parseToml(massage(content)) as GradleCatalog;
   const versions = tomlContent.versions ?? {};
   const libs = tomlContent.libraries ?? {};
   const libStartIndex = content.indexOf('libraries');
@@ -298,7 +298,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = normalizeAlias(version.ref);
+      dependency.sharedVariableName = normalizeAlias(version.ref);
       delete dependency.commitMessageTopic;
     }
 
