@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
@@ -123,6 +124,7 @@ export class DockerDatasource extends Datasource {
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
+        cacheProvider: memCacheProvider,
       });
       return manifestResponse;
     } catch (err) /* istanbul ignore next */ {
