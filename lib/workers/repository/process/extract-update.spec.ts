@@ -1,4 +1,3 @@
-import { logger, mocked, scm } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
@@ -13,6 +12,7 @@ import {
   lookup,
   update,
 } from './extract-update';
+import { logger, scm } from '~test/util';
 
 const createVulnerabilitiesMock = vi.fn();
 
@@ -32,10 +32,9 @@ vi.mock('./vulnerabilities', () => {
 vi.mock('../updates/branchify');
 vi.mock('../extract');
 vi.mock('../../../util/cache/repository');
-vi.mock('../../../util/git');
 
-const branchify = mocked(_branchify);
-const repositoryCache = mocked(_repositoryCache);
+const branchify = vi.mocked(_branchify);
+const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('workers/repository/process/extract-update', () => {
   beforeEach(() => {

@@ -38,6 +38,9 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
     const result = await super.requestJsonUnsafe<T>(method, opts);
     if (opts.httpOptions.paginate && is.array(result.body)) {
+      delete opts.httpOptions.cacheProvider;
+      opts.httpOptions.memCache = false;
+
       // Check if result is paginated
       try {
         const linkHeader = parseLinkHeader(result.headers.link);

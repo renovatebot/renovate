@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
 import * as hostRules from '../../../../../lib/util/host-rules';
-import { Fixtures } from '../../../../../test/fixtures';
-import * as httpMock from '../../../../../test/http-mock';
-import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence';
 import type { AllConfig } from '../../../../config/types';
@@ -34,6 +31,9 @@ import { Result } from '../../../../util/result';
 import type { Timestamp } from '../../../../util/timestamp';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const qJson = {
   ...Fixtures.getJson('01.json'),
@@ -4905,6 +4905,161 @@ describe('workers/repository/process/lookup/index', () => {
         {
           newName: 'eclipse-temurin',
           newValue: '17.0.0',
+          updateType: 'replacement',
+        },
+      ]);
+    });
+
+    it('handles replacements - can template replacement version without a replacement name', async () => {
+      config.packageName = 'mirror_some_org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 18,
+          newMinor: 0,
+          newPatch: 0,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+          updateType: 'major',
+        },
+        {
+          newName: 'mirror_some_org/library/openjdk',
+          newValue: '17',
+          updateType: 'replacement',
+        },
+      ]);
+    });
+
+    it('handles replacements - can template replacement version with a replacement name', async () => {
+      config.packageName = 'mirror_some_org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 18,
+          newMinor: 0,
+          newPatch: 0,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+          updateType: 'major',
+        },
+        {
+          newName: 'eclipse-temurin',
+          newValue: '17',
+          updateType: 'replacement',
+        },
+      ]);
+    });
+
+    it('handles replacements - can template replacement version with a template replacement name', async () => {
+      config.packageName = 'mirror_some_org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementNameTemplate = `{{{replace 'mirror_some_org/' 'new.registry.io/' packageName}}}`;
+      config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 18,
+          newMinor: 0,
+          newPatch: 0,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+          updateType: 'major',
+        },
+        {
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '17',
+          updateType: 'replacement',
+        },
+      ]);
+    });
+
+    it('handles replacements - replacementVersion takes precedence over replacementVersionTemplate', async () => {
+      config.packageName = 'mirror_some_org/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementVersionTemplate = `{{ lookup (split currentValue '.') 0 }}`;
+      config.replacementVersion = '18.0.0';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 18,
+          newMinor: 0,
+          newPatch: 0,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+          updateType: 'major',
+        },
+        {
+          newName: 'mirror_some_org/library/openjdk',
+          newValue: '18.0.0',
           updateType: 'replacement',
         },
       ]);

@@ -1,10 +1,10 @@
 import upath from 'upath';
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs } from '~test/util';
 
 vi.mock('../../../../util/exec/env');
 vi.mock('../../../../util/fs');
@@ -16,7 +16,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });

@@ -4,7 +4,6 @@ import type {
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
-  UserEnv,
   ValidationMessage,
 } from '../config/types';
 import type { Release } from '../modules/datasource/types';
@@ -86,7 +85,6 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
-  env?: UserEnv;
 }
 
 export type PrBlockedBy =
@@ -137,7 +135,6 @@ export interface BranchConfig
   isConflicted?: boolean;
   commitFingerprint?: string;
   skipBranchUpdate?: boolean;
-  env?: UserEnv;
 }
 
 export interface BranchMetadata {
@@ -190,7 +187,6 @@ export interface UpgradeFingerprintConfig {
   currentVersion?: string;
   datasource?: string;
   depName?: string;
-  env?: UserEnv;
   lockFile?: string;
   lockedVersion?: string;
   manager?: string | null;

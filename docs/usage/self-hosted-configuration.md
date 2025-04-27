@@ -68,6 +68,8 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 ## allowedCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
+
+If you are using a template command, the regular expression should match the template itself, not the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:
