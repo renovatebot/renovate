@@ -1,14 +1,10 @@
-import semver from 'semver';
-import stable from 'semver-stable';
+import { major as getMajor, minor as getMinor } from 'semver';
+import { is as isStable } from 'semver-stable';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
-
-const { is: isStable } = stable;
-
-const { major: getMajor, minor: getMinor } = semver;
 
 export const id = 'cargo';
 export const displayName = 'Cargo';
