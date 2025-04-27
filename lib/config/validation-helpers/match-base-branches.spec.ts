@@ -10,7 +10,7 @@ describe('config/validation-helpers/match-base-branches', () => {
       {
         topic: 'Configuration Error',
         message:
-          'packageRules[0]: You must configure baseBranches inorder to use them inside matchBaseBranches.',
+          'packageRules[0]: You must configure baseBranchPatterns inorder to use them inside matchBaseBranches.',
       },
     ]);
   });
@@ -19,7 +19,7 @@ describe('config/validation-helpers/match-base-branches', () => {
     const res = check({
       resolvedRule: { matchBaseBranches: ['develop'], addLabels: ['develop'] },
       currentPath: 'packageRules[0]',
-      baseBranches: ['develop', 'main'],
+      baseBranchPatterns: ['develop', 'main'],
     });
     expect(res).toBeEmptyArray();
   });

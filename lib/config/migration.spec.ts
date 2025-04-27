@@ -391,7 +391,7 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(migratedConfig).toEqual({
-        baseBranches: [],
+        baseBranchPatterns: [],
         commitMessage: 'test',
         ignorePaths: [],
         includePaths: ['test'],

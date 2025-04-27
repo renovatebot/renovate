@@ -31,7 +31,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
-  "baseBranches": [
+  "baseBranchPatterns": [
     "next",
   ],
   "binarySource": "global",

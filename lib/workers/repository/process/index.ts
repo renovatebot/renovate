@@ -76,7 +76,7 @@ async function getBaseBranchConfig(
     baseBranchConfig.baseBranches = config.baseBranches;
   }
 
-  if (config.baseBranches!.length > 1) {
+  if (config.baseBranchPatterns!.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
@@ -88,24 +88,24 @@ async function getBaseBranchConfig(
 
 function unfoldBaseBranches(
   defaultBranch: string,
-  baseBranches: string[],
+  baseBranchPatterns: string[],
 ): string[] {
   const unfoldedList: string[] = [];
 
   const allBranches = getBranchList();
-  for (const baseBranch of baseBranches) {
-    const isAllowedPred = getRegexPredicate(baseBranch);
+  for (const baseBranchPattern of baseBranchPatterns) {
+    const isAllowedPred = getRegexPredicate(baseBranchPattern);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
-        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`,
+        `baseBranchePatterns regex "${baseBranchPattern}" matches [${matchingBranches.join()}]`,
       );
       unfoldedList.push(...matchingBranches);
-    } else if (baseBranch === '$default') {
-      logger.debug(`baseBranches "$default" matches "${defaultBranch}"`);
+    } else if (baseBranchPattern === '$default') {
+      logger.debug(`baseBranchPatterns "$default" matches "${defaultBranch}"`);
       unfoldedList.push(defaultBranch);
     } else {
-      unfoldedList.push(baseBranch);
+      unfoldedList.push(baseBranchPattern);
     }
   }
 
@@ -121,10 +121,13 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: {},
   };
-  if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
+  if (
+    GlobalConfig.get('platform') !== 'local' &&
+    config.baseBranchPatterns?.length
+  ) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
-      config.baseBranches,
+      config.baseBranchPatterns,
     );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};

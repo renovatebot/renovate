@@ -10,6 +10,7 @@ import { AutomergePatchMigration } from './custom/automerge-patch-migration';
 import { AutomergeTypeMigration } from './custom/automerge-type-migration';
 import { AzureGitLabAutomergeMigration } from './custom/azure-gitlab-automerge-migration';
 import { BaseBranchMigration } from './custom/base-branch-migration';
+import { BaseBranchesMigration } from './custom/base-branches-migration';
 import { BinarySourceMigration } from './custom/binary-source-migration';
 import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
@@ -161,6 +162,7 @@ export class MigrationsService {
     MatchManagersMigration,
     CustomManagersMigration,
     PlatformCommitMigration,
+    BaseBranchesMigration,
   ];
 
   static run(
