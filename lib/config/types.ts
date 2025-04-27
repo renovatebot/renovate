@@ -6,6 +6,7 @@ import type { HostRule, SkipReason } from '../types';
 import type { StageName } from '../types/skip-reason';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
+import type { Timestamp } from '../util/timestamp';
 
 export type RenovateConfigStage =
   | 'global'
@@ -131,13 +132,13 @@ export interface GlobalOnlyConfig {
 // Config options used within the repository worker, but not user configurable
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
+  allowedCommands?: string[];
+  allowCommandTemplating?: boolean;
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
-  allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedEnv?: string[];
   allowedHeaders?: string[];
-  allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
@@ -218,8 +219,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
-export type UserEnv = Record<string, string>;
-
+type UserEnv = Record<string, string>;
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -305,6 +305,9 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  /**
+   * User configured environment variables that Renovate uses when executing package manager commands
+   */
   env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
 
@@ -463,6 +466,16 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
+
+  /**
+   * Managers which support this option, leave undefined if all managers support it.
+   */
+  supportedManagers?: string[];
+
+  /**
+   * Platforms which support this option, leave undefined if all platforms support it.
+   */
+  supportedPlatforms?: PlatformId[];
 }
 
 export interface RenovateArrayOption<
@@ -472,35 +485,25 @@ export interface RenovateArrayOption<
   mergeable?: boolean;
   type: 'array';
   subType?: 'string' | 'object' | 'number';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
   subType: 'number';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
   default?: boolean | null;
   type: 'boolean';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateIntegerOption extends RenovateOptionBase {
   default?: number | null;
   type: 'integer';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateStringOption extends RenovateOptionBase {
@@ -510,8 +513,6 @@ export interface RenovateStringOption extends RenovateOptionBase {
   // Not used
   replaceLineReturns?: boolean;
   type: 'string';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export interface RenovateObjectOption extends RenovateOptionBase {
@@ -519,8 +520,6 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
-  supportedManagers?: string[] | 'all';
-  supportedPlatforms?: string[] | 'all';
 }
 
 export type RenovateOptions =
@@ -553,7 +552,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
-  releaseTimestamp?: string | null;
+  releaseTimestamp?: Timestamp | null;
   repository?: string;
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: string;

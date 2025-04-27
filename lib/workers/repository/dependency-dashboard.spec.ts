@@ -1,9 +1,8 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import type { RenovateConfig } from '../../../test/util';
-import { logger, mockedFunction, platform } from '../../../test/util';
+import type { MockedObject } from 'vitest';
+import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
@@ -18,9 +17,12 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+import { Fixtures } from '~test/fixtures';
+import { logger, platform } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-const createVulnerabilitiesMock = jest.fn();
-jest.mock('./process/vulnerabilities', () => {
+const createVulnerabilitiesMock = vi.fn();
+vi.mock('./process/vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -73,7 +75,7 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.MockedObject<Platform>,
+  platform: MockedObject<Platform>,
   ensureIssueClosingCalls: number,
   ensureIssueCalls: number,
 ) {
@@ -1102,11 +1104,11 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -1140,7 +1142,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = {};
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
@@ -1152,7 +1154,7 @@ None detected
 
 `,
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });
@@ -1509,7 +1511,7 @@ None detected
     });
 
     it('return no data section if summary is set to all and no vulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1528,7 +1530,7 @@ None detected
     });
 
     it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1595,7 +1597,7 @@ None detected
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });

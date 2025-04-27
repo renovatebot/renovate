@@ -1,16 +1,16 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path addAssignees() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > addAssignees() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path addReviewers throws on invalid reviewers 1`] = `"Response code 409 (Conflict)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > addReviewers > throws on invalid reviewers 1`] = `[HTTPError: Response code 409 (Conflict)]`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > deleteLAbel() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() has pr 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > findPr() > has pr 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -25,25 +25,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() 
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
-{
-  "bodyStruct": {
-    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
-  },
-  "createdAt": 1547853840016,
-  "number": 5,
-  "reviewers": [
-    "userName2",
-  ],
-  "sourceBranch": "userName1/pullRequest5",
-  "state": "open",
-  "targetBranch": "master",
-  "title": "title",
-  "version": 1,
-}
-`;
-
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getBranchPr() > has pr 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -61,7 +43,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 2`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr() > canRebase 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -79,7 +61,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() canRebase 3`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr() > canRebase 2`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -97,7 +79,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a PR 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr() > canRebase 3`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -115,7 +97,25 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() g
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr() > gets a PR 1`] = `
+{
+  "bodyStruct": {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
+  "createdAt": 1547853840016,
+  "number": 5,
+  "reviewers": [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr() > gets a closed PR 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -131,7 +131,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() g
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPrList() > has pr 1`] = `
 [
   {
     "bodyStruct": {
@@ -148,14 +148,14 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPrList
 ]
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should init 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > initPlatform() > should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
   "gitAuthor": "Abc Def <abc@def.com>",
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() generates URL if API does not contain clone links 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > initRepo() > generates URL if API does not contain clone links 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -163,7 +163,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > initRepo() > uses http url from API with injected auth if http url in API response 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -171,7 +171,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() uses ssh url from API if http not in API response 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > initRepo() > uses ssh url from API if http not in API response 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -179,7 +179,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() works 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > initRepo() > works 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -187,9 +187,9 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo(
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > massageMarkdown() > returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > massageMarkdown() > sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, click this checkbox
@@ -203,19 +203,19 @@ Followed by some information.
 "
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with no path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with no path > updatePr() > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path addAssignees() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > addAssignees() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers throws on invalid reviewers 1`] = `"Response code 409 (Conflict)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > addReviewers > throws on invalid reviewers 1`] = `[HTTPError: Response code 409 (Conflict)]`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > deleteLAbel() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > findPr() > has pr 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -230,25 +230,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getBranchPr() has pr 1`] = `
-{
-  "bodyStruct": {
-    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
-  },
-  "createdAt": 1547853840016,
-  "number": 5,
-  "reviewers": [
-    "userName2",
-  ],
-  "sourceBranch": "userName1/pullRequest5",
-  "state": "open",
-  "targetBranch": "master",
-  "title": "title",
-  "version": 1,
-}
-`;
-
-exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getBranchPr() > has pr 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -266,7 +248,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 2`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPr() > canRebase 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -284,7 +266,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canRebase 3`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPr() > canRebase 2`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -302,7 +284,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPr() > canRebase 3`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
@@ -320,7 +302,25 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPr() > gets a PR 1`] = `
+{
+  "bodyStruct": {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
+  "createdAt": 1547853840016,
+  "number": 5,
+  "reviewers": [
+    "userName2",
+  ],
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPr() > gets a closed PR 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -336,7 +336,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > getPrList() > has pr 1`] = `
 [
   {
     "bodyStruct": {
@@ -353,14 +353,14 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() 
 ]
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > initPlatform() > should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
   "gitAuthor": "Abc Def <abc@def.com>",
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() generates URL if API does not contain clone links 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > initRepo() > generates URL if API does not contain clone links 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -368,7 +368,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() g
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses http url from API with injected auth if http url in API response 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > initRepo() > uses http url from API with injected auth if http url in API response 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -376,7 +376,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() u
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() uses ssh url from API if http not in API response 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > initRepo() > uses ssh url from API if http not in API response 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -384,7 +384,7 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() u
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() works 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > initRepo() > works 1`] = `
 {
   "defaultBranch": "master",
   "isFork": false,
@@ -392,9 +392,9 @@ exports[`modules/platform/bitbucket-server/index endpoint with path initRepo() w
 }
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > massageMarkdown() > returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path massageMarkdown() sanitizes HTML comments in the body 1`] = `
+exports[`modules/platform/bitbucket-server/index > endpoint with path > massageMarkdown() > sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, click this checkbox
@@ -408,4 +408,4 @@ Followed by some information.
 "
 `;
 
-exports[`modules/platform/bitbucket-server/index endpoint with path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+exports[`modules/platform/bitbucket-server/index > endpoint with path > updatePr() > throws 1`] = `[HTTPError: Response code 405 (Method Not Allowed)]`;

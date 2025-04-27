@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import type { Timestamp } from '../../../util/timestamp';
 import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
@@ -192,7 +193,7 @@ export function generateBranchConfig(
     }
     if (upg.newDigest) {
       upg.newDigestShort =
-        upg.newDigestShort ||
+        upg.newDigestShort ??
         upg.newDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upg.isDigest || upg.isPinDigest) {
@@ -245,7 +246,7 @@ export function generateBranchConfig(
   logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
-  let releaseTimestamp: string;
+  let releaseTimestamp: Timestamp;
 
   if (depTypes.size) {
     config.depTypes = Array.from(depTypes).sort();
@@ -284,7 +285,6 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&
@@ -435,15 +435,34 @@ export function generateBranchConfig(
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
+
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
     config.updateType = 'major';
   }
+
+  // explicit set `isLockFileMaintenance` for the branch for groups
+  if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
+    config.isLockFileMaintenance = true;
+    // istanbul ignore if: not worth testing
+    if (config.upgrades.some((upgrade) => !upgrade.isLockFileMaintenance)) {
+      // TODO: warn?
+      logger.debug(
+        'Grouping lockfile maintenance with other update types is not supported',
+      );
+    }
+  }
+
   config.constraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
   }
+
+  // Set skipInstalls to false if any upgrade in the branch has it false
+  config.skipInstalls = config.upgrades.every(
+    (upgrade) => upgrade.skipInstalls !== false,
+  );
 
   const tableRows = config.upgrades
     .map(getTableValues)

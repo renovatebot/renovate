@@ -1,38 +1,19 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
-import type { BranchStatus } from '../../../types';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { detectConfigFile } from '../init/merge';
 import { setReconfigureBranchCache } from './reconfigure-cache';
-import { getReconfigureBranchName } from './utils';
-
-async function setBranchStatus(
-  branchName: string,
-  description: string,
-  state: BranchStatus,
-  context?: string | null,
-): Promise<void> {
-  if (!is.nonEmptyString(context)) {
-    // already logged this case when validating the status check
-    return;
-  }
-
-  await platform.setBranchStatus({
-    branchName,
-    context,
-    description,
-    state,
-  });
-}
+import { getReconfigureBranchName, setBranchStatus } from './utils';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig,
@@ -138,7 +119,8 @@ export async function validateReconfigureBranch(
   }
 
   // perform validation and provide a passing or failing check based on result
-  const validationResult = await validateConfig('repo', configFileParsed);
+  const massagedConfig = massageConfig(configFileParsed);
+  const validationResult = await validateConfig('repo', massagedConfig);
 
   // failing check
   if (validationResult.errors.length > 0) {
@@ -151,6 +133,7 @@ export async function validateReconfigureBranch(
       branchName,
       state: 'open',
       includeOtherAuthors: true,
+      targetBranch: config.defaultBranch,
     });
 
     // add comment to reconfigure PR if it exists

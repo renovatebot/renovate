@@ -165,7 +165,7 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
-  const alreadySeenProps: Set<string> = new Set();
+  const alreadySeenProps = new Set<string>();
 
   do {
     const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
@@ -200,7 +200,7 @@ function applyPropsInternal(
   let anyChange = false;
   let fatal = false;
 
-  const seenProps: Set<string> = new Set();
+  const seenProps = new Set<string>();
 
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${[^}]*?}/g), (substr) => {
@@ -232,9 +232,7 @@ function applyPropsInternal(
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
-        if (!sharedVariableName) {
-          sharedVariableName = propKey;
-        }
+        sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
         propSource =
           propValue.packageFile ??
@@ -430,7 +428,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
-    const visitedPackages: Set<string> = new Set();
+    const visitedPackages = new Set<string>();
     let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
@@ -473,7 +471,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       const dep = applyProps(rawDep, name, extractedProps[name]);
       if (dep.depType === 'parent') {
         const parentPkg = extractedPackages[pkg.parent!];
-        if (parentPkg && !parentPkg.parent) {
+        const hasParentWithNoParent = parentPkg && !parentPkg.parent;
+        const hasParentWithExternalParent =
+          parentPkg && !packageFileNames.includes(parentPkg.parent!);
+        if (hasParentWithNoParent || hasParentWithExternalParent) {
           rootDeps.add(dep.depName!);
         }
       }

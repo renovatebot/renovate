@@ -1,7 +1,7 @@
-import { fs } from '../../../../test/util';
 import { extractAllPackageFiles } from './extract';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/bun/extract', () => {
   describe('extractAllPackageFiles()', () => {
@@ -15,7 +15,7 @@ describe('modules/manager/bun/extract', () => {
       });
 
       it('ignores invalid package.json file', async () => {
-        (fs.readLocalFile as jest.Mock).mockResolvedValueOnce('invalid');
+        vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
         expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
       });
 
@@ -43,7 +43,8 @@ describe('modules/manager/bun/extract', () => {
             },
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toMatchObject([
+        const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+        expect(packageFiles).toMatchObject([
           {
             deps: [
               {
@@ -73,7 +74,7 @@ describe('modules/manager/bun/extract', () => {
       });
 
       it('ignores invalid package.json file', async () => {
-        (fs.readLocalFile as jest.Mock).mockResolvedValueOnce('invalid');
+        vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
         expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
       });
 
@@ -87,7 +88,8 @@ describe('modules/manager/bun/extract', () => {
             _from: 1,
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+        expect(packageFiles).toEqual([]);
       });
 
       it('parses valid package.json file', async () => {
@@ -123,6 +125,94 @@ describe('modules/manager/bun/extract', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('workspaces', () => {
+    it('processes workspace package files when workspaces are detected', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with workspaces)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: ['packages/*'],
+          }),
+        )
+        // Second call: workspace package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { dep2: '2.0.0' },
+          }),
+        );
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          packageFileVersion: '1.0.0',
+          lockFiles: ['bun.lock'],
+        },
+      ]);
+    });
+
+    it('skips workspace processing when workspaces is not a valid array', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: 'invalid',
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+          deps: [
+            {
+              depName: 'dep1',
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            packageJsonName: 'test',
+          },
+        },
+      ]);
     });
   });
 });

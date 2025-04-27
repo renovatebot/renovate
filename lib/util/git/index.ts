@@ -120,7 +120,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
-    // istanbul ignore if
+    /* v8 ignore start -- TODO: add test */
     if (!res) {
       logger.debug('Could not determine default branch using git rev-parse');
       const headPrefix = 'HEAD branch: ';
@@ -130,8 +130,10 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
         .find((line) => line.startsWith(headPrefix))!
         .replace(headPrefix, '');
     }
+    /* v8 ignore stop */
     return res.replace('origin/', '').trim();
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore start -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -143,13 +145,13 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     ) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    // istanbul ignore if
     if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
       logger.warn({ err }, 'Error getting default branch');
       throw new Error(TEMPORARY_ERROR);
     }
     throw err;
   }
+  /* v8 ignore stop */
 }
 
 let config: LocalConfig = {} as any;
@@ -168,17 +170,18 @@ export async function validateGitVersion(): Promise<boolean> {
   const globalGit = simpleGit();
   try {
     const { major, minor, patch, installed } = await globalGit.version();
-    // istanbul ignore if
+    /* v8 ignore next 4 -- TODO: add test */
     if (!installed) {
       logger.error('Git not installed');
       return false;
     }
     version = `${major}.${minor}.${patch}`;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 4 */
+  } catch (err) {
     logger.error({ err }, 'Error fetching git version');
     return false;
   }
-  // istanbul ignore if
+  /* v8 ignore next 7 -- TODO: add test */
   if (!(version && semver.gte(version, GIT_MINIMUM_VERSION))) {
     logger.error(
       { detectedVersion: version, minimumVersion: GIT_MINIMUM_VERSION },
@@ -211,7 +214,8 @@ async function fetchBranchCommits(): Promise<void> {
           sha as LongCommitSha;
       });
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 11 -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -251,7 +255,7 @@ async function resetToBranch(branchName: string): Promise<void> {
   await git.raw(['clean', '-fd']);
 }
 
-// istanbul ignore next
+/* v8 ignore next 4 -- TODO: add test */
 export async function resetToCommit(commit: LongCommitSha): Promise<void> {
   logger.debug(`resetToCommit(${commit})`);
   await git.raw(['reset', '--hard', commit]);
@@ -265,8 +269,7 @@ async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
     .split(newlineRegex)
     .map((branch) => branch.trim())
-    .filter((branch) => branch.length)
-    .filter((branch) => !branch.startsWith('* '));
+    .filter((branch) => branch.length > 0 && !branch.startsWith('* '));
   logger.debug({ existingBranches });
   for (const branchName of existingBranches) {
     await deleteLocalBranch(branchName);
@@ -290,7 +293,7 @@ export function setGitAuthor(gitAuthor: string | undefined): void {
 
 export async function writeGitAuthor(): Promise<void> {
   const { gitAuthorName, gitAuthorEmail, writeGitDone } = config;
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (writeGitDone) {
     return;
   }
@@ -304,7 +307,8 @@ export async function writeGitAuthor(): Promise<void> {
       logger.debug(`Setting git author email: ${gitAuthorEmail}`);
       await git.addConfig('user.email', gitAuthorEmail);
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 11 -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -339,7 +343,8 @@ export async function getSubmodules(): Promise<string[]> {
       .trim()
       .split(regEx(/[\n\s]/))
       .filter((_e: string, i: number) => i % 2);
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 4 -- TODO: add test */
+  } catch (err) {
     logger.warn({ err }, 'Error getting submodules');
     return [];
   }
@@ -380,13 +385,13 @@ export function isCloned(): boolean {
 
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (process.env.RENOVATE_X_CLEAR_HOOKS) {
       await git.raw(['config', 'core.hooksPath', '/dev/null']);
     }
     return;
   }
-  // istanbul ignore if: failsafe
+  /* v8 ignore next 3 -- failsafe TODO: add test */
   if (GlobalConfig.get('platform') === 'local') {
     throw new Error('Cannot sync git when platform=local');
   }
@@ -399,19 +404,17 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await gitRetry(() => git.pull());
-      await gitRetry(() => git.fetch());
+      await gitRetry(() => git.fetch(['--prune', 'origin']));
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
-      await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
-    } catch (err) /* istanbul ignore next */ {
+      /* v8 ignore next 6 -- TODO: add test */
+    } catch (err) {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
@@ -442,7 +445,8 @@ export async function syncGit(): Promise<void> {
         await git.clone(config.url, '.', opts);
       };
       await gitRetry(() => emptyDirAndClone());
-    } catch (err) /* istanbul ignore next */ {
+      /* v8 ignore next 10 -- TODO: add test */
+    } catch (err) {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
@@ -459,7 +463,8 @@ export async function syncGit(): Promise<void> {
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])
     ).trim() as LongCommitSha;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 6 -- TODO: add test */
+  } catch (err) {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -470,7 +475,8 @@ export async function syncGit(): Promise<void> {
   try {
     const latestCommit = (await git.log({ n: 1 })).latest;
     logger.debug({ latestCommit }, 'latest repository commit');
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 10 -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -484,10 +490,10 @@ export async function syncGit(): Promise<void> {
     config.currentBranch ??
     config.defaultBranch ??
     (await getDefaultBranch(git));
+  /* v8 ignore next -- TODO: add test */
   delete getCache()?.semanticCommits;
 }
 
-// istanbul ignore next
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
   if (is.string(path)) {
     const localDir = GlobalConfig.get('localDir');
@@ -525,7 +531,8 @@ export async function getCommitMessages(): Promise<string[]> {
       format: { message: '%s' },
     });
     return res.all.map((commit) => commit.message);
-  } catch /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch {
     return [];
   }
 }
@@ -553,7 +560,8 @@ export async function checkoutBranch(
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 11 -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -572,7 +580,8 @@ export async function getFileList(): Promise<string[]> {
   let files: string;
   try {
     files = await git.raw(['ls-tree', '-r', branch]);
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 10 -- TODO: add test */
+  } catch (err) {
     if (err.message?.includes('fatal: Not a valid object name')) {
       logger.debug(
         { err },
@@ -582,7 +591,7 @@ export async function getFileList(): Promise<string[]> {
     }
     throw err;
   }
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!files) {
     return [];
   }
@@ -595,7 +604,7 @@ export async function getFileList(): Promise<string[]> {
 }
 
 export function getBranchList(): string[] {
-  return Object.keys(config.branchCommits ?? /* istanbul ignore next */ {});
+  return Object.keys(config.branchCommits ?? {});
 }
 
 export async function isBranchBehindBase(
@@ -629,7 +638,8 @@ export async function isBranchBehindBase(
     );
     setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 7 -- TODO: add test */
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -673,7 +683,8 @@ export async function isBranchModified(
     for (const commit of commits.all) {
       committedAuthors.add(commit.author_email);
     }
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 10 -- TODO: add test */
+  } catch (err) {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
         { err },
@@ -778,7 +789,7 @@ export async function isBranchConflicted(
     await git.merge(['--no-commit', '--no-ff', `origin/${branch}`]);
   } catch (err) {
     result = true;
-    // istanbul ignore if: not easily testable
+    /* v8 ignore next 6 -- TODO: add test */
     if (!err?.git?.conflicts?.length) {
       logger.debug(
         { baseBranch, branch, err },
@@ -791,7 +802,8 @@ export async function isBranchConflicted(
       if (origBranch !== baseBranch) {
         await git.checkout(origBranch);
       }
-    } catch (err) /* istanbul ignore next */ {
+      /* v8 ignore next 6 -- TODO: add test */
+    } catch (err) {
       logger.debug(
         { baseBranch, branch, err },
         'isBranchConflicted: cleanup error',
@@ -815,20 +827,21 @@ export async function deleteBranch(branchName: string): Promise<void> {
 
     await gitRetry(() => git.raw(deleteCommand));
     logger.debug(`Deleted remote branch: ${branchName}`);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }
     logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
+    /* v8 ignore next 2 -- TODO: add test (always throws) */
     await deleteLocalBranch(branchName);
-    // istanbul ignore next
     logger.debug(`Deleted local branch: ${branchName}`);
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }
@@ -913,7 +926,7 @@ export async function getBranchLastCommitTime(
     return new Date(Date.parse(time));
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }
@@ -930,7 +943,8 @@ export async function getBranchFiles(
       git.diffSummary([`origin/${branchName}`, `origin/${branchName}^`]),
     );
     return diff.files.map((file) => file.file);
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 8 -- TODO: add test */
+  } catch (err) {
     logger.warn({ err }, 'getBranchFiles error');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
@@ -952,7 +966,7 @@ export async function getFile(
     return content;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }
@@ -1033,7 +1047,8 @@ export async function prepareCommit({
         try {
           await git.rm([fileName]);
           deletedFiles.push(fileName);
-        } catch (err) /* istanbul ignore next */ {
+          /* v8 ignore next 8 -- TODO: add test */
+        } catch (err) {
           const errChecked = checkForPlatformFailure(err);
           if (errChecked) {
             throw errChecked;
@@ -1049,9 +1064,9 @@ export async function prepareCommit({
           continue;
         } else {
           let contents: Buffer;
-          // istanbul ignore else
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
+            /* v8 ignore next 3 -- TODO: add test */
           } else {
             contents = file.contents;
           }
@@ -1066,7 +1081,7 @@ export async function prepareCommit({
           }
         }
         try {
-          // istanbul ignore next
+          /* v8 ignore next 2 -- TODO: add test */
           const addParams =
             fileName === configFileNames[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
@@ -1074,7 +1089,8 @@ export async function prepareCommit({
             await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
-        } catch (err) /* istanbul ignore next */ {
+          /* v8 ignore next 11 -- TODO: add test */
+        } catch (err) {
           if (
             !err.message.includes(
               'The following paths are ignored by one of your .gitignore files',
@@ -1130,7 +1146,8 @@ export async function prepareCommit({
     };
 
     return result;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch (err) {
     return handleCommitError(err, branchName, files);
   }
 }
@@ -1159,7 +1176,8 @@ export async function pushCommit({
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
     result = true;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch (err) {
     handleCommitError(err, sourceRef, files);
   }
   return result;
@@ -1177,7 +1195,8 @@ export async function fetchBranch(
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch (err) {
     return handleCommitError(err, branchName);
   }
 }
@@ -1201,7 +1220,8 @@ export async function commitFiles(
       }
     }
     return null;
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 6 -- TODO: add test */
+  } catch (err) {
     if (err.message.includes('[rejected] (stale info)')) {
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -1248,9 +1268,8 @@ let remoteRefsExist = false;
 export async function pushCommitToRenovateRef(
   commitSha: string,
   refName: string,
-  section = 'branches',
 ): Promise<void> {
-  const fullRefName = `refs/renovate/${section}/${refName}`;
+  const fullRefName = `refs/renovate/branches/${refName}`;
   await git.raw(['update-ref', fullRefName, commitSha]);
   await git.push(['--force', 'origin', fullRefName]);
   remoteRefsExist = true;
@@ -1258,75 +1277,69 @@ export async function pushCommitToRenovateRef(
 
 /**
  *
- * Removes all remote "refs/renovate/*" refs in two steps:
+ * Removes all remote "refs/renovate/branches/*" refs in two steps:
  *
  * Step 1: list refs
  *
- *   $ git ls-remote origin "refs/renovate/*"
+ *   $ git ls-remote origin "refs/renovate/branches/*"
  *
- *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/foo
- *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/bar
- *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/baz
+ *   > cca38e9ea6d10946bdb2d0ca5a52c205783897aa        refs/renovate/branches/foo
+ *   > 29ac154936c880068994e17eb7f12da7fdca70e5        refs/renovate/branches/bar
+ *   > 3fafaddc339894b6d4f97595940fd91af71d0355        refs/renovate/branches/baz
  *   > ...
  *
  * Step 2:
  *
- *   $ git push --delete origin refs/renovate/foo refs/renovate/bar refs/renovate/baz
+ *   $ git push --delete origin refs/renovate/branches/foo refs/renovate/branches/bar refs/renovate/branches/baz
  *
  * If Step 2 fails because the repo doesn't allow bulk changes, we'll remove them one by one instead:
  *
- *   $ git push --delete origin refs/renovate/foo
- *   $ git push --delete origin refs/renovate/bar
- *   $ git push --delete origin refs/renovate/baz
+ *   $ git push --delete origin refs/renovate/branches/foo
+ *   $ git push --delete origin refs/renovate/branches/bar
+ *   $ git push --delete origin refs/renovate/branches/baz
  */
 export async function clearRenovateRefs(): Promise<void> {
   if (!gitInitialized || !remoteRefsExist) {
     return;
   }
 
-  logger.debug(`Cleaning up Renovate refs: refs/renovate/*`);
+  logger.debug(`Cleaning up Renovate refs: refs/renovate/branches/*`);
   const renovateRefs: string[] = [];
-  const obsoleteRefs: string[] = [];
 
   try {
-    const rawOutput = await git.listRemote([config.url, 'refs/renovate/*']);
+    const rawOutput = await git.listRemote([
+      config.url,
+      'refs/renovate/branches/*',
+    ]);
     const refs = rawOutput
       .split(newlineRegex)
       .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), '').trim())
-      .filter((line) => line.startsWith('refs/renovate/'));
+      .filter((line) => line.startsWith('refs/renovate/branches/'));
     renovateRefs.push(...refs);
-  } catch (err) /* istanbul ignore next */ {
+    /* v8 ignore next 3 -- TODO: add test */
+  } catch (err) {
     logger.warn({ err }, `Renovate refs cleanup error`);
   }
 
-  const nonSectionedRefs = renovateRefs.filter((ref) => {
-    return ref.split('/').length === 3;
-  });
-  obsoleteRefs.push(...nonSectionedRefs);
-
-  const renovateBranchRefs = renovateRefs.filter((ref) =>
-    ref.startsWith('refs/renovate/branches/'),
-  );
-  obsoleteRefs.push(...renovateBranchRefs);
-
-  if (obsoleteRefs.length) {
+  if (renovateRefs.length) {
     try {
-      const pushOpts = ['--delete', 'origin', ...obsoleteRefs];
+      const pushOpts = ['--delete', 'origin', ...renovateRefs];
       await git.push(pushOpts);
     } catch (err) {
-      /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
-        for (const ref of obsoleteRefs) {
+        for (const ref of renovateRefs) {
           try {
             const pushOpts = ['--delete', 'origin', ref];
             await git.push(pushOpts);
-          } catch (err) /* istanbul ignore next */ {
-            logger.debug({ err }, 'Error deleting obsolete refs');
+            /* v8 ignore next 4 -- TODO: add test */
+          } catch (err) {
+            logger.debug({ err }, 'Error deleting "refs/renovate/branches/*"');
             break;
           }
         }
+        /* v8 ignore next 3 -- TODO: add test */
       } else {
-        logger.warn({ err }, 'Error deleting obsolete refs');
+        logger.warn({ err }, 'Error deleting "refs/renovate/branches/*"');
       }
     }
   }
@@ -1367,8 +1380,8 @@ export async function listCommitTree(
 ): Promise<TreeItem[]> {
   const commitOutput = await git.catFile(['-p', commitSha]);
   const { treeSha } =
-    treeShaRegex.exec(commitOutput)?.groups ??
-    /* istanbul ignore next: will never happen */ {};
+    /* v8 ignore next -- will never happen ? */
+    treeShaRegex.exec(commitOutput)?.groups ?? {};
   const contents = await git.catFile(['-p', treeSha]);
   const lines = contents.split(newlineRegex);
   const result: TreeItem[] = [];

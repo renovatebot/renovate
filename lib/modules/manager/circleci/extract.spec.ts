@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
@@ -14,16 +14,20 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('handles registry alias', () => {
-      const res = extractPackageFile(
-        'executors:\n  my-executor:\n    docker:\n      - image: quay.io/myName/myPackage:0.6.2',
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-            'index.docker.io': 'my-docker-mirror.registry.com',
-          },
+      const src = codeBlock`
+        executors:
+          my-executor:
+            docker:
+              - image: quay.io/myName/myPackage:0.6.2
+      `;
+
+      const res = extractPackageFile(src, '.circleci/config.yml', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      );
+      });
+
       expect(res).toEqual({
         deps: [
           {
@@ -32,7 +36,8 @@ describe('modules/manager/circleci/extract', () => {
             currentDigest: undefined,
             currentValue: '0.6.2',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/myName/myPackage',
+            depName: 'quay.io/myName/myPackage',
+            packageName: 'my-quay-mirror.registry.com/myName/myPackage',
             depType: 'docker',
             replaceString: 'quay.io/myName/myPackage:0.6.2',
           },
@@ -48,6 +53,7 @@ describe('modules/manager/circleci/extract', () => {
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           datasource: 'docker',
           depName: 'node',
+          packageName: 'node',
           depType: 'docker',
           replaceString: 'node',
         },
@@ -57,6 +63,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '4',
           datasource: 'docker',
           depName: 'node',
+          packageName: 'node',
           depType: 'docker',
           replaceString: 'node:4',
         },
@@ -66,6 +73,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '6',
           datasource: 'docker',
           depName: 'node',
+          packageName: 'node',
           depType: 'docker',
           replaceString: 'node:6',
         },
@@ -75,6 +83,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '8.9.0',
           datasource: 'docker',
           depName: 'node',
+          packageName: 'node',
           depType: 'docker',
           replaceString: 'node:8.9.0',
         },
@@ -115,6 +124,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.7',
           datasource: 'docker',
           depName: 'python',
+          packageName: 'python',
           depType: 'docker',
           replaceString:
             'python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077',
@@ -127,6 +137,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.7',
           datasource: 'docker',
           depName: 'python',
+          packageName: 'python',
           depType: 'docker',
           replaceString:
             'python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077',
@@ -139,6 +150,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.7',
           datasource: 'docker',
           depName: 'python',
+          packageName: 'python',
           depType: 'docker',
           replaceString:
             'python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077',
@@ -151,6 +163,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.7',
           datasource: 'docker',
           depName: 'python',
+          packageName: 'python',
           depType: 'docker',
           replaceString:
             'python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077',
@@ -163,6 +176,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3-6',
           datasource: 'docker',
           depName: 'pypy',
+          packageName: 'pypy',
           depType: 'docker',
           replaceString:
             'pypy:3-6@sha256:eb6325b75c1c70b4992eaa1bdd29e24e5f14d5324b4714a49f3e67783473214b',
@@ -175,6 +189,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.7',
           datasource: 'docker',
           depName: 'python',
+          packageName: 'python',
           depType: 'docker',
           replaceString:
             'python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077',
@@ -191,6 +206,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '14.8.0',
           datasource: 'docker',
           depName: 'cimg/node',
+          packageName: 'cimg/node',
           depType: 'docker',
           replaceString: 'cimg/node:14.8.0',
         },
@@ -200,6 +216,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '14.8.0',
           datasource: 'docker',
           depName: 'cimg/node',
+          packageName: 'cimg/node',
           depType: 'docker',
           replaceString: 'cimg/node:14.8.0',
         },
@@ -209,10 +226,10 @@ describe('modules/manager/circleci/extract', () => {
     it('extracts and exclude android images', () => {
       expect(
         extractPackageFile(codeBlock`
-        jobs:
-          build:
-            machine:
-              image: android:202102-01
+          jobs:
+            build:
+              machine:
+                image: android:202102-01
         `),
       ).toBeNull();
     });
@@ -233,10 +250,12 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts executors', () => {
       const res = extractPackageFile(codeBlock`
-      executors:
-        my-executor:
-          docker:
-            - image: cimg/ruby:3.0.3-browsers`);
+        executors:
+          my-executor:
+            docker:
+              - image: cimg/ruby:3.0.3-browsers
+      `);
+
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -244,6 +263,7 @@ describe('modules/manager/circleci/extract', () => {
           currentValue: '3.0.3-browsers',
           datasource: 'docker',
           depName: 'cimg/ruby',
+          packageName: 'cimg/ruby',
           depType: 'docker',
           replaceString: 'cimg/ruby:3.0.3-browsers',
         },
@@ -252,29 +272,30 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts orb definitions', () => {
       const res = extractPackageFile(codeBlock`
-      version: 2.1
+        version: 2.1
 
-      orbs:
-        myorb:
-          orbs:
-            python: circleci/python@2.1.1
+        orbs:
+          myorb:
+            orbs:
+              python: circleci/python@2.1.1
 
-          executors:
-            python:
-              docker:
-                - image: cimg/python:3.9
+            executors:
+              python:
+                docker:
+                  - image: cimg/python:3.9
 
-          jobs:
-            test_image:
-              docker:
-                - image: cimg/python:3.7
-              steps:
-                - checkout
+            jobs:
+              test_image:
+                docker:
+                  - image: cimg/python:3.7
+                steps:
+                  - checkout
 
-      workflows:
-        Test:
-          jobs:
-            - myorb/test_image`);
+        workflows:
+          Test:
+            jobs:
+              - myorb/test_image
+      `);
 
       expect(res).toEqual({
         deps: [
@@ -293,6 +314,7 @@ describe('modules/manager/circleci/extract', () => {
             currentValue: '3.9',
             datasource: 'docker',
             depName: 'cimg/python',
+            packageName: 'cimg/python',
             depType: 'docker',
             replaceString: 'cimg/python:3.9',
           },
@@ -303,6 +325,7 @@ describe('modules/manager/circleci/extract', () => {
             currentValue: '3.7',
             datasource: 'docker',
             depName: 'cimg/python',
+            packageName: 'cimg/python',
             depType: 'docker',
             replaceString: 'cimg/python:3.7',
           },

@@ -147,7 +147,7 @@ export class UvProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
-    const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+    const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
@@ -177,7 +177,6 @@ export class UvProcessor implements PyProjectProcessor {
         cwdFile: packageFileName,
         extraEnv,
         docker: {},
-        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, uvConstraint],
       };
 
@@ -285,7 +284,8 @@ async function getUvExtraIndexUrl(
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
-      return !sources || !(dep.packageName! in sources);
+      const packageName = dep.packageName!;
+      return !sources || !(packageName in sources);
     })
     .flatMap((dep) => dep.registryUrls)
     .filter(is.string)

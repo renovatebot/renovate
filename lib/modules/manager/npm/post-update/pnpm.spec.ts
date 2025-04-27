@@ -1,14 +1,14 @@
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, partial } from '~test/util';
 
-jest.mock('../../../../util/exec/env');
-jest.mock('../../../../util/fs');
-jest.mock('./node-version');
+vi.mock('../../../../util/exec/env');
+vi.mock('../../../../util/fs');
+vi.mock('./node-version');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
@@ -21,7 +21,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
@@ -94,7 +94,28 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for workspace with --recursive', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -120,10 +141,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm update --no-save some-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm update --no-save some-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -154,7 +175,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
         cmd: 'pnpm dedupe --config.ignore-scripts=true',
@@ -201,7 +222,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
           cwd: 'some-folder',
           encoding: 'utf-8',
@@ -243,7 +264,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
           cwd: 'some-folder',
           encoding: 'utf-8',
@@ -310,7 +331,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
-          '&& pnpm install --recursive --lockfile-only' +
+          '&& pnpm install --lockfile-only' +
           '"',
       },
     ]);
@@ -336,7 +357,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { cmd: 'install-tool node 16.16.0' },
       { cmd: 'install-tool pnpm 6.0.0' },
       {
-        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });

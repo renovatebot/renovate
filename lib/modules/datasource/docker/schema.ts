@@ -170,7 +170,8 @@ export const DockerHubTagsPage = z.object({
   count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
-    onError: /* istanbul ignore next */ ({ error }) => {
+    /* v8 ignore next 6 -- TODO: add test */
+    onError: ({ error }) => {
       logger.debug(
         { error },
         'Docker: Failed to parse some tags from Docker Hub',

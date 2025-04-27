@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
+exports[`modules/manager/npm/post-update/npm > generates lock files 1`] = `
 [
   {
     "cmd": "npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts",
@@ -23,7 +23,7 @@ exports[`modules/manager/npm/post-update/npm generates lock files 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/npm performs lock file maintenance 1`] = `
+exports[`modules/manager/npm/post-update/npm > performs lock file maintenance 1`] = `
 [
   {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts",
@@ -46,7 +46,7 @@ exports[`modules/manager/npm/post-update/npm performs lock file maintenance 1`] 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/npm performs lock file updates 1`] = `
+exports[`modules/manager/npm/post-update/npm > performs lock file updates 1`] = `
 [
   {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1",
@@ -69,7 +69,7 @@ exports[`modules/manager/npm/post-update/npm performs lock file updates 1`] = `
 ]
 `;
 
-exports[`modules/manager/npm/post-update/npm performs lock file updates retaining the package.json counterparts 1`] = `
+exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts 1`] = `
 "{
   "name": "update-lockfile-massage-1",
   "version": "1.0.0",
@@ -156,7 +156,7 @@ exports[`modules/manager/npm/post-update/npm performs lock file updates retainin
 "
 `;
 
-exports[`modules/manager/npm/post-update/npm performs lock file updates retaining the package.json counterparts 2`] = `
+exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts 2`] = `
 [
   {
     "cmd": "npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8",

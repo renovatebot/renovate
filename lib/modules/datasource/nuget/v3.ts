@@ -11,8 +11,10 @@ import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash } from '../../../util/url';
 import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
@@ -39,7 +41,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -50,10 +52,12 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
-      // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
-          .body;
+        servicesIndexRaw = (
+          await http.getJsonUnchecked<ServicesIndexRaw>(url, {
+            cacheProvider: memCacheProvider,
+          })
+        ).body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,
@@ -161,14 +165,9 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({
-        version,
-        published: releaseTimestamp,
-        projectUrl,
-        listed,
-        packageContent,
-      }) => {
+      ({ version, published, projectUrl, listed, packageContent }) => {
         const release: Release = { version: removeBuildMeta(version) };
+        const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
@@ -213,7 +212,7 @@ export class NugetV3Api {
           // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.get(nuspecUrl);
+        const metaresult = await http.getText(nuspecUrl);
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
@@ -251,7 +250,6 @@ export class NugetV3Api {
       }
     }
 
-    // istanbul ignore else: not easy testable
     if (homepage) {
       // only assign if not assigned
       dep.sourceUrl ??= homepage;

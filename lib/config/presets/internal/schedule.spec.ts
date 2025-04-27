@@ -6,11 +6,11 @@ describe('config/presets/internal/schedule', () => {
   let config: RenovateConfig;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   beforeEach(() => {
-    jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
+    vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
     config = {};
   });
@@ -25,7 +25,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-30T04:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.daily.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -41,7 +41,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-30T00:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.earlyMondays.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -57,7 +57,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-02T00:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.monthly.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -77,7 +77,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-03T09:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.nonOfficeHours.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -96,7 +96,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-02-01T04:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.quarterly.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -113,7 +113,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-07T11:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.weekdays.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -130,7 +130,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2017-06-07T11:50:00.000'} | ${false}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.weekends.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });
@@ -143,7 +143,7 @@ describe('config/presets/internal/schedule', () => {
       ${'2018-01-01T02:50:00.000'} | ${true}
     `('$datetime', ({ datetime, expected }) => {
       config.schedule = presets.yearly.schedule;
-      jest.setSystemTime(new Date(datetime));
+      vi.setSystemTime(new Date(datetime));
       expect(isScheduledNow(config)).toBe(expected);
     });
   });

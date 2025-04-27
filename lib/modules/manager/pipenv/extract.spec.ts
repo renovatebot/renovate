@@ -1,13 +1,21 @@
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
-jest.mock('fs-extra');
-const fsExtra = mocked(_fsExtra);
+// mock for cjs require for `@renovatebot/detect-tools`
+// https://github.com/vitest-dev/vitest/discussions/3134
+vi.hoisted(() => {
+  require.cache[require.resolve('fs-extra')] = {
+    exports: fixtures.fsExtra(),
+  } as never;
+});
+
+vi.mock('fs-extra', () => fixtures.fsExtra());
+
+const fsExtra = vi.mocked(_fsExtra);
 
 const pipfile1 = Fixtures.get('Pipfile1');
 const pipfile2 = Fixtures.get('Pipfile2');
@@ -15,15 +23,14 @@ const pipfile3 = Fixtures.get('Pipfile3');
 const pipfile4 = Fixtures.get('Pipfile4');
 const pipfile5 = Fixtures.get('Pipfile5');
 
+const localDir = '/tmp/github/some/repo/';
+
 describe('modules/manager/pipenv/extract', () => {
   beforeEach(() => {
+    Fixtures.reset();
     GlobalConfig.set({
-      localDir: join('/tmp/github/some/repo'),
+      localDir: join(localDir),
     });
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   describe('extractPackageFile()', () => {
@@ -37,7 +44,7 @@ describe('modules/manager/pipenv/extract', () => {
 
     it('extracts dependencies', async () => {
       fsExtra.stat.mockResolvedValueOnce({} as never);
-      fsExtra.readFile.mockResolvedValueOnce(pipfile1 as never);
+      Fixtures.mock({ Pipfile: pipfile1 }, localDir);
       const res = await extractPackageFile(pipfile1, 'Pipfile');
       expect(res).toMatchObject({
         deps: [
@@ -134,7 +141,7 @@ describe('modules/manager/pipenv/extract', () => {
 
     it('extracts multiple dependencies', async () => {
       fsExtra.stat.mockResolvedValueOnce({} as never);
-      fsExtra.readFile.mockResolvedValueOnce(pipfile2 as never);
+      Fixtures.mock({ Pipfile: pipfile2 }, localDir);
       const res = await extractPackageFile(pipfile2, 'Pipfile');
       expect(res).toMatchObject({
         deps: [

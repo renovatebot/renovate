@@ -48,7 +48,7 @@ export async function getDependentPackageFiles(
       .childrenNamed('ItemGroup')
       .map((ig) => ig.childrenNamed('ProjectReference'))
       .flat()
-      .map((pf) => pf.attr['Include'])
+      .map((pf) => pf.attr.Include)
       .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
@@ -87,6 +87,11 @@ function recursivelyGetDependentPackageFiles(
   graph: Graph,
   deps: Map<string, boolean>,
 ): void {
+  if (deps.has(packageFileName)) {
+    // we have already visited this package file
+    return;
+  }
+
   const dependents = graph.adjacent(packageFileName);
 
   if (!dependents || dependents.size === 0) {

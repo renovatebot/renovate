@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
@@ -102,7 +103,7 @@ function resolveGitRepositoryPerSourceTag(
 
   dep.datasource = GitTagsDatasource.id;
   dep.packageName = gitUrl;
-  if (gitUrl.startsWith('https://')) {
+  if (isHttpUrl(gitUrl)) {
     dep.sourceUrl = gitUrl.replace(/\.git$/, '');
   }
 }
@@ -123,7 +124,7 @@ function resolveHelmRepository(
             `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
             false,
             registryAliases,
-          ).depName;
+          ).packageName;
           return null;
         } else {
           return repo.spec.url;
@@ -164,36 +165,75 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        const chartSpec = resource.spec.chart.spec;
-        const depName = chartSpec.chart;
-        const dep: PackageDependency = {
-          depName,
-          currentValue: resource.spec.chart.spec.version,
-          datasource: HelmDatasource.id,
-        };
+        if (resource.spec.chartRef) {
+          logger.trace(
+            'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
+          );
+        } else if (resource.spec.chart) {
+          const chartSpec = resource.spec.chart.spec;
+          const depName = chartSpec.chart;
+          const dep: PackageDependency = {
+            depName,
+            currentValue: resource.spec.chart.spec.version,
+            datasource: HelmDatasource.id,
+          };
 
-        if (depName.startsWith('./')) {
-          dep.skipReason = 'local-chart';
-          delete dep.datasource;
+          if (depName.startsWith('./')) {
+            dep.skipReason = 'local-chart';
+            delete dep.datasource;
+          } else {
+            const matchingRepositories = helmRepositories.filter(
+              (rep) =>
+                rep.kind === chartSpec.sourceRef?.kind &&
+                rep.metadata.name === chartSpec.sourceRef.name &&
+                rep.metadata.namespace ===
+                  (chartSpec.sourceRef.namespace ??
+                    resource.metadata?.namespace),
+            );
+            resolveHelmRepository(dep, matchingRepositories, registryAliases);
+          }
           deps.push(dep);
-          continue;
+        } else {
+          logger.debug('invalid or incomplete HelmRelease spec, skipping');
         }
 
-        const matchingRepositories = helmRepositories.filter(
-          (rep) =>
-            rep.kind === chartSpec.sourceRef?.kind &&
-            rep.metadata.name === chartSpec.sourceRef.name &&
-            rep.metadata.namespace ===
-              (chartSpec.sourceRef.namespace ?? resource.metadata?.namespace),
-        );
-        resolveHelmRepository(dep, matchingRepositories, registryAliases);
-        deps.push(dep);
-
         if (resource.spec.values) {
+          logger.trace('detecting dependencies in HelmRelease values');
           deps.push(...findDependencies(resource.spec.values, registryAliases));
         }
         break;
       }
+
+      case 'HelmChart': {
+        if (resource.spec.sourceRef.kind === 'GitRepository') {
+          logger.trace(
+            'HelmChart using GitRepository was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+
+        const dep: PackageDependency = {
+          depName: resource.spec.chart,
+        };
+
+        if (resource.spec.sourceRef.kind === 'HelmRepository') {
+          dep.currentValue = resource.spec.version;
+          dep.datasource = HelmDatasource.id;
+
+          const matchingRepositories = helmRepositories.filter(
+            (rep) =>
+              rep.kind === resource.spec.sourceRef?.kind &&
+              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.metadata.namespace === resource.metadata?.namespace,
+          );
+          resolveHelmRepository(dep, matchingRepositories, registryAliases);
+        } else {
+          dep.skipReason = 'unsupported-datasource';
+        }
+        deps.push(dep);
+        break;
+      }
+
       case 'GitRepository': {
         const dep: PackageDependency = {
           depName: resource.metadata.name,
@@ -205,7 +245,7 @@ function resolveResourceManifest(
           dep.datasource = GitRefsDatasource.id;
           dep.packageName = gitUrl;
           dep.replaceString = resource.spec.ref.commit;
-          if (gitUrl.startsWith('https://')) {
+          if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
         } else if (resource.spec.ref?.tag) {

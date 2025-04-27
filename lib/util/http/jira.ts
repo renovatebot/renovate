@@ -1,22 +1,18 @@
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from '.';
+import { HttpBase } from './http';
+import type { HttpOptions } from './types';
 
 let baseUrl: string;
 
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
-export class JiraHttp extends Http {
-  constructor(type = 'jira', options?: HttpOptions) {
-    super(type, options);
+export class JiraHttp extends HttpBase {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
   }
 
-  protected override request<T>(
-    url: string | URL,
-    options?: InternalHttpOptions,
-  ): Promise<HttpResponse<T>> {
-    const opts = { baseUrl, ...options };
-    return super.request<T>(url, opts);
+  constructor(type = 'jira', options?: HttpOptions) {
+    super(type, options);
   }
 }

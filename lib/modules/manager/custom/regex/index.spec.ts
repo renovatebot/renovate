@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../../test/fixtures';
 import { logger } from '../../../../logger';
 import type { CustomExtractConfig } from '../types';
 import { defaultConfig, displayName, extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
 const ansibleYamlContent = Fixtures.get(`ansible.yml`);
@@ -513,7 +513,7 @@ describe('modules/manager/custom/regex/index', () => {
     expect(res?.deps).toHaveLength(2);
   });
 
-  it('extracts with recursive strategy and multiple layers ', async () => {
+  it('extracts with recursive strategy and multiple layers', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
         '"backup":\\s*{[^}]*}',

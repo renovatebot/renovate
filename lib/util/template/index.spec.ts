@@ -1,11 +1,10 @@
-import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
 import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
-jest.mock('../exec/utils');
+vi.mock('../exec/utils');
 
-const execUtils = mocked(_execUtils);
+const execUtils = vi.mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
@@ -89,7 +88,7 @@ describe('util/template/index', () => {
     expect(output).toContain('False');
   });
 
-  it('string to pretty JSON ', () => {
+  it('string to pretty JSON', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
     const output = template.compile(userTemplate, undefined as never);

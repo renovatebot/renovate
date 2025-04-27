@@ -1,10 +1,11 @@
 import { DateTime, Settings } from 'luxon';
+import type { Timestamp } from '../../../../util/timestamp';
 import * as packageCache from '../../../cache/package';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
 
-const isoTs = (t: string) => t.replace(' ', 'T') + ':00.000Z';
+const isoTs = (t: string) => (t.replace(' ', 'T') + ':00.000Z') as Timestamp;
 
 const mockTime = (input: string): void => {
   const now = DateTime.fromISO(isoTs(input)).valueOf();
@@ -14,8 +15,8 @@ const mockTime = (input: string): void => {
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
 describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
-  const cacheGet = jest.spyOn(packageCache, 'get');
-  const cacheSet = jest.spyOn(packageCache, 'set');
+  const cacheGet = vi.spyOn(packageCache, 'get');
+  const cacheSet = vi.spyOn(packageCache, 'set');
 
   it('reconciles old cache record with new items', async () => {
     const item1 = { version: '1', releaseTimestamp: isoTs('2020-01-01 10:00') };

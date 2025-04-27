@@ -1,12 +1,11 @@
-import { mockDeep } from 'jest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import { mocked } from '../../../../test/util';
-import * as _hostRules from '../../../util/host-rules';
+import { mockDeep } from 'vitest-mock-extended';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { hostRules } from '~test/util';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+
 const filename = '.pre-commit.yaml';
 
 const complexPrecommitConfig = Fixtures.get('complex.pre-commit-config.yaml');
@@ -105,6 +104,7 @@ describe('modules/manager/pre-commit/extract', () => {
           },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
+          { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
           { skipReason: 'invalid-url' },
         ],
       });

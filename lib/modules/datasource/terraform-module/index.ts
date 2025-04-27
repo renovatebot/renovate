@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { coerceString } from '../../../util/string';
+import { asTimestamp } from '../../../util/timestamp';
 import { isHttpUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -51,7 +52,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -128,7 +129,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       (release) => res.version === release.version,
     );
     if (latestVersion) {
-      latestVersion.releaseTimestamp = res.published_at;
+      latestVersion.releaseTimestamp = asTimestamp(res.published_at);
     }
     return dep;
   }

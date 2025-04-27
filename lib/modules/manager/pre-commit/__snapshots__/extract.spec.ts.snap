@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from complex config file correctly 1`] = `
+exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts from complex config file correctly 1`] = `
 {
   "deps": [
     {
@@ -72,6 +72,13 @@ exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from c
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "packageName": "prettier/pre-commit",
+    },
+    {
+      "currentValue": "v5.0.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "packageName": "pre-commit/pre-commit-hooks",
     },
     {
       "currentValue": "v1.0.0",

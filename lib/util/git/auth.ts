@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -80,7 +81,7 @@ export function getGitAuthenticatedEnvironmentVariables(
       rule.insteadOf;
     gitConfigCount++;
   }
-  newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
+  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
 }
@@ -92,9 +93,7 @@ function getAuthenticationRulesWithToken(
 ): AuthenticationRule[] {
   let token = authToken;
   let type = hostType;
-  if (!type) {
-    type = detectPlatform(url);
-  }
+  type ??= detectPlatform(url);
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
@@ -124,10 +123,13 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    if (!sshPort) {
+    // sshPort is string, wrong type!
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
+    // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
+    if (!sshPort || is.emptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
-      sshPort = 7999;
+      sshPort = '7999';
     }
   }
 

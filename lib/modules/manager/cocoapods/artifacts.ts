@@ -72,7 +72,6 @@ export async function updateArtifacts({
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
-    userConfiguredEnv: config.env,
     cwdFile: packageFileName,
     extraEnv: {
       CP_HOME_DIR: await ensureCacheDir('cocoapods'),
@@ -100,7 +99,7 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.stderr || err.stdout || err.message,
+          stderr: err.stderr ?? err.stdout ?? err.message,
         },
       },
     ];

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
 export const PythonRelease = z
@@ -12,7 +13,7 @@ export const PythonRelease = z
     /** is latest major version, true for Python 2.7.18 and latest Python 3 */
     is_latest: z.boolean(),
     is_published: z.boolean(),
-    release_date: z.string(),
+    release_date: MaybeTimestamp,
     pre_release: z.boolean(),
     release_page: z.string().nullable(),
     show_on_download_page: z.boolean(),

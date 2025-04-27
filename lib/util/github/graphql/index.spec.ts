@@ -1,6 +1,6 @@
-import * as httpMock from '../../../../test/http-mock';
 import { GithubHttp } from '../../http/github';
 import { queryReleases, queryTags } from '.';
+import * as httpMock from '~test/http-mock';
 
 const http = new GithubHttp();
 
@@ -72,7 +72,7 @@ describe('util/github/graphql/index', () => {
     expect(res).toEqual([
       {
         version: '1.2.3',
-        releaseTimestamp: '2024-09-24',
+        releaseTimestamp: '2024-09-24T00:00:00.000Z',
         url: 'https://example.com',
         id: 123,
         name: 'name',

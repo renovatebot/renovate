@@ -63,6 +63,7 @@ import {
 } from './utils';
 
 interface GiteaRepoConfig {
+  ignorePrAuthor: boolean;
   repository: string;
   mergeMethod: PRMergeMethod;
 
@@ -86,6 +87,17 @@ const defaults = {
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
+
+export function resetPlatform(): void {
+  config = {} as any;
+  botUserID = undefined as never;
+  botUserName = undefined as never;
+  defaults.hostType = 'gitea';
+  defaults.endpoint = 'https://gitea.com/';
+  defaults.version = '0.0.0';
+  defaults.isForgejo = false;
+  setBaseUrl(defaults.endpoint);
+}
 
 function toRenovateIssue(data: Issue): Issue {
   return {
@@ -212,13 +224,18 @@ const platform: Platform = {
       gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
-      defaults.version = await helper.getVersion({ token });
+      /* v8 ignore start: experimental feature */
+      if (semver.valid(process.env.RENOVATE_X_PLATFORM_VERSION)) {
+        defaults.version = process.env.RENOVATE_X_PLATFORM_VERSION!;
+      } /* v8 ignore stop */ else {
+        defaults.version = await helper.getVersion({ token });
+      }
       if (defaults.version?.includes('gitea-')) {
-        defaults.version = defaults.version.substring(
-          defaults.version.indexOf('gitea-') + 6,
-        );
         defaults.isForgejo = true;
       }
+      logger.debug(
+        `${defaults.isForgejo ? 'Forgejo' : 'Gitea'} version: ${defaults.version}`,
+      );
     } catch (err) {
       logger.debug(
         { err },
@@ -258,6 +275,7 @@ const platform: Platform = {
     cloneSubmodules,
     cloneSubmodulesFilter,
     gitUrl,
+    ignorePrAuthor,
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
@@ -265,6 +283,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
+    config.ignorePrAuthor = !!ignorePrAuthor;
 
     // Try to fetch information about repository
     try {
@@ -440,10 +459,8 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
-      /* istanbul ignore next */ 'yellow'
-    );
+    /* v8 ignore next */
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
   async getBranchStatusCheck(
@@ -470,7 +487,12 @@ const platform: Platform = {
   },
 
   getPrList(): Promise<Pr[]> {
-    return GiteaPrCache.getPrs(giteaHttp, config.repository, botUserName);
+    return GiteaPrCache.getPrs(
+      giteaHttp,
+      config.repository,
+      config.ignorePrAuthor,
+      botUserName,
+    );
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -486,7 +508,13 @@ const platform: Platform = {
 
       // Add pull request to cache for further lookups / queries
       if (pr) {
-        await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+        await GiteaPrCache.setPr(
+          giteaHttp,
+          config.repository,
+          config.ignorePrAuthor,
+          botUserName,
+          pr,
+        );
       }
     }
 
@@ -503,8 +531,22 @@ const platform: Platform = {
     prTitle: title,
     state = 'all',
     includeOtherAuthors,
+    targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
+    if (includeOtherAuthors && is.string(targetBranch)) {
+      // do not use pr cache as it only fetches prs created by the bot account
+      const pr = await helper.getPRByBranch(
+        config.repository,
+        targetBranch,
+        branchName,
+      );
+      if (!pr) {
+        return null;
+      }
+
+      return toRenovatePR(pr, null);
+    }
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>
@@ -551,13 +593,18 @@ const platform: Platform = {
       });
 
       if (platformPrOptions?.usePlatformAutomerge) {
-        if (semver.gte(defaults.version, '1.17.0')) {
+        // Only Gitea v1.24.0+ and Forgejo v10.0.0+ support delete_branch_after_merge.
+        // This is required to not have undesired behavior when renovate finds existing branches on next run.
+        if (
+          semver.gte(defaults.version, defaults.isForgejo ? '10.0.0' : '1.24.0')
+        ) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
               Do:
                 getMergeMethod(platformPrOptions?.automergeStrategy) ??
                 config.mergeMethod,
               merge_when_checks_succeed: true,
+              delete_branch_after_merge: true,
             });
 
             logger.debug(
@@ -573,7 +620,7 @@ const platform: Platform = {
         } else {
           logger.debug(
             { prNumber: gpr.number },
-            'Gitea-native automerge: not supported on this version of Gitea. Use 1.17.0 or newer.',
+            `Gitea-native automerge: not supported on this version of ${defaults.isForgejo ? 'Forgejo' : 'Gitea'}. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer.`,
           );
         }
       }
@@ -583,7 +630,13 @@ const platform: Platform = {
         throw new Error('Can not parse newly created Pull Request');
       }
 
-      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(
+        giteaHttp,
+        config.repository,
+        config.ignorePrAuthor,
+        botUserName,
+        pr,
+      );
       return pr;
     } catch (err) {
       // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -677,7 +730,13 @@ const platform: Platform = {
     );
     const pr = toRenovatePR(gpr, botUserName);
     if (pr) {
-      await GiteaPrCache.setPr(giteaHttp, config.repository, botUserName, pr);
+      await GiteaPrCache.setPr(
+        giteaHttp,
+        config.repository,
+        config.ignorePrAuthor,
+        botUserName,
+        pr,
+      );
     }
   },
 
@@ -697,15 +756,13 @@ const platform: Platform = {
     if (config.hasIssuesEnabled === false) {
       return Promise.resolve([]);
     }
-    if (config.issueList === null) {
-      config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
-        .then((issues) => {
-          const issueList = issues.map(toRenovateIssue);
-          logger.debug(`Retrieved ${issueList.length} Issues`);
-          return issueList;
-        });
-    }
+    config.issueList ??= helper
+      .searchIssues(config.repository, { state: 'all' }, { memCache: false })
+      .then((issues) => {
+        const issueList = issues.map(toRenovateIssue);
+        logger.debug(`Retrieved ${issueList.length} Issues`);
+        return issueList;
+      });
 
     return config.issueList;
   },
@@ -722,10 +779,10 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) /* v8 ignore start */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
-    }
+    } /* v8 ignore stop */
   },
 
   async findIssue(title: string): Promise<Issue | null> {

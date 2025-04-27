@@ -1,7 +1,5 @@
-import { mocked, partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
 import type {
@@ -14,11 +12,11 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
+import { hostRules, partial } from '~test/util';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://gerrit.example.com';
-const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/utils', () => {
   beforeEach(() => {
@@ -86,6 +84,7 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
+        created: '2025-04-14 16:33:37.000000000',
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
           REMOVED: [],
@@ -122,6 +121,7 @@ describe('modules/platform/gerrit/utils', () => {
         number: 123456,
         state: 'open',
         title: 'Fix for',
+        createdAt: '2025-04-14T16:33:37.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: ['username'],
@@ -185,47 +185,6 @@ describe('modules/platform/gerrit/utils', () => {
         },
       });
       expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('no commit message but with hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('commit message with no footer but with hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-        current_revision: 'abc',
-        revisions: {
-          abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
-          }),
-        },
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('prefers the footer over the hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-        current_revision: 'abc',
-        revisions: {
-          abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-2.x\nChange-Id: ...',
-            },
-          }),
-        },
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-2.x');
     });
   });
 

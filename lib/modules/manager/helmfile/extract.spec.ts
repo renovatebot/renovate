@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const localDir = '/tmp/github/some/repo';
 
@@ -532,6 +532,42 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'subgroup',
             packageName: 'gitlab.example.com:5000/group/subgroup',
             registryUrls: [],
+          },
+        ],
+      });
+    });
+
+    it('skips helm-git repos', async () => {
+      const content = codeBlock`
+        repositories:
+          # Official codefresh helm chart
+          - name: gitops-external-cluster
+            url: git+https://github.com/codefresh-io/csdp-official@add-cluster/helm
+
+        releases:
+          - name: gitops-external-cluster
+            namespace: gitops-runtime
+            chart: gitops-external-cluster/csdp-add-cluster
+            version: 0.4.0
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          repo: {
+            name: 'gitops-external-cluster',
+            url: 'git+https://github.com/codefresh-io/csdp-official@add-cluster/helm',
+          },
+          packageFile: 'helmfile.yaml',
+        },
+        'Skipping unsupported helm-git repository.',
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.0',
+            depName: 'csdp-add-cluster',
+            skipReason: 'unknown-registry',
           },
         ],
       });

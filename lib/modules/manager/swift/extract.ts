@@ -98,8 +98,7 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
 function getMatch(str: string, state: string | null): MatchResult | null {
   const keys = searchKeysForState(state);
   let result: MatchResult | null = null;
-  for (let i = 0; i < keys.length; i += 1) {
-    const key = keys[i];
+  for (const key of keys) {
     const regex = regExps[key];
     const label = searchLabels[key];
     const match = regex.exec(str);

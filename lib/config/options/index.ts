@@ -108,7 +108,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowPostUpgradeCommandTemplating',
+    name: 'allowCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
@@ -116,9 +116,9 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowedPostUpgradeCommands',
+    name: 'allowedCommands',
     description:
-      'A list of regular expressions that decide which post-upgrade tasks are allowed.',
+      'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.6.0',
+    default: 'ghcr.io/containerbase/sidecar:13.8.17',
     globalOnly: true,
   },
   {
@@ -1466,6 +1466,26 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementVersionTemplate',
+    description:
+      'Template field for the version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementApproach',
+    description:
+      'Select whether to perform a direct replacement or alias replacement.',
+    type: 'string',
+    stage: 'branch',
+    allowedValues: ['replace', 'alias'],
+    supportedManagers: ['npm'],
+    default: 'replace',
+  },
+  {
     name: 'matchConfidence',
     description:
       'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
@@ -1869,6 +1889,17 @@ const options: RenovateOptions[] = [
     default: 'strict',
   },
   {
+    name: 'processEnv',
+    description: 'Environment variables to be used in global config only.',
+    type: 'object',
+    default: {},
+    globalOnly: true,
+    stage: 'global',
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1996,7 +2027,7 @@ const options: RenovateOptions[] = [
       'squash',
     ],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',
@@ -2399,6 +2430,7 @@ const options: RenovateOptions[] = [
       'gomodSkipVendor',
       'gomodVendor',
       'helmUpdateSubChartArchives',
+      'kustomizeInflateHelmCharts',
       'npmDedupe',
       'pnpmDedupe',
       'yarnDedupeFewer',
@@ -2425,6 +2457,10 @@ const options: RenovateOptions[] = [
       'pipenv',
       'poetry',
     ],
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'hostRules',
@@ -2742,18 +2778,26 @@ const options: RenovateOptions[] = [
     description:
       'Custom manager to use. Valid only within a `customManagers` object.',
     type: 'string',
-    allowedValues: ['regex'],
+    allowedValues: ['jsonata', 'regex'],
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fileFormat',
+    description:
+      'It specifies the syntax of the package file being managed by the custom JSONata manager.',
+    type: 'string',
+    allowedValues: ['json', 'toml', 'yaml'],
     parents: ['customManagers'],
     cli: false,
     env: false,
   },
   {
     name: 'matchStrings',
-    description:
-      'Regex capture rule to use. Valid only within a `customManagers` object.',
+    description: 'Queries to use. Valid only within a `customManagers` object.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     parents: ['customManagers'],
     cli: false,
     env: false,
@@ -2903,7 +2947,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['gitlab', 'bitbucket-server'],
+    supportedPlatforms: ['gitea', 'gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',

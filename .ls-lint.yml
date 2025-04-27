@@ -15,7 +15,7 @@ ignore:
   - .venv
   - CODE_OF_CONDUCT.md
   - dist
-  - jest.config.ts
+  - vitest.config.ts
   - node_modules
   - SECURITY.md
   - test/e2e/node_modules

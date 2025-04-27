@@ -2,12 +2,12 @@ import { createReadStream } from 'node:fs';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { Fixtures } from '../../../../../test/fixtures';
-import * as httpMock from '../../../../../test/http-mock';
-import { getFixturePath, logger } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { TerraformProviderHash } from './hash';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { getFixturePath, logger } from '~test/util';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
@@ -366,7 +366,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     ]);
   });
 
-  it('it does not add any ziphashes when the shasums endpoint fails`', async () => {
+  it('does not add any ziphashes when the shasums endpoint fails`', async () => {
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );

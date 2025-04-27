@@ -1,6 +1,5 @@
 import { Readable } from 'node:stream';
-import { GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
-import { DateTime } from 'luxon';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -9,24 +8,21 @@ import { type Http, HttpError } from '../../../util/http';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { Result } from '../../../util/result';
-import type { S3UrlParts } from '../../../util/s3';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
 import { asTimestamp } from '../../../util/timestamp';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url';
 import { getGoogleAuthToken } from '../util';
 import { MAVEN_REPO } from './common';
 import type {
   DependencyInfo,
-  HttpResourceCheckResult,
   MavenDependency,
   MavenFetchResult,
   MavenFetchSuccess,
-  MavenXml,
 } from './types';
 
-function getHost(url: string): string | null {
-  return parseUrl(url)?.host ?? /* istanbul ignore next: not possible */ null;
+function getHost(url: string): string | undefined {
+  return parseUrl(url)?.host;
 }
 
 function isTemporaryError(err: HttpError): boolean {
@@ -74,7 +70,7 @@ export async function downloadHttpProtocol(
 ): Promise<MavenFetchResult> {
   const url = pkgUrl.toString();
   const fetchResult = await Result.wrap<HttpResponse, Error>(
-    http.get(url, opts),
+    http.getText(url, opts),
   )
     .transform((res): MavenFetchSuccess => {
       const result: MavenFetchSuccess = { data: res.body };
@@ -91,10 +87,10 @@ export async function downloadHttpProtocol(
       return result;
     })
     .catch((err): MavenFetchResult => {
-      // istanbul ignore next: never happens, needs for type narrowing
+      /* v8 ignore start: never happens, needs for type narrowing */
       if (!(err instanceof HttpError)) {
         return Result.err({ type: 'unknown', err });
-      }
+      } /* v8 ignore stop */
 
       const failedUrl = url;
       if (err.message === HOST_DISABLED) {
@@ -268,92 +264,6 @@ export async function downloadArtifactRegistryProtocol(
   return downloadHttpProtocol(http, url, opts);
 }
 
-async function checkHttpResource(
-  http: Http,
-  pkgUrl: URL,
-): Promise<HttpResourceCheckResult> {
-  try {
-    const res = await http.head(pkgUrl.toString());
-    const timestamp = res?.headers?.['last-modified'];
-    if (timestamp) {
-      const isoTimestamp = asTimestamp(timestamp);
-      if (isoTimestamp) {
-        const releaseDate = DateTime.fromISO(isoTimestamp, {
-          zone: 'UTC',
-        }).toJSDate();
-        return releaseDate;
-      }
-    }
-    return 'found';
-  } catch (err) {
-    if (isNotFoundError(err)) {
-      return 'not-found';
-    }
-
-    const failedUrl = pkgUrl.toString();
-    logger.debug(
-      { failedUrl, statusCode: err.statusCode },
-      `Can't check HTTP resource existence`,
-    );
-    return 'error';
-  }
-}
-
-export async function checkS3Resource(
-  s3Url: S3UrlParts,
-): Promise<HttpResourceCheckResult> {
-  try {
-    const response = await getS3Client().send(new HeadObjectCommand(s3Url));
-    if (response.DeleteMarker) {
-      return 'not-found';
-    }
-    if (response.LastModified) {
-      return response.LastModified;
-    }
-    return 'found';
-  } catch (err) {
-    if (isS3NotFound(err)) {
-      return 'not-found';
-    } else {
-      logger.debug(
-        {
-          bucket: s3Url.Bucket,
-          key: s3Url.Key,
-          name: err.name,
-          message: err.message,
-        },
-        `Can't check S3 resource existence`,
-      );
-    }
-    return 'error';
-  }
-}
-
-export async function checkResource(
-  http: Http,
-  pkgUrl: URL | string,
-): Promise<HttpResourceCheckResult> {
-  const parsedUrl = typeof pkgUrl === 'string' ? parseUrl(pkgUrl) : pkgUrl;
-  if (parsedUrl === null) {
-    return 'error';
-  }
-
-  const s3Url = parseS3Url(parsedUrl);
-  if (s3Url) {
-    return await checkS3Resource(s3Url);
-  }
-
-  if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-    return await checkHttpResource(http, parsedUrl);
-  }
-
-  logger.debug(
-    { url: pkgUrl.toString() },
-    `Unsupported Maven protocol in check resource`,
-  );
-  return 'not-found';
-}
-
 function containsPlaceholder(str: string): boolean {
   return regEx(/\${.*?}/g).test(str);
 }
@@ -369,44 +279,51 @@ export function getMavenUrl(
   );
 }
 
-export async function downloadMavenXml(
+export async function downloadMaven(
   http: Http,
-  pkgUrl: URL,
-): Promise<MavenXml> {
-  const protocol = pkgUrl.protocol;
+  url: URL,
+): Promise<MavenFetchResult> {
+  const protocol = url.protocol;
 
-  if (protocol === 'http:' || protocol === 'https:') {
-    const rawResult = await downloadHttpProtocol(http, pkgUrl);
-    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
-      const xml = new XmlDocument(data);
-      return { isCacheable, xml };
-    });
-    return xmlResult.unwrapOr({});
+  let result: MavenFetchResult = Result.err({ type: 'unsupported-protocol' });
+
+  if (isHttpUrl(url)) {
+    result = await downloadHttpProtocol(http, url);
   }
 
   if (protocol === 'artifactregistry:') {
-    const rawResult = await downloadArtifactRegistryProtocol(http, pkgUrl);
-    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
-      const xml = new XmlDocument(data);
-      return { isCacheable, xml };
-    });
-    return xmlResult.unwrapOr({});
+    result = await downloadArtifactRegistryProtocol(http, url);
   }
 
   if (protocol === 's3:') {
-    const rawResult = await downloadS3Protocol(pkgUrl);
-    const xmlResult = rawResult.transform(({ isCacheable, data }): MavenXml => {
-      const xml = new XmlDocument(data);
-      return { xml };
-    });
-    return xmlResult.unwrapOr({});
+    result = await downloadS3Protocol(url);
   }
 
-  logger.debug(
-    { url: pkgUrl.toString() },
-    `Content is not found for Maven url`,
-  );
-  return {};
+  return result.onError((err) => {
+    if (err.type === 'unsupported-protocol') {
+      logger.debug(
+        { url: url.toString() },
+        `Maven lookup error: unsupported protocol (${protocol})`,
+      );
+    }
+  });
+}
+
+export async function downloadMavenXml(
+  http: Http,
+  url: URL,
+): Promise<MavenFetchResult<XmlDocument>> {
+  const rawResult = await downloadMaven(http, url);
+  return rawResult.transform((result): MavenFetchResult<XmlDocument> => {
+    try {
+      return Result.ok({
+        ...result,
+        data: new XmlDocument(result.data),
+      });
+    } catch (err) {
+      return Result.err({ type: 'xml-parse-error', err });
+    }
+  });
 }
 
 export function getDependencyParts(packageName: string): MavenDependency {
@@ -458,13 +375,15 @@ async function getSnapshotFullVersion(
     `${version}/maven-metadata.xml`,
   );
 
-  const { xml: mavenMetadata } = await downloadMavenXml(http, metadataUrl);
-  // istanbul ignore if: hard to test
-  if (!mavenMetadata) {
-    return null;
-  }
+  const metadataXmlResult = await downloadMavenXml(http, metadataUrl);
 
-  return extractSnapshotVersion(mavenMetadata);
+  return metadataXmlResult
+    .transform(({ data }) =>
+      Result.wrapNullable(extractSnapshotVersion(data), {
+        type: 'snapshot-extract-error',
+      }),
+    )
+    .unwrapOrNull();
 }
 
 function isSnapshotVersion(version: string): boolean {
@@ -508,7 +427,6 @@ export async function getDependencyInfo(
   version: string,
   recursionLimit = 5,
 ): Promise<DependencyInfo> {
-  const result: DependencyInfo = {};
   const path = await createUrlForDependencyPom(
     http,
     version,
@@ -517,81 +435,88 @@ export async function getDependencyInfo(
   );
 
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
-  const { xml: pomContent } = await downloadMavenXml(http, pomUrl);
-  // istanbul ignore if
-  if (!pomContent) {
-    return result;
-  }
+  const pomXmlResult = await downloadMavenXml(http, pomUrl);
+  const dependencyInfoResult = await pomXmlResult.transform(
+    async ({ data: pomContent }) => {
+      const result: DependencyInfo = {};
 
-  const homepage = pomContent.valueWithPath('url');
-  if (homepage && !containsPlaceholder(homepage)) {
-    result.homepage = homepage;
-  }
+      const homepage = pomContent.valueWithPath('url');
+      if (homepage && !containsPlaceholder(homepage)) {
+        result.homepage = homepage;
+      }
 
-  const sourceUrl = pomContent.valueWithPath('scm.url');
-  if (sourceUrl && !containsPlaceholder(sourceUrl)) {
-    result.sourceUrl = sourceUrl
-      .replace(regEx(/^scm:/), '')
-      .replace(regEx(/^git:/), '')
-      .replace(regEx(/^git@github.com:/), 'https://github.com/')
-      .replace(regEx(/^git@github.com\//), 'https://github.com/');
+      const sourceUrl = pomContent.valueWithPath('scm.url');
+      if (sourceUrl && !containsPlaceholder(sourceUrl)) {
+        result.sourceUrl = sourceUrl
+          .replace(regEx(/^scm:/), '')
+          .replace(regEx(/^git:/), '')
+          .replace(regEx(/^git@github.com:/), 'https://github.com/')
+          .replace(regEx(/^git@github.com\//), 'https://github.com/');
 
-    if (result.sourceUrl.startsWith('//')) {
-      // most likely the result of us stripping scm:, git: etc
-      // going with prepending https: here which should result in potential information retrival
-      result.sourceUrl = `https:${result.sourceUrl}`;
-    }
-  }
+        if (result.sourceUrl.startsWith('//')) {
+          // most likely the result of us stripping scm:, git: etc
+          // going with prepending https: here which should result in potential information retrival
+          result.sourceUrl = `https:${result.sourceUrl}`;
+        }
+      }
 
-  const relocation = pomContent.descendantWithPath(
-    'distributionManagement.relocation',
-  );
-  if (relocation) {
-    const relocationGroup =
-      relocation.valueWithPath('groupId') ?? dependency.group;
-    const relocationName =
-      relocation.valueWithPath('artifactId') ?? dependency.name;
-    result.replacementName = `${relocationGroup}:${relocationName}`;
-    const relocationVersion = relocation.valueWithPath('version');
-    result.replacementVersion = relocationVersion ?? version;
-    const relocationMessage = relocation.valueWithPath('message');
-    if (relocationMessage) {
-      result.deprecationMessage = relocationMessage;
-    }
-  }
-
-  const groupId = pomContent.valueWithPath('groupId');
-  if (groupId) {
-    result.packageScope = groupId;
-  }
-
-  const parent = pomContent.childNamed('parent');
-  if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
-    // if we found a parent and are missing some information
-    // trying to get the scm/homepage information from it
-    const [parentGroupId, parentArtifactId, parentVersion] = [
-      'groupId',
-      'artifactId',
-      'version',
-    ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
-    if (parentGroupId && parentArtifactId && parentVersion) {
-      const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
-      const parentDependency = getDependencyParts(parentDisplayId);
-      const parentInformation = await getDependencyInfo(
-        http,
-        parentDependency,
-        repoUrl,
-        parentVersion,
-        recursionLimit - 1,
+      const relocation = pomContent.descendantWithPath(
+        'distributionManagement.relocation',
       );
-      if (!result.sourceUrl && parentInformation.sourceUrl) {
-        result.sourceUrl = parentInformation.sourceUrl;
+      if (relocation) {
+        const relocationGroup =
+          relocation.valueWithPath('groupId') ?? dependency.group;
+        const relocationName =
+          relocation.valueWithPath('artifactId') ?? dependency.name;
+        result.replacementName = `${relocationGroup}:${relocationName}`;
+        const relocationVersion = relocation.valueWithPath('version');
+        result.replacementVersion = relocationVersion ?? version;
+        const relocationMessage = relocation.valueWithPath('message');
+        if (relocationMessage) {
+          result.deprecationMessage = relocationMessage;
+        }
       }
-      if (!result.homepage && parentInformation.homepage) {
-        result.homepage = parentInformation.homepage;
-      }
-    }
-  }
 
-  return result;
+      const groupId = pomContent.valueWithPath('groupId');
+      if (groupId) {
+        result.packageScope = groupId;
+      }
+
+      const parent = pomContent.childNamed('parent');
+      if (
+        recursionLimit > 0 &&
+        parent &&
+        (!result.sourceUrl || !result.homepage)
+      ) {
+        // if we found a parent and are missing some information
+        // trying to get the scm/homepage information from it
+        const [parentGroupId, parentArtifactId, parentVersion] = [
+          'groupId',
+          'artifactId',
+          'version',
+        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        if (parentGroupId && parentArtifactId && parentVersion) {
+          const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
+          const parentDependency = getDependencyParts(parentDisplayId);
+          const parentInformation = await getDependencyInfo(
+            http,
+            parentDependency,
+            repoUrl,
+            parentVersion,
+            recursionLimit - 1,
+          );
+          if (!result.sourceUrl && parentInformation.sourceUrl) {
+            result.sourceUrl = parentInformation.sourceUrl;
+          }
+          if (!result.homepage && parentInformation.homepage) {
+            result.homepage = parentInformation.homepage;
+          }
+        }
+      }
+
+      return result;
+    },
+  );
+
+  return dependencyInfoResult.unwrapOr({});
 }

@@ -1,12 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { mocked } from '../../../../test/util';
-import { logger } from '../../../logger';
-import * as _fs from '../../../util/fs';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
-
-const fs = mocked(_fs);
+vi.mock('../../../util/fs');
 
 const lockFileContent = codeBlock`
   packages = [
@@ -48,7 +44,6 @@ describe('modules/manager/gleam/locked-version', () => {
   describe('parseLockFile', () => {
     it('parses lockfile string into an object', () => {
       const parseLockFileResult = parseLockFile(lockFileContent);
-      logger.debug({ parseLockFileResult }, 'parseLockFile');
       expect(parseLockFileResult).toStrictEqual({
         packages: [
           {
