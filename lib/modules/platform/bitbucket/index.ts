@@ -89,7 +89,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = { memCache: false };
+  const options: HttpOptions = {};
   if (token) {
     options.token = token;
   } else {
@@ -434,8 +434,6 @@ async function getStatus(
   /* v8 ignore start: temporary code */
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
-  } else {
-    opts.memCache = false;
   } /* v8 ignore stop */
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(

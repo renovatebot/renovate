@@ -148,7 +148,6 @@ export class GiteaPrCache {
       const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
         `${API_PATH}/repos/${this.repo}/pulls?${query}`,
         {
-          memCache: false,
           paginate: false,
         },
       );

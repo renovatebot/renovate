@@ -9,10 +9,7 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../cache/memory';
-import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
-import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -31,7 +28,6 @@ import type {
   HttpResponse,
   SafeJsonError,
 } from './types';
-import { copyResponse } from './util';
 
 export interface InternalJsonUnsafeOptions<
   Opts extends HttpOptions = HttpOptions,
@@ -159,37 +155,12 @@ export abstract class HttpBase<
 
     const { cacheProvider } = options;
 
-    const memCacheKey =
-      !cacheProvider &&
-      options.memCache !== false &&
-      (options.method === 'get' || options.method === 'head')
-        ? hash(
-            `got-${JSON.stringify({
-              url,
-              headers: options.headers,
-              method: options.method,
-            })}`,
-          )
-        : null;
-
     const cachedResponse = await cacheProvider?.bypassServer<unknown>(url);
     if (cachedResponse) {
       return cachedResponse;
     }
 
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
-
-    // Cache GET requests unless memCache=false
-    if (memCacheKey) {
-      resPromise = memCache.get(memCacheKey);
-
-      /* v8 ignore start: temporary code */
-      if (resPromise && !cacheProvider) {
-        ObsoleteCacheHitLogger.write(url);
-      }
-      /* v8 ignore stop: temporary code */
-    }
-
     if (!resPromise) {
       if (cacheProvider) {
         await cacheProvider.setCacheHeaders(url, options);
@@ -209,23 +180,17 @@ export abstract class HttpBase<
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
-
-      if (memCacheKey) {
-        memCache.set(memCacheKey, resPromise);
-      }
     }
 
     try {
       const res = await resPromise;
-      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
-      const resCopy = copyResponse(res, deepCopyNeeded);
-      resCopy.authorization = !!options?.headers?.authorization;
+      res.authorization = !!options?.headers?.authorization;
 
       if (cacheProvider) {
-        return await cacheProvider.wrapServerResponse(url, resCopy);
+        return await cacheProvider.wrapServerResponse(url, res);
       }
 
-      return resCopy;
+      return res;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {

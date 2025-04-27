@@ -147,9 +147,6 @@ export class BbsPrCache {
         values: BbsRestPr[];
       }>(
         `./rest/api/1.0/projects/${this.projectKey}/repos/${this.repo}/pull-requests?${query}`,
-        {
-          memCache: false,
-        },
       );
 
       const needNextPage = this.reconcile(res.body.values);

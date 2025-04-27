@@ -144,9 +144,7 @@ export async function initPlatform({
 
   if (!gitAuthor && username) {
     logger.debug(`Attempting to confirm gitAuthor from username`);
-    const options: HttpOptions = {
-      memCache: false,
-    };
+    const options: HttpOptions = {};
 
     if (token) {
       options.token = token;
@@ -340,12 +338,9 @@ export async function getPr(
     return null;
   }
 
-  // Disables memCache (which is enabled by default) to be replaced by
-  // memCacheProvider.
-  const opts: HttpOptions = { memCache: false };
-  // TODO: should refresh the cache rather than just ignore it
-  if (!refreshCache) {
-    opts.cacheProvider = memCacheProvider;
+  const opts: HttpOptions = { cacheProvider: memCacheProvider };
+  if (refreshCache) {
+    delete opts.cacheProvider;
   }
 
   const res = await bitbucketServerHttp.getJsonUnchecked<BbsRestPr>(
@@ -471,11 +466,11 @@ async function getStatus(
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
-  /* v8 ignore start: temporary code */
-  const opts: HttpOptions = memCache
-    ? { cacheProvider: memCacheProvider }
-    : { memCache: false };
-  /* v8 ignore stop */
+  /* v8 ignore start */
+  const opts: HttpOptions = {};
+  if (memCache) {
+    opts.cacheProvider = memCacheProvider;
+  } /* v8 ignore stop */
 
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
@@ -524,13 +519,11 @@ async function getStatusCheck(
   const branchCommit = git.getBranchCommit(branchName);
 
   const opts: BitbucketServerHttpOptions = { paginate: true };
-  /* v8 ignore start: temporary code */
+
+  /* v8 ignore start */
   if (memCache) {
     opts.cacheProvider = memCacheProvider;
-  } else {
-    opts.memCache = false;
-  }
-  /* v8 ignore stop */
+  } /* v8 ignore stop */
 
   return (
     await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(

@@ -1,9 +1,20 @@
 import { logger } from '../../../logger';
+import { clone } from '../../clone';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
-import { copyResponse } from '../util';
 import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
+
+// Copying will help to avoid circular structure
+// and mutation of the cached response.
+function copyResponse<T>(response: HttpResponse<T>): HttpResponse<T> {
+  const { body, statusCode, headers } = response;
+  return {
+    statusCode,
+    body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
+    headers: clone(headers),
+  };
+}
 
 export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
   protected abstract load(url: string): Promise<unknown>;
@@ -56,7 +67,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
 
       HttpCacheStats.incRemoteMisses(url);
 
-      const httpResponse = copyResponse(resp, true);
+      const httpResponse = copyResponse(resp);
       const timestamp = new Date().toISOString();
 
       const newHttpCache = HttpCacheSchema.parse({
@@ -92,7 +103,6 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       HttpCacheStats.incRemoteHits(url);
       const cachedResp = copyResponse(
         httpCache.httpResponse as HttpResponse<T>,
-        true,
       );
       cachedResp.authorization = resp.authorization;
       return cachedResp;

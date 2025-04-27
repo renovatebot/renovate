@@ -63,15 +63,11 @@ class GerritClient {
     findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean,
   ): Promise<GerritChange[]> {
-    const opts: HttpOptions = {};
-    /* v8 ignore start: temporary code */
-    // TODO: should refresh the cache rather than just ignore it
+    const opts: HttpOptions = { cacheProvider: memCacheProvider };
+    /* v8 ignore start */
     if (refreshCache) {
-      opts.memCache = false;
-    } else {
-      opts.cacheProvider = memCacheProvider;
-    }
-    /* v8 ignore stop */
+      delete opts.cacheProvider;
+    } /* v8 ignore stop */
 
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const queryString = getQueryString({
@@ -117,7 +113,7 @@ class GerritClient {
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJsonUnchecked<
       GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`, { memCache: false });
+    >(`a/changes/${changeNumber}/messages`);
     return messages.body;
   }
 
