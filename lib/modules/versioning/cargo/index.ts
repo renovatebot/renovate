@@ -1,6 +1,5 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
