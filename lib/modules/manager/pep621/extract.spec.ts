@@ -239,7 +239,7 @@ describe('modules/manager/pep621/extract', () => {
         {
           commitMessageTopic: 'Python',
           currentValue: '>=3.7',
-          datasource: 'docker',
+          datasource: 'python-version',
           depType: 'requires-python',
           packageName: 'python',
           versioning: 'pep440',
@@ -518,7 +518,7 @@ describe('modules/manager/pep621/extract', () => {
           {
             commitMessageTopic: 'Python',
             currentValue: '>=3.11',
-            datasource: 'docker',
+            datasource: 'python-version',
             depType: 'requires-python',
             packageName: 'python',
             versioning: 'pep440',
@@ -586,7 +586,7 @@ describe('modules/manager/pep621/extract', () => {
           {
             commitMessageTopic: 'Python',
             currentValue: '>=3.11',
-            datasource: 'docker',
+            datasource: 'python-version',
             depType: 'requires-python',
             packageName: 'python',
             versioning: 'pep440',
@@ -622,7 +622,7 @@ describe('modules/manager/pep621/extract', () => {
           {
             packageName: 'python',
             depType: 'requires-python',
-            datasource: 'docker',
+            datasource: 'python-version',
             versioning: 'pep440',
           },
           {

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { DockerDatasource } from '../../datasource/docker';
+import { PythonVersionDatasource } from '../../datasource/python-version';
 import * as pep440 from '../../versioning/pep440';
 import type {
   ExtractConfig,
@@ -41,7 +41,7 @@ export async function extractPackageFile(
       depType: 'requires-python',
       currentValue: pythonConstraint,
       commitMessageTopic: 'Python',
-      datasource: DockerDatasource.id,
+      datasource: PythonVersionDatasource.id,
       versioning: pep440.id,
     });
   } else {
