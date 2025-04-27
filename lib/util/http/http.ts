@@ -192,6 +192,10 @@ export abstract class HttpBase<
         authorization,
       } as HttpResponse<unknown>;
 
+      if (body instanceof Buffer) {
+        return res;
+      }
+
       if (cacheProvider) {
         return await cacheProvider.wrapServerResponse(url, res);
       }
