@@ -134,6 +134,10 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
+
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -1490,6 +1494,7 @@ But if you're embedding changelogs in commit information, you may use `fetchChan
 Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
+- Bitbucket Server / Data Center
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
@@ -2352,6 +2357,7 @@ Supported lock files:
 - `Cargo.lock`
 - `Chart.lock`
 - `composer.lock`
+- `conan.lock`
 - `flake.lock`
 - `Gemfile.lock`
 - `gradle.lockfile`
@@ -2736,9 +2742,22 @@ To read the changelogs you must use the link.
 }
 ```
 
+`changelogUrl` supports template compilation.
+
+```json title="Setting the changelog URL for the dummy package using a template"
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "changelogUrl": "https://github.com/org/monorepo/blob/{{{sourceDirectory}}}/my-custom-changelog.txt"
+    }
+  ]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
-    Renovate can fetch changelogs from Bitbucket, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
+    Renovate can fetch changelogs from Bitbucket, Bitbucket Server / Data Center, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
@@ -3373,6 +3392,27 @@ For example to replace the npm package `jade` with version `2.0.0` of the packag
 }
 ```
 
+### replacementVersionTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementVersion` will take precedence if used within the same package rule.
+
+Use the `replacementVersionTemplate` config option to control the replacement version.
+
+For example, the following package rule can be used to replace version with major-only version (17.0.1 -> 17):
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["dummy"],
+      "replacementVersionTemplate": "{{ lookup (split currentValue '.') 0 }}"
+    }
+  ]
+}
+```
+
 ### sourceDirectory
 
 Use this field to set the directory in which the package is present at the source of the package.
@@ -3933,6 +3973,10 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
 
 ## reviewersSampleSize
 

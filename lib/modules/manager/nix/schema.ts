@@ -6,6 +6,7 @@ const InputType = z.enum([
   'github',
   'gitlab',
   'indirect',
+  'path',
   'sourcehut',
   'tarball',
 ]);
