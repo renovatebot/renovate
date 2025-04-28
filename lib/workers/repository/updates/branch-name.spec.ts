@@ -322,10 +322,13 @@ describe('workers/repository/updates/branch-name', () => {
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
         newMajor: '42',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: '3',
         group: {},
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toBe('dep-df9ca0f348');
+      expect(upgrade.branchName).toBe('dep-2e27927800');
     });
 
     it('enforces valid git branch name', () => {
