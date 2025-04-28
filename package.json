@@ -325,7 +325,7 @@
     "eslint": "9.25.0",
     "eslint-config-prettier": "10.1.2",
     "eslint-formatter-gha": "1.5.2",
-    "eslint-import-resolver-typescript": "4.3.3",
+    "eslint-import-resolver-typescript": "4.3.4",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-promise": "7.2.1",
     "expect-more-jest": "5.5.0",
