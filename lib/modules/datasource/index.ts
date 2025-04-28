@@ -203,7 +203,7 @@ async function mergeRegistries(
       if (tags) {
         if (res.tags) {
           // Both results had tags, so we need to compare them
-          ['release', 'latest'].forEach((tag) => {
+          for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
             if (is.string(newTag) && mavenVersioning.isVersion(newTag)) {
@@ -222,7 +222,7 @@ async function mergeRegistries(
                 tags![tag] = newTag;
               }
             }
-          });
+          }
         }
       } else {
         // Existing results had no tags, so we can just use the new ones
