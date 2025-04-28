@@ -12,6 +12,7 @@ import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
 import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
+import * as versioning from '../versioning';
 import datasources from './api';
 import {
   applyConstraintsFiltering,
@@ -40,6 +41,8 @@ export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
+
+const mavenVersioning = versioning.get('maven');
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -163,7 +166,7 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
-  let commonRegistryUrl = true;
+  let singleRegistry = true;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -172,24 +175,67 @@ async function mergeRegistries(
       }
 
       if (!combinedRes) {
+        // This is the first registry, so we can just use it and continue
         combinedRes = res;
         continue;
       }
 
-      if (commonRegistryUrl) {
+      if (singleRegistry) {
+        // This is the second registry
+        // We need to move the registryUrl from the package level to the release level
         for (const release of coerceArray(combinedRes.releases)) {
           release.registryUrl ??= combinedRes.registryUrl;
         }
-        commonRegistryUrl = false;
+        singleRegistry = false;
       }
 
       const releases = coerceArray(res.releases);
       for (const release of releases) {
+        // We have more than one registry, so we need to move the registryUrl
+        // from the package level to the release level before merging
         release.registryUrl ??= res.registryUrl;
       }
 
       combinedRes.releases.push(...releases);
+
+      // Merge the tags from the two results
+      let tags = combinedRes.tags;
+      if (tags) {
+        console.warn('combinedRes.tags exists');
+        if (res.tags) {
+          console.warn('res.tags exists');
+          // Both results had tags, so we need to compare them
+          ['release', 'latest'].forEach((tag) => {
+            const existingTag = combinedRes?.tags?.[tag];
+            const newTag = res.tags?.[tag];
+            if (is.string(newTag) && mavenVersioning.isVersion(newTag)) {
+              if (
+                is.string(existingTag) &&
+                mavenVersioning.isVersion(existingTag)
+              ) {
+                // We need to compare them
+                if (mavenVersioning.isGreaterThan(newTag, existingTag)) {
+                  // New tag is greater than the existing one
+                  tags![tag] = newTag;
+                }
+              } else {
+                // Existing tag was not present or not a version
+                // so we can just use the new one
+                tags![tag] = newTag;
+              }
+            }
+          });
+        }
+      } else {
+        console.warn('No combinedRes.tags');
+        // Existing results had no tags, so we can just use the new ones
+        tags = res.tags;
+      }
       combinedRes = { ...res, ...combinedRes };
+      if (tags) {
+        combinedRes.tags = tags;
+      }
+      // Remove the registryUrl from the package level when more than one registry
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
