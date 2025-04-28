@@ -1,17 +1,18 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
 import type { Pr } from '../../../../modules/platform';
-import { platform } from '../../../../modules/platform';
 import * as gitlab from '../../../../modules/platform/gitlab';
 import { codeOwnersForPr } from './code-owners';
-import { fs, git } from '~test/util';
+import { fs, git, platform } from '~test/util';
 
 vi.mock('../../../../util/fs');
-vi.mock('../../../../modules/platform');
 
 describe('workers/repository/update/pr/code-owners', () => {
   beforeAll(() => {
-    platform.extractRulesFromCodeOwnersFile = undefined;
+    Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
+      value: undefined,
+      writable: true,
+    });
   });
 
   describe('codeOwnersForPr', () => {
@@ -178,8 +179,10 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     describe('supports Gitlab sections', () => {
       beforeAll(() => {
-        platform.extractRulesFromCodeOwnersFile =
-          gitlab.extractRulesFromCodeOwnersFile;
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
+          value: gitlab.extractRulesFromCodeOwnersFile,
+          writable: true,
+        });
       });
 
       it('returns section code owner', async () => {
@@ -272,8 +275,11 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
-    it.failing('does not parse Gitea regex as Gitlab sections', async () => {
-      platform.extractRulesFromCodeOwnersFile = undefined;
+    it.fails('does not parse Gitea regex as Gitlab sections', async () => {
+      Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
+        value: undefined,
+        writable: true,
+      });
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
           # This is a regex, not a Gitlab section, so 002-file.md should be assigned to @reviewer-03
