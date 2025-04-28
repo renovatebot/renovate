@@ -189,16 +189,17 @@ describe('modules/manager/maven/update', () => {
         .childNamed('image')!
         .childNamed('buildpacks')!
         .childrenNamed('buildpack');
-      let buildpackWithDigest = '';
+      const buildpackWithDigest = [];
       for (const buildpack of buildpacks) {
         const buildpackValue = buildpack.val;
         if (buildpackValue.includes('docker://')) {
-          buildpackWithDigest = buildpackValue;
+          buildpackWithDigest.push(buildpackValue.trim());
         }
       }
-      expect(buildpackWithDigest).toEqual(
+      expect(buildpackWithDigest).toEqual([
         'docker://docker.io/paketobuildpacks/python:2.24.3@sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1',
-      );
+        'docker://docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+      ]);
     });
   });
 

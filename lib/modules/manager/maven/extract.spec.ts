@@ -349,12 +349,25 @@ describe('modules/manager/maven/extract', () => {
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+          datasource: 'docker',
+          depName: 'docker.io/paketobuildpacks/ruby',
+          fileReplacePosition: 1795,
+          packageName: 'docker.io/paketobuildpacks/ruby',
+          registryUrls: [],
+          replaceString:
+            'docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentValue: '12.1.0',
           datasource: 'docker',
           depName: 'paketobuildpacks/java',
           packageName: 'paketobuildpacks/java',
           replaceString: 'paketobuildpacks/java:12.1.0',
-          fileReplacePosition: 1849,
+          fileReplacePosition: 2001,
           registryUrls: [],
         },
       ]);
