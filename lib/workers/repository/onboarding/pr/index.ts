@@ -58,7 +58,9 @@ export async function ensureOnboardingPr(
       )
     ) {
       if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving');
+        logger.info(
+          'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
+        );
         return;
       }
       await ensureComment({
