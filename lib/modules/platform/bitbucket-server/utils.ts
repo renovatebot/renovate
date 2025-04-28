@@ -10,8 +10,8 @@ import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
+import type { RestDetailedUser } from './schema';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
-import { RestDetailedUser } from './schema';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
