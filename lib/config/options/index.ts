@@ -516,7 +516,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.9',
+    default: 'ghcr.io/containerbase/sidecar:13.8.17',
     globalOnly: true,
   },
   {
@@ -1460,6 +1460,16 @@ const options: RenovateOptions[] = [
     name: 'replacementVersion',
     description:
       'The version of the new dependency that replaces the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementVersionTemplate',
+    description:
+      'Template field for the version of the new dependency that replaces the old deprecated dependency.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -2441,6 +2451,10 @@ const options: RenovateOptions[] = [
       'pipenv',
       'poetry',
     ],
+    freeChoice: true,
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'hostRules',

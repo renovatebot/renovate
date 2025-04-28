@@ -359,7 +359,8 @@
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
       "https://github.com/FasterXML/jackson-jaxrs-providers",
-      "https://github.com/FasterXML/jackson-module-kotlin"
+      "https://github.com/FasterXML/jackson-module-kotlin",
+      "https://github.com/FasterXML/jackson-module-scala"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
@@ -544,6 +545,7 @@
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
+    "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
     "storybook": "https://github.com/storybookjs/storybook",
     "storybook-react-native": "https://github.com/storybookjs/react-native",
@@ -625,6 +627,7 @@
     "ngrx": "https://github.com/ngrx/",
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
+    "php-enqueue": "https://github.com/php-enqueue/",
     "semantic-release": "https://github.com/semantic-release/",
     "swc": "https://github.com/swc-project/",
     "twig": "https://github.com/twigphp/"
