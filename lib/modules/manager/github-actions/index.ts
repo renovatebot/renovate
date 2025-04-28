@@ -14,6 +14,10 @@ export const defaultConfig = {
     '/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/',
     '/(^|/)action\\.ya?ml$/',
   ],
+  prBodyDefinitions: {
+    Change:
+      '[{{#if displayFrom}}{{{displayFrom}}}{{else}}{{{currentValue}}}{{/if}} -> {{#if displayTo}}{{{displayTo}}}{{else}}{{{newValue}}}{{/if}}]({{#if sourceUrl}}{{{sourceUrl}}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{else}}{{#if depName}}https://github.com/{{replace "/" "%2F" depName}}/compare/{{#if currentDigest}}{{{currentDigestShort}}}{{else}}{{{currentValue}}}{{/if}}...{{#if newDigest}}{{{newDigestShort}}}{{else}}{{{newValue}}}{{/if}}{{/if}}{{/if}})',
+  },
 };
 
 export const supportedDatasources = [
