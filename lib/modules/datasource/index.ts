@@ -201,9 +201,7 @@ async function mergeRegistries(
       // Merge the tags from the two results
       let tags = combinedRes.tags;
       if (tags) {
-        console.warn('combinedRes.tags exists');
         if (res.tags) {
-          console.warn('res.tags exists');
           // Both results had tags, so we need to compare them
           ['release', 'latest'].forEach((tag) => {
             const existingTag = combinedRes?.tags?.[tag];
@@ -227,7 +225,6 @@ async function mergeRegistries(
           });
         }
       } else {
-        console.warn('No combinedRes.tags');
         // Existing results had no tags, so we can just use the new ones
         tags = res.tags;
       }
