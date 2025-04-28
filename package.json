@@ -142,7 +142,7 @@
   },
   "volta": {
     "node": "22.15.0",
-    "pnpm": "10.8.1"
+    "pnpm": "10.9.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.777.0",
@@ -314,7 +314,7 @@
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@vitest/coverage-v8": "3.1.1",
+    "@vitest/coverage-v8": "3.1.2",
     "@vitest/eslint-plugin": "1.1.43",
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
@@ -325,7 +325,7 @@
     "eslint": "9.25.0",
     "eslint-config-prettier": "10.1.2",
     "eslint-formatter-gha": "1.5.2",
-    "eslint-import-resolver-typescript": "4.3.2",
+    "eslint-import-resolver-typescript": "4.3.4",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-promise": "7.2.1",
     "expect-more-jest": "5.5.0",
@@ -336,7 +336,7 @@
     "lint-staged": "15.5.1",
     "markdownlint-cli2": "0.17.2",
     "memfs": "4.17.0",
-    "nock": "14.0.3",
+    "nock": "14.0.4",
     "npm-run-all2": "7.0.2",
     "nyc": "17.1.0",
     "rimraf": "6.0.1",
@@ -350,10 +350,10 @@
     "unified": "9.2.2",
     "vite": "6.3.2",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.1.1",
+    "vitest": "3.1.2",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.9.0",
   "files": [
     "dist",
     "renovate-schema.json"
