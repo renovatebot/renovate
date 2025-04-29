@@ -118,11 +118,11 @@ const commonOptionsWithArguments = [
   '--output-file',
   '--extra',
   '--extra-index-url',
+  '--annotation-style',
 ];
 const pipOptionsWithArguments = [
   '--resolver',
   '--constraint',
-  '--annotation-style',
   ...commonOptionsWithArguments,
 ];
 const uvOptionsWithArguments = [
@@ -147,7 +147,6 @@ export const allowedOptions: Record<CommandType, string[]> = {
     '--generate-hashes',
     '--no-emit-index-url',
     '--strip-extras',
-    '--annotation-style',
     ...allowedCommonOptions,
     ...pipOptionsWithArguments,
   ],
