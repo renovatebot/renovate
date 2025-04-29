@@ -778,7 +778,7 @@ describe('modules/datasource/custom/index', () => {
       };
       const content = JSON.stringify(expected);
       const compressedContent = zlib.gzipSync(content);
-      +
+
       httpMock
         .scope('https://example.com')
         .get('/v1')
@@ -786,7 +786,7 @@ describe('modules/datasource/custom/index', () => {
           'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
         });
-      +
+
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
         packageName: 'myPackage',
