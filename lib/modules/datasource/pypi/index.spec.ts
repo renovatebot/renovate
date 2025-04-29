@@ -1,13 +1,13 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import { PypiDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-const googleAuth = mocked(_googleAuth);
-jest.mock('google-auth-library');
+vi.mock('google-auth-library');
+
+const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const htmlResponse = Fixtures.get('versions-html.html');
@@ -205,8 +205,8 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       const res = await getPkgReleases({
@@ -229,8 +229,8 @@ describe('modules/datasource/pypi/index', () => {
         ],
       };
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getPkgReleases({
@@ -779,8 +779,8 @@ describe('modules/datasource/pypi/index', () => {
       ],
     };
     googleAuth.mockImplementationOnce(
-      jest.fn().mockImplementationOnce(() => ({
-        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      vi.fn().mockImplementationOnce(() => ({
+        getAccessToken: vi.fn().mockResolvedValue('some-token'),
       })),
     );
     expect(

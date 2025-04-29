@@ -1,11 +1,10 @@
 import { lang, query as q } from 'good-enough-parser';
-import { Ctx } from '../context';
-import type { RecordFragment } from '../fragments';
-import { mavenRules } from './maven';
-import { moduleRules } from './module';
-import { ociRules } from './oci';
+import { Ctx } from './context';
+import { extensionTags } from './extension-tags';
+import type { ResultFragment } from './fragments';
+import { rules } from './rules';
 
-const rule = q.alt<Ctx>(moduleRules, mavenRules, ociRules);
+const rule = q.alt<Ctx>(rules, extensionTags);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',
@@ -15,7 +14,7 @@ const query = q.tree<Ctx>({
 
 const starlarkLang = lang.createLang('starlark');
 
-export function parse(input: string): RecordFragment[] {
-  const parsedResult = starlarkLang.query(input, query, new Ctx());
+export function parse(input: string): ResultFragment[] {
+  const parsedResult = starlarkLang.query(input, query, new Ctx(input));
   return parsedResult?.results ?? [];
 }

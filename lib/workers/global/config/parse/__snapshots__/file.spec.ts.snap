@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/global/config/parse/file .getConfig() migrates 1`] = `
+exports[`workers/global/config/parse/file > .getConfig() > migrates 1`] = `
 {
   "rangeStrategy": "bump",
 }

@@ -1,8 +1,8 @@
 import { cleanup, get, init, set } from '.';
 
-jest.mock('./file');
-jest.mock('./redis');
-jest.mock('./sqlite');
+vi.mock('./file');
+vi.mock('./redis');
+vi.mock('./sqlite');
 
 describe('util/cache/package/index', () => {
   beforeEach(() => {

@@ -8,12 +8,6 @@ Support for Gerrit is currently _experimental_, meaning that it _might_ still ha
 
 Renovate stores its metadata in the _commit message footer_.
 
-Previously Renovate stored metadata in Gerrit's _hashtags_.
-To keep backwards compatibility, Renovate still reads metadata from hashtags.
-But Renovate _always_ puts its metadata in the _commit message footer_!
-When the Renovate maintainers mark Gerrit support as stable, the maintainers will remove the "read metadata from hashtags" feature.
-This means changes without metadata in the commit message footer will be "forgotten" by Renovate.
-
 ## Authentication
 
 <figure markdown>

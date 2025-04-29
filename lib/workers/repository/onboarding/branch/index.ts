@@ -160,7 +160,7 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
 
 function invalidateExtractCache(baseBranch: string): void {
   const cache = getCache();
-  cache.scan ||= {};
+  cache.scan ??= {};
 
   if (cache.scan?.[baseBranch]) {
     delete cache.scan[baseBranch];

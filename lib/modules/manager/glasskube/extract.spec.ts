@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { GlasskubePackagesDatasource } from '../../datasource/glasskube-packages';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 const config: ExtractConfig = {};
 const adminConfig: RepoGlobalConfig = { localDir: '' };
@@ -32,7 +32,7 @@ spec:
   url: https://packages.dl.glasskube.dev/packages
 `;
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/glasskube/extract', () => {
   beforeEach(() => {

@@ -3,6 +3,7 @@ import type {
   CustomDatasourceConfig,
 } from '../../config/types';
 import type { ModuleApi } from '../../types';
+import type { Timestamp } from '../../util/timestamp';
 
 export interface GetDigestInputConfig {
   datasource: string;
@@ -50,6 +51,7 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  registryStrategy?: RegistryStrategy;
 }
 
 export interface Release {
@@ -59,7 +61,7 @@ export interface Release {
   gitRef?: string;
   isDeprecated?: boolean;
   isStable?: boolean;
-  releaseTimestamp?: string | null;
+  releaseTimestamp?: Timestamp | null;
   version: string;
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
@@ -91,6 +93,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  bumpedAt?: Timestamp;
 }
 
 export interface PostprocessReleaseConfig {

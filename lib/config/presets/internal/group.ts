@@ -316,9 +316,10 @@ const staticGroups = {
           'k8s.io/cluster-bootstrap**',
           'k8s.io/code-generator**',
           'k8s.io/component-base**',
+          'k8s.io/component-helpers**',
           'k8s.io/controller-manager**',
           'k8s.io/cri-api**',
-          // 'k8s.io/csi-api', has not go.mod set up and does not follow the versioning of other repos
+          // 'k8s.io/csi-api', has no go.mod set up and does not follow the versioning of other repos
           'k8s.io/csi-translation-lib**',
           'k8s.io/kube-aggregator**',
           'k8s.io/kube-controller-manager**',
@@ -346,6 +347,16 @@ const staticGroups = {
       },
     ],
   },
+  micrometer: {
+    description:
+      "Group Micrometer packages together, e.g. 'io.micrometer:micrometer-core'.",
+    packageRules: [
+      {
+        groupName: 'micrometer',
+        matchPackageNames: ['io.micrometer:micrometer-**'],
+      },
+    ],
+  },
   nodeJs: {
     description:
       "Group anything that looks like Node.js together so that it's updated together.",
@@ -357,6 +368,7 @@ const staticGroups = {
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
+          '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
         ],
       },
@@ -435,12 +447,26 @@ const staticGroups = {
       },
     ],
   },
+  puppeteer: {
+    description: 'Group Puppeteer packages together.',
+    packageRules: [
+      {
+        groupName: 'Puppeteer',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['puppeteer', 'puppeteer-core'],
+      },
+    ],
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
       {
         groupName: 'react monorepo',
-        matchPackageNames: ['@types/react', '@types/react-dom'],
+        matchPackageNames: [
+          '@types/react',
+          '@types/react-dom',
+          '@types/react-is',
+        ],
       },
     ],
   },
@@ -467,8 +493,10 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:micrometer',
       'group:phpstan',
       'group:polymer',
+      'group:puppeteer',
       'group:react',
       'group:remark',
       'group:resilience4j',
@@ -781,7 +809,24 @@ const staticGroups = {
       {
         groupName: 'symfony packages',
         groupSlug: 'symfony',
-        matchPackageNames: ['symfony/**'],
+        matchDatasources: ['packagist'],
+        matchPackageNames: [
+          'symfony/*',
+          '!symfony/*contracts',
+          '!symfony/*pack',
+          '!symfony/flex',
+          '!symfony/maker-bundle',
+          '!symfony/monolog-bundle',
+          '!symfony/panther',
+          '!symfony/polyfill*',
+          '!symfony/proxy-manager-bridge',
+          '!symfony/security-guard',
+          '!symfony/stimulus-bundle',
+          '!symfony/templating',
+          '!symfony/thanks',
+          '!symfony/ux*',
+          '!symfony/webpack-encore-bundle',
+        ],
       },
     ],
   },

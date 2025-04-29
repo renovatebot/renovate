@@ -1,4 +1,3 @@
-import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
 import {
   DatasourceCacheStats,
@@ -8,6 +7,7 @@ import {
   PackageCacheStats,
   makeTimingReport,
 } from './stats';
+import { logger } from '~test/util';
 
 describe('util/stats', () => {
   beforeEach(() => {
@@ -51,11 +51,11 @@ describe('util/stats', () => {
 
   describe('LookupStats', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('returns empty report', () => {
@@ -91,7 +91,7 @@ describe('util/stats', () => {
 
     it('wraps a function', async () => {
       const res = await LookupStats.wrap('npm', () => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         return Promise.resolve('foo');
       });
 
@@ -139,7 +139,7 @@ describe('util/stats', () => {
 
   describe('PackageCacheStats', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     it('returns empty report', () => {
@@ -178,7 +178,7 @@ describe('util/stats', () => {
 
     it('wraps get function', async () => {
       const res = await PackageCacheStats.wrapGet(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         return Promise.resolve('foo');
       });
 
@@ -191,7 +191,7 @@ describe('util/stats', () => {
 
     it('wraps set function', async () => {
       await PackageCacheStats.wrapSet(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
         return Promise.resolve();
       });
 

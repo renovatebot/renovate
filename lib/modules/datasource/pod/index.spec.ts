@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import * as rubyVersioning from '../../versioning/ruby';
 import { PodDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const config = {
   versioning: rubyVersioning.id,

@@ -90,3 +90,85 @@ export function coerceString(
 ): string {
   return val ?? def ?? '';
 }
+
+/**
+ * Remove templates from string.
+ *
+ * This is more performant version of this code:
+ *
+ * ```
+ *   content
+ *     .replaceAll(regEx(/{{`.+?`}}/gs), '')
+ *     .replaceAll(regEx(/{{.+?}}/gs), '')
+ *     .replaceAll(regEx(/{%`.+?`%}/gs), '')
+ *     .replaceAll(regEx(/{%.+?%}/gs), '')
+ *     .replaceAll(regEx(/{#.+?#}/gs), '')
+ * ```
+ */
+export function stripTemplates(content: string): string {
+  const result: string[] = [];
+
+  const len = content.length;
+  let idx = 0;
+  let lastPos = 0; // Tracks the start index of the next chunk to push
+  while (idx < len) {
+    if (content[idx] === '{' && idx + 1 < len) {
+      let closing: string | undefined;
+      let skipLength = 0;
+
+      if (content[idx + 1] === '%') {
+        if (idx + 2 < len && content[idx + 2] === '`') {
+          // Handle `{%` ... `%}`
+          closing = '`%}';
+          skipLength = 3;
+        } else {
+          // Handle `{% ... %}`
+          closing = '%}';
+          skipLength = 2;
+        }
+      } else if (content[idx + 1] === '{') {
+        if (idx + 2 < len && content[idx + 2] === '`') {
+          // Handle `{{` ... `}}`
+          closing = '`}}';
+          skipLength = 3;
+        } else {
+          // Handle `{{ ... }}`
+          closing = '}}';
+          skipLength = 2;
+        }
+      } else if (content[idx + 1] === '#') {
+        // Handle `{# ... #}`
+        closing = '#}';
+        skipLength = 2;
+      }
+
+      if (closing) {
+        const end = content.indexOf(closing, idx + skipLength);
+        if (end !== -1) {
+          // Append the content before the pattern
+          if (idx > lastPos) {
+            result.push(content.slice(lastPos, idx));
+          }
+
+          // Move `idx` past the closing tag
+          idx = end + closing.length;
+          lastPos = idx; // Update the last position
+          continue;
+        }
+      }
+    }
+
+    idx++;
+  }
+
+  // Append any remaining content after the last pattern
+  if (lastPos < len) {
+    result.push(content.slice(lastPos));
+  }
+
+  return result.join('');
+}
+
+export function capitalize(input: string): string {
+  return input[0].toUpperCase() + input.slice(1);
+}

@@ -1,15 +1,14 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _changelog from '../changelog';
 import { branchifyUpgrades } from './branchify';
 import * as _flatten from './flatten';
+import type { RenovateConfig } from '~test/util';
 
-const flattenUpdates = mocked(_flatten).flattenUpdates;
-const embedChangelogs = mocked(_changelog).embedChangelogs;
+const flattenUpdates = vi.mocked(_flatten).flattenUpdates;
+const embedChangelogs = vi.mocked(_changelog).embedChangelogs;
 
-jest.mock('./flatten');
-jest.mock('../changelog');
+vi.mock('./flatten');
+vi.mock('../changelog');
 
 let config: RenovateConfig;
 

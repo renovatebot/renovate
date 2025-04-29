@@ -2,15 +2,12 @@
 
 This page explains what we (the Renovate maintainers) recommend you do to update your dependencies.
 
-We'll cover starting a new project, updating a year-old project, and updating a project with five year old dependencies.
-We explain why you should update often, and how to nudge your team to update their dependencies.
-
 ## General recommendations
 
 In general, you should:
 
 - Run Renovate on _every_ repository
-- Use the `config:best-practices` preset instead of `config:recommended`
+- Use the `config:best-practices` preset, instead of the `config:recommended` preset
 - Use the Dependency Dashboard issue (it's on by default)
 - Update your dependencies often
 - Read the changelogs for the updates
@@ -45,17 +42,17 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
 
 ```json
 {
-  "configMigration": true,
   "extends": [
     "config:recommended",
     "docker:pinDigests",
     "helpers:pinGitHubActionDigests",
+    ":configMigration",
     ":pinDevDependencies"
   ]
 }
 ```
 
-The next sections explain each part of the preset.
+The next sections explain what each part of the preset does.
 
 #### Config migration
 
@@ -88,7 +85,7 @@ Pinning your development dependencies means you, and your team, are using the sa
 This makes the developer-tool side of your builds reproducible.
 Debugging faulty versions of your tools is easier, because you can use Git to check out different versions of the tools.
 
-### Why updating often is easier, faster and safer
+## Why updating often is easier, faster and safer
 
 You may think that updating takes too much time.
 But updating regularly actually _saves_ you time, because:
@@ -98,14 +95,14 @@ But updating regularly actually _saves_ you time, because:
 - You'll be ready for CVE patches
 - You'll look for ways to automate the updates
 
-#### Regular updates tend to be small
+### Regular updates tend to be small
 
 Firstly, when you update regularly updates tend to be small.
 The update's changelogs are small, quick to read, and easy to understand.
 You probably only need to make changes in a few places (if at all) to merge the PR and get going again.
 Because you're reading the changelogs regularly, you'll get a feel for the direction of the upstream project.
 
-#### Applying `major` updates is easier
+### Applying `major` updates is easier
 
 Secondly, when you're current with upstream, `major` updates are easier.
 This is because you already:
@@ -114,18 +111,26 @@ This is because you already:
 - use the latest names for features/variables
 - read the previous changelogs
 
-#### You'll be ready for CVE patches
+### You'll be ready for CVE patches
 
 Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
 If you're current, you can review and merge Renovate's PR quickly.
 
 When you're behind on updates, you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
-#### You'll look for ways to automate the updates
+### You'll look for ways to automate the updates
 
 Finally, when you're updating often, you'll start looking for ways to automate the updates.
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
 Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](./presets-default.md#automergepatch) preset.
+
+#### Wait two weeks before automerging third-party dependencies
+
+If you `automerge` third-party dependencies, we recommend setting [`minimumReleaseAge`](./configuration-options.md#minimumreleaseage) to `"14 days"`.
+By waiting two weeks before automerging the dependencies, you give the upstream registries time to pull malicious dependencies, before Renovate merges them.
+If you want a third-party dependency update _now_, instead of waiting two weeks, you can request the update from the Dependency Dashboard.
+
+#### Use GitHub Pull Request Merge Queues
 
 You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
 Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
@@ -276,5 +281,5 @@ Martin Fowler has two great resources:
 - The free page [Patterns for Managing Source Code Branches](https://martinfowler.com/articles/branching-patterns.html) to help you decide what Git branch pattern to use
 - The book [Refactoring, Improving the Design of Existing Code](https://martinfowler.com/books/refactoring.html) to help your developers gradually refactor to clean, modular and easy to read code
 
-The `git bisect` command can help you find out which commit introduced a bug, or other behavior change.
+The `git bisect` command can help you find the commit that introduced a bug, or other behavior change.
 Read the [ProGit 2 book, section on binary search](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git#_binary_search) to learn more.

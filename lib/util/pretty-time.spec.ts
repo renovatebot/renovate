@@ -47,14 +47,14 @@ describe('util/pretty-time', () => {
   });
 
   describe('satisfiesDateRange()', () => {
-    const t0 = DateTime.fromISO('2023-07-07T12:00:00');
+    const t0 = DateTime.fromISO('2023-07-07T12:00:00Z');
 
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(t0.toMillis());
+      vi.setSystemTime(t0.toMillis());
     });
 
     it.each`

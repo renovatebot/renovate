@@ -49,8 +49,22 @@ Here is another example, this time for handling Bitnami Docker images, which use
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackageNamees": ["bitnami/**", "docker.io/bitnami/**"],
+      "matchPackageNames": ["bitnami/**", "docker.io/bitnami/**"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$"
+    }
+  ]
+}
+```
+
+Here is another example, this time for handling `ghcr.io/linuxserver/tautulli` Docker images, which use `major` and `build` indicators with string prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/linuxserver/tautulli"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-ls(?<build>.+)$"
     }
   ]
 }
@@ -63,7 +77,7 @@ Here is another example, this time for handling `ghcr.io/linuxserver/openssh-ser
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackageNamees": ["ghcr.io/linuxserver/openssh-server"],
+      "matchPackageNames": ["ghcr.io/linuxserver/openssh-server"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)_p(?<patch>\\d+)-r(?<build>\\d)-ls(?<revision>.+)$"
     }
   ]

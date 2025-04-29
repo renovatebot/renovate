@@ -1,16 +1,14 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { MavenDatasource } from '../../../modules/datasource/maven';
 import type { PackageFile } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { Result } from '../../../util/result';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
+import type { RenovateConfig } from '~test/util';
 
-const lookupUpdates = mocked(lookup).lookupUpdates;
+const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 
-jest.mock('./lookup');
+vi.mock('./lookup');
 
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
@@ -59,21 +57,18 @@ describe('workers/repository/process/fetch', () => {
                 depName: 'abcd',
                 packageName: 'abcd',
                 skipReason: 'ignored',
-                skipStage: 'lookup',
                 updates: [],
               },
               {
                 depName: 'foo',
                 packageName: 'foo',
                 skipReason: 'disabled',
-                skipStage: 'lookup',
                 updates: [],
               },
               {
                 depName: 'skipped',
                 packageName: 'skipped',
                 skipReason: 'some-reason',
-                skipStage: 'lookup',
                 updates: [],
               },
             ],
@@ -201,7 +196,7 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValueOnce(Result.err(new Error('some error')));
+      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
@@ -218,7 +213,7 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValueOnce(Result.err(new Error('some error')));
+      lookupUpdates.mockRejectedValueOnce(new Error('some error'));
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),

@@ -11,6 +11,7 @@ import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
 import { prFieldsFilter, prInfo, prStates } from './utils';
 
 export class BitbucketPrCache {
+  private items: Pr[] = [];
   private cache: BitbucketPrCacheData;
 
   private constructor(
@@ -41,6 +42,7 @@ export class BitbucketPrCache {
     }
     repoCache.platform.bitbucket.pullRequestsCache = pullRequestCache;
     this.cache = pullRequestCache;
+    this.updateItems();
   }
 
   private static async init(
@@ -62,7 +64,7 @@ export class BitbucketPrCache {
   }
 
   private getPrs(): Pr[] {
-    return Object.values(this.cache.items);
+    return this.items;
   }
 
   static async getPrs(
@@ -74,19 +76,20 @@ export class BitbucketPrCache {
     return prCache.getPrs();
   }
 
-  private addPr(pr: Pr): void {
+  private setPr(pr: Pr): void {
     logger.debug(`Adding PR #${pr.number} to the PR cache`);
     this.cache.items[pr.number] = pr;
+    this.updateItems();
   }
 
-  static async addPr(
+  static async setPr(
     http: BitbucketHttp,
     repo: string,
     author: string | null,
     item: Pr,
   ): Promise<void> {
     const prCache = await BitbucketPrCache.init(http, repo, author);
-    prCache.addPr(item);
+    prCache.setPr(item);
   }
 
   private reconcile(rawItems: PrResponse[]): void {
@@ -144,7 +147,7 @@ export class BitbucketPrCache {
       pagelen: 50,
       cacheProvider: repoCacheProvider,
     };
-    const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
+    const res = await http.getJsonUnchecked<PagedResult<PrResponse>>(url, opts);
 
     const items = res.body.values;
     logger.debug(`Fetched ${items.length} PRs to sync with cache`);
@@ -161,6 +164,16 @@ export class BitbucketPrCache {
       },
       `PR cache sync finished`,
     );
+
+    this.updateItems();
     return this;
+  }
+
+  /**
+   * Ensure the pr cache starts with the most recent PRs.
+   * JavaScript ensures that the cache is sorted by PR number.
+   */
+  private updateItems(): void {
+    this.items = Object.values(this.cache.items).reverse();
   }
 }

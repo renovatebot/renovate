@@ -51,13 +51,20 @@ steps:
       workingFile: .npmrc
 
   - bash: |
+      add-apt-repository ppa:git-core/ppa
+      apt update && apt install git -y
+    displayName: 'Install latest version of Git'
+
+  - bash: |
       git config --global user.email 'bot@renovateapp.com'
       git config --global user.name 'Renovate Bot'
       npx --userconfig .npmrc renovate
     env:
       RENOVATE_PLATFORM: azure
       RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_CONFIG_FILE: $(Build.SourcesDirectory)/renovate_bot_config.json
       RENOVATE_TOKEN: $(System.AccessToken)
+      LOG_LEVEL: debug
 ```
 
 ### Create a .npmrc file
@@ -91,6 +98,42 @@ module.exports = {
 
 For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
+### Using Azure DevOps internal API for pipeline tasks versions
+
+<!-- prettier-ignore -->
+!!! info
+    Renovate now uses the set of APIs that Azure provides to query the azure-pipelines tasks versions directly from the instance. Read [pull request 32966](https://github.com/renovatebot/renovate/pull/32966) and [discussion 24820](https://github.com/renovatebot/renovate/discussions/24820) for more background information on this change.
+
+To let Renovate use the Azure DevOps internal API, you must set these variables in your config:
+
+- `platform` = `azure`
+- `endpoint` = `$(System.CollectionUri)`, this is an [Azure predefined variable](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml)
+- `hostRules.hostType` = `azure-pipelines-tasks`
+
+```json title="Example config file in JSON format"
+  "platform": "azure",
+  "endpoint": "https://dev.azure.com/ORG_NAME",
+  "azure-pipelines": {
+    "enabled": true
+  },
+  "repositories": ["PROJECT_NAME/REPO_NAME"],
+  "prHourlyLimit": 0,
+  "baseBranches": ["main"],
+  "hostRules": [
+    {
+      "matchHost": "https://dev.azure.com/",
+      "hostType": "azure-pipelines-tasks"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["azure-pipelines-tasks"],
+      "extractVersion": "^(?<version>\\d+)"
+    }
+  ]
+}
+```
+
 ### Yarn users
 
 To do a successful `yarn install` you need to match the URL of the registry fully.
@@ -108,7 +151,7 @@ module.exports = {
     },
     {
       matchHost: 'github.com',
-      token: process.env.GITHUB_COM_TOKEN,
+      token: process.env.RENOVATE_GITHUB_COM_TOKEN,
     },
   ],
   repositories: ['YOUR-PROJECT/YOUR-REPO'],

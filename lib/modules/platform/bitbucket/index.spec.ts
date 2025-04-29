@@ -1,12 +1,12 @@
-import * as httpMock from '../../../../test/http-mock';
-import type { logger as _logger } from '../../../logger';
-import type * as _git from '../../../util/git';
+import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
-import type { Platform, PlatformResult, RepoParams } from '../types';
+import type { PlatformResult, RepoParams } from '../types';
 import type { PrTask } from './schema';
+import * as bitbucket from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -21,28 +21,16 @@ const pr = {
 };
 
 describe('modules/platform/bitbucket/index', () => {
-  let bitbucket: Platform;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
-  let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
-  let memCache: typeof import('../../../util/cache/memory');
-
-  beforeEach(async () => {
-    // reset module
-    jest.resetModules();
-    memCache = await import('../../../util/cache/memory');
-    hostRules = jest.requireMock('../../../util/host-rules');
-    bitbucket = await import('.');
-    logger = (await import('../../../logger')).logger as any;
-    git = jest.requireMock('../../../util/git');
+  beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({
       username: 'abc',
       password: '123',
     });
+
+    bitbucket.resetPlatform();
 
     setBaseUrl(baseUrl);
     memCache.init();
@@ -84,7 +72,7 @@ describe('modules/platform/bitbucket/index', () => {
         username: 'abc',
         password: '123',
       });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
@@ -122,7 +110,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/user')
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         `Bitbucket: missing 'account' scope for password`,
       );
     });
@@ -483,7 +471,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('getBranchStatusCheck 1', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', null)).toBeNull();
+      expect(await bitbucket.getBranchStatusCheck('master', '')).toBeNull();
     });
 
     it('getBranchStatusCheck 2', async () => {
@@ -1302,7 +1290,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+      ).rejects.toThrow('Response code 401 (Unauthorized)');
     });
 
     it('removes reviewer if they are also the author of the pr', async () => {
@@ -1396,7 +1384,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
@@ -1435,7 +1423,7 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('lists PR tasks and resolves the unresolved tasks', async () => {
@@ -1668,7 +1656,12 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, { reviewers: [reviewer] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       await expect(
         bitbucket.updatePr({
           number: 5,
@@ -1736,7 +1729,12 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'inactive',
         })
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       await expect(
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
@@ -1779,7 +1777,12 @@ describe('modules/platform/bitbucket/index', () => {
         )
         .reply(200)
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200);
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
 
       await expect(
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
@@ -1815,7 +1818,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
+      ).rejects.toThrow('Response code 401 (Unauthorized)');
     });
 
     it('rethrows exception when PR update error due to unknown reviewers error', async () => {
@@ -1865,7 +1868,7 @@ describe('modules/platform/bitbucket/index', () => {
         });
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
+      ).rejects.toThrow('Response code 400 (Bad Request)');
     });
 
     it('throws an error on failure to get current list of reviewers', async () => {
@@ -1884,9 +1887,14 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, { values: [pr] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200)
+        .reply(200, { id: 5 })
         .post('/2.0/repositories/some/repo/pullrequests/5/decline')
-        .reply(200);
+        .reply(200)
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
 
       expect(
         await bitbucket.updatePr({
@@ -1895,6 +1903,113 @@ describe('modules/platform/bitbucket/index', () => {
           state: 'closed',
         }),
       ).toBeUndefined();
+    });
+  });
+
+  describe('maintains pr cache integrity at runtime', () => {
+    it('pr cache gets updated after a pr is created', async () => {
+      const projectReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+      const repoReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'repository',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
+
+      const scope = httpMock.scope(baseUrl);
+      scope.get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      await initRepoMock(undefined, null, scope);
+      scope
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [
+            {
+              id: 1,
+              author: { uuid: '12345' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-b' } },
+              state: 'OPEN',
+            },
+          ],
+        })
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [projectReviewer, repoReviewer],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 });
+
+      await bitbucket.getPrList(); // cache is now initialized
+
+      await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+      });
+
+      const newPrList = await bitbucket.getPrList();
+      expect(newPrList).toHaveLength(2);
+    });
+
+    it('pr cache gets updated after a pr is updated', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
+      const scope = httpMock.scope(baseUrl);
+      scope.get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      await initRepoMock(undefined, null, scope);
+      scope
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              author: { uuid: '12345' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-b' } },
+              state: 'OPEN',
+              title: 'title',
+            },
+          ],
+        })
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { id: 5, title: 'newTitle' });
+
+      const oldPrList = await bitbucket.getPrList(); // cache is now initialized
+      expect(oldPrList.find((pr) => pr.title === 'title')).toBeDefined();
+      await bitbucket.updatePr({
+        number: 5,
+        prTitle: 'newTitle',
+        prBody: 'body',
+        targetBranch: 'new_base',
+      });
+
+      const newPrList = await bitbucket.getPrList();
+      expect(newPrList.find((pr) => pr.title === 'newTitle')).toBeDefined();
     });
   });
 

@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { GalaxyCollectionDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const communityKubernetesBase = Fixtures.get('community_kubernetes_base.json');
 const communityKubernetesVersions = Fixtures.get(
@@ -119,7 +119,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       ).toBeNull();
     });
 
-    it('returns null for null packageName ', async () => {
+    it('returns null for null packageName', async () => {
       expect(
         await getPkgReleases({
           datasource,

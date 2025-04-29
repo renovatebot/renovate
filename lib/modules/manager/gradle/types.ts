@@ -68,9 +68,21 @@ export interface RichVersion {
 export type GradleVersionPointerTarget = string | RichVersion;
 export type GradleVersionCatalogVersion = string | VersionPointer | RichVersion;
 
+export type ContentDescriptorMatcher = 'simple' | 'regex' | 'subgroup';
+
+export interface ContentDescriptorSpec {
+  mode: 'include' | 'exclude';
+  matcher: ContentDescriptorMatcher;
+  groupId: string;
+  artifactId?: string;
+  version?: string;
+}
+
 export interface PackageRegistry {
   registryUrl: string;
+  registryType: 'regular' | 'exclusive';
   scope: 'dep' | 'plugin';
+  content?: ContentDescriptorSpec[];
 }
 
 export interface Ctx {
@@ -86,6 +98,7 @@ export interface Ctx {
   varTokens: lexer.Token[];
   tmpKotlinImportStore: lexer.Token[][];
   tmpNestingDepth: lexer.Token[];
+  tmpRegistryContent: ContentDescriptorSpec[];
   tmpTokenStore: Record<string, lexer.Token[]>;
   tokenMap: Record<string, lexer.Token[]>;
 }

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubygemsDatasource } from '../../datasource/rubygems';
@@ -35,7 +36,7 @@ export async function extractPackageFile(
   async function processGroupBlock(
     line: string,
     repositoryUrl?: string,
-    trimGroupLine: boolean = false,
+    trimGroupLine = false,
   ): Promise<void> {
     const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
     if (groupMatch) {
@@ -170,7 +171,7 @@ export async function extractPackageFile(
           const gitUrl = gitRefsMatch.gitUrl;
           dep.packageName = gitUrl;
 
-          if (gitUrl.startsWith('https://')) {
+          if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
         } else if (gitRefsMatch.repoName) {

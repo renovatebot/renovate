@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
@@ -141,6 +141,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
 
   const dep: PackageDependency = {
     depName,
+    packageName: depName,
     currentValue,
     currentDigest,
   };
@@ -167,7 +168,10 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>,
 ): PackageDependency {
-  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
+  if (
+    !is.string(currentFrom) ||
+    !is.nonEmptyStringAndNotWhitespace(currentFrom)
+  ) {
     return {
       skipReason: 'invalid-value',
     };
@@ -175,25 +179,27 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    const escapedName = escapeRegExp(name);
-    const groups = regEx(`(?<prefix>${escapedName})/(?<depName>.+)`).exec(
-      currentFrom,
-    )?.groups;
-    if (groups) {
+    if (currentFrom.startsWith(`${name}/`)) {
+      const depName = currentFrom.substring(name.length + 1);
       const dep = {
-        ...getDep(`${value}/${groups.depName}`),
+        ...getDep(`${value}/${depName}`, false),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      // retain depName, not sure if condition is necessary
+      if (dep.depName?.startsWith(value)) {
+        dep.packageName = dep.depName;
+        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
+      }
+      if (specifyReplaceString) {
+        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+      }
       return dep;
     }
   }
 
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    if (!dep.replaceString) {
-      dep.replaceString = currentFrom;
-    }
+    dep.replaceString ??= currentFrom;
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
@@ -204,7 +210,6 @@ export function getDep(
     const specialPrefixes = ['amd64', 'arm64', 'library'];
     for (const prefix of specialPrefixes) {
       if (dep.depName.startsWith(`${prefix}/`)) {
-        dep.packageName = dep.depName;
         dep.depName = dep.depName.replace(`${prefix}/`, '');
         if (specifyReplaceString) {
           dep.autoReplaceStringTemplate =
@@ -229,7 +234,6 @@ export function getDep(
   if (dep.depName && quayRegex.test(dep.depName)) {
     const depName = dep.depName.replace(quayRegex, 'quay.io');
     if (depName !== dep.depName) {
-      dep.packageName = dep.depName;
       dep.depName = depName;
       dep.autoReplaceStringTemplate =
         '{{packageName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
@@ -254,7 +258,7 @@ export function extractPackageFile(
   let lookForEscapeChar = true;
   let lookForSyntaxDirective = true;
 
-  const lineFeed = sanitizedContent.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
     const lineNumberInstrStart = lineNumber;
@@ -323,10 +327,7 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        argMatchValue.charAt(0) === '"' &&
-        argMatchValue.charAt(argMatchValue.length - 1) === '"'
-      ) {
+      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 
@@ -464,9 +465,7 @@ export function extractPackageFile(
     return null;
   }
   for (const d of deps) {
-    if (!d.depType) {
-      d.depType = 'stage';
-    }
+    d.depType ??= 'stage';
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };

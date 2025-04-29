@@ -25,7 +25,11 @@ import {
   NUGET_CENTRAL_FILE,
   getDependentPackageFiles,
 } from './package-tree';
-import { getConfiguredRegistries, getDefaultRegistries } from './util';
+import {
+  findGlobalJson,
+  getConfiguredRegistries,
+  getDefaultRegistries,
+} from './util';
 
 async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
@@ -55,16 +59,16 @@ async function runDotnetRestore(
     packageFileName,
   );
 
+  const dotnetVersion =
+    config.constraints?.dotnet ??
+    (await findGlobalJson(packageFileName))?.sdk?.version;
   const execOptions: ExecOptions = {
     docker: {},
-    userConfiguredEnv: config.env,
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
     },
-    toolConstraints: [
-      { toolName: 'dotnet', constraint: config.constraints?.dotnet },
-    ],
+    toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
   const cmds = [
@@ -182,7 +186,7 @@ export async function updateArtifacts({
         artifactError: {
           lockFile: lockFileNames.join(', '),
           // error is written to stdout
-          stderr: err.stdout || err.message,
+          stderr: err.stdout ?? err.message,
         },
       },
     ];

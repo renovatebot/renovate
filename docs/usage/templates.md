@@ -130,7 +130,7 @@ Splits a string into an array of substrings.
 
 This example splits a package name by `-` and gets the second part:
 `{{ lookup (split packageName '-') 1 }}`
-An input of `foo-bar-test` therefor would return `bar`.
+An input of `foo-bar-test` therefore would return `bar`.
 
 ### stringToPrettyJSON
 

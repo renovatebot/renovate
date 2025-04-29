@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
@@ -18,6 +16,7 @@ import {
   getIssue,
   getOrgLabels,
   getPR,
+  getPRByBranch,
   getRepo,
   getRepoContents,
   getRepoLabels,
@@ -46,6 +45,8 @@ import type {
   RepoContents,
   User,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { logger, partial } from '~test/util';
 
 describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
@@ -420,6 +421,62 @@ describe('modules/platform/gitea/gitea-helper', () => {
     });
   });
 
+  describe('getPRByBranch', () => {
+    it('should call /api/v1/repos/[repo]/pulls/[base]/[head] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(200, mockPR);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toEqual(mockPR);
+    });
+
+    it('should return null if pr not found', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(404);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should log error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(410);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          err: expect.any(Object),
+        },
+        'Error while fetching PR',
+      );
+    });
+  });
+
   describe('addReviewers', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint', async () => {
       httpMock
@@ -685,37 +742,41 @@ describe('modules/platform/gitea/gitea-helper', () => {
     });
 
     it('should properly determine worst commit status', async () => {
-      const statuses: {
-        status: CommitStatusType;
-        created_at: string;
+      const statuses: (Pick<CommitStatus, 'id' | 'status' | 'created_at'> & {
         expected: CommitStatusType;
-      }[] = [
+      })[] = [
         {
+          id: 122,
           status: 'unknown',
           created_at: '2020-03-25T01:00:00Z',
           expected: 'unknown',
         },
         {
+          id: 124,
           status: 'pending',
           created_at: '2020-03-25T03:00:00Z',
           expected: 'pending',
         },
         {
+          id: 125,
           status: 'warning',
           created_at: '2020-03-25T04:00:00Z',
           expected: 'warning',
         },
         {
+          id: 126,
           status: 'failure',
           created_at: '2020-03-25T05:00:00Z',
           expected: 'failure',
         },
         {
+          id: 123,
           status: 'success',
           created_at: '2020-03-25T02:00:00Z',
           expected: 'failure',
         },
         {
+          id: 127,
           status: 'success',
           created_at: '2020-03-25T06:00:00Z',
           expected: 'success',
@@ -726,13 +787,13 @@ describe('modules/platform/gitea/gitea-helper', () => {
         { ...mockCommitStatus, status: 'unknown' },
       ];
 
-      for (const statusElem of statuses) {
-        const { status, expected } = statusElem;
+      for (const { id, status, expected, created_at } of statuses) {
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
+          id,
           status,
-          created_at: statusElem.created_at,
+          created_at,
         });
         httpMock
           .scope(baseUrl)

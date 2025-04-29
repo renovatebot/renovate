@@ -91,7 +91,7 @@ export class DenoDatasource extends Datasource {
       versions,
       async (version) => {
         const cacheRelease = releasesCache[version];
-        // istanbul ignore if
+        /* v8 ignore next 3: hard to test */
         if (cacheRelease) {
           return cacheRelease;
         }
@@ -102,8 +102,8 @@ export class DenoDatasource extends Datasource {
           url,
           DenoAPIModuleVersionResponse.catch(({ error: err }) => {
             logger.warn(
-              { err },
-              `Deno: failed to get version details for ${version}`,
+              { err, version },
+              'Deno: failed to get version details',
             );
             return { version };
           }),

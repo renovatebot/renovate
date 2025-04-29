@@ -1,10 +1,8 @@
-import { expect } from '@jest/globals';
 import type {
   Migration,
   MigrationConstructor,
 } from '../lib/config/migrations/types';
 import type { RenovateConfig } from '../lib/config/types';
-import { MigrationsService } from './../lib/config/migrations/migrations-service';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -20,17 +18,21 @@ declare global {
 }
 
 expect.extend({
-  toMigrate(
+  async toMigrate(
     CustomMigration: MigrationConstructor,
     originalConfig: RenovateConfig,
     expectedConfig: RenovateConfig,
-    isMigrated: boolean = true,
+    isMigrated = true,
   ) {
+    // async load to avoid circular dependency
+    const { MigrationsService } = await import(
+      './../lib/config/migrations/migrations-service.js'
+    );
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(
         original: RenovateConfig,
         migrated: RenovateConfig,
-      ): ReadonlyArray<Migration> {
+      ): readonly Migration[] {
         return [new CustomMigration(original, migrated)];
       }
     }

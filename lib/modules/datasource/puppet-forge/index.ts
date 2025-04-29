@@ -1,3 +1,4 @@
+import { asTimestamp } from '../../../util/timestamp';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { PUPPET_FORGE } from './common';
@@ -28,7 +29,7 @@ export class PuppetForgeDatasource extends Datasource {
     let module: PuppetModule;
 
     try {
-      const response = await this.http.getJson<PuppetModule>(url);
+      const response = await this.http.getJsonUnchecked<PuppetModule>(url);
       module = response.body;
     } catch (err) {
       this.handleGenericErrors(err);
@@ -37,7 +38,7 @@ export class PuppetForgeDatasource extends Datasource {
     const releases: Release[] = module?.releases?.map((release) => ({
       version: release.version,
       downloadUrl: release.file_uri,
-      releaseTimestamp: release.created_at,
+      releaseTimestamp: asTimestamp(release.created_at),
       registryUrl,
     }));
 

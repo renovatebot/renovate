@@ -119,8 +119,7 @@ const charactersToEscape = regEx(/[^A-Za-z0-9\-_.]/);
 
 function escapeName(name: string): string {
   let escapedName = '';
-  for (let i = 0; i < name.length; i++) {
-    const char = name[i];
+  for (const char of name) {
     if (char.match(charactersToEscape)) {
       escapedName += `__x${char
         .codePointAt(0)!

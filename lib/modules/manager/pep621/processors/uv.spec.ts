@@ -1,12 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import {
-  fs,
-  hostRules,
-  mocked,
-  mockedFunction,
-} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -18,13 +11,15 @@ import { PypiDatasource } from '../../../datasource/pypi';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { UvProcessor } from './uv';
+import { mockExecAll } from '~test/exec-util';
+import { fs, hostRules } from '~test/util';
 
-jest.mock('google-auth-library');
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('google-auth-library');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
-const googleAuth = mocked(_googleAuth);
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const googleAuth = vi.mocked(_googleAuth);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -227,6 +222,48 @@ describe('modules/manager/pep621/processors/uv', () => {
         depName: 'dep4',
         registryUrls: ['https://baz.com/simple', 'https://pypi.org/pypi/'],
         packageName: 'dep4',
+      },
+    ]);
+  });
+
+  it('index with optional name', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          index: [
+            {
+              url: 'https://foo.com/simple',
+              default: true,
+              explicit: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep2',
       },
     ]);
   });
@@ -480,8 +517,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -535,6 +572,12 @@ describe('modules/manager/pep621/processors/uv', () => {
           datasource: PypiDatasource.id,
           registryUrls: ['https://pinned.com/simple'],
         },
+        {
+          packageName: 'dep7',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://unnamed.com/simple'],
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -556,6 +599,11 @@ describe('modules/manager/pep621/processors/uv', () => {
                   default: false,
                   explicit: true,
                 },
+                {
+                  url: 'https://unnamed.com/simple',
+                  default: false,
+                  explicit: true,
+                },
               ],
             },
           },
@@ -572,7 +620,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6 --upgrade-package dep7',
           options: {
             env: {
               GIT_CONFIG_COUNT: '6',
@@ -611,8 +659,8 @@ describe('modules/manager/pep621/processors/uv', () => {
         password: 'pass',
       });
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -710,8 +758,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       googleAuth.mockImplementation(
-        jest.fn().mockImplementation(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       fs.getSiblingFileName.mockReturnValueOnce('uv.lock');
@@ -787,7 +835,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },

@@ -96,7 +96,7 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo(${repository}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${gitUrl})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -160,9 +160,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(prConfig.number);
-  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -195,9 +192,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(pr._number);
-  }
   return getPr(pr._number);
 }
 
