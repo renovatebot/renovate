@@ -1,5 +1,5 @@
 import type { AllConfig } from '../../../config/types';
-import { PackageCacheStats } from '../../stats';
+import { PackageCacheStats, RepeatingPackageCacheKeyLogger } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import { getCombinedKey } from './key';
@@ -19,7 +19,9 @@ export async function get<T = any>(
 
   const combinedKey = getCombinedKey(namespace, key);
   let p = memCache.get(combinedKey);
-  if (!p) {
+  if (p) {
+    RepeatingPackageCacheKeyLogger.write(namespace, key);
+  } else {
     p = PackageCacheStats.wrapGet(() =>
       cacheProxy!.get<number[]>(namespace, key),
     );
