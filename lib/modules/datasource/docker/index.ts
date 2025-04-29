@@ -713,12 +713,12 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-tags',
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
-    cacheable: (registryHost: string, dockerRepository: string) => {
+    cacheable: (registryHost: string, _dockerRepository: string) => {
       const { password, token } = hostRules.find({
         hostType: dockerDatasourceId,
         url: registryHost,
       });
-      const secret = password ?? token;
+      const secret = token ?? password;
       return !secret;
     },
   })
