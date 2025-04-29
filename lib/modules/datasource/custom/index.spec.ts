@@ -5,6 +5,7 @@ import { CustomDatasource } from './index';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 import { fs } from '~test/util';
+import zlib from 'zlib';
 
 vi.mock('../../../util/fs');
 
@@ -764,6 +765,38 @@ describe('modules/datasource/custom/index', () => {
         },
       });
 
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for gzip compressed API directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'v1.0.0',
+          },
+        ],
+      };
+      const content = JSON.stringify(expected);
+      const compressedContent = zlib.gzipSync(content);
+      +
+      httpMock
+        .scope('https://example.com')
+        .get('/v1')
+        .reply(200, compressedContent, {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
+        });
+      +
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            compressionType: 'gzip',
+          },
+        },
+      });
       expect(result).toEqual(expected);
     });
   });

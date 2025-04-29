@@ -6,6 +6,8 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
+import zlib from 'zlib';
+import fs from 'fs';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
@@ -24,7 +26,7 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
+    const { defaultRegistryUrlTemplate, transformTemplates, format, compressionType } = config;
 
     const fetcher = fetchers[format];
     const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
@@ -36,7 +38,16 @@ export class CustomDatasource extends Datasource {
           defaultRegistryUrlTemplate.replace('file://', ''),
         );
       } else {
-        data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
+        switch (compressionType) {
+          case 'gzip':
+            data = await fetcher.fetch(this.http, await this.extractGZip(defaultRegistryUrlTemplate));
+            break;
+          case 'none':
+          default:
+            // default to no compression
+            data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
+            break;
+        }
       }
     } catch (e) {
       this.handleHttpErrors(e);
@@ -93,5 +104,30 @@ export class CustomDatasource extends Datasource {
   ): Promise<string | null> {
     // Return null here to support setting a digest: value can be provided digest in getReleases
     return Promise.resolve(null);
+  }
+
+  private extractGZip(filePath: string): Promise<string> {
+    const outputFilePath = filePath.replace(/\.gz$/, ''); // Remove .gz extension
+
+    // Create a read stream for the gzip file
+    const fileContents = fs.createReadStream(filePath);
+
+    // Create a write stream for the extracted file
+    const writeStream = fs.createWriteStream(outputFilePath);
+
+    // Use zlib to decompress the gzip file
+    const unzip = zlib.createGunzip();
+
+    return new Promise<string>((resolve, reject) => {
+      fileContents
+        .pipe(unzip)
+        .pipe(writeStream)
+        .on('finish', () => {
+          resolve(outputFilePath); // Return the path of the extracted file
+        })
+        .on('error', (err: Error) => {
+          reject(err); // Handle errors
+        });
+    });
   }
 }

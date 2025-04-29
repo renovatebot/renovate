@@ -323,6 +323,7 @@ export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
   format?: CustomDatasourceFormats;
   transformTemplates?: string[];
+  compressionType?: 'none' | 'gzip';
 }
 
 export interface AllConfig
