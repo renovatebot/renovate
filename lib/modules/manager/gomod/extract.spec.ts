@@ -124,6 +124,17 @@ describe('modules/manager/gomod/extract', () => {
       });
     });
 
+    // https://go.dev/doc/modules/gomod-ref#exclude
+    it('ignores exclude directives from single line', () => {
+      const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        exclude github.com/pravesht/gocql v0.0.0
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toBeNull();
+    });
+
     it('extracts the toolchain directive', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
@@ -295,6 +306,35 @@ describe('modules/manager/gomod/extract', () => {
   it('extracts tool directives with no matching dependencies', () => {
     const goMod = codeBlock`
         tool github.com/foo/bar/sub/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toBeNull();
+  });
+
+  /**
+   *
+   * https://go.dev/doc/modules/gomod-ref#retract
+   * https://go.dev/doc/modules/gomod-ref#godebug
+   */
+  it('ignores directives unrelated to dependencies', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        godebug asynctimerchan=0
+
+        godebug (
+          default=go1.21
+          panicnil=1
+        )
+
+        retract v3.0.0
+
+        retract [v2.0.0,v2.0.5] // Build broken on some platforms.
+
+        retract (
+            v1.0.0 // Published accidentally.
+            v1.0.1 // Contains retractions only.
+        )
       `;
     const res = extractPackageFile(goMod);
     expect(res).toBeNull();
