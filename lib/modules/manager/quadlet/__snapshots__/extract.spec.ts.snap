@@ -1,0 +1,61 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/manager/quadlet/extract > extractPackageFile() > extracts from quadlet container file 1`] = `
+{
+  "deps": [
+    {
+      "currentDigest": undefined,
+      "currentValue": "1.21",
+      "datasource": "docker",
+      "depName": "docker.io/alpine",
+      "depType": "image",
+      "packageName": "docker.io/alpine",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/quadlet/extract > extractPackageFile() > extracts from quadlet container unit 1`] = `
+{
+  "deps": [
+    {
+      "currentDigest": undefined,
+      "currentValue": "1.21",
+      "datasource": "docker",
+      "depName": "docker.io/alpine",
+      "depType": "image",
+      "packageName": "docker.io/alpine",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/quadlet/extract > extractPackageFile() > extracts from quadlet image unit 1`] = `
+{
+  "deps": [
+    {
+      "currentDigest": undefined,
+      "currentValue": "1.21",
+      "datasource": "docker",
+      "depName": "docker.io/alpine",
+      "depType": "image",
+      "packageName": "docker.io/alpine",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/quadlet/extract > extractPackageFile() > extracts from quadlet volume unit 1`] = `
+{
+  "deps": [
+    {
+      "currentDigest": undefined,
+      "currentValue": "1.21",
+      "datasource": "docker",
+      "depName": "docker.io/alpine",
+      "depType": "image",
+      "packageName": "docker.io/alpine",
+    },
+  ],
+}
+`;
