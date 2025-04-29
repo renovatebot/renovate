@@ -122,6 +122,7 @@ const commonOptionsWithArguments = [
 const pipOptionsWithArguments = [
   '--resolver',
   '--constraint',
+  '--annotation-style',
   ...commonOptionsWithArguments,
 ];
 const uvOptionsWithArguments = [
@@ -146,6 +147,7 @@ export const allowedOptions: Record<CommandType, string[]> = {
     '--generate-hashes',
     '--no-emit-index-url',
     '--strip-extras',
+    '--annotation-style',
     ...allowedCommonOptions,
     ...pipOptionsWithArguments,
   ],
@@ -235,6 +237,11 @@ export function extractHeaderCommand(
         }
         result.indexUrl = value;
         // TODO: add to secrets? next PR
+      } else if (option === '--annotation-style') {
+        if (result.annotationStyle) {
+          throw new Error('Cannot use multiple --annotation-style options');
+        }
+        result.annotationStyle = value;
       } else {
         logger.debug({ option }, `pip-compile: option not handled`);
       }

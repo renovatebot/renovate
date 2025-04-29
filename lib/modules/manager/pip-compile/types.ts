@@ -21,6 +21,7 @@ export interface PipCompileArgs {
   emitIndexUrl?: boolean;
   outputFile?: string;
   sourceFiles: string[]; // positional arguments
+  annotationStyle?: string;
 }
 
 export interface DependencyBetweenFiles {

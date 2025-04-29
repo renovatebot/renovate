@@ -695,6 +695,37 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
+    it('handles --annotation-style option', () => {
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(
+            getCommandInHeader('pip-compile --annotation-style=line requirements.in'),
+            'subdir/requirements.txt',
+          ),
+        ),
+      ).toBe('pip-compile --annotation-style=line requirements.in');
+    });
+
+    it('rejects multiple --annotation-style options', () => {
+      expect(() =>
+        extractHeaderCommand(
+          getCommandInHeader('pip-compile --annotation-style=line --annotation-style=split requirements.in'),
+          'subdir/requirements.txt',
+        ),
+      ).toThrow('Cannot use multiple --annotation-style options');
+    });
+
+    it('works with other valid options', () => {
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(
+            getCommandInHeader('pip-compile --annotation-style=line --generate-hashes --strip-extras requirements.in'),
+            'subdir/requirements.txt',
+          ),
+        ),
+      ).toBe('pip-compile --annotation-style=line --generate-hashes --strip-extras requirements.in');
+    });
+
     it('throws on unknown arguments', () => {
       expect(() =>
         constructPipCompileCmd(
