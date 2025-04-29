@@ -79,7 +79,7 @@ export class MigrationsService {
     'yarnMaintenancePrTitle',
     'raiseDeprecationWarnings',
     'allowPostUpgradeCommandTemplating',
-    'allowCommandTemplating'
+    'allowCommandTemplating',
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
