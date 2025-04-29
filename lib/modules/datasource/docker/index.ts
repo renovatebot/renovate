@@ -4,6 +4,7 @@ import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import * as hostRules from '../../../util/host-rules';
 import { HttpError } from '../../../util/http';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
@@ -712,6 +713,14 @@ export class DockerDatasource extends Datasource {
     namespace: 'datasource-docker-tags',
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
+    cacheable: (registryHost: string, dockerRepository: string) => {
+      const { password, token } = hostRules.find({
+        hostType: dockerDatasourceId,
+        url: registryHost,
+      });
+      const secret = password ?? token;
+      return !secret;
+    },
   })
   async getTags(
     registryHost: string,
