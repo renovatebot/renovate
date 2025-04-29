@@ -125,11 +125,20 @@ describe('modules/manager/gomod/extract', () => {
     });
 
     // https://go.dev/doc/modules/gomod-ref#exclude
-    it('ignores exclude directives from single line', () => {
+    it('ignores exclude directives from multi-line and single line', () => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
 
         exclude github.com/pravesht/gocql v0.0.0
+
+        exclude (
+              k8s.io/client-go v0.21.9
+              )
+        exclude (
+          k8s.io/cloud-provider v0.17.3
+          k8s.io/cluster-bootstrap v0.17.3 // indirect
+          k8s.io/code-generator v0.17.3
+        )
       `;
       const res = extractPackageFile(goMod);
       expect(res).toBeNull();
