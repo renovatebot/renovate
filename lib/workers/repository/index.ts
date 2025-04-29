@@ -26,6 +26,7 @@ import {
   LookupStats,
   ObsoleteCacheHitLogger,
   PackageCacheStats,
+  RepeatingPackageCacheKeyLogger,
 } from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
@@ -149,6 +150,7 @@ export async function renovateRepository(
   HttpCacheStats.report();
   LookupStats.report();
   ObsoleteCacheHitLogger.report();
+  RepeatingPackageCacheKeyLogger.report();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   resetRepositoryLogLevelRemaps();

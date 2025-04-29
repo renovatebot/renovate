@@ -20,7 +20,7 @@ export async function get<T = any>(
   const combinedKey = getCombinedKey(namespace, key);
   let p = memCache.get(combinedKey);
   if (p) {
-    RepeatingPackageCacheKeyLogger.write(namespace, key);
+    RepeatingPackageCacheKeyLogger.track(namespace, key);
   } else {
     p = PackageCacheStats.wrapGet(() =>
       cacheProxy!.get<number[]>(namespace, key),

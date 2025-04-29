@@ -548,20 +548,19 @@ export class ObsoleteCacheHitLogger {
       'Cache fallback URLs',
     );
   }
-}
-/* v8 ignore stop: temporary code */
+} /* v8 ignore stop: temporary code */
 
 /* v8 ignore start: temporary code */
 export class RepeatingPackageCacheKeyLogger {
-  static getData(): Record<PackageCacheNamespace, Record<string, number>> {
+  static getData(): Record<string, Record<string, number>> {
     return (
-      memCache.get<Record<PackageCacheNamespace, Record<string, number>>>(
+      memCache.get<Record<string, Record<string, number>>>(
         'repeating-package-cache-keys',
       ) ?? {}
     );
   }
 
-  static write(namespace: PackageCacheNamespace, key: string): void {
+  static track(namespace: PackageCacheNamespace, key: string): void {
     const data = this.getData();
     data[namespace] ??= {};
     data[namespace][key] = (data[namespace][key] ?? 0) + 1;
@@ -573,13 +572,10 @@ export class RepeatingPackageCacheKeyLogger {
     const report: Record<string, Record<string, number>> = {};
 
     for (const [namespace, keys] of Object.entries(data)) {
-      const repeatingKeys = Object.entries(keys)
-        .filter(([_, count]) => count > 1)
-        .sort((a, b) => b[1] - a[1]);
+      const repeatingKeys = Object.entries(keys).sort((a, b) => b[1] - a[1]);
 
       if (repeatingKeys.length > 0) {
-        report[namespace as PackageCacheNamespace] =
-          Object.fromEntries(repeatingKeys);
+        report[namespace] = Object.fromEntries(repeatingKeys);
       }
     }
 
