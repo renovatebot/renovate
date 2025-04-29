@@ -2268,7 +2268,7 @@ Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
-1. Set the self-hosted config option [`allowScripts`](../self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
 1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## ignoreTests
