@@ -1,3 +1,4 @@
+import zlib from 'zlib';
 import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
 import { logger } from '../../../logger';
@@ -5,7 +6,6 @@ import { CustomDatasource } from './index';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 import { fs } from '~test/util';
-import zlib from 'zlib';
 
 vi.mock('../../../util/fs');
 

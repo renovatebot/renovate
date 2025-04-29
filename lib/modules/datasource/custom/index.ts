@@ -1,3 +1,5 @@
+import zlib from 'zlib';
+import fs from 'fs';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { getExpression } from '../../../util/jsonata';
@@ -6,8 +8,6 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
-import zlib from 'zlib';
-import fs from 'fs';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
