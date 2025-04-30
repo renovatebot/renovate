@@ -691,6 +691,24 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with Dockerfile image replacement with digest and no version change', async () => {
+      const dockerfile = 'FROM example.org/ubuntu:16.04@q1w2e3r4t5z6u7i8o9p0\n';
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'example.org/ubuntu';
+      upgrade.replaceString = 'example.org/ubuntu:16.04@q1w2e3r4t5z6u7i8o9p0';
+      upgrade.currentValue = '16.04';
+      upgrade.currentDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.currentDigestShort = 'q1w2e3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'test.com/ubuntu';
+      upgrade.newValue = '16.04';
+      upgrade.newDigest = 'q1w2e3r4t5z6u7i8o9p0';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(dockerfile.replace(upgrade.depName, upgrade.newName));
+    });
+
     it('updates with droneci image replacement', async () => {
       const yml = codeBlock`
         steps:
