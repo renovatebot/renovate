@@ -782,8 +782,9 @@ describe('modules/datasource/custom/index', () => {
       httpMock
         .scope('https://example.com')
         .get('/index.html')
-        .reply(200, content, {
-          compressedContent,
+        .reply(200, compressedContent, {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
         });
 
       const result = await getPkgReleases({
