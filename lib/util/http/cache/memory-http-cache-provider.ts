@@ -9,12 +9,17 @@ export class MemoryHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   protected override load(url: string): Promise<unknown> {
-    const data = memCache.get<HttpCache>(this.cacheKey(url));
+    const data = memCache.get<string | undefined>(this.cacheKey(url));
+    if (typeof data === 'string') {
+      const parsed = JSON.parse(data);
+      return Promise.resolve(parsed);
+    }
     return Promise.resolve(data);
   }
 
   protected override persist(url: string, data: HttpCache): Promise<void> {
-    memCache.set(this.cacheKey(url), data);
+    const stringData = JSON.stringify(data);
+    memCache.set(this.cacheKey(url), stringData);
     return Promise.resolve();
   }
 
