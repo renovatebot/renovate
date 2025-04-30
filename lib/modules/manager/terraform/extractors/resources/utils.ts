@@ -35,15 +35,12 @@ const KubernetesJobTemplateInit = [
   'image',
 ];
 
-export const generic_image_data_source: GenericImageResourceDef[] = [
-  { type: 'docker_registry_image', path: ['name'] },
-];
-
 export const generic_image_resource: GenericImageResourceDef[] = [
   // Docker provider: https://registry.terraform.io/providers/kreuzwerker/docker
   { type: 'docker_image', path: ['name'] },
   { type: 'docker_container', path: ['image'] },
   { type: 'docker_service', path: ['task_spec', 'container_spec', 'image'] },
+  { type: 'docker_registry_image', path: ['name'] },
   // Kubernetes provider: https://registry.terraform.io/providers/hashicorp/kubernetes
   { type: 'kubernetes_pod', path: KubernetesSpecContainer },
   { type: 'kubernetes_pod', path: KubernetesSpecInitContainer },
