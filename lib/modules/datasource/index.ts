@@ -42,8 +42,6 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-const mavenVersioning = versioning.get('maven');
-
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
@@ -167,6 +165,7 @@ async function mergeRegistries(
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
   let singleRegistry = true;
+  const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -206,20 +205,20 @@ async function mergeRegistries(
           for (const tag of ['release', 'latest']) {
             const existingTag = combinedRes?.tags?.[tag];
             const newTag = res.tags?.[tag];
-            if (is.string(newTag) && mavenVersioning.isVersion(newTag)) {
+            if (is.string(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
                 is.string(existingTag) &&
-                mavenVersioning.isVersion(existingTag)
+                releaseVersioning.isVersion(existingTag)
               ) {
                 // We need to compare them
-                if (mavenVersioning.isGreaterThan(newTag, existingTag)) {
+                if (releaseVersioning.isGreaterThan(newTag, existingTag)) {
                   // New tag is greater than the existing one
-                  tags![tag] = newTag;
+                  tags[tag] = newTag;
                 }
               } else {
                 // Existing tag was not present or not a version
                 // so we can just use the new one
-                tags![tag] = newTag;
+                tags[tag] = newTag;
               }
             }
           }

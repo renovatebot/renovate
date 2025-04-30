@@ -521,7 +521,7 @@ describe('modules/datasource/index', () => {
           // has the same result as reg1 url, to test de-deplication of releases
           'https://reg7.com': () => ({
             releases: [{ version: '1.0.0' }],
-            tags: { latest: '1.2.0', release: '2.1.0' },
+            tags: { latest: '1.2.0.0', release: '2.1.0' },
           }),
         };
 
@@ -589,7 +589,7 @@ describe('modules/datasource/index', () => {
               // { registryUrl: 'https://reg2.com', version: '1.0.0' },
             ],
             tags: {
-              latest: '1.2.0',
+              latest: '1.2.0.0',
               release: '2.1.0',
             },
           });
