@@ -1148,6 +1148,11 @@ Default registries are only used when both:
 Think of `defaultRegistryUrls` as a way to specify the "fallback" registries for a datasource, for use when no `registryUrls` are extracted or configured.
 Compare that to `registryUrls`, which are a way to _override_ registries.
 
+## compressionType
+
+Specify if the datasource file is compressed and its type. Currently only `Gzip` and `none` are supported.
+Default is `none` if not specified.
+
 ## dependencyDashboard
 
 Starting from version `v26.0.0` the "Dependency Dashboard" is enabled by default as part of the commonly-used `config:recommended` preset.
