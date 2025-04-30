@@ -45,6 +45,7 @@ export function massageCustomDatasourceConfig(
     format: customDatasource.format ?? 'json',
     defaultRegistryUrlTemplate: registryUrl,
     transformTemplates: transform,
+    compressionType: customDatasource.compressionType ?? 'none', // Default to 'none' if not provided
   };
 }
 
@@ -60,6 +61,11 @@ export function getCustomConfig(
     logger.debug(
       `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`,
     );
+    return null;
+  }
+
+  if (!customDatasourceName) {
+    logger.debug('Custom datasource name is undefined.');
     return null;
   }
 
