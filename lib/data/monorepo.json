@@ -545,6 +545,7 @@
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
+    "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
     "storybook": "https://github.com/storybookjs/storybook",
     "storybook-react-native": "https://github.com/storybookjs/react-native",
