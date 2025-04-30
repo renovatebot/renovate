@@ -2250,21 +2250,19 @@ By default, Renovate will disable package manager scripts.
 Allowing packager manager scripts is a risk:
 
 - Untrusted or compromised repository users could use package manager scripts to exploit the system where Renovate runs, and
-- Malicious package authors could use scripts to exploit a repository and Renovate system, for example to exfiltrate source code and secrets
+- Malicious package authors could use scripts to exploit a repository and Renovate system, for example to exfiltrate source code and secrets.
 
-<!-- markdownlint-disable MD001 -->
-
-#### No script execution on free Mend-hosted Renovate
+**No script execution on free Mend-hosted Renovate**
 
 The Mend Renovate App does not allow scripts to run.
 We do not plan to let users on free tiers run scripts, because the risk of abuse is too high.
 
-#### Renovate Enterprise Cloud can be configured to run scripts
+**Renovate Enterprise Cloud can be configured to run scripts**
 
 Scripts can be enabled for paying customers on Mend.io hosted apps.
 Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
-#### Allowing scripts if self-hosting Renovate
+**Allowing scripts if self-hosting Renovate**[
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
