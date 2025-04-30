@@ -58,7 +58,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
-import { getExtraCloneOpts } from './utils';
+import { getExtraGitOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -285,7 +285,7 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
-      extraCloneOpts: getExtraCloneOpts(opts),
+      extraGitOptions: getExtraGitOpts(opts),
       cloneSubmodules,
       cloneSubmodulesFilter,
       fullClone: semver.lte(defaults.version, '8.0.0'),

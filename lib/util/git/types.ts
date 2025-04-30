@@ -19,6 +19,7 @@ export interface StorageConfig {
   currentBranch?: string;
   defaultBranch?: string;
   url: string;
+  extraGitOptions?: GitOptions;
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
