@@ -10,7 +10,7 @@ describe('config/validation-helpers/match-base-branches', () => {
       {
         topic: 'Configuration Error',
         message:
-          'packageRules[0]: You must configure baseBranchPatterns inorder to use them inside matchBaseBranches.',
+          'packageRules[0]: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.',
       },
     ]);
   });

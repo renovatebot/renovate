@@ -305,6 +305,8 @@ Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renova
 
 ## baseBranchPatterns
 
+This configuration option was formerly known as `baseBranches`.
+
 By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
 Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:

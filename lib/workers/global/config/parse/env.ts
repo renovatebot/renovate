@@ -44,6 +44,7 @@ const renameKeys = {
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
   allowPostUpgradeCommandTemplating: 'allowCommandTemplating',
   allowedPostUpgradeCommands: 'allowedCommands',
+  baseBranches: 'baseBranchPatterns',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {

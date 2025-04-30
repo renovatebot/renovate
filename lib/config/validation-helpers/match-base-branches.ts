@@ -15,7 +15,7 @@ export function check({
     if (!is.nonEmptyArray(baseBranchPatterns)) {
       warnings.push({
         topic: 'Configuration Error',
-        message: `${currentPath}: You must configure baseBranchPatterns inorder to use them inside matchBaseBranches.`,
+        message: `${currentPath}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.`,
       });
     }
   }
