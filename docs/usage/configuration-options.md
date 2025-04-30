@@ -2262,7 +2262,7 @@ We do not plan to let users on free tiers run scripts, because the risk of abuse
 Scripts can be enabled for paying customers on Mend.io hosted apps.
 Please ask Mend.io sales about "Renovate Enterprise Cloud".
 
-**Allowing scripts if self-hosting Renovate**[
+**Allowing scripts if self-hosting Renovate**
 
 If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
 
