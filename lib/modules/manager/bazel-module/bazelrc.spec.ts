@@ -229,7 +229,11 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         'shared.bazelrc': true,
       });
       expect.assertions(1);
-      await expect(read('.')).rejects.toThrowError();
+      await expect(read('.')).rejects.toEqual(
+        new Error(
+          'Attempted to read a bazelrc multiple times. file: shared.bazelrc',
+        ),
+      );
     });
 
     it('when .bazelrc refers to a non-local file', async () => {
