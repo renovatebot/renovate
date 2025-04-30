@@ -23,8 +23,8 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       return [];
     }
 
-    const resourceTypMap = hclMap.resource || {};
-    const dataTypMap = hclMap.data || {};
+    const resourceTypMap = hclMap.resource ?? {};
+    const dataTypMap = hclMap.data ?? {};
 
     const dependencies = [];
 
