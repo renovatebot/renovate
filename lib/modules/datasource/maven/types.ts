@@ -1,6 +1,11 @@
 import type { Result } from '../../../util/result';
 import type { ReleaseResult } from '../types';
 
+export interface MetadataResults {
+  tags?: Record<string, string>;
+  versions?: string[];
+}
+
 export interface MavenDependency {
   display: string;
   group?: string;

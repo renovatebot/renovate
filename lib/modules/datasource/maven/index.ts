@@ -17,7 +17,7 @@ import type {
   ReleaseResult,
 } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, MetadataResults } from './types';
 import {
   createUrlForDependencyPom,
   downloadMaven,
@@ -42,13 +42,26 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
   );
 }
 
-function extractVersions(metadata: XmlDocument): string[] {
+function extractVersions(metadata: XmlDocument): MetadataResults {
+  const res: MetadataResults = {};
   const versions = metadata.descendantWithPath('versioning.versions');
   const elements = versions?.childrenNamed('version');
   if (!elements) {
-    return [];
+    return res;
   }
-  return elements.map((el) => el.val);
+  res.versions = elements.map((el) => el.val);
+  const latest = metadata.descendantWithPath('versioning.latest');
+  if (latest?.val) {
+    res.tags ??= {};
+    res.tags.latest = latest.val;
+  }
+  const release = metadata.descendantWithPath('versioning.release');
+  if (release?.val) {
+    res.tags ??= {};
+    res.tags.release = release.val;
+  }
+
+  return res;
 }
 
 export const defaultRegistryUrls = [MAVEN_REPO];
@@ -78,12 +91,12 @@ export class MavenDatasource extends Datasource {
   async fetchVersionsFromMetadata(
     dependency: MavenDependency,
     repoUrl: string,
-  ): Promise<string[]> {
+  ): Promise<MetadataResults> {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
     const cacheNamespace = 'datasource-maven:metadata-xml';
-    const cacheKey = `v2:${metadataUrl}`;
-    const cachedVersions = await packageCache.get<string[]>(
+    const cacheKey = `v3:${metadataUrl}`;
+    const cachedVersions = await packageCache.get<MetadataResults>(
       cacheNamespace,
       cacheKey,
     );
@@ -95,7 +108,10 @@ export class MavenDatasource extends Datasource {
     const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
     return metadataXmlResult
       .transform(
-        async ({ isCacheable, data: mavenMetadata }): Promise<string[]> => {
+        async ({
+          isCacheable,
+          data: mavenMetadata,
+        }): Promise<MetadataResults> => {
           const versions = extractVersions(mavenMetadata);
           const cachePrivatePackages = GlobalConfig.get(
             'cachePrivatePackages',
@@ -114,7 +130,7 @@ export class MavenDatasource extends Datasource {
           `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
         );
       })
-      .unwrapOr([]);
+      .unwrapOr({});
   }
 
   async getReleases({
@@ -131,14 +147,11 @@ export class MavenDatasource extends Datasource {
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-    const metadataVersions = await this.fetchVersionsFromMetadata(
-      dependency,
-      repoUrl,
-    );
-    if (!metadataVersions?.length) {
+    const metadata = await this.fetchVersionsFromMetadata(dependency, repoUrl);
+    if (!metadata.versions?.length) {
       return null;
     }
-    const releases = metadataVersions.map((version) => ({ version }));
+    const releases = metadata.versions.map((version) => ({ version }));
 
     logger.debug(
       `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
@@ -159,6 +172,9 @@ export class MavenDatasource extends Datasource {
       ...dependencyInfo,
       releases,
     };
+    if (metadata.tags) {
+      result.tags = metadata.tags;
+    }
 
     if (!this.defaultRegistryUrls.includes(registryUrl)) {
       result.isPrivate = true;

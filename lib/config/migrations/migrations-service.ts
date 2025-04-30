@@ -61,6 +61,8 @@ import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
+    'allowCommandTemplating',
+    'allowPostUpgradeCommandTemplating',
     'deepExtract',
     'gitFs',
     'groupBranchName',
@@ -69,6 +71,7 @@ export class MigrationsService {
     'groupPrTitle',
     'lazyGrouping',
     'maintainYarnLock',
+    'raiseDeprecationWarnings',
     'statusCheckVerify',
     'supportPolicy',
     'transitiveRemediation',
@@ -77,12 +80,10 @@ export class MigrationsService {
     'yarnMaintenanceCommitMessage',
     'yarnMaintenancePrBody',
     'yarnMaintenancePrTitle',
-    'raiseDeprecationWarnings',
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
-    ['allowPostUpgradeCommandTemplating', 'allowCommandTemplating'],
     ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],
