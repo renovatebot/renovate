@@ -154,7 +154,6 @@ async function readFile(
   readFiles.add(file);
   const contents = await fs.readLocalFile(file, 'utf8');
   if (!contents) {
-    logger.error(`Error reading bazelrc file: ${file}`);
     return [];
   }
   const entries = parse(contents);
