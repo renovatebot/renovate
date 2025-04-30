@@ -99,16 +99,14 @@ function createEntry(line: string): BazelrcEntries | undefined {
 export function expandWorkspacePath(
   value: string,
   workspaceDir: string,
-): string {
+): string | undefined {
   if (!value.includes('%workspace%')) {
     return value;
   }
   const absolutePath = upath.resolve(workspaceDir);
   const expandedPath = value.replace('%workspace%', absolutePath);
   if (!fs.isValidLocalPath(expandedPath)) {
-    throw new Error(
-      `Invalid workspace path: ${expandedPath} is outside workspace directory ${workspaceDir}`,
-    );
+    return undefined;
   }
   return expandedPath;
 }
@@ -117,13 +115,21 @@ export function sanitizeOptions(
   options: BazelOption[],
   workspaceDir: string,
 ): BazelOption[] {
-  return options.map((option) => {
-    if (!option.value) {
-      return option;
-    }
-    const expandedPath = expandWorkspacePath(option.value, workspaceDir);
-    return new BazelOption(option.name, expandedPath);
-  });
+  return options
+    .map((option) => {
+      if (!option.value) {
+        return option;
+      }
+      const expandedPath = expandWorkspacePath(option.value, workspaceDir);
+      if (!expandedPath) {
+        logger.debug(
+          `Skipping invalid workspace path: ${option.value} in ${workspaceDir}`,
+        );
+        return undefined;
+      }
+      return new BazelOption(option.name, expandedPath);
+    })
+    .filter(isNotNullOrUndefined);
 }
 
 export function parse(contents: string): BazelrcEntries[] {
@@ -148,6 +154,7 @@ async function readFile(
   readFiles.add(file);
   const contents = await fs.readLocalFile(file, 'utf8');
   if (!contents) {
+    logger.error(`Error reading bazelrc file: ${file}`);
     return [];
   }
   const entries = parse(contents);

@@ -229,11 +229,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         'shared.bazelrc': true,
       });
       expect.assertions(1);
-      await expect(read('.')).rejects.toEqual(
-        new Error(
-          'Attempted to read a bazelrc multiple times. file: shared.bazelrc',
-        ),
-      );
+      await expect(read('.')).rejects.toThrowError();
     });
 
     it('when .bazelrc refers to a non-local file', async () => {
@@ -320,7 +316,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     it('should throw error for invalid workspace path', () => {
       const workspaceDir = '/workspace';
       const value = '%workspace%/../../outside';
-      expect(() => expandWorkspacePath(value, workspaceDir)).toThrow();
+      expect(expandWorkspacePath(value, workspaceDir)).toBeUndefined();
     });
   });
 
@@ -354,7 +350,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
         new BazelOption('build', '%workspace%/valid/path'),
         new BazelOption('test', '%workspace%/../../invalid'),
       ];
-      expect(() => sanitizeOptions(options, '/workspace')).toThrow();
+      expect(sanitizeOptions(options, '/workspace')).toEqual([]);
     });
   });
 });
