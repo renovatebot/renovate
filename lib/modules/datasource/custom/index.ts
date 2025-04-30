@@ -1,5 +1,5 @@
-import zlib from 'zlib';
 import fs from 'fs';
+import zlib from 'zlib';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { getExpression } from '../../../util/jsonata';

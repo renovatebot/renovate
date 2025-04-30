@@ -781,10 +781,9 @@ describe('modules/datasource/custom/index', () => {
 
       httpMock
         .scope('https://example.com')
-        .get('/v1')
-        .reply(200, compressedContent, {
-          'Content-Encoding': 'gzip',
-          'Content-Type': 'application/json',
+        .get('/index.html')
+        .reply(200, content, {
+          compressedContent,
         });
 
       const result = await getPkgReleases({
@@ -792,8 +791,9 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            defaultRegistryUrlTemplate: 'https://example.com/index.html',
             compressionType: 'gzip',
+            format: 'json',
           },
         },
       });
