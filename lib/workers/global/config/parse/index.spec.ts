@@ -1,15 +1,17 @@
 import upath from 'upath';
+import * as _http from '../../../../config/presets/http';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
-import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
 vi.mock('./host-rules-from-env');
+vi.mock('../../../../config/presets/http');
 
 const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
+const http = vi.mocked(_http);
 
 describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -173,10 +175,12 @@ describe('workers/global/config/parse/index', () => {
           dryRun: 'extract', // This should overwrite the one from the globalExtends
         },
       }));
-      httpMock
-        .scope('http://example.com/')
-        .get('/config.json')
-        .reply(200, { repositories: ['g/r1', 'g/r2'], dryRun: 'full' });
+
+      // Mock the remote preset used in globalExtends
+      http.getPreset.mockResolvedValueOnce({
+        repositories: ['g/r1', 'g/r2'],
+        dryRun: 'full',
+      });
 
       const parsedConfig = await configParser.parseConfigs({}, defaultArgv);
 
@@ -190,7 +194,6 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['globalExtends', []]]);
       // `dryRun` from globalExtends should be overwritten
       expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
-      vi.unmock('./__fixtures__/default.js');
     });
 
     it('cli dryRun replaced to full', async () => {
