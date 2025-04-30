@@ -17,48 +17,6 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## allowCommandTemplating
-
-Let's look at an example of configuring packages with existing Angular migrations.
-
-```javascript
-module.exports = {
-  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
-};
-```
-
-In the `renovate.json` file, define the commands and files to be included in the final commit.
-
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["@angular/core"],
-      "postUpgradeTasks": {
-        "commands": [
-          "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ]
-      }
-    }
-  ]
-}
-```
-
-With this configuration, the executable command for `@angular/core` looks like this:
-
-```bash
-npm ci --ignore-scripts
-npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
-```
-
-If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
-
-This configuration option was previously named `allowPostUpgradeCommandTemplating`.
-
 ## allowCustomCrateRegistries
 
 ## allowPlugins
@@ -69,7 +27,7 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
 
-If you are using a template command, the regular expression should match the template itself, not the final resolved value.
+If you are using a template command, the regular expression should match the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:

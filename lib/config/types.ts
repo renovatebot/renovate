@@ -133,7 +133,6 @@ export interface GlobalOnlyConfig {
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
-  allowCommandTemplating?: boolean;
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;

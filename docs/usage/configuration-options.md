@@ -3559,7 +3559,8 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use variable templating in your commands as long as [`allowCommandTemplating`](./self-hosted-configuration.md#allowcommandtemplating) is enabled.
+You can use handlebars templating in these commands.
+They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
 !!! note
