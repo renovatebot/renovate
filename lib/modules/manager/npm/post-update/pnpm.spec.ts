@@ -115,7 +115,35 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+        cmd: 'pnpm update --no-save --recursive some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs install for workspace with --recursive for pnpm v8', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      {
+        ...config,
+        constraints: { pnpm: '^8.0.0' },
+      },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: false,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
