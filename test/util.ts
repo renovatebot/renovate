@@ -1,5 +1,4 @@
 import upath from 'upath';
-import type { MockedFunction } from 'vitest';
 import type { DeepMockProxy } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
@@ -14,28 +13,10 @@ import { regEx } from '../lib/util/regex';
 
 /**
  * Simple wrapper for getting mocked version of a module
- * @param module module which is mocked by `vi.mock`
- * @deprecated Use `vi.mocked` instead
- */
-export const mocked = vi.mocked;
-
-/**
- * Simple wrapper for getting mocked version of a module
  * @param module module which is mocked by `vitest-mock-extended.mockDeep`
  */
 export function mockedExtended<T extends object>(module: T): DeepMockProxy<T> {
   return module as DeepMockProxy<T>;
-}
-
-/**
- * Simple wrapper for getting mocked version of a function
- * @param func function which is mocked by `vi.mock`
- * @deprecated Use `vi.mocked` instead
- */
-export function mockedFunction<T extends (...args: any[]) => any>(
-  func: T,
-): MockedFunction<T> {
-  return func as MockedFunction<T>;
 }
 
 /**

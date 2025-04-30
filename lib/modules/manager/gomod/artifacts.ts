@@ -191,7 +191,7 @@ export async function updateArtifacts({
     }
   }
   const goConstraints =
-    config.constraints?.go ?? (await getGoConstraints(goModFileName));
+    config.constraints?.go ?? getGoConstraints(newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -199,7 +199,6 @@ export async function updateArtifacts({
     const cmd = 'go';
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
-      userConfiguredEnv: config.env,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
         GOPROXY: process.env.GOPROXY,
@@ -208,9 +207,8 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints)
-          ? '-modcacherw'
-          : /* istanbul ignore next: hard to test */ null,
+        /* v8 ignore next -- TODO: add test */
+        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -444,17 +442,37 @@ export async function updateArtifacts({
   }
 }
 
-async function getGoConstraints(
-  goModFileName: string,
-): Promise<string | undefined> {
-  const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
-  if (!content) {
-    return undefined;
+function getGoConstraints(content: string): string | undefined {
+  // prefer toolchain directive when go.mod has one
+  const toolchainMatch = regEx(/^toolchain\s*go(?<gover>\d+\.\d+\.\d+)$/m).exec(
+    content,
+  );
+  const toolchainVer = toolchainMatch?.groups?.gover;
+  if (toolchainVer) {
+    logger.debug(
+      `Using go version ${toolchainVer} found in toolchain directive`,
+    );
+    return toolchainVer;
   }
+
+  // If go.mod doesn't have toolchain directive and has a full go version spec,
+  // for example `go 1.23.6`, pick this version, this doesn't match major.minor version spec.
+  //
+  // This is because when go.mod have same version defined in go directive and toolchain directive,
+  // go will remove toolchain directive from go.mod.
+  //
+  // For example, go will rewrite `go 1.23.5\ntoolchain go1.23.5` to `go 1.23.5` by default,
+  // in this case, the go directive is the toolchain directive.
+  const goFullVersion = regEx(/^go\s*(?<gover>\d+\.\d+\.\d+)$/m).exec(content)
+    ?.groups?.gover;
+  if (goFullVersion) {
+    return goFullVersion;
+  }
+
   const re = regEx(/^go\s*(?<gover>\d+\.\d+)$/m);
   const match = re.exec(content);
   if (!match?.groups?.gover) {
     return undefined;
   }
-  return '^' + match.groups.gover;
+  return `^${match.groups.gover}`;
 }

@@ -1,5 +1,5 @@
 {
-  "count": 3,
+  "count": 4,
   "value": [
     {
       "visibility": [
@@ -570,6 +570,93 @@
         "Default": "5.248.2",
         "Node20_229_2": "5.248.3"
       }
+    },
+    {
+      "runsOn": [
+        "Agent",
+        "DeploymentGroup"
+      ],
+      "id": "5d437bf5-f193-4449-b531-c4c69eebaa48",
+      "name": "gitreleasemanager/open",
+      "version": {
+        "major": 3,
+        "minor": 1,
+        "patch": 11,
+        "isTest": false
+      },
+      "contentsUploaded": true,
+      "iconUrl": "https://dev.azure.com/test_organisation/_apis/distributedtask/tasks/5d437bf5-f193-4449-b531-c4c69eebaa48/3.1.11/icon",
+      "minimumAgentVersion": "3.224.0",
+      "friendlyName": "Open GitReleaseManager Task",
+      "description": "Tool for creating and exporting releases for software applications hosted on GitHub",
+      "category": "Build",
+      "helpMarkDown": "See the [documentation](https://gittools.github.io/GitReleaseManager/docs/) for help",
+      "contributionIdentifier": "gittools.gittools.open-gitreleasemanager-task",
+      "contributionVersion": "3.1.11.25012214",
+      "definitionType": "task",
+      "author": "GitTools Contributors",
+      "demands": [],
+      "groups": [],
+      "inputs": [
+        {
+          "aliases": [],
+          "name": "owner",
+          "label": "The owner of the repository",
+          "defaultValue": "",
+          "required": true,
+          "type": "string",
+          "helpMarkDown": "The owner of the repository"
+        },
+        {
+          "aliases": [],
+          "name": "repository",
+          "label": "The name of the repository",
+          "defaultValue": "",
+          "required": true,
+          "type": "string",
+          "helpMarkDown": "The name of the repository"
+        },
+        {
+          "aliases": [],
+          "name": "token",
+          "label": "The access token to access GitHub with",
+          "defaultValue": "",
+          "required": true,
+          "type": "string",
+          "helpMarkDown": "The access token to access GitHub with"
+        },
+        {
+          "aliases": [],
+          "name": "milestone",
+          "label": "The milestone to use",
+          "defaultValue": "",
+          "required": true,
+          "type": "string",
+          "helpMarkDown": "The milestone to use"
+        },
+        {
+          "aliases": [],
+          "name": "targetDirectory",
+          "label": "The directory on which GitReleaseManager should be executed. Defaults to current directory",
+          "defaultValue": "",
+          "type": "string",
+          "helpMarkDown": "The directory on which GitReleaseManager should be executed. Defaults to current directory"
+        }
+      ],
+      "satisfies": [],
+      "sourceDefinitions": [],
+      "dataSourceBindings": [],
+      "instanceNameFormat": "gitreleasemanager/open",
+      "preJobExecution": {},
+      "execution": {
+        "Node20_1": {
+          "target": "main.mjs",
+          "argumentFormat": "",
+          "workingDirectory": "."
+        }
+      },
+      "postJobExecution": {},
+      "_buildConfigMapping": {}
     }
   ]
 }

@@ -3,16 +3,31 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
-  biomeVersions: {
+  azurePipelinesVersions: {
     customManagers: [
       {
         customType: 'regex',
+        fileMatch: [
+          '(^|/).azuredevops/.+\\.ya?ml$',
+          'azure.*pipelines?.*\\.ya?ml$',
+        ],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+    description:
+      'Update `_VERSION` environment variables in Azure Pipelines files.',
+  },
+  biomeVersions: {
+    customManagers: [
+      {
+        customType: 'jsonata',
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
+        fileFormat: 'json',
         fileMatch: ['(^|/)biome.jsonc?$'],
-        matchStrings: [
-          '"https://biomejs.dev/schemas/(?<currentValue>[^"]+)/schema.json"',
-        ],
+        matchStrings: ['{"currentValue": $split($."$schema",("/"))[-2]}'],
       },
     ],
     description:

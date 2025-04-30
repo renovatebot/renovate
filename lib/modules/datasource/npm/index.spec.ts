@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { NpmDatasource, setNpmrc } from '.';
+import * as httpMock from '~test/http-mock';
 
 const datasource = NpmDatasource.id;
 
@@ -55,10 +55,10 @@ describe('modules/datasource/npm/index', () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .reply(200, npmResponse, { 'Cache-control': 'public, expires=300' });
+      .reply(200, npmResponse, { 'Cache-Control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res?.isPrivate).toBeFalse();
+    expect(res?.isPrivate).toBeUndefined();
   });
 
   it('should parse repo url', async () => {

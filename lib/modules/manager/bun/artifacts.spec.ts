@@ -1,5 +1,4 @@
 import _fs from 'fs-extra';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -11,8 +10,8 @@ import { updateArtifacts } from './artifacts';
 vi.mock('../../../util/exec');
 vi.mock('fs-extra');
 
-const exec = mocked(_exec);
-const fs = mocked(_fs);
+const exec = vi.mocked(_exec);
+const fs = vi.mocked(_fs);
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
@@ -317,7 +316,6 @@ describe('modules/manager/bun/artifacts', () => {
                 toolName: 'bun',
               },
             ],
-            userConfiguredEnv: undefined,
           });
 
           exec.mockClear();

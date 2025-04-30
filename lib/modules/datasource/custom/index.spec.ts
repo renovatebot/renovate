@@ -1,10 +1,10 @@
 import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { fs } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { CustomDatasource } from './index';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

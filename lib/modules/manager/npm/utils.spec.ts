@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { LockFile } from './types';
 import { composeLockFile, parseLockFile } from './utils';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/npm/utils', () => {
   describe('parseLockFile', () => {

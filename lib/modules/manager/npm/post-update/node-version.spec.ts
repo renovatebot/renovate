@@ -1,10 +1,10 @@
-import { fs } from '../../../../../test/util';
 import { Lazy } from '../../../../util/lazy';
 import {
   getNodeConstraint,
   getNodeToolConstraint,
   getNodeUpdate,
 } from './node-version';
+import { fs } from '~test/util';
 
 vi.mock('../../../../util/fs');
 

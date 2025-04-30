@@ -43,7 +43,7 @@ export async function fetchJSONFile(
     }
     url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw${ref}`;
     logger.trace({ url }, `Preset URL`);
-    res = await gitlabApi.get(url);
+    res = await gitlabApi.getText(url);
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;

@@ -1,5 +1,5 @@
-import { logger } from '../../../../../test/util';
 import { hostRulesFromEnv } from './host-rules-from-env';
+import { logger } from '~test/util';
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
   it('supports docker username/password', () => {
@@ -49,6 +49,28 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
         password: 'some-password',
         username: 'some-user',
       },
+    ]);
+  });
+
+  it('support RENOVATE_ prefixed host rules', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_GITHUB__TAGS_GITHUB_COM_TOKEN: 'some-token',
+    };
+
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      { matchHost: 'github.com', token: 'some-token' },
+    ]);
+  });
+
+  it('supports renovate in the env variable', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      PYPI_MY_RENOVATE_HOST_PASSWORD: 'some-password',
+      RENOVATE_DOCKER_MY_RENOVATE_HOST_PASSWORD: 'docker-password',
+    };
+
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
+      { matchHost: 'my.renovate.host', password: 'some-password' },
+      { matchHost: 'my.renovate.host', password: 'docker-password' },
     ]);
   });
 

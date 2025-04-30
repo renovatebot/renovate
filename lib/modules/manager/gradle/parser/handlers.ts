@@ -1,8 +1,8 @@
-import URL from 'node:url';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
+import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
 import type { parseGradle as parseGradleCallback } from '../parser';
 import type {
@@ -15,7 +15,6 @@ import { isDependencyString, parseDependencyString } from '../utils';
 import {
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
-  REGISTRY_URLS,
   findVariable,
   interpolateString,
   loadFromTokenMap,
@@ -337,19 +336,16 @@ function isPluginRegistry(ctx: Ctx): boolean {
   return false;
 }
 
-export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
-  const registryName = loadFromTokenMap(ctx, 'registryUrl')[0].value;
+function isExclusiveRegistry(ctx: Ctx): boolean {
+  if (ctx.tokenMap.registryType) {
+    const registryType = loadFromTokenMap(ctx, 'registryType')[0].value;
+    return registryType === 'exclusiveContent';
+  }
 
-  ctx.registryUrls.push({
-    registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
-    scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
-    content: ctx.tmpRegistryContent,
-  });
-
-  return ctx;
+  return false;
 }
 
-export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
+export function handleRegistryUrl(ctx: Ctx): Ctx {
   let localVariables = ctx.globalVars;
 
   if (ctx.tokenMap.name) {
@@ -373,17 +369,14 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
   );
   if (registryUrl) {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
-    try {
-      const { host, protocol } = URL.parse(registryUrl);
-      if (host && protocol) {
-        ctx.registryUrls.push({
-          registryUrl,
-          scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
-          content: ctx.tmpRegistryContent,
-        });
-      }
-    } catch {
-      // no-op
+    const url = parseUrl(registryUrl);
+    if (url?.host && url.protocol) {
+      ctx.registryUrls.push({
+        registryUrl,
+        registryType: isExclusiveRegistry(ctx) ? 'exclusive' : 'regular',
+        scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+        content: ctx.tmpRegistryContent,
+      });
     }
   }
 

@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
 
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {

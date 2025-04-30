@@ -1,6 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
-import { hostRules } from '../../../test/util';
 import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url';
+import { hostRules } from '~test/util';
 
 vi.mock('../host-rules', () => mockDeep());
 

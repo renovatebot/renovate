@@ -13,6 +13,7 @@ import { parseGitUrl } from '../../../util/git/url';
 import { toSha256 } from '../../../util/hash';
 import * as hostRules from '../../../util/host-rules';
 import type { Http } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type {
   HttpOptions,
   HttpResponse,
@@ -58,6 +59,7 @@ export async function getAuthHeaders(
     const options = {
       throwHttpErrors: false,
       noAuth: true,
+      cacheProvider: memCacheProvider,
     };
     const apiCheckResponse = apiCheckUrl.endsWith('/v2/')
       ? await http.get(apiCheckUrl, options)
@@ -192,6 +194,7 @@ export async function getAuthHeaders(
       `Obtaining docker registry token`,
     );
     opts.noAuth = true;
+    opts.cacheProvider = memCacheProvider;
     const authResponse = (
       await http.getJsonUnchecked<{ token?: string; access_token?: string }>(
         authUrl.href,
@@ -200,7 +203,7 @@ export async function getAuthHeaders(
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
-    // istanbul ignore if
+    /* v8 ignore next 4 -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;
@@ -341,7 +344,7 @@ export function findLatestStable(tags: string[]): string | null {
   return stable;
 }
 
-const chartRepo = regEx(/charts?|helm|helm-charts/i);
+const chartRepo = regEx(/charts?|helm|helm-charts?/i);
 
 function isPossibleChartRepo(url: string): boolean {
   if (detectPlatform(url) === null) {

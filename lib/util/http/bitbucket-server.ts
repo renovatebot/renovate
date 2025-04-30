@@ -1,10 +1,9 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { parseUrl, resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from '.';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
 const MAX_LIMIT = 100;
+const MAX_PAGES = 100;
 
 let baseUrl: string;
 export const setBaseUrl = (url: string): void => {
@@ -14,6 +13,7 @@ export const setBaseUrl = (url: string): void => {
 export interface BitbucketServerHttpOptions extends HttpOptions {
   paginate?: boolean;
   limit?: number;
+  maxPages?: number;
 }
 
 interface PagedResult<T = unknown> {
@@ -21,46 +21,51 @@ interface PagedResult<T = unknown> {
   values: T[];
 }
 
-export class BitbucketServerHttp extends Http<BitbucketServerHttpOptions> {
-  constructor(options?: HttpOptions) {
-    super('bitbucket-server', options);
+export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
   }
 
-  protected override async request<T>(
-    path: string,
-    options?: InternalHttpOptions & BitbucketServerHttpOptions,
+  constructor(type = 'bitbucket-server', options?: BitbucketServerHttpOptions) {
+    super(type, options);
+  }
+
+  protected override async requestJsonUnsafe<T>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<BitbucketServerHttpOptions>,
   ): Promise<HttpResponse<T>> {
-    const opts = { baseUrl, ...options };
-    opts.headers = {
-      ...opts.headers,
-      'X-Atlassian-Token': 'no-check',
-    };
+    const resolvedUrl = this.resolveUrl(options.url, options.httpOptions);
+    const opts = { ...options, url: resolvedUrl };
+    opts.httpOptions ??= {};
+    opts.httpOptions.headers ??= {};
+    opts.httpOptions.headers['X-Atlassian-Token'] = 'no-check';
 
-    const resolvedUrl = parseUrl(resolveBaseUrl(baseUrl, path));
-    if (!resolvedUrl) {
-      logger.error({ path }, 'Bitbucket Server: cannot parse path');
-      throw new Error(`Bitbucket Server: cannot parse path ${path}`);
-    }
-
-    if (opts.paginate) {
-      const limit = opts.limit ?? MAX_LIMIT;
+    const paginate = opts.httpOptions.paginate;
+    if (paginate) {
+      const limit = opts.httpOptions.limit ?? MAX_LIMIT;
       resolvedUrl.searchParams.set('limit', limit.toString());
     }
 
-    const result = await super.request<T | PagedResult<T>>(
-      resolvedUrl.toString(),
+    const result = await super.requestJsonUnsafe<T | PagedResult<T>>(
+      method,
       opts,
     );
 
-    if (opts.paginate && isPagedResult(result.body)) {
+    if (paginate && isPagedResult(result.body)) {
+      if (opts.httpOptions) {
+        delete opts.httpOptions.cacheProvider;
+        opts.httpOptions.memCache = false;
+      }
+
       const collectedValues = [...result.body.values];
       let nextPageStart = result.body.nextPageStart;
 
-      while (nextPageStart) {
+      let maxPages = opts.httpOptions.maxPages ?? MAX_PAGES;
+      while (nextPageStart && --maxPages > 0) {
         resolvedUrl.searchParams.set('start', nextPageStart.toString());
 
-        const nextResult = await super.request<PagedResult<T>>(
-          resolvedUrl.toString(),
+        const nextResult = await super.requestJsonUnsafe<PagedResult<T>>(
+          method,
           opts,
         );
         collectedValues.push(...nextResult.body.values);
