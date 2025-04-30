@@ -101,7 +101,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs lock file updates for workspace with --recursive', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.readLocalFile
+      .mockResolvedValueOnce(`packages:\n  - package-1\n  - package-2`)
+      .mockResolvedValueOnce('package-lock-contents'); // pnpm-workspace.yaml
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
@@ -111,7 +113,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -122,7 +124,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs install for workspace with --recursive for pnpm v8', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.readLocalFile
+      .mockResolvedValueOnce(`packages:\n  - package-1\n  - package-2`)
+      .mockResolvedValueOnce('package-lock-contents'); // pnpm-workspace.yaml
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
     const res = await pnpmHelper.generateLockFile(
       'some-folder',
@@ -139,7 +143,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {

@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { tryParsePnpmWorkspaceYaml } from '../extract/pnpm';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
@@ -31,6 +32,23 @@ function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
     }
   }
   return null;
+}
+
+async function isPnpmWorkspace(
+  pnpmWorkspaceFilePath: string,
+): Promise<boolean> {
+  if (!(await localPathExists(pnpmWorkspaceFilePath))) {
+    return false;
+  }
+  const content = await readLocalFile(pnpmWorkspaceFilePath, 'utf8');
+  if (!content) {
+    return false;
+  }
+  const workspaceContents = tryParsePnpmWorkspaceYaml(content);
+  if (!workspaceContents.success) {
+    return false;
+  }
+  return workspaceContents.data.packages?.length > 0;
 }
 
 export async function generateLockFile(
@@ -82,7 +100,7 @@ export async function generateLockFile(
 
     let args = '--lockfile-only';
 
-    const isWorkspace = await localPathExists(pnpmWorkspaceFilePath);
+    const isWorkspace = await isPnpmWorkspace(pnpmWorkspaceFilePath);
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
