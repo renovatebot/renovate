@@ -613,9 +613,10 @@ For more details, read the [config migration documentation](./config-migration.m
 
 ## configWarningReuseIssue
 
-Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
-However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
-Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+If no existing issue is found, Renovate's default behavior is to create a new Config Warning issue.
+Accordingly, you'll get a new issue each time you have a Config Warning, although never more than one open at a time.
+Configure this option to `true` if you prefer Renovate to reopen any found matching closed issue whenever there is a config warning.
+The downside of this is that you may end up with a very old issue getting "recycled" each time and it will sort older than others.
 
 ## constraints
 
