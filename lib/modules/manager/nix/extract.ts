@@ -82,7 +82,9 @@ export async function extractPackageFile(
       continue;
     }
 
+    // flakeLocked example: { rev: '56a49ffef2908dad1e9a8adef1f18802bc760962', type: 'github' }
     const flakeLocked = flakeInput.locked;
+    // flakeOriginal example: { owner: 'NuschtOS', repo: 'search', type: 'github' }
     const flakeOriginal = flakeInput.original;
 
     // istanbul ignore if: if we are not in a root node then original and locked always exist which cannot be easily expressed in the type
