@@ -1,17 +1,15 @@
 import upath from 'upath';
-import * as _http from '../../../../config/presets/http';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
 vi.mock('./host-rules-from-env');
-vi.mock('../../../../config/presets/http');
 
 const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
-const http = vi.mocked(_http);
 
 describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -169,20 +167,23 @@ describe('workers/global/config/parse/index', () => {
     });
 
     it('resolves global presets', async () => {
-      vi.doMock('../../../../../config.js', () => ({
-        default: {
-          globalExtends: ['http://example.com/config.json', ':pinVersions'],
-          dryRun: 'extract', // This should overwrite the one from the globalExtends
-        },
-      }));
+      // The remote preset defined in globalExtends of the config file
+      httpMock
+        .scope('http://example.com/')
+        .get('/config.json')
+        .reply(200, { repositories: ['g/r1', 'g/r2'], druRun: 'full' });
 
-      // Mock the remote preset used in globalExtends
-      http.getPreset.mockResolvedValueOnce({
-        repositories: ['g/r1', 'g/r2'],
-        dryRun: 'full',
-      });
+      // Replace default config with a config using globalExtends
+      const configPath = upath.join(
+        __dirname,
+        '__fixtures__/config-global-extends.js',
+      );
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_CONFIG_FILE: configPath,
+      };
 
-      const parsedConfig = await configParser.parseConfigs({}, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       // Remote preset in globalExtends should be resolved
       expect(parsedConfig).toContainEntries([
@@ -192,7 +193,7 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['rangeStrategy', 'pin']]);
       // `globalExtends` should be an empty array after merging
       expect(parsedConfig).toContainEntries([['globalExtends', []]]);
-      // `dryRun` from globalExtends should be overwritten
+      // `dryRun` from globalExtends should be overwritten with value defined in config file
       expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
     });
 
