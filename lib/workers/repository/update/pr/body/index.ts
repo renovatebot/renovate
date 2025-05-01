@@ -48,8 +48,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
         `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );
     }
-    if (changelogUrl) {
-      otherLinks.push(`[changelog](${changelogUrl})`);
+    const templatedChangelogUrl = changelogUrl
+      ? template.compile(changelogUrl, upgrade, true)
+      : undefined;
+    if (templatedChangelogUrl) {
+      otherLinks.push(`[changelog](${templatedChangelogUrl})`);
     }
     if (otherLinks.length) {
       depNameLinked += ` (${otherLinks.join(', ')})`;
@@ -64,8 +67,8 @@ function massageUpdateMetadata(config: BranchConfig): void {
         `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );
     }
-    if (changelogUrl) {
-      references.push(`[changelog](${changelogUrl})`);
+    if (templatedChangelogUrl) {
+      references.push(`[changelog](${templatedChangelogUrl})`);
     }
     upgrade.references = references.join(', ');
   });
