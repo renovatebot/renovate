@@ -937,6 +937,14 @@ describe('modules/manager/nix/extract', () => {
           packageName: 'https://github.com/NixOS/nixpkgs',
           versioning: nixpkgsVersioning,
         },
+        {
+          currentDigest: 'b62d2a95c72f',
+          currentValue: 'nixpkgs-unstable',
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          rangeStrategy: 'update-lockfile',
+        },
       ],
     });
   });
