@@ -263,7 +263,7 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
-          prBodyTemplate: 'PR BODY',
+          templateStrings: { prBody: 'PR BODY' },
         },
         {
           debugData: {
@@ -287,7 +287,9 @@ describe('workers/repository/update/pr/body/index', () => {
           baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [],
-          prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
+          templateStrings: {
+            prBody: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
+          },
         },
         {
           rebasingNotice: 'BAR',
@@ -311,7 +313,7 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           upgrades: [],
           baseBranch: 'base',
-          prBodyTemplate: 'PR BODY',
+          templateStrings: { prBody: 'PR BODY' },
         },
         {
           debugData: {
@@ -360,7 +362,7 @@ describe('workers/repository/update/pr/body/index', () => {
           branchName: 'some-branch',
           upgrades: [],
           packageFiles,
-          prBodyTemplate: '{{{warnings}}}',
+          templateStrings: { prBody: '{{{warnings}}}' },
           baseBranch: 'base',
         },
         {

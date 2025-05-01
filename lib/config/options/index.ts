@@ -244,6 +244,23 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'templateStrings',
+    description: 'Custom templates for user-facing strings.',
+    type: 'object',
+    mergeable: true,
+    cli: false,
+    env: false,
+    default: {
+      prBody:
+        '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      prFooter: '',
+      prHeader: '',
+    },
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'secrets',
     description: 'Object which holds secret name/value pairs.',
     type: 'object',
@@ -2169,15 +2186,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     advancedUse: true,
-  },
-  {
-    name: 'prBodyTemplate',
-    description:
-      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
-    type: 'string',
-    default:
-      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
-    cli: false,
   },
   {
     name: 'prTitle',

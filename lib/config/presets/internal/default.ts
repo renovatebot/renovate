@@ -194,8 +194,10 @@ export const presets: Record<string, Preset> = {
   },
   disablePrControls: {
     description: 'Remove the checkbox controls from PRs.',
-    prBodyTemplate:
-      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
+    templateStrings: {
+      prBody:
+        '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
+    },
   },
   disableRateLimiting: {
     description: 'Remove hourly and concurrent rate limits.',

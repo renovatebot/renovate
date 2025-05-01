@@ -3666,19 +3666,6 @@ Use this field to add custom content inside PR bodies, including conditionally.
 }
 ```
 
-## prBodyTemplate
-
-The available sections are:
-
-- `header`
-- `table`
-- `warnings`
-- `notes`
-- `changelogs`
-- `configDescription`
-- `controls`
-- `footer`
-
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs open at any time.
@@ -4191,6 +4178,11 @@ For example:
 ```
 
 The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
+
+## templateStrings
+
+The `templateStrings` object contains user-facing string fields which can be customized via config.
+For details on each field and its use, please see the dedicated [Template Strings](./config/template-strings.md) documentation page.
 
 ## timezone
 

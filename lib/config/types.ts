@@ -313,6 +313,7 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  templateStrings?: Record<string, string>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;

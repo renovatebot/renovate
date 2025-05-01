@@ -68,7 +68,7 @@ export function generatePrBodyFingerprintConfig(
     filteredUpgrades,
     hasReleaseNotes: config.hasReleaseNotes,
     isPin: config.isPin,
-    prBodyTemplate: config.prBodyTemplate,
+    prBodyTemplate: config.templateStrings?.prBody,
     prFooter: config.prFooter,
     prHeader: config.prHeader,
     prTitle: config.prTitle,
