@@ -42,7 +42,6 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
     "python": "3.7",
   },
   "dependencyDashboard": true,
-  "dependencyDashboardTitle": "foo",
   "enabled": true,
   "enabledManagers": [
     "npm",
@@ -214,6 +213,9 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "suppressNotifications": [
     "lockFileErrors",
   ],
+  "templateStrings": {
+    "dashboardTitle": "foo",
+  },
   "travis": {
     "enabled": true,
   },

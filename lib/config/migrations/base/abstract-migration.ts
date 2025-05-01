@@ -29,11 +29,23 @@ export abstract class AbstractMigration implements Migration {
     key: Key,
     value: RenovateConfig[Key],
   ): void {
+    if (!is.string(key)) {
+      return;
+    }
+    let writeLocation = this.migratedConfig;
+    const keySplits = key.split('.');
+    if (keySplits.length === 2) {
+      // Create the parent
+      const parentObject = keySplits.shift();
+      this.migratedConfig[parentObject!] ??= {};
+      writeLocation = this.migratedConfig[parentObject!] as RenovateConfig;
+    }
+    const keyToWrite = keySplits.pop() as string;
     if (
       is.nullOrUndefined(this.originalConfig[key]) &&
-      is.nullOrUndefined(this.migratedConfig[key])
+      is.nullOrUndefined(writeLocation[keyToWrite])
     ) {
-      this.migratedConfig[key] = value;
+      writeLocation[keyToWrite] = value;
     }
   }
 

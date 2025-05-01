@@ -33,9 +33,18 @@ describe('config/migrations/migrations-service', () => {
       expect(
         MigrationsService.isMigrated(originalConfig, migratedConfig),
       ).toBeTrue();
-      expect(migratedConfig).toEqual({
-        [newPropertyName]: 'test',
-      });
+      if (newPropertyName.includes('.')) {
+        const [parent, child] = newPropertyName.split('.');
+        expect(migratedConfig).toEqual({
+          [parent]: {
+            [child]: 'test',
+          },
+        });
+      } else {
+        expect(migratedConfig).toEqual({
+          [newPropertyName]: 'test',
+        });
+      }
     }
   });
 
