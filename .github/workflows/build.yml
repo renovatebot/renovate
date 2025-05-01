@@ -414,7 +414,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
@@ -450,7 +450,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
@@ -560,7 +560,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -652,7 +652,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -698,7 +698,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@c018171e015fd3c91f5572332b30600409925824 # v3.10.25
+        uses: containerbase/internal-tools@77f4534ea093557aab79c9fbdbb1e09e4a00f91d # v3.10.28
         with:
           command: docker-config
 
