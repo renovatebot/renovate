@@ -155,6 +155,28 @@ describe('modules/platform/gerrit/client', () => {
         ]);
       },
     );
+
+    it('sets query.n when limit is provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '5' && !('no-limit' in query))
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', { branchName: 'dependency-xyz', limit: 5 }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query["no-limit"] when limit is not provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query['no-limit'] === 'true')
+        .reply(200, gerritRestResponse([{ _number: 2 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', { branchName: 'dependency-xyz' }),
+      ).resolves.toEqual([{ _number: 2 }]);
+    });
   });
 
   describe('getChange()', () => {
