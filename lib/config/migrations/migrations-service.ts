@@ -102,7 +102,7 @@ export class MigrationsService {
     ['masterIssueAutoclose', 'dependencyDashboardAutoclose'],
     ['masterIssueHeader', 'dependencyDashboardHeader'],
     ['masterIssueFooter', 'dependencyDashboardFooter'],
-    ['masterIssueTitle', 'dependencyDashboardTitle'],
+    ['masterIssueTitle', 'templateStrings.dashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
   ]);

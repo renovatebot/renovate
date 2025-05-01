@@ -1255,10 +1255,6 @@ This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
-## dependencyDashboardTitle
-
-Configure this option if you prefer a different title for the Dependency Dashboard.
-
 ## description
 
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.

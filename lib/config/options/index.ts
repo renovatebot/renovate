@@ -251,6 +251,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     default: {
+      dashboardTitle: 'Title for the Dependency Dashboard issue.',
       prBody:
         '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
       prFooter: '',
@@ -725,12 +726,6 @@ const options: RenovateOptions[] = [
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
     default: false,
-  },
-  {
-    name: 'dependencyDashboardTitle',
-    description: 'Title for the Dependency Dashboard issue.',
-    type: 'string',
-    default: `Dependency Dashboard`,
   },
   {
     name: 'dependencyDashboardHeader',
