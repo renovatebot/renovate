@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
+import { applySecretsToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { logger, setContext } from '../../../../logger';
@@ -107,6 +108,16 @@ export async function parseConfigs(
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
     config.onboardingNoDeps = 'enabled';
+  }
+
+  // do not add these secrets to repoSecrets and,
+  //  do not delete the secrets object after applying on global config as it needs to be re-used for repo config
+  if (is.nonEmptyObject(config.secrets)) {
+    config = applySecretsToConfig(config, undefined, false);
+    // adding these secrets to the globalSecrets set so that they can be redacted from logs
+    for (const secret of Object.values(config.secrets!)) {
+      addSecretForSanitizing(secret, 'global');
+    }
   }
 
   if (is.nonEmptyObject(config.customEnvVariables)) {

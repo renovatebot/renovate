@@ -71,6 +71,8 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('massages upgrades', () => {
+      template.compile.mockImplementation((x) => x);
+
       const upgrade = {
         manager: 'some-manager',
         branchName: 'some-branch',
@@ -169,6 +171,54 @@ describe('workers/repository/update/pr/body/index', () => {
           '[homepage](https://example.com), [source](https://bitbucket.domain.org/projects/foo/repos/bar/browse/baz), [changelog](https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md)',
         homepage: 'https://example.com',
         sourceUrl: 'https://bitbucket.domain.org/projects/foo/repos/bar',
+      });
+    });
+
+    it('templates changelogUrl', () => {
+      template.compile.mockImplementation((x) =>
+        x === '{{ testTemplate }}'
+          ? 'https://raw.githubusercontent.com/some/templated/CHANGELOG.md'
+          : x,
+      );
+
+      const upgrade = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        dependencyUrl: 'https://github.com/foo/bar',
+        sourceUrl: 'https://github.com/foo/bar',
+        sourceDirectory: '/baz',
+        changelogUrl: '{{ testTemplate }}',
+        homepage: 'https://example.com',
+      };
+
+      getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(upgrade).toMatchObject({
+        branchName: 'some-branch',
+        changelogUrl: '{{ testTemplate }}',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/some/templated/CHANGELOG.md))',
+        dependencyUrl: 'https://github.com/foo/bar',
+        homepage: 'https://example.com',
+        references:
+          '[homepage](https://example.com), [source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/some/templated/CHANGELOG.md)',
+        sourceDirectory: '/baz',
+        sourceUrl: 'https://github.com/foo/bar',
       });
     });
 
