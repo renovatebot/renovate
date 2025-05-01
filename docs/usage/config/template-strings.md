@@ -19,6 +19,16 @@ The config is "mergeable", so you only need to include what you want to change a
 
 ## Available fields
 
+### dashboardFooter
+
+Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.
+
+### dashboardHeader
+
+Any text added here will be placed first in the Dependency Dashboard issue body.
+
+### dashboardTitle
+
 ### prBody
 
 This field is used to control which sections are present in Renovate's regular update/pin/etc Pull Requests.

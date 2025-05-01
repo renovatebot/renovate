@@ -251,6 +251,10 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     default: {
+      dashboardFooter:
+        'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+      dashboardHeader:
+        'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
       dashboardTitle: 'Title for the Dependency Dashboard issue.',
       prBody:
         '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
@@ -726,20 +730,6 @@ const options: RenovateOptions[] = [
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
     default: false,
-  },
-  {
-    name: 'dependencyDashboardHeader',
-    description:
-      'Any text added here will be placed first in the Dependency Dashboard issue body.',
-    type: 'string',
-    default:
-      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
-  },
-  {
-    name: 'dependencyDashboardFooter',
-    description:
-      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
-    type: 'string',
   },
   {
     name: 'dependencyDashboardLabels',

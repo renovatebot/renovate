@@ -285,9 +285,9 @@ export async function ensureDependencyDashboard(
   }
   let issueBody = '';
 
-  if (config.dependencyDashboardHeader?.length) {
+  if (config.templateStrings?.dashboardHeader?.length) {
     issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
+      template.compile(config.templateStrings.dashboardHeader, config) + '\n\n';
   }
 
   if (configMigrationRes.result === 'pr-exists') {
@@ -561,10 +561,10 @@ export async function ensureDependencyDashboard(
 
 function getFooter(config: RenovateConfig): string {
   let footer = '';
-  if (config.dependencyDashboardFooter?.length) {
+  if (config.templateStrings?.dashboardFooter?.length) {
     footer +=
       '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
+      template.compile(config.templateStrings.dashboardFooter, config) +
       '\n';
   }
 

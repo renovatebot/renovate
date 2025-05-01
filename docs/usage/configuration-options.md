@@ -1231,10 +1231,6 @@ If you want to approve _specific_ packages, set `dependencyDashboardApproval` to
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
 
-## dependencyDashboardFooter
-
-## dependencyDashboardHeader
-
 ## dependencyDashboardLabels
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.

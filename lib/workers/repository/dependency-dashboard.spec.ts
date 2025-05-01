@@ -397,8 +397,11 @@ describe('workers/repository/dependency-dashboard', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
-      config.dependencyDashboardHeader = 'This is a header';
-      config.dependencyDashboardFooter = 'And this is a footer';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header',
+        dashboardFooter: 'And this is a footer',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -425,10 +428,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -735,10 +739,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -766,10 +771,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -798,10 +804,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -830,10 +837,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
