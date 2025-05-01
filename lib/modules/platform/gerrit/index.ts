@@ -31,6 +31,7 @@ import { client } from './client';
 import { configureScm } from './scm';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
+  MAP_TO_PR_QUERY_OPTIONS,
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
@@ -129,19 +130,27 @@ export async function initRepo({
   return repoConfig;
 }
 
-export async function findPr(
-  findPRConfig: FindPRConfig,
-  refreshCache?: boolean,
-): Promise<Pr | null> {
+export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
   const change = (
-    await client.findChanges(config.repository!, findPRConfig, refreshCache)
+    await client.findChanges(config.repository!, {
+      ...findPRConfig,
+      limit: 1,
+      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+    })
   ).pop();
-  return change ? mapGerritChangeToPr(change) : null;
+  return change
+    ? mapGerritChangeToPr(change, {
+        sourceBranch: findPRConfig.branchName,
+      })
+    : null;
 }
 
-export async function getPr(number: number): Promise<Pr | null> {
+export async function getPr(
+  number: number,
+  refreshCache?: boolean,
+): Promise<Pr | null> {
   try {
-    const change = await client.getChange(number);
+    const change = await client.getChange(number, refreshCache);
     return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -171,41 +180,76 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`,
   );
-  const pr = (
-    await client.findChanges(
-      config.repository!,
-      {
-        branchName: prConfig.sourceBranch,
-        targetBranch: prConfig.targetBranch,
-        state: 'open',
-      },
-      true,
-    )
+  const change = (
+    await client.findChanges(config.repository!, {
+      branchName: prConfig.sourceBranch,
+      targetBranch: prConfig.targetBranch,
+      state: 'open',
+      limit: 1,
+      refreshCache: true,
+      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+    })
   ).pop();
-  if (pr === undefined) {
+  if (change === undefined) {
     throw new Error(
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
     );
   }
+  if (
+    change.created &&
+    new Date(change.created.replace(' ', 'T')).getTime() -
+      new Date().getTime() <
+      5 * 60 * 1000
+  ) {
+    throw new Error(
+      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
+    );
+  }
   await client.addMessageIfNotAlreadyExists(
-    pr._number,
+    change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
+    change.messages,
   );
-  return getPr(pr._number);
+  return mapGerritChangeToPr(change, {
+    sourceBranch: prConfig.sourceBranch,
+    prBody: prConfig.prBody,
+  });
 }
 
-export async function getBranchPr(branchName: string): Promise<Pr | null> {
+export async function getBranchPr(
+  branchName: string,
+  targetBranch?: string,
+): Promise<Pr | null> {
   const change = (
-    await client.findChanges(config.repository!, { branchName, state: 'open' })
+    await client.findChanges(config.repository!, {
+      branchName,
+      state: 'open',
+      targetBranch,
+      limit: 1,
+      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+    })
   ).pop();
-  return change ? mapGerritChangeToPr(change) : null;
+  return change
+    ? mapGerritChangeToPr(change, {
+        sourceBranch: branchName,
+      })
+    : null;
 }
 
-export function getPrList(): Promise<Pr[]> {
-  return client
-    .findChanges(config.repository!, { branchName: '' })
-    .then((res) => res.map((change) => mapGerritChangeToPr(change)));
+export async function refreshPr(number: number): Promise<void> {
+  // refresh cache
+  await getPr(number, true);
+}
+
+export async function getPrList(): Promise<Pr[]> {
+  const changes = await client.findChanges(config.repository!, {
+    branchName: '',
+    queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+  });
+  return changes
+    .map((change) => mapGerritChangeToPr(change))
+    .filter((pr) => pr !== null);
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
@@ -235,29 +279,28 @@ export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  const changes = await client.findChanges(
-    config.repository!,
-    { state: 'open', branchName },
-    true,
-  );
-  if (changes.length > 0) {
-    const allSubmittable =
-      changes.filter((change) => change.submittable === true).length ===
-      changes.length;
-    if (allSubmittable) {
-      return 'green';
-    }
-    const hasProblems =
-      changes.filter((change) => change.problems.length > 0).length > 0;
+  const change = (
+    await client.findChanges(config.repository!, {
+      state: 'open',
+      branchName,
+      limit: 1,
+      refreshCache: true,
+      queryOptions: ['LABELS', 'SUBMITTABLE', 'CHECK'],
+    })
+  ).pop();
+  if (change) {
+    const hasProblems = change.problems && change.problems.length > 0;
     if (hasProblems) {
       return 'red';
     }
-    const hasBlockingLabels =
-      changes.filter((change) =>
-        Object.values(change.labels ?? {}).some((label) => label.blocking),
-      ).length > 0;
+    const hasBlockingLabels = Object.values(change.labels ?? {}).some(
+      (label) => label.blocking,
+    );
     if (hasBlockingLabels) {
       return 'red';
+    }
+    if (change.submittable) {
+      return 'green';
     }
   }
   return 'yellow';
@@ -273,23 +316,25 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string,
 ): Promise<BranchStatus | null> {
-  const label = config.labels[context];
-  if (label) {
+  const labelConfig = config.labels[context];
+  if (labelConfig) {
     const change = (
-      await client.findChanges(
-        config.repository!,
-        { branchName, state: 'open' },
-        true,
-      )
+      await client.findChanges(config.repository!, {
+        branchName,
+        state: 'open',
+        limit: 1,
+        refreshCache: true,
+        queryOptions: ['LABELS'],
+      })
     ).pop();
     if (change) {
-      const labelRes = change.labels?.[context];
-      if (labelRes) {
-        // Check for rejected first, as a label could have both rejected and approved
-        if (labelRes.rejected) {
+      const label = change.labels![context];
+      if (label) {
+        // Check for rejected or blocking first, as a label could have both rejected and approved
+        if (label.rejected || label.blocking) {
           return 'red';
         }
-        if (labelRes.approved) {
+        if (label.approved) {
           return 'green';
         }
       }
@@ -310,11 +355,21 @@ export async function setBranchStatus(
   const labelValue =
     label && mapBranchStatusToLabel(branchStatusConfig.state, label);
   if (branchStatusConfig.context && labelValue) {
-    const pr = await getBranchPr(branchStatusConfig.branchName);
-    if (pr === null) {
+    const change = (
+      await client.findChanges(config.repository!, {
+        branchName: branchStatusConfig.branchName,
+        state: 'open',
+        limit: 1,
+        queryOptions: ['LABELS'],
+      })
+    ).pop();
+
+    const labelKey = branchStatusConfig.context;
+    if (!change?.labels || !Object.hasOwn(change.labels, labelKey)) {
       return;
     }
-    await client.setLabel(pr.number, branchStatusConfig.context, labelValue);
+
+    await client.setLabel(change._number, labelKey, labelValue);
   }
 }
 

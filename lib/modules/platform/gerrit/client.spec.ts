@@ -108,7 +108,7 @@ describe('modules/platform/gerrit/client', () => {
         { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
       ],
       [
-        'status:closed',
+        'status:abandoned',
         {
           branchName: 'dependency-xyz',
           state: 'closed' as FindPRConfig['state'],
@@ -122,7 +122,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): update dependency react-router-dom to ~> \\"v6.21.2\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -130,7 +130,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): \\"update dependency react-router-dom to ~> \\"v6.21.2\\"\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -163,7 +163,7 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION&o=CURRENT_COMMIT',
+          '/a/changes/123456?o=MESSAGES&o=LABELS&o=DETAILED_ACCOUNTS&o=CURRENT_REVISION&o=COMMIT_FOOTERS',
         )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.getChange(123456)).resolves.toEqual(change);
