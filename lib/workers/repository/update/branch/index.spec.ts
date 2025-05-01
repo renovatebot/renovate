@@ -1626,12 +1626,12 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
       const inconfig = {
         ...config,
+        versioning: 'semver',
         postUpgradeTasks: {
           executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1724,7 +1724,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^exit 1$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1808,8 +1807,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: false,
+        allowedCommands: ['^echo'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1823,6 +1821,7 @@ describe('workers/repository/update/branch/index', () => {
         upgrades: [
           partial<BranchUpgradeConfig>({
             depName: 'some-dep-name',
+            versioning: 'semver',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1839,7 +1838,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
     });
@@ -1910,8 +1909,7 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{depName}}}$'],
-        allowCommandTemplating: true,
+        allowedCommands: ['^echo some'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -2061,7 +2059,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });

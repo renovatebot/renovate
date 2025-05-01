@@ -134,6 +134,10 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
+
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -609,9 +613,10 @@ For more details, read the [config migration documentation](./config-migration.m
 
 ## configWarningReuseIssue
 
-Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
-However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
-Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+If no existing issue is found, Renovate's default behavior is to create a new Config Warning issue.
+Accordingly, you'll get a new issue each time you have a Config Warning, although never more than one open at a time.
+Configure this option to `true` if you prefer Renovate to reopen any found matching closed issue whenever there is a config warning.
+The downside of this is that you may end up with a very old issue getting "recycled" each time and it will sort older than others.
 
 ## constraints
 
@@ -2242,7 +2247,28 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 
 ## ignoreScripts
 
-Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
+By default, Renovate will disable package manager scripts.
+Allowing packager manager scripts is a risk:
+
+- Untrusted or compromised repository users could use package manager scripts to exploit the system where Renovate runs, and
+- Malicious package authors could use scripts to exploit a repository and Renovate system, for example to exfiltrate source code and secrets
+
+**No script execution on free Mend-hosted Renovate**
+
+The Mend Renovate App does not allow scripts to run.
+We do not plan to let users on free tiers run scripts, because the risk of abuse is too high.
+
+**Renovate Enterprise Cloud can be configured to run scripts**
+
+Scripts can be enabled for paying customers on Mend.io hosted apps.
+Please ask Mend.io sales about "Renovate Enterprise Cloud".
+
+**Allowing scripts if self-hosting Renovate**
+
+If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
+
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## ignoreTests
 
@@ -3554,7 +3580,8 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use variable templating in your commands as long as [`allowCommandTemplating`](./self-hosted-configuration.md#allowcommandtemplating) is enabled.
+You can use handlebars templating in these commands.
+They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
 !!! note
@@ -3969,6 +3996,10 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
 
 ## reviewersSampleSize
 
