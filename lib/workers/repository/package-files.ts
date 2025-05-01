@@ -119,20 +119,12 @@ export class PackageFiles {
             const lock = dep.lockedVersion;
             let version;
             if (ver || digest) {
-              version = ver && digest ? `${ver}@${digest}` : `${digest ?? ver}`;
+              version =
+                ver && digest ? `${ver}@${digest}` : `${digest ?? ver ?? lock}`;
             } else if (lock) {
               version = `lock file @ ${lock}`;
             } else {
               version = 'unknown version';
-            }
-            let updates = '';
-            const uniqueUpdates = [
-              ...new Set(
-                dep.updates?.map((update) => `\`${update.newValue}\``),
-              ),
-            ];
-            if (uniqueUpdates.length > 0) {
-              updates = ` → [Updates: ${uniqueUpdates.join(', ')}]`;
             }
             // TODO: types (#22198)
             deps += ` - \`${dep.depName!} ${version}\`${updates}\n`;
