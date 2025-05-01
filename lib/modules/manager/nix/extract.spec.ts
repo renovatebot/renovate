@@ -434,6 +434,35 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
+  it('includes nixpkgs but using indirect type and path locked type that cannot be updated', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1687274257,
+            "narHash": "sha256-TutzPriQcZ8FghDhEolnHcYU2oHIG5XWF+/SUBNnAOE=",
+            "path": "/nix/store/22qgs3skscd9bmrxv9xv4q5d4wwm5ppx-source",
+            "rev": "2c9ecd1f0400076a4d6b2193ad468ff0a7e7fdc5",
+            "type": "path"
+          },
+          "original": {
+            "id": "nixpkgs",
+            "type": "indirect"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+  });
+
   it('includes flake from GitHub Enterprise', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
