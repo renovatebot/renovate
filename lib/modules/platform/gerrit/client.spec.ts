@@ -177,6 +177,24 @@ describe('modules/platform/gerrit/client', () => {
         client.findChanges('repo', { branchName: 'dependency-xyz' }),
       ).resolves.toEqual([{ _number: 2 }]);
     });
+
+    it('sets query.o when queryOptions is provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(
+          (query) =>
+            Array.isArray(query.o) &&
+            query.o.toString() === ['LABELS', 'MESSAGES'].toString(),
+        )
+        .reply(200, gerritRestResponse([{ _number: 3 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          queryOptions: ['LABELS', 'MESSAGES'],
+        }),
+      ).resolves.toEqual([{ _number: 3 }]);
+    });
   });
 
   describe('getChange()', () => {
