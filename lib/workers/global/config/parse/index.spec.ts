@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
@@ -198,6 +199,20 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['globalExtends', []]]);
       // `dryRun` from globalExtends should be overwritten with value defined in config file
       expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
+    });
+
+    it('throws exception if global presets cannot be resolved', async () => {
+      httpMock
+        .scope('http://example.com/')
+        .get('/config.json')
+        .reply(404, 'Not Found');
+
+      await expect(
+        configParser.resolveGlobalExtends([
+          'http://example.com/config.json',
+          ':pinVersions',
+        ]),
+      ).rejects.toThrow(CONFIG_PRESETS_INVALID);
     });
 
     it('cli dryRun replaced to full', async () => {
