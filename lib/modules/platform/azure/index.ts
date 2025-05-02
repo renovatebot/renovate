@@ -239,7 +239,7 @@ export async function initRepo({
   await git.initRepo({
     ...config,
     url,
-    extraCloneOpts: getStorageExtraCloneOpts(opts),
+    extraGitOptions: getStorageExtraCloneOpts(opts),
     cloneSubmodules,
     cloneSubmodulesFilter,
   });
