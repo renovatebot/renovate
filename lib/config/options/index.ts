@@ -251,8 +251,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     default: {
-      dashboardFooter:
-        'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+      dashboardFooter: '',
       dashboardHeader:
         'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
       dashboardTitle: 'Title for the Dependency Dashboard issue.',
