@@ -173,17 +173,20 @@ describe('workers/global/config/parse/index', () => {
         .get('/config.json')
         .reply(200, { repositories: ['g/r1', 'g/r2'], druRun: 'full' });
 
-      // Replace default config with a config using globalExtends
-      const configPath = upath.join(
-        __dirname,
-        '__fixtures__/config-global-extends.js',
-      );
-      const env: NodeJS.ProcessEnv = {
-        ...defaultEnv,
-        RENOVATE_CONFIG_FILE: configPath,
-      };
+      // Mock the default config file to return a preset
+      const defaultConfig = upath.join(__dirname, '__fixtures__/default.js');
+      vi.doMock(defaultConfig, () => ({
+        default: {
+          globalExtends: ['http://example.com/config.json', ':pinVersions'],
+          dryRun: 'extract',
+        },
+      }));
 
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+      vi.doUnmock(defaultConfig);
 
       // Remote preset in globalExtends should be resolved
       expect(parsedConfig).toContainEntries([
