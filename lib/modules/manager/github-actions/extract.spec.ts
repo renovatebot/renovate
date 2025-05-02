@@ -460,7 +460,8 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: 'prettier/v2.0.0',
           replaceString:
             'grafana/writers-toolkit@4b1248585248751e3b12fd020cf7ac91540ca09c # prettier/v2.0.0',
-
+        },
+      ]);
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
 
