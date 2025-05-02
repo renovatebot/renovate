@@ -342,7 +342,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('getBranchPr()', () => {
     it('getBranchPr() - no result', async () => {
-      clientMock.findChanges.mockResolvedValue([]);
+      clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
@@ -365,7 +365,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValue([change]);
+      clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', 'master'),
       ).resolves.toHaveProperty('number', 123456);
@@ -391,7 +391,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValue([change]);
+      clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x', undefined),
       ).resolves.toHaveProperty('number', 123456);
@@ -410,7 +410,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('refreshPr()', () => {
     it('refreshPr()', async () => {
-      clientMock.getChange.mockResolvedValue(partial<GerritChange>({}));
+      clientMock.getChange.mockResolvedValueOnce(partial<GerritChange>({}));
       await expect(gerrit.refreshPr(123456)).toResolve();
       expect(clientMock.getChange).toHaveBeenCalledWith(
         123456,
@@ -422,7 +422,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('getPrList()', () => {
     it('getPrList() - empty list', async () => {
-      clientMock.findChanges.mockResolvedValue([]);
+      clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(gerrit.getPrList()).resolves.toEqual([]);
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: '',
@@ -439,7 +439,7 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValue([change, change, change]);
+      clientMock.findChanges.mockResolvedValueOnce([change, change, change]);
       await expect(gerrit.getPrList()).resolves.toHaveLength(3);
     });
   });
