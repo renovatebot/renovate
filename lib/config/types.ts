@@ -120,6 +120,8 @@ export interface GlobalOnlyConfig {
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
+  privateKey?: string;
+  privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisPrefix?: string;
@@ -160,8 +162,6 @@ export interface RepoGlobalConfig {
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
-  privateKey?: string;
-  privateKeyOld?: string;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;

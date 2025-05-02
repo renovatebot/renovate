@@ -14,30 +14,41 @@ import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
 import type { RenovateConfig } from './types';
 
+let privateKey: string | undefined;
+let privateKeyOld: string | undefined;
+
+export function setPrivateKeys(
+  pKey: string | undefined,
+  pKeyOld: string | undefined,
+): void {
+  privateKey = pKey;
+  privateKeyOld = pKeyOld;
+}
+
 export async function tryDecrypt(
-  privateKey: string,
+  key: string,
   encryptedStr: string,
   repository: string,
   keyName: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
+  if (key?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr =
       process.env.RENOVATE_X_USE_OPENPGP === 'true'
-        ? await tryDecryptOpenPgp(privateKey, encryptedStr)
-        : await tryDecryptKbPgp(privateKey, encryptedStr);
+        ? await tryDecryptOpenPgp(key, encryptedStr)
+        : await tryDecryptKbPgp(key, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
   } else {
-    decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
+    decryptedStr = tryDecryptPublicKeyDefault(key, encryptedStr);
     if (is.string(decryptedStr)) {
       logger.warn(
         { keyName },
         'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
       );
     } else {
-      decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+      decryptedStr = tryDecryptPublicKeyPKCS1(key, encryptedStr);
       /* v8 ignore start -- not testable */
       if (is.string(decryptedStr)) {
         logger.warn(
@@ -145,8 +156,6 @@ export async function decryptConfig(
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
-  const privateKey = GlobalConfig.get('privateKey');
-  const privateKeyOld = GlobalConfig.get('privateKeyOld');
   for (const [key, val] of Object.entries(config)) {
     if (key === 'encrypted' && is.object(val)) {
       const path = `${existingPath}.${key}`;
