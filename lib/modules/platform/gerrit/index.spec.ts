@@ -187,7 +187,11 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.getPr(123456)).resolves.toEqual(
         mapGerritChangeToPr(change),
       );
-      expect(clientMock.getChange).toHaveBeenCalledWith(123456, undefined);
+      expect(clientMock.getChange).toHaveBeenCalledWith(
+        123456,
+        undefined,
+        REQUEST_DETAILS_FOR_PRS,
+      );
     });
 
     it('getPr() - not found', async () => {
@@ -408,7 +412,11 @@ describe('modules/platform/gerrit/index', () => {
     it('refreshPr()', async () => {
       clientMock.getChange.mockResolvedValue(partial<GerritChange>({}));
       await expect(gerrit.refreshPr(123456)).toResolve();
-      expect(clientMock.getChange).toHaveBeenCalledWith(123456, true);
+      expect(clientMock.getChange).toHaveBeenCalledWith(
+        123456,
+        true,
+        REQUEST_DETAILS_FOR_PRS,
+      );
     });
   });
 
