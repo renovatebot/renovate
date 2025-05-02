@@ -178,7 +178,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([{ _number: 2 }]);
     });
 
-    it('sets query.o when queryOptions is provided', async () => {
+    it('sets query.o when requestDetails is provided', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -191,7 +191,7 @@ describe('modules/platform/gerrit/client', () => {
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
-          queryOptions: ['LABELS', 'MESSAGES'],
+          requestDetails: ['LABELS', 'MESSAGES'],
         }),
       ).resolves.toEqual([{ _number: 3 }]);
     });
@@ -202,11 +202,14 @@ describe('modules/platform/gerrit/client', () => {
       const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
-        .get(
-          '/a/changes/123456?o=MESSAGES&o=LABELS&o=DETAILED_ACCOUNTS&o=CURRENT_REVISION&o=COMMIT_FOOTERS',
-        )
+        .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.getChange(123456)).resolves.toEqual(change);
+      await expect(
+        client.getChange(123456, undefined, [
+          'CURRENT_REVISION',
+          'COMMIT_FOOTERS',
+        ]),
+      ).resolves.toEqual(change);
     });
   });
 

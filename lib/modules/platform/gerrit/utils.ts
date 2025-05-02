@@ -11,12 +11,12 @@ import type {
   GerritChange,
   GerritChangeStatus,
   GerritLabelTypeInfo,
-  GerritQueryOption,
+  GerritRequestDetail,
 } from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
-export const MAP_TO_PR_QUERY_OPTIONS: GerritQueryOption[] = [
+export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
   'MESSAGES', // to get the pr body
   'LABELS', // to get the reviewers
   'DETAILED_ACCOUNTS', // to get the reviewers usernames

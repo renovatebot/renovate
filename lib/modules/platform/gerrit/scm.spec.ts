@@ -30,7 +30,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetBranch: 'baseBranch',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
+        requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
       });
     });
 
@@ -83,7 +83,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetBranch: 'master',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
+        requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
       });
     });
 
@@ -193,7 +193,7 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION'],
+        requestDetails: ['CURRENT_REVISION'],
       });
     });
 
@@ -222,7 +222,7 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION'],
+        requestDetails: ['CURRENT_REVISION'],
       });
       expect(git.mergeToLocal).toHaveBeenCalledWith('nonExistingChange');
     });
@@ -246,7 +246,7 @@ describe('modules/platform/gerrit/scm', () => {
         state: 'open',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION'],
+        requestDetails: ['CURRENT_REVISION'],
       });
       expect(git.mergeToLocal).toHaveBeenCalledWith('refs/changes/34/1234/1');
     });
@@ -272,7 +272,7 @@ describe('modules/platform/gerrit/scm', () => {
         targetBranch: 'main',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['CURRENT_REVISION'],
+        requestDetails: ['CURRENT_REVISION'],
       });
     });
 

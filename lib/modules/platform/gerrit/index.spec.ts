@@ -12,7 +12,7 @@ import type {
   GerritRevisionInfo,
 } from './types';
 import {
-  MAP_TO_PR_QUERY_OPTIONS,
+  REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   mapGerritChangeToPr,
 } from './utils';
@@ -153,7 +153,7 @@ describe('modules/platform/gerrit/index', () => {
         state: 'open',
         targetBranch: 'master',
         limit: 1,
-        queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+        requestDetails: REQUEST_DETAILS_FOR_PRS,
       });
     });
 
@@ -347,7 +347,7 @@ describe('modules/platform/gerrit/index', () => {
         state: 'open',
         limit: 1,
         refreshCache: undefined,
-        queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+        requestDetails: REQUEST_DETAILS_FOR_PRS,
       });
     });
 
@@ -372,7 +372,7 @@ describe('modules/platform/gerrit/index', () => {
           branchName: 'renovate/dependency-1.x',
           limit: 1,
           targetBranch: 'master',
-          queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       ]);
     });
@@ -398,7 +398,7 @@ describe('modules/platform/gerrit/index', () => {
           branchName: 'renovate/dependency-1.x',
           limit: 1,
           targetBranch: undefined,
-          queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+          requestDetails: REQUEST_DETAILS_FOR_PRS,
         },
       ]);
     });
@@ -418,7 +418,7 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.getPrList()).resolves.toEqual([]);
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: '',
-        queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+        requestDetails: REQUEST_DETAILS_FOR_PRS,
       });
     });
 

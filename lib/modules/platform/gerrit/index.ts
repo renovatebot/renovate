@@ -31,7 +31,7 @@ import { client } from './client';
 import { configureScm } from './scm';
 import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
-  MAP_TO_PR_QUERY_OPTIONS,
+  REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
@@ -135,7 +135,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
     await client.findChanges(config.repository!, {
       ...findPRConfig,
       limit: 1,
-      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+      requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
   return change
@@ -150,7 +150,11 @@ export async function getPr(
   refreshCache?: boolean,
 ): Promise<Pr | null> {
   try {
-    const change = await client.getChange(number, refreshCache);
+    const change = await client.getChange(
+      number,
+      refreshCache,
+      REQUEST_DETAILS_FOR_PRS,
+    );
     return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -187,7 +191,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       state: 'open',
       limit: 1,
       refreshCache: true,
-      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+      requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
   if (change === undefined) {
@@ -227,7 +231,7 @@ export async function getBranchPr(
       state: 'open',
       targetBranch,
       limit: 1,
-      queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+      requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
   return change
@@ -245,7 +249,7 @@ export async function refreshPr(number: number): Promise<void> {
 export async function getPrList(): Promise<Pr[]> {
   const changes = await client.findChanges(config.repository!, {
     branchName: '',
-    queryOptions: MAP_TO_PR_QUERY_OPTIONS,
+    requestDetails: REQUEST_DETAILS_FOR_PRS,
   });
   return changes
     .map((change) => mapGerritChangeToPr(change))
@@ -285,7 +289,7 @@ export async function getBranchStatus(
       branchName,
       limit: 1,
       refreshCache: true,
-      queryOptions: ['LABELS', 'SUBMITTABLE', 'CHECK'],
+      requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
   if (change) {
@@ -324,7 +328,7 @@ export async function getBranchStatusCheck(
         state: 'open',
         limit: 1,
         refreshCache: true,
-        queryOptions: ['LABELS'],
+        requestDetails: ['LABELS'],
       })
     ).pop();
     if (change) {
@@ -360,7 +364,7 @@ export async function setBranchStatus(
         branchName: branchStatusConfig.branchName,
         state: 'open',
         limit: 1,
-        queryOptions: ['LABELS'],
+        requestDetails: ['LABELS'],
       })
     ).pop();
 

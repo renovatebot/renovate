@@ -3,7 +3,7 @@ import type { FindPRConfig } from '../types';
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
   limit?: number;
-  queryOptions?: GerritQueryOption[];
+  requestDetails?: GerritRequestDetail[];
 }
 
 /**
@@ -32,7 +32,7 @@ export interface GerritBranchInfo {
 
 export type GerritChangeStatus = 'NEW' | 'MERGED' | 'ABANDONED';
 
-export type GerritQueryOption =
+export type GerritRequestDetail =
   | 'SUBMITTABLE'
   | 'CHECK'
   | 'MESSAGES'

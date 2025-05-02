@@ -12,8 +12,9 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
   GerritProjectInfo,
+  GerritRequestDetail,
 } from './types';
-import { MAP_TO_PR_QUERY_OPTIONS, mapPrStateToGerritFilter } from './utils';
+import { mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
   private gerritHttp = new GerritHttp();
@@ -55,8 +56,8 @@ class GerritClient {
     }
 
     const query: Record<string, any> = {};
-    if (findPRConfig.queryOptions) {
-      query.o = findPRConfig.queryOptions;
+    if (findPRConfig.requestDetails) {
+      query.o = findPRConfig.requestDetails;
     }
     if (findPRConfig.limit) {
       query.n = findPRConfig.limit;
@@ -77,6 +78,7 @@ class GerritClient {
   async getChange(
     changeNumber: number,
     refreshCache?: boolean,
+    requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
     // Disables memCache (enabled by default) to be replaced by memCacheProvider
     const opts: HttpOptions = { memCache: false };
@@ -85,7 +87,7 @@ class GerritClient {
       opts.cacheProvider = memCacheProvider;
     }
 
-    const queryString = getQueryString({ o: MAP_TO_PR_QUERY_OPTIONS });
+    const queryString = getQueryString({ o: requestDetails });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
       `a/changes/${changeNumber}?${queryString}`,
       opts,
