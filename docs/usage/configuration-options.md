@@ -1196,7 +1196,7 @@ You can configure Renovate to wait for approval for:
 - specific package upgrades
 - upgrades coming from specific package managers
 
-If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+If you want to require approval for _all_ upgrades, set `dependencyDashboardApproval` to `true`:
 
 ```json
 {
