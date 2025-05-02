@@ -27,8 +27,7 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'presetCachePersistence',
-    'privateKey',
-    'privateKeyOld',
+
     'gitTimeout',
     'platform',
     'endpoint',

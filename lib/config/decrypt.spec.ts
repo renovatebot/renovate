@@ -1,6 +1,7 @@
 import {
   decryptConfig,
   getAzureCollection,
+  setPrivateKeys,
   validateDecryptedValue,
 } from './decrypt';
 import { GlobalConfig } from './global';
@@ -16,6 +17,7 @@ describe('config/decrypt', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
+      setPrivateKeys(undefined, undefined);
       delete process.env.MEND_HOSTED;
       delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
     });
