@@ -40,7 +40,7 @@ export abstract class AbstractMigration implements Migration {
       this.migratedConfig[parentObject!] ??= {};
       writeLocation = this.migratedConfig[parentObject!] as RenovateConfig;
     }
-    const keyToWrite = keySplits.pop() as string;
+    const keyToWrite = keySplits.pop()!;
     if (
       is.nullOrUndefined(this.originalConfig[key]) &&
       is.nullOrUndefined(writeLocation[keyToWrite])
