@@ -237,6 +237,14 @@ describe('modules/manager/pep621/extract', () => {
 
       expect(result?.deps).toEqual([
         {
+          commitMessageTopic: 'Python',
+          currentValue: '>=3.7',
+          datasource: 'python-version',
+          depType: 'requires-python',
+          packageName: 'python',
+          versioning: 'pep440',
+        },
+        {
           packageName: 'blinker',
           depName: 'blinker',
           datasource: 'pypi',
@@ -508,6 +516,14 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'jwcrypto',
             depName: 'jwcrypto',
             datasource: 'pypi',
@@ -568,6 +584,14 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'attrs',
             depName: 'attrs',
             datasource: 'pypi',
@@ -596,6 +620,12 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            packageName: 'python',
+            depType: 'requires-python',
+            datasource: 'python-version',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'attrs',
             depName: 'attrs',
             datasource: 'pypi',
@@ -623,7 +653,7 @@ describe('modules/manager/pep621/extract', () => {
             readme = "README.md"
           `;
       const res = await extractPackageFile(content, 'pyproject.toml');
-      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toHaveLength(3);
     });
   });
 });
