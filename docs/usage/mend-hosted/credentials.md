@@ -10,7 +10,7 @@ If you self-host, you can skip reading this page.
 
 ## :warning: Migrate secrets in your Renovate config file :warning:
 
-The Mend Renovate cloud apps no longer reads encrypted secrets from Renovate config files in your repositories.
+The Mend Renovate cloud apps no longer read encrypted secrets from Renovate config files in your repositories.
 You must migrate any secrets you currently keep in a Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).
 To add secrets you must have admin-level rights.
 

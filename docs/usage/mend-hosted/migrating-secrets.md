@@ -1,6 +1,6 @@
 # Migrating Secrets from Repo Config to App Settings
 
-The Mend Renovate Cloud apps no longer reads encrypted secrets from Renovate config files in your repositories.
+The Mend Renovate Cloud apps no longer read encrypted secrets from Renovate config files in your repositories.
 Previously, you could encrypt a secret with the [Renovate encryption tool](https://app.renovatebot.com/encrypt) and then put it in your Renovate config file.
 
 When using the Mend Renovate Cloud apps, all secrets must be stored in the App settings on the cloud.
@@ -60,6 +60,7 @@ You must Migrate encrypted secrets using the PLAIN TEXT value. You can not use t
 ### Add the secret to the correct Org or Repo
 
 When you migrate a secret from a repository, make sure you are adding the secret to the _same_ organization or repository for which you generated the secret!
+
 - A secret generated for a specific repository can only be added to that _same_ repository.
 - A secret generated for a specific repository can only be added to the repository settings for the matching repository. This secret can _not_ be added to the organization's settings.
 - A secret generated without a specific repository _can_ be added into the organization _or_ into the repository settings under that organization.
@@ -83,8 +84,8 @@ When you migrate a secret from a repository, make sure you are adding the secret
 
 The secret might be wrong. Try uploading the secret again.
 
-* Ensure that the PLAIN TEXT value of the secret is used - not the encrypted value.
-* Ensure that the secret was uploaded to the correct Org or Repo.
+- Ensure that the PLAIN TEXT value of the secret is used - not the encrypted value.
+- Ensure that the secret was uploaded to the correct Org or Repo.
 
 ## Related links
 
