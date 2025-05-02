@@ -377,15 +377,21 @@ export async function setBranchStatus(
   }
 }
 
-export function getRawFile(
+export async function getRawFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const repo = repoName ?? config.repository ?? 'All-Projects';
+  const repo = repoName ?? config.repository;
+  if (!repo) {
+    logger.debug('No repo so cannot getRawFile');
+    return null;
+  }
   const branch =
-    branchOrTag ?? (repo === config.repository ? config.head! : 'HEAD');
-  return client.getFile(repo, branch, fileName);
+    branchOrTag ??
+    (repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD');
+  const result = await client.getFile(repo, branch, fileName);
+  return result;
 }
 
 export async function getJsonFile(

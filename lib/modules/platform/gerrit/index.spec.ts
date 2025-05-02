@@ -831,18 +831,28 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
 
-    it('getRawFile() - repo/branch defaults', async () => {
+    it('getRawFile() - branch defaults', async () => {
       writeToConfig({
-        repository: undefined,
+        repository: 'repo',
         head: undefined,
         labels: {},
       });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
       expect(clientMock.getFile).toHaveBeenCalledWith(
-        'All-Projects',
+        'repo',
         'HEAD',
         'renovate.json',
       );
+    });
+
+    it('getRawFile() - no repo', async () => {
+      writeToConfig({
+        repository: undefined,
+        head: 'master',
+        labels: {},
+      });
+      await expect(gerrit.getRawFile('renovate.json')).resolves.toBe(null);
+      expect(clientMock.getFile).not.toHaveBeenCalled();
     });
   });
 
