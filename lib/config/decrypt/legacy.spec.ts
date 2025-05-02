@@ -33,7 +33,7 @@ describe('config/decrypt/legacy', () => {
     });
 
     it('replaces npm token placeholder in npmrc', async () => {
-      setPrivateKeys('invalid-key', privateKey);
+      setPrivateKeys('invalid-key', privateKey); // test old key failover
       config.npmrc =
         '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n';
       config.encrypted = {
