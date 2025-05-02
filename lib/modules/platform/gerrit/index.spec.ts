@@ -157,7 +157,7 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
-    it('findPr() - finds change', async () => {
+    it('findPr() - found', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
         current_revision: 'some-revision',
