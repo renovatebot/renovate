@@ -157,8 +157,9 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
-    it('findPr() - return the last change from search results', async () => {
+    it('findPr() - finds change', async () => {
       const change = partial<GerritChange>({
+        _number: 123456,
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -166,17 +167,14 @@ describe('modules/platform/gerrit/index', () => {
           }),
         },
       });
-      clientMock.findChanges.mockResolvedValueOnce([
-        { ...change, _number: 1 },
-        { ...change, _number: 2 },
-      ]);
+      clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
         gerrit.findPr({
           branchName: 'branch',
           state: 'open',
           targetBranch: 'master',
         }),
-      ).resolves.toHaveProperty('number', 2);
+      ).resolves.toHaveProperty('number', 123456);
     });
   });
 
