@@ -48,12 +48,14 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
   ): Promise<GerritChange[]> {
+    /* v8 ignore start: temporary code */
     // Disables memCache (enabled by default) to be replaced by memCacheProvider
     const opts: HttpOptions = { memCache: false };
     // TODO: should refresh the cache rather than just ignore it
     if (!findPRConfig.refreshCache) {
       opts.cacheProvider = memCacheProvider;
     }
+    /* v8 ignore stop */
 
     const query: Record<string, any> = {};
     if (findPRConfig.requestDetails) {
@@ -80,12 +82,14 @@ class GerritClient {
     refreshCache?: boolean,
     requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
+    /* v8 ignore start: temporary code */
     // Disables memCache (enabled by default) to be replaced by memCacheProvider
     const opts: HttpOptions = { memCache: false };
     // TODO: should refresh the cache rather than just ignore it
     if (!refreshCache) {
       opts.cacheProvider = memCacheProvider;
     }
+    /* v8 ignore stop */
 
     const queryString = getQueryString({ o: requestDetails });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
