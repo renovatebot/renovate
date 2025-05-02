@@ -324,6 +324,10 @@
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
