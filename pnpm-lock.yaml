@@ -552,8 +552,8 @@ importers:
         specifier: 16.0.0
         version: 16.0.0
       graphql:
-        specifier: 16.10.0
-        version: 16.10.0
+        specifier: 16.11.0
+        version: 16.11.0
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -3731,8 +3731,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  graphql@16.10.0:
-    resolution: {integrity: sha512-AjqGKbDGUFRKIRCP9tCKiIGHyriz2oHEbPIbEtcSLSs4YjReZOIPQQWek4+6hjw62H9QShXHyaGivGiYVLeYFQ==}
+  graphql@16.11.0:
+    resolution: {integrity: sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   gtoken@7.1.0:
@@ -10532,7 +10532,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphql@16.10.0: {}
+  graphql@16.11.0: {}
 
   gtoken@7.1.0(encoding@0.1.13):
     dependencies:
