@@ -62,14 +62,10 @@ export async function checkReconfigureBranch(
     }
   }
 
-  const {
-    config: reconfigureConfig,
-    errMessage,
-    configFileName,
-  } = await getReconfigureConfig(reconfigureBranch);
+  const result = await getReconfigureConfig(reconfigureBranch);
 
-  if (!reconfigureConfig) {
-    await setBranchStatus(reconfigureBranch, errMessage!, 'red', context);
+  if (!result.ok) {
+    await setBranchStatus(reconfigureBranch, result.errMessage, 'red', context);
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.defaultBranch!);
     return;
@@ -77,8 +73,8 @@ export async function checkReconfigureBranch(
 
   const isValidConfig = await validateReconfigureBranch(
     config,
-    reconfigureConfig,
-    configFileName!,
+    result.config,
+    result.configFileName,
     existingPr,
   );
 

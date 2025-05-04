@@ -18,7 +18,7 @@ describe('workers/repository/reconfigure/utils', () => {
       merge.detectConfigFile.mockResolvedValue(null);
       const res = await getReconfigureConfig(reconfigureBranch);
       expect(res).toMatchObject({
-        config: null,
+        ok: false,
         errMessage: 'Validation Failed - No config file found',
       });
     });
@@ -27,7 +27,7 @@ describe('workers/repository/reconfigure/utils', () => {
       fs.readLocalFile.mockResolvedValue(null);
       const res = await getReconfigureConfig(reconfigureBranch);
       expect(res).toMatchObject({
-        config: null,
+        ok: false,
         errMessage: 'Validation Failed - Invalid config file',
         configFileName: 'renovate.json',
       });
@@ -37,7 +37,7 @@ describe('workers/repository/reconfigure/utils', () => {
       fs.readLocalFile.mockResolvedValue('{');
       const res = await getReconfigureConfig(reconfigureBranch);
       expect(res).toMatchObject({
-        config: null,
+        ok: false,
         errMessage: 'Validation Failed - Unparsable config file',
         configFileName: 'renovate.json',
       });
@@ -52,6 +52,7 @@ describe('workers/repository/reconfigure/utils', () => {
       fs.readLocalFile.mockResolvedValue('{renovate: {}}');
       const res = await getReconfigureConfig(reconfigureBranch);
       expect(res).toMatchObject({
+        ok: true,
         config: {},
         configFileName: 'package.json',
       });

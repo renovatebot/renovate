@@ -31,26 +31,31 @@ export async function setBranchStatus(
   });
 }
 
-export async function getReconfigureConfig(branchName: string): Promise<{
-  config: RenovateConfig | null;
-  errMessage?: string;
-  configFileName?: string;
-}> {
-  let errMessage = undefined;
+type GetReconfigureConfigResult =
+  | { ok: true; config: RenovateConfig; configFileName: string }
+  | { ok: false; errMessage: string; configFileName?: string };
 
+export async function getReconfigureConfig(
+  branchName: string,
+): Promise<GetReconfigureConfigResult> {
   await scm.checkoutBranch(branchName);
   const configFileName = await detectConfigFile();
 
   if (configFileName === null) {
     logger.debug('No config file found in reconfigure branch');
-    errMessage = 'Validation Failed - No config file found';
-    return { config: null, errMessage };
+    return {
+      ok: false,
+      errMessage: 'Validation Failed - No config file found',
+    };
   }
 
   const configFileRaw = await readLocalFile(configFileName, 'utf8');
   if (configFileRaw === null) {
-    errMessage = 'Validation Failed - Invalid config file';
-    return { config: null, errMessage, configFileName };
+    return {
+      ok: false,
+      errMessage: 'Validation Failed - Invalid config file',
+      configFileName,
+    };
   }
 
   let configFileParsed: any;
@@ -62,9 +67,12 @@ export async function getReconfigureConfig(branchName: string): Promise<{
     }
   } catch (err) {
     logger.debug({ err }, 'Error while parsing config file');
-    errMessage = 'Validation Failed - Unparsable config file';
-    return { config: null, errMessage, configFileName };
+    return {
+      ok: false,
+      errMessage: 'Validation Failed - Unparsable config file',
+      configFileName,
+    };
   }
 
-  return { config: configFileParsed, errMessage, configFileName };
+  return { ok: true, config: configFileParsed, configFileName };
 }

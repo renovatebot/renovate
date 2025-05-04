@@ -48,6 +48,7 @@ describe('workers/repository/reconfigure/index', () => {
     validate.validateReconfigureBranch.mockResolvedValue(true);
     platform.findPr.mockResolvedValue(partial<Pr>({ number: 1 }));
     utils.getReconfigureConfig.mockResolvedValue({
+      ok: true,
       configFileName: 'renovate.json',
       config: { labels: ['label'] },
     });
@@ -96,8 +97,8 @@ describe('workers/repository/reconfigure/index', () => {
 
   it('skips if error while finding reconfigure config', async () => {
     utils.getReconfigureConfig.mockResolvedValue({
+      ok: false,
       configFileName: 'renovate.json',
-      config: null,
       errMessage: 'error',
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
