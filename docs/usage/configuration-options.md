@@ -723,9 +723,9 @@ Renovate has two custom managers:
 | `regex`        | Regular Expression, with named capture groups. |
 | `jsonata`      | JSONata query.                                 |
 
-To use a custom manager, you need give some information:
+To use a custom manager, you must give Renovate this information:
 
-1. `fileMatch`: name/pattern of the file to extract deps from
+1. `managerFilePatterns`: regex/glob pattern of the file to extract deps from
 1. `matchStrings`: `regex` patterns or `jsonata` queries used to process the file
 
 The `matchStrings` must capture/extract the following three fields:
@@ -767,7 +767,7 @@ image: my.old.registry/aRepository/andImage:1.18-alpine
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
@@ -806,7 +806,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -821,7 +821,7 @@ Example:
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": ["file.json"],
+      "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -868,7 +868,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": [".renovaterc"],
+      "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -883,7 +883,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "fileMatch": ["file.yml"],
+      "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -898,7 +898,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "toml",
-      "fileMatch": ["file.toml"],
+      "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -957,7 +957,7 @@ As example the following configuration will update all three lines in the Docker
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
@@ -995,7 +995,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"backup\":\\s*{[^}]*}",
@@ -1005,7 +1005,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"test\":\\s*\\{[^}]*}",
@@ -1051,7 +1051,7 @@ Matched group values will be merged to form a single dependency.
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1060,7 +1060,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1506,35 +1506,6 @@ If you are running on any platform except `github.com`, you need to [configure a
     Renovate can only show changelogs from some platforms and some package managers.
     We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
-
-## fileMatch
-
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
-`fileMatch` patterns in the user config are added to the default values and do not replace them.
-The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
-
-Some `fileMatch` patterns are short, like Renovate's default Go Modules `fileMatch` for example.
-Here Renovate looks for _any_ `go.mod` file.
-In this case you can probably keep using that default `fileMatch`.
-
-At other times, the possible files is too vague for Renovate to have any default.
-For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
-
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
-For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$', '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$']`.
-This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
-Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could add the missing file like this:
-
-```json
-{
-  "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
-  }
-}
-```
-
-If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -2440,6 +2411,45 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## managerFilePatterns
+
+`managerFilePatterns` were formerly known as `fileMatch`, and regex-only.
+`managerFilePatterns` instead supports regex or glob patterns, and any existing config containing `fileMatch` patterns will be automatically migrated.
+Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
+
+`managerFilePatterns` tells Renovate which repository files to parse and extract.
+`managerFilePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
+
+The default `managerFilePatterns` patterns can not be removed.
+If you need to include, or exclude, specific paths then use the `ignorePaths` or `includePaths` configuration options.
+
+Some `managerFilePatterns` patterns are short, like Renovate's default Go Modules `managerFilePatterns` for example.
+Here Renovate looks for _any_ `go.mod` file.
+In this case you can probably keep using that default `managerFilePatterns`.
+
+At other times, the possible files is too vague for Renovate to have any default.
+For example, Kubernetes manifests can exist in any `*.yaml` file.
+We do not want Renovate to parse every YAML file in every repository, just in case _some_ of them have a Kubernetes manifest.
+Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
+Because the array is empty, you as user must tell Renovate which directories/files to check.
+
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess about.
+For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
+This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
+Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
+
+```json
+{
+  "dockerfile": {
+    "managerFilePatterns": ["/^ACTUALLY_A_DOCKERFILE\\.template$/"]
+  }
+}
+```
+
+You must configure `managerFilePatterns` _inside_ a manager object.
+In the example above, the manager object is the `dockerfile`.
+For reference, here is a [list of supported managers](modules/manager/index.md#supported-managers).
 
 ## milestone
 
