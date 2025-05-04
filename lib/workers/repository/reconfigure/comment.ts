@@ -26,14 +26,11 @@ export async function ensureReconfigurePrComment(
 ): Promise<boolean> {
   logger.debug('ensureReconfigurePrComment()');
   logger.trace({ config });
-  let prCommentTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
-  })! This is an reconfigure PR comment to help you understand and re-configure your renovate bot settings.\n\n`;
+  let prCommentTemplate = `This is an reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
   // TODO #22198
   prCommentTemplate += emojify(
     `
-
 ---
 {{PACKAGE FILES}}
 {{CONFIG}}
@@ -41,15 +38,6 @@ export async function ensureReconfigurePrComment(
 {{PRLIST}}
 {{WARNINGS}}
 {{ERRORS}}
-
----
-
-:question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
-    }), particularly the Getting Started section.
-If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
-    }).
 `,
   );
   let prBody = prCommentTemplate;

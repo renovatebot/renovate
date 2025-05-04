@@ -142,7 +142,10 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
+  if (
+    overwriteCache &&
+    isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
+  ) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
