@@ -3,6 +3,7 @@ import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
+import { partial } from '~test/util';
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -2073,7 +2074,7 @@ describe('config/validation', () => {
     });
 
     it('errors if no bumpVersion filePattern is provided', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         bumpVersion: {
           matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
           bumpType: 'patch',
@@ -2087,10 +2088,10 @@ describe('config/validation', () => {
             },
           },
         ],
-      };
+      });
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        config as any,
+        config,
         true,
       );
       expect(warnings).toHaveLength(0);
@@ -2098,7 +2099,7 @@ describe('config/validation', () => {
     });
 
     it('errors if no matchStrings are provided for bumpVersion', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],
         },
@@ -2110,10 +2111,10 @@ describe('config/validation', () => {
             },
           },
         ],
-      };
+      });
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        config as any,
+        config,
         true,
       );
       expect(warnings).toHaveLength(0);
@@ -2121,7 +2122,7 @@ describe('config/validation', () => {
     });
 
     it('allow bumpVersion ', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         bumpVersion: {
           filePatterns: ['foo'],
         },
@@ -2133,10 +2134,10 @@ describe('config/validation', () => {
             },
           },
         ],
-      };
+      });
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        config as any,
+        config,
         true,
       );
       expect(warnings).toHaveLength(0);

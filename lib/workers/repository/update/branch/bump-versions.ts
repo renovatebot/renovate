@@ -4,16 +4,17 @@ import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { coerceArray } from '../../../../util/array';
 import { readLocalFile } from '../../../../util/fs';
-import type {
-  FileAddition,
-  FileChange,
-  FileDeletion,
-} from '../../../../util/git/types';
+import type { FileChange } from '../../../../util/git/types';
 import { regEx } from '../../../../util/regex';
 import { matchRegexOrGlobList } from '../../../../util/string-match';
 import { compile } from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { getFilteredFileList } from '../../extract/file-match';
+
+type ParseFileChangesResult =
+  | { state: 'modified'; content: string | null }
+  | { state: 'deleted' }
+  | { state: 'unmodified' };
 
 export async function bumpVersions(config: BranchConfig): Promise<void> {
   const bumpVersions = config.bumpVersions;
@@ -37,28 +38,22 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
       bumpVersionConfig,
       config,
       fileList,
-      packageFileChanges.additions,
-      artifactFileChanges.additions,
+      packageFileChanges,
+      artifactFileChanges,
     );
   }
 
   // update the config with the new files
-  config.updatedPackageFiles = [
-    ...Object.values(packageFileChanges.additions),
-    ...Object.values(packageFileChanges.deletions),
-  ];
-  config.updatedArtifacts = [
-    ...Object.values(artifactFileChanges.additions),
-    ...Object.values(artifactFileChanges.deletions),
-  ];
+  config.updatedPackageFiles = Object.values(packageFileChanges).flat();
+  config.updatedArtifacts = Object.values(artifactFileChanges).flat();
 }
 
 async function bumpVersion(
   config: BumpVersionConfig,
   branchConfig: BranchConfig,
   fileList: string[],
-  packageFiles: Record<string, FileAddition>,
-  artifactFiles: Record<string, FileAddition>,
+  packageFiles: Record<string, FileChange[]>,
+  artifactFiles: Record<string, FileChange[]>,
 ): Promise<void> {
   const bumpVersionsDescr = config.name
     ? `bumpVersions(${config.name})`
@@ -88,14 +83,14 @@ async function bumpVersion(
     }
   }
 
-  for (const file of files) {
-    // getting the already modified file contents or read the file directly
-    let fileContents: string | null | undefined =
-      packageFiles[file]?.contents?.toString();
-    fileContents ??= artifactFiles[file]?.contents?.toString();
-    fileContents ??= await readLocalFile(file, 'utf8');
+  for (const filePath of files) {
+    const fileContents = await getFileContent(
+      bumpVersionsDescr,
+      filePath,
+      packageFiles,
+      artifactFiles,
+    );
     if (!fileContents) {
-      logger.warn({ file }, `${bumpVersionsDescr}: Could not read file`);
       continue;
     }
 
@@ -107,7 +102,10 @@ async function bumpVersion(
       }
       const version = regexResult.groups?.version;
       if (!version) {
-        logger.debug({ file }, `${bumpVersionsDescr}: No version found`);
+        logger.debug(
+          { file: filePath },
+          `${bumpVersionsDescr}: No version found`,
+        );
         continue;
       }
 
@@ -120,11 +118,14 @@ async function bumpVersion(
         addArtifactError(
           branchConfig,
           `Failed to calculate new version for ${bumpVersionsDescr}: ${e.message}`,
-          file,
+          filePath,
         );
       }
       if (!newVersion) {
-        logger.debug({ file }, `${bumpVersionsDescr}: Could not bump version`);
+        logger.debug(
+          { file: filePath },
+          `${bumpVersionsDescr}: Could not bump version`,
+        );
         continue;
       }
 
@@ -137,24 +138,19 @@ async function bumpVersion(
         });
 
       // update the file. Add it to the buckets if exists or create a new artifact update
-      if (packageFiles[file]) {
-        packageFiles[file] = {
-          ...packageFiles[file],
+      if (packageFiles[filePath]) {
+        packageFiles[filePath].push({
           type: 'addition',
+          path: filePath,
           contents: newFileContents,
-        };
-      } else if (artifactFiles[file]) {
-        artifactFiles[file] = {
-          ...artifactFiles[file],
-          type: 'addition',
-          contents: newFileContents,
-        };
+        });
       } else {
-        artifactFiles[file] = {
+        artifactFiles[filePath] ??= [];
+        artifactFiles[filePath].push({
           type: 'addition',
+          path: filePath,
           contents: newFileContents,
-          path: file,
-        };
+        });
       }
     }
   }
@@ -187,20 +183,15 @@ function getMatchedFiles(
   return files;
 }
 
-function fileChangeListToMap(list: FileChange[] | undefined): {
-  additions: Record<string, FileAddition>;
-  deletions: Record<string, FileDeletion>;
-} {
-  const additions: Record<string, FileAddition> = {};
-  const deletions: Record<string, FileDeletion> = {};
+function fileChangeListToMap(
+  list: FileChange[] | undefined,
+): Record<string, FileChange[]> {
+  const record: Record<string, FileChange[]> = {};
   for (const fileChange of coerceArray(list)) {
-    if (fileChange.type === 'addition') {
-      additions[fileChange.path] = fileChange;
-    } else {
-      deletions[fileChange.path] = fileChange;
-    }
+    record[fileChange.path] ??= [];
+    record[fileChange.path].push(fileChange);
   }
-  return { additions, deletions };
+  return record;
 }
 
 function addArtifactError(
@@ -213,4 +204,66 @@ function addArtifactError(
     stderr: message,
     fileName,
   });
+}
+
+async function getFileContent(
+  bumpVersionsDescr: string,
+  filePath: string,
+  packageFiles: Record<string, FileChange[]>,
+  artifactFiles: Record<string, FileChange[]>,
+): Promise<string | null> {
+  const packageFileChanges = parseFileChanges(filePath, packageFiles);
+  const artifactFileChanges = parseFileChanges(filePath, artifactFiles);
+
+  // skip if the file is deleted as it virtually doesn't exist
+  if (
+    packageFileChanges.state === 'deleted' ||
+    artifactFileChanges.state === 'deleted'
+  ) {
+    return null;
+  }
+
+  if (packageFileChanges.state === 'modified') {
+    const lastChange = packageFileChanges.content;
+    if (lastChange) {
+      return lastChange;
+    }
+  }
+  if (artifactFileChanges.state === 'modified') {
+    const lastChange = artifactFileChanges.content;
+    if (lastChange) {
+      return lastChange;
+    }
+  }
+
+  try {
+    return await readLocalFile(filePath, 'utf8');
+  } catch (e) {
+    logger.warn(
+      { file: filePath },
+      `${bumpVersionsDescr}: Could not read file: ${e.message}`,
+    );
+    return null;
+  }
+}
+
+function parseFileChanges(
+  filePath: string,
+  changeRecord: Record<string, FileChange[]>,
+): ParseFileChangesResult {
+  const changes = coerceArray(changeRecord[filePath]);
+
+  // skip if we can fetch from record
+  if (!changes.length) {
+    return { state: 'unmodified' };
+  }
+
+  const lastChange = changes[changes.length - 1];
+  if (lastChange.type === 'deletion') {
+    return { state: 'deleted' };
+  }
+  return {
+    state: 'modified',
+    content: lastChange.contents?.toString() ?? null,
+  };
 }

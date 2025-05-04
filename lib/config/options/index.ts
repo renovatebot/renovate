@@ -133,6 +133,7 @@ const options: RenovateOptions[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     default: 'patch',
+    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     parents: ['bumpVersions'],
   },
   {
@@ -2819,7 +2820,7 @@ const options: RenovateOptions[] = [
       'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
     type: 'array',
     subType: 'string',
-    parents: ['customManagers', 'bumpVersions'],
+    parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
   },

@@ -223,6 +223,14 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
+              version: 1.0.0
+              dependencies: {}
+            `,
+          },
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
               version: 1.1.0
               dependencies: {}
             `,
@@ -261,9 +269,101 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
+            version: 1.0.0
+            dependencies: {}
+            `,
+          },
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
               version: 1.1.0
               dependencies: {}
             `,
+          },
+        ],
+      });
+    });
+
+    it('should bump version in deleted and recreated file changed artifact file', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: null,
+            filePatterns: ['foo'],
+            bumpType: 'minor',
+            matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'deletion',
+            path: 'foo',
+          },
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
+            version: 1.0.0
+            dependencies: {}
+            `,
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo']);
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'deletion',
+            path: 'foo',
+          },
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
+            version: 1.0.0
+            dependencies: {}
+            `,
+          },
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
+              version: 1.1.0
+              dependencies: {}
+            `,
+          },
+        ],
+      });
+    });
+
+    it('should ignore deleted file', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            name: null,
+            filePatterns: ['foo'],
+            bumpType: 'minor',
+            matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'deletion',
+            path: 'foo',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo']);
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'deletion',
+            path: 'foo',
           },
         ],
       });
@@ -290,13 +390,14 @@ describe('workers/repository/update/branch/bump-versions', () => {
           },
         ],
       });
+      fs.readLocalFile.mockRejectedValue(new Error('an error'));
       scm.getFileList.mockResolvedValueOnce(['foo-bar']);
 
       await bumpVersions(config);
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { file: 'foo-bar' },
-        'bumpVersions(foo): Could not read file',
+        'bumpVersions(foo): Could not read file: an error',
       );
       expect(config).toMatchObject({
         updatedPackageFiles: [
@@ -343,6 +444,14 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       expect(config).toMatchObject({
         updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: codeBlock`
+              version: 1.0.0
+              dependencies: {}
+            `,
+          },
           {
             type: 'addition',
             path: 'foo',
