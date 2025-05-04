@@ -1,6 +1,6 @@
 import upath from 'upath';
-import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import * as _decrypt from '../../../../config/decrypt';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
