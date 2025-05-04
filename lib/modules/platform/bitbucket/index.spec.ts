@@ -1,12 +1,11 @@
-import * as httpMock from '../../../../test/http-mock';
-import { git, hostRules, logger } from '../../../../test/util';
 import * as memCache from '../../../util/cache/memory';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { PlatformResult, RepoParams } from '../types';
 import type { PrTask } from './schema';
 import * as bitbucket from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://api.bitbucket.org';

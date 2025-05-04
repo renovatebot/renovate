@@ -48,6 +48,7 @@ export interface LookupUpdateConfig
   replacementName?: string;
   replacementNameTemplate?: string;
   replacementVersion?: string;
+  replacementVersionTemplate?: string;
   extractVersion?: string;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;

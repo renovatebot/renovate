@@ -33,10 +33,10 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       // use file url paths to avoid issues with windows paths
       // typescript does not support file URL for import
       const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
-      /* v8 ignore next: not testable */
-      let config = tmpConfig.default ? tmpConfig.default : tmpConfig;
+      /* v8 ignore next -- not testable */
+      let config = tmpConfig.default ?? tmpConfig;
       // Allow the config to be a function
-      if (is.function_(config)) {
+      if (is.function(config)) {
         config = config();
       }
       return config;

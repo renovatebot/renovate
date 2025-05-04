@@ -1,6 +1,6 @@
-import * as httpMock from '../../../../test/http-mock';
 import { GithubHttp } from '../../http/github';
 import { queryReleases, queryTags } from '.';
+import * as httpMock from '~test/http-mock';
 
 const http = new GithubHttp();
 

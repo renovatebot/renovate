@@ -1,9 +1,9 @@
 import { HTTPError } from 'got';
-import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { GitlabReleasesDatasource } from '../../modules/datasource/gitlab-releases';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
+import * as httpMock from '~test/http-mock';
 import { logger } from '~test/util';
 
 hostRules.add({

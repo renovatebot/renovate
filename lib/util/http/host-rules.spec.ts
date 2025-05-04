@@ -44,6 +44,11 @@ describe('util/http/host-rules', () => {
       hostType: 'bitbucket',
       token: 'cdef',
     });
+
+    hostRules.add({
+      hostType: 'bitbucket-server',
+      token: 'cdef',
+    });
   });
 
   afterEach(() => {
@@ -494,6 +499,40 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('no fallback to bitbucket-server', () => {
+    hostRules.add({
+      hostType: 'bitbucket-server-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+    const opts = { ...options, hostType: 'bitbucket-server-tags' };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      password: 'xxx',
+      username: 'some',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'bitbucket-server-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+  });
+
+  it('fallback to bitbucket-server', () => {
+    const opts = { ...options, hostType: 'bitbucket-server-tags' };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'cdef',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'bitbucket-server-tags',
+      token: 'cdef',
+    });
+  });
+
   it('no fallback to gitea', () => {
     hostRules.add({
       hostType: 'gitea-tags',
@@ -561,6 +600,21 @@ describe('util/http/host-rules', () => {
       headers: {
         Accept: 'replacement',
       },
+    });
+  });
+
+  it('enabled=false with noAuth', () => {
+    hostRules.add({
+      hostType: 'docker',
+      enabled: false,
+    });
+
+    const opts = { ...options, hostType: 'docker', noAuth: true };
+    const hostRule = findMatchingRule(url, opts);
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'docker',
+      noAuth: true,
+      enabled: false,
     });
   });
 });

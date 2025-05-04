@@ -193,7 +193,7 @@ export function generateBranchConfig(
     }
     if (upg.newDigest) {
       upg.newDigestShort =
-        upg.newDigestShort ||
+        upg.newDigestShort ??
         upg.newDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upg.isDigest || upg.isPinDigest) {
@@ -285,7 +285,6 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&
@@ -459,6 +458,11 @@ export function generateBranchConfig(
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
   }
+
+  // Set skipInstalls to false if any upgrade in the branch has it false
+  config.skipInstalls = config.upgrades.every(
+    (upgrade) => upgrade.skipInstalls !== false,
+  );
 
   const tableRows = config.upgrades
     .map(getTableValues)

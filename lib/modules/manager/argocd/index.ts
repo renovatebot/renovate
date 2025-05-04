@@ -10,7 +10,7 @@ export const url = 'https://argo-cd.readthedocs.io';
 export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [

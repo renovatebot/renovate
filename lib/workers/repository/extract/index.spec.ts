@@ -1,15 +1,14 @@
-import { mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
+import { partial, scm } from '~test/util';
 
 vi.mock('./manager-files');
-vi.mock('../../../util/git');
 
-const managerFiles = mocked(_managerFiles);
+const managerFiles = vi.mocked(_managerFiles);
 
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
@@ -62,7 +61,11 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       config.customManagers = [
-        { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
+        {
+          customType: 'regex',
+          managerFilePatterns: ['README'],
+          matchStrings: [''],
+        },
       ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');

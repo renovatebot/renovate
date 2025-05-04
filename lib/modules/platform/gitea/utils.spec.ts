@@ -1,4 +1,3 @@
-import { partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { Repo } from './types';
 import {
@@ -7,6 +6,7 @@ import {
   trimTrailingApiPath,
   usableRepo,
 } from './utils';
+import { partial } from '~test/util';
 
 describe('modules/platform/gitea/utils', () => {
   const mockRepo = partial<Repo>({

@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
@@ -84,7 +85,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+    'The release timestamp is determined from the `tag_last_pushed` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -123,6 +124,7 @@ export class DockerDatasource extends Datasource {
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
+        cacheProvider: memCacheProvider,
       });
       return manifestResponse;
     } catch (err) /* istanbul ignore next */ {
@@ -199,7 +201,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -244,7 +246,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -291,7 +293,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -527,7 +529,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          // istanbul ignore if: should never happen
+          /* v8 ignore next 3 -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -1099,7 +1101,7 @@ export class DockerDatasource extends Datasource {
       ? 'latest'
       : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
-    // istanbul ignore if: needs test
+    /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {
       return ret;
     }

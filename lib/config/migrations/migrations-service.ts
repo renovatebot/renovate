@@ -22,6 +22,7 @@ import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
+import { FileMatchMigration } from './custom/file-match-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -61,6 +62,8 @@ import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
+    'allowCommandTemplating',
+    'allowPostUpgradeCommandTemplating',
     'deepExtract',
     'gitFs',
     'groupBranchName',
@@ -69,6 +72,7 @@ export class MigrationsService {
     'groupPrTitle',
     'lazyGrouping',
     'maintainYarnLock',
+    'raiseDeprecationWarnings',
     'statusCheckVerify',
     'supportPolicy',
     'transitiveRemediation',
@@ -77,12 +81,10 @@ export class MigrationsService {
     'yarnMaintenanceCommitMessage',
     'yarnMaintenancePrBody',
     'yarnMaintenancePrTitle',
-    'raiseDeprecationWarnings',
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
-    ['allowPostUpgradeCommandTemplating', 'allowCommandTemplating'],
     ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],
@@ -161,6 +163,7 @@ export class MigrationsService {
     MatchManagersMigration,
     CustomManagersMigration,
     PlatformCommitMigration,
+    FileMatchMigration,
   ];
 
   static run(

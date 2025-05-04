@@ -96,7 +96,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 export function prepareZodError(err: ZodError): Record<string, unknown> {
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    /* v8 ignore next 3: TODO: drop set? */
+    /* v8 ignore next 3 -- TODO: drop set? */
     set: () => {
       /* intentionally empty */
     },
@@ -178,7 +178,7 @@ export function sanitizeValue(
     return value;
   }
 
-  if (is.function_(value)) {
+  if (is.function(value)) {
     return '[function]';
   }
 

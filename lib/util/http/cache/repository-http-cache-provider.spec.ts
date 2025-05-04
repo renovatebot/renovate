@@ -1,7 +1,7 @@
 import { Http } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { resetCache } from '../../cache/repository';
 import { repoCacheProvider } from './repository-http-cache-provider';
+import * as httpMock from '~test/http-mock';
 
 describe('util/http/cache/repository-http-cache-provider', () => {
   beforeEach(() => {
