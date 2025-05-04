@@ -1,3 +1,4 @@
+import { describe } from 'vitest';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
@@ -2069,6 +2070,77 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if no bumpVersion filePattern is provided', async () => {
+      const config = {
+        bumpVersion: {
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          bumpType: 'patch',
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              bumpType: 'patch',
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config as any,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      const config = {
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config as any,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allow bumpVersion ', async () => {
+      const config = {
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config as any,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
     });
   });
 });

@@ -10,6 +10,7 @@ import type {
   FileDeletion,
 } from '../../../../util/git/types';
 import { regEx } from '../../../../util/regex';
+import { matchRegexOrGlobList } from '../../../../util/string-match';
 import { compile } from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { getFilteredFileList } from '../../extract/file-match';
@@ -59,16 +60,19 @@ async function bumpVersion(
   packageFiles: Record<string, FileAddition>,
   artifactFiles: Record<string, FileAddition>,
 ): Promise<void> {
+  const bumpVersionsDescr = config.name
+    ? `bumpVersions(${config.name})`
+    : 'bumpVersions';
+
   const files: string[] = [];
   try {
-    files.push(...getMatchedFiles(config.fileMatch, branchConfig, fileList));
+    files.push(...getMatchedFiles(config.filePatterns, branchConfig, fileList));
   } catch (e) {
     addArtifactError(
       branchConfig,
       `Failed to calculate matched files for bumpVersions: ${e.message}`,
     );
   }
-
   // prepare the matchStrings
   const matchStringsRegexes: RegExp[] = [];
   for (const matchString of config.matchStrings) {
@@ -78,7 +82,7 @@ async function bumpVersion(
     } catch (e) {
       addArtifactError(
         branchConfig,
-        `Failed to compile matchString for bumpVersions: ${e.message}`,
+        `Failed to compile matchString for ${bumpVersionsDescr}: ${e.message}`,
         matchString,
       );
     }
@@ -91,7 +95,7 @@ async function bumpVersion(
     fileContents ??= artifactFiles[file]?.contents?.toString();
     fileContents ??= await readLocalFile(file, 'utf8');
     if (!fileContents) {
-      logger.trace({ file }, `bumpVersions: Could not read file`);
+      logger.warn({ file }, `${bumpVersionsDescr}: Could not read file`);
       continue;
     }
 
@@ -103,7 +107,7 @@ async function bumpVersion(
       }
       const version = regexResult.groups?.version;
       if (!version) {
-        logger.trace({ file }, `bumpVersions: No version found`);
+        logger.debug({ file }, `${bumpVersionsDescr}: No version found`);
         continue;
       }
 
@@ -115,12 +119,12 @@ async function bumpVersion(
       } catch (e) {
         addArtifactError(
           branchConfig,
-          `Failed to calculate new version for bumpVersions: ${e.message}`,
+          `Failed to calculate new version for ${bumpVersionsDescr}: ${e.message}`,
           file,
         );
       }
       if (!newVersion) {
-        logger.debug({ file }, `bumpVersions: Could not bump version`);
+        logger.debug({ file }, `${bumpVersionsDescr}: Could not bump version`);
         continue;
       }
 
@@ -158,29 +162,26 @@ async function bumpVersion(
 
 /**
  * Get files that match ANY of the fileMatches pattern. fileMatches are compiled with the branchConfig.
- * @param fileMatches list of regex patterns
+ * @param filePatternTemplates list of regex patterns
  * @param branchConfig compile metadata
  * @param fileList list of files to match against
  */
 function getMatchedFiles(
-  fileMatches: string[],
+  filePatternTemplates: string[],
   branchConfig: BranchConfig,
   fileList: string[],
 ): string[] {
   // prepare file regex
-  const fileMatchRegexes: RegExp[] = [];
-  for (const fileMatchElement of fileMatches) {
-    const fileMatch = compile(fileMatchElement, branchConfig);
-    fileMatchRegexes.push(regEx(fileMatch));
+  const filePatterns: string[] = [];
+  for (const filePatternTemplateElement of filePatternTemplates) {
+    const filePattern = compile(filePatternTemplateElement, branchConfig);
+    filePatterns.push(filePattern);
   }
   // get files that match the fileMatch
   const files: string[] = [];
   for (const file of fileList) {
-    for (const fileMatchRegex of fileMatchRegexes) {
-      if (fileMatchRegex.test(file)) {
-        files.push(file);
-        break;
-      }
+    if (matchRegexOrGlobList(file, filePatterns)) {
+      files.push(file);
     }
   }
   return files;

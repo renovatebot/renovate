@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { fs, logger, partial, scm } from '../../../../../test/util';
 import * as templates from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { bumpVersions } from './bump-versions';
+import { fs, logger, partial, scm } from '~test/util';
 
 vi.mock('../../../../util/fs');
 
@@ -30,7 +30,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['\\.release-version'],
+            name: null,
+            filePatterns: ['\\.release-version'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
           },
@@ -46,14 +47,15 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
-    it('should catch template error in fileMatch', async () => {
+    it('should catch template error in filePatterns', async () => {
       vi.spyOn(templates, 'compile').mockImplementationOnce(() => {
         throw new Error("Unexpected token '{'");
       });
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['\\^'],
+            name: null,
+            filePatterns: ['\\^'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
           },
@@ -90,7 +92,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: 'bar',
+            filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
           },
@@ -112,7 +115,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
         artifactErrors: [
           {
             stderr:
-              "Failed to compile matchString for bumpVersions: Unexpected token '{'",
+              "Failed to compile matchString for bumpVersions(bar): Unexpected token '{'",
           },
         ],
       });
@@ -128,7 +131,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: null,
+            filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
           },
@@ -160,7 +164,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['\\.release-version'],
+            name: null,
+            filePatterns: ['\\.release-version'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
           },
@@ -192,7 +197,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: null,
+            filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
           },
@@ -202,8 +208,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.0.0
-            dependencies: {}
+              version: 1.0.0
+              dependencies: {}
             `,
           },
         ],
@@ -217,8 +223,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.1.0
-            dependencies: {}
+              version: 1.1.0
+              dependencies: {}
             `,
           },
         ],
@@ -229,7 +235,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: null,
+            filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
           },
@@ -254,8 +261,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.1.0
-            dependencies: {}
+              version: 1.1.0
+              dependencies: {}
             `,
           },
         ],
@@ -266,7 +273,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: 'foo',
+            filePatterns: ['foo-bar'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
           },
@@ -286,9 +294,9 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
       await bumpVersions(config);
 
-      expect(logger.logger.trace).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         { file: 'foo-bar' },
-        'bumpVersions: Could not read file',
+        'bumpVersions(foo): Could not read file',
       );
       expect(config).toMatchObject({
         updatedPackageFiles: [
@@ -296,8 +304,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.0.0
-            dependencies: {}
+              version: 1.0.0
+              dependencies: {}
             `,
           },
         ],
@@ -308,7 +316,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            fileMatch: ['foo'],
+            name: null,
+            filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: [
               'version=\\s*(?<version>[^\\s]+)', // not matching with the version group
@@ -322,8 +331,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.0.0
-            dependencies: {}
+              version: 1.0.0
+              dependencies: {}
             `,
           },
         ],
@@ -338,8 +347,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.1.0
-            dependencies: {}
+              version: 1.1.0
+              dependencies: {}
             `,
           },
         ],

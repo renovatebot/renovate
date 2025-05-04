@@ -470,21 +470,21 @@ This is useful if Renovate does not support bumping the version in a package fil
 
 For example, if you have a file `.release-version` with the version in it, you can configure Renovate to bump the version in that file to next minor release.
 
-`fileMatch` is a regex pattern to match the file name and follow the same rules.
+`filePatterns` is a regex pattern to match the file name and follow the same rules.
 
 `matchStrings` is an array of regex patterns to match the version string in the file.
 It must contain a named capture group `version` to capture the version string.
 
 <!-- prettier-ignore -->
 !!! tip
-    You can use templates in `fileMatch`, `bumpType`, and `matchStrings`.
+    You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
     This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
 
 ```json title="renovate.json with bumpVersions"
 {
   "bumpVersions": [
     {
-      "fileMatch": ["\\.release-version"],
+      "filePatterns": [".release-version"],
       "bumpType": "minor",
       "matchStrings": ["^(?<version>.+)$"]
     }
@@ -501,7 +501,7 @@ The following example will only bump the version if there has been an upgrade in
     {
       "matchFileNames": ["charts/**"],
       "bumpVersions": {
-        "fileMatch": "{{packageFileDir}}\/Chart.ya?ml",
+        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
         "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}",
         "matchStrings": ["version:\\s(?<version>[^\\s]+)"]
       }
@@ -527,6 +527,16 @@ E.g. this will use `patch` if the upgrade has been of type `patch` else it will 
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
 ```
+
+### filePatterns
+
+This field is used to define which files should be scanned using the regexes defined with `matchStrings`.
+It should contain one or more patterns following the common [Renovate pattern matching syntax](./string-pattern-matching.md) and allows additionally using templates for dynamic patterns.
+See [Templates](./templates.md) for more information.
+
+### name
+
+This name is used to identify the bump version rule in the logs.
 
 ## cloneSubmodules
 

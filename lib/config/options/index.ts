@@ -136,6 +136,22 @@ const options: RenovateOptions[] = [
     parents: ['bumpVersions'],
   },
   {
+    name: 'filePatterns',
+    description:
+      'A list of patterns to match files that contain the version string.',
+    type: 'array',
+    subType: 'string',
+    parents: ['bumpVersions'],
+  },
+  {
+    name: 'name',
+    description:
+      'A name for the bumpVersion config. This is used for logging and debugging.',
+    type: 'string',
+    default: null,
+    parents: ['bumpVersions'],
+  },
+  {
     name: 'postUpgradeTasks',
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate.',
