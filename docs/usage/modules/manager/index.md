@@ -52,7 +52,7 @@ For example:
 
 #### Ignoring files that match the default managerFilePatterns
 
-Renovate will _extend_ the existing [`managerFilePatterns`](../../configuration-options.md#managerFilePatterns), meaning you don't need to include the default patterns like `Dockerfile` in your own array.
+Renovate will _extend_ the existing [`managerFilePatterns`](../../configuration-options.md#managerfilepatterns), meaning you don't need to include the default patterns like `Dockerfile` in your own array.
 In other words, the patterns are "additive".
 If a manager matches a file that you _don't_ want it to, ignore it using the [`ignorePaths`](../../configuration-options.md#ignorepaths) configuration option.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
