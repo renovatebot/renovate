@@ -101,7 +101,9 @@ If you need any further assistance then you can also [request help here](${
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.nonEmptyArray(config.description) ? config.description : [];
+  const desc = is.array(config.description, is.string)
+    ? config.description
+    : [];
   return desc.concat(getScheduleDesc(config));
 }
 
