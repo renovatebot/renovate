@@ -8,7 +8,7 @@ export const url = 'https://projectsveltos.github.io/sveltos';
 export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];

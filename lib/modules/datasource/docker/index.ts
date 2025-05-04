@@ -6,6 +6,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { getEnv } from '../../../util/env';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
@@ -85,7 +86,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+    'The release timestamp is determined from the `tag_last_pushed` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -124,6 +125,7 @@ export class DockerDatasource extends Datasource {
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
+        cacheProvider: memCacheProvider,
       });
       return manifestResponse;
     } catch (err) /* istanbul ignore next */ {

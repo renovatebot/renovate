@@ -8,7 +8,7 @@ export const url = 'https://github.com/bazelbuild/bazelisk';
 export const categories: Category[] = ['bazel'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.bazelversion$'],
+  managerFilePatterns: ['/(^|/)\\.bazelversion$/'],
   pinDigests: false,
   versioning: semverVersioning.id,
 };

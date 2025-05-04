@@ -1,4 +1,5 @@
 import upath from 'upath';
+import * as _decrypt from '../../../../config/decrypt';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
@@ -6,7 +7,10 @@ import * as _hostRulesFromEnv from './host-rules-from-env';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
+vi.mock('../../../../config/decrypt');
 vi.mock('./host-rules-from-env');
+
+const decrypt = vi.mocked(_decrypt);
 
 const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
 
@@ -109,7 +113,8 @@ describe('workers/global/config/parse/index', () => {
       const expected = await readSystemFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
-      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
+      expect(parsedConfig.privateKey).toBeUndefined();
+      expect(decrypt.setPrivateKeys).toHaveBeenCalledWith(expected, undefined);
     });
 
     it('supports Bitbucket username/password', async () => {
@@ -204,6 +209,28 @@ describe('workers/global/config/parse/index', () => {
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
+    });
+
+    it('apply secrets to global config', async () => {
+      vi.doMock('../../../../../config.js', () => ({
+        default: {},
+      }));
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_SECRETS: '{"SECRET_TOKEN": "secret_token"}',
+        RENOVATE_CUSTOM_ENV_VARIABLES:
+          '{"TOKEN": "{{ secrets.SECRET_TOKEN }}"}',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toMatchObject({
+        secrets: {
+          SECRET_TOKEN: 'secret_token',
+        },
+
+        customEnvVariables: {
+          TOKEN: 'secret_token',
+        },
+      });
     });
   });
 });

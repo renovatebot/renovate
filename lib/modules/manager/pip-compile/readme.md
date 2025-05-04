@@ -6,20 +6,20 @@ The `uv pip compile` command is also supported through this manager in the same 
 The current implementation has some limitations.
 Read the full document before you start using the `pip-compile` manager.
 
-### Non-configured fileMatch
+### Non-configured managerFilePatterns
 
-The `pip-compile` manager has an empty array for default `fileMatch`, meaning it won't match any files ever by default.
-You can "activate" the manager by specifying a `fileMatch` pattern such as:
+The `pip-compile` manager has an empty array for default `managerFilePatterns`, meaning it won't match any files ever by default.
+You can "activate" the manager by specifying a `managerFilePatterns` pattern such as:
 
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["(^|/)requirements\\.txt$"]
+    "managerFilePatterns": ["/(^|/)requirements\\.txt$/"]
   }
 }
 ```
 
-`pip-compile` reads the output files to extract the arguments passed to the original command, as such the `fileMatch` must be configured for `*.txt` files and not `*.in`.
+`pip-compile` reads the output files to extract the arguments passed to the original command, as such the `managerFilePatterns` must be configured for `*.txt` files and not `*.in`.
 
 ### Assumption of header with a command
 
