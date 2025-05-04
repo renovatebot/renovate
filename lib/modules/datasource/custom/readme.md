@@ -27,7 +27,7 @@ Available template variables:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["k3s.version"],
+      "managerFilePatterns": ["/k3s.version/"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
       "versioningTemplate": "semver-coerced",
@@ -248,7 +248,7 @@ You can use this configuration to request the newest versions of the Hashicorp p
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?) )?depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s*\\w*:\\s*(?<currentValue>.*)\\s"
@@ -283,7 +283,7 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "matchStrings": [
         "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
       ],
@@ -369,7 +369,7 @@ And the following custom manager:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.yml$"],
+      "managerFilePatterns": ["/\\.yml$/"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"

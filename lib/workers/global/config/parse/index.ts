@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
+import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
+import { applySecretsToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { logger, setContext } from '../../../../logger';
@@ -60,8 +62,12 @@ export async function parseConfigs(
     delete config.privateKeyPathOld;
   }
 
+  // Add private keys for sanitizing then set and delete them
   addSecretForSanitizing(config.privateKey, 'global');
   addSecretForSanitizing(config.privateKeyOld, 'global');
+  setPrivateKeys(config.privateKey, config.privateKeyOld);
+  delete config.privateKey;
+  delete config.privateKeyOld;
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -107,6 +113,16 @@ export async function parseConfigs(
   if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
     config.onboardingNoDeps = 'enabled';
+  }
+
+  // do not add these secrets to repoSecrets and,
+  //  do not delete the secrets object after applying on global config as it needs to be re-used for repo config
+  if (is.nonEmptyObject(config.secrets)) {
+    config = applySecretsToConfig(config, undefined, false);
+    // adding these secrets to the globalSecrets set so that they can be redacted from logs
+    for (const secret of Object.values(config.secrets!)) {
+      addSecretForSanitizing(secret, 'global');
+    }
   }
 
   if (is.nonEmptyObject(config.customEnvVariables)) {
