@@ -77,6 +77,12 @@ class DockerVersioningApi extends GenericVersioningApi {
     return suffix2.localeCompare(suffix1);
   }
 
+  haveSameVPrefix(version1: string, version2: string): boolean {
+    const hasV1 = version1.startsWith('v');
+    const hasV2 = version2.startsWith('v');
+    return hasV1 === hasV2;
+  }
+
   override isCompatible(version: string, current: string): boolean {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(current);
@@ -84,7 +90,8 @@ class DockerVersioningApi extends GenericVersioningApi {
       parsed1 &&
       parsed2 &&
       parsed1.suffix === parsed2.suffix &&
-      parsed1.release.length === parsed2.release.length
+      parsed1.release.length === parsed2.release.length &&
+      this.haveSameVPrefix(version, current)
     );
   }
 
