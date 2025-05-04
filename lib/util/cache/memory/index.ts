@@ -20,9 +20,9 @@ export function set(key: string, value: unknown): void {
 
 export function cleanDatasourceKeys(): void {
   if (memCache) {
-    for (const k of Object.keys(memCache)) {
-      if (k.startsWith('global%%') || k.startsWith('datasource-releases')) {
-        delete memCache[k];
+    for (const key of Object.keys(memCache)) {
+      if (key.startsWith('global%%') || key.startsWith('datasource-releases')) {
+        delete memCache[key];
       }
     }
   }
