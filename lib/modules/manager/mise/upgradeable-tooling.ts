@@ -240,7 +240,6 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
           datasource: GithubTagsDatasource.id,
           packageName: 'apache/kafka',
           currentValue: apacheMatches.version,
-          extractVersion: '^(?<version>\\S+)',
         };
       }
 
