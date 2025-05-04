@@ -465,25 +465,33 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 ## bumpVersions
 
-Use this option to configure Renovate to increase a semantic version in your code when it updates dependencies.
-This is useful if Renovate does not support bumping the version in a package file which Renovate does not support, or the version is not in a package file.
+The `bumpVersions` option allows Renovate to update semantic version strings in your code when dependencies are updated.
+This is useful for files or version fields that Renovate does not natively support or for custom versioning needs.
 
-For example, if you have a file `.release-version` with the version in it, you can configure Renovate to bump the version in that file to next minor release.
+The option is an array of rules, each specifying how and where to bump versions. Each rule includes the following fields:
 
-`filePatterns` is a regex pattern to match the file name and follow the same rules.
-
-`matchStrings` is an array of regex patterns to match the version string in the file.
-It must contain a named capture group `version` to capture the version string.
+- `filePatterns`: A list of regex patterns to match file names. These patterns follow Renovate's [string pattern matching syntax](./string-pattern-matching.md). Templates can also be used for dynamic patterns.
+- `matchStrings`: An array of regex patterns to locate version strings within the matched files. Any of the regexes can match the content. Each pattern must include a named capture group `version` to extract the version string.
+- `bumpType`: Specifies the type of version bump which defaults to `patch`. Supported values are:
+  - `prerelease`
+  - `patch`
+  - `minor`
+  - `major`
+    This field supports templates for conditional logic.
+- `name` (optional): A descriptive name for the rule, which is used in logs for easier identification.
 
 <!-- prettier-ignore -->
 !!! tip
     You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
     This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
 
-```json title="renovate.json with bumpVersions"
+Here is an example of a `bumpVersions` configuration:
+
+```json
 {
   "bumpVersions": [
     {
+      "name": "Updating release version file",
       "filePatterns": [".release-version"],
       "bumpType": "minor",
       "matchStrings": ["^(?<version>.+)$"]
@@ -492,51 +500,90 @@ It must contain a named capture group `version` to capture the version string.
 }
 ```
 
-To only bump the version conditionally, you can use [`packageRules`](#packagerules) to select specific upgrades.
-The following example will only bump the version if there has been an upgrade in the `charts/` directory.
+In this example:
 
-```json title="renovate.json with bumpVersions wrapped in a packageRule"
+- Renovate scans files named `.release-version`.
+- It matches the entire file content as the version string.
+- It bumps the version to the next minor release.
+
+**Conditional Bumping with `packageRules`:**
+
+You can use `packageRules` to apply `bumpVersions` conditionally.
+For example, to bump versions only for updates in the `charts/` directory:
+
+```json
 {
   "packageRules": [
     {
       "matchFileNames": ["charts/**"],
       "bumpVersions": {
         "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
-        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}",
-        "matchStrings": ["version:\\s(?<version>[^\\s]+)"]
+        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
       }
     }
   ]
 }
 ```
 
+In this configuration:
+
+- If Renovate updates dependencies in the `charts/` directory check the `Chart.yaml` file next to the updated file.
+- The version string is extracted from lines matching `version: <value>`.
+- The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
+
 ### bumpType
 
-The `bumpType` field can be one of:
+The `bumpType` field specifies the type of version bump to apply.
+Supported values are:
 
 - `prerelease`
 - `patch`
 - `minor`
 - `major`
 
-As this is a template field you can conditionally set the step to upgrade.
-E.g. this will use `patch` if the upgrade has been of type `patch` else it will return `minor`.
+This field supports templates for conditional logic.
+For example:
 
-```json title="bumpType example with template"
+```json
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
 ```
 
+In this example, the bump type is set to `patch` for patch updates and `minor` for all other cases.
+
 ### filePatterns
 
-This field is used to define which files should be scanned using the regexes defined with `matchStrings`.
-It should contain one or more patterns following the common [Renovate pattern matching syntax](./string-pattern-matching.md) and allows additionally using templates for dynamic patterns.
-See [Templates](./templates.md) for more information.
+The `filePatterns` field defines which files should be scanned for version strings.
+It accepts one or more patterns following Renovate's [string pattern matching syntax](./string-pattern-matching.md).
+Templates can also be used for dynamic patterns. See [Templates](./templates.md) for more information.
+
+For example:
+
+```json
+{
+  "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
+}
+```
+
+This configuration matches files named `version.txt` in any directory and `Chart.yaml` files in specific package directories.
+
+---
 
 ### name
 
-This name is used to identify the bump version rule in the logs.
+The `name` field is an optional identifier for the bump version rule. It is used in logs to help identify which rule is being applied.
+
+For example:
+
+```json
+{
+  "name": "Update release version"
+}
+```
+
+This name will appear in Renovate logs, making it easier to debug or trace specific rules.
 
 ## cloneSubmodules
 
@@ -4472,3 +4519,5 @@ If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its n
   }
 }
 ```
+
+`
