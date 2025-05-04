@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
+import * as _decrypt from '../../../../config/decrypt';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
@@ -8,7 +9,10 @@ import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
+vi.mock('../../../../config/decrypt');
 vi.mock('./host-rules-from-env');
+
+const decrypt = vi.mocked(_decrypt);
 
 const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
 
@@ -111,7 +115,8 @@ describe('workers/global/config/parse/index', () => {
       const expected = await readSystemFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
-      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
+      expect(parsedConfig.privateKey).toBeUndefined();
+      expect(decrypt.setPrivateKeys).toHaveBeenCalledWith(expected, undefined);
     });
 
     it('supports Bitbucket username/password', async () => {

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
 import { applySecretsToConfig } from '../../../../config/secrets';
@@ -90,8 +91,12 @@ export async function parseConfigs(
     delete config.privateKeyPathOld;
   }
 
+  // Add private keys for sanitizing then set and delete them
   addSecretForSanitizing(config.privateKey, 'global');
   addSecretForSanitizing(config.privateKeyOld, 'global');
+  setPrivateKeys(config.privateKey, config.privateKeyOld);
+  delete config.privateKey;
+  delete config.privateKeyOld;
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
