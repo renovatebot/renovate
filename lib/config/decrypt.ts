@@ -36,8 +36,8 @@ export async function tryDecrypt(
   if (key?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr =
       getEnv().RENOVATE_X_USE_OPENPGP === 'true'
-        ? await tryDecryptOpenPgp(privateKey, encryptedStr)
-        : await tryDecryptKbPgp(privateKey, encryptedStr);
+        ? await tryDecryptOpenPgp(key, encryptedStr)
+        : await tryDecryptKbPgp(key, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }

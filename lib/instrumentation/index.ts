@@ -80,8 +80,7 @@ export function init(): void {
     [ATTR_SERVICE_NAME]: env.OTEL_SERVICE_NAME ?? 'renovate',
     // https://github.com/open-telemetry/opentelemetry-js/tree/main/semantic-conventions#unstable-semconv
     // https://github.com/open-telemetry/opentelemetry-js/blob/e9d3c71918635d490b6a9ac9f8259265b38394d0/semantic-conventions/src/experimental_attributes.ts#L7688
-    ['service.namespace']:
-      env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
+    ['service.namespace']: env.OTEL_SERVICE_NAMESPACE ?? 'renovatebot.com',
     [ATTR_SERVICE_VERSION]: env.OTEL_SERVICE_VERSION ?? pkg.version,
   });
 
