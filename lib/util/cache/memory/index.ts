@@ -1,19 +1,29 @@
-let repoCache: Record<string, any> | undefined;
+let memCache: Record<string, any> | undefined;
 
 export function init(): void {
-  repoCache = {};
+  memCache = {};
 }
 
 export function reset(): void {
-  repoCache = undefined;
+  memCache = undefined;
 }
 
 export function get<T = any>(key: string): T {
-  return repoCache?.[key];
+  return memCache?.[key];
 }
 
 export function set(key: string, value: unknown): void {
-  if (repoCache) {
-    repoCache[key] = value;
+  if (memCache) {
+    memCache[key] = value;
+  }
+}
+
+export function cleanDatasourceKeys(): void {
+  if (memCache) {
+    for (const k of Object.keys(memCache)) {
+      if (k.startsWith('global%%') || k.startsWith('datasource-releases')) {
+        delete memCache[k];
+      }
+    }
   }
 }
