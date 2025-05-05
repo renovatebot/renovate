@@ -36,7 +36,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       /* v8 ignore next -- not testable */
       let config = tmpConfig.default ?? tmpConfig;
       // Allow the config to be a function
-      if (is.function_(config)) {
+      if (is.function(config)) {
         config = config();
       }
       return config;
