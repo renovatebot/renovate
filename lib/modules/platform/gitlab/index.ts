@@ -27,7 +27,7 @@ import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import {
   ensureTrailingSlash,
@@ -1522,17 +1522,9 @@ export async function expandGroupMembers(
 }
 
 export function extractRulesFromCodeOwnersFile(
-  codeOwnersFile: string,
+  cleanedLines: string[],
 ): FileOwnerRule[] {
   const parser = new CodeOwnersParser();
-
-  const cleanedLines = codeOwnersFile
-    .split(newlineRegex)
-    // Remove comments
-    .map((line) => line.split('#')[0])
-    // Remove empty lines
-    .map((line) => line.trim())
-    .filter(is.nonEmptyString);
 
   for (const line of cleanedLines) {
     parser.parseLine(line);

@@ -287,7 +287,7 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
-  extractRulesFromCodeOwnersFile?(fileContent: string): FileOwnerRule[];
+  extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
