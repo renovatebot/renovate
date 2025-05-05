@@ -108,4 +108,4 @@ export type PackageCacheNamespace =
   | 'url-sha256';
 
 export type CombinedKey =
-  `datasource-mem-cache:package-cache-memoization:${PackageCacheNamespace}:${string}`;
+  `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

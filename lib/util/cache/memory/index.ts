@@ -22,8 +22,8 @@ export function cleanDatasourceKeys(): void {
   if (memCache) {
     for (const key of Object.keys(memCache)) {
       if (
-        key.startsWith('datasource-mem-cache:package-cache-memoization:') ||
-        key.startsWith('datasource-mem-cache:releases-memoization:')
+        key.startsWith('datasource-mem:pkg-fetch:') ||
+        key.startsWith('datasource-mem:releases:')
       ) {
         delete memCache[key];
       }
