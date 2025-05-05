@@ -3011,6 +3011,11 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
+This matching can be an exact match, Glob match, or Regular Expression match.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
 Invalid if used outside of a `packageRule`.
 
 ### matchFileNames
