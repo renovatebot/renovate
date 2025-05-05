@@ -31,11 +31,16 @@ describe('util/cache/memory/index', () => {
       expect(memCache.get('another-key')).toBe('data');
     });
 
-    it('removes keys that start with global%%', () => {
-      memCache.set('global%%test', 'value');
+    it('removes keys that start with datasource-mem-cache:package-cache-memoization:', () => {
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:test',
+        'value',
+      );
       memCache.set('normal-key', 'data');
       memCache.cleanDatasourceKeys();
-      expect(memCache.get('global%%test')).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:package-cache-memoization:test'),
+      ).toBeUndefined();
       expect(memCache.get('normal-key')).toBe('data');
     });
 
@@ -48,8 +53,14 @@ describe('util/cache/memory/index', () => {
     });
 
     it('removes all matching keys while keeping others', () => {
-      memCache.set('global%%test1', 'value1');
-      memCache.set('global%%test2', 'value2');
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:test1',
+        'value1',
+      );
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:test2',
+        'value2',
+      );
       memCache.set('datasource-releases-npm', 'npm-data');
       memCache.set('datasource-releases-docker', 'docker-data');
       memCache.set('normal-key1', 'normal1');
@@ -57,8 +68,12 @@ describe('util/cache/memory/index', () => {
 
       memCache.cleanDatasourceKeys();
 
-      expect(memCache.get('global%%test1')).toBeUndefined();
-      expect(memCache.get('global%%test2')).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:package-cache-memoization:test1'),
+      ).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:package-cache-memoization:test2'),
+      ).toBeUndefined();
       expect(memCache.get('datasource-releases-npm')).toBeUndefined();
       expect(memCache.get('datasource-releases-docker')).toBeUndefined();
       expect(memCache.get('normal-key1')).toBe('normal1');

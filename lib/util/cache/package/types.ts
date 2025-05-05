@@ -107,4 +107,5 @@ export type PackageCacheNamespace =
   | 'terraform-provider-hash'
   | 'url-sha256';
 
-export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
+export type CombinedKey =
+  `datasource-mem-cache:package-cache-memoization:${PackageCacheNamespace}:${string}`;
