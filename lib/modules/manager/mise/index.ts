@@ -20,7 +20,10 @@ export const displayName = 'mise-en-place';
 export const url = 'https://mise.jdx.dev';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.?mise\\.toml$', '(^|/)\\.?mise/config\\.toml$'],
+  managerFilePatterns: [
+    '/(^|/)\\.?mise\\.toml$/',
+    '/(^|/)\\.?mise/config\\.toml$/',
+  ],
 };
 
 const backendDatasources = {

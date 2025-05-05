@@ -158,16 +158,19 @@ export function migrateConfig(
     }
     if (
       is.nonEmptyObject(migratedConfig['pip-compile']) &&
-      is.nonEmptyArray(migratedConfig['pip-compile'].fileMatch)
+      is.nonEmptyArray(migratedConfig['pip-compile'].managerFilePatterns)
     ) {
-      migratedConfig['pip-compile'].fileMatch = migratedConfig[
+      migratedConfig['pip-compile'].managerFilePatterns = migratedConfig[
         'pip-compile'
-      ].fileMatch.map((fileMatch) => {
-        const match = fileMatch as string;
-        if (match.endsWith('.in')) {
-          return match.replace(/\.in$/, '.txt');
+      ].managerFilePatterns.map((filePattern) => {
+        const pattern = filePattern as string;
+        if (pattern.endsWith('.in')) {
+          return pattern.replace(/\.in$/, '.txt');
         }
-        return match.replace(/\.in\$$/, '.txt$');
+        if (pattern.endsWith('.in/')) {
+          return pattern.replace(/\.in\/$/, '.txt/');
+        }
+        return pattern.replace(/\.in\$\/$/, '.txt$/');
       });
     }
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {

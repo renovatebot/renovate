@@ -9,7 +9,7 @@ export const url = 'https://github.com/nvm-sh/nvm#readme';
 export const categories: Category[] = ['js', 'node'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.nvmrc$'],
+  managerFilePatterns: ['/(^|/)\\.nvmrc$/'],
   versioning: nodeVersioning.id,
   pinDigests: false,
 };
