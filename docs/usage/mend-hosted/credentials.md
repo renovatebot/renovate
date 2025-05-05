@@ -4,13 +4,14 @@ The information on this page is for the Mend-hosted cloud apps:
 
 - Renovate App on GitHub
 - Mend App on Bitbucket
+- Mend App on Azure DevOps
 
 If you self-host, you can skip reading this page.
 
 ## :warning: Migrate secrets in your Renovate config file :warning:
 
-The Mend-hosted cloud app will stop reading secrets from the Renovate config file in your repository on 01-Oct-2024.
-You must migrate any secrets you currently keep in the Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).
+The Mend Renovate cloud apps no longer read `encrypted` secrets from Renovate config files in your repositories.
+You must migrate any secrets you currently keep in a Renovate config file, and upload them as secrets to org or repo settings pages on [developer.mend.io](https://developer.mend.io).
 To add secrets you must have admin-level rights.
 
 Read [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md) to learn more.

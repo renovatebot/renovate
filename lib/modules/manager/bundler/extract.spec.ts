@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const railsGemfile = Fixtures.get('Gemfile.rails');
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
@@ -171,14 +171,22 @@ describe('modules/manager/bundler/extract', () => {
   it('parses inline source in Gemfile', async () => {
     const sourceInlineGemfile = codeBlock`
       baz = 'https://gems.baz.com'
+      gem 'inline_gem'
       gem "inline_source_gem", source: 'https://gems.foo.com'
       gem 'inline_source_gem_with_version', "~> 1", source: 'https://gems.bar.com'
       gem 'inline_source_gem_with_variable_source', source: baz
+      gem 'inline_source_gem_with_variable_source_and_require_after', source: baz, require: %w[inline_source_gem]
+      gem "inline_source_gem_with_require_after", source: 'https://gems.foo.com', require: %w[inline_source_gem]
+      gem "inline_source_gem_with_require_before", require: %w[inline_source_gem], source: 'https://gems.foo.com'
+      gem "inline_source_gem_with_group_before", group: :production, source: 'https://gems.foo.com'
       `;
     fs.readLocalFile.mockResolvedValueOnce(sourceInlineGemfile);
     const res = await extractPackageFile(sourceInlineGemfile, 'Gemfile');
     expect(res).toMatchObject({
       deps: [
+        {
+          depName: 'inline_gem',
+        },
         {
           depName: 'inline_source_gem',
           registryUrls: ['https://gems.foo.com'],
@@ -191,6 +199,104 @@ describe('modules/manager/bundler/extract', () => {
         {
           depName: 'inline_source_gem_with_variable_source',
           registryUrls: ['https://gems.baz.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_variable_source_and_require_after',
+          registryUrls: ['https://gems.baz.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_after',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_require_before',
+          registryUrls: ['https://gems.foo.com'],
+        },
+        {
+          depName: 'inline_source_gem_with_group_before',
+          registryUrls: ['https://gems.foo.com'],
+        },
+      ],
+    });
+  });
+
+  it('parses git refs in Gemfile', async () => {
+    const gitRefGemfile = codeBlock`
+      gem 'foo', git: 'https://github.com/foo/foo', ref: 'fd184883048b922b176939f851338d0a4971a532'
+      gem 'bar', git: 'https://github.com/bar/bar', tag: 'v1.0.0'
+      gem 'baz', github: 'baz/baz', branch: 'master'
+      `;
+
+    fs.readLocalFile.mockResolvedValueOnce(gitRefGemfile);
+    const res = await extractPackageFile(gitRefGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          packageName: 'https://github.com/foo/foo',
+          sourceUrl: 'https://github.com/foo/foo',
+          currentDigest: 'fd184883048b922b176939f851338d0a4971a532',
+          datasource: 'git-refs',
+        },
+        {
+          depName: 'bar',
+          packageName: 'https://github.com/bar/bar',
+          sourceUrl: 'https://github.com/bar/bar',
+          currentValue: 'v1.0.0',
+          datasource: 'git-refs',
+        },
+        {
+          depName: 'baz',
+          packageName: 'https://github.com/baz/baz',
+          sourceUrl: 'https://github.com/baz/baz',
+          currentValue: 'master',
+          datasource: 'git-refs',
+        },
+      ],
+    });
+  });
+
+  it('parses multiple current values Gemfile', async () => {
+    const multipleValuesGemfile = codeBlock`
+      gem 'gem_without_values'
+      gem 'gem_with_one_value', ">= 3.0.5"
+      gem 'gem_with_multiple_values', ">= 3.0.5", "< 3.2"
+    `;
+    fs.readLocalFile.mockResolvedValueOnce(multipleValuesGemfile);
+    const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'gem_without_values',
+        },
+        {
+          depName: 'gem_with_one_value',
+          currentValue: '">= 3.0.5"',
+        },
+        {
+          depName: 'gem_with_multiple_values',
+          currentValue: '">= 3.0.5", "< 3.2"',
+        },
+      ],
+    });
+  });
+
+  it('skips local gems in Gemfile', async () => {
+    const pathGemfile = codeBlock`
+      gem 'foo', path: 'vendor/foo'
+      gem 'bar'
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(pathGemfile);
+    const res = await extractPackageFile(pathGemfile, 'Gemfile');
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'foo',
+          skipReason: 'internal-package',
+        },
+        {
+          depName: 'bar',
         },
       ],
     });

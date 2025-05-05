@@ -1,5 +1,6 @@
 import type {
   CreateNodeOptions,
+  Document,
   DocumentOptions,
   ParseOptions,
   SchemaOptions,
@@ -8,9 +9,9 @@ import type {
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
 import type { ZodType } from 'zod';
 import { logger } from '../logger';
-import { regEx } from './regex';
+import { stripTemplates } from './string';
 
-interface YamlOptions<
+export interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends ParseOptions,
@@ -20,7 +21,14 @@ interface YamlOptions<
   removeTemplates?: boolean;
 }
 
-interface YamlOptionsMultiple<
+interface YamlParseDocumentOptions
+  extends ParseOptions,
+    DocumentOptions,
+    SchemaOptions {
+  removeTemplates?: boolean;
+}
+
+export interface YamlOptionsMultiple<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends YamlOptions<ResT, Schema> {
@@ -68,7 +76,7 @@ export function parseYaml<ResT = unknown>(
     if (errors?.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
-        logger.debug(`Failed to parse YAML file: ${error.message}`);
+        logger.debug(`Failed to parse YAML file`);
         continue;
       }
       throw error;
@@ -117,15 +125,7 @@ export function parseSingleYaml<ResT = unknown>(
   content: string,
   options?: YamlOptions<ResT>,
 ): ResT {
-  const massagedContent = massageContent(content, options);
-  const rawDocument = parseDocument(
-    massagedContent,
-    prepareParseOption(options),
-  );
-
-  if (rawDocument?.errors?.length) {
-    throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');
-  }
+  const rawDocument = parseSingleYamlDocument(content, options);
 
   const document = rawDocument.toJS({ maxAliasCount: 10000 });
   const schema = options?.customSchema;
@@ -136,18 +136,38 @@ export function parseSingleYaml<ResT = unknown>(
   return schema.parse(document);
 }
 
+/**
+ * Parse a YAML string into a Document representation.
+ *
+ * Only a single document is supported.
+ *
+ * @param content
+ * @param options
+ */
+export function parseSingleYamlDocument(
+  content: string,
+  options?: YamlParseDocumentOptions,
+): Document {
+  const massagedContent = massageContent(content, options);
+  const rawDocument = parseDocument(
+    massagedContent,
+    prepareParseOption(options),
+  );
+
+  if (rawDocument?.errors?.length) {
+    throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');
+  }
+
+  return rawDocument;
+}
+
 export function dump(obj: any, opts?: DumpOptions): string {
   return stringify(obj, opts);
 }
 
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
-    return content
-      .replace(regEx(/\s+{{.+?}}:.+/gs), '')
-      .replace(regEx(/{{`.+?`}}/gs), '')
-      .replace(regEx(/{{.+?}}/gs), '')
-      .replace(regEx(/{%`.+?`%}/gs), '')
-      .replace(regEx(/{%.+?%}/g), '');
+    return stripTemplates(content);
   }
 
   return content;

@@ -242,7 +242,12 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (!packageFile.path.endsWith('package.json')) {
+    if (
+      !(
+        packageFile.path.endsWith('package.json') ||
+        packageFile.path.endsWith('pnpm-workspace.yaml')
+      )
+    ) {
       continue;
     }
     logger.debug(`Writing ${packageFile.path}`);
@@ -312,7 +317,7 @@ export async function updateYarnBinary(
   let yarnrcYml = existingYarnrcYmlContent;
   try {
     const yarnrcYmlFilename = upath.join(lockFileDir, '.yarnrc.yml');
-    yarnrcYml ||= (await getFile(yarnrcYmlFilename)) ?? undefined;
+    yarnrcYml ??= (await getFile(yarnrcYmlFilename)) ?? undefined;
     const newYarnrcYml = await readLocalFile(yarnrcYmlFilename, 'utf8');
     if (!is.string(yarnrcYml) || !is.string(newYarnrcYml)) {
       return existingYarnrcYmlContent;
@@ -370,17 +375,9 @@ export async function getAdditionalFiles(
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }
-  if (
-    config.reuseExistingBranch &&
-    !config.updatedPackageFiles?.length &&
-    config.upgrades?.every((upgrade) => upgrade.isLockfileUpdate)
-  ) {
-    logger.debug('Existing branch contains all necessary lock file updates');
-    return { artifactErrors, updatedArtifacts };
-  }
   logger.debug('Getting updated lock files');
   if (
-    config.updateType === 'lockFileMaintenance' &&
+    config.isLockFileMaintenance &&
     config.reuseExistingBranch &&
     (await scm.branchExists(config.branchName))
   ) {

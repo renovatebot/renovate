@@ -96,10 +96,11 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 
 export async function resolveGlobalExtends(
   globalExtends: string[],
+  ignorePresets?: string[],
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalExtends };
+    const config = { extends: globalExtends, ignorePresets };
     const resolvedConfig = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
@@ -133,26 +134,31 @@ export async function start(): Promise<number> {
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
-      if (config?.globalExtends) {
+      if (is.nonEmptyArray(config?.globalExtends)) {
         // resolve global presets immediately
         config = mergeChildConfig(
-          await resolveGlobalExtends(config.globalExtends),
+          await resolveGlobalExtends(
+            config.globalExtends,
+            config.ignorePresets,
+          ),
           config,
         );
       }
 
-      // Set allowedHeaders in case hostRules headers are configured in file config
+      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint and allowedHeaders in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        userAgent: config.userAgent,
       });
 
       await validatePresets(config);
@@ -217,9 +223,12 @@ export async function start(): Promise<number> {
     await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
-      logger.fatal(err.message.substring(6));
+      logger.fatal(
+        { errorMessage: err.message.substring(6) },
+        'Initialization error',
+      );
     } else {
-      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
+      logger.fatal({ err }, 'Unknown error');
     }
     if (!config!) {
       // return early if we can't parse config options

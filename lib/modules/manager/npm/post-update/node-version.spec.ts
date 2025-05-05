@@ -1,12 +1,12 @@
-import { fs } from '../../../../../test/util';
 import { Lazy } from '../../../../util/lazy';
 import {
   getNodeConstraint,
   getNodeToolConstraint,
   getNodeUpdate,
 } from './node-version';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('modules/manager/npm/post-update/node-version', () => {
   const config = {

@@ -1,12 +1,24 @@
 # Renovate configuration overview
 
-When Renovate runs on a repository, the final config used is derived from the:
+Each time Renovate runs on a repository it reads the configuration files listed below and creates a final config.
+This final config describes what Renovate will do during its run.
 
-- Default config
-- Global config
-- Inherited config
-- Repository config
-- Resolved presets referenced in config
+The final config is internal to Renovate, and is _not_ saved or cached for a later run.
+But you can always find the final config in Renovate's logs.
+
+Renovate reads the configuration files in this order (from from top to bottom):
+
+1. Default config
+2. Global config
+   - File config
+   - Environment config
+   - CLI config
+3. Inherited config
+4. Resolved presets referenced in config
+5. Repository config
+
+Items with a higher number override items that have lower numbers.
+If the item has the `mergeable` property, it will merge with lower numbers instead.
 
 <!-- prettier-ignore -->
 !!! note
@@ -158,6 +170,19 @@ Avoid putting any global-only setting in a Inherited config, as doing so will re
 Inherited config may use all Repository config settings, and any Global config options which have the "supportsInheritConfig" property in the docs.
 
 For information on how the Mend Renovate App supports Inherited config, see the dedicated "Mend Renovate App Config" section toward the end of this page.
+
+#### Presets handling
+
+If the inherited config contains `extends` presets, then Renovate will:
+
+1. Resolve the presets
+1. Add the resolved preset config to the beginning of the inherited config
+1. Merge the presets on top of the global config
+
+##### You can not ignore presets from inherited config
+
+You can _not_ use `ignorePresets` in your repository config to ignore presets _within_ inherited config.
+This is because inherited config is resolved _before_ the repository config.
 
 ### Repository config
 

@@ -5,8 +5,10 @@ export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 export { updateDependency } from './update';
 
+export const url = 'https://cashapp.github.io/hermit';
+
 export const defaultConfig = {
-  fileMatch: partialDefaultConfig.fileMatch,
+  managerFilePatterns: partialDefaultConfig.managerFilePatterns,
   excludeCommitPaths: partialDefaultConfig.excludeCommitPaths,
   versioning: versionId,
 };

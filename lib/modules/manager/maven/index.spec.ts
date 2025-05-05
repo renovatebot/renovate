@@ -1,6 +1,4 @@
 // TODO #22198
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
   extractAllPackageFiles,
@@ -8,8 +6,10 @@ import {
   resolveParents,
 } from './extract';
 import { updateDependency } from './update';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const parentPomContent = Fixtures.get('parent.pom.xml');
@@ -25,7 +25,7 @@ describe('modules/manager/maven/index', () => {
     it('should update an existing dependency', () => {
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractPackage(simpleContent, 'some-file')!;
+      const { deps } = extractPackage(simpleContent, 'some-file', {})!;
       const dep = selectDep(deps);
       const updatedContent = updateDependency({
         fileContent: simpleContent,
@@ -33,7 +33,7 @@ describe('modules/manager/maven/index', () => {
       })!;
 
       const updatedDep = selectDep(
-        extractPackage(updatedContent, 'some-file')!.deps,
+        extractPackage(updatedContent, 'some-file', {})!.deps,
       );
       expect(updatedDep?.currentValue).toEqual(newValue);
     });
@@ -42,8 +42,8 @@ describe('modules/manager/maven/index', () => {
       const newValue = '9.9.9.9-final';
 
       const packages = resolveParents([
-        extractPackage(parentPomContent, 'parent.pom.xml')!,
-        extractPackage(childPomContent, 'child.pom.xml')!,
+        extractPackage(parentPomContent, 'parent.pom.xml', {})!,
+        extractPackage(childPomContent, 'child.pom.xml', {})!,
       ]);
       const [{ deps }] = packages;
       const dep = selectDep(deps, 'org.example:quux');
@@ -53,8 +53,8 @@ describe('modules/manager/maven/index', () => {
       })!;
 
       const [updatedPkg] = resolveParents([
-        extractPackage(updatedContent, 'parent.pom.xml')!,
-        extractPackage(childPomContent, 'child.pom.xml')!,
+        extractPackage(updatedContent, 'parent.pom.xml', {})!,
+        extractPackage(childPomContent, 'child.pom.xml', {})!,
       ]);
       const updatedDep = selectDep(updatedPkg.deps, 'org.example:quux');
       expect(updatedDep?.registryUrls).toContain('http://example.com/');
@@ -62,7 +62,7 @@ describe('modules/manager/maven/index', () => {
     });
 
     it('should not touch content if new and old versions are equal', () => {
-      const { deps } = extractPackage(simpleContent, 'some-file')!;
+      const { deps } = extractPackage(simpleContent, 'some-file', {})!;
       const dep = selectDep(deps);
       const updatedContent = updateDependency({
         fileContent: simpleContent,
@@ -130,7 +130,7 @@ describe('modules/manager/maven/index', () => {
     });
 
     it('should return null if current versions in content and upgrade are not same', () => {
-      const { deps } = extractPackage(simpleContent, 'some-file')!;
+      const { deps } = extractPackage(simpleContent, 'some-file', {})!;
       const dep = selectDep(deps);
 
       const updatedContent = updateDependency({
@@ -144,7 +144,7 @@ describe('modules/manager/maven/index', () => {
       const newValue = '[1.2.3]';
       const select = (depSet: PackageFileContent) =>
         selectDep(depSet.deps, 'org.example:hard-range');
-      const oldContent = extractPackage(simpleContent, 'some-file');
+      const oldContent = extractPackage(simpleContent, 'some-file', {});
       const dep = select(oldContent!);
       const newContent = extractPackage(
         updateDependency({
@@ -152,6 +152,7 @@ describe('modules/manager/maven/index', () => {
           upgrade: { ...dep, newValue },
         })!,
         'some-file',
+        {},
       );
       const newDep = select(newContent!);
       expect(newDep?.currentValue).toEqual(newValue);
@@ -160,7 +161,7 @@ describe('modules/manager/maven/index', () => {
     it('should preserve ranges', () => {
       const select = (depSet: PackageFileContent) =>
         depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
-      const oldContent = extractPackage(simpleContent, 'some-file');
+      const oldContent = extractPackage(simpleContent, 'some-file', {});
       const dep = select(oldContent!);
       expect(dep).not.toBeNull();
 

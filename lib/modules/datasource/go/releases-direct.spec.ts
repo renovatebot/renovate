@@ -1,25 +1,21 @@
-import { mockDeep } from 'jest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import * as _hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('./base');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./base');
 
 const datasource = new GoDirectDatasource();
-const getDatasourceSpy = jest.spyOn(BaseGoDatasource, 'getDatasource');
-const hostRules = mocked(_hostRules);
+const getDatasourceSpy = vi.spyOn(BaseGoDatasource, 'getDatasource');
+const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
-  const gitGetTags = jest.spyOn(GitTagsDatasource.prototype, 'getReleases');
-  const githubGetTags = jest.spyOn(
-    GithubTagsDatasource.prototype,
-    'getReleases',
-  );
+  const gitGetTags = vi.spyOn(GitTagsDatasource.prototype, 'getReleases');
+  const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
   beforeEach(() => {
     hostRules.find.mockReturnValue({});
@@ -129,19 +125,19 @@ describe('modules/datasource/go/releases-direct', () => {
           {
             gitRef: 'v0.1.0',
             newDigest: 'd73d815ec22c421e7192a414594ac798c73c89e5',
-            releaseTimestamp: '2022-05-15T16:29:42Z',
+            releaseTimestamp: '2022-05-15T16:29:42.000Z',
             version: 'v0.1.0',
           },
           {
             gitRef: 'v0.2.0',
             newDigest: '3976707232cb68751ff2ddf42547ff95c6878a97',
-            releaseTimestamp: '2022-05-15T17:23:28Z',
+            releaseTimestamp: '2022-05-15T17:23:28.000Z',
             version: 'v0.2.0',
           },
           {
             gitRef: 'v0.2.1',
             newDigest: '2963b104773ead7ed28c00181c03318885d909dc',
-            releaseTimestamp: '2024-09-06T23:44:34Z',
+            releaseTimestamp: '2024-09-06T23:44:34.000Z',
             version: 'v0.2.1',
           },
         ],

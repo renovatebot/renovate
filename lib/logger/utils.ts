@@ -57,14 +57,12 @@ type ZodShortenedIssue =
     };
 
 export function prepareZodIssues(input: unknown): ZodShortenedIssue {
-  // istanbul ignore if
   if (!is.plainObject(input)) {
     return null;
   }
 
   let err: null | string | string[] = null;
   if (is.array(input._errors, is.string)) {
-    // istanbul ignore else
     if (input._errors.length === 1) {
       err = input._errors[0];
     } else if (input._errors.length > 1) {
@@ -89,17 +87,19 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
 
   if (entries.length > 3) {
-    output['___'] = `... ${entries.length - 3} more`;
+    output.___ = `... ${entries.length - 3} more`;
   }
 
   return output;
 }
 
 export function prepareZodError(err: ZodError): Record<string, unknown> {
-  // istanbul ignore next
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    set: () => {},
+    /* v8 ignore next 3 -- TODO: drop set? */
+    set: () => {
+      /* intentionally empty */
+    },
   });
 
   return {
@@ -142,13 +142,11 @@ export default function prepareError(err: Error): Record<string, unknown> {
     options.method = err.options.method;
     options.http2 = err.options.http2;
 
-    // istanbul ignore else
     if (err.response) {
       response.response = {
-        statusCode: err.response?.statusCode,
-        statusMessage: err.response?.statusMessage,
+        statusCode: err.response.statusCode,
+        statusMessage: err.response.statusMessage,
         body:
-          // istanbul ignore next: not easily testable
           err.name === 'TimeoutError'
             ? undefined
             : structuredClone(err.response.body),
@@ -180,7 +178,7 @@ export function sanitizeValue(
     return value;
   }
 
-  if (is.function_(value)) {
+  if (is.function(value)) {
     return '[function]';
   }
 
@@ -317,7 +315,7 @@ export function validateLogLevel(
       },
     ],
   });
-  logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
+  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
   process.exit(1);
 }
 
@@ -338,4 +336,17 @@ export function getEnv(key: string): string | undefined {
   return [process.env[`RENOVATE_${key}`], process.env[key]]
     .map((v) => v?.toLowerCase().trim())
     .find(is.nonEmptyStringAndNotWhitespace);
+}
+
+export function getMessage(
+  p1: string | Record<string, any>,
+  p2?: string,
+): string | undefined {
+  return is.string(p1) ? p1 : p2;
+}
+
+export function toMeta(
+  p1: string | Record<string, any>,
+): Record<string, unknown> {
+  return is.object(p1) ? p1 : {};
 }

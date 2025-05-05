@@ -1,4 +1,3 @@
-import { mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import * as _datasource from '../../modules/datasource';
 import {
@@ -8,9 +7,9 @@ import {
 } from './containerbase';
 import type { ToolConstraint } from './types';
 
-jest.mock('../../modules/datasource');
+vi.mock('../../modules/datasource');
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {

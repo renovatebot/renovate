@@ -4,10 +4,14 @@ import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import * as bazelrc from './bazelrc';
-import type { RecordFragment } from './fragments';
 import { parse } from './parser';
+import type { ResultFragment } from './parser/fragments';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven';
-import { RuleToBazelModulePackageDep } from './rules';
+import { RuleToDockerPackageDep } from './parser/oci';
+import {
+  GitRepositoryToPackageDep,
+  RuleToBazelModulePackageDep,
+} from './rules';
 import * as rules from './rules';
 
 export async function extractPackageFile(
@@ -17,10 +21,20 @@ export async function extractPackageFile(
   try {
     const records = parse(content);
     const pfc = await extractBazelPfc(records, packageFile);
+    const gitRepositoryDeps = extractGitRepositoryDeps(records);
     const mavenDeps = extractMavenDeps(records);
+    const dockerDeps = LooseArray(RuleToDockerPackageDep).parse(records);
+
+    if (gitRepositoryDeps.length) {
+      pfc.deps.push(...gitRepositoryDeps);
+    }
 
     if (mavenDeps.length) {
       pfc.deps.push(...mavenDeps);
+    }
+
+    if (dockerDeps.length) {
+      pfc.deps.push(...dockerDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -31,7 +45,7 @@ export async function extractPackageFile(
 }
 
 async function extractBazelPfc(
-  records: RecordFragment[],
+  records: ResultFragment[],
   packageFile: string,
 ): Promise<PackageFileContent> {
   const pfc: PackageFileContent = LooseArray(RuleToBazelModulePackageDep)
@@ -51,7 +65,13 @@ async function extractBazelPfc(
   return pfc;
 }
 
-function extractMavenDeps(records: RecordFragment[]): PackageDependency[] {
+function extractGitRepositoryDeps(
+  records: ResultFragment[],
+): PackageDependency[] {
+  return LooseArray(GitRepositoryToPackageDep).parse(records);
+}
+
+function extractMavenDeps(records: ResultFragment[]): PackageDependency[] {
   return LooseArray(RuleToMavenPackageDep)
     .transform(fillRegistryUrls)
     .parse(records);

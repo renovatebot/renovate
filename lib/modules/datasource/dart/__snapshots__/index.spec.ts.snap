@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
+exports[`modules/datasource/dart/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
   "registryUrl": "https://pub.dartlang.org",

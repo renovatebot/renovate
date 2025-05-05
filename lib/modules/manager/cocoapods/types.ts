@@ -1,6 +1,6 @@
 export interface ParsedLine {
   depName?: string;
-  groupName?: string;
+  specName?: string;
   spec?: string;
   subspec?: string;
   currentValue?: string;

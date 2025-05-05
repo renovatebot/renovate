@@ -13,6 +13,7 @@ const program = new Command('pnpm release:prepare')
   .description('Build docker images')
   .option('--platform <type>', 'docker platforms to build')
   .option('--version <version>', 'version to use as tag', parseVersion)
+  .option('--channel <channel>', 'channel to use as tag')
   .option('--sha <type>', 'git sha')
   .option('--exit-on-error <boolean>', 'exit on docker error', (s) =>
     s ? s !== 'false' : undefined,

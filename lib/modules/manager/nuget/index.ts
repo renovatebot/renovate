@@ -7,16 +7,18 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 export { bumpPackageVersion } from './update';
 
+export const displayName = 'NuGet';
+export const url = 'https://learn.microsoft.com/nuget';
+export const categories: Category[] = ['dotnet'];
+
 export const defaultConfig = {
-  fileMatch: [
-    '\\.(?:cs|fs|vb)proj$',
-    '\\.(?:props|targets)$',
-    '(^|/)dotnet-tools\\.json$',
-    '(^|/)global\\.json$',
+  managerFilePatterns: [
+    '/\\.(?:cs|fs|vb)proj$/',
+    '/\\.(?:props|targets)$/',
+    '/(^|/)dotnet-tools\\.json$/',
+    '/(^|/)global\\.json$/',
   ],
 };
-
-export const categories: Category[] = ['dotnet'];
 
 export const supportedDatasources = [
   DockerDatasource.id,

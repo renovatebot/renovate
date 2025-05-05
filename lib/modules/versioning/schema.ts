@@ -12,14 +12,13 @@ export const Versioning = z
 
     let versioning = versionings.get(versioningName);
     if (!versioning) {
-      logger.info(
-        { versioning: versioningSpec },
+      logger.debug(
         `Versioning: '${versioningSpec}' not found, falling back to ${defaultVersioning.id}`,
       );
       return defaultVersioning.api;
     }
 
-    if (is.function_(versioning)) {
+    if (is.function(versioning)) {
       const versioningConfig = versioningRest.length
         ? versioningRest.join(':')
         : undefined;

@@ -21,8 +21,7 @@ export function isSpace(c: string): boolean {
 function removeLineComments(content: string): string {
   let newContent = '';
   let comment = false;
-  for (let i = 0; i < content.length; i += 1) {
-    const c = content[i];
+  for (const c of content) {
     if (c === '#') {
       comment = true;
     }

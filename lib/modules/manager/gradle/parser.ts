@@ -18,7 +18,7 @@ import type {
   PackageVariables,
   ParseGradleResult,
 } from './types';
-import { isDependencyString, parseDependencyString } from './utils';
+import { parseDependencyString } from './utils';
 
 const groovy = lang.createLang('groovy');
 const ctx: Ctx = {
@@ -33,6 +33,7 @@ const ctx: Ctx = {
   varTokens: [],
   tmpKotlinImportStore: [],
   tmpNestingDepth: [],
+  tmpRegistryContent: [],
   tmpTokenStore: {},
   tokenMap: {},
 };
@@ -127,28 +128,27 @@ export function parseProps(
 ): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   let offset = 0;
   const vars: PackageVariables = {};
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<GradleManagerData>[] = [];
+
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propRegex.exec(line);
     if (lineMatch?.groups) {
       const { key, value, leftPart } = lineMatch.groups;
-      if (isDependencyString(value)) {
-        const dep = parseDependencyString(value);
-        if (dep) {
-          deps.push({
-            ...dep,
-            managerData: {
-              fileReplacePosition:
-                offset + leftPart.length + dep.depName!.length + 1,
-              packageFile,
-            },
-          });
-        }
+      const replacePosition = offset + leftPart.length;
+      const dep = parseDependencyString(value);
+      if (dep) {
+        deps.push({
+          ...dep,
+          managerData: {
+            fileReplacePosition: replacePosition + dep.depName!.length + 1,
+            packageFile,
+          },
+        });
       } else {
         vars[key] = {
           key,
           value,
-          fileReplacePosition: offset + leftPart.length,
+          fileReplacePosition: replacePosition,
           packageFile,
         };
       }

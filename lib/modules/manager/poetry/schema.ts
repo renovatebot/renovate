@@ -195,9 +195,9 @@ export const PoetryGroupDependencies = LooseRecord(
     .transform(({ dependencies }) => dependencies),
 ).transform((record) => {
   const deps: PackageDependency[] = [];
-  for (const [groupName, group] of Object.entries(record)) {
-    for (const dep of Object.values(group)) {
-      dep.depType = groupName;
+  for (const [name, val] of Object.entries(record)) {
+    for (const dep of Object.values(val)) {
+      dep.depType = name;
       deps.push(dep);
     }
   }

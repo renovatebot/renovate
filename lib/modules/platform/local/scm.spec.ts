@@ -1,12 +1,11 @@
 import { execSync as _execSync } from 'node:child_process';
-import { mockedFunction } from '../../../../test/util';
 import { LocalFs } from './scm';
 
-jest.mock('glob', () => ({
-  glob: jest.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
+vi.mock('glob', () => ({
+  glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
 }));
-jest.mock('node:child_process');
-const execSync = mockedFunction(_execSync);
+vi.mock('node:child_process');
+const execSync = vi.mocked(_execSync);
 
 describe('modules/platform/local/scm', () => {
   let localFs: LocalFs;

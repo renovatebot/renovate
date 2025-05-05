@@ -1,5 +1,6 @@
+import fs from 'node:fs';
 import type { Url } from 'node:url';
-import { afterAll, afterEach, beforeAll } from '@jest/globals';
+import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 // eslint-disable-next-line no-restricted-imports
 import nock from 'nock';
@@ -27,10 +28,10 @@ type BasePath = string | RegExp | Url;
 let requestsDone: RequestLog[] = [];
 let requestsMissing: MissingRequestLog[] = [];
 
-type TestRequest = {
+interface TestRequest {
   method: string;
   href: string;
-};
+}
 
 function onMissing(req: TestRequest, opts?: TestRequest): void {
   if (opts) {
@@ -72,7 +73,7 @@ export function clear(check = true): void {
   }
 
   if (missing.length) {
-    const err = new Error(missingHttpMockMessage(done, missing));
+    const err = new Error(missingHttpMockMessage(done, missing, pending));
     massageHttpMockStacktrace(err);
     throw err;
   }
@@ -123,7 +124,6 @@ function massageHttpMockStacktrace(err: Error): void {
     return;
   }
 
-  const fs: typeof import('fs-extra') = jest.requireActual('fs-extra');
   const content = fs.readFileSync(state.testPath, { encoding: 'utf8' });
 
   // Shrink the `testName` until we could locate it in the source file
@@ -158,6 +158,7 @@ function massageHttpMockStacktrace(err: Error): void {
 function missingHttpMockMessage(
   done: RequestLog[],
   missing: MissingRequestLog[],
+  pending: string[],
 ): string {
   const blocks: string[] = [];
 
@@ -205,6 +206,14 @@ function missingHttpMockMessage(
       Requests done:
 
       ${done.map(({ method, url, status }) => `- ${method} ${url} [${status}]`).join('\n')}
+    `);
+  }
+
+  if (pending.length) {
+    blocks.push(codeBlock`
+      Pending mocks:
+
+      ${pending.join('\n')}
     `);
   }
 
@@ -265,3 +274,10 @@ afterAll(() => {
 afterEach(() => {
   clear();
 });
+
+export function error(props: string | Record<string, unknown> = {}): Error {
+  if (is.string(props)) {
+    return new Error(props);
+  }
+  return Object.assign(new Error(), props);
+}

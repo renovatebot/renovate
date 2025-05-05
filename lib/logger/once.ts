@@ -1,5 +1,7 @@
 type OmitFn = (...args: any[]) => any;
 
+// TODO: use `callsite` package instead?
+
 /**
  * Get the single frame of this function's callers stack.
  *
@@ -24,7 +26,8 @@ function getCallSite(omitFn: OmitFn): string | null {
     if (callsite) {
       result = callsite.toString();
     }
-  } catch /* istanbul ignore next */ {
+    /* v8 ignore next 2 -- should not happen */
+  } catch {
     // no-op
   } finally {
     Error.stackTraceLimit = stackTraceLimitOrig;
@@ -39,7 +42,7 @@ const keys = new Set<string>();
 export function once(callback: () => void, omitFn: OmitFn = once): void {
   const key = getCallSite(omitFn);
 
-  // istanbul ignore if
+  /* v8 ignore next 3 -- should not happen */
   if (!key) {
     return;
   }

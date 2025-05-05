@@ -5,15 +5,16 @@ import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 
+export const displayName = 'HTML';
+export const categories: Category[] = ['cd'];
+
 export const defaultConfig = {
-  fileMatch: ['\\.html?$'],
+  managerFilePatterns: ['/\\.html?$/'],
   versioning: semverVersioning.id,
   digest: {
     enabled: false,
   },
   pinDigests: false,
 };
-
-export const categories: Category[] = ['cd'];
 
 export const supportedDatasources = [CdnjsDatasource.id];

@@ -4,12 +4,14 @@ import * as dockerVersioning from '../../versioning/docker';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [DockerDatasource.id];
+export const displayName = 'pyenv';
+export const url = 'https://github.com/pyenv/pyenv#readme';
+export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.python-version$'],
+  managerFilePatterns: ['/(^|/)\\.python-version$/'],
   versioning: dockerVersioning.id,
   pinDigests: false,
 };
 
-export const categories: Category[] = ['python'];
+export const supportedDatasources = [DockerDatasource.id];

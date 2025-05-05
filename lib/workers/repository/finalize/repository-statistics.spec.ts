@@ -1,6 +1,3 @@
-import { Fixtures } from '../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../test/util';
-import { mockedFunction, partial } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as cache from '../../../util/cache/repository';
@@ -14,9 +11,12 @@ import {
   runBranchSummary,
   runRenovateRepoStats,
 } from './repository-statistics';
+import { Fixtures } from '~test/fixtures';
+import { partial } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../modules/platform/github/pr');
-jest.mock('../../../util/http/github');
+vi.mock('../../../modules/platform/github/pr');
+vi.mock('../../../util/http/github');
 
 const prJson = Fixtures.getJson('./pr-list.json');
 const result = Object.keys(prJson).map((key) => {
@@ -28,7 +28,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
   describe('runRenovateRepoStats', () => {
     beforeEach(() => {
-      mockedFunction(platform.getPrList).mockReturnValue(prJson);
+      vi.mocked(platform.getPrList).mockReturnValue(prJson);
       config = partial<RenovateConfig>({
         onboardingPrTitle: 'Configure Renovate',
         defaultBranch: 'main',
@@ -54,8 +54,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
   });
 
   describe('runBranchSummary', () => {
-    const getCacheSpy = jest.spyOn(cache, 'getCache');
-    const isCacheModifiedSpy = jest.spyOn(cache, 'isCacheModified');
+    const getCacheSpy = vi.spyOn(cache, 'getCache');
+    const isCacheModifiedSpy = vi.spyOn(cache, 'isCacheModified');
     const config: RenovateConfig = {};
 
     it('processes cache with baseBranches only', () => {

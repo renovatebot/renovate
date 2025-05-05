@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip chart that does not have specified version 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -12,7 +12,7 @@ exports[`modules/manager/helmfile/extract extractPackageFile() skip chart that d
 }
 `;
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with special character in the name 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip chart with special character in the name 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -36,7 +36,7 @@ exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with s
 }
 `;
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with unknown repository 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip chart with unknown repository 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -50,7 +50,7 @@ exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with u
 }
 `;
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip if repository details are not specified 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip if repository details are not specified 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -64,7 +64,7 @@ exports[`modules/manager/helmfile/extract extractPackageFile() skip if repositor
 }
 `;
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip local charts 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip local charts 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -76,7 +76,7 @@ exports[`modules/manager/helmfile/extract extractPackageFile() skip local charts
 }
 `;
 
-exports[`modules/manager/helmfile/extract extractPackageFile() skip templetized release with invalid characters 1`] = `
+exports[`modules/manager/helmfile/extract > extractPackageFile() > skip templetized release with invalid characters 1`] = `
 {
   "datasource": "helm",
   "deps": [

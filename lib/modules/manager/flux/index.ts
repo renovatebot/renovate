@@ -12,11 +12,12 @@ import { systemManifestFileNameRegex } from './common';
 export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
-export const defaultConfig = {
-  fileMatch: [systemManifestFileNameRegex],
-};
-
+export const url = 'https://fluxcd.io/flux';
 export const categories: Category[] = ['cd', 'kubernetes'];
+
+export const defaultConfig = {
+  managerFilePatterns: [`/${systemManifestFileNameRegex}/`],
+};
 
 export const supportedDatasources = [
   GithubReleasesDatasource.id,

@@ -17,7 +17,7 @@ let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = process.env): any {
-  // istanbul ignore if
+  /* v8 ignore next 3 -- TODO: add test */
   if (!is.string(value)) {
     return value;
   }
@@ -26,7 +26,7 @@ function envReplace(value: any, env = process.env): any {
 
   return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {
-      logger.warn('Failed to replace env in config: ' + match);
+      logger.warn({ match }, 'Failed to replace env in config');
       throw new Error('env-replace');
     }
     return env[envVarName];

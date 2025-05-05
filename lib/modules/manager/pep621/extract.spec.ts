@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { depTypes } from './utils';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
@@ -236,6 +236,14 @@ describe('modules/manager/pep621/extract', () => {
       );
 
       expect(result?.deps).toEqual([
+        {
+          commitMessageTopic: 'Python',
+          currentValue: '>=3.7',
+          datasource: 'python-version',
+          depType: 'requires-python',
+          packageName: 'python',
+          versioning: 'pep440',
+        },
         {
           packageName: 'blinker',
           depName: 'blinker',
@@ -508,6 +516,14 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'jwcrypto',
             depName: 'jwcrypto',
             datasource: 'pypi',
@@ -568,6 +584,14 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            commitMessageTopic: 'Python',
+            currentValue: '>=3.11',
+            datasource: 'python-version',
+            depType: 'requires-python',
+            packageName: 'python',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'attrs',
             depName: 'attrs',
             datasource: 'pypi',
@@ -596,6 +620,12 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: { python: '>=3.11' },
         deps: [
           {
+            packageName: 'python',
+            depType: 'requires-python',
+            datasource: 'python-version',
+            versioning: 'pep440',
+          },
+          {
             packageName: 'attrs',
             depName: 'attrs',
             datasource: 'pypi',
@@ -604,6 +634,26 @@ describe('modules/manager/pep621/extract', () => {
           },
         ],
       });
+    });
+
+    it('should resolve dependencies with template', async () => {
+      const content = codeBlock`
+            [project]
+            name = "{{ name }}"
+            dynamic = ["version"]
+            requires-python = ">=3.7"
+            license = {text = "MIT"}
+            {# comment #}
+            dependencies = [
+              "blinker",
+              {% if foo %}
+              "packaging>=20.9,!=22.0",
+              {% endif %}
+            ]
+            readme = "README.md"
+          `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toHaveLength(3);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { once, reset } from './once';
 import { logger } from '.';
 
-jest.unmock('.');
+vi.unmock('.');
 
 describe('logger/once', () => {
   afterEach(() => {
@@ -10,7 +10,7 @@ describe('logger/once', () => {
 
   describe('core', () => {
     it('should call a function only once', () => {
-      const innerFn = jest.fn();
+      const innerFn = vi.fn();
 
       function outerFn() {
         once(innerFn);
@@ -23,8 +23,8 @@ describe('logger/once', () => {
     });
 
     it('supports support distinct calls', () => {
-      const innerFn1 = jest.fn();
-      const innerFn2 = jest.fn();
+      const innerFn1 = vi.fn();
+      const innerFn2 = vi.fn();
 
       function outerFn() {
         once(innerFn1);
@@ -39,7 +39,7 @@ describe('logger/once', () => {
     });
 
     it('resets keys', () => {
-      const innerFn = jest.fn();
+      const innerFn = vi.fn();
 
       function outerFn() {
         once(innerFn);
@@ -55,7 +55,7 @@ describe('logger/once', () => {
 
   describe('logger', () => {
     it('logs once per function call', () => {
-      const debug = jest.spyOn(logger, 'debug');
+      const debug = vi.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('test');
@@ -68,8 +68,8 @@ describe('logger/once', () => {
     });
 
     it('distincts between log levels', () => {
-      const debug = jest.spyOn(logger, 'debug');
-      const info = jest.spyOn(logger, 'info');
+      const debug = vi.spyOn(logger, 'debug');
+      const info = vi.spyOn(logger, 'info');
 
       function doSomething() {
         logger.once.debug('test');
@@ -84,7 +84,7 @@ describe('logger/once', () => {
     });
 
     it('distincts between different log statements', () => {
-      const debug = jest.spyOn(logger, 'debug');
+      const debug = vi.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');
@@ -101,7 +101,7 @@ describe('logger/once', () => {
     });
 
     it('allows mixing single-time and regular logging', () => {
-      const debug = jest.spyOn(logger, 'debug');
+      const debug = vi.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');
@@ -123,7 +123,7 @@ describe('logger/once', () => {
     });
 
     it('supports reset method', () => {
-      const debug = jest.spyOn(logger, 'debug');
+      const debug = vi.spyOn(logger, 'debug');
 
       function doSomething() {
         logger.once.debug('foo');

@@ -64,7 +64,7 @@ Read the [GitHub Docs, Signature verification for rebase and merge](https://docs
 
 #### Why we change branch names with multiple slashes
 
-Branches with mutiple slashes (`/`) are not wanted, this was a bug.
+Branches with multiple slashes (`/`) are not wanted, this was a bug.
 We are changing it in a major release out of politeness to all our users.
 If you enabled `branchNameStrict`, you can expect some branch names to change.
 
@@ -91,6 +91,7 @@ Specific:
 - **git:** check _all_ commits on the branch to decide if the branch was modified ([#28225](https://github.com/renovatebot/renovate/pull/28225))
 - **gitea:** use "bearer auth" instead of "token auth" to authenticate to the Gitea platform
 - **github:** if you run Renovate as a GitHub app then `platformCommit` is automatically enabled
+- **gomod:** the value of `GOSUMDB` was previously set to `off`, meaning the Go toolchain would not validate signatures for modules. This has now been corrected, which may result in errors updating Go modules. In particular, if you are using Renovate with private Go modules, you will need to set `GOPRIVATE`. For more details, see [Go's official documentation for working with private Go modules](https://golang.org/ref/mod#private-modules).
 - **http:** remove `dnsCache`
 - **logging:** you must set file logging via env, not in `config.js`
 - **manager/pep621:** change `depName` for `pep621` dependencies. This causes the branch name for `pep621` updates to change, which in turn means Renovate may autoclose and re-open some `pep621` PRs. Also, Renovate may start grouping dependencies into a single PR.
@@ -195,7 +196,7 @@ If you're on a version of Lerna before v7, you should prioritize upgrading to v7
 - **automerge:** Platform automerge will now be chosen by default whenever automerge is enabled
 - Post upgrade templating is now allowed by default, as long as the post upgrade task command is itself already allowed
 - Official Renovate Docker images now use the "slim" approach with `binarySource=install` by default. e.g. `renovate/renovate:latest` is the slim image, not full
-- The "full" image is now available via the tag `full`, e.g. `renovate/renovate:39-full`, and defaults to `binarySource=global` (no dynamic installs)
+- The "full" image is now available via the tag `full`, e.g. `renovate/renovate:40-full`, and defaults to `binarySource=global` (no dynamic installs)
 - Third party tools in the full image have been updated to latest/LTS major version
 
 ### Commentary for 36

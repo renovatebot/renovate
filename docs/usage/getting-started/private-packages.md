@@ -154,7 +154,11 @@ It can be confusing for people who host their own source code privately to be as
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
 - Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, but we recommend you create an "empty" account for this purpose.
-- Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
+- Add the PAT to Renovate using the environment variable `RENOVATE_GITHUB_COM_TOKEN`
+
+<!-- prettier-ignore -->
+!!! note
+    `GITHUB_COM_TOKEN` is still parsed and takes precedence over `RENOVATE_GITHUB_COM_TOKEN`, but is considered deprecated and will be removed in a future major update.
 
 ## Package Manager Credentials for Artifact Updating
 
@@ -485,7 +489,7 @@ private-package==1.2.3
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["requirements.in"]
+    "managerFilePatterns": ["requirements.in"]
   },
   "hostRules": [
     {
@@ -499,7 +503,7 @@ private-package==1.2.3
 
 #### Packages that Renovate needs
 
-Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+Renovate relies on `pip`'s integration with the Python [keyring](https://pypi.org/project/keyring/) package along with the [keyrings.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
 
 ##### Self-hosting Renovate
 
@@ -511,7 +515,7 @@ But if you are self-hosting Renovate and:
 - _not_ running Renovate in a Containerbase environment
 - or, _not_ using the Docker sidecar container
 
-Then you must install the Python keyring package and the keyrigs.envvars package into your self-hosted environment.
+Then you must install the Python keyring package and the keyrings.envvars package into your self-hosted environment.
 
 ### poetry
 
@@ -605,7 +609,7 @@ If you need to provide credentials to the Mend Renovate App, please do this:
      "hostRules": [
        {
          "matchHost": "github.com",
-         "token": "{{ secrets.GITHUB_COM_TOKEN }}"
+         "token": "{{ secrets.RENOVATE_GITHUB_COM_TOKEN }}"
        }
      ]
    }

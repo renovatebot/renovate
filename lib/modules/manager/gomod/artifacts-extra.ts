@@ -26,15 +26,23 @@ export function getExtraDeps(
       continue;
     }
 
-    const { depName, currentValue } = res;
+    const { depName, depType, currentValue } = res;
     if (!depName || !currentValue) {
       continue;
     }
 
+    let expandedDepName = depName;
+    // NOTE: Right now the only special depType we care about is 'toolchain' because the table
+    // rendering prior to this change was ambiguous with regards to go version vs toolchain
+    // version updates.
+    if (depType === 'toolchain') {
+      expandedDepName = `${depName} (${depType})`;
+    }
+
     if (added) {
-      addDeps[depName] = currentValue;
+      addDeps[expandedDepName] = currentValue;
     } else {
-      rmDeps[depName] = currentValue;
+      rmDeps[expandedDepName] = currentValue;
     }
   }
 
@@ -92,7 +100,11 @@ export function getExtraDepsNotice(
   ];
 
   const goUpdated = extraDeps.some(({ depName }) => depName === 'go');
-  const otherDepsCount = extraDeps.length - (goUpdated ? 1 : 0);
+  const toolchainUpdated = extraDeps.some(
+    ({ depName }) => depName === 'go (toolchain)',
+  );
+  const otherDepsCount =
+    extraDeps.length - (goUpdated ? 1 : 0) - (toolchainUpdated ? 1 : 0);
 
   if (otherDepsCount === 1) {
     noticeLines.push(`- ${otherDepsCount} additional dependency was updated`);

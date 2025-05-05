@@ -4,11 +4,12 @@ import { KubernetesApiDatasource } from '../../datasource/kubernetes-api';
 
 export { extractPackageFile } from './extract';
 
-export const defaultConfig = {
-  fileMatch: [],
-};
-
+export const url = 'https://kubernetes.io/docs';
 export const categories: Category[] = ['kubernetes'];
+
+export const defaultConfig = {
+  managerFilePatterns: [],
+};
 
 export const supportedDatasources = [
   DockerDatasource.id,

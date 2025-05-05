@@ -1,27 +1,31 @@
-# syntax=docker/dockerfile:1.12.0@sha256:db1ff77fb637a5955317c7a3a62540196396d565f3dd5742e76dddbb6d75c4c5
+# syntax=docker/dockerfile:1.15.1@sha256:9857836c9ee4268391bb5b09f9f157f3c91bb15821bb77969642813b0d00518d
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.11.3@sha256:ab2d4b9fccf67319a396dc4de146d8bc2e57e5e152946663ab8160f83125b077 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.64.4@sha256:0f23280377ccbcf5a4ffc864aaf7bfa3d319fe100816791d808337eabf3b5e02 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.11.3-full@sha256:2b2dff67edfded6909bcd201d3f561cdd9275c1fe50e844f14b34bc69cbc16af AS full-base
+FROM ghcr.io/renovatebot/base-image:9.64.4-full@sha256:8dd30f37a1a6974c82254efec874fae892af42f5361376f4eb018186539fcfbf AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.11.3@sha256:ab2d4b9fccf67319a396dc4de146d8bc2e57e5e152946663ab8160f83125b077 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.64.4@sha256:0f23280377ccbcf5a4ffc864aaf7bfa3d319fe100816791d808337eabf3b5e02 AS build
 
 # We want a specific node version here
-# renovate: datasource=node-version
-RUN install-tool node 22.11.0
+# renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
+RUN install-tool node 22.15.0
+
+# corepack is too buggy 😞
+# renovate: datasource=npm
+RUN install-tool pnpm 10.10.0
 
 WORKDIR /usr/local/renovate
 
@@ -47,29 +51,31 @@ RUN set -ex; \
   cp ${temp_dir}/bin/node ./node; \
   true
 
-# fetch npm packages
+# prepare pnpm env
 ENV CI=1 npm_config_modules_cache_max_age=0 \
   npm_config_loglevel=info
 
-
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
-
-COPY --link pnpm-lock.yaml ./
-
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
+ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
+COPY --link .npmrc ./
+COPY --link patches ./patches
+COPY --link pnpm-lock.yaml ./
+
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
-  export npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}; \
-  corepack pnpm fetch --prod; \
+  pnpm fetch --prod --ignore-scripts; \
   true
 
 COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  corepack pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --prod --offline --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3; \
   true
 
 # --------------------------------------
@@ -96,8 +102,9 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
-RUN mkdir -p /tmp/renovate/cache && \
-    chmod -R 777 /tmp/renovate
+# /runner/cache is an alternative cache directory used in both Docker and microVMs.
+RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
+  chmod -R 777 /tmp/renovate /runner
 
 # test
 RUN set -ex; \

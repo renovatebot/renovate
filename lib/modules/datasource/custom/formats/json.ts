@@ -4,7 +4,7 @@ import type { CustomDatasourceFetcher } from './types';
 
 export class JSONFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {
-    const response = await http.getJson(registryURL);
+    const response = await http.getJsonUnchecked(registryURL);
     return response.body;
   }
 

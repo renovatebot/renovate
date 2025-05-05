@@ -209,7 +209,7 @@ export class VersionsEndpointCache {
     try {
       const url = `${registryUrl}/versions`;
       const opts: HttpOptions = { headers: { 'Accept-Encoding': 'gzip' } };
-      const { body } = await this.http.get(url, opts);
+      const { body } = await this.http.getText(url, opts);
       return parseFullBody(body);
     } catch (err) {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
@@ -233,7 +233,7 @@ export class VersionsEndpointCache {
           ['Range']: `bytes=${startByte}-`,
         },
       };
-      const { statusCode, body } = await this.http.get(url, opts);
+      const { statusCode, body } = await this.http.getText(url, opts);
 
       /**
        * Rubygems will return the full body instead of `416 Range Not Satisfiable`.

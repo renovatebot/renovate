@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/gradle-version/index getReleases calls configured registryUrls 1`] = `
+exports[`modules/datasource/gradle-version/index > getReleases > calls configured registryUrls 1`] = `
 {
   "homepage": "https://gradle.org",
   "releases": [
@@ -1820,7 +1820,7 @@ exports[`modules/datasource/gradle-version/index getReleases calls configured re
 }
 `;
 
-exports[`modules/datasource/gradle-version/index getReleases processes real data 1`] = `
+exports[`modules/datasource/gradle-version/index > getReleases > processes real data 1`] = `
 {
   "homepage": "https://gradle.org",
   "registryUrl": "https://services.gradle.org/versions/all",

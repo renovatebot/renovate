@@ -4,12 +4,13 @@ import * as hashicorpVersioning from '../../versioning/hashicorp';
 
 export { extractPackageFile } from './extract';
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const displayName = '.terraform-version';
+export const categories: Category[] = ['terraform'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.terraform-version$'],
+  managerFilePatterns: ['/(^|/)\\.terraform-version$/'],
   versioning: hashicorpVersioning.id,
   extractVersion: '^v(?<version>.*)$',
 };
 
-export const categories: Category[] = ['terraform'];
+export const supportedDatasources = [GithubReleasesDatasource.id];

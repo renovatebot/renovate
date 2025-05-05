@@ -7,11 +7,15 @@ import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
-import { incLimitedValue, setMaxLimit } from '../../global/limits';
+import { incCountValue, setCount } from '../../global/limits';
 import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
-import { getBranchesRemaining, getPrsRemaining } from './limits';
+import {
+  getConcurrentBranchesCount,
+  getConcurrentPrsCount,
+  getPrHourlyCount,
+} from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -21,13 +25,7 @@ export function generateCommitFingerprintConfig(
   const res = branch.upgrades.map((upgrade) => {
     const filteredUpgrade = {} as UpgradeFingerprintConfig;
     for (const field of upgradeFingerprintFields) {
-      // TS cannot narrow the type here
-      // I am not sure if this is the best way suggestions welcome
-      if (field !== 'env' && is.string(upgrade[field])) {
-        filteredUpgrade[field] = upgrade[field];
-      } else if (is.plainObject(upgrade[field])) {
-        filteredUpgrade.env = upgrade[field] as Record<string, string>;
-      }
+      filteredUpgrade[field] = upgrade[field];
     }
     return filteredUpgrade;
   });
@@ -127,21 +125,21 @@ export async function writeUpdates(
       .sort()
       .join(', ')}`,
   );
-  const prsRemaining = await getPrsRemaining(config, branches);
-  logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
-  setMaxLimit('PullRequests', prsRemaining);
 
-  const branchesRemaining = await getBranchesRemaining(config, branches);
-  logger.debug(
-    `Calculated maximum branches remaining this run: ${branchesRemaining}`,
-  );
-  setMaxLimit('Branches', branchesRemaining);
+  const concurrentPrsCount = await getConcurrentPrsCount(config, branches);
+  setCount('ConcurrentPRs', concurrentPrsCount);
+
+  const concurrentBranchesCount = await getConcurrentBranchesCount(branches);
+  setCount('Branches', concurrentBranchesCount);
+
+  const prsThisHourCount = await getPrHourlyCount(config);
+  setCount('HourlyPRs', prsThisHourCount);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
-      meta['baseBranch'] = baseBranch;
+      meta.baseBranch = baseBranch;
     }
     addMeta(meta);
     const branchExisted = await scm.branchExists(branchName);
@@ -182,7 +180,7 @@ export async function writeUpdates(
       return 'automerged';
     }
     if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-      incLimitedValue('Branches');
+      incCountValue('Branches');
     }
   }
   removeMeta(['branch', 'baseBranch']);

@@ -1,6 +1,4 @@
 import { join } from 'upath';
-import { mockExecAll } from '../../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -9,11 +7,13 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../datasource');
+vi.mock('../../../../util/fs');
+vi.mock('../../../datasource');
 
-const getPkgReleases = mockedFunction(_getPkgReleases);
+const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
@@ -173,6 +173,11 @@ describe('modules/manager/pep621/processors/pdm', () => {
           managerData: { depGroup: 'group3' },
         },
         { packageName: 'dep9', depType: depTypes.buildSystemRequires },
+        {
+          packageName: 'dep10',
+          depType: depTypes.dependencyGroups,
+          managerData: { depGroup: 'dev' },
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -205,6 +210,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
         {
           cmd: 'pdm update --no-sync --update-eager -dG group3 dep7 dep8',
         },
+        {
+          cmd: 'pdm update --no-sync --update-eager -dG dev dep10',
+        },
       ]);
     });
 
@@ -232,6 +240,10 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageName: 'dep5',
           depType: depTypes.pdmDevDependencies,
         },
+        {
+          packageName: 'dep10',
+          depType: depTypes.dependencyGroups,
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -244,7 +256,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       );
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
-      expect(logger.once.warn).toHaveBeenCalledTimes(2);
+      expect(logger.once.warn).toHaveBeenCalledTimes(3);
     });
 
     it('return update on lockfileMaintenance', async () => {
@@ -267,7 +279,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
@@ -317,7 +329,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
-            updateType: 'lockFileMaintenance',
+            isLockFileMaintenance: true,
           },
           updatedDeps: [],
         },
