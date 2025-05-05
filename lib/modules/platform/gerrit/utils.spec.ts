@@ -68,7 +68,7 @@ describe('modules/platform/gerrit/utils', () => {
       ['NEW' as GerritChangeStatus, 'open'],
       ['MERGED' as GerritChangeStatus, 'merged'],
       ['ABANDONED' as GerritChangeStatus, 'closed'],
-      ['unknown' as GerritChangeStatus, 'all'],
+      ['unknown' as GerritChangeStatus, undefined],
     ])(
       'maps gerrit change state %p to PrState %p',
       (state: GerritChangeStatus, prState: any) => {

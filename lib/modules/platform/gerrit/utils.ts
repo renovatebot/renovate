@@ -99,8 +99,8 @@ export function mapGerritChangeToPr(
 }
 
 export function mapGerritChangeStateToPrState(
-  state: GerritChangeStatus | 'UNKNOWN', // suppress default path code removal
-): PrState {
+  state: GerritChangeStatus,
+): 'merged' | 'open' | 'closed' {
   switch (state) {
     case 'NEW':
       return 'open';
@@ -109,7 +109,6 @@ export function mapGerritChangeStateToPrState(
     case 'ABANDONED':
       return 'closed';
   }
-  return 'all';
 }
 
 export function extractSourceBranch(change: GerritChange): string | undefined {
