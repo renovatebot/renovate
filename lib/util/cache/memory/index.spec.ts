@@ -45,10 +45,15 @@ describe('util/cache/memory/index', () => {
     });
 
     it('removes keys that start with datasource-releases', () => {
-      memCache.set('datasource-releases-npm', 'value');
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:npm',
+        'value',
+      );
       memCache.set('normal-key', 'data');
       memCache.cleanDatasourceKeys();
-      expect(memCache.get('datasource-releases-npm')).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:releases-memoization:npm'),
+      ).toBeUndefined();
       expect(memCache.get('normal-key')).toBe('data');
     });
 
@@ -61,8 +66,14 @@ describe('util/cache/memory/index', () => {
         'datasource-mem-cache:package-cache-memoization:test2',
         'value2',
       );
-      memCache.set('datasource-releases-npm', 'npm-data');
-      memCache.set('datasource-releases-docker', 'docker-data');
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:npm',
+        'npm-data',
+      );
+      memCache.set(
+        'datasource-mem-cache:package-cache-memoization:docker',
+        'docker-data',
+      );
       memCache.set('normal-key1', 'normal1');
       memCache.set('normal-key2', 'normal2');
 
@@ -74,8 +85,12 @@ describe('util/cache/memory/index', () => {
       expect(
         memCache.get('datasource-mem-cache:package-cache-memoization:test2'),
       ).toBeUndefined();
-      expect(memCache.get('datasource-releases-npm')).toBeUndefined();
-      expect(memCache.get('datasource-releases-docker')).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:package-cache-memoization:npm'),
+      ).toBeUndefined();
+      expect(
+        memCache.get('datasource-mem-cache:package-cache-memoization:docker'),
+      ).toBeUndefined();
       expect(memCache.get('normal-key1')).toBe('normal1');
       expect(memCache.get('normal-key2')).toBe('normal2');
     });
