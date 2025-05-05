@@ -8,7 +8,7 @@ export { updateArtifacts } from './artifacts';
 export const categories: Category[] = ['batect'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)batect$'],
+  managerFilePatterns: ['/(^|/)batect$/'],
   versioning,
 };
 

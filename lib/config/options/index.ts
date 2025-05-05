@@ -108,14 +108,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowCommandTemplating',
-    description:
-      'Set this to `false` to disable template compilation for post-upgrade commands.',
-    type: 'boolean',
-    default: true,
-    globalOnly: true,
-  },
-  {
     name: 'allowedCommands',
     description:
       'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',
@@ -516,7 +508,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.17',
+    default: 'ghcr.io/containerbase/sidecar:13.8.18',
     globalOnly: true,
   },
   {
@@ -757,9 +749,9 @@ const options: RenovateOptions[] = [
   {
     name: 'configWarningReuseIssue',
     description:
-      'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',
+      'Set this to `true` to make Renovate reuse/reopen an existing closed Config Warning issue, instead of opening a new one each time.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
 
   // encryption
@@ -2395,13 +2387,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'fileMatch',
-    description: 'RegEx (`re2`) pattern for matching manager files.',
+    name: 'managerFilePatterns',
+    description: 'RegEx (`re2`) and glob patterns for matching manager files.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     stage: 'repository',
     allowString: true,
+    patternMatch: true,
     mergeable: true,
     cli: false,
     env: false,
