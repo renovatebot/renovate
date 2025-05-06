@@ -269,8 +269,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.0.0
-            dependencies: {}
+              version: 1.0.0
+              dependencies: {}
             `,
           },
           {
@@ -323,8 +323,8 @@ describe('workers/repository/update/branch/bump-versions', () => {
             type: 'addition',
             path: 'foo',
             contents: codeBlock`
-            version: 1.0.0
-            dependencies: {}
+              version: 1.0.0
+              dependencies: {}
             `,
           },
           {
