@@ -368,6 +368,7 @@ const staticGroups = {
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
+          '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
         ],
       },

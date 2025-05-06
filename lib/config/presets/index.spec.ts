@@ -3,6 +3,7 @@ import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as _packageCache from '../../util/cache/package';
+import { setCustomEnv } from '../../util/env';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
 import * as _github from './github';
@@ -331,7 +332,7 @@ describe('config/presets/index', () => {
     });
 
     it('resolves self-hosted preset with templating', async () => {
-      GlobalConfig.set({ customEnvVariables: { GIT_REF: 'abc123' } });
+      setCustomEnv({ GIT_REF: 'abc123' });
       config.extends = ['local>username/preset-repo#{{ env.GIT_REF }}'];
       local.getPreset.mockImplementationOnce(({ tag }) =>
         tag === 'abc123'

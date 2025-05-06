@@ -19,6 +19,7 @@ import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { parseJson } from '../../../util/common';
+import { setUserEnv } from '../../../util/env';
 import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
@@ -187,7 +188,7 @@ export async function mergeRenovateConfig(
       configFileParsed: await getOnboardingConfig(config),
     };
   }
-  const configFileParsed = repoConfig?.configFileParsed || {};
+  const configFileParsed = repoConfig?.configFileParsed ?? {};
   const configFileAndEnv = await mergeStaticRepoEnvConfig(
     configFileParsed,
     process.env,
@@ -285,6 +286,10 @@ export async function mergeRenovateConfig(
       `Found repo ignorePaths`,
     );
   }
+
+  setUserEnv(returnConfig.env);
+  delete returnConfig.env;
+
   return returnConfig;
 }
 

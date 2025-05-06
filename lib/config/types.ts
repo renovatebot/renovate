@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
+  bumpVersions?: BumpVersionConfig[];
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -54,7 +55,7 @@ export interface RenovateSharedConfig {
   enabled?: boolean;
   enabledManagers?: string[];
   extends?: string[];
-  fileMatch?: string[];
+  managerFilePatterns?: string[];
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
@@ -120,6 +121,8 @@ export interface GlobalOnlyConfig {
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
+  privateKey?: string;
+  privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisPrefix?: string;
@@ -133,7 +136,6 @@ export interface GlobalOnlyConfig {
 // The below should contain config options where globalOnly=true
 export interface RepoGlobalConfig {
   allowedCommands?: string[];
-  allowCommandTemplating?: boolean;
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
@@ -161,8 +163,6 @@ export interface RepoGlobalConfig {
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
-  privateKey?: string;
-  privateKeyOld?: string;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
@@ -219,8 +219,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
-export type UserEnv = Record<string, string>;
-
+type UserEnv = Record<string, string>;
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -306,6 +305,9 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  /**
+   * User configured environment variables that Renovate uses when executing package manager commands
+   */
   env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
 
@@ -400,6 +402,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
@@ -584,4 +587,11 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface BumpVersionConfig {
+  bumpType: string;
+  filePatterns: string[];
+  matchStrings: string[];
+  name: string | null;
 }

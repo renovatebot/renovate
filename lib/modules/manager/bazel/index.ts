@@ -12,10 +12,10 @@ export const url = 'https://bazel.build/docs';
 export const categories: Category[] = ['bazel'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/)WORKSPACE(|\\.bazel|\\.bzlmod)$',
-    '\\.WORKSPACE\\.bazel$',
-    '\\.bzl$',
+  managerFilePatterns: [
+    '/(^|/)WORKSPACE(|\\.bazel|\\.bzlmod)$/',
+    '/\\.WORKSPACE\\.bazel$/',
+    '/\\.bzl$/',
   ],
 };
 
