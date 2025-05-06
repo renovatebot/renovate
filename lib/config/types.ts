@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
+  bumpVersions?: BumpVersionConfig[];
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -401,6 +402,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
@@ -585,4 +587,11 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface BumpVersionConfig {
+  bumpType: string;
+  filePatterns: string[];
+  matchStrings: string[];
+  name: string | null;
 }
