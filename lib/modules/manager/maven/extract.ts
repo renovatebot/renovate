@@ -156,10 +156,7 @@ function getAllCNBDependencies(
   );
   deps.push(...builder, ...runImage, ...buildpacks);
 
-  if (!deps.length) {
-    return null;
-  }
-  return deps;
+  return deps.length ? deps : null;
 }
 
 function depFromNode(
