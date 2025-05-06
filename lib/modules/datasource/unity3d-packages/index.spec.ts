@@ -151,9 +151,9 @@ describe('modules/datasource/unity3d-packages/index', () => {
     );
     expect(res?.registryUrl).toBe('https://packages.unity.com');
 
-    expect(res?.releases).toHaveLength(38);
+    expect(res?.releases).toHaveLength(4);
 
-    expect(res?.releases.find((r) => r.version === '1.14.2')).toEqual({
+    expect(res?.releases[3]).toEqual({
       changelogUrl:
         'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/changelog/CHANGELOG.html',
       isStable: true,
@@ -162,13 +162,27 @@ describe('modules/datasource/unity3d-packages/index', () => {
       version: '1.14.2',
     });
 
-    expect(res?.releases.find((r) => r.version === '1.12.0-exp.1')).toEqual({
+    expect(res?.releases[2]).toEqual({
       changelogUrl:
         'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/changelog/CHANGELOG.html',
       isStable: false,
       registryUrl: 'https://packages.unity.com',
       releaseTimestamp: '2024-07-03T15:24:28.000Z',
       version: '1.12.0-exp.1',
+    });
+
+    expect(res?.releases[1]).toEqual({
+      isStable: false,
+      registryUrl: 'https://packages.unity.com',
+      releaseTimestamp: '2021-02-11T19:26:19.000Z',
+      version: '1.0.0-pre.1',
+    });
+
+    expect(res?.releases[0]).toEqual({
+      isStable: false,
+      registryUrl: 'https://packages.unity.com',
+      releaseTimestamp: '2021-01-05T17:57:41.000Z',
+      version: '0.1.2-preview.2',
     });
   });
 });
