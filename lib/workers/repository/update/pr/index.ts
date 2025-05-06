@@ -310,12 +310,10 @@ export async function ensurePr(
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
-    if (!notesSourceUrl) {
-      // TODO: types (#22198)
-      notesSourceUrl = `${upgrade.sourceUrl!}${
-        upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
-      }`;
-    }
+    // TODO: types (#22198)
+    notesSourceUrl ??= `${upgrade.sourceUrl!}${
+      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+    }`;
 
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {

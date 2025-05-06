@@ -44,7 +44,7 @@ export default tseslint.config(
   eslintContainerbase.configs.all,
   {
     linterOptions: {
-      reportUnusedDisableDirectives: true,
+      reportUnusedDisableDirectives: 'error',
     },
 
     languageOptions: {
@@ -128,6 +128,19 @@ export default tseslint.config(
           alphabetize: {
             order: 'asc',
           },
+        },
+      ],
+
+      'import/no-restricted-paths': [
+        2,
+        {
+          zones: [
+            {
+              target: 'lib/**/*.ts',
+              from: 'tools/**/*.ts',
+              message: 'Importing the `tools/*` files is not allowed',
+            },
+          ],
         },
       ],
 

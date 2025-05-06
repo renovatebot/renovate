@@ -2,7 +2,6 @@ import type { Category } from '../../../constants';
 import { CondaDatasource } from '../../datasource/conda';
 import { PypiDatasource } from '../../datasource/pypi';
 
-export { bumpPackageVersion } from '../pep621/update';
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
@@ -12,9 +11,9 @@ export const url = 'https://github.com/prefix-dev/pixi/';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/)pyproject\\.toml$', // `tool.pixi` section
-    '(^|/)pixi\\.toml$', // root object
+  managerFilePatterns: [
+    '/(^|/)pyproject\\.toml$/', // `tool.pixi` section
+    '/(^|/)pixi\\.toml$/', // root object
   ],
 };
 

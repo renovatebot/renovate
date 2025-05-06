@@ -7,6 +7,7 @@ import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
+import { getUserEnv } from '../../../util/env';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
 import { OnboardingState } from '../onboarding/common';
 import {
@@ -431,6 +432,28 @@ describe('workers/repository/init/merge', () => {
       });
       const res = await mergeRenovateConfig(config);
       expect(res.npmrc).toBe('something_authToken=token');
+    });
+
+    it('deletes user conifgured env after setting in mem cache', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{"env": { "var": "value" }}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        env: {
+          var: 'value',
+        },
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      const res = await mergeRenovateConfig(config);
+      expect(res.env).toBeUndefined();
+      expect(getUserEnv()).toEqual({
+        var: 'value',
+      });
     });
   });
 

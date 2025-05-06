@@ -11,9 +11,10 @@ export const url = 'https://hexdocs.pm/mix/Mix.html';
 export const categories: Category[] = ['elixir'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)mix\\.exs$'],
+  managerFilePatterns: ['/(^|/)mix\\.exs$/'],
 };
 
+export const supportsLockFileMaintenance = true;
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,

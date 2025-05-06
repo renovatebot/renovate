@@ -155,7 +155,6 @@ export async function updateArtifacts(
 
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
-      userConfiguredEnv: config.env,
       extraEnv: {
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),

@@ -774,5 +774,23 @@ exports[`modules/manager/gomod/extract > extractPackageFile() > extracts single-
       "lineNumber": 13,
     },
   },
+  {
+    "currentValue": "v4.7.0",
+    "datasource": "go",
+    "depName": "sigs.k8s.io/structured-merge-diff/v4",
+    "depType": "require",
+    "managerData": {
+      "lineNumber": 15,
+    },
+  },
+  {
+    "currentValue": "v18.0.0",
+    "datasource": "go",
+    "depName": "github.com/cucumber/common/messages/go/v18",
+    "depType": "require",
+    "managerData": {
+      "lineNumber": 16,
+    },
+  },
 ]
 `;

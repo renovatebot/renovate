@@ -4,7 +4,6 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
-import { mergeChildConfig } from '../../config';
 import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
@@ -94,21 +93,6 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   }
 }
 
-export async function resolveGlobalExtends(
-  globalExtends: string[],
-  ignorePresets?: string[],
-): Promise<AllConfig> {
-  try {
-    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalExtends, ignorePresets };
-    const resolvedConfig = await resolveConfigPresets(config);
-    return resolvedConfig;
-  } catch (err) {
-    logger.error({ err }, 'Error resolving config preset');
-    throw new Error(CONFIG_PRESETS_INVALID);
-  }
-}
-
 export async function start(): Promise<number> {
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
@@ -134,29 +118,21 @@ export async function start(): Promise<number> {
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
-      if (is.nonEmptyArray(config?.globalExtends)) {
-        // resolve global presets immediately
-        config = mergeChildConfig(
-          await resolveGlobalExtends(
-            config.globalExtends,
-            config.ignorePresets,
-          ),
-          config,
-        );
-      }
 
-      // Set allowedHeaders in case hostRules headers are configured in file config
+      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint and allowedHeaders in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        userAgent: config.userAgent,
       });
 
       await validatePresets(config);

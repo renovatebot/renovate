@@ -531,8 +531,22 @@ const platform: Platform = {
     prTitle: title,
     state = 'all',
     includeOtherAuthors,
+    targetBranch,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
+    if (includeOtherAuthors && is.string(targetBranch)) {
+      // do not use pr cache as it only fetches prs created by the bot account
+      const pr = await helper.getPRByBranch(
+        config.repository,
+        targetBranch,
+        branchName,
+      );
+      if (!pr) {
+        return null;
+      }
+
+      return toRenovatePR(pr, null);
+    }
     const prList = await platform.getPrList();
     const pr = prList.find(
       (p) =>
@@ -742,15 +756,13 @@ const platform: Platform = {
     if (config.hasIssuesEnabled === false) {
       return Promise.resolve([]);
     }
-    if (config.issueList === null) {
-      config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
-        .then((issues) => {
-          const issueList = issues.map(toRenovateIssue);
-          logger.debug(`Retrieved ${issueList.length} Issues`);
-          return issueList;
-        });
-    }
+    config.issueList ??= helper
+      .searchIssues(config.repository, { state: 'all' }, { memCache: false })
+      .then((issues) => {
+        const issueList = issues.map(toRenovateIssue);
+        logger.debug(`Retrieved ${issueList.length} Issues`);
+        return issueList;
+      });
 
     return config.issueList;
   },
