@@ -43,7 +43,6 @@ import * as swift from './swift';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as ubuntu from './ubuntu';
 import * as unity3d from './unity3d';
-import * as unity3dPackages from './unity3d-packages';
 
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
@@ -92,4 +91,3 @@ api.set(semverCoerced.id, semverCoerced.api);
 api.set(swift.id, swift.api);
 api.set(ubuntu.id, ubuntu.api);
 api.set(unity3d.id, unity3d.api);
-api.set(unity3dPackages.id, unity3dPackages.api);
