@@ -67,6 +67,7 @@ async function bumpVersion(
       branchConfig,
       `Failed to calculate matched files for bumpVersions: ${e.message}`,
     );
+    return;
   }
   // prepare the matchStrings
   const matchStringsRegexes: RegExp[] = [];
