@@ -491,9 +491,6 @@ importers:
       '@types/tmp':
         specifier: 0.2.6
         version: 0.2.6
-      '@types/url-join':
-        specifier: 5.0.0
-        version: 5.0.0
       '@types/validate-npm-package-name':
         specifier: 4.0.2
         version: 4.0.2
@@ -2241,10 +2238,6 @@ packages:
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
-
-  '@types/url-join@5.0.0':
-    resolution: {integrity: sha512-hvwpcDQdoMBPdra8zIxnmsIWFtkc6fUwY2E90MKNvYfZBgRQDQRgiLmhdNOcWUlfMviq8gOYWRmMKzBBCOe8sg==}
-    deprecated: This is a stub types definition. url-join provides its own type definitions, so you do not need this installed.
 
   '@types/uuid@9.0.8':
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
@@ -8828,10 +8821,6 @@ snapshots:
   '@types/treeify@1.0.3': {}
 
   '@types/unist@2.0.11': {}
-
-  '@types/url-join@5.0.0':
-    dependencies:
-      url-join: 5.0.0
 
   '@types/uuid@9.0.8': {}
 
