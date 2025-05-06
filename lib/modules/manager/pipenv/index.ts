@@ -10,7 +10,7 @@ export const url = 'https://pipenv.pypa.io/en/latest';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)Pipfile$'],
+  managerFilePatterns: ['/(^|/)Pipfile$/'],
 };
 
 export const supportedDatasources = [PypiDatasource.id];

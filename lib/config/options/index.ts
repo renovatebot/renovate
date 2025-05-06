@@ -508,7 +508,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.17',
+    default: 'ghcr.io/containerbase/sidecar:13.8.19',
     globalOnly: true,
   },
   {
@@ -2387,13 +2387,13 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
-    name: 'fileMatch',
-    description: 'RegEx (`re2`) pattern for matching manager files.',
+    name: 'managerFilePatterns',
+    description: 'RegEx (`re2`) and glob patterns for matching manager files.',
     type: 'array',
     subType: 'string',
-    format: 'regex',
     stage: 'repository',
     allowString: true,
+    patternMatch: true,
     mergeable: true,
     cli: false,
     env: false,
