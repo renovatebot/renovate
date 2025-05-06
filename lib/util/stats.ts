@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import * as memCache from './cache/memory';
+import type { PackageCacheNamespace } from './cache/package/types';
 import { parseUrl } from './url';
 
 type LookupStatsData = Record<string, number[]>;
@@ -547,5 +548,44 @@ export class ObsoleteCacheHitLogger {
       'Cache fallback URLs',
     );
   }
-}
-/* v8 ignore stop: temporary code */
+} /* v8 ignore stop: temporary code */
+
+/* v8 ignore start: temporary code */
+export class RepeatingPackageCacheKeyLogger {
+  static getData(): Record<string, Record<string, number>> {
+    return (
+      memCache.get<Record<string, Record<string, number>>>(
+        'repeating-package-cache-keys',
+      ) ?? {}
+    );
+  }
+
+  static track(namespace: PackageCacheNamespace, key: string): void {
+    const data = this.getData();
+    data[namespace] ??= {};
+    data[namespace][key] = (data[namespace][key] ?? 0) + 1;
+    memCache.set('repeating-package-cache-keys', data);
+  }
+
+  static getReport(): Record<string, Record<string, number>> {
+    const data = this.getData();
+    const report: Record<string, Record<string, number>> = {};
+
+    for (const [namespace, keys] of Object.entries(data)) {
+      const repeatingKeys = Object.entries(keys).sort((a, b) => b[1] - a[1]);
+
+      if (repeatingKeys.length > 0) {
+        report[namespace] = Object.fromEntries(repeatingKeys);
+      }
+    }
+
+    return report;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+    if (Object.keys(report).length > 0) {
+      logger.debug(report, 'Repeating package cache keys');
+    }
+  }
+} /* v8 ignore stop: temporary code */
