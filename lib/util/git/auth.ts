@@ -42,9 +42,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
-        {
-          GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
-        },
+        { GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT },
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
       gitConfigCount = 0;
@@ -71,9 +69,7 @@ export function getGitAuthenticatedEnvironmentVariables(
   // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
   // add the two new config key and value to the returnEnvironmentVariables object
   // increase the CONFIG_COUNT by one for each rule and add it to the object
-  const newEnvironmentVariables = {
-    ...environmentVariables,
-  };
+  const newEnvironmentVariables = { ...environmentVariables };
   for (const rule of authenticationRules) {
     newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
       `url.${rule.url}.insteadOf`;
@@ -81,6 +77,25 @@ export function getGitAuthenticatedEnvironmentVariables(
       rule.insteadOf;
     gitConfigCount++;
   }
+
+  // check if environmentVariables contains RENOVATE_GIT_EXTRA_CONFIG
+  const extraConfig = environmentVariables?.RENOVATE_GIT_EXTRA_CONFIG;
+  if (extraConfig) {
+    try {
+      const parsedExtraConfig = JSON.parse(extraConfig);
+      for (const { key, value } of parsedExtraConfig) {
+        newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] = key;
+        newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = value;
+        gitConfigCount++;
+      }
+    } catch (error) {
+      logger.warn(
+        { extraConfig },
+        `Failed to parse RENOVATE_GIT_EXTRA_CONFIG: ${error.message}`,
+      );
+    }
+  }
+
   newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
