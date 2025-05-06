@@ -450,8 +450,6 @@ async function getStatus(
     const opts: GitlabHttpOptions = { paginate: true };
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
-    } else {
-      opts.memCache = false;
     }
 
     return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
@@ -680,9 +678,7 @@ async function tryPrAutomerge(
           pipeline: {
             status: string;
           };
-        }>(`projects/${config.repository}/merge_requests/${pr}`, {
-          memCache: false,
-        });
+        }>(`projects/${config.repository}/merge_requests/${pr}`);
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -1040,7 +1036,7 @@ export async function setBranchStatus({
     for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
       const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
       await gitlabApi
-        .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
+        .getJsonSafe(commitUrl, LastPipelineId)
         .onValue((pipelineId) => {
           options.pipeline_id = pipelineId;
         });
@@ -1097,7 +1093,6 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
-      memCache: false,
       paginate: true,
     });
     /* v8 ignore start */
@@ -1123,8 +1118,6 @@ export async function getIssue(
     /* v8 ignore start: temporary code */
     if (useCache) {
       opts.cacheProvider = memCacheProvider;
-    } else {
-      opts.memCache = false;
     } /* v8 ignore stop */
     const issueBody = (
       await gitlabApi.getJsonUnchecked<{ description: string }>(
