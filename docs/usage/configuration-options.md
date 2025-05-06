@@ -472,12 +472,7 @@ The option is an array of rules, each specifying how and where to bump versions.
 
 - `filePatterns`: A list of regex patterns to match file names. These patterns follow Renovate's [string pattern matching syntax](./string-pattern-matching.md). Templates can also be used for dynamic patterns.
 - `matchStrings`: An array of regex patterns to locate version strings within the matched files. Any of the regexes can match the content. Each pattern must include a named capture group `version` to extract the version string.
-- `bumpType`: Specifies the type of version bump which defaults to `patch`. Supported values are:
-  - `prerelease`
-  - `patch`
-  - `minor`
-  - `major`
-    This field supports templates for conditional logic.
+- `bumpType`: Specifies the type of version bump which defaults to `patch`. This field supports templates for conditional logic. Supported values are documented in the [bumpType section](#bumptype).
 - `name` (optional): A descriptive name for the rule, which is used in logs for easier identification.
 
 <!-- prettier-ignore -->
