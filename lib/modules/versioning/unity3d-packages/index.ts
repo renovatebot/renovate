@@ -40,7 +40,9 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     _right: GenericVersion,
   ): number {
     if (is.nonEmptyString(_left.suffix) && is.nonEmptyString(_right.suffix)) {
-      return _left.suffix.localeCompare(_right.suffix);
+      return _left.suffix.localeCompare(_right.suffix, undefined, {
+        numeric: true,
+      });
     } else if (
       is.nonEmptyString(_left.suffix) &&
       !is.nonEmptyString(_right.suffix)
