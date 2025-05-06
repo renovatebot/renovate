@@ -1,4 +1,3 @@
-import { describe } from 'vitest';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
