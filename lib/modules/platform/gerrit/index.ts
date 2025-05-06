@@ -199,12 +199,9 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
     );
   }
-  if (
-    change.created &&
-    new Date(change.created.replace(' ', 'T')).getTime() -
-      new Date().getTime() <
-      5 * 60 * 1000
-  ) {
+  const createdTs = new Date(change.created.replace(' ', 'T')).getTime();
+  const ageMs = Date.now() - createdTs;
+  if (ageMs > 5 * 60 * 1000) {
     throw new Error(
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );

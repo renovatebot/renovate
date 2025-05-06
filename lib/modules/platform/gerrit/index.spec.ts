@@ -278,7 +278,8 @@ describe('modules/platform/gerrit/index', () => {
     it('createPr() - found existing but not created in the last 5 minutes => rejects', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        created: new Date('1997').toISOString(),
+        // 6 minutes ago
+        created: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -306,6 +307,7 @@ describe('modules/platform/gerrit/index', () => {
     const change = partial<GerritChange>({
       _number: 123456,
       current_revision: 'some-revision',
+      created: new Date().toISOString(),
       revisions: {
         'some-revision': partial<GerritRevisionInfo>({
           commit_with_footers: 'Renovate-Branch: source',
