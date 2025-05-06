@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)devbox\\.json$'],
+  managerFilePatterns: ['/(^|/)devbox\\.json$/'],
 };
 
 export const supportedDatasources = [DevboxDatasource.id];
