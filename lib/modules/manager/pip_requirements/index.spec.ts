@@ -1,13 +1,14 @@
+import { matchRegexOrGlobList } from '../../../util/string-match';
 import { defaultConfig } from '.';
 
 describe('modules/manager/pip_requirements/index', () => {
   it('default config file pattern', () => {
-    const reg = new RegExp(defaultConfig.fileMatch[0]);
+    const patterns = defaultConfig.managerFilePatterns;
 
-    expect(reg.test('requirements.txt')).toBe(true);
-    expect(reg.test('requirements-dev.txt')).toBe(true);
-    expect(reg.test('requirements.dev.txt')).toBe(true);
-    expect(reg.test('requirements-dev.pip')).toBe(true);
-    expect(reg.test('requirements.dev.pip')).toBe(true);
+    expect(matchRegexOrGlobList('requirements.txt', patterns)).toBe(true);
+    expect(matchRegexOrGlobList('requirements-dev.txt', patterns)).toBe(true);
+    expect(matchRegexOrGlobList('requirements.dev.txt', patterns)).toBe(true);
+    expect(matchRegexOrGlobList('requirements-dev.pip', patterns)).toBe(true);
+    expect(matchRegexOrGlobList('requirements.dev.pip', patterns)).toBe(true);
   });
 });

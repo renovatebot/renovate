@@ -85,7 +85,7 @@ export type PackageCacheNamespace =
   | 'datasource-maven:head-requests'
   | 'datasource-maven:metadata-xml'
   | 'datasource-node-version'
-  | 'datasource-npm:data'
+  | 'datasource-npm:cache-provider'
   | 'datasource-nuget-v3'
   | 'datasource-orb'
   | 'datasource-packagist'
@@ -107,4 +107,5 @@ export type PackageCacheNamespace =
   | 'terraform-provider-hash'
   | 'url-sha256';
 
-export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
+export type CombinedKey =
+  `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

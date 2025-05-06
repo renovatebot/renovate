@@ -8,6 +8,7 @@ import type {
   NpmResponseVersion,
 } from '../../../modules/datasource/npm/types';
 import { Http } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { Preset, PresetConfig } from '../types';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -31,7 +32,11 @@ export async function getPreset({
       'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead.',
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
-    const body = (await http.getJsonUnchecked<NpmResponse>(packageUrl)).body;
+    const body = (
+      await http.getJsonUnchecked<NpmResponse>(packageUrl, {
+        cacheProvider: memCacheProvider,
+      })
+    ).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
   } catch {
