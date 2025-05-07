@@ -4,7 +4,9 @@ import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
@@ -84,7 +86,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+    'The release timestamp is determined from the `tag_last_pushed` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -123,6 +125,7 @@ export class DockerDatasource extends Datasource {
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
+        cacheProvider: memCacheProvider,
       });
       return manifestResponse;
     } catch (err) /* istanbul ignore next */ {
@@ -458,7 +461,7 @@ export class DockerDatasource extends Datasource {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
     // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
     if (
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
+      getEnv().RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
       registryHost === 'https://index.docker.io'
     ) {
       logger.debug(
@@ -1074,7 +1077,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
+      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 

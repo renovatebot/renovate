@@ -10,7 +10,7 @@ export const url = 'https://carvel.dev/vendir/docs/latest';
 
 export const defaultConfig = {
   commitMessageTopic: 'vendir {{depName}}',
-  fileMatch: ['(^|/)vendir\\.yml$'],
+  managerFilePatterns: ['/(^|/)vendir\\.yml$/'],
 };
 
 export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];

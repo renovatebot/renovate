@@ -1,3 +1,4 @@
+import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { asTimestamp } from '../../../util/timestamp';
@@ -15,7 +16,7 @@ import type {
   ReleaseResult,
 } from '../types';
 import { MAVEN_REPO } from './common';
-import type { MavenDependency } from './types';
+import type { MavenDependency, MetadataResults } from './types';
 import {
   createUrlForDependencyPom,
   downloadMaven,
@@ -38,6 +39,28 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
       ? version
       : /* istanbul ignore next: hard to test */ latestVersion,
   );
+}
+
+function extractVersions(metadata: XmlDocument): MetadataResults {
+  const res: MetadataResults = {};
+  const versions = metadata.descendantWithPath('versioning.versions');
+  const elements = versions?.childrenNamed('version');
+  if (!elements) {
+    return res;
+  }
+  res.versions = elements.map((el) => el.val);
+  const latest = metadata.descendantWithPath('versioning.latest');
+  if (latest?.val) {
+    res.tags ??= {};
+    res.tags.latest = latest.val;
+  }
+  const release = metadata.descendantWithPath('versioning.release');
+  if (release?.val) {
+    res.tags ??= {};
+    res.tags.release = release.val;
+  }
+
+  return res;
 }
 
 export const defaultRegistryUrls = [MAVEN_REPO];
@@ -67,24 +90,17 @@ export class MavenDatasource extends Datasource {
   async fetchVersionsFromMetadata(
     dependency: MavenDependency,
     repoUrl: string,
-  ): Promise<string[]> {
+  ): Promise<MetadataResults> {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
     const metadataXmlResult = await downloadMavenXml(this.http, metadataUrl);
     return metadataXmlResult
-      .transform(({ data: metadata }) => {
-        const versions = metadata.descendantWithPath('versioning.versions');
-        const elements = versions?.childrenNamed('version');
-        if (!elements) {
-          return [];
-        }
-        return elements.map((el) => el.val);
-      })
+      .transform(({ data: metadata }) => extractVersions(metadata))
       .onError((err) => {
         logger.debug(
           `Maven: error fetching versions for "${dependency.display}": ${err.type}`,
         );
       })
-      .unwrapOr([]);
+      .unwrapOr({});
   }
 
   async getReleases({
@@ -101,14 +117,11 @@ export class MavenDatasource extends Datasource {
 
     logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
 
-    const metadataVersions = await this.fetchVersionsFromMetadata(
-      dependency,
-      repoUrl,
-    );
-    if (!metadataVersions?.length) {
+    const metadata = await this.fetchVersionsFromMetadata(dependency, repoUrl);
+    if (!metadata.versions?.length) {
       return null;
     }
-    const releases = metadataVersions.map((version) => ({ version }));
+    const releases = metadata.versions.map((version) => ({ version }));
 
     logger.debug(
       `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
@@ -129,6 +142,9 @@ export class MavenDatasource extends Datasource {
       ...dependencyInfo,
       releases,
     };
+    if (metadata.tags) {
+      result.tags = metadata.tags;
+    }
 
     if (!this.defaultRegistryUrls.includes(registryUrl)) {
       result.isPrivate = true;
