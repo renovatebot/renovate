@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
+  bumpVersions?: BumpVersionConfig[];
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -54,7 +55,7 @@ export interface RenovateSharedConfig {
   enabled?: boolean;
   enabledManagers?: string[];
   extends?: string[];
-  fileMatch?: string[];
+  managerFilePatterns?: string[];
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
@@ -120,6 +121,8 @@ export interface GlobalOnlyConfig {
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   prCommitsPerRunLimit?: number;
+  privateKey?: string;
+  privateKeyOld?: string;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisPrefix?: string;
@@ -160,8 +163,6 @@ export interface RepoGlobalConfig {
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;
-  privateKey?: string;
-  privateKeyOld?: string;
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
@@ -404,6 +405,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
@@ -588,4 +590,11 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface BumpVersionConfig {
+  bumpType: string;
+  filePatterns: string[];
+  matchStrings: string[];
+  name: string | null;
 }

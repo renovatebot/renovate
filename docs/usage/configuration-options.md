@@ -465,6 +465,123 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 
 For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
 
+## bumpVersions
+
+The `bumpVersions` option allows Renovate to update semantic version strings in your code when dependencies are updated.
+This is useful for files or version fields that Renovate does not natively support or for custom versioning needs.
+
+The option is an array of rules, each specifying how and where to bump versions. Each rule includes the following fields:
+
+- `filePatterns`: A list of regex patterns to match file names. These patterns follow Renovate's [string pattern matching syntax](./string-pattern-matching.md). Templates can also be used for dynamic patterns.
+- `matchStrings`: An array of regex patterns to locate version strings within the matched files. Any of the regexes can match the content. Each pattern must include a named capture group `version` to extract the version string.
+- `bumpType`: Specifies the type of version bump which defaults to `patch`. This field supports templates for conditional logic. Supported values are documented in the [bumpType section](#bumptype).
+- `name` (optional): A descriptive name for the rule, which is used in logs for easier identification.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
+    This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
+
+Here is an example of a `bumpVersions` configuration:
+
+```json
+{
+  "bumpVersions": [
+    {
+      "name": "Updating release version file",
+      "filePatterns": [".release-version"],
+      "bumpType": "minor",
+      "matchStrings": ["^(?<version>.+)$"]
+    }
+  ]
+}
+```
+
+In this example:
+
+- Renovate scans files named `.release-version`.
+- It matches the entire file content as the version string.
+- It bumps the version to the next minor release.
+
+**Conditional Bumping with `packageRules`:**
+
+You can use `packageRules` to apply `bumpVersions` conditionally.
+For example, to bump versions only for updates in the `charts/` directory:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["charts/**"],
+      "bumpVersions": {
+        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
+        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+      }
+    }
+  ]
+}
+```
+
+In this configuration:
+
+- If Renovate updates dependencies in the `charts/` directory check the `Chart.yaml` file next to the updated file.
+- The version string is extracted from lines matching `version: <value>`.
+- The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
+
+### bumpType
+
+The `bumpType` field specifies the type of version bump to apply.
+Supported values are:
+
+- `prerelease`
+- `patch`
+- `minor`
+- `major`
+
+This field supports templates for conditional logic.
+For example:
+
+```json
+{
+  "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+}
+```
+
+In this example, the bump type is set to `patch` for patch updates and `minor` for all other cases.
+
+### filePatterns
+
+The `filePatterns` field defines which files should be scanned for version strings.
+It accepts one or more patterns following Renovate's [string pattern matching syntax](./string-pattern-matching.md).
+Templates can also be used for dynamic patterns. See [Templates](./templates.md) for more information.
+
+For example:
+
+```json
+{
+  "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
+}
+```
+
+This configuration matches files named `version.txt` in any directory and `Chart.yaml` files in specific package directories.
+
+---
+
+### name
+
+The `name` field is an optional identifier for the bump version rule. It is used in logs to help identify which rule is being applied.
+
+For example:
+
+```json
+{
+  "name": "Update release version"
+}
+```
+
+This name will appear in Renovate logs, making it easier to debug or trace specific rules.
+
 ## cloneSubmodules
 
 Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
@@ -725,9 +842,9 @@ Renovate has two custom managers:
 | `regex`        | Regular Expression, with named capture groups. |
 | `jsonata`      | JSONata query.                                 |
 
-To use a custom manager, you need give some information:
+To use a custom manager, you must give Renovate this information:
 
-1. `fileMatch`: name/pattern of the file to extract deps from
+1. `managerFilePatterns`: regex/glob pattern of the file to extract deps from
 1. `matchStrings`: `regex` patterns or `jsonata` queries used to process the file
 
 The `matchStrings` must capture/extract the following three fields:
@@ -769,7 +886,7 @@ image: my.old.registry/aRepository/andImage:1.18-alpine
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
@@ -808,7 +925,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -823,7 +940,7 @@ Example:
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": ["file.json"],
+      "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -870,7 +987,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": [".renovaterc"],
+      "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -885,7 +1002,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "fileMatch": ["file.yml"],
+      "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -900,7 +1017,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "toml",
-      "fileMatch": ["file.toml"],
+      "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -959,7 +1076,7 @@ As example the following configuration will update all three lines in the Docker
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
@@ -997,7 +1114,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"backup\":\\s*{[^}]*}",
@@ -1007,7 +1124,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"test\":\\s*\\{[^}]*}",
@@ -1053,7 +1170,7 @@ Matched group values will be merged to form a single dependency.
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1062,7 +1179,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1198,7 +1315,7 @@ You can configure Renovate to wait for approval for:
 - specific package upgrades
 - upgrades coming from specific package managers
 
-If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+If you want to require approval for _all_ upgrades, set `dependencyDashboardApproval` to `true`:
 
 ```json
 {
@@ -1508,35 +1625,6 @@ If you are running on any platform except `github.com`, you need to [configure a
     Renovate can only show changelogs from some platforms and some package managers.
     We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
-
-## fileMatch
-
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
-`fileMatch` patterns in the user config are added to the default values and do not replace them.
-The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
-
-Some `fileMatch` patterns are short, like Renovate's default Go Modules `fileMatch` for example.
-Here Renovate looks for _any_ `go.mod` file.
-In this case you can probably keep using that default `fileMatch`.
-
-At other times, the possible files is too vague for Renovate to have any default.
-For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
-
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
-For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$', '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$']`.
-This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
-Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could add the missing file like this:
-
-```json
-{
-  "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
-  }
-}
-```
-
-If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -2443,6 +2531,45 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 
 Add to this object if you wish to define rules that apply only to major updates.
 
+## managerFilePatterns
+
+`managerFilePatterns` were formerly known as `fileMatch`, and regex-only.
+`managerFilePatterns` instead supports regex or glob patterns, and any existing config containing `fileMatch` patterns will be automatically migrated.
+Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
+
+`managerFilePatterns` tells Renovate which repository files to parse and extract.
+`managerFilePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
+
+The default `managerFilePatterns` patterns can not be removed.
+If you need to include, or exclude, specific paths then use the `ignorePaths` or `includePaths` configuration options.
+
+Some `managerFilePatterns` patterns are short, like Renovate's default Go Modules `managerFilePatterns` for example.
+Here Renovate looks for _any_ `go.mod` file.
+In this case you can probably keep using that default `managerFilePatterns`.
+
+At other times, the possible files is too vague for Renovate to have any default.
+For example, Kubernetes manifests can exist in any `*.yaml` file.
+We do not want Renovate to parse every YAML file in every repository, just in case _some_ of them have a Kubernetes manifest.
+Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
+Because the array is empty, you as user must tell Renovate which directories/files to check.
+
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess about.
+For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
+This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
+Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
+
+```json
+{
+  "dockerfile": {
+    "managerFilePatterns": ["/^ACTUALLY_A_DOCKERFILE\\.template$/"]
+  }
+}
+```
+
+You must configure `managerFilePatterns` _inside_ a manager object.
+In the example above, the manager object is the `dockerfile`.
+For reference, here is a [list of supported managers](modules/manager/index.md#supported-managers).
+
 ## milestone
 
 If set to the number of an existing [GitHub milestone](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones), Renovate will add that milestone to its PR.
@@ -3003,6 +3130,11 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
+This matching can be an exact match, Glob match, or Regular Expression match.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
 Invalid if used outside of a `packageRule`.
 
 ### matchFileNames

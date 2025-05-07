@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { toSha256 } from '../../../util/hash';
@@ -318,7 +319,10 @@ export class CrateDatasource extends Datasource {
           `Cloning private cargo registry`,
         );
 
-        const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
+        const git = Git({
+          ...simpleGitConfig(),
+          maxConcurrentProcesses: 1,
+        }).env(getChildProcessEnv());
         const clonePromise = git.clone(registryFetchUrl, clonePath, {
           '--depth': 1,
         });
