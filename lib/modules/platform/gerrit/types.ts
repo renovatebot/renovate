@@ -46,9 +46,9 @@ export interface GerritChange {
   _number: number;
   branch: string;
   change_id: string;
-  subject: string;
-  status: GerritChangeStatus;
   created: string;
+  status: GerritChangeStatus;
+  subject: string;
   /** Requires o=LABELS. */
   reviewers?: {
     REVIEWER?: GerritAccountInfo[];
