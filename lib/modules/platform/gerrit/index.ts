@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
@@ -199,9 +200,11 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
     );
   }
-  const createdTs = new Date(change.created.replace(' ', 'T')).getTime();
-  const ageMs = Date.now() - createdTs;
-  if (ageMs > 5 * 60 * 1000) {
+  const createdMs = DateTime.fromISO(change.created.replace(' ', 'T'), {
+    zone: 'utc',
+  }).toMillis();
+  const fiveMinutesAgoMs = DateTime.utc().minus({ minutes: 5 }).toMillis();
+  if (createdMs < fiveMinutesAgoMs) {
     throw new Error(
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );

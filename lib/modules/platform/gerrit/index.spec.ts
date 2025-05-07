@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -260,7 +261,23 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
-  describe('createPr() - error', () => {
+  describe('createPr()', () => {
+    const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
+      zone: 'utc',
+    }) as DateTime<true>;
+
+    beforeAll(() => {
+      vi.useFakeTimers();
+    });
+
+    beforeEach(() => {
+      vi.setSystemTime(t0.toMillis());
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
     it('createPr() - no existing found => rejects', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
@@ -278,8 +295,7 @@ describe('modules/platform/gerrit/index', () => {
     it('createPr() - found existing but not created in the last 5 minutes => rejects', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        // 6 minutes ago
-        created: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
+        created: t0.minus({ minutes: 6 }).toISO().replace('T', ' '),
         current_revision: 'some-revision',
         revisions: {
           'some-revision': partial<GerritRevisionInfo>({
@@ -297,30 +313,20 @@ describe('modules/platform/gerrit/index', () => {
         }),
       ).rejects.toThrow(/it was not created in the last 5 minutes/);
     });
-  });
-
-  describe('createPr() - success', () => {
-    beforeAll(() => {
-      gerrit.writeToConfig({ labels: {} });
-    });
-
-    const change = partial<GerritChange>({
-      _number: 123456,
-      current_revision: 'some-revision',
-      created: new Date().toISOString(),
-      revisions: {
-        'some-revision': partial<GerritRevisionInfo>({
-          commit_with_footers: 'Renovate-Branch: source',
-        }),
-      },
-      messages: [],
-    });
-
-    beforeEach(() => {
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-    });
 
     it('createPr() - update body', async () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        current_revision: 'some-revision',
+        created: t0.minus({ seconds: 30 }).toISO().replace('T', ' '),
+        revisions: {
+          'some-revision': partial<GerritRevisionInfo>({
+            commit_with_footers: 'Renovate-Branch: source',
+          }),
+        },
+        messages: [],
+      });
+      clientMock.findChanges.mockResolvedValueOnce([change]);
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
