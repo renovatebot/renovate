@@ -89,7 +89,7 @@ function getCNBDependencies(
   config: ExtractConfig,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  nodes.forEach((node) => {
+  for (const node of nodes) {
     const depString = node.val.trim();
     if (isDockerRef(depString)) {
       const dep = getDockerDep(
@@ -97,7 +97,6 @@ function getCNBDependencies(
         true,
         config.registryAliases,
       );
-      dep.registryUrls = [];
       dep.fileReplacePosition = node.position;
       if (dep.currentValue || dep.currentDigest) {
         deps.push(dep);
@@ -107,13 +106,12 @@ function getCNBDependencies(
         depString.replace(BUILDPACK_REGISTRY_PREFIX, ''),
       );
 
-      if (dep && (dep.currentValue || dep.currentDigest)) {
-        dep.registryUrls = [];
+      if (dep?.currentValue) {
         dep.fileReplacePosition = node.position;
         deps.push(dep);
       }
     }
-  });
+  }
   return deps;
 }
 
@@ -551,7 +549,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const urlsSet = new Set([...rawDep.registryUrls!, ...registryUrls[name]]);
+      const urlsSet = new Set([
+        ...(rawDep.registryUrls ?? []),
+        ...registryUrls[name],
+      ]);
       rawDep.registryUrls = [...urlsSet];
     });
   });
@@ -670,7 +671,9 @@ export async function extractAllPackageFiles(
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
-        dep.registryUrls!.unshift(...additionalRegistryUrls);
+        if (dep.registryUrls) {
+          dep.registryUrls.unshift(...additionalRegistryUrls);
+        }
       }
     }
   }

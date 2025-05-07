@@ -147,10 +147,11 @@ describe('modules/manager/maven/update', () => {
       const res = updateDependency({
         fileContent: cnbContent,
         upgrade: {
+          datasource: 'docker',
           updateType: 'patch',
           depName: 'paketo-buildpacks/nodejs',
           currentValue: '6.1.1',
-          fileReplacePosition: 1428,
+          fileReplacePosition: 1430,
           newValue: '6.1.2',
         },
       });
