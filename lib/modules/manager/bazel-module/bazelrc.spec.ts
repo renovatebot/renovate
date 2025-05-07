@@ -320,7 +320,7 @@ describe('modules/manager/bazel-module/bazelrc', () => {
     it('should throw error for invalid workspace path', () => {
       const workspaceDir = '/workspace';
       const value = '%workspace%/../../outside';
-      expect(expandWorkspacePath(value, workspaceDir)).toBeUndefined();
+      expect(expandWorkspacePath(value, workspaceDir)).toBeNull();
     });
   });
 

@@ -99,14 +99,14 @@ function createEntry(line: string): BazelrcEntries | undefined {
 export function expandWorkspacePath(
   value: string,
   workspaceDir: string,
-): string | undefined {
+): string | null {
   if (!value.includes('%workspace%')) {
     return value;
   }
   const absolutePath = upath.resolve(workspaceDir);
   const expandedPath = value.replace('%workspace%', absolutePath);
   if (!fs.isValidLocalPath(expandedPath)) {
-    return undefined;
+    return null;
   }
   return expandedPath;
 }
@@ -125,7 +125,7 @@ export function sanitizeOptions(
         logger.debug(
           `Skipping invalid workspace path: ${option.value} in ${workspaceDir}`,
         );
-        return undefined;
+        return null;
       }
       return new BazelOption(option.name, expandedPath);
     })
