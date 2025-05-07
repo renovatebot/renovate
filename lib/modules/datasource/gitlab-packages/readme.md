@@ -22,7 +22,7 @@ This can be achieved by configuring a custom manager in `renovate.json` for file
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^versions.ini$"],
+      "managerFilePatterns": ["/^versions.ini$/"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"
       ],

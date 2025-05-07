@@ -1,4 +1,4 @@
-Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML files that use the same format (via `fileMatch` configuration).
+Renovate supports updating of Docker dependencies within Helm Chart `values.yaml` files or other YAML files that use the same format (via `managerFilePatterns` configuration).
 Updates are performed if the files follow the conventional format used in most of the Helm charts:
 
 ```yaml

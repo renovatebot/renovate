@@ -1,23 +1,17 @@
-import url from 'node:url';
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import { z } from 'zod';
-import { GlobalConfig } from '../../../config/global';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import type { Http } from '../../../util/http';
+import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
-import { HttpCacheStats } from '../../../util/stats';
 import { asTimestamp } from '../../../util/timestamp';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
-import type { CachedReleaseResult, NpmResponse } from './types';
-
-export const CACHE_REVISION = 1;
+import type { NpmResponse } from './types';
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
@@ -81,53 +75,12 @@ export async function getDependency(
 
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
-  // Now check the persistent cache
-  const cacheNamespace = 'datasource-npm:data';
-  const cachedResult = await packageCache.get<CachedReleaseResult>(
-    cacheNamespace,
-    packageUrl,
-  );
-  if (cachedResult?.cacheData) {
-    if (cachedResult.cacheData.revision === CACHE_REVISION) {
-      const softExpireAt = DateTime.fromISO(
-        cachedResult.cacheData.softExpireAt,
-      );
-      if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
-        logger.trace('Cached result is not expired - reusing');
-        HttpCacheStats.incLocalHits(packageUrl);
-        delete cachedResult.cacheData;
-        return cachedResult;
-      }
-
-      logger.trace('Cached result is soft expired');
-      HttpCacheStats.incLocalMisses(packageUrl);
-    } else {
-      logger.trace(
-        `Package cache for npm package "${packageName}" is from an old revision - discarding`,
-      );
-      delete cachedResult.cacheData;
-    }
-  }
-  const cacheMinutes = 15;
-  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
-  let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
-  if (
-    !(
-      is.number(cacheHardTtlMinutes) &&
-      /* istanbul ignore next: needs test */ cacheHardTtlMinutes > cacheMinutes
-    )
-  ) {
-    cacheHardTtlMinutes = cacheMinutes;
-  }
-
-  const uri = url.parse(packageUrl);
-
   try {
-    const options: HttpOptions = {};
-    if (cachedResult?.cacheData?.etag) {
-      logger.trace({ packageName }, 'Using cached etag');
-      options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
-    }
+    const cacheProvider = new PackageHttpCacheProvider({
+      namespace: 'datasource-npm:cache-provider',
+      checkAuthorizationHeader: false,
+    });
+    const options: HttpOptions = { cacheProvider };
 
     // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists
     if (
@@ -145,23 +98,8 @@ export async function getDependency(
       });
     }
 
-    const raw = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
-    if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.trace(`Cached npm result for ${packageName} is revalidated`);
-      HttpCacheStats.incRemoteHits(packageUrl);
-      cachedResult.cacheData.softExpireAt = softExpireAt;
-      await packageCache.set(
-        cacheNamespace,
-        packageUrl,
-        cachedResult,
-        cacheHardTtlMinutes,
-      );
-      delete cachedResult.cacheData;
-      return cachedResult;
-    }
-    HttpCacheStats.incRemoteMisses(packageUrl);
-    const etag = raw.headers.etag;
-    const res = raw.body;
+    const resp = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
+    const { body: res } = resp;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
       logger.debug(`No versions returned for npm dependency ${packageName}`);
@@ -226,25 +164,16 @@ export async function getDependency(
       }
       return release;
     });
-    logger.trace({ dep }, 'dep');
-    const cacheControl = raw.headers?.['cache-control'];
-    if (
-      is.nonEmptyString(cacheControl) &&
-      regEx(/(^|,)\s*public\s*(,|$)/).test(cacheControl)
-    ) {
-      dep.isPrivate = false;
-      const cacheData = { revision: CACHE_REVISION, softExpireAt, etag };
-      await packageCache.set(
-        cacheNamespace,
-        packageUrl,
-        { ...dep, cacheData },
-        etag
-          ? /* istanbul ignore next: needs test */ cacheHardTtlMinutes
-          : cacheMinutes,
-      );
-    } else {
+
+    const isPublic = resp.headers?.['cache-control']
+      ?.toLocaleLowerCase()
+      ?.split(regEx(/\s*,\s*/))
+      ?.includes('public');
+    if (!isPublic) {
       dep.isPrivate = true;
     }
+
+    logger.trace({ dep }, 'dep');
     return dep;
   } catch (err) {
     const actualError = err instanceof ExternalHostError ? err.err : err;
@@ -259,15 +188,6 @@ export async function getDependency(
     }
 
     if (err instanceof ExternalHostError) {
-      if (cachedResult) {
-        logger.warn(
-          { err, host: uri.host },
-          `npm host error, reusing expired cached result instead`,
-        );
-        delete cachedResult.cacheData;
-        return cachedResult;
-      }
-
       if (actualError.name === 'ParseError' && actualError.body) {
         actualError.body = 'err.body deleted by Renovate';
         err.err = actualError;

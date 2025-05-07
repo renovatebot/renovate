@@ -336,6 +336,15 @@ function isPluginRegistry(ctx: Ctx): boolean {
   return false;
 }
 
+function isExclusiveRegistry(ctx: Ctx): boolean {
+  if (ctx.tokenMap.registryType) {
+    const registryType = loadFromTokenMap(ctx, 'registryType')[0].value;
+    return registryType === 'exclusiveContent';
+  }
+
+  return false;
+}
+
 export function handleRegistryUrl(ctx: Ctx): Ctx {
   let localVariables = ctx.globalVars;
 
@@ -364,6 +373,7 @@ export function handleRegistryUrl(ctx: Ctx): Ctx {
     if (url?.host && url.protocol) {
       ctx.registryUrls.push({
         registryUrl,
+        registryType: isExclusiveRegistry(ctx) ? 'exclusive' : 'regular',
         scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
         content: ctx.tmpRegistryContent,
       });
