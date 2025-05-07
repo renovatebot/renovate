@@ -54,7 +54,7 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   return url.toString();
 }
 
-export function mapPrStateToGerritFilter(state?: PrState): string | undefined {
+export function mapPrStateToGerritFilter(state?: PrState): string | null {
   switch (state) {
     case 'merged':
       return 'status:merged';
@@ -66,7 +66,7 @@ export function mapPrStateToGerritFilter(state?: PrState): string | undefined {
       return '-status:open';
     case 'all':
     default:
-      return undefined;
+      return null;
   }
 }
 

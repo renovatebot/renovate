@@ -53,11 +53,11 @@ describe('modules/platform/gerrit/utils', () => {
       ['merged', 'status:merged'],
       ['!open', '-status:open'],
       ['open', 'status:open'],
-      ['all', undefined],
-      [undefined, undefined],
+      ['all', null],
+      [undefined, null],
     ])(
       'maps pr state %p to gerrit filter %p',
-      (prState: any, filter: string | undefined) => {
+      (prState: any, filter: string | null) => {
         expect(utils.mapPrStateToGerritFilter(prState)).toEqual(filter);
       },
     );
