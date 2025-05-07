@@ -2,7 +2,7 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { getEnv } from '../../../util/env';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { readLocalFile } from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateDependencyConfig } from '../types';
@@ -18,12 +18,12 @@ export default async function updateDependency({
   ]);
   const gitEnv = {
     // pass all existing env variables
-    ...getEnv(),
+    ...getChildProcessEnv(),
     // add all known git Variables
     ...gitSubmoduleAuthEnvironmentVariables,
   };
   const git = Git(localDir).env(gitEnv);
-  const submoduleGit = Git(upath.join(localDir, upgrade.depName));
+  const submoduleGit = Git(upath.join(localDir, upgrade.depName)).env(gitEnv);
 
   try {
     await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);
