@@ -4,7 +4,8 @@ import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
 import type { ProviderLock } from '../../lockfile/types';
-import { generic_image_resource } from './utils';
+import type { GenericImageResourceDef } from '../../types';
+import { generic_image_data_source, generic_image_resource } from './utils';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -16,39 +17,43 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     _locks: ProviderLock[],
     config: ExtractConfig,
   ): PackageDependency[] {
-    if (
-      is.nullOrUndefined(hclMap.resource) &&
-      is.nullOrUndefined(hclMap.data)
-    ) {
+    const dependencies = [];
+
+    dependencies.push(
+      ...this.extractResources(hclMap.resource, generic_image_resource, config),
+    );
+
+    dependencies.push(
+      ...this.extractResources(hclMap.data, generic_image_data_source, config),
+    );
+
+    return dependencies;
+  }
+
+  private extractResources(
+    typeMap: Record<string, unknown> | undefined,
+    image_definitions: GenericImageResourceDef[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
+    if (is.nullOrUndefined(typeMap)) {
       return [];
     }
 
-    const resourceTypMap = hclMap.resource ?? {};
-    const dataTypMap = hclMap.data ?? {};
-
     const dependencies = [];
 
-    for (const image_resource_def of generic_image_resource) {
+    for (const image_resource_def of image_definitions) {
       const { type, path } = image_resource_def;
-
-      const resourceInstancesMap = resourceTypMap[type];
-      if (is.nonEmptyObject(resourceInstancesMap)) {
-        // loop over instances of a resource type
-        for (const instance of Object.values(resourceInstancesMap).flat()) {
-          dependencies.push(
-            ...this.walkPath({ depType: type }, instance, path, config),
-          );
-        }
+      const resourceInstancesMap = typeMap[type];
+      // is there a resource with current looked at type ( `image_resource_def` )
+      if (!is.nonEmptyObject(resourceInstancesMap)) {
+        continue;
       }
 
-      const dataInstancesMap = dataTypMap[type];
-      if (is.nonEmptyObject(dataInstancesMap)) {
-        // loop over instances of a data source type
-        for (const instance of Object.values(dataInstancesMap).flat()) {
-          dependencies.push(
-            ...this.walkPath({ depType: type }, instance, path, config),
-          );
-        }
+      // loop over instances of a resource type
+      for (const instance of Object.values(resourceInstancesMap).flat()) {
+        dependencies.push(
+          ...this.walkPath({ depType: type }, instance, path, config),
+        );
       }
     }
 

@@ -59,7 +59,7 @@ Renovate can update the version attribute of `helm_release` resources. This appl
 
 #### Docker
 
-Renovate can update image references of the Docker provider resources and data sources (`docker\_\*`).
+Renovate can update image references of the Docker provider resources (`docker\_\*`).
 
 | Name            | Public hosting | Private hosting |
 | --------------- | :------------: | :-------------: |
@@ -104,7 +104,6 @@ You can use these `depTypes` for fine-grained control, for example to disable pa
 | Helm release                         |             `helm_release`             |                                                                            |
 | Docker container                     |           `docker_container`           |                                                                            |
 | Docker image                         |             `docker_image`             |                                                                            |
-| Docker registry image                |        `docker_registry_image`         |                                                                            |
 | Docker service                       |            `docker_service`            |                                                                            |
 | Kubernetes CronJob                   |         `kubernetes_cron_job`          |                                                                            |
 | Kubernetes CronJob v1                |        `kubernetes_cron_job_v1`        |                                                                            |
@@ -120,5 +119,9 @@ You can use these `depTypes` for fine-grained control, for example to disable pa
 | Kubernetes Replication Controller v1 | `kubernetes_replication_controller_v1` |                                                                            |
 | Kubernetes StatefulSet               |       `kubernetes_stateful_set`        |                                                                            |
 | Kubernetes StatefulSet v1            |      `kubernetes_stateful_set_v1`      |                                                                            |
+
+| Data Source           |        `depType`        | Notes |
+| --------------------- | :---------------------: | :---: |
+| Docker registry image | `docker_registry_image` |       |
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
