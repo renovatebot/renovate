@@ -578,18 +578,6 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'fileMatch') {
-              for (const fileMatch of val as string[]) {
-                try {
-                  regEx(fileMatch);
-                } catch {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
-                  });
-                }
-              }
-            }
             if (key === 'baseBranchPatterns') {
               for (const baseBranchPattern of val as string[]) {
                 if (
