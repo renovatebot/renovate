@@ -125,7 +125,6 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '3.9.0',
             datasource: 'github-tags',
             depName: 'kafka',
-            extractVersion: '^(?<version>\\S+)',
             packageName: 'apache/kafka',
           },
           {
