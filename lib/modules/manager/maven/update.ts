@@ -79,10 +79,10 @@ export function updateAtPosition(
     if (currentValue) {
       replacedPart = version.replace(currentValue, newValue!);
     }
-    if (upgrade.currentDigest) {
+    if (upgrade.currentDigest && upgrade.newDigest) {
       replacedPart = replacedPart.replace(
         upgrade.currentDigest,
-        upgrade.newDigest!,
+        upgrade.newDigest,
       );
     }
     if (replacedPart !== version) {
