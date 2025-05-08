@@ -7,6 +7,18 @@ The `debian` datasource is meant for projects that:
 By default, Renovate does not detect Debian dependencies.
 For Renovate to update dependencies, you must combine the Debian datasource with [regex managers](../../manager/regex/index.md).
 
+## Workflow
+
+1. Try to fetch Release / InRelease file
+   1.1. if either exists, parse and resolve Packages file (no compression|xz|gz|bzip2)
+   1.2. else resolve in the following order
+   Packages.gz
+   Packages.xz
+   Packages.bzip2
+   Packages
+   return error if not found
+2. Extract Packages file, parse and return release information as usual
+
 ## Set URL when using a Debian repository
 
 To use a Debian repository with the datasource, you must set a properly formatted URL with specific query parameters as `registryUrl`:
