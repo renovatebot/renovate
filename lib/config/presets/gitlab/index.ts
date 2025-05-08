@@ -53,29 +53,20 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  // Extract the actual filename from the path without query parameters or URL encoding
   let cleanFileName = fileName;
-
-  // First, remove any query parameters
   cleanFileName = cleanFileName.split('?')[0];
 
-  // Handle "/raw" suffix that GitLab API may add
   if (cleanFileName.endsWith('/raw')) {
     cleanFileName = cleanFileName.substring(0, cleanFileName.length - 4);
   }
-
-  // Check if it's a URL-encoded repository path
   if (cleanFileName.includes('%2F')) {
-    // Decode URL-encoded path to get the real path
     const decodedPath = decodeURIComponent(cleanFileName);
-    // Get the actual filename (last part of the path)
     const lastSlashIndex = decodedPath.lastIndexOf('/');
     cleanFileName =
       lastSlashIndex >= 0
         ? decodedPath.substring(lastSlashIndex + 1)
         : decodedPath;
   } else if (cleanFileName.includes('/')) {
-    // For regular paths, use the generic helper
     cleanFileName = getFilenameFromPath(cleanFileName);
   }
 
