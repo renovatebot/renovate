@@ -1,8 +1,11 @@
 import is from '@sindresorhus/is';
+import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
+import { resolveConfigPresets } from '../../../../config/presets';
 import { applySecretsToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
 import { coerceArray } from '../../../../util/array';
@@ -15,6 +18,21 @@ import * as codespaces from './codespaces';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { hostRulesFromEnv } from './host-rules-from-env';
+
+export async function resolveGlobalExtends(
+  globalExtends: string[],
+  ignorePresets?: string[],
+): Promise<AllConfig> {
+  try {
+    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
+    const config = { extends: globalExtends, ignorePresets };
+    const resolvedConfig = await resolveConfigPresets(config);
+    return resolvedConfig;
+  } catch (err) {
+    logger.error({ err }, 'Error resolving config preset');
+    throw new Error(CONFIG_PRESETS_INVALID);
+  }
+}
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
@@ -32,6 +50,18 @@ export async function parseConfigs(
   config = mergeChildConfig(config, cliConfig);
 
   config = await codespaces.setConfig(config);
+
+  let resolvedGlobalExtends: AllConfig | undefined;
+
+  if (is.nonEmptyArray(config?.globalExtends)) {
+    // resolve global presets immediately
+    resolvedGlobalExtends = await resolveGlobalExtends(
+      config.globalExtends,
+      config.ignorePresets,
+    );
+    config = mergeChildConfig(resolvedGlobalExtends, config);
+    delete config.globalExtends;
+  }
 
   const combinedConfig = config;
 
@@ -61,8 +91,12 @@ export async function parseConfigs(
     delete config.privateKeyPathOld;
   }
 
+  // Add private keys for sanitizing then set and delete them
   addSecretForSanitizing(config.privateKey, 'global');
   addSecretForSanitizing(config.privateKeyOld, 'global');
+  setPrivateKeys(config.privateKey, config.privateKeyOld);
+  delete config.privateKey;
+  delete config.privateKeyOld;
 
   if (config.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
@@ -73,6 +107,7 @@ export async function parseConfigs(
   logger.debug({ config: fileConfig }, 'File config');
   logger.debug({ config: cliConfig }, 'CLI config');
   logger.debug({ config: envConfig }, 'Env config');
+  logger.debug({ config: resolvedGlobalExtends }, 'Resolved global extends');
   logger.debug({ config: combinedConfig }, 'Combined config');
 
   if (config.detectGlobalManagerConfig) {

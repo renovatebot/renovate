@@ -360,10 +360,8 @@ Valid codes for namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
-- `datasource-maven`
-- `datasource-maven:head-requests-timeout`
-- `datasource-maven:head-requests`
-- `datasource-maven:metadata-xml`
+- `datasource-maven:cache-provider`
+- `datasource-maven:postprocess-reject`
 - `datasource-node-version`
 - `datasource-npm:data`
 - `datasource-nuget-v3`

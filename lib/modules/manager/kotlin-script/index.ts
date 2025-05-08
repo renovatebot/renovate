@@ -8,7 +8,7 @@ export const url =
 export const categories: Category[] = ['java'];
 
 export const defaultConfig = {
-  fileMatch: ['^.+\\.main\\.kts$'],
+  managerFilePatterns: ['/^.+\\.main\\.kts$/'],
 };
 
 export const supportedDatasources = [MavenDatasource.id];

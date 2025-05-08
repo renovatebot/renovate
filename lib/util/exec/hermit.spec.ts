@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import _findUp from 'find-up';
+import { findUp as _findUp } from 'find-up';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit';

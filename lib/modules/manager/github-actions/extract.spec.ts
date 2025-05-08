@@ -455,8 +455,13 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'actions-runner-controller/execute-assert-arc-e2e@f1d7c52253b89f0beae60141f8465d9495cdc2cf # actions-runner-controller-0.23.5',
         },
+        {
+          currentDigest: '4b1248585248751e3b12fd020cf7ac91540ca09c',
+          currentValue: 'prettier/v2.0.1',
+          replaceString:
+            'grafana/writers-toolkit@4b1248585248751e3b12fd020cf7ac91540ca09c # prettier/v2.0.1',
+        },
       ]);
-
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
 

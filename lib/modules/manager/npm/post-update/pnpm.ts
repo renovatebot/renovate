@@ -13,6 +13,7 @@ import type {
 } from '../../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   getSiblingFileName,
   localPathExists,
   readLocalFile,
@@ -57,8 +58,12 @@ export async function generateLockFile(
     };
 
     const extraEnv: ExtraEnv = {
+      // those arwe no longer working and it's unclear if they ever worked
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
+      // these are used by pnpm v5 and above. Maybe earlier versions too
+      npm_config_cache_dir: await ensureCacheDir('pnpm-cache'),
+      npm_config_store_dir: await ensureCacheDir('pnpm-store'),
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,

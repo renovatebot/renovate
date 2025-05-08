@@ -1,4 +1,5 @@
 import { GlobalConfig } from '../../config/global';
+import { getEnv } from '../env';
 
 const basicEnvVars = [
   'HTTP_PROXY',
@@ -42,21 +43,22 @@ const basicEnvVars = [
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
+  const combinedEnv = getEnv();
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
-    return { ...process.env };
+    return { ...combinedEnv };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {
-    if (typeof process.env[envVar] !== 'undefined') {
-      env[envVar] = process.env[envVar];
+    if (typeof combinedEnv[envVar] !== 'undefined') {
+      env[envVar] = combinedEnv[envVar];
     }
   });
 
   // Copy containerbase url replacements
-  for (const key of Object.keys(process.env)) {
+  for (const key of Object.keys(combinedEnv)) {
     if (/^URL_REPLACE_\d+_(?:FROM|TO)$/.test(key)) {
-      env[key] = process.env[key];
+      env[key] = combinedEnv[key];
     }
   }
   return env;
