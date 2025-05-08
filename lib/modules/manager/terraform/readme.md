@@ -82,13 +82,14 @@ Renovate searches for the `terraform_version` argument.
 
 Renovate understands these Terraform range constraints:
 
-| Terraform range      | Notes                                                       |
-| -------------------- | ----------------------------------------------------------- |
-| `>= 1.2.0`           | version `1.2.0` or newer                                    |
-| `<= 1.2.0`           | version `1.2.0` or older                                    |
-| `~> 1.2.0`           | any non-beta version `>= 1.2.0` and `< 1.3.0`, e.g. `1.2.X` |
-| `~> 1.2`             | any non-beta version `>= 1.2.0` and `< 2.0.0`, e.g. `1.X.Y` |
-| `>= 1.0.0, <= 2.0.0` | any version between `1.0.0` and `2.0.0` inclusive           |
+| Terraform range      | Notes                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `>= 1.2.0`           | version `1.2.0` or newer                                                   |
+| `<= 1.2.0`           | version `1.2.0` or older                                                   |
+| `~> 1.2.0`           | any non-beta version `>= 1.2.0` and `< 1.3.0`, e.g. `1.2.X`                |
+| `~> 1.2`             | any non-beta version `>= 1.2.0` and `< 2.0.0`, e.g. `1.X.Y`                |
+| `~> 1.2, != 1.2.3`   | any non-beta version `>= 1.2.0` and `< 2.0.0`, e.g. `1.X.Y` except `1.2.3` |
+| `>= 1.0.0, <= 2.0.0` | any version between `1.0.0` and `2.0.0` inclusive                          |
 
 ### Disabling parts of the manager
 
