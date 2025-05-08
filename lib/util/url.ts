@@ -134,6 +134,24 @@ export function parseLinkHeader(
 }
 
 /**
+ * Extract the filename from a file path or URL.
+ * Works with paths that may have query parameters.
+ *
+ * @param pathOrUrl - The path or URL to extract the filename from
+ * @returns The extracted filename without query parameters
+ */
+export function getFilenameFromPath(pathOrUrl: string): string {
+  const pathWithoutQuery = pathOrUrl.split('?')[0];
+
+  const lastSlashIndex = pathWithoutQuery.lastIndexOf('/');
+  if (lastSlashIndex >= 0) {
+    return pathWithoutQuery.substring(lastSlashIndex + 1);
+  }
+
+  return pathWithoutQuery;
+}
+
+/**
  * prefix https:// to hosts with port or path
  */
 export function massageHostUrl(url: string): string {
