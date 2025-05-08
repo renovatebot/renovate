@@ -22,6 +22,14 @@ Administrators of GitHub organizations and repositories can use the Developer Pl
 
 See the [Developer Platform API documentation](https://api-docs.mend.io/developer-platform/1.0/repo-secret) for details.
 
+### Authenticating the APIs
+
+Calls to the APIs require authentication with a personal access token from GitHub user making the request.
+The token must be included in the request header as the `authorization` property.
+
+You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
+No additional scopes or permissions are required for the token.
+
 ## Managing secrets via the Web UI
 
 This section explains how to manage secrets for the Mend-hosted cloud apps via the Web UI.
