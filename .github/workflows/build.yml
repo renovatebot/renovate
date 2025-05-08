@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION }}
+      node-version: ${{ steps.setup-outputs.outputs.node-version }}
 
     steps:
       - name: Checkout code
@@ -142,6 +142,11 @@ jobs:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
+
+      - name: Setup outputs
+        id: setup-outputs
+        run: |
+          echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
