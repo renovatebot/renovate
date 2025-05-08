@@ -497,7 +497,9 @@ export async function syncGit(): Promise<void> {
     (await getDefaultBranch(git));
   /* v8 ignore next -- TODO: add test */
   delete getCache()?.semanticCommits;
-  // istanbul ignore if
+
+  // If upstreamUrl is set then the bot is running in fork mode
+  // The "upstream" remote is the original repository which was forked from
   if (config.upstreamUrl) {
     logger.debug(
       `Bringing default branch up-to-date with upstream, to get latest config`,
@@ -511,6 +513,7 @@ export async function syncGit(): Promise<void> {
     await syncForkWithUpstream(config.currentBranch);
     await fetchBranchCommits(false);
   }
+
   config.currentBranchSha = (
     await git.raw(['rev-parse', 'HEAD'])
   ).trim() as LongCommitSha;

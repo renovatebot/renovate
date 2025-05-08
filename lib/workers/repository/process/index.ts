@@ -131,8 +131,9 @@ export async function extractDependencies(
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
 
-      await scm.syncForkWithUpstream(baseBranch);
-
+      if (scm.syncForkWithUpstream) {
+        await scm.syncForkWithUpstream(baseBranch);
+      }
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
