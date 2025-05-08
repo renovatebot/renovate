@@ -1,8 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -10,14 +8,15 @@ import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmfile from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git } from '~test/util';
 
 vi.mock('../../datasource', () => mockDeep());
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 process.env.CONTAINERBASE = 'true';
 

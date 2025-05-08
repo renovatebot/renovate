@@ -10,8 +10,8 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "skipFiles": ["<node_internals>/**/*.js"]
+      "runtimeExecutable": "tsx",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
       "type": "node",
@@ -23,8 +23,8 @@
       },
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
-      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "skipFiles": ["<node_internals>/**/*.js"]
+      "runtimeExecutable": "tsx",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
       "type": "node",

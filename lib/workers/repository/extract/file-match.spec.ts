@@ -1,7 +1,5 @@
-import type { RenovateConfig } from '../../../../test/util';
 import * as fileMatch from './file-match';
-
-vi.mock('../../../util/git');
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/extract/file-match', () => {
   const fileList = ['package.json', 'frontend/package.json'];
@@ -53,7 +51,7 @@ describe('workers/repository/extract/file-match', () => {
       includePaths: [],
       ignorePaths: [],
       manager: 'npm',
-      fileMatch: ['(^|/)package\\.json$'],
+      managerFilePatterns: ['/(^|/)package\\.json$/'],
     };
 
     it('returns npm files', () => {
@@ -64,7 +62,7 @@ describe('workers/repository/extract/file-match', () => {
     });
 
     it('deduplicates', () => {
-      config.fileMatch?.push('package.json');
+      config.managerFilePatterns?.push('package.json');
       const res = fileMatch.getMatchingFiles(config, fileList);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);

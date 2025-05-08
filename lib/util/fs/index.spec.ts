@@ -1,9 +1,8 @@
-import _findUp from 'find-up';
+import { findUp as _findUp } from 'find-up';
 import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import { join, resolve } from 'upath';
-import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
@@ -42,9 +41,7 @@ import {
 
 vi.mock('../exec/env');
 vi.mock('find-up');
-vi.mock('../git');
-
-const findUp = mockedFunction(_findUp);
+const findUp = vi.mocked(_findUp);
 
 describe('util/fs/index', () => {
   let localDirResult: DirectoryResult;

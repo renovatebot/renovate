@@ -33,7 +33,7 @@ export function sortBranches(branches: Partial<BranchConfig>[]): void {
     }
     // TODO #22198
     // Sort by prTitle if updateType is the same
-    return a.prTitle! < b.prTitle! ? -1 : 1;
+    return a.prTitle!.localeCompare(b.prTitle!, undefined, { numeric: true });
   });
 }
 

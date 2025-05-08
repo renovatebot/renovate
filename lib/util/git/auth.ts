@@ -1,7 +1,9 @@
+import is from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
+import { getEnv } from '../env';
 import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
 import { createURLFromHostOrURL, isHttpUrl } from '../url';
@@ -32,9 +34,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     return { ...environmentVariables };
   }
 
+  const env = getEnv();
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT ?? process.env.GIT_CONFIG_COUNT;
+    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
@@ -42,7 +45,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
         {
-          GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
+          GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
         },
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
@@ -92,9 +95,7 @@ function getAuthenticationRulesWithToken(
 ): AuthenticationRule[] {
   let token = authToken;
   let type = hostType;
-  if (!type) {
-    type = detectPlatform(url);
-  }
+  type ??= detectPlatform(url);
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
@@ -124,10 +125,13 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    if (!sshPort) {
+    // sshPort is string, wrong type!
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
+    // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
+    if (!sshPort || is.emptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
-      sshPort = 7999;
+      sshPort = '7999';
     }
   }
 

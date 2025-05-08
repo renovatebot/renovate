@@ -10,8 +10,10 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { getEnv } from '../env';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -81,7 +83,7 @@ export abstract class HttpBase<
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,
       {
@@ -157,14 +159,9 @@ export abstract class HttpBase<
     options.timeout ??= 60000;
 
     const { cacheProvider } = options;
-    const cachedResponse = await cacheProvider?.bypassServer<string | Buffer>(
-      url,
-    );
-    if (cachedResponse) {
-      return cachedResponse;
-    }
 
     const memCacheKey =
+      !cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
         ? hash(
@@ -176,11 +173,22 @@ export abstract class HttpBase<
           )
         : null;
 
+    const cachedResponse = await cacheProvider?.bypassServer<unknown>(url);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
 
     // Cache GET requests unless memCache=false
     if (memCacheKey) {
       resPromise = memCache.get(memCacheKey);
+
+      /* v8 ignore start: temporary code */
+      if (resPromise && !cacheProvider) {
+        ObsoleteCacheHitLogger.write(url);
+      }
+      /* v8 ignore stop: temporary code */
     }
 
     if (!resPromise) {

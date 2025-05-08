@@ -1,5 +1,5 @@
+import is from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
@@ -11,22 +11,27 @@ import * as _npm from '../../../../modules/manager/npm';
 import * as _pep621 from '../../../../modules/manager/pep621';
 import * as _pipCompile from '../../../../modules/manager/pip-compile';
 import * as _poetry from '../../../../modules/manager/poetry';
-import type { PackageFile } from '../../../../modules/manager/types';
+import type {
+  LookupUpdate,
+  PackageFile,
+  UpdateArtifact,
+} from '../../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
+import { git } from '~test/util';
 
-const bundler = mocked(_bundler);
-const composer = mocked(_composer);
-const gitSubmodules = mocked(_gitSubmodules);
-const gomod = mocked(_gomod);
-const helmv3 = mocked(_helmv3);
-const npm = mocked(_npm);
-const batectWrapper = mocked(_batectWrapper);
-const autoReplace = mocked(_autoReplace);
-const pep621 = mocked(_pep621);
-const pipCompile = mocked(_pipCompile);
-const poetry = mocked(_poetry);
+const bundler = vi.mocked(_bundler);
+const composer = vi.mocked(_composer);
+const gitSubmodules = vi.mocked(_gitSubmodules);
+const gomod = vi.mocked(_gomod);
+const helmv3 = vi.mocked(_helmv3);
+const npm = vi.mocked(_npm);
+const batectWrapper = vi.mocked(_batectWrapper);
+const autoReplace = vi.mocked(_autoReplace);
+const pep621 = vi.mocked(_pep621);
+const pipCompile = vi.mocked(_pipCompile);
+const poetry = vi.mocked(_poetry);
 
 vi.mock('../../../../modules/manager/bundler');
 vi.mock('../../../../modules/manager/composer');
@@ -38,7 +43,6 @@ vi.mock('../../../../modules/manager/batect-wrapper');
 vi.mock('../../../../modules/manager/pep621');
 vi.mock('../../../../modules/manager/pip-compile');
 vi.mock('../../../../modules/manager/poetry');
-vi.mock('../../../../util/git');
 vi.mock('./auto-replace');
 
 describe('workers/repository/update/branch/get-updated', () => {
@@ -502,6 +506,138 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    /*
+     * The pip-compile manager uses lock files, the regex manager does not.
+     * Verify pip-compile updates the lock files even if the same dependency
+     * is also updated by the regex manager in the same branch.
+     * Cf. #34015.
+     */
+    it('updates lock files in mixed-manager scenarios', async () => {
+      const branchName = 'renovate/wheel-0.x';
+      const updateType = 'patch';
+      const depName = 'wheel';
+      const packageName = depName;
+      const currentVersion = '0.45.0';
+      const lockedVersion = '0.45.0';
+      const newVersion = '0.45.1';
+      const currentRegexValue = currentVersion;
+      const currentPipCompileValue = '==0.45.0';
+      const newRegexValue = newVersion;
+      const newPipCompileValue = '==0.45.1';
+
+      const packageFileA = 'requirements-a.in';
+      const lockFileA = 'requirements-a.txt';
+      const packageFileB = 'requirements-b.in';
+      const lockFileB = 'requirements-b.txt';
+
+      const regexWheelLookup: LookupUpdate = {
+        newVersion,
+        newValue: newRegexValue,
+        updateType,
+        branchName,
+      };
+      const regexWheelDep = {
+        depName,
+        packageName,
+        currentVersion,
+        currentValue: currentVersion,
+        updates: [regexWheelLookup],
+      };
+      const pipCompileWheelLookup: LookupUpdate = {
+        ...regexWheelLookup,
+        newValue: newPipCompileValue,
+      };
+      const pipCompileWheelDep = {
+        ...regexWheelDep,
+        currentValue: currentPipCompileValue,
+        lockedVersion,
+        updates: [pipCompileWheelLookup],
+      };
+
+      config.manager = 'regex';
+      config.branchName = branchName;
+      config.upgrades.push({
+        packageFile: 'README.adoc',
+        manager: 'regex',
+        updateType,
+        depName,
+        currentValue: currentRegexValue,
+        newVersion,
+        branchName,
+      });
+      config.upgrades.push({
+        packageFile: packageFileA,
+        lockFiles: [lockFileA],
+        manager: 'pip-compile',
+        updateType,
+        depName,
+        currentValue: currentPipCompileValue,
+        newVersion,
+        branchName,
+      });
+      config.upgrades.push({
+        packageFile: packageFileB,
+        lockFiles: [lockFileB],
+        manager: 'pip-compile',
+        updateType,
+        depName,
+        currentValue: currentPipCompileValue,
+        newVersion,
+        branchName,
+      });
+
+      config.packageFiles = {
+        'pip-compile': [
+          {
+            packageFile: packageFileA,
+            lockFiles: [lockFileA],
+            deps: [pipCompileWheelDep],
+          },
+          {
+            packageFile: packageFileB,
+            lockFiles: [lockFileB],
+            deps: [pipCompileWheelDep],
+          },
+        ],
+        regex: [
+          {
+            packageFile: 'README.adoc',
+            deps: [regexWheelDep],
+          },
+        ],
+      };
+
+      pipCompile.updateArtifacts.mockResolvedValue([]);
+      autoReplace.doAutoReplace.mockResolvedValue('new content');
+
+      await getUpdatedPackageFiles(config);
+
+      const expectPipCompilePackageAndLockFile = (
+        expectedPackageFileName: string,
+        expectedLockFileName: string,
+      ) => {
+        expect(pipCompile.updateArtifacts).toSatisfy(
+          (updateArtifactsSpy) => {
+            return updateArtifactsSpy.mock.calls.some((args: any[]) => {
+              const updateArtifact: UpdateArtifact = args[0];
+              const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
+              return (
+                updateArtifact?.packageFileName === expectedPackageFileName &&
+                is.array(updateArtifactLockfiles) &&
+                updateArtifactLockfiles?.length === 1 &&
+                updateArtifactLockfiles?.[0] === expectedLockFileName
+              );
+            });
+          },
+          `pipCompile.updateArtifacts() must be called for package file ${expectedPackageFileName}` +
+            ` and with lock file ${expectedLockFileName}`,
+        );
+      };
+
+      expectPipCompilePackageAndLockFile(packageFileA, lockFileA);
+      expectPipCompilePackageAndLockFile(packageFileB, lockFileB);
     });
 
     it('update artifacts on update-lockfile strategy', async () => {

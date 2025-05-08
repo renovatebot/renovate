@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { coerceArray } from '../../../util/array';
+import { Result } from '../../../util/result';
 import { parseSingleYaml } from '../../../util/yaml';
 import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
@@ -9,15 +9,14 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { CircleCiFile, type CircleCiJob, type CircleCiOrb } from './schema';
+import { CircleCiFile, type CircleCiOrb } from './schema';
 
 function extractDefinition(
+  deps: PackageDependency[],
   definition: CircleCiOrb | CircleCiFile,
-  config?: ExtractConfig,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-
-  for (const [key, orb] of Object.entries(definition.orbs ?? {})) {
+  registryAliases: Record<string, string>,
+): void {
+  for (const [key, orb] of Object.entries(definition.orbs)) {
     if (typeof orb === 'string') {
       const [packageName, currentValue] = orb.split('@');
 
@@ -30,25 +29,18 @@ function extractDefinition(
         datasource: OrbDatasource.id,
       });
     } else {
-      deps.push(...extractDefinition(orb, config));
+      extractDefinition(deps, orb, registryAliases);
     }
   }
 
   // extract environments
-  const environments: CircleCiJob[] = [
-    Object.values(definition.executors ?? {}),
-    Object.values(definition.jobs ?? {}),
-  ].flat();
-  for (const job of environments) {
-    for (const dockerElement of coerceArray(job.docker)) {
-      deps.push({
-        ...getDep(dockerElement.image, true, config?.registryAliases),
-        depType: 'docker',
-      });
-    }
+  const environments = [...definition.executors, ...definition.jobs];
+  for (const dockerImage of environments) {
+    deps.push({
+      ...getDep(dockerImage, true, registryAliases),
+      depType: 'docker',
+    });
   }
-
-  return deps;
 }
 
 export function extractPackageFile(
@@ -56,25 +48,29 @@ export function extractPackageFile(
   packageFile?: string,
   config?: ExtractConfig,
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-  try {
-    const parsed = parseSingleYaml(content, {
-      customSchema: CircleCiFile,
-    });
+  const { val: parsed, err } = Result.wrap(() =>
+    CircleCiFile.parse(parseSingleYaml(content)),
+  ).unwrap();
 
-    deps.push(...extractDefinition(parsed, config));
-
-    for (const alias of coerceArray(parsed.aliases)) {
-      deps.push({
-        ...getDep(alias.image, true, config?.registryAliases),
-        depType: 'docker',
-      });
-    }
-  } catch (err) /* istanbul ignore next */ {
+  if (err) {
     logger.debug({ err, packageFile }, 'Error extracting circleci images');
+    return null;
   }
+
+  const registryAliases = config?.registryAliases ?? {};
+  const deps: PackageDependency[] = [];
+  extractDefinition(deps, parsed, registryAliases);
+
+  for (const alias of parsed.aliases) {
+    deps.push({
+      ...getDep(alias, true, registryAliases),
+      depType: 'docker',
+    });
+  }
+
   if (!deps.length) {
     return null;
   }
+
   return { deps };
 }

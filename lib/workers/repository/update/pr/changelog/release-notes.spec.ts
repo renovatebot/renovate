@@ -1,12 +1,8 @@
 import { DateTime } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../test/http-mock';
-import { mocked, partial } from '../../../../../../test/util';
 import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../../../util/github/graphql/types';
-import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
 import type { Timestamp } from '../../../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -24,10 +20,11 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { hostRules, partial } from '~test/util';
 
 vi.mock('../../../../../util/host-rules', () => mockDeep());
-
-const hostRules = mocked(_hostRules);
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');
@@ -98,6 +95,12 @@ const bitbucketProject = partial<ChangeLogProject>({
   type: 'bitbucket',
   apiBaseUrl: 'https://api.bitbucket.org/',
   baseUrl: 'https://bitbucket.org/',
+});
+
+const bitbucketServerProject = partial<ChangeLogProject>({
+  type: 'bitbucket-server',
+  apiBaseUrl: 'https://bitbucket.domain.org/rest/api/1.0/',
+  baseUrl: 'https://bitbucket\\.domain.org/',
 });
 
 const githubProject = partial<ChangeLogProject>({
@@ -363,6 +366,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           url: 'https://my.custom.domain/some/yet-other-repository/-/releases/v1.0.1',
         },
       ]);
+    });
+
+    it('should return empty release list for self-hosted bitbucket-server', async () => {
+      const res = await getReleaseList(
+        {
+          ...bitbucketServerProject,
+          repository: 'some/yet-other-repository',
+        },
+        partial<ChangeLogRelease>(),
+      );
+      expect(res).toBeEmptyArray();
     });
   });
 
@@ -1150,6 +1164,35 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         notesSourceUrl:
           'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md',
         url: 'https://bitbucket.org/some-org/some-repo/src/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02',
+      });
+    });
+
+    it('handles bitbucket-server release notes link', async () => {
+      httpMock
+        .scope(bitbucketServerProject.apiBaseUrl)
+        .get('/projects/some-org/repos/some-repo/files?limit=100')
+        .reply(200, {
+          isLastPage: true,
+          values: ['CHANGELOG.md'],
+        })
+        .get('/projects/some-org/repos/some-repo/raw/CHANGELOG.md')
+        .reply(200, angularJsChangelogMd);
+
+      const res = await getReleaseNotesMd(
+        {
+          ...bitbucketServerProject,
+          repository: 'some-org/some-repo',
+        },
+        partial<ChangeLogRelease>({
+          version: '1.6.9',
+          gitRef: '1.6.9',
+        }),
+      );
+
+      const notesSourceUrl = `${bitbucketServerProject.baseUrl}projects/some-org/repos/some-repo/browse/CHANGELOG.md?at=HEAD`;
+      expect(res).toMatchObject({
+        notesSourceUrl,
+        url: `${notesSourceUrl}#169-fiery-basilisk-2018-02-02`,
       });
     });
 

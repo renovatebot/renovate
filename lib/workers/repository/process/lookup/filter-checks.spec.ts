@@ -1,4 +1,3 @@
-import { mocked } from '../../../../../test/util';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -18,13 +17,13 @@ import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
 vi.mock('../../../../util/date');
-const dateUtil = mocked(_dateUtil);
+const dateUtil = vi.mocked(_dateUtil);
 
 vi.mock('../../../../util/merge-confidence');
-const mergeConfidence = mocked(_mergeConfidence);
+const mergeConfidence = vi.mocked(_mergeConfidence);
 
 vi.mock('../../../../modules/datasource/common');
-const { getDatasourceFor } = mocked(_datasourceCommon);
+const { getDatasourceFor } = vi.mocked(_datasourceCommon);
 
 class DummyDatasource extends Datasource {
   constructor() {

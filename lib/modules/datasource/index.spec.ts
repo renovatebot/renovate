@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import { logger } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   EXTERNAL_HOST_ERROR,
@@ -24,6 +23,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from '.';
+import { logger } from '~test/util';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -499,8 +499,14 @@ describe('modules/datasource/index', () => {
         }
 
         const registries: RegistriesMock = {
-          'https://reg1.com': () => ({ releases: [{ version: '1.0.0' }] }),
-          'https://reg2.com': () => ({ releases: [{ version: '1.1.0' }] }),
+          'https://reg1.com': () => ({
+            releases: [{ version: '1.0.0' }],
+            tags: { release: '2.0.0' },
+          }),
+          'https://reg2.com': () => ({
+            releases: [{ version: '1.1.0' }],
+            tags: { latest: '1.1.0', release: '1.1.0' },
+          }),
           'https://reg3.com': () => {
             throw new ExternalHostError(new Error());
           },
@@ -513,7 +519,10 @@ describe('modules/datasource/index', () => {
           // for coverage
           'https://reg6.com': null,
           // has the same result as reg1 url, to test de-deplication of releases
-          'https://reg7.com': () => ({ releases: [{ version: '1.0.0' }] }),
+          'https://reg7.com': () => ({
+            releases: [{ version: '1.0.0' }],
+            tags: { latest: '1.2.0.0', release: '2.1.0' },
+          }),
         };
 
         beforeEach(() => {
@@ -531,6 +540,10 @@ describe('modules/datasource/index', () => {
               { registryUrl: 'https://reg1.com', version: '1.0.0' },
               { registryUrl: 'https://reg2.com', version: '1.1.0' },
             ],
+            tags: {
+              latest: '1.1.0',
+              release: '2.0.0',
+            },
           });
         });
 
@@ -575,6 +588,10 @@ describe('modules/datasource/index', () => {
               { registryUrl: 'https://reg1.com', version: '1.0.0' },
               // { registryUrl: 'https://reg2.com', version: '1.0.0' },
             ],
+            tags: {
+              latest: '1.2.0.0',
+              release: '2.1.0',
+            },
           });
         });
 
@@ -908,6 +925,61 @@ describe('modules/datasource/index', () => {
           });
           expect(res).toMatchObject({
             releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
+          });
+        });
+      });
+
+      describe('overruled by package config', () => {
+        beforeEach(() => {
+          datasources.set(
+            datasource,
+            new DummyDatasource({
+              'https://reg1.com': { releases: [{ version: '0.0.1' }] },
+              'https://reg2.com': { releases: [{ version: '0.0.2' }] },
+              'https://reg3.com': { releases: [{ version: '0.0.3' }] },
+            }),
+          );
+        });
+
+        it('first', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'first',
+            defaultRegistryUrls: ['https://reg1.com', 'https://reg2.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }],
+          });
+        });
+        it('hunt', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'hunt',
+            defaultRegistryUrls: ['https://foo.bar', 'https://reg1.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }],
+          });
+        });
+        it('merge', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'merge',
+            defaultRegistryUrls: [
+              'https://reg1.com',
+              'https://reg2.com',
+              'https://reg3.com',
+            ],
+          });
+          expect(res).toMatchObject({
+            releases: [
+              { version: '0.0.1' },
+              { version: '0.0.2' },
+              { version: '0.0.3' },
+            ],
           });
         });
       });

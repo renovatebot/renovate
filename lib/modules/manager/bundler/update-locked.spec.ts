@@ -1,7 +1,7 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import * as lockedVersion from './locked-version';
 import { updateLockedDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const lockFileContent = Fixtures.get('Gemfile.rubyci.lock');
 

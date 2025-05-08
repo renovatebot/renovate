@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { HackageDatasource, versionToRelease } from './index';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://hackage.haskell.org/';
 
