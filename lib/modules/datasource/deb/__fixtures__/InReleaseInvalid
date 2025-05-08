@@ -1,0 +1,17 @@
+Origin: Debian
+Label: Debian
+Suite: stable
+Version: 12.10
+Codename: bookworm
+Changelogs: https://metadata.ftp-master.debian.org/changelogs/@CHANGEPATH@_changelog
+Date: Sat, 15 Mar 2025 09:09:36 UTC
+Acquire-By-Hash: yes
+No-Support-for-Architecture-all: Packages
+Architectures: all amd64 arm64 armel armhf i386 mips64el mipsel ppc64el s390x
+Components: main contrib non-free-firmware non-free
+Description: Debian 12.10 Released 15 March 2025
+MD5Sum:
+SHA256:
+ d0f253340d20cf69d4781b80088b6c2b00b0002e69ca0a50c9197c634bd1fcef    66277 non-free/binary-s390x/Packages.gz non-free/binary-test/Packages.gz
+ 0adc3569f322f7c993a39f471783aba9f91792789e57774ed2a28b3ecbbe0e0c    54196 non-free/binary-s390x/Packages.xz non-free/binary-test/Packages.xz
+ d357305aec89074729f9c85a7f0c44061c75ed8db3db5e0e73f24a6da27e0879      121 non-free/binary-s390x/Release non-free/binary-test/Packages
