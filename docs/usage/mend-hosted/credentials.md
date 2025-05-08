@@ -16,12 +16,19 @@ To add secrets you must have admin-level rights.
 
 Read [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md) to learn more.
 
-## Managing secrets for the Mend-hosted cloud apps
+## Automating secrets via APIs (GitHub only)
 
-This section explains how you manage secrets for the Mend-hosted cloud apps.
-If you self-host you do not need this section.
+Administrators of GitHub organizations and repositories can use the Developer Platform APIs to manage secrets.
 
-### Adding a secret
+See the [Developer Platform API documentation](https://api-docs.mend.io/developer-platform/1.0/repo-secret) for details.
+
+## Managing secrets via the Web UI
+
+This section explains how to manage secrets for the Mend-hosted cloud apps via the Web UI.
+
+Only administrators of an Org or Repo can manage the secrets for that Org or Repo.
+
+### Adding a secret through the UI
 
 To add a secret for the Mend cloud app:
 
