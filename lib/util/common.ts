@@ -87,11 +87,11 @@ export function parseJson(content: string | null, filename: string): JsonValue {
     return null;
   }
 
-  if (filename.includes('.jsonc')) {
+  if (filename.endsWith('.jsonc')) {
     return parseJsonc(content);
   }
 
-  if (filename.includes('.json5')) {
+  if (filename.endsWith('.json5')) {
     return JSON5.parse(content);
   }
 
