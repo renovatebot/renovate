@@ -24,7 +24,7 @@ See the [Developer Platform API documentation](https://api-docs.mend.io/develope
 
 ### Authenticating the APIs
 
-Calls to the APIs require authentication with a personal access token from GitHub user making the request.
+Calls to the APIs require authentication with a personal access token from the GitHub user making the request.
 The token must be included in the request header as the `authorization` property.
 
 You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
