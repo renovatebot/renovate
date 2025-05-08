@@ -370,9 +370,6 @@
     ],
     "overrides": {
       "esbuild": "0.25.3"
-    },
-    "patchedDependencies": {
-      "re2": "patches/re2.patch"
     }
   }
 }
