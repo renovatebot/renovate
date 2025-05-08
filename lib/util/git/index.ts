@@ -8,7 +8,7 @@ import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
+import type { MergeStrategy, RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -883,7 +883,10 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
   }
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  mergeStrategy: MergeStrategy,
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -900,7 +903,30 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    if (
+      mergeStrategy === 'fast-forward' ||
+      mergeStrategy === 'rebase' ||
+      mergeStrategy === 'auto'
+    ) {
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
+    } else if (mergeStrategy === 'merge-commit') {
+      await gitRetry(() =>
+        git.merge([
+          '--no-ff',
+          '--no-edit',
+          '-m',
+          'Automerge branch ' + branchName + ' by Renovate Bot',
+          branchName,
+        ]),
+      );
+    } else if (mergeStrategy === 'squash') {
+      // Create a squash commit
+      await gitRetry(() => git.merge(['--squash', branchName]));
+      // Commit the squash commit
+      await gitRetry(() =>
+        git.commit('Automerge branch ' + branchName + ' by Renovate Bot'),
+      );
+    }
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {

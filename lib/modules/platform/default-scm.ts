@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../../config/types';
 import * as git from '../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
@@ -41,8 +42,11 @@ export class DefaultGitScm implements PlatformScm {
     return git.checkoutBranch(branchName);
   }
 
-  mergeAndPush(branchName: string): Promise<void> {
-    return git.mergeBranch(branchName);
+  mergeAndPush(
+    branchName: string,
+    mergeStrategy: MergeStrategy = 'auto',
+  ): Promise<void> {
+    return git.mergeBranch(branchName, mergeStrategy);
   }
 
   mergeToLocal(branchName: string): Promise<void> {
