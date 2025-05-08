@@ -16,6 +16,119 @@ function matchAction(action: string): z.Schema {
     .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(@.+)?$`));
 }
 
+const setupUVSchema = z
+  .object({
+    // https://github.com/astral-sh/setup-uv
+    uses: matchAction('astral-sh/setup-uv'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: 'astral-sh/uv',
+      versioning: npmVersioning.id,
+      packageName: 'astral-sh/uv',
+      skipReason,
+      skipStage,
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
+const setupPnpmSchema = z
+  .object({
+    uses: matchAction('pnpm/action-setup'),
+    with: z.object({
+      version: z.string().optional(),
+    }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: NpmDatasource.id,
+      depName: 'pnpm',
+      versioning: npmVersioning.id,
+      packageName: 'pnpm',
+      skipReason,
+      skipStage,
+      currentValue: val.version,
+      depType: 'uses-with',
+    };
+  });
+
+const setupPDMSchema = z
+  .object({
+    uses: matchAction('pdm-project/setup-pdm'),
+    with: z.object({ version: z.string().optional() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    let skipStage: StageName | undefined;
+    let skipReason: SkipReason | undefined;
+    if (!val.version) {
+      skipStage = 'extract';
+      skipReason = 'unspecified-version';
+    }
+
+    return {
+      datasource: PypiDatasource.id,
+      depName: 'pdm',
+      versioning: pep440versioning.id,
+      packageName: 'pdm',
+      currentValue: val.version,
+      skipStage,
+      skipReason,
+      depType: 'uses-with',
+    };
+  });
+
+const installBianrySchema = z
+  .object({
+    uses: z.union([
+      matchAction('jaxxstorm/action-install-gh-release'),
+      matchAction('sigoden/install-binary'),
+    ]),
+    with: z.object({ repo: z.string(), tag: z.string() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    return {
+      datasource: GithubReleasesDatasource.id,
+      depName: val.repo,
+      packageName: val.repo,
+      currentValue: val.tag,
+      depType: 'uses-with',
+    };
+  });
+
+const setupPixiSchema = z
+  .object({
+    uses: matchAction('prefix-dev/setup-pixi'),
+    with: z.object({ 'pixi-version': z.string() }),
+  })
+  .transform(({ with: val }): PackageDependency => {
+    return {
+      datasource: GithubReleasesDatasource.id,
+      versioning: condaVersioning.id,
+      depName: 'prefix-dev/pixi',
+      packageName: 'prefix-dev/pixi',
+      currentValue: val['pixi-version'],
+      depType: 'uses-with',
+    };
+  });
+
 /**
  * schema here should match the whole step,
  * there may be some actions use env as arguments version.
@@ -23,112 +136,9 @@ function matchAction(action: string): z.Schema {
  * each type should return `PackageDependency | undefined`
  */
 export const communityActions = z.union([
-  z
-    .object({
-      // https://github.com/astral-sh/setup-uv
-      uses: matchAction('astral-sh/setup-uv'),
-      with: z.object({ version: z.string().optional() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      let skipStage: StageName | undefined;
-      let skipReason: SkipReason | undefined;
-
-      if (!val.version) {
-        skipStage = 'extract';
-        skipReason = 'unspecified-version';
-      }
-
-      return {
-        datasource: GithubReleasesDatasource.id,
-        depName: 'astral-sh/uv',
-        versioning: npmVersioning.id,
-        packageName: 'astral-sh/uv',
-        skipReason,
-        skipStage,
-        currentValue: val.version,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      uses: matchAction('pnpm/action-setup'),
-      with: z.object({
-        version: z.string().optional(),
-      }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      let skipStage: StageName | undefined;
-      let skipReason: SkipReason | undefined;
-      if (!val.version) {
-        skipStage = 'extract';
-        skipReason = 'unspecified-version';
-      }
-
-      return {
-        datasource: NpmDatasource.id,
-        depName: 'pnpm',
-        versioning: npmVersioning.id,
-        packageName: 'pnpm',
-        skipReason,
-        skipStage,
-        currentValue: val.version,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      uses: matchAction('pdm-project/setup-pdm'),
-      with: z.object({ version: z.string().optional() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      let skipStage: StageName | undefined;
-      let skipReason: SkipReason | undefined;
-      if (!val.version) {
-        skipStage = 'extract';
-        skipReason = 'unspecified-version';
-      }
-
-      return {
-        datasource: PypiDatasource.id,
-        depName: 'pdm',
-        versioning: pep440versioning.id,
-        packageName: 'pdm',
-        currentValue: val.version,
-        skipStage,
-        skipReason,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      uses: z.union([
-        matchAction('jaxxstorm/action-install-gh-release'),
-        matchAction('sigoden/install-binary'),
-      ]),
-      with: z.object({ repo: z.string(), tag: z.string() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      return {
-        datasource: GithubReleasesDatasource.id,
-        depName: val.repo,
-        packageName: val.repo,
-        currentValue: val.tag,
-        depType: 'uses-with',
-      };
-    }),
-  z
-    .object({
-      uses: matchAction('prefix-dev/setup-pixi'),
-      with: z.object({ 'pixi-version': z.string() }),
-    })
-    .transform(({ with: val }): PackageDependency => {
-      return {
-        datasource: GithubReleasesDatasource.id,
-        versioning: condaVersioning.id,
-        depName: 'prefix-dev/pixi',
-        packageName: 'prefix-dev/pixi',
-        currentValue: val['pixi-version'],
-        depType: 'uses-with',
-      };
-    }),
+  setupUVSchema,
+  setupPnpmSchema,
+  setupPDMSchema,
+  installBianrySchema,
+  setupPixiSchema,
 ]);
