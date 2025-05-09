@@ -10,6 +10,7 @@ const requirements5 = Fixtures.get('requirements5.txt');
 const requirements6 = Fixtures.get('requirements6.txt');
 const requirements7 = Fixtures.get('requirements7.txt');
 const requirements8 = Fixtures.get('requirements8.txt');
+const requirements9 = Fixtures.get('requirements9.txt');
 const requirementsWithEnvMarkers = Fixtures.get('requirements-env-markers.txt');
 const requirementsGitPackages = Fixtures.get('requirements-git-packages.txt');
 
@@ -110,6 +111,18 @@ some-package==0.3.1`;
 
     it('handles extra index url', () => {
       const res = extractPackageFile(requirements5);
+      expect(res).toMatchSnapshot();
+      expect(res?.registryUrls).toEqual([
+        'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+      ]);
+      expect(res?.additionalRegistryUrls).toEqual([
+        'http://example.com/private-pypi/',
+      ]);
+      expect(res?.deps).toHaveLength(6);
+    });
+
+    it('handles index urls with = as separator', () => {
+      const res = extractPackageFile(requirements9);
       expect(res).toMatchSnapshot();
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
