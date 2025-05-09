@@ -9,7 +9,7 @@ vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/pr/code-owners', () => {
   beforeAll(() => {
-    Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
+    Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
       value: undefined,
       writable: true,
     });
@@ -179,8 +179,8 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     describe('supports Gitlab sections', () => {
       beforeAll(() => {
-        Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
-          value: gitlab.extractRulesFromCodeOwnersFile,
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+          value: gitlab.extractRulesFromCodeOwnersLines,
           writable: true,
         });
       });
@@ -276,7 +276,7 @@ describe('workers/repository/update/pr/code-owners', () => {
     });
 
     it.fails('does not parse Gitea regex as Gitlab sections', async () => {
-      Object.defineProperty(platform, 'extractRulesFromCodeOwnersFile', {
+      Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
         value: undefined,
         writable: true,
       });

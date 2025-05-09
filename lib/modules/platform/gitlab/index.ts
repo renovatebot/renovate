@@ -1526,7 +1526,7 @@ export async function expandGroupMembers(
   return expandedReviewersOrAssignees;
 }
 
-export function extractRulesFromCodeOwnersFile(
+export function extractRulesFromCodeOwnersLines(
   cleanedLines: string[],
 ): FileOwnerRule[] {
   const parser = new CodeOwnersParser();
