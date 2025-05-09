@@ -9,7 +9,28 @@ export async function embedChangelog(
   if (upgrade.logJSON !== undefined) {
     return;
   }
-  upgrade.logJSON = await getChangeLogJSON(upgrade);
+
+  if (upgrade.changelogContent === undefined) {
+    upgrade.logJSON = await getChangeLogJSON(upgrade);
+  } else {
+    upgrade.logJSON = {
+      hasReleaseNotes: true,
+      versions: [
+        {
+          changes: undefined!,
+          compare: undefined!,
+          date: undefined!,
+          releaseNotes: {
+            body: upgrade.changelogContent,
+            notesSourceUrl: undefined!,
+            url: undefined!,
+          },
+          gitRef: undefined!,
+          version: undefined!,
+        },
+      ],
+    };
+  }
 }
 
 export async function embedChangelogs(
