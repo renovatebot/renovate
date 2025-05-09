@@ -440,6 +440,8 @@ export function generateBranchConfig(
     config.updateType = 'major';
   }
 
+  config.isBreaking = config.upgrades.some((upgrade) => upgrade.isBreaking);
+
   // explicit set `isLockFileMaintenance` for the branch for groups
   if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
     config.isLockFileMaintenance = true;

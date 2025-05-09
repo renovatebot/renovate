@@ -72,6 +72,28 @@ describe('modules/versioning/semver-coerced/index', () => {
     });
   });
 
+  describe('.isBreaking(current, version)', () => {
+    it('should return false for patch updates', () => {
+      expect(semverCoerced.isBreaking!('1.0', '1.0.1')).toBeFalse();
+    });
+
+    it('should return false for minor updates', () => {
+      expect(semverCoerced.isBreaking!('1.0', '1.1')).toBeFalse();
+    });
+
+    it('should return true for major updates', () => {
+      expect(semverCoerced.isBreaking!('1.0.0', '2')).toBeTrue();
+    });
+
+    it('should return true for major updates from v0.x', () => {
+      expect(semverCoerced.isBreaking!('0.0.0', '1.0.0')).toBeTrue();
+    });
+
+    it('should return true for major updates within v0.x', () => {
+      expect(semverCoerced.isBreaking!('0.1', '0.2.1')).toBeTrue();
+    });
+  });
+
   describe('.isCompatible(input)', () => {
     it('should return true for strict semver', () => {
       expect(semverCoerced.isCompatible('1.0.2')).toBeTrue();

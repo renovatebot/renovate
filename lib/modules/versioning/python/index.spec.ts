@@ -178,3 +178,17 @@ it.each`
 `('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
   expect(versioning.subset!(a, b)).toBe(expected);
 });
+
+// isBreaking
+it.each`
+  currentVersion | newVersion | expected
+  ${'3.7'}       | ${'3.8'}   | ${true}
+  ${'3.7.0'}     | ${'3.8.0'} | ${true}
+  ${'3.8.0'}     | ${'3.8.1'} | ${false}
+  ${'3.8.0'}     | ${'4.0.0'} | ${true}
+`(
+  'isBreaking("$currentVersion", "$newVersion") === $expected',
+  ({ currentVersion, newVersion, expected }) => {
+    expect(versioning.isBreaking!(currentVersion, newVersion)).toBe(expected);
+  },
+);
