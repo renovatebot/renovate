@@ -4,17 +4,23 @@ title: Versioning
 
 # Versioning
 
-Versioning is one of Renovate's four core "module" types (alongside Platform, Manager and Datasource).
-Versioning is used to determine the answer to questions such as:
+Versioning is one of Renovate's core "module" types.
+The other modules are Platform, Manager and Datasource.
+Renovate uses the version module to answer questions such as:
 
 - Is this a valid version string?
 - Is this a valid constraint/range?
 - Does this version match with this constraint?
 - If the current constraint is X, what would the new constraint be if we updated to version Y?
-- Is this a major, minor or patch update?
+- Is this a `major`, `minor` or `patch` update?
 - Is this a breaking change?
 
-Once Managers have extracted dependencies, and Datasources have located available versions, then Renovate will use a "Versioning" scheme to perform sorting and filtering of results.
+How Renovate uses its core modules during a run:
+
+1. Renovate's Manager module _extracts_ the dependencies
+1. Renovate's Datasource _finds_ the versions of the dependencies
+1. Renovate's Versioning scheme _sorts and filters_ the results
+
 The "versioning" chosen can be different per package manager, because different package managers use different versioning schemes.
 For example, `npm` uses `1.0.0-beta.1` while `pip` uses `1.0.0b1`.
 
@@ -24,11 +30,11 @@ Renovate interprets versions correctly out-of-the-box most of the time.
 But Renovate can't automatically detect **all** versioning schemes.
 So sometimes you need to tell the bot what versioning scheme it should use.
 
-For some ecosystems, automatic version selection works nearly every time (e.g. for npm-compliant managers, use npm versioning).
+For some ecosystems, automatic version selection works nearly every time (e.g. for npm-compliant managers, use `npm` versioning).
 For other ecosystems such as Docker or GitHub tags, there is no consistent convention for versions, so the default choice may not always work.
 For example some Docker images may use SemVer, some PEP440, some Calendar Versioning, etc.
 
-To allow for such cases, you can manually configure or override the `versioning` value for a particular dependency.
+If the automatic version selection does _not_ work for a dependency update: set the `versioning` for that dependency in the Renovate config file.
 
 ## General concepts behind overriding versioning
 
@@ -70,8 +76,8 @@ The configuration below overrides Renovate's default `docker` versioning for the
 
 ## Breaking Changes
 
-In most ecosystems, especially SemVer, major upgrades are synonymous with breaking changes.
-However, there are other cases too:
+In most ecosystems, especially SemVer, major upgrades are treated as breaking changes.
+But other updates may have breaking changes too, for example:
 
 - In SemVer, any update from a 0.x version may be breaking (including `0.1.0` -> `0.1.1`, `0.1.0` -> `0.2.0` and `0.1.0` -> `1.0.0`)
 - Updates from pre-release versions like `1.0.0-pre.1` to other versions (including stable versions like `1.0.0`) can be breaking
@@ -87,7 +93,7 @@ Here's an example of grouping all non-breaking updates together:
 {
   "packageRules": [
     {
-      "description": "Group together non-breaking updates",
+      "description": "Group non-breaking updates",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "matchJsonata": ["isBreaking != true"],
       "groupName": "Non-breaking updates"
