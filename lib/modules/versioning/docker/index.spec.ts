@@ -188,6 +188,8 @@ describe('modules/versioning/docker/index', () => {
     ${'3.8.0-alpine'}   | ${'3.7.0-alpine'} | ${true}
     ${'3.8.0b1-alpine'} | ${'3.7.0-alpine'} | ${true}
     ${'3.8.2'}          | ${'3.7.0-alpine'} | ${false}
+    ${'v3.8.2'}         | ${'v3.7.0'}       | ${true}
+    ${'3.8.2'}          | ${'v3.7.0'}       | ${false}
   `(
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {

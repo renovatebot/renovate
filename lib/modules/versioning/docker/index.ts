@@ -15,6 +15,12 @@ const versionPattern = regEx(/^(?<version>\d+(?:\.\d+)*)(?<prerelease>\w*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
+function haveSameVPrefix(version1: string, version2: string): boolean {
+  const hasV1 = version1.startsWith('v');
+  const hasV2 = version2.startsWith('v');
+  return hasV1 === hasV2;
+}
+
 class DockerVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
     if (!version) {
@@ -84,7 +90,8 @@ class DockerVersioningApi extends GenericVersioningApi {
       parsed1 &&
       parsed2 &&
       parsed1.suffix === parsed2.suffix &&
-      parsed1.release.length === parsed2.release.length
+      parsed1.release.length === parsed2.release.length &&
+      haveSameVPrefix(version, current)
     );
   }
 
