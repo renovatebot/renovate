@@ -133,7 +133,6 @@ const options: RenovateOptions[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     default: 'patch',
-    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     parents: ['bumpVersions'],
   },
   {
