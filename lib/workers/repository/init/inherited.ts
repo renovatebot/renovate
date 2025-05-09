@@ -6,6 +6,7 @@ import { resolveConfigPresets } from '../../../config/presets';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
+import { applyVariablesToConfig } from '../../../config/variables';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
@@ -107,6 +108,10 @@ export async function mergeInheritedConfig(
 
   if (is.nullOrUndefined(filteredConfig.extends)) {
     filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+    filteredConfig = applyVariablesToConfig(
+      filteredConfig,
+      config.variables ?? {},
+    );
     setInheritedHostRules(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -144,6 +149,10 @@ export async function mergeInheritedConfig(
   }
 
   filteredConfig = applySecretsToConfig(filteredConfig, config.secrets ?? {});
+  filteredConfig = applyVariablesToConfig(
+    filteredConfig,
+    config.variables ?? {},
+  );
   setInheritedHostRules(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
 }
