@@ -16,10 +16,13 @@ export function configureScm(repo: string, login: string): void {
 
 export class GerritScm extends DefaultGitScm {
   override async branchExists(branchName: string): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      limit: 1,
+      refreshCache: true,
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
       return true;
     }
@@ -29,10 +32,14 @@ export class GerritScm extends DefaultGitScm {
   override async getBranchCommit(
     branchName: string,
   ): Promise<LongCommitSha | null> {
-    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION'],
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
       return change.current_revision as LongCommitSha;
     }
@@ -47,13 +54,14 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName,
       targetBranch: baseBranch,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
     };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
-      const currentGerritPatchset = change.revisions[change.current_revision];
-      return currentGerritPatchset.actions?.rebase.enabled === true;
+      const currentRevision = change.revisions![change.current_revision!];
+      return currentRevision.actions!.rebase.enabled === true;
     }
     return true;
   }
@@ -66,6 +74,7 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName: branch,
       targetBranch: baseBranch,
+      limit: 1,
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
@@ -80,14 +89,22 @@ export class GerritScm extends DefaultGitScm {
     }
   }
 
-  override async isBranchModified(branchName: string): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+  override async isBranchModified(
+    branchName: string,
+    baseBranch: string,
+  ): Promise<boolean> {
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      targetBranch: baseBranch,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
-      const currentGerritPatchset = change.revisions[change.current_revision];
-      return currentGerritPatchset.uploader.username !== username;
+      const currentRevision = change.revisions![change.current_revision!];
+      return currentRevision.uploader.username !== username;
     }
     return false;
   }
@@ -100,10 +117,13 @@ export class GerritScm extends DefaultGitScm {
       state: 'open',
       branchName: commit.branchName,
       targetBranch: commit.baseBranch,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION'],
     };
-    const existingChange = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const existingChange = (
+      await client.findChanges(repository, searchConfig)
+    ).pop();
 
     let hasChanges = true;
     const message =
@@ -116,18 +136,20 @@ export class GerritScm extends DefaultGitScm {
       message[0] = firstMessageLines.join('\n');
     }
 
+    const changeId = existingChange?.change_id ?? generateChangeId();
     commit.message = [
       ...message,
-      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
+      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {
       const { commitSha } = commitResult;
-      if (existingChange?.revisions && existingChange.current_revision) {
-        const fetchRefSpec =
-          existingChange.revisions[existingChange.current_revision].ref;
-        await git.fetchRevSpec(fetchRefSpec); //fetch current ChangeSet for git diff
-        hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); //avoid empty patchsets
+      if (existingChange) {
+        const currentRevision =
+          existingChange.revisions![existingChange.current_revision!];
+        const fetchRefSpec = currentRevision.ref;
+        await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
+        hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
       }
       if (hasChanges || commit.force) {
         const pushOptions = ['notify=NONE'];
@@ -144,7 +166,7 @@ export class GerritScm extends DefaultGitScm {
         }
       }
     }
-    return null; //empty commit, no changes in this Gerrit-Change
+    return null; // empty commit, no changes in this Gerrit Change
   }
 
   override deleteBranch(branchName: string): Promise<void> {
@@ -152,12 +174,17 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override async mergeToLocal(branchName: string): Promise<void> {
-    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION'],
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
-      return super.mergeToLocal(change.revisions[change.current_revision].ref);
+      const currentRevision = change.revisions![change.current_revision!];
+      return super.mergeToLocal(currentRevision.ref);
     }
     return super.mergeToLocal(branchName);
   }
