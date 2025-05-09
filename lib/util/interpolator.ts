@@ -40,6 +40,7 @@ export function validateInterpolatedValues(
       `Config ${name}s must be a plain object. Found: ${typeof input}`,
     );
   }
+
   if (validationErrors.length) {
     logger.error({ validationErrors }, `Invalid ${name}s configured`);
     throw new Error(CONFIG_SECRETS_INVALID);
