@@ -13,8 +13,8 @@ import type { HttpCache } from './schema';
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
   ttlMinutes?: number;
-  checkCacheControlHeader?: boolean;
-  checkAuthorizationHeader?: boolean;
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -29,8 +29,8 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor({
     namespace,
     ttlMinutes = 15,
-    checkCacheControlHeader = true,
-    checkAuthorizationHeader = true,
+    checkCacheControlHeader = false,
+    checkAuthorizationHeader = false,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;

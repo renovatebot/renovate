@@ -5,7 +5,6 @@ export class GlobalConfig {
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
     'allowedCommands',
     'allowedEnv',
-    'allowCommandTemplating',
     'allowCustomCrateRegistries',
     'allowedHeaders',
     'allowPlugins',
@@ -28,8 +27,6 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'presetCachePersistence',
-    'privateKey',
-    'privateKeyOld',
     'gitTimeout',
     'platform',
     'endpoint',

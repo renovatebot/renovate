@@ -57,6 +57,12 @@ export async function ensureOnboardingPr(
         config.onboardingBranch!,
       )
     ) {
+      if (GlobalConfig.get('dryRun')) {
+        logger.info(
+          'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
+        );
+        return;
+      }
       await ensureComment({
         number: existingPr.number,
         topic: 'Branch Conflicted',

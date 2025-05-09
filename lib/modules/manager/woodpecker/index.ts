@@ -8,7 +8,7 @@ export const url = 'https://woodpecker-ci.org';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  fileMatch: ['^\\.woodpecker(?:/[^/]+)?\\.ya?ml$'],
+  managerFilePatterns: ['/^\\.woodpecker(?:/[^/]+)?\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

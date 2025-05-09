@@ -100,6 +100,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;

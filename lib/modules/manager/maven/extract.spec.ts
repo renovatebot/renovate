@@ -20,14 +20,14 @@ const profileSettingsContent = Fixtures.get('profile.settings.xml');
 describe('modules/manager/maven/extract', () => {
   describe('extractPackage', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage('', 'some-file')).toBeNull();
-      expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
-      expect(extractPackage('<foobar></foobar>', 'some-file')).toBeNull();
-      expect(extractPackage('<project></project>', 'some-file')).toBeNull();
+      expect(extractPackage('', 'some-file', {})).toBeNull();
+      expect(extractPackage('invalid xml content', 'some-file', {})).toBeNull();
+      expect(extractPackage('<foobar></foobar>', 'some-file', {})).toBeNull();
+      expect(extractPackage('<project></project>', 'some-file', {})).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractPackage(simpleContent, 'some-file');
+      const res = extractPackage(simpleContent, 'some-file', {});
       expect(res).toMatchObject({
         datasource: 'maven',
         deps: [
@@ -238,6 +238,7 @@ describe('modules/manager/maven/extract', () => {
       extractPackage(
         '<?xml version="1.0" encoding="UTF-8"?> \r\n',
         'some-file',
+        {},
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
@@ -245,7 +246,11 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
+      const res = extractPackage(
+        Fixtures.get('minimum.pom.xml'),
+        'some-file',
+        {},
+      );
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],
@@ -259,6 +264,7 @@ describe('modules/manager/maven/extract', () => {
       const res = extractPackage(
         Fixtures.get(`minimum_snapshot.pom.xml`),
         'some-file',
+        {},
       );
       expect(res).toEqual({
         datasource: 'maven',
@@ -275,6 +281,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -289,6 +296,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('multiple_usages_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -303,6 +311,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('infinite_recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([

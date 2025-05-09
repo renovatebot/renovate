@@ -227,6 +227,25 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
+    it('does nothing in dry run when PR is conflicted', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      await ensureOnboardingPr(config, {}, branches);
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
     it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(

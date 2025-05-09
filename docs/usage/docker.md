@@ -16,7 +16,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## How It Works
 
-1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Renovate searches in each repository for any files matching each manager's configured `managerFilePatterns`
 1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
@@ -307,7 +307,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v41.0.21
+  uses: renovatebot/github-action@v42.0.1
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -478,7 +478,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:39.252.0
+FROM renovate/renovate:40.3.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

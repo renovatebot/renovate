@@ -324,6 +324,10 @@
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
@@ -545,6 +549,7 @@
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
+    "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
     "storybook": "https://github.com/storybookjs/storybook",
     "storybook-react-native": "https://github.com/storybookjs/react-native",

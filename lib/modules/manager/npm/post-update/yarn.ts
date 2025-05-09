@@ -9,6 +9,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getEnv } from '../../../../util/env';
 import { exec } from '../../../../util/exec';
 import type {
   ExecOptions,
@@ -209,17 +210,18 @@ export async function generateLockFile(
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
-    if (process.env.RENOVATE_X_YARN_PROXY) {
-      if (process.env.HTTP_PROXY && !isYarn1) {
+    const allEnv = getEnv();
+    if (allEnv.RENOVATE_X_YARN_PROXY) {
+      if (allEnv.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(
-          `yarn config set --home httpProxy ${quote(process.env.HTTP_PROXY)}`,
+          `yarn config set --home httpProxy ${quote(allEnv.HTTP_PROXY)}`,
         );
       }
-      if (process.env.HTTPS_PROXY && !isYarn1) {
+      if (allEnv.HTTPS_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpsProxy');
         commands.push(
-          `yarn config set --home httpsProxy ${quote(process.env.HTTPS_PROXY)}`,
+          `yarn config set --home httpsProxy ${quote(allEnv.HTTPS_PROXY)}`,
         );
       }
     }

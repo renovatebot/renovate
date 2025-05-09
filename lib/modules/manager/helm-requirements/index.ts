@@ -12,7 +12,7 @@ export const defaultConfig = {
     stable: 'https://charts.helm.sh/stable',
   },
   commitMessageTopic: 'helm chart {{depName}}',
-  fileMatch: ['(^|/)requirements\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)requirements\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [HelmDatasource.id];

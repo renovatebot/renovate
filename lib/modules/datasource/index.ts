@@ -12,6 +12,7 @@ import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
 import { DatasourceCacheStats } from '../../util/stats';
 import { trimTrailingSlash } from '../../util/url';
+import * as versioning from '../versioning';
 import datasources from './api';
 import {
   applyConstraintsFiltering,
@@ -163,7 +164,8 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
-  let commonRegistryUrl = true;
+  let singleRegistry = true;
+  const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -172,24 +174,64 @@ async function mergeRegistries(
       }
 
       if (!combinedRes) {
+        // This is the first registry, so we can just use it and continue
         combinedRes = res;
         continue;
       }
 
-      if (commonRegistryUrl) {
+      if (singleRegistry) {
+        // This is the second registry
+        // We need to move the registryUrl from the package level to the release level
         for (const release of coerceArray(combinedRes.releases)) {
           release.registryUrl ??= combinedRes.registryUrl;
         }
-        commonRegistryUrl = false;
+        singleRegistry = false;
       }
 
       const releases = coerceArray(res.releases);
       for (const release of releases) {
+        // We have more than one registry, so we need to move the registryUrl
+        // from the package level to the release level before merging
         release.registryUrl ??= res.registryUrl;
       }
 
       combinedRes.releases.push(...releases);
+
+      // Merge the tags from the two results
+      let tags = combinedRes.tags;
+      if (tags) {
+        if (res.tags) {
+          // Both results had tags, so we need to compare them
+          for (const tag of ['release', 'latest']) {
+            const existingTag = combinedRes?.tags?.[tag];
+            const newTag = res.tags?.[tag];
+            if (is.string(newTag) && releaseVersioning.isVersion(newTag)) {
+              if (
+                is.string(existingTag) &&
+                releaseVersioning.isVersion(existingTag)
+              ) {
+                // We need to compare them
+                if (releaseVersioning.isGreaterThan(newTag, existingTag)) {
+                  // New tag is greater than the existing one
+                  tags[tag] = newTag;
+                }
+              } else {
+                // Existing tag was not present or not a version
+                // so we can just use the new one
+                tags[tag] = newTag;
+              }
+            }
+          }
+        }
+      } else {
+        // Existing results had no tags, so we can just use the new ones
+        tags = res.tags;
+      }
       combinedRes = { ...res, ...combinedRes };
+      if (tags) {
+        combinedRes.tags = tags;
+      }
+      // Remove the registryUrl from the package level when more than one registry
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
@@ -247,7 +289,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function_(datasource.defaultRegistryUrls)
+    return is.function(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
@@ -258,7 +300,7 @@ function resolveRegistryUrls(
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function_(datasource.defaultRegistryUrls)) {
+  } else if (is.function(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
@@ -346,7 +388,7 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${packageName}${config.registryStrategy}${String(
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
     registryUrls,
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once

@@ -9,7 +9,7 @@ export const url = 'https://tekton.dev/docs';
 export const categories: Category[] = ['ci', 'cd'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [DockerDatasource.id, GitTagsDatasource.id];

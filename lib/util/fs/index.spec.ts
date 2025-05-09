@@ -1,4 +1,4 @@
-import _findUp from 'find-up';
+import { findUp as _findUp } from 'find-up';
 import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
