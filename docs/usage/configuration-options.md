@@ -511,11 +511,13 @@ For example, to bump versions only for updates in the `charts/` directory:
   "packageRules": [
     {
       "matchFileNames": ["charts/**"],
-      "bumpVersions": {
-        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
-        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
-        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
-      }
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
     }
   ]
 }

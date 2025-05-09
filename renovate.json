@@ -76,10 +76,7 @@
     },
     {
       "description": "require approval on next branch",
-      "matchPackageNames": [
-        "!ghcr.io/containerbase/sidecar",
-        "!ghcr.io/renovatebot/base-image"
-      ],
+      "matchPackageNames": ["*"],
       "matchBaseBranches": ["next"],
       "dependencyDashboardApproval": true
     }
