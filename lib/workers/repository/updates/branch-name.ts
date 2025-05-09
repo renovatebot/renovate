@@ -116,6 +116,10 @@ export function generateBranchName(update: RenovateConfig): void {
 
     let hashInput = additionalBranchPrefix + branchTopic;
 
+    if (update.updateType === 'minor' && update.separateMultipleMinor) {
+      hashInput = hashInput.replace('.x', `.${newMinor}.x`);
+    }
+
     // Compile extra times in case of nested templates
     hashInput = template.compile(hashInput, update);
     hashInput = template.compile(hashInput, update);

@@ -312,6 +312,25 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('dep-cf83e1');
     });
 
+    it('hashedBranchLength separates minor when separateMultipleMinor=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        hashedBranchLength: 14,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: '42',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: '3',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-2e27927800');
+    });
+
     it('enforces valid git branch name', () => {
       const fixtures = [
         {
