@@ -1,11 +1,11 @@
-import { CodeOwnersParser } from './code-owners';
+import { extractRulesFromCodeOwnersLines } from './code-owners';
 
 describe('modules/platform/gitlab/code-owners', () => {
   describe('CodeOwnersParser', () => {
     it('should extract an owner rule from a line', () => {
-      const parser = new CodeOwnersParser();
-
-      const rules = parser.parseLine('pattern username1 username2').rules;
+      const rules = extractRulesFromCodeOwnersLines([
+        'pattern username1 username2',
+      ]);
 
       expect(rules).toEqual([
         {
@@ -18,9 +18,7 @@ describe('modules/platform/gitlab/code-owners', () => {
     });
 
     it('should extract an owner rule from a line with no usernames', () => {
-      const parser = new CodeOwnersParser();
-
-      const rules = parser.parseLine('pattern').rules;
+      const rules = extractRulesFromCodeOwnersLines(['pattern']);
 
       expect(rules).toEqual([
         {
@@ -33,11 +31,8 @@ describe('modules/platform/gitlab/code-owners', () => {
     });
 
     it('should extract an owner rule from a line after a section header', () => {
-      const parser = new CodeOwnersParser();
       const lines = ['[team] username1 username2', 'filename'];
-
-      lines.forEach((line) => parser.parseLine(line));
-      const rules = parser.rules;
+      const rules = extractRulesFromCodeOwnersLines(lines);
 
       expect(rules).toEqual([
         {
@@ -50,11 +45,8 @@ describe('modules/platform/gitlab/code-owners', () => {
     });
 
     it('should extract an owner rule from a line after a section header with no usernames', () => {
-      const parser = new CodeOwnersParser();
       const lines = ['[team]', 'filename'];
-
-      lines.forEach((line) => parser.parseLine(line));
-      const rules = parser.rules;
+      const rules = extractRulesFromCodeOwnersLines(lines);
 
       expect(rules).toEqual([
         {

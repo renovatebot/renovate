@@ -42,7 +42,6 @@ import type {
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
-  FileOwnerRule,
   FindPRConfig,
   GitUrlOption,
   Issue,
@@ -58,7 +57,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { CodeOwnersParser } from './code-owners';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -77,6 +75,7 @@ import type {
   RepoResponse,
 } from './types';
 import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
@@ -1524,16 +1523,4 @@ export async function expandGroupMembers(
     }
   }
   return expandedReviewersOrAssignees;
-}
-
-export function extractRulesFromCodeOwnersLines(
-  cleanedLines: string[],
-): FileOwnerRule[] {
-  const parser = new CodeOwnersParser();
-
-  for (const line of cleanedLines) {
-    parser.parseLine(line);
-  }
-
-  return parser.rules;
 }

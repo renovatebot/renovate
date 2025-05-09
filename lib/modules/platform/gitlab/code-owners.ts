@@ -2,57 +2,48 @@ import ignore from 'ignore';
 import { regEx } from '../../../util/regex';
 import type { FileOwnerRule } from '../types';
 
-export class CodeOwnersParser {
-  private currentSection: { name: string; defaultUsers: string[] };
-  private internalRules: FileOwnerRule[];
+interface CodeOwnersSection {
+  name: string;
+  defaultUsers: string[];
+}
 
-  constructor() {
-    this.currentSection = { name: '', defaultUsers: [] };
-    this.internalRules = [];
-  }
+export function extractRulesFromCodeOwnersLines(
+  cleanedLines: string[],
+): FileOwnerRule[] {
+  let currentSection: CodeOwnersSection = { name: '', defaultUsers: [] };
+  const internalRules = [];
 
-  private changeCurrentSection(line: string): void {
-    const [name, ...usernames] = line.split(regEx(/\s+/));
-    this.currentSection = { name, defaultUsers: usernames };
-  }
-
-  private addRule(rule: FileOwnerRule): void {
-    this.internalRules.push(rule);
-  }
-
-  private extractOwnersFromLine(
-    line: string,
-    defaultUsernames: string[],
-  ): FileOwnerRule {
-    const [pattern, ...usernames] = line.split(regEx(/\s+/));
-    const matchPattern = ignore().add(pattern);
-    return {
-      usernames: usernames.length > 0 ? usernames : defaultUsernames,
-      pattern,
-      score: pattern.length,
-      match: (path: string) => matchPattern.ignores(path),
-    };
-  }
-
-  parseLine(line: string): CodeOwnersParser {
-    if (CodeOwnersParser.isSectionHeader(line)) {
-      this.changeCurrentSection(line);
+  for (const line of cleanedLines) {
+    if (isSectionHeader(line)) {
+      currentSection = changeCurrentSection(line);
     } else {
-      const rule = this.extractOwnersFromLine(
-        line,
-        this.currentSection.defaultUsers,
-      );
-      this.addRule(rule);
+      const rule = extractOwnersFromLine(line, currentSection.defaultUsers);
+      internalRules.push(rule);
     }
-
-    return this;
   }
 
-  get rules(): FileOwnerRule[] {
-    return this.internalRules;
-  }
+  return internalRules;
+}
 
-  private static isSectionHeader(line: string): boolean {
-    return line.startsWith('[') || line.startsWith('^[');
-  }
+function changeCurrentSection(line: string): CodeOwnersSection {
+  const [name, ...usernames] = line.split(regEx(/\s+/));
+  return { name, defaultUsers: usernames };
+}
+
+function extractOwnersFromLine(
+  line: string,
+  defaultUsernames: string[],
+): FileOwnerRule {
+  const [pattern, ...usernames] = line.split(regEx(/\s+/));
+  const matchPattern = ignore().add(pattern);
+  return {
+    usernames: usernames.length > 0 ? usernames : defaultUsernames,
+    pattern,
+    score: pattern.length,
+    match: (path: string) => matchPattern.ignores(path),
+  };
+}
+
+function isSectionHeader(line: string): boolean {
+  return line.startsWith('[') || line.startsWith('^[');
 }
