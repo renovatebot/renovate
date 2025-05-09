@@ -131,14 +131,14 @@ export async function readDashboardBody(
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
+  const dashboardTitle =
+    config.templateStrings?.dashboardTitle ?? 'Dependency Dashboard';
   if (
     config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
-    config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
-    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    const issue = await platform.findIssue(dashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
       dashboardChecks = parseDashboardIssue(issue.body ?? '');
@@ -208,6 +208,8 @@ export async function ensureDependencyDashboard(
     );
     return;
   }
+  const dashboardTitle =
+    config.templateStrings?.dashboardTitle ?? 'Dependency Dashboard';
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -230,12 +232,12 @@ export async function ensureDependencyDashboard(
   ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { title: config.dependencyDashboardTitle },
+        { title: dashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(dashboardTitle);
     }
     return;
   }
@@ -272,20 +274,20 @@ export async function ensureDependencyDashboard(
   if (config.dependencyDashboardAutoclose && !hasBranches && !hasDeprecations) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { title: config.dependencyDashboardTitle },
+        { dashboardTitle },
         'DRY-RUN: Would close Dependency Dashboard',
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(dashboardTitle);
     }
     return;
   }
   let issueBody = '';
 
-  if (config.dependencyDashboardHeader?.length) {
+  if (config.templateStrings?.dashboardHeader?.length) {
     issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
+      template.compile(config.templateStrings.dashboardHeader, config) + '\n\n';
   }
 
   if (configMigrationRes.result === 'pr-exists') {
@@ -543,12 +545,12 @@ export async function ensureDependencyDashboard(
 
   if (GlobalConfig.get('dryRun')) {
     logger.info(
-      { title: config.dependencyDashboardTitle },
+      { dashboardTitle },
       'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
     await platform.ensureIssue({
-      title: config.dependencyDashboardTitle!,
+      title: dashboardTitle,
       reuseTitle,
       body: platform.massageMarkdown(issueBody),
       labels: config.dependencyDashboardLabels,
@@ -559,10 +561,10 @@ export async function ensureDependencyDashboard(
 
 function getFooter(config: RenovateConfig): string {
   let footer = '';
-  if (config.dependencyDashboardFooter?.length) {
+  if (config.templateStrings?.dashboardFooter?.length) {
     footer +=
       '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
+      template.compile(config.templateStrings.dashboardFooter, config) +
       '\n';
   }
 

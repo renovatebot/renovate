@@ -67,7 +67,7 @@ If you have a requirement where `prTitle` should be different from `commitMessag
 
 You can change the PR body in the following ways:
 
-- Change the entire layout/flow by using `prBodyTemplate` (we do not recommend this)
+- Change the entire layout/flow by using `stringTemplates.prBody` (we do not recommend this)
 - Add a header by using `prHeader`
 - Add a footer by using `prFooter`
 - Add a note by using `prBodyNotes`

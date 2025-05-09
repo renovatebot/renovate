@@ -111,7 +111,6 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
-        dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
     });
@@ -138,7 +137,6 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: true,
-        dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
     });
@@ -164,7 +162,6 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
-        dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
       });
     });
@@ -189,7 +186,6 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
-        dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
         dependencyDashboardAllPending: true,
         dependencyDashboardAllRateLimited: false,
@@ -216,7 +212,6 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         dependencyDashboardIssue: 1,
         dependencyDashboardRebaseAllOpen: false,
-        dependencyDashboardTitle: 'Dependency Dashboard',
         prCreation: 'approval',
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: true,
@@ -359,7 +354,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -391,7 +386,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -402,8 +397,11 @@ describe('workers/repository/dependency-dashboard', () => {
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
-      config.dependencyDashboardHeader = 'This is a header';
-      config.dependencyDashboardFooter = 'And this is a footer';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header',
+        dashboardFooter: 'And this is a footer',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -413,7 +411,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -430,10 +428,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -443,7 +442,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
         /platform:github/,
@@ -534,7 +533,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-8-PR.txt'),
@@ -576,7 +575,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-2-PR-edited.txt'),
@@ -626,7 +625,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt'),
@@ -666,7 +665,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
@@ -721,7 +720,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt'),
@@ -740,10 +739,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -755,7 +755,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
         ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.',
@@ -771,10 +771,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -787,7 +788,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
         `## Config Migration Needed\n\n<!-- config-migration-pr-info --> See Config Migration PR:`,
@@ -803,10 +804,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -819,7 +821,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
         'The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted.',
@@ -835,10 +837,11 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {},
       ];
-      config.dependencyDashboardHeader =
-        'This is a header for platform:{{platform}}';
-      config.dependencyDashboardFooter =
-        'And this is a footer for repository:{{repository}}';
+      config.templateStrings = {
+        dashboardTitle: 'Dependency Dashboard',
+        dashboardHeader: 'This is a header for platform:{{platform}}',
+        dashboardFooter: 'And this is a footer for repository:{{repository}}',
+      };
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -848,7 +851,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle,
+        config.templateStrings?.dashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).not.toMatch(
         '## Config Migration Needed',
