@@ -7,3 +7,16 @@ export const LastPipelineId = z
     }),
   })
   .transform(({ last_pipeline }) => last_pipeline.id);
+
+export const GitLabApprovalRules = z.array(
+  z.object({
+    name: z.string(),
+    eligible_approvers: z
+      .array(
+        z.object({
+          id: z.number(),
+        }),
+      )
+      .optional(),
+  }),
+);
