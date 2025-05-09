@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 
 const DockerComposeService = z.object({
@@ -14,13 +15,49 @@ const DockerComposeService = z.object({
 });
 
 const DockerComposeFileV1 = z.record(DockerComposeService);
-const DockerComposeFileModern = z.object({
-  // compose does not use this strictly, so we shouldn't be either
-  // https://docs.docker.com/compose/compose-file/04-version-and-name/#version-top-level-element
-  version: z.string().optional(),
-  services: z.record(DockerComposeService),
-});
+const DockerComposeFileModern = z
+  .object({
+    // compose does not use this strictly, so we shouldn't be either
+    // https://docs.docker.com/compose/compose-file/04-version-and-name/#version-top-level-element
+    version: z.string().optional(),
+    services: z.record(DockerComposeService),
+  })
+  .catchall(z.unknown()) // allow unknown fields
+  .transform(
+    (
+      obj,
+    ): {
+      version?: string;
+      services: Record<string, z.infer<typeof DockerComposeService>>;
+      fragments?: Record<string, z.infer<typeof DockerComposeService>>;
+    } => {
+      const { version, services, ...rest } = obj;
 
-export const DockerComposeFile =
-  DockerComposeFileModern.or(DockerComposeFileV1);
+      let fragments:
+        | Record<string, z.infer<typeof DockerComposeService>>
+        | undefined = undefined;
+
+      // collect fragments which have image field
+      for (const key in rest) {
+        if (key.startsWith('x-')) {
+          const value = rest[key];
+          if (is.object(value) && 'image' in value && is.string(value.image)) {
+            fragments ??= {};
+            fragments[key] = value as z.infer<typeof DockerComposeService>;
+          }
+        }
+      }
+
+      return {
+        version,
+        services,
+        ...(fragments && { fragments }),
+      };
+    },
+  );
+
+export const DockerComposeFile = z.union([
+  DockerComposeFileModern,
+  DockerComposeFileV1,
+]);
 export type DockerComposeFile = z.infer<typeof DockerComposeFile>;
