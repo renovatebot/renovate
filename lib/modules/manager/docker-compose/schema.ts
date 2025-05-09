@@ -38,6 +38,8 @@ const DockerComposeFileModern = z
         | undefined = undefined;
 
       // collect fragments which have image field
+      // https://docs.docker.com/reference/compose-file/fragments/
+      // https://docs.docker.com/reference/compose-file/extensions/
       for (const key in rest) {
         if (key.startsWith('x-')) {
           const value = rest[key];
