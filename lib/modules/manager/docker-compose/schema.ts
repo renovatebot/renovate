@@ -29,23 +29,22 @@ const DockerComposeFileModern = z
     ): {
       version?: string;
       services: Record<string, z.infer<typeof DockerComposeService>>;
-      fragments?: Record<string, z.infer<typeof DockerComposeService>>;
+      extensions?: Record<string, z.infer<typeof DockerComposeService>>;
     } => {
       const { version, services, ...rest } = obj;
 
-      let fragments:
+      let extensions:
         | Record<string, z.infer<typeof DockerComposeService>>
         | undefined = undefined;
 
-      // collect fragments which have image field
-      // https://docs.docker.com/reference/compose-file/fragments/
+      // collect extensions which have image field
       // https://docs.docker.com/reference/compose-file/extensions/
       for (const key in rest) {
         if (key.startsWith('x-')) {
           const value = rest[key];
           if (is.object(value) && 'image' in value && is.string(value.image)) {
-            fragments ??= {};
-            fragments[key] = value as z.infer<typeof DockerComposeService>;
+            extensions ??= {};
+            extensions[key] = value as z.infer<typeof DockerComposeService>;
           }
         }
       }
@@ -53,7 +52,7 @@ const DockerComposeFileModern = z
       return {
         version,
         services,
-        ...(fragments && { fragments }),
+        ...(extensions && { extensions }),
       };
     },
   );
