@@ -17,6 +17,19 @@ export function getBaseSuiteUrl(basePackageUrl: string): string {
 }
 
 /**
+ * Extract the relative package path from the base package URL.
+ * For example, given the URL 'https://deb.debian.org/debian/dists/bullseye/main/binary-amd64',
+ * it will return 'main/binary-amd64'.
+ *
+ * @param basePackageUrl - The base URL of the package.
+ * @returns
+ */
+export function getPackagePath(basePackageUrl: string): string {
+  const urlParts = basePackageUrl.split('/');
+  return urlParts.slice(urlParts.length - 2, urlParts.length).join('/');
+}
+
+/**
  * Constructs the component URLs from the given registry URL.
  *
  * @param registryUrl - The base URL of the registry.

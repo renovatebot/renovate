@@ -38,12 +38,12 @@ export function formatReleaseResult(
  *
  * @param baseReleaseUrl - The base URL of the suite (e.g., 'https://deb.debian.org/debian/dists/bullseye').
  * @returns resolves to the content of the InRelease or Release file.
- * @throws An error if the InRelease file could not be downloaded.
+ * @throws An error if neither the InRelease or Release file could not be downloaded.
  */
 export async function fetchReleaseFile(
   baseReleaseUrl: string,
   http: Http,
-): Promise<string | undefined> {
+): Promise<string> {
   for (const releaseFileName of ReleaseFiles) {
     const releaseUrl = joinUrlParts(baseReleaseUrl, releaseFileName);
     try {
@@ -56,5 +56,6 @@ export async function fetchReleaseFile(
       );
     }
   }
-  return undefined;
+
+  throw new Error('Could not fetch InRelease or Release file');
 }
