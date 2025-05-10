@@ -13,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import * as yaml from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
@@ -230,7 +231,7 @@ function isChartLockChanged(
     return true;
   }
 
-  const regex = /^generated: ".+"$/gm;
+  const regex = regEx(/^generated: ".+"$/gm);
   const replacement = 'generated: "stubbed"';
   return (
     newLockContent!.replace(regex, replacement) !==
