@@ -472,8 +472,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       const updatedDeps = [
         { packageName: 'dep1', depType: depTypes.dependencies },
         { packageName: 'dep2', depType: depTypes.dependencies },
-        { depName: 'group1/dep3', depType: depTypes.optionalDependencies },
-        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        { depName: 'dep3', depType: depTypes.optionalDependencies },
+        { depName: 'dep4', depType: depTypes.optionalDependencies },
         { depName: 'dep5', depType: depTypes.uvDevDependencies },
         { depName: 'dep6', depType: depTypes.uvDevDependencies },
         { depName: 'dep7', depType: depTypes.buildSystemRequires },
