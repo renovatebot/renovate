@@ -184,11 +184,21 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should throw error when checksum validation fails', async () => {
+      // return InRelease content
+      mockFetchInReleaseContent(
+        '11111111111111111111111111111929c567de6970f3f1b95dac9b498dd80fe63', // wrong hash
+        'bullseye',
+        'main',
+        'amd64',
+        false,
+        'xz',
+      );
+
+      // return package file
       httpMock
         .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64'))
+        .get(getPackageUrl('', 'bullseye', 'main', 'amd64', 'xz'))
         .replyWithFile(200, fixturePackagesArchivePath2);
-      mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
 
       await expect(
         downloadAndExtractPackage(
@@ -198,14 +208,27 @@ describe('modules/datasource/deb/packages', () => {
       ).rejects.toThrow(`SHA256 checksum validation failed`);
     });
 
+    it('should throw error when release file is fetched but package cannot be found', async () => {
+      // return InRelease content
+      mockFetchInReleaseContent(
+        'non-compliant-hash',
+        'bullseye',
+        'main',
+        'amd64',
+        false,
+        'xz',
+      );
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
+          new Http('deb'),
+        ),
+      ).rejects.toThrow(`No Package file found in release files`);
+    });
+
     it('should throw error for when extracting fails', async () => {
       vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
-
-      // return package file
-      httpMock
-        .scope(debBaseUrl)
-        .get(getPackageUrl('', 'bullseye', 'main', 'amd64', 'xz'))
-        .replyWithFile(200, fixturePackagesArchivePath2);
 
       // return InRelease content
       mockFetchInReleaseContent(
@@ -216,6 +239,12 @@ describe('modules/datasource/deb/packages', () => {
         false,
         'xz',
       );
+
+      // return package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', 'bullseye', 'main', 'amd64', 'xz'))
+        .replyWithFile(200, fixturePackagesArchivePath2);
 
       await expect(
         downloadAndExtractPackage(

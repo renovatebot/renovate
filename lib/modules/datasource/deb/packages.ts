@@ -45,39 +45,37 @@ export async function downloadAndExtractPackage(
   }
 
   let packageReleaseInfo;
-  // parse the release file to get the package file URL and its compression method
   if (releaseContent) {
-    try {
-      packageReleaseInfo = getPackagesRelativeUrlFromReleaseFile(
-        releaseContent,
-        packagePath,
-      );
-    } catch (error) {
-      packageReleaseInfo = null;
-      logger.debug(
-        { baseSuiteUrl, packagePath, error: error.message },
-        'Failed to find package file in release file',
-      );
-    }
+    // packageReleaseInfo is set, there is a release file,
+    // so we can check which package file to download and retrieve its hash
+    // NOTE: this could also be an uncompressed package file
+    packageReleaseInfo = getPackagesRelativeUrlFromReleaseFile(
+      releaseContent,
+      packagePath,
+    );
+  } else {
+    // if packageReleaseInfo is null, it means the release file could not be fetched,
+    // so we fall back to the original behavior of this data module
+    packageReleaseInfo = {
+      hash: '',
+      compression: 'gz',
+      packagesFile: packagePath,
+    };
   }
-
-  // if packageReleaseInfo is not null, it means a Package file was found in the release file, thus we know the compression method
-  // we fall back to the original behavior of fetching the Package.gz file directly if Release file is not available
-  // compression can also be empty if there is only a package file without compression available
-  const compression = packageReleaseInfo
-    ? packageReleaseInfo.compression
-    : 'gz';
 
   // the path to the package file to download
   const downloadedPackageFile =
-    compression.length > 0
-      ? upath.join(fullCacheDir, `${nanoid()}_${packageUrlHash}.${compression}`)
+    packageReleaseInfo.compression.length > 0
+      ? upath.join(
+          fullCacheDir,
+          `${nanoid()}_${packageUrlHash}.${packageReleaseInfo.compression}`,
+        )
       : extractedFile;
 
   // the URL to download the package file from
   const packageDownloadUrl =
-    compression.length > 0
-      ? joinUrlParts(componentUrl, `Packages.${compression}`)
+    packageReleaseInfo.compression.length > 0
+      ? joinUrlParts(componentUrl, `Packages.${packageReleaseInfo.compression}`)
       : joinUrlParts(componentUrl, 'Packages');
 
   const packageFileChanged = await downloadPackageFile(
@@ -89,16 +87,20 @@ export async function downloadAndExtractPackage(
   );
 
   if (packageFileChanged || !lastTimestamp) {
-    if (compression.length > 0) {
+    if (packageReleaseInfo.compression.length > 0) {
       // let's extract if we have a compressed file
       try {
-        await extract(downloadedPackageFile, compression, extractedFile);
+        await extract(
+          downloadedPackageFile,
+          packageReleaseInfo.compression,
+          extractedFile,
+        );
       } catch (error) {
         logger.warn(
           {
             downloadedPackageFile,
             componentUrl,
-            compression,
+            compression: packageReleaseInfo.compression,
             error: error.message,
           },
           'Failed to extract package file from compressed file',
@@ -163,7 +165,7 @@ export function getPackagesRelativeUrlFromReleaseFile(
     }
   }
 
-  throw new Error('No packages file found in the release file');
+  throw new Error(`No Package file found in release files`);
 }
 
 /**
