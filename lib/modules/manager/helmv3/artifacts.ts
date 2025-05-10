@@ -153,10 +153,9 @@ export async function updateArtifacts({
 
     if (is.truthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = isChartLockChanged(
-        existingLockFileContent,
-        newHelmLockContent,
-      );
+      const isLockFileChanged =
+        !is.truthy(newHelmLockContent) ||
+        isChartLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
         fileChanges.push({
           file: {
@@ -224,17 +223,13 @@ export async function updateArtifacts({
 }
 
 function isChartLockChanged(
-  oldLockContent: string | null,
-  newLockContent: string | null,
+  oldLockContent: string,
+  newLockContent: string,
 ): boolean {
-  if (typeof newLockContent !== typeof oldLockContent) {
-    return true;
-  }
-
   const regex = regEx(/^generated: ".+"$/gm);
   const replacement = 'generated: "stubbed"';
   return (
-    newLockContent!.replace(regex, replacement) !==
-    oldLockContent!.replace(regex, replacement)
+    newLockContent.replace(regex, replacement) !==
+    oldLockContent.replace(regex, replacement)
   );
 }
