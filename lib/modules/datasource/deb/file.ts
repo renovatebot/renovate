@@ -1,4 +1,3 @@
-import type { ReadStream, WriteStream } from 'fs';
 import { createUnzip } from 'zlib';
 import * as lzma from 'lzma-native';
 import unbzip2 from 'unbzip2-stream';
@@ -18,22 +17,8 @@ export async function extract(
   compression: CompressionAlgorithms,
   outputFile: string,
 ): Promise<void> {
-  let source: ReadStream;
-  let destination: WriteStream;
-
-  try {
-    source = fs.createCacheReadStream(compressedFile);
-  } catch (error) {
-    throw new Error(
-      `Failed to create read streams for file ${compressedFile}: ${error.message}`,
-    );
-  }
-
-  try {
-    destination = fs.createCacheWriteStream(outputFile);
-  } catch (error) {
-    throw new Error(`Failed to create write streams: ${error.message}`);
-  }
+  const source = fs.createCacheReadStream(compressedFile);
+  const destination = fs.createCacheWriteStream(outputFile);
 
   switch (compression) {
     case 'gz':
