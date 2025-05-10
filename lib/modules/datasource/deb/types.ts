@@ -45,3 +45,5 @@ export const ReleaseFiles = ['InRelease', 'Release'] as const;
  * See https://wiki.debian.org/DebianRepository/Format#Compression_of_indices
  */
 export const PackagesCompressionAlgos = ['xz', 'bz2', 'gz'] as const;
+
+export type CompressionAlgorithms = (typeof PackagesCompressionAlgos)[number];
