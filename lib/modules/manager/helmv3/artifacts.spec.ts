@@ -31,6 +31,9 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 const ociLockFile1 = Fixtures.get('oci_1.lock');
+const ociLockFile1GeneratedChanged = Fixtures.get(
+  'oci_1_generated_changed.lock',
+);
 const ociLockFile2 = Fixtures.get('oci_2.lock');
 const chartFile = Fixtures.get('Chart.yaml');
 
@@ -95,6 +98,27 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config,
+      }),
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('returns null if only "generated" is changed', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1GeneratedChanged as any);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
