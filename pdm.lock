@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:59d2dc85493b35125613e29195fcf831285904b837b7a4e8e957e0299f853989"
+content_hash = "sha256:6dd458c3b2e3eb4d176cecb0baef20617b9f057eec40e9203e67266c42151287"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -310,7 +310,7 @@ files = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.12"
+version = "9.6.13"
 requires_python = ">=3.8"
 summary = "Documentation that simply works"
 groups = ["default"]
@@ -328,8 +328,8 @@ dependencies = [
     "requests~=2.26",
 ]
 files = [
-    {file = "mkdocs_material-9.6.12-py3-none-any.whl", hash = "sha256:92b4fbdc329e4febc267ca6e2c51e8501fa97b2225c5f4deb4d4e43550f8e61e"},
-    {file = "mkdocs_material-9.6.12.tar.gz", hash = "sha256:add6a6337b29f9ea7912cb1efc661de2c369060b040eb5119855d794ea85b473"},
+    {file = "mkdocs_material-9.6.13-py3-none-any.whl", hash = "sha256:3730730314e065f422cc04eacbc8c6084530de90f4654a1482472283a38e30d3"},
+    {file = "mkdocs_material-9.6.13.tar.gz", hash = "sha256:7bde7ebf33cfd687c1c86c08ed8f6470d9a5ba737bd89e7b3e5d9f94f8c72c16"},
 ]
 
 [[package]]
@@ -388,13 +388,13 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.3.7"
+version = "4.3.8"
 requires_python = ">=3.9"
 summary = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 groups = ["default"]
 files = [
-    {file = "platformdirs-4.3.7-py3-none-any.whl", hash = "sha256:a03875334331946f13c549dbd8f4bac7a13a50a895a0eb1e8c6a8ace80d40a94"},
-    {file = "platformdirs-4.3.7.tar.gz", hash = "sha256:eb437d586b6a0986388f0d6f74aa0cde27b48d0e3d66843640bfb6bdcdb6e351"},
+    {file = "platformdirs-4.3.8-py3-none-any.whl", hash = "sha256:ff7059bb7eb1179e2685604f4aaf157cfd9535242bd23742eadc3c13542139b4"},
+    {file = "platformdirs-4.3.8.tar.gz", hash = "sha256:3d512d96e16bcb959a814c9f348431070822a6496326a4be0911c40b5a74c2bc"},
 ]
 
 [[package]]
@@ -476,16 +476,16 @@ files = [
 
 [[package]]
 name = "pyyaml-env-tag"
-version = "0.1"
-requires_python = ">=3.6"
-summary = "A custom YAML tag for referencing environment variables in YAML files. "
+version = "1.0"
+requires_python = ">=3.9"
+summary = "A custom YAML tag for referencing environment variables in YAML files."
 groups = ["default"]
 dependencies = [
     "pyyaml",
 ]
 files = [
-    {file = "pyyaml_env_tag-0.1-py3-none-any.whl", hash = "sha256:af31106dec8a4d68c60207c1886031cbf839b68aa7abccdb19868200532c2069"},
-    {file = "pyyaml_env_tag-0.1.tar.gz", hash = "sha256:70092675bda14fdec33b31ba77e7543de9ddc88f2e5b99160396572d11525bdb"},
+    {file = "pyyaml_env_tag-1.0-py3-none-any.whl", hash = "sha256:37f081041b8dca44ed8eb931ce0056f97de17251450f0ed08773dc2bcaf9e683"},
+    {file = "pyyaml_env_tag-1.0.tar.gz", hash = "sha256:bc952534a872b583f66f916e2dd83e7a7b9087847f4afca6d9c957c48b258ed2"},
 ]
 
 [[package]]
