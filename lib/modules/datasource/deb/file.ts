@@ -1,25 +1,52 @@
+import type { ReadStream, WriteStream } from 'fs';
 import { createUnzip } from 'zlib';
+import * as lzma from 'lzma-native';
+import unbzip2 from 'unbzip2-stream';
 import * as fs from '../../../util/fs';
+import type { CompressionAlgorithms } from './types';
 
 /**
  * Extracts the specified compressed file to the output file.
  *
  * @param compressedFile - The path to the compressed file.
- * @param compression - The compression method used (currently only 'gz' is supported).
+ * @param compression - The compression method used (currently 'gz', 'xz' and 'bzip2' is supported).
  * @param outputFile - The path where the extracted content will be stored.
  * @throws Will throw an error if the compression method is unknown.
  */
 export async function extract(
   compressedFile: string,
-  compression: string,
+  compression: CompressionAlgorithms,
   outputFile: string,
 ): Promise<void> {
-  if (compression === 'gz') {
-    const source = fs.createCacheReadStream(compressedFile);
-    const destination = fs.createCacheWriteStream(outputFile);
-    await fs.pipeline(source, createUnzip(), destination);
-  } else {
-    throw new Error(`Unsupported compression standard '${compression}'`);
+  let source: ReadStream;
+  let destination: WriteStream;
+
+  try {
+    source = fs.createCacheReadStream(compressedFile);
+  } catch (error) {
+    throw new Error(
+      `Failed to create read streams for file ${compressedFile}: ${error.message}`,
+    );
+  }
+
+  try {
+    destination = fs.createCacheWriteStream(outputFile);
+  } catch (error) {
+    throw new Error(`Failed to create write streams: ${error.message}`);
+  }
+
+  switch (compression) {
+    case 'gz':
+      await fs.pipeline(source, createUnzip(), destination);
+      break;
+    case 'xz':
+      await fs.pipeline(source, lzma.createDecompressor(), destination);
+      break;
+    case 'bz2':
+      await fs.pipeline(source, unbzip2(), destination);
+      break;
+    default:
+      throw new Error('Unsupported compression standard');
   }
 }
 
