@@ -2,7 +2,6 @@ import { createUnzip } from 'zlib';
 import * as lzma from 'lzma-native';
 import unbzip2 from 'unbzip2-stream';
 import * as fs from '../../../util/fs';
-import type { CompressionAlgorithms } from './types';
 
 /**
  * Extracts the specified compressed file to the output file.
@@ -14,7 +13,7 @@ import type { CompressionAlgorithms } from './types';
  */
 export async function extract(
   compressedFile: string,
-  compression: CompressionAlgorithms,
+  compression: string,
   outputFile: string,
 ): Promise<void> {
   const source = fs.createCacheReadStream(compressedFile);

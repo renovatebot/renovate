@@ -22,9 +22,9 @@ describe('modules/datasource/deb/file', () => {
     GlobalConfig.set({ cacheDir: cacheDir.path });
 
     extractionFolder = await fs.ensureCacheDir('file');
-    extractedPackageFile = upath.join(extractionFolder, `package.txt`);
+    extractedPackageFile = upath.join(extractionFolder, 'package.txt');
 
-    packageArchiveCache = upath.join(extractionFolder, `Package`);
+    packageArchiveCache = upath.join(extractionFolder, 'Package');
   });
 
   afterEach(async () => {
@@ -65,6 +65,13 @@ describe('modules/datasource/deb/file', () => {
   });
 });
 
+/**
+ * Copies a fixture file to the cache directory.
+ *
+ * @param fixturePath
+ * @param cachePath
+ * @returns
+ */
 function copyFixtureToCache(
   fixturePath: string,
   cachePath: string,
