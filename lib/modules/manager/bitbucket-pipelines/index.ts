@@ -12,7 +12,7 @@ export const urls = [
 ];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.?bitbucket-pipelines\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)\\.?bitbucket-pipelines\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

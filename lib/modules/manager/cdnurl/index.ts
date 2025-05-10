@@ -9,7 +9,7 @@ export const displayName = 'CDN URL';
 export const categories: Category[] = ['cd'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
   versioning: semverVersioning.id,
 };
 

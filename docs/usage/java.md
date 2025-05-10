@@ -44,7 +44,7 @@ Renovate does not support:
 - Catalog versions using `reject`, and `rejectAll` constraints
 - Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
-- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](./configuration-options.md#filematch) configuration)
+- Catalogs outside the `gradle` folder, whose names do _not_ end in `.versions.toml` (unless overridden via [`managerFilePatterns`](./configuration-options.md#managerfilepatterns) configuration)
 
 ### Gradle Plugin Support
 

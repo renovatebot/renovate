@@ -23,6 +23,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
+import { getEnv } from '../env';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
@@ -237,8 +238,9 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-    ...process.env,
+    ...getEnv(),
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
   });
@@ -269,8 +271,7 @@ async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
     .split(newlineRegex)
     .map((branch) => branch.trim())
-    .filter((branch) => branch.length)
-    .filter((branch) => !branch.startsWith('* '));
+    .filter((branch) => branch.length > 0 && !branch.startsWith('* '));
   logger.debug({ existingBranches });
   for (const branchName of existingBranches) {
     await deleteLocalBranch(branchName);
@@ -387,7 +388,7 @@ export function isCloned(): boolean {
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     /* v8 ignore next 3 -- TODO: add test */
-    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+    if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
       await git.raw(['config', 'core.hooksPath', '/dev/null']);
     }
     return;
@@ -405,15 +406,12 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await gitRetry(() => git.pull());
-      await gitRetry(() => git.fetch());
+      await gitRetry(() => git.fetch(['--prune', 'origin']));
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
-      await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
