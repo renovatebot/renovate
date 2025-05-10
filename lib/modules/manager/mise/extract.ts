@@ -169,7 +169,7 @@ function getConfigFromTooling(
   } // Return null if no toolDefinition is found
 
   return (
-    (is.function_(toolDefinition.config)
+    (is.function(toolDefinition.config)
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
   );
