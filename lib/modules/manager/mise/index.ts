@@ -51,4 +51,4 @@ const backendDatasources = {
 
 export const supportedDatasources = deduplicateArray(
   Object.values(backendDatasources).flat(),
-);
+).sort();
