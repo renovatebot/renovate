@@ -223,7 +223,7 @@ export async function updateArtifacts({
 }
 
 function isHelmLockChanged(oldContent: string, newContent: string): boolean {
-  const regex = regEx(/^generated: ".+"$/gm);
+  const regex = regEx(/^generated: ".+"$/m);
   const replacement = 'generated: "stubbed"';
   return (
     newContent.replace(regex, replacement) !==

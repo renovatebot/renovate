@@ -1,6 +1,7 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import { stripIndent } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
@@ -31,9 +32,6 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 const ociLockFile1 = Fixtures.get('oci_1.lock');
-const ociLockFile1GeneratedChanged = Fixtures.get(
-  'oci_1_generated_changed.lock',
-);
 const ociLockFile2 = Fixtures.get('oci_2.lock');
 const chartFile = Fixtures.get('Chart.yaml');
 
@@ -115,10 +113,24 @@ describe('modules/manager/helmv3/artifacts', () => {
   });
 
   it('returns null if only "generated" is changed', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
+    fs.readLocalFile.mockResolvedValueOnce(stripIndent`
+      dependencies:
+      - name: renovate-test
+        repository: oci://registry.gitlab.com/user/oci-helm-test
+        version: 0.1.0
+      digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+      generated: "2022-01-20T17:48:47.610371241+01:00"
+      `);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1GeneratedChanged as any);
+    const execMocks = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(stripIndent`
+      dependencies:
+      - name: renovate-test
+        repository: oci://registry.gitlab.com/user/oci-helm-test
+        version: 0.1.0
+      digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+      generated: "2025-01-20T17:48:47.610371241+01:00"
+      `);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -132,7 +144,58 @@ describe('modules/manager/helmv3/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execMocks).toEqual([
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Chart.lock', async () => {
