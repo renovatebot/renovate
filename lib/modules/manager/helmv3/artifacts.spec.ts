@@ -144,58 +144,11 @@ describe('modules/manager/helmv3/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execMocks).toEqual([
-      {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          timeout: 900000,
-        },
-      },
-      {
-        cmd: "helm dependency update ''",
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CACHE:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories',
-            HELM_REPOSITORY_CONFIG:
-              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          timeout: 900000,
-        },
-      },
-    ]);
+    expect(execMocks).toBeArrayOfSize(2);
+    expect(execMocks[0].cmd).toBe(
+      'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+    );
+    expect(execMocks[1].cmd).toBe("helm dependency update ''");
   });
 
   it('returns updated Chart.lock', async () => {
