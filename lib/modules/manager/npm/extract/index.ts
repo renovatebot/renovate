@@ -230,7 +230,7 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      // pnpm workspace files are their own package file, defined via fileMatch.
+      // pnpm workspace files are their own package file, defined via managerFilePatterns.
       // We duck-type the content here, to allow users to rename the file itself.
       const parsedPnpmWorkspaceYaml = tryParsePnpmWorkspaceYaml(content);
       if (parsedPnpmWorkspaceYaml.success) {

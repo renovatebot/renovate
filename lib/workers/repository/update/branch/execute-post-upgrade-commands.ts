@@ -31,7 +31,6 @@ export async function postUpgradeCommandsExecutor(
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
   const allowedCommands = GlobalConfig.get('allowedCommands');
-  const allowCommandTemplating = GlobalConfig.get('allowCommandTemplating');
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
@@ -63,12 +62,17 @@ export async function postUpgradeCommandsExecutor(
       }
 
       for (const cmd of commands) {
-        if (allowedCommands!.some((pattern) => regEx(pattern).test(cmd))) {
+        const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
+        if (compiledCmd !== cmd) {
+          logger.debug(
+            { rawCmd: cmd, compiledCmd },
+            'Post-upgrade command has been compiled',
+          );
+        }
+        if (
+          allowedCommands!.some((pattern) => regEx(pattern).test(compiledCmd))
+        ) {
           try {
-            const compiledCmd = allowCommandTemplating
-              ? compile(cmd, mergeChildConfig(config, upgrade))
-              : cmd;
-
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
@@ -87,7 +91,7 @@ export async function postUpgradeCommandsExecutor(
         } else {
           logger.warn(
             {
-              cmd,
+              cmd: compiledCmd,
               allowedCommands,
             },
             'Post-upgrade task did not match any on allowedCommands list',
@@ -95,7 +99,7 @@ export async function postUpgradeCommandsExecutor(
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedCommands`,
+              `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
             ),
           });
         }
