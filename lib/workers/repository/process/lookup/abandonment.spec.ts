@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { ReleaseResult } from '../../../../modules/datasource/types';
-import { calculateAbandonment } from './abandonment';
-import { LookupUpdateConfig } from './types';
+import type { ReleaseResult } from '../../../../modules/datasource/types';
 import { asTimestamp } from '../../../../util/timestamp';
+import { calculateAbandonment } from './abandonment';
+import type { LookupUpdateConfig } from './types';
 
 describe('workers/repository/process/lookup/abandonment', () => {
   describe('calculateAbandonment', () => {

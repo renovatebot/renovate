@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
-import { ReleaseResult } from '../../../../modules/datasource/types';
+import type { ReleaseResult } from '../../../../modules/datasource/types';
 import { toMs } from '../../../../util/pretty-time';
-import { LookupUpdateConfig } from './types';
+import type { LookupUpdateConfig } from './types';
 
 export function calculateAbandonment(
   releaseResult: ReleaseResult,
