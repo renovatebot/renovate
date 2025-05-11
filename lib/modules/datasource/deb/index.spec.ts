@@ -1,11 +1,12 @@
 import { createReadStream } from 'fs';
-import { copyFile, stat } from 'fs-extra';
+import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
+import { joinUrlParts } from '../../../util/url';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
 import { getBaseSuiteUrl } from './url';
@@ -28,6 +29,7 @@ describe('modules/datasource/deb/index', () => {
   let cfg: GetPkgReleasesConfig;
   let extractionFolder: string;
   let extractedPackageFile: string;
+  let packageArchiveFile: string;
 
   beforeEach(async () => {
     vi.resetAllMocks();
@@ -39,6 +41,11 @@ describe('modules/datasource/deb/index', () => {
     extractedPackageFile = upath.join(
       extractionFolder,
       `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.txt`,
+    );
+
+    packageArchiveFile = upath.join(
+      extractionFolder,
+      `${toSha256(getComponentUrl(debBaseUrl, 'stable', 'non-free', 'amd64'))}.gz`,
     );
 
     cfg = {
@@ -64,19 +71,17 @@ describe('modules/datasource/deb/index', () => {
 
   describe('getReleases', () => {
     it('returns a valid version for the package `album` and does not require redownload', async () => {
+      // copy compressed package file
+      await copyFile(fixturePackagesArchivePath, packageArchiveFile);
+      // copy uncompressed package file
       await copyFile(fixturePackagesPath, extractedPackageFile);
-      const stats = await stat(extractedPackageFile);
-      const ts = stats.ctime;
 
+      // mock Release files fetch
+      httpMock.scope(debBaseUrl).get(`/debian/dists/stable/Release`).reply(404);
       httpMock
-        .scope(debBaseUrl, {
-          // ensure the rest call sets the correct request headers
-          reqheaders: {
-            'if-modified-since': ts.toUTCString(),
-          },
-        })
-        .head(getPackageUrl('', 'stable', 'non-free', 'amd64'))
-        .reply(304);
+        .scope(debBaseUrl)
+        .get(`/debian/dists/stable/InRelease`)
+        .reply(404);
 
       const res = await getPkgReleases(cfg);
       expect(res).toEqual({
@@ -397,6 +402,7 @@ function mockHttpCalls(
  * @param arch - The architecture (e.g., 'amd64').
  * @param error - Optional flag to simulate an error response (default is false).
  * @param compression - The compression type (e.g., 'gz', 'xz', etc.) for the package index file.
+ * @param releaseFile - The name of the InRelease file (either 'InRelease' or 'Release, defaults to 'InRelease').
  */
 export function mockFetchInReleaseContent(
   packageIndexHash: string,
@@ -405,6 +411,7 @@ export function mockFetchInReleaseContent(
   arch: string,
   error = false,
   compression = 'gz',
+  releaseFile = 'InRelease',
 ) {
   const packageIndexPath =
     compression.length > 0
@@ -416,12 +423,12 @@ export function mockFetchInReleaseContent(
  ${packageIndexHash} 1234 ${packageIndexPath}
 `;
 
-  const mockCall = httpMock
-    .scope(debBaseUrl)
-    .get(
-      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
-        '/InRelease',
-    );
+  const uri = joinUrlParts(
+    getBaseSuiteUrl(getComponentUrl('', release, component, arch)),
+    releaseFile,
+  );
+
+  const mockCall = httpMock.scope(debBaseUrl).get(uri);
 
   if (error) {
     mockCall.replyWithError('Unexpected Error');
@@ -454,7 +461,8 @@ export function getComponentUrl(
  * @param baseUrl - The base URL of the repository.
  * @param release - The release name or codename (e.g., 'buster', 'bullseye').
  * @param component - The component name (e.g., 'main', 'contrib', 'non-free').
- * @param arch - The architecture name (e.g., 'amd64', 'i386').
+ * @param arch - The architecture name (e.g., 'amd64', 'i386').7
+ * @param compression - The compression type (e.g., 'gz', 'xz', etc.) for the Packages file, empty string for no compression.
  * @returns The complete URL to the Packages.gz file.
  */
 export function getPackageUrl(
@@ -464,7 +472,10 @@ export function getPackageUrl(
   arch: string,
   compression = 'gz',
 ) {
-  return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.${compression}`;
+  if (compression.length > 0) {
+    return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.${compression}`;
+  }
+  return `${getComponentUrl(baseUrl, release, component, arch)}/Packages`;
 }
 
 /**
