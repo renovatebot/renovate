@@ -49,6 +49,43 @@ When an array or object configuration option is `mergeable`, it means that value
 
 ---
 
+## abandonmentThreshold
+
+The `abandonmentThreshold` option allows Renovate to flag packages as abandoned when they haven't received updates for a specified period of time.
+
+Renovate adds an `isAbandoned` boolean property to the package lookup result when:
+
+- `abandonmentThreshold` is defined (not `null`)
+- The package has a `bumpedAt` timestamp available
+
+If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).
+
+This option accepts time duration strings like `1 year`, `6 months`, `90 days`, etc.
+
+Example usage:
+
+```json
+{
+  "abandonmentThreshold": "2 years"
+}
+```
+
+You can also apply this setting selectively using `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "abandonmentThreshold": "1 year"
+    }
+  ]
+}
+```
+
+The `isAbandoned` flag is calculated during the package lookup phase but doesn't affect the update process by default.
+You can use this flag in templating, custom managers, or with platform-specific extensions.
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
