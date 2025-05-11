@@ -9,6 +9,7 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getEnv } from '../env';
 import { type AsyncResult, Result } from '../result';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
@@ -78,7 +79,7 @@ export abstract class HttpBase<
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,
       {

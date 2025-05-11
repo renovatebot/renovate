@@ -1,7 +1,7 @@
 import stream from 'node:stream';
 import util from 'node:util';
 import is from '@sindresorhus/is';
-import findUp from 'find-up';
+import { findUp } from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';

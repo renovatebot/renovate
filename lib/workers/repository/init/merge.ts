@@ -189,6 +189,7 @@ export async function mergeRenovateConfig(
     };
   }
   const configFileParsed = repoConfig?.configFileParsed ?? {};
+  // I think we do not need to use combined env here as static repo config is meant to be in the env var and not file/repo config
   const configFileAndEnv = await mergeStaticRepoEnvConfig(
     configFileParsed,
     process.env,
