@@ -81,12 +81,7 @@ export function getNewValue({
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }
-    return getNewValue({
-      currentValue,
-      rangeStrategy: 'replace',
-      currentVersion,
-      newVersion,
-    });
+    return getNewValueHelper(currentValue, currentVersion, newVersion);
   }
   const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
@@ -94,18 +89,16 @@ export function getNewValue({
     if (satisfies(newVersion, currentValue)) {
       return currentValue;
     }
-    const newValue = getNewValue({
+    const newValue = getNewValueHelper(
       currentValue,
-      rangeStrategy: 'replace',
       currentVersion,
       newVersion,
-    });
+    );
     if (element.operator?.startsWith('<')) {
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
-      // TODO: types (#22198)
-      return `${splitCurrent.join(element.operator)}${newValue!}`;
+      return `${splitCurrent.join(element.operator)}${newValue}`;
     }
     if (parsedRange.length > 1) {
       const previousElement = parsedRange[parsedRange.length - 2];
@@ -113,22 +106,16 @@ export function getNewValue({
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
         // TODO: types (#22198)
-        return `${splitCurrent.join('-')}- ${newValue!}`;
+        return `${splitCurrent.join('-')}- ${newValue}`;
       }
       if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);
         return null;
       }
     }
-    // TODO: types (#22198)
-    return `${currentValue} || ${newValue!}`;
+    return `${currentValue} || ${newValue}`;
   }
-  const toVersionMajor = major(newVersion);
-  const toVersionMinor = minor(newVersion);
-  const toVersionPatch = patch(newVersion);
-  const toNewVersion = prerelease(newVersion);
-  const suffix = toNewVersion ? `-${toNewVersion[0]}` : '';
-  // Simple range
+
   if (rangeStrategy === 'bump') {
     if (parsedRange.length === 1) {
       if (!element.operator) {
@@ -182,6 +169,38 @@ export function getNewValue({
     );
     return null;
   }
+
+  // meaning rangeStrategy is replace
+  if (parsedRange.length > 1) {
+    const previousElement = parsedRange[parsedRange.length - 2];
+    const toVersionMajor = major(newVersion);
+    const toVersionMinor = minor(newVersion);
+
+    if (previousElement.major === element.major) {
+      return `>= ${newVersion} < ${toVersionMajor}.${toVersionMinor + 1}.0`;
+    }
+
+    return `>= ${newVersion} < ${toVersionMajor + 1}.0.0`;
+  }
+
+  return getNewValueHelper(currentValue, currentVersion, newVersion);
+}
+
+function getNewValueHelper(
+  currentValue: string,
+  currentVersion: string | undefined,
+  newVersion: string,
+): string {
+  const parsedRange = semverUtils.parseRange(currentValue);
+  const element = parsedRange[parsedRange.length - 1];
+
+  const toVersionMajor = major(newVersion);
+  const toVersionMinor = minor(newVersion);
+  const toVersionPatch = patch(newVersion);
+  const toNewVersion = prerelease(newVersion);
+  const suffix = toNewVersion ? `-${toNewVersion[0]}` : '';
+  // Simple range
+
   if (element.operator === '~>') {
     return `~> ${toVersionMajor}.${toVersionMinor}.0`;
   }
