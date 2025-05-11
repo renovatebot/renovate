@@ -7,7 +7,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { packageKeys, requiredPackageKeys } from './common';
 import { downloadAndExtractPackage } from './packages';
 import {
-  fetchReleaseFile,
+  getReleaseFileContent,
   formatReleaseResult,
   releaseMetaInformationMatches,
 } from './release';
@@ -67,7 +67,7 @@ export class DebDatasource extends Datasource {
     key: (baseReleaseUrl: string) => baseReleaseUrl,
   })
   async fetchReleaseFile(baseReleaseUrl: string): Promise<string> {
-    return await fetchReleaseFile(baseReleaseUrl, this.http);
+    return await getReleaseFileContent(baseReleaseUrl, this.http);
   }
 
   /**

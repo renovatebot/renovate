@@ -1,68 +1,140 @@
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global';
+import { toSha256 } from '../../../util/hash';
 import { Http } from '../../../util/http';
-import { fetchReleaseFile } from './release';
+import { joinUrlParts } from '../../../util/url';
+import { cacheSubDir } from './common';
+import { getComponentUrl } from './index.spec';
+import { getReleaseFileContent } from './release';
 import * as httpMock from '~test/http-mock';
+import { fs } from '~test/util';
 
 const debBaseUrl = 'http://deb.debian.org';
 
 describe('modules/datasource/deb/release', () => {
-  describe('fetchReleaseFile', () => {
-    describe('with InRelease and Release file', () => {
-      const contentOfInReleaseFile = 'content of InRelease file';
+  const packageArgs: [release: string, component: string, arch: string] = [
+    'stable',
+    'non-free',
+    'amd64',
+  ];
 
-      beforeEach(() => {
-        httpMock
-          .scope(debBaseUrl)
-          .get(`/dists/bullseye/InRelease`)
-          .reply(200, contentOfInReleaseFile);
-      });
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
 
-      it('throws an error if no InRelease or Release file is found', async () => {
-        const baseReleaseUrl = `${debBaseUrl}/dists/bullseye`;
-        const res = await fetchReleaseFile(baseReleaseUrl, new Http('deb'));
-        expect(res).toEqual(contentOfInReleaseFile);
-      });
+  describe('getReleaseFileContent', () => {
+    let cacheDir: DirectoryResult | null;
+    let releaseFolder: string;
+    let releaseFilePath: string;
+    const contentOfInReleaseFile = 'content of InRelease file';
+    const relativeReleaseFilePath = `/debian/dists/bullseye`;
+    const releaseFileFolderUri = joinUrlParts(
+      debBaseUrl,
+      relativeReleaseFilePath,
+    );
+
+    beforeEach(async () => {
+      cacheDir = await dir({ unsafeCleanup: true });
+      GlobalConfig.set({ cacheDir: cacheDir.path });
+
+      releaseFolder = await fs.ensureCacheDir(cacheSubDir);
+      releaseFilePath = upath.join(
+        releaseFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.txt`,
+      );
     });
 
-    describe('with Release file only', () => {
-      const contentOfReleaseFile = 'content of Release file';
-
-      beforeEach(() => {
-        httpMock
-          .scope(debBaseUrl)
-          .get(`/dists/bullseye/InRelease`)
-          .reply(404, 'Not Found');
-        httpMock
-          .scope(debBaseUrl)
-          .get(`/dists/bullseye/Release`)
-          .reply(200, contentOfReleaseFile);
-      });
-
-      it('throws an error if no InRelease or Release file is found', async () => {
-        const baseReleaseUrl = `${debBaseUrl}/dists/bullseye`;
-        const res = await fetchReleaseFile(baseReleaseUrl, new Http('deb'));
-
-        expect(res).toEqual(contentOfReleaseFile);
-      });
+    afterEach(async () => {
+      await cacheDir?.cleanup();
+      cacheDir = null;
     });
 
-    describe('bad server response', () => {
-      beforeEach(() => {
-        httpMock
-          .scope(debBaseUrl)
-          .get(`/dists/bullseye/InRelease`)
-          .reply(500, 'Bad Gateway');
-        httpMock
-          .scope(debBaseUrl)
-          .get(`/dists/bullseye/Release`)
-          .reply(500, 'Bad Gateway');
-      });
+    it('falls back to Release file if InRelease is not available', async () => {
+      // no InRelease available
+      httpMock
+        .scope(debBaseUrl)
+        .get(joinUrlParts(relativeReleaseFilePath, 'InRelease'))
+        .reply(404, contentOfInReleaseFile);
 
-      it('throws an error if no InRelease or Release file is found', async () => {
-        const baseReleaseUrl = `${debBaseUrl}/dists/bullseye`;
-        const res = await fetchReleaseFile(baseReleaseUrl, new Http('deb'));
+      // Release available
+      httpMock
+        .scope(debBaseUrl)
+        .get(joinUrlParts(relativeReleaseFilePath, 'Release'))
+        .reply(200, contentOfInReleaseFile);
 
-        expect(res).toBeUndefined();
-      });
+      const res = await getReleaseFileContent(
+        releaseFileFolderUri,
+        releaseFilePath,
+        new Http('deb'),
+      );
+      expect(res).toEqual(contentOfInReleaseFile);
+    });
+
+    it('throws an error if neither InRelease nor Release file could be downloaded', async () => {
+      // no InRelease available
+      httpMock
+        .scope(debBaseUrl)
+        .get(joinUrlParts(relativeReleaseFilePath, 'InRelease'))
+        .reply(404, 'Not Found');
+
+      // Release available
+      httpMock
+        .scope(debBaseUrl)
+        .get(joinUrlParts(relativeReleaseFilePath, 'Release'))
+        .reply(404, 'Not Found');
+
+      await expect(
+        getReleaseFileContent(
+          releaseFileFolderUri,
+          releaseFilePath,
+          new Http('deb'),
+        ),
+      ).rejects.toThrowError('Could not fetch InRelease or Release file');
+    });
+
+    it('does not download if file was not modified', async () => {
+      // write file to cache
+      await fs.outputCacheFile(releaseFilePath, contentOfInReleaseFile);
+
+      // mock http head request
+      httpMock
+        .scope(debBaseUrl)
+        .head(joinUrlParts(relativeReleaseFilePath, 'InRelease'))
+        .reply(304, 'Not Modified');
+
+      await expect(
+        getReleaseFileContent(
+          releaseFileFolderUri,
+          releaseFilePath,
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(contentOfInReleaseFile);
+    });
+
+    it('proceed with download if modification of file cannot be determined', async () => {
+      // write file to cache
+      await fs.outputCacheFile(releaseFilePath, contentOfInReleaseFile);
+
+      // mock http head request
+      httpMock
+        .scope(debBaseUrl)
+        .head(joinUrlParts(relativeReleaseFilePath, 'InRelease'))
+        .reply(500, 'Internal Server Error');
+
+      // mock http get request
+      httpMock
+        .scope(debBaseUrl)
+        .get(joinUrlParts(relativeReleaseFilePath, 'InRelease'))
+        .reply(200, contentOfInReleaseFile);
+
+      const res = await getReleaseFileContent(
+        releaseFileFolderUri,
+        releaseFilePath,
+        new Http('deb'),
+      );
+      expect(res).toEqual(contentOfInReleaseFile);
     });
   });
 });
