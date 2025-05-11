@@ -207,16 +207,21 @@ export function getExtractedConstraints(
   deps: PackageDependency[],
 ): Record<string, string> {
   const extractedConstraints: Record<string, string> = {};
-  const constraints = ['node', 'yarn', 'npm', 'pnpm', 'vscode'];
-  for (const dep of deps) {
-    if (
-      !dep.skipReason &&
-      (dep.depType === 'engines' || dep.depType === 'packageManager') &&
-      dep.depName &&
-      constraints.includes(dep.depName) &&
-      is.string(dep.currentValue)
-    ) {
-      extractedConstraints[dep.depName] = dep.currentValue;
+  const constraints = new Set(['node', 'yarn', 'npm', 'pnpm', 'vscode']);
+  // precedence order: do not sort
+  const depTypes = ['volta', 'packageManager', 'engines'];
+
+  for (const depType of depTypes) {
+    for (const dep of deps) {
+      if (
+        !dep.skipReason &&
+        dep.depType === depType &&
+        dep.depName &&
+        constraints.has(dep.depName) &&
+        is.string(dep.currentValue)
+      ) {
+        extractedConstraints[dep.depName] ??= dep.currentValue;
+      }
     }
   }
   return extractedConstraints;
