@@ -6,11 +6,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { packageKeys, requiredPackageKeys } from './common';
 import { downloadAndExtractPackage } from './packages';
-import {
-  getReleaseFileContent,
-  formatReleaseResult,
-  releaseMetaInformationMatches,
-} from './release';
+import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
 import { constructComponentUrls } from './url';
 
@@ -53,22 +49,6 @@ export class DebDatasource extends Datasource {
   ];
 
   override readonly defaultVersioning = 'deb';
-
-  /**
-   * Fetches the content of the InRelease or Release file from the given base suite URL.
-   * Result is cached.
-   *
-   * @param baseReleaseUrl - The base URL of the suite (e.g., 'https://deb.debian.org/debian/dists/bullseye').
-   * @returns resolves to the content of the InRelease or Release file.
-   * @throws An error if neither the InRelease nor the Release file could not be downloaded.
-   */
-  @cache({
-    namespace: `datasource-${DebDatasource.id}`,
-    key: (baseReleaseUrl: string) => baseReleaseUrl,
-  })
-  async fetchReleaseFile(baseReleaseUrl: string): Promise<string> {
-    return await getReleaseFileContent(baseReleaseUrl, this.http);
-  }
 
   /**
    * Parses the extracted package index file.

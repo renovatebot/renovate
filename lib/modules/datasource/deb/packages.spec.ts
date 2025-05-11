@@ -1,4 +1,4 @@
-import { createReadStream, readFileSync } from 'fs';
+import { copyFileSync, createReadStream, readFileSync } from 'fs';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -442,6 +442,49 @@ describe('modules/datasource/deb/packages', () => {
           new Http('deb'),
         ),
       ).rejects.toThrow(`Missing metadata in extracted package index file!`);
+    });
+
+    it('should not download if package file already exists', async () => {
+      downloadedPackageFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.xz`,
+      );
+
+      const extractedFile = upath.join(
+        extractionFolder,
+        `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.txt`,
+      );
+
+      // write cached compressed package file
+      copyFileSync(fixturePackagesArchiveXzPath, downloadedPackageFile);
+
+      // write cached extracted package file
+      copyFileSync(fixturePackagesArchiveNoCompr, extractedFile);
+
+      const fixturePackageHash = await computeFileChecksum(
+        fixturePackagesArchiveXzPath,
+      );
+
+      // return InRelease content
+      mockFetchInReleaseContent(
+        fixturePackageHash,
+        ...packageArgs,
+        false,
+        'xz',
+        'InRelease',
+      );
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).resolves.toEqual(
+        expect.objectContaining({
+          extractedFile,
+          lastTimestamp: expect.anything(),
+        }),
+      );
     });
   });
 });
