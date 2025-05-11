@@ -52,6 +52,7 @@ export interface LookupUpdateConfig
   extractVersion?: string;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
+  abandonmentThreshold?: string;
 }
 
 export interface UpdateResult {

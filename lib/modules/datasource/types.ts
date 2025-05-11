@@ -94,6 +94,7 @@ export interface ReleaseResult {
   lookupName?: string;
   packageScope?: string;
   bumpedAt?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface PostprocessReleaseConfig {

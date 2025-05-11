@@ -42,6 +42,7 @@ import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils';
+import { calculateAbandonment } from './abandonment';
 
 async function getTimestamp(
   config: LookupUpdateConfig,
@@ -158,6 +159,7 @@ export async function lookupUpdates(
         config,
       )
         .transform((res) => calculateLatestReleaseBump(versioningApi, res))
+        .transform((res) => calculateAbandonment(res, config))
         .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 
