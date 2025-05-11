@@ -549,3 +549,58 @@ export class ObsoleteCacheHitLogger {
   }
 }
 /* v8 ignore stop: temporary code */
+
+interface AbandonedPackage {
+  datasource: string;
+  packageName: string;
+  bumpedAt: string;
+}
+
+type AbandonedPackageReport = Record<string, Record<string, string>>;
+
+export class AbandonedPackageStats {
+  static getData(): AbandonedPackage[] {
+    return memCache.get<AbandonedPackage[]>('abandonment-stats') ?? [];
+  }
+
+  private static setData(data: AbandonedPackage[]): void {
+    memCache.set('abandonment-stats', data);
+  }
+
+  static write(
+    datasource: string,
+    packageName: string,
+    bumpedAt: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, packageName, bumpedAt });
+    this.setData(data);
+  }
+
+  static getReport(): AbandonedPackageReport {
+    const data = this.getData();
+    const result: AbandonedPackageReport = {};
+
+    for (const { datasource, packageName, bumpedAt } of data) {
+      result[datasource] ??= {};
+      result[datasource][packageName] = bumpedAt;
+    }
+
+    const sortedResult: AbandonedPackageReport = {};
+    for (const datasource of Object.keys(result).sort()) {
+      sortedResult[datasource] = {};
+      for (const packageName of Object.keys(result[datasource]).sort()) {
+        sortedResult[datasource][packageName] = result[datasource][packageName];
+      }
+    }
+
+    return sortedResult;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+    if (Object.keys(report).length > 0) {
+      logger.debug(report, 'Abandoned package statistics');
+    }
+  }
+}

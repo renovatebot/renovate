@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import type { ReleaseResult } from '../../../../modules/datasource/types';
 import { toMs } from '../../../../util/pretty-time';
+import { AbandonedPackageStats } from '../../../../util/stats';
 import type { LookupUpdateConfig } from './types';
 
 export function calculateAbandonment(
@@ -28,5 +29,11 @@ export function calculateAbandonment(
   });
   const isAbandoned = abandonmentDate < DateTime.now();
   releaseResult.isAbandoned = isAbandoned;
+
+  if (isAbandoned) {
+    const { datasource, packageName } = config;
+    AbandonedPackageStats.write(datasource, packageName, bumpedAt);
+  }
+
   return releaseResult;
 }
