@@ -77,11 +77,25 @@ describe('modules/datasource/deb/index', () => {
       await copyFile(fixturePackagesPath, extractedPackageFile);
 
       // mock Release files fetch
-      httpMock.scope(debBaseUrl).get(`/debian/dists/stable/Release`).reply(404);
-      httpMock
-        .scope(debBaseUrl)
-        .get(`/debian/dists/stable/InRelease`)
-        .reply(404);
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        'stable',
+        'non-free-second',
+        'amd64',
+        true, // return error to signal that the file is not available
+        '',
+        'Release',
+      );
+
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        'stable',
+        'non-free-second',
+        'amd64',
+        true, // return error to signal that the file is not available
+        '',
+        'InRelease',
+      );
 
       const res = await getPkgReleases(cfg);
       expect(res).toEqual({
@@ -238,6 +252,28 @@ describe('modules/datasource/deb/index', () => {
           .scope(debBaseUrl)
           .get(getPackageUrl('', 'stable', 'non-free', 'amd64'))
           .reply(404);
+
+        // no InRelease file
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+          true,
+          '',
+          'InRelease',
+        );
+
+        // no Release file
+        mockFetchInReleaseContent(
+          fixturePackagesArchiveHash,
+          'stable',
+          'non-free',
+          'amd64',
+          true,
+          '',
+          'Release',
+        );
       });
 
       it('returns null for the package', async () => {
@@ -363,7 +399,7 @@ describe('modules/datasource/deb/index', () => {
  * @param release - The release name (e.g., 'bullseye').
  * @param component - The component name (e.g., 'main').
  * @param arch - The architecture (e.g., 'amd64').
- * @param checkIfModified - whether it should mock the http head call of the Package Index file
+ * @param checkIfModified - whether it should mock the http head call of the Release file
  * @param packageArchivePath - path to package index
  * @param packagesArchiveHash - sha256 hash of package
  */
@@ -383,9 +419,10 @@ function mockHttpCalls(
   mockFetchInReleaseContent(packagesArchiveHash, release, component, arch);
 
   if (checkIfModified) {
+    // check if modified is used for InRelease or Release files
     httpMock
       .scope(debBaseUrl)
-      .head(getPackageUrl('', release, component, arch))
+      .head(getReleaseUrl('', release, 'InRelease'))
       .reply(200);
   }
 }
@@ -453,6 +490,22 @@ export function getComponentUrl(
   arch: string,
 ): string {
   return `${baseUrl}/debian/dists/${release}/${component}/binary-${arch}`;
+}
+
+/**
+ * Constructs a URL for accessing the Release or InRelease file for a specific release.
+ *
+ * @param baseUrl
+ * @param release
+ * @param releaseFile
+ * @returns
+ */
+export function getReleaseUrl(
+  baseUrl: string,
+  release: string,
+  releaseFile: string,
+): string {
+  return `${baseUrl}/debian/dists/${release}/${releaseFile}`;
 }
 
 /**

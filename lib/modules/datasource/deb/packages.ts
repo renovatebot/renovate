@@ -188,7 +188,7 @@ export async function downloadPackageFile(
   const hashProvided = packageHash.length > 0;
 
   if (packageFileExists && hashProvided) {
-    // checke whether the file is modified locally
+    // check whether the file is modified locally
     const fileChecksum = await computeFileChecksum(packageFile);
     if (fileChecksum === packageHash) {
       logger.debug(
