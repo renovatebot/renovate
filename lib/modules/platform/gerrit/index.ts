@@ -338,6 +338,13 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
+export async function deleteLabel(
+  number: number,
+  label: string,
+): Promise<void> {
+  await client.deleteHashtag(number, label);
+}
+
 export async function addReviewers(
   number: number,
   reviewers: string[],
@@ -405,10 +412,6 @@ export function massageMarkdown(prBody: string): string {
 
 export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
-}
-
-export function deleteLabel(number: number, label: string): Promise<void> {
-  return Promise.resolve();
 }
 
 export function ensureCommentRemoval(
