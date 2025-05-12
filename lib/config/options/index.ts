@@ -1882,7 +1882,7 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit'],
   },
   {
     name: 'minimumReleaseAge',
