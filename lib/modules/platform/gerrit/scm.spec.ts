@@ -313,7 +313,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE'],
       });
     });
 
@@ -353,7 +354,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE,label=Code-Review+2',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
       });
     });
 
@@ -442,7 +444,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE,label=Code-Review+2',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
       });
     });
   });

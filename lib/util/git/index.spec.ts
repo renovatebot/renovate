@@ -766,7 +766,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ '--no-verify': null }),
+        expect.arrayContaining(['--no-verify']),
       );
     });
 
