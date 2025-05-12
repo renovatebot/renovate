@@ -385,7 +385,7 @@ export async function ensureComment(
   return true;
 }
 
-export function massageMarkdown(prBody: string): string {
+export function massageMarkdown(prBody: string, rebaseLabel?: string): string {
   //TODO: do more Gerrit specific replacements?
   return smartTruncate(readOnlyIssueBody(prBody), maxBodyLength())
     .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
@@ -404,7 +404,15 @@ export function massageMarkdown(prBody: string): string {
     )
     .replace(
       'you tick the rebase/retry checkbox',
-      'add "rebase!" at the beginning of the commit message.',
+      rebaseLabel
+        ? `add the "${rebaseLabel}" hashtag`
+        : 'add "rebase!" at the beginning of the commit message',
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      rebaseLabel
+        ? `adding the "${rebaseLabel}" hashtag`
+        : 'adding "rebase!" at the beginning of the commit message',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');

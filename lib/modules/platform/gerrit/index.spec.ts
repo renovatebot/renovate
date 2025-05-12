@@ -1,3 +1,4 @@
+import { stripIndent } from 'common-tags';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -711,6 +712,36 @@ describe('modules/platform/gerrit/index', () => {
     it('massageMarkdown()', () => {
       expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
     });
+
+    it('massageMarkdown() with rebaseLabel', () => {
+      expect(
+        gerrit.massageMarkdown(
+          stripIndent`
+        you tick the rebase/retry checkbox
+        checking the rebase/retry box above
+        `,
+          'rebase',
+        ),
+      ).toBe(stripIndent`
+        add the "rebase" hashtag
+        adding the "rebase" hashtag
+        `);
+    });
+
+    it('massageMarkdown() without rebaseLabel', () => {
+      expect(
+        gerrit.massageMarkdown(
+          stripIndent`
+        you tick the rebase/retry checkbox
+        checking the rebase/retry box above
+        `,
+        ),
+      ).toBe(stripIndent`
+        add "rebase!" at the beginning of the commit message
+        adding "rebase!" at the beginning of the commit message
+        `);
+    });
+
     //TODO: add some tests for Gerrit-specific replacements..
   });
 
