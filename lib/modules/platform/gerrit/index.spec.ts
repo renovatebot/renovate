@@ -713,15 +713,27 @@ describe('modules/platform/gerrit/index', () => {
       expect(
         gerrit.massageMarkdown(
           stripIndent`
-        Pull Requests
-        you tick the rebase/retry checkbox
-        checking the rebase/retry box above
-        `,
+          Pull Request
+          PR
+          Branch creation
+          Disabled because a matching PR was automerged previously
+          Whenever PR becomes conflicted
+          close this Pull Request unmerged
+          Close this PR
+          you tick the rebase/retry checkbox
+          checking the rebase/retry box above
+          `,
         ),
       ).toBe(stripIndent`
-        Change-Requests
-        you add "rebase!" at the beginning of the commit message
-        adding "rebase!" at the beginning of the commit message
+        change
+        change
+        Change creation
+        Disabled because a matching change was automerged previously
+        Whenever change becomes conflicted
+        abandon or vote this change with Code-Review -2
+        Abandon or vote this change with Code-Review -2
+        you add \`rebase!\` to the beginning of this change's commit message
+        adding \`rebase!\` to the beginning of this change's commit message
         `);
     });
 
@@ -739,8 +751,6 @@ describe('modules/platform/gerrit/index', () => {
         adding the _rebase_ hashtag to this change
         `);
     });
-
-    //TODO: add some tests for Gerrit-specific replacements..
   });
 
   describe('currently unused/not-implemented functions', () => {
