@@ -4,10 +4,11 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
-import { getChildProcessEnv } from '../../../util/exec/env';
+import { getChildEnv } from '../../../util/exec/utils';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { toSha256 } from '../../../util/hash';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -322,7 +323,7 @@ export class CrateDatasource extends Datasource {
         const git = Git({
           ...simpleGitConfig(),
           maxConcurrentProcesses: 1,
-        }).env(getChildProcessEnv());
+        }).env(getChildEnv());
         const clonePromise = git.clone(registryFetchUrl, clonePath, {
           '--depth': 1,
         });
@@ -406,6 +407,7 @@ export class CrateDatasource extends Datasource {
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
+      { cacheProvider: memCacheProvider },
       ReleaseTimestampSchema,
     );
     release.releaseTimestamp = releaseTimestamp;
