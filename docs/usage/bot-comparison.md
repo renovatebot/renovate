@@ -23,7 +23,6 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Project pulse                             | [`renovatebot/renovate` monthly pulse](https://github.com/renovatebot/renovate/pulse/monthly)                                  | [`dependabot-core` monthly pulse](https://github.com/dependabot/dependabot-core/pulse/monthly)                                                                                            |
 | Contributor graph                         | [`renovatebot/renovate` contributor graph](https://github.com/renovatebot/renovate/graphs/contributors)                        | [`dependabot-core` contributor graph](https://github.com/dependabot/dependabot-core/graphs/contributors)                                                                                  |
 
-
 ## Hosted app
 
 This section explains the key differences between the Mend Renovate app and the GitHub-native Dependabot.
