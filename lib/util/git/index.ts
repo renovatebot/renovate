@@ -3,7 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
-import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import type { Options, SimpleGit } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
@@ -1158,21 +1158,24 @@ export async function pushCommit({
   sourceRef,
   targetRef,
   files,
+  pushOptions,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
-    const pushOptions: TaskOptions = {
-      '--force-with-lease': null,
-      '-u': null,
-    };
+    const extraArgs = ['--force-with-lease', '-u'];
     if (getNoVerify().includes('push')) {
-      pushOptions['--no-verify'] = null;
+      extraArgs.push('--no-verify');
+    }
+    if (pushOptions) {
+      for (const pushOption of pushOptions) {
+        extraArgs.push('--push-option', pushOption);
+      }
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions),
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, extraArgs),
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
