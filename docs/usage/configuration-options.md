@@ -86,9 +86,6 @@ You can also apply this setting selectively using `packageRules`:
 }
 ```
 
-The `isAbandoned` flag is calculated during the package lookup phase but doesn't affect the update process by default.
-You can use this flag in templating, custom managers, or with platform-specific extensions.
-
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
