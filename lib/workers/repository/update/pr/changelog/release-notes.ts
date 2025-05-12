@@ -540,7 +540,7 @@ function getNotesSourceUrl(
 async function linkifyBody(
   { baseUrl, repository }: ChangeLogProject,
   bodyStr: string,
-) {
+): Promise<string> {
   const body = massageBody(bodyStr, baseUrl);
   if (body?.length) {
     try {
@@ -551,4 +551,5 @@ async function linkifyBody(
       logger.warn({ body, err }, 'linkify error');
     }
   }
+  return body;
 }
