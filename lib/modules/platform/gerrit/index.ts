@@ -405,13 +405,13 @@ export function massageMarkdown(prBody: string, rebaseLabel?: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       rebaseLabel
-        ? `add the "${rebaseLabel}" hashtag`
-        : 'add "rebase!" at the beginning of the commit message',
+        ? `you add the _${rebaseLabel}_ hashtag to this change`
+        : 'you add "rebase!" at the beginning of the commit message',
     )
     .replace(
       'checking the rebase/retry box above',
       rebaseLabel
-        ? `adding the "${rebaseLabel}" hashtag`
+        ? `adding the _${rebaseLabel}_ hashtag to this change`
         : 'adding "rebase!" at the beginning of the commit message',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')

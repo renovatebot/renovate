@@ -710,7 +710,19 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
-      expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
+      expect(
+        gerrit.massageMarkdown(
+          stripIndent`
+        Pull Requests
+        you tick the rebase/retry checkbox
+        checking the rebase/retry box above
+        `,
+        ),
+      ).toBe(stripIndent`
+        Change-Requests
+        you add "rebase!" at the beginning of the commit message
+        adding "rebase!" at the beginning of the commit message
+        `);
     });
 
     it('massageMarkdown() with rebaseLabel', () => {
@@ -723,22 +735,8 @@ describe('modules/platform/gerrit/index', () => {
           'rebase',
         ),
       ).toBe(stripIndent`
-        add the "rebase" hashtag
-        adding the "rebase" hashtag
-        `);
-    });
-
-    it('massageMarkdown() without rebaseLabel', () => {
-      expect(
-        gerrit.massageMarkdown(
-          stripIndent`
-        you tick the rebase/retry checkbox
-        checking the rebase/retry box above
-        `,
-        ),
-      ).toBe(stripIndent`
-        add "rebase!" at the beginning of the commit message
-        adding "rebase!" at the beginning of the commit message
+        you add the _rebase_ hashtag to this change
+        adding the _rebase_ hashtag to this change
         `);
     });
 
