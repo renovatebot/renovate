@@ -722,18 +722,30 @@ describe('modules/platform/gerrit/index', () => {
       expect(
         gerrit.massageMarkdown(
           codeBlock`
-        you tick the rebase/retry checkbox
-        checking the rebase/retry box above
-        `,
+          Pull Request
+          PR
+          Branch creation
+          Disabled because a matching PR was automerged previously
+          Whenever PR becomes conflicted
+          close this Pull Request unmerged
+          Close this PR
+          you tick the rebase/retry checkbox
+          checking the rebase/retry box above
+          `,
           'rebase',
         ),
       ).toBe(codeBlock`
+        change
+        change
+        Change creation
+        Disabled because a matching change was automerged previously
+        Whenever change becomes conflicted
+        abandon or vote this change with Code-Review -2
+        Abandon or vote this change with Code-Review -2
         you add the _rebase_ hashtag to this change
         adding the _rebase_ hashtag to this change
         `);
     });
-
-    //TODO: add some tests for Gerrit-specific replacements..
   });
 
   describe('currently unused/not-implemented functions', () => {
