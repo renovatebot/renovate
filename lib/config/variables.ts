@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import type { InterpolatorOptions } from '../util/interpolators';
+import type { InterpolatorOptions } from '../util/interpolator';
 import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
-} from '../util/interpolators';
+} from '../util/interpolator';
 import { regEx } from '../util/regex';
 import type { AllConfig, RenovateConfig } from './types';
 
