@@ -332,7 +332,7 @@
     "graphql": "16.11.0",
     "husky": "9.1.7",
     "jest-extended": "4.0.2",
-    "lint-staged": "15.5.1",
+    "lint-staged": "15.5.2",
     "markdownlint-cli2": "0.17.2",
     "memfs": "4.17.1",
     "nock": "14.0.4",
