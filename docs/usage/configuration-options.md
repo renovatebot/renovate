@@ -28,7 +28,7 @@ You can store your Renovate configuration file in one of these locations:
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
 
-Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranchPatterns`.
+Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
 Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
@@ -322,7 +322,8 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
-`baseBranchPatterns` supports Regular Expressions that must begin and end with `/`, e.g.:
+The simplest approach is exact matches, e.g. `["main", "dev"]`.
+`baseBranchPatterns` also supports Regular Expressions that must begin and end with `/`, e.g.:
 
 ```json
 {
