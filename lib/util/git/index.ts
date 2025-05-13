@@ -24,6 +24,7 @@ import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import { getChildEnv } from '../exec/utils';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { getGitEnvironmentVariables } from './auth';
@@ -362,12 +363,7 @@ export async function cloneSubmodules(
   }
   submodulesInitizialized = true;
   const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
-  const gitEnv = {
-    // pass all existing env variables
-    ...process.env,
-    // add all known git variables
-    ...gitSubmoduleAuthEnvironmentVariables,
-  };
+  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
