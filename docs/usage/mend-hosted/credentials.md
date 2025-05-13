@@ -119,5 +119,5 @@ No additional scopes or permissions are required for the token.
 
 Problem: When deleting a host rule from the Developer Portal, an error is shown "Error deleting host rule".
 
-There is a workaround for this.
-Update the host rule to point to a valid host that you are not using in your repo. This way, the host rule will have no effect.
+Workaround:
+If you can't delete the hostRule, you can modify the hostRule so that it points to a host that will never be targeted. (ie. https://mend.io/)
