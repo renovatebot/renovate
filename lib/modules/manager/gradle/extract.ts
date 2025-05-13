@@ -137,10 +137,18 @@ function getRegistryUrlsForDep(
 ): string[] {
   const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
 
-  const registryUrls = packageRegistries
-    .filter((item) => item.scope === scope)
-    .filter((item) => matchesContentDescriptor(dep, item.content))
-    .map((item) => item.registryUrl);
+  const matchingRegistries = packageRegistries.filter(
+    (item) =>
+      item.scope === scope && matchesContentDescriptor(dep, item.content),
+  );
+
+  const exclusiveRegistries = matchingRegistries.filter(
+    (item) => item.registryType === 'exclusive',
+  );
+
+  const registryUrls = (
+    exclusiveRegistries.length ? exclusiveRegistries : matchingRegistries
+  ).map((item) => item.registryUrl);
 
   if (!registryUrls.length && scope === 'plugin') {
     registryUrls.push(REGISTRY_URLS.gradlePluginPortal);

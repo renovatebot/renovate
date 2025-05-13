@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import type { InterpolatorOptions } from '../util/interpolators';
+import type { InterpolatorOptions } from '../util/interpolator';
 import {
   replaceInterpolatedValuesInObject,
   validateInterpolatedValues,
-} from '../util/interpolators';
+} from '../util/interpolator';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import type { AllConfig, RenovateConfig } from './types';
@@ -13,7 +13,7 @@ const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 const secretNameRegex = regEx(`^${secretNamePattern}$`);
 const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
 
-const options: InterpolatorOptions = {
+export const options: InterpolatorOptions = {
   name: 'secrets',
   nameRegex: secretNameRegex,
   templateRegex: secretTemplateRegex,

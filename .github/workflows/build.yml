@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.23.1 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.24.1 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION }}
+      node-version: ${{ steps.setup-outputs.outputs.node-version }}
 
     steps:
       - name: Checkout code
@@ -142,6 +142,11 @@ jobs:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
+
+      - name: Setup outputs
+        id: setup-outputs
+        run: |
+          echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
@@ -414,14 +419,14 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
+        uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -450,7 +455,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
@@ -560,7 +565,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -605,7 +610,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -652,7 +657,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -698,7 +703,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@58012bf37e61c96af489185b723fe67a7b9b5c07 # v3.10.23
+        uses: containerbase/internal-tools@a2739c77de4cbf44c896d30ed351800214ba57c1 # v3.10.35
         with:
           command: docker-config
 
@@ -708,7 +713,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
+      - uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
       - name: Docker registry login
         run: |

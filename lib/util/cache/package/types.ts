@@ -80,12 +80,10 @@ export type PackageCacheNamespace =
   | 'datasource-hexpm-bob'
   | 'datasource-java-version'
   | 'datasource-jenkins-plugins'
-  | 'datasource-maven'
-  | 'datasource-maven:head-requests-timeout'
-  | 'datasource-maven:head-requests'
-  | 'datasource-maven:metadata-xml'
+  | 'datasource-maven:cache-provider'
+  | 'datasource-maven:postprocess-reject'
   | 'datasource-node-version'
-  | 'datasource-npm:data'
+  | 'datasource-npm:cache-provider'
   | 'datasource-nuget-v3'
   | 'datasource-orb'
   | 'datasource-packagist'
@@ -107,4 +105,5 @@ export type PackageCacheNamespace =
   | 'terraform-provider-hash'
   | 'url-sha256';
 
-export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
+export type CombinedKey =
+  `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;
