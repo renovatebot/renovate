@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6dd458c3b2e3eb4d176cecb0baef20617b9f057eec40e9203e67266c42151287"
+content_hash = "sha256:a4652e08936527fd604e5f9e0a8ad757760218baa8a4963dc8ce03e421c8f65e"
 
 [[metadata.targets]]
 requires_python = ">=3.11"
@@ -309,7 +309,7 @@ files = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.6.13"
+version = "9.6.14"
 requires_python = ">=3.8"
 summary = "Documentation that simply works"
 groups = ["default"]
@@ -327,8 +327,8 @@ dependencies = [
     "requests~=2.26",
 ]
 files = [
-    {file = "mkdocs_material-9.6.13-py3-none-any.whl", hash = "sha256:3730730314e065f422cc04eacbc8c6084530de90f4654a1482472283a38e30d3"},
-    {file = "mkdocs_material-9.6.13.tar.gz", hash = "sha256:7bde7ebf33cfd687c1c86c08ed8f6470d9a5ba737bd89e7b3e5d9f94f8c72c16"},
+    {file = "mkdocs_material-9.6.14-py3-none-any.whl", hash = "sha256:3b9cee6d3688551bf7a8e8f41afda97a3c39a12f0325436d76c86706114b721b"},
+    {file = "mkdocs_material-9.6.14.tar.gz", hash = "sha256:39d795e90dce6b531387c255bd07e866e027828b7346d3eba5ac3de265053754"},
 ]
 
 [[package]]
