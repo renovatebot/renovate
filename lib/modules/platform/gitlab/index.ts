@@ -736,10 +736,11 @@ async function tryPrAutomerge(
   } /* v8 ignore stop */
 }
 
-async function approvePr(pr: number): Promise<void> {
+async function autoApproveMr(mrNumber: number): Promise<void> {
   try {
+    logger.debug(`Auto-approving MR ${mrNumber}`);
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${pr}/approve`,
+      `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
@@ -784,7 +785,7 @@ export async function createPr({
   } /* v8 ignore stop */
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.number);
+    await autoApproveMr(pr.number);
   }
 
   await tryPrAutomerge(pr.number, platformPrOptions);
@@ -863,7 +864,7 @@ export async function updatePr({
   }
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(iid);
+    await autoApproveMr(iid);
   }
 }
 
