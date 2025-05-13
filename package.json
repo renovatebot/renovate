@@ -343,7 +343,7 @@
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
     "tsx": "4.19.4",
-    "type-fest": "4.40.1",
+    "type-fest": "4.41.0",
     "typescript": "5.8.3",
     "typescript-eslint": "8.32.0",
     "unified": "9.2.2",
