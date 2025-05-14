@@ -211,11 +211,6 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('uses config.npmrc if no .npmrc is returned from search', async () => {
-      fs.findLocalSiblingOrParent.mockImplementation(
-        (_packageFile, _configFile): Promise<string | null> => {
-          return Promise.resolve(null);
-        },
-      );
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
