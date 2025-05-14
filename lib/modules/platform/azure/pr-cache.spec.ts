@@ -71,7 +71,6 @@ describe('modules/platform/azure/pr-cache', () => {
             items: {
               '1': getRenovatePRFormat(pr1),
             },
-            updated_at: '2025-01-30T10:50:00.000Z',
           },
         },
       },
@@ -85,7 +84,6 @@ describe('modules/platform/azure/pr-cache', () => {
           items: {
             '1': getRenovatePRFormat(pr1),
           },
-          updated_at: '2023-01-01T00:00:00.000Z',
         },
       },
     };
@@ -110,7 +108,6 @@ describe('modules/platform/azure/pr-cache', () => {
               '1': getRenovatePRFormat(pr1),
               '2': getRenovatePRFormat(pr2),
             },
-            updated_at: '2025-01-30T10:50:00.000Z',
           },
         },
       },

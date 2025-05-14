@@ -14,5 +14,4 @@ export const AzurePrVote = {
 
 export interface AzurePrCacheData {
   items: Record<number, AzurePr>;
-  updated_at: string | null;
 }

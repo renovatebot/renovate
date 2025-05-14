@@ -1,6 +1,5 @@
 import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { dequal } from 'dequal';
-import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
@@ -26,7 +25,6 @@ export class AzurePrCache {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {
         items: {},
-        updated_at: null,
       };
     }
     repoCache.platform.azure.pullRequestsCache = pullRequestCache;
@@ -81,7 +79,6 @@ export class AzurePrCache {
 
   private reconcile(rawItems: GitPullRequest[]): boolean {
     const { items: oldItems } = this.cache;
-    let { updated_at } = this.cache;
 
     let needNextPage = true;
 
@@ -91,23 +88,14 @@ export class AzurePrCache {
       const oldItem = oldItems[id];
       const newItem = getRenovatePRFormat(rawItem);
 
-      // Using current date because azure pullrequest responses do not return updated date
-      const itemNewTime = DateTime.now().toUTC();
-
       if (dequal(oldItem, newItem)) {
         needNextPage = false;
         continue;
       }
 
       oldItems[id] = newItem;
-
-      const cacheOldTime = updated_at ? DateTime.fromISO(updated_at) : null;
-      if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        updated_at = itemNewTime.toISO();
-      }
     }
 
-    this.cache.updated_at = updated_at;
     return needNextPage;
   }
 
@@ -127,14 +115,14 @@ export class AzurePrCache {
         this.project,
         0,
         skip,
-        100,
+        this.items.length ? 20 : 100,
       );
 
       const needNextPage = this.reconcile(fetchedPrs);
       if (!needNextPage) {
         break;
       }
-      skip += 100;
+      skip += 20;
     } while (fetchedPrs.length > 0);
 
     this.updateItems();
