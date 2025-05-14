@@ -165,7 +165,7 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
-  const alreadySeenProps: Set<string> = new Set();
+  const alreadySeenProps = new Set<string>();
 
   do {
     const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
@@ -200,7 +200,7 @@ function applyPropsInternal(
   let anyChange = false;
   let fatal = false;
 
-  const seenProps: Set<string> = new Set();
+  const seenProps = new Set<string>();
 
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${[^}]*?}/g), (substr) => {
@@ -219,7 +219,11 @@ function applyPropsInternal(
       return substr;
     });
 
-  const depName = replaceAll(dep.depName!);
+  let depName = dep.depName;
+  if (dep.depName) {
+    depName = replaceAll(dep.depName);
+  }
+
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
@@ -232,9 +236,7 @@ function applyPropsInternal(
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
-        if (!sharedVariableName) {
-          sharedVariableName = propKey;
-        }
+        sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
         propSource =
           propValue.packageFile ??
@@ -295,6 +297,7 @@ interface MavenInterimPackageFile extends PackageFile {
 export function extractPackage(
   rawContent: string,
   packageFile: string,
+  _config: ExtractConfig,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -430,7 +433,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
-    const visitedPackages: Set<string> = new Set();
+    const visitedPackages = new Set<string>();
     let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
@@ -473,7 +476,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       const dep = applyProps(rawDep, name, extractedProps[name]);
       if (dep.depType === 'parent') {
         const parentPkg = extractedPackages[pkg.parent!];
-        if (parentPkg && !parentPkg.parent) {
+        const hasParentWithNoParent = parentPkg && !parentPkg.parent;
+        const hasParentWithExternalParent =
+          parentPkg && !packageFileNames.includes(parentPkg.parent!);
+        if (hasParentWithNoParent || hasParentWithExternalParent) {
           rootDeps.add(dep.depName!);
         }
       }
@@ -503,7 +509,9 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
       //Add Registry From SuperPom
-      dep.registryUrls!.push(MAVEN_REPO);
+      if (dep.datasource === MavenDatasource.id) {
+        dep.registryUrls!.push(MAVEN_REPO);
+      }
     });
   });
   return packageFiles;
@@ -534,7 +542,7 @@ export function extractExtensions(
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
@@ -563,7 +571,7 @@ export async function extractAllPackageFiles(
         logger.trace({ packageFile }, 'can not read extensions');
       }
     } else {
-      const pkg = extractPackage(content, packageFile);
+      const pkg = extractPackage(content, packageFile, config);
       if (pkg) {
         packages.push(pkg);
       } else {

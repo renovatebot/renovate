@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateType } from '../../../config/types';
 import { updateDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const gomod1 = Fixtures.get('1/go-mod');
 const gomod2 = Fixtures.get('2/go-mod');
@@ -110,6 +110,38 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
+    });
+
+    it('bumps major with single package name component', () => {
+      const upgrade = {
+        depName: 'sigs.k8s.io/structured-merge-diff/v4',
+        managerData: { lineNumber: 15 },
+        currentValue: 'v4.7.0',
+        newValue: 'v6.0.0',
+        newMajor: 6,
+        updateType: 'major' as UpdateType,
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain('sigs.k8s.io/structured-merge-diff/v6 v6.0.0');
+    });
+
+    it('bumps major with multiple package name components', () => {
+      const upgrade = {
+        depName: 'github.com/cucumber/common/messages/go/v18',
+        managerData: { lineNumber: 16 },
+        currentValue: 'v18.0.0',
+        newValue: 'v19.0.0',
+        newMajor: 19,
+        updateType: 'major' as UpdateType,
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(
+        'github.com/cucumber/common/messages/go/v19 v19.0.0',
+      );
     });
 
     it('replaces major gopkg.in updates', () => {

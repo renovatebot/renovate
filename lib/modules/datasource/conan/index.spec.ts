@@ -1,10 +1,10 @@
 import { getDigest, getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import * as conan from '../../versioning/conan';
 import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types';
 import { defaultRegistryUrl } from './common';
 import { ConanDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const mixedCaseJson = Fixtures.get('mixed_case.json');
 const pocoJson = Fixtures.get('poco.json');
@@ -244,7 +244,7 @@ describe('modules/datasource/conan/index', () => {
       ).toBeNull();
     });
 
-    it('it handles mismatched userAndChannel versioned data', async () => {
+    it('handles mismatched userAndChannel versioned data', async () => {
       httpMock
         .scope(nonDefaultRegistryUrl)
         .get('/v2/conans/search?q=poco')

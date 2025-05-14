@@ -17,6 +17,7 @@ export class GiteaPrCache {
 
   private constructor(
     private repo: string,
+    private readonly ignorePrAuthor: boolean,
     private author: string | null,
   ) {
     const repoCache = getCache();
@@ -44,9 +45,10 @@ export class GiteaPrCache {
   private static async init(
     http: GiteaHttp,
     repo: string,
+    ignorePrAuthor: boolean,
     author: string | null,
   ): Promise<GiteaPrCache> {
-    const res = new GiteaPrCache(repo, author);
+    const res = new GiteaPrCache(repo, ignorePrAuthor, author);
     const isSynced = memCache.get<true | undefined>('gitea-pr-cache-synced');
 
     if (!isSynced) {
@@ -64,9 +66,10 @@ export class GiteaPrCache {
   static async getPrs(
     http: GiteaHttp,
     repo: string,
+    ignorePrAuthor: boolean,
     author: string,
   ): Promise<Pr[]> {
-    const prCache = await GiteaPrCache.init(http, repo, author);
+    const prCache = await GiteaPrCache.init(http, repo, ignorePrAuthor, author);
     return prCache.getPrs();
   }
 
@@ -78,10 +81,11 @@ export class GiteaPrCache {
   static async setPr(
     http: GiteaHttp,
     repo: string,
+    ignorePrAuthor: boolean,
     author: string,
     item: Pr,
   ): Promise<void> {
-    const prCache = await GiteaPrCache.init(http, repo, author);
+    const prCache = await GiteaPrCache.init(http, repo, ignorePrAuthor, author);
     prCache.setPr(item);
   }
 
@@ -126,18 +130,23 @@ export class GiteaPrCache {
   }
 
   private async sync(http: GiteaHttp): Promise<GiteaPrCache> {
-    const query = getQueryString({
+    let query: string | null = getQueryString({
       state: 'all',
       sort: 'recentupdate',
+      // Fetch 100 PRs on the first run to ensure we have the most recent PRs.
+      // Gitea / Forgejo will cap appropriate (50 by default, see `MAX_RESPONSE_ITEMS`).
+      // https://docs.gitea.com/administration/config-cheat-sheet#api-api
+      // https://forgejo.org/docs/latest/admin/config-cheat-sheet/#api-api
+      limit: this.items.length ? 20 : 100,
+      // Supported since Gitea 1.23.0 and Forgejo v10.0.0.
+      // Will be ignoded by older instances.
+      ...(this.ignorePrAuthor ? {} : { poster: this.author }),
     });
 
-    let url: string | undefined =
-      `${API_PATH}/repos/${this.repo}/pulls?${query}`;
-
-    while (url) {
+    while (query) {
       // TODO: use zod, typescript can't infer the type of the response #22198
       const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
-        url,
+        `${API_PATH}/repos/${this.repo}/pulls?${query}`,
         {
           memCache: false,
           paginate: false,
@@ -150,7 +159,7 @@ export class GiteaPrCache {
       }
 
       const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
-      url = uri ? `${uri.pathname}${uri.search}` : undefined;
+      query = uri ? uri.search : null;
     }
 
     this.updateItems();

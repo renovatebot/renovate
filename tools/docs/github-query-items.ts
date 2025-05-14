@@ -3,17 +3,17 @@ import { z } from 'zod';
 import { logger } from '../../lib/logger';
 import { exec } from '../../lib/util/exec';
 
-export type ItemsEntity = {
+export interface ItemsEntity {
   url: string;
   number: number;
   title: string;
   labels: LabelsEntity[];
   issueType: 'Bug' | 'Feature';
-};
+}
 
-export type LabelsEntity = {
+export interface LabelsEntity {
   name: string;
-};
+}
 
 export interface RenovateOpenItems {
   managers: OpenItems;
@@ -116,9 +116,7 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
     if (!label) {
       continue;
     }
-    if (!issuesMap[label]) {
-      issuesMap[label] = { bugs: [], features: [] };
-    }
+    issuesMap[label] ??= { bugs: [], features: [] };
     switch (type) {
       case 'Bug':
         issuesMap[label]?.bugs.push(item);

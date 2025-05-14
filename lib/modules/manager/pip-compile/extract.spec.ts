@@ -1,12 +1,12 @@
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI

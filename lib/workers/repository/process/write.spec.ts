@@ -1,6 +1,4 @@
 import is from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../test/util';
-import { logger, mocked, partial, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -22,25 +20,25 @@ import {
   syncBranchState,
   writeUpdates,
 } from './write';
+import { logger, partial, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('../../../util/cache/repository');
+vi.mock('../../../util/cache/repository');
+vi.mock('./limits');
+vi.mock('../update/branch');
 
-const branchWorker = mocked(_branchWorker);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
-
-branchWorker.processBranch = jest.fn();
-
-limits.getConcurrentPrsCount = jest.fn().mockResolvedValue(0);
-limits.getConcurrentBranchesCount = jest.fn().mockResolvedValue(0);
-limits.getPrHourlyCount = jest.fn().mockResolvedValue(0);
+const branchWorker = vi.mocked(_branchWorker);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 let config: RenovateConfig;
 
 beforeEach(() => {
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
+  limits.getConcurrentPrsCount.mockResolvedValue(0);
+  limits.getConcurrentBranchesCount.mockResolvedValue(0);
+  limits.getPrHourlyCount.mockResolvedValue(0);
 });
 
 describe('workers/repository/process/write', () => {
@@ -182,9 +180,6 @@ describe('workers/repository/process/write', () => {
           upgrades: [
             partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
-              env: {
-                SOME_VAR: 'SOME_VALUE',
-              },
             }),
           ],
         },

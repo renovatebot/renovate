@@ -1,7 +1,7 @@
-import { Fixtures } from '../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../types';
 import * as lockedVersion from './locked-version';
 import { updateLockedDependency } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const lockFileContent = Fixtures.get('Gemfile.rubyci.lock');
 
@@ -62,9 +62,9 @@ describe('modules/manager/bundler/update-locked', () => {
       newVersion: '5.2.0',
       currentVersion: '5.1.9',
     };
-    jest
-      .spyOn(lockedVersion, 'extractLockFileEntries')
-      .mockReturnValueOnce(new Error() as never);
+    vi.spyOn(lockedVersion, 'extractLockFileEntries').mockReturnValueOnce(
+      new Error() as never,
+    );
     expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });

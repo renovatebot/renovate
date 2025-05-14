@@ -16,7 +16,7 @@ export class RebaseStalePrsMigration extends AbstractMigration {
         );
       }
 
-      if (is.null_(value)) {
+      if (null === value) {
         this.setSafely('rebaseWhen', 'auto');
       }
     }

@@ -199,9 +199,7 @@ export function getDep(
 
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    if (!dep.replaceString) {
-      dep.replaceString = currentFrom;
-    }
+    dep.replaceString ??= currentFrom;
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
@@ -260,7 +258,7 @@ export function extractPackageFile(
   let lookForEscapeChar = true;
   let lookForSyntaxDirective = true;
 
-  const lineFeed = sanitizedContent.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
+  const lineFeed = sanitizedContent.includes('\r\n') ? '\r\n' : '\n';
   const lines = sanitizedContent.split(newlineRegex);
   for (let lineNumber = 0; lineNumber < lines.length; ) {
     const lineNumberInstrStart = lineNumber;
@@ -329,10 +327,7 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        argMatchValue.charAt(0) === '"' &&
-        argMatchValue.charAt(argMatchValue.length - 1) === '"'
-      ) {
+      if (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 
@@ -470,9 +465,7 @@ export function extractPackageFile(
     return null;
   }
   for (const d of deps) {
-    if (!d.depType) {
-      d.depType = 'stage';
-    }
+    d.depType ??= 'stage';
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };

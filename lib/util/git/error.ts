@@ -1,11 +1,11 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getEnv } from '../env';
 import type { FileChange } from './types';
 
-// istanbul ignore next
 export function checkForPlatformFailure(err: Error): Error | null {
-  if (process.env.NODE_ENV === 'test') {
+  if (getEnv().NODE_ENV === 'test') {
     return null;
   }
   const externalHostFailureStrings = [
@@ -29,6 +29,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
       logger.debug({ err }, 'Converting git error to ExternalHostError');
       return new ExternalHostError(err, 'git');
     }
+    /* v8 ignore start -- TODO: add test */
   }
 
   const configErrorStrings = [
@@ -70,8 +71,9 @@ export function checkForPlatformFailure(err: Error): Error | null {
 
   return null;
 }
+/* v8 ignore stop */
 
-// istanbul ignore next
+/* v8 ignore start -- TODO: add tests */
 export function handleCommitError(
   err: Error,
   branchName: string,
@@ -139,6 +141,7 @@ export function handleCommitError(
   // We don't know why this happened, so this will cause bubble up to a branch error
   throw err;
 }
+/* v8 ignore stop */
 
 export function bulkChangesDisallowed(err: Error): boolean {
   return err.message.includes('update more than');

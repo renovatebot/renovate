@@ -97,7 +97,7 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-export type PlatformPrOptions = {
+export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
@@ -112,8 +112,7 @@ export type PlatformPrOptions = {
   azureBypassPolicyWorkItemLinking?: boolean;
   azureBypassPolicyTypeUuids?: string[];
   azureBypassPolicyReason?: string;
-};
-
+}
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;

@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BazelDatasource } from '../../datasource/bazel';
@@ -9,6 +8,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
 import * as parser from './parser';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('lib/modules/manager/bazel-module/__fixtures__'),
@@ -18,7 +18,7 @@ describe('modules/manager/bazel-module/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set(adminConfig);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('returns null if fails to parse', async () => {
@@ -30,7 +30,7 @@ describe('modules/manager/bazel-module/extract', () => {
     });
 
     it('returns null if something throws an error', async () => {
-      jest.spyOn(parser, 'parse').mockImplementationOnce(() => {
+      vi.spyOn(parser, 'parse').mockImplementationOnce(() => {
         throw new Error('Test error');
       });
       const result = await extractPackageFile('content', 'MODULE.bazel');
@@ -473,6 +473,15 @@ describe('modules/manager/bazel-module/extract', () => {
             currentValue: '1.27.1',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+                tag = "1.27.1",
+              )
+            `,
           },
         ],
       });
@@ -502,6 +511,14 @@ describe('modules/manager/bazel-module/extract', () => {
             packageName: 'index.docker.io/library/nginx',
             currentDigest:
               'sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720',
+            replaceString: codeBlock`
+              oci.pull(
+                name = "nginx_image",
+                digest = "sha256:287ff321f9e3cde74b600cc26197424404157a72043226cbbf07ee8304a2c720",
+                image = "index.docker.io/library/nginx",
+                platforms = ["linux/amd64"],
+              )
+            `,
           },
         ],
       });

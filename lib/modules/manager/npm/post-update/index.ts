@@ -4,7 +4,7 @@ import deepmerge from 'deepmerge';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getChildProcessEnv } from '../../../../util/exec/env';
+import { getEnv } from '../../../../util/env';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -377,7 +377,7 @@ export async function getAdditionalFiles(
   }
   logger.debug('Getting updated lock files');
   if (
-    config.updateType === 'lockFileMaintenance' &&
+    config.isLockFileMaintenance &&
     config.reuseExistingBranch &&
     (await scm.branchExists(config.branchName))
   ) {
@@ -391,8 +391,10 @@ export async function getAdditionalFiles(
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
 
+  // This isn't passed directly to the child process, so no need to filter.
+  // But pass custom env and user vars.
   const env = {
-    ...getChildProcessEnv(),
+    ...getEnv(),
     NPM_CONFIG_CACHE: await ensureCacheDir('npm'),
     YARN_CACHE_FOLDER: await ensureCacheDir('yarn'),
     YARN_GLOBAL_FOLDER: await ensureCacheDir('berry'),

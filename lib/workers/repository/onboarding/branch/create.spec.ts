@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { createOnboardingBranch } from './create';
+import type { RenovateConfig } from '~test/util';
+import { scm } from '~test/util';
 
-jest.mock('./config', () => ({
+vi.mock('./config', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
       foo: 'bar',

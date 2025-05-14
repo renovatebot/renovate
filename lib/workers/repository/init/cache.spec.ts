@@ -1,8 +1,8 @@
-import { partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepositoryCacheConfig } from '../../../config/types';
 import type { WorkerPlatformConfig } from './apis';
 import { initializeCaches } from './cache';
+import { partial } from '~test/util';
 
 describe('workers/repository/init/cache', () => {
   describe('initializeCaches()', () => {

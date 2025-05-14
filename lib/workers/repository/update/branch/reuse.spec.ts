@@ -1,7 +1,7 @@
-import { platform, scm } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import { shouldReuseExistingBranch } from './reuse';
+import { platform, scm } from '~test/util';
 
 describe('workers/repository/update/branch/reuse', () => {
   describe('shouldReuseExistingBranch(config)', () => {

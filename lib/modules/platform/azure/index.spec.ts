@@ -12,8 +12,9 @@ import {
   type PolicyEvaluationRecord,
   PolicyEvaluationStatus,
 } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
-import { mockDeep } from 'jest-mock-extended';
-import { mocked, partial } from '../../../../test/util';
+import type { Mocked, MockedObject } from 'vitest';
+import { vi } from 'vitest';
+import { mockDeep } from 'vitest-mock-extended';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -23,33 +24,35 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePolicyTypeId, AzurePrVote } from './types';
+import { partial } from '~test/util';
 
-jest.mock('./azure-got-wrapper');
-jest.mock('./azure-helper');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/sanitize', () =>
+vi.mock('./azure-got-wrapper', () => mockDeep());
+vi.mock('./azure-helper', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/sanitize', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
-jest.mock('timers/promises');
+vi.mock('timers/promises');
 
 describe('modules/platform/azure/index', () => {
-  let hostRules: jest.Mocked<typeof _hostRules>;
+  let hostRules: Mocked<typeof _hostRules>;
   let azure: Platform;
-  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
-  let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
-  let git: jest.Mocked<typeof _git>;
-  let logger: jest.MockedObject<typeof _logger>;
+  let azureApi: Mocked<typeof import('./azure-got-wrapper')>;
+  let azureHelper: Mocked<typeof import('./azure-helper')>;
+  let git: Mocked<typeof _git>;
+  let logger: MockedObject<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
-    jest.resetModules();
-    hostRules = jest.requireMock('../../../util/host-rules');
-    azure = await import('.');
-    azureApi = jest.requireMock('./azure-got-wrapper');
-    azureHelper = jest.requireMock('./azure-helper');
-    logger = mocked(await import('../../../logger')).logger;
-    git = jest.requireMock('../../../util/git');
+    vi.resetModules();
+    hostRules = await vi.importMock('../../../util/host-rules');
+    azure = await vi.importActual('.');
+    azureApi = await vi.importMock('./azure-got-wrapper');
+    azureHelper = await vi.importMock('./azure-helper');
+    logger = (
+      await vi.importMock<typeof import('../../../logger')>('../../../logger')
+    ).logger;
+    git = await vi.importMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
@@ -67,7 +70,7 @@ describe('modules/platform/azure/index', () => {
     azureApi.gitApi.mockImplementationOnce(
       () =>
         ({
-          getRepositories: jest.fn(() => [
+          getRepositories: vi.fn(() => [
             {
               name: 'repo1',
               project: {
@@ -153,7 +156,7 @@ describe('modules/platform/azure/index', () => {
   function initRepo(args?: Partial<RepoParams> | string) {
     azureApi.gitApi.mockResolvedValueOnce(
       partial<IGitApi>({
-        getRepositories: jest.fn().mockResolvedValue([
+        getRepositories: vi.fn().mockResolvedValue([
           {
             name: 'repo',
             id: '1',
@@ -224,7 +227,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest
+            getPullRequests: vi
               .fn()
               .mockReturnValue([])
               .mockReturnValueOnce([
@@ -236,7 +239,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Active,
                 },
               ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
       const res = await azure.findPr({
@@ -265,7 +268,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest
+            getPullRequests: vi
               .fn()
               .mockReturnValue([])
               .mockReturnValueOnce([
@@ -277,7 +280,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Completed,
                 },
               ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
       const res = await azure.findPr({
@@ -306,7 +309,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest
+            getPullRequests: vi
               .fn()
               .mockReturnValue([])
               .mockReturnValueOnce([
@@ -318,7 +321,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Abandoned,
                 },
               ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
       const res = await azure.findPr({
@@ -347,7 +350,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest
+            getPullRequests: vi
               .fn()
               .mockReturnValue([])
               .mockReturnValueOnce([
@@ -359,7 +362,7 @@ describe('modules/platform/azure/index', () => {
                   status: PullRequestStatus.Abandoned,
                 },
               ]),
-            getPullRequestCommits: jest.fn().mockReturnValue([]),
+            getPullRequestCommits: vi.fn().mockReturnValue([]),
           }) as any,
       );
       const res = await azure.findPr({
@@ -386,7 +389,7 @@ describe('modules/platform/azure/index', () => {
     it('returns pr if found matches targetBranch', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequests: jest
+          getPullRequests: vi
             .fn()
             .mockReturnValue([])
             .mockReturnValueOnce([
@@ -405,7 +408,7 @@ describe('modules/platform/azure/index', () => {
                 status: PullRequestStatus.Active,
               },
             ]),
-          getPullRequestCommits: jest.fn().mockReturnValue([]),
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
         }),
       );
       const res = await azure.findPr({
@@ -434,7 +437,7 @@ describe('modules/platform/azure/index', () => {
     it('returns first pr if found does not match targetBranch', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequests: jest
+          getPullRequests: vi
             .fn()
             .mockReturnValue([])
             .mockReturnValueOnce([
@@ -453,7 +456,7 @@ describe('modules/platform/azure/index', () => {
                 status: PullRequestStatus.Active,
               },
             ]),
-          getPullRequestCommits: jest.fn().mockReturnValue([]),
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
         }),
       );
       const res = await azure.findPr({
@@ -482,7 +485,7 @@ describe('modules/platform/azure/index', () => {
     it('catches errors', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequests: jest.fn().mockRejectedValueOnce(new Error()),
+          getPullRequests: vi.fn().mockRejectedValueOnce(new Error()),
         }),
       );
       const res = await azure.findPr({
@@ -498,7 +501,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => []),
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       expect(await azure.getPrList()).toEqual([]);
@@ -510,7 +513,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValue(
         partial<IGitApi>({
-          getPullRequests: jest.fn().mockResolvedValueOnce([]),
+          getPullRequests: vi.fn().mockResolvedValueOnce([]),
         }),
       );
       const pr = await azure.getBranchPr('somebranch');
@@ -521,7 +524,7 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValue(
         partial<IGitApi>({
-          getPullRequests: jest
+          getPullRequests: vi
             .fn()
             .mockResolvedValueOnce([
               {
@@ -533,7 +536,7 @@ describe('modules/platform/azure/index', () => {
               },
             ])
             .mockResolvedValueOnce([]),
-          getPullRequestLabels: jest.fn().mockResolvedValue([]),
+          getPullRequestLabels: vi.fn().mockResolvedValue([]),
         }),
       );
       const pr = await azure.getBranchPr('branch-a', 'branch-b');
@@ -562,8 +565,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -583,8 +586,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.NotApplicable,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -604,8 +607,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Failed,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -625,8 +628,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Error,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -646,8 +649,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Pending,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -667,8 +670,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.NotSet,
                 context: { genre: 'a-genre', name: 'a-name' },
@@ -687,10 +690,10 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getBranch: jest
+          getBranch: vi
             .fn()
             .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
-          getStatuses: jest.fn().mockResolvedValue([
+          getStatuses: vi.fn().mockResolvedValue([
             {
               state: -1,
               context: { genre: 'a-genre', name: 'a-name' },
@@ -710,8 +713,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Pending,
                 context: { genre: 'another-genre', name: 'a-name' },
@@ -733,8 +736,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
                 context: { genre: 'renovate' },
@@ -751,8 +754,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [
               {
                 state: GitStatusState.Succeeded,
                 context: { genre: 'renovate' },
@@ -769,8 +772,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [{ state: GitStatusState.Error }]),
           }) as any,
       );
       const res = await azure.getBranchStatus('somebranch', true);
@@ -782,8 +785,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => [{ state: GitStatusState.Pending }]),
           }) as any,
       );
       const res = await azure.getBranchStatus('somebranch', true);
@@ -795,8 +798,8 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => []),
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: vi.fn(() => []),
           }) as any,
       );
       const res = await azure.getBranchStatus('somebranch', true);
@@ -815,7 +818,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequests: jest.fn(() => []),
+            getPullRequests: vi.fn(() => []),
           }) as any,
       );
       const pr = await azure.getPr(1234);
@@ -827,7 +830,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getPullRequests: jest
+            getPullRequests: vi
               .fn()
               .mockReturnValue([])
               .mockReturnValueOnce([
@@ -835,10 +838,10 @@ describe('modules/platform/azure/index', () => {
                   pullRequestId: 1234,
                 },
               ]),
-            getPullRequestLabels: jest
+            getPullRequestLabels: vi
               .fn()
               .mockReturnValue([{ active: true, name: 'renovate' }]),
-            getPullRequestCommits: jest.fn().mockReturnValue([
+            getPullRequestCommits: vi.fn().mockReturnValue([
               {
                 author: {
                   name: 'renovate',
@@ -858,10 +861,10 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            createPullRequest: jest.fn(() => ({
+            createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
-            createPullRequestLabel: jest.fn(() => ({})),
+            createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
       const pr = await azure.createPr({
@@ -879,10 +882,10 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            createPullRequest: jest.fn(() => ({
+            createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
             })),
-            createPullRequestLabel: jest.fn(() => ({})),
+            createPullRequestLabel: vi.fn(() => ({})),
           }) as any,
       );
       const pr = await azure.createPr({
@@ -916,11 +919,11 @@ describe('modules/platform/azure/index', () => {
             mergeCommitMessage: 'The Title',
           },
         };
-        const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+        const updateFn = vi.fn().mockResolvedValue(prUpdateResult);
         azureApi.gitApi.mockResolvedValueOnce(
           partial<IGitApi>({
-            createPullRequest: jest.fn().mockResolvedValue(prResult),
-            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            createPullRequest: vi.fn().mockResolvedValue(prResult),
+            createPullRequestLabel: vi.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
           }),
         );
@@ -978,9 +981,7 @@ describe('modules/platform/azure/index', () => {
             },
           },
         ];
-        const updateFn = jest.fn(() =>
-          Promise.resolve(prUpdateResults.shift()!),
-        );
+        const updateFn = vi.fn(() => Promise.resolve(prUpdateResults.shift()!));
 
         azureHelper.getMergeMethod.mockResolvedValueOnce(
           GitPullRequestMergeStrategy.Squash,
@@ -988,10 +989,8 @@ describe('modules/platform/azure/index', () => {
 
         azureApi.gitApi.mockResolvedValue(
           partial<IGitApi>({
-            createPullRequest: jest.fn(() =>
-              Promise.resolve(prResult.shift()!),
-            ),
-            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            createPullRequest: vi.fn(() => Promise.resolve(prResult.shift()!)),
+            createPullRequestLabel: vi.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
           }),
         );
@@ -1051,12 +1050,12 @@ describe('modules/platform/azure/index', () => {
               mergeCommitMessage: 'The Title',
             },
           };
-          const updateFn = jest.fn(() => Promise.resolve(prUpdateResults));
+          const updateFn = vi.fn(() => Promise.resolve(prUpdateResults));
 
           azureApi.gitApi.mockResolvedValue(
             partial<IGitApi>({
-              createPullRequest: jest.fn(() => Promise.resolve(prResult)),
-              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              createPullRequest: vi.fn(() => Promise.resolve(prResult)),
+              createPullRequestLabel: vi.fn().mockResolvedValue({}),
               updatePullRequest: updateFn,
             }),
           );
@@ -1104,11 +1103,11 @@ describe('modules/platform/azure/index', () => {
               mergeCommitMessage: 'The Title',
             },
           };
-          const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+          const updateFn = vi.fn().mockResolvedValue(prUpdateResult);
           azureApi.gitApi.mockResolvedValueOnce(
             partial<IGitApi>({
-              createPullRequest: jest.fn().mockResolvedValue(prResult),
-              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              createPullRequest: vi.fn().mockResolvedValue(prResult),
+              createPullRequestLabel: vi.fn().mockResolvedValue({}),
               updatePullRequest: updateFn,
             }),
           );
@@ -1151,14 +1150,14 @@ describe('modules/platform/azure/index', () => {
         isFlagged: false,
         isRequired: false,
       };
-      const updateFn = jest
+      const updateFn = vi
         .fn(() => prUpdateResult)
         .mockName('createPullRequestReviewer');
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            createPullRequest: jest.fn(() => prResult),
-            createPullRequestLabel: jest.fn(() => ({})),
+            createPullRequest: vi.fn(() => prResult),
+            createPullRequestLabel: vi.fn(() => ({})),
             createPullRequestReviewer: updateFn,
           }) as any,
       );
@@ -1178,7 +1177,7 @@ describe('modules/platform/azure/index', () => {
   describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn(() => ({}));
+      const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1199,13 +1198,13 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            createPullRequest: jest.fn(() => ({
+            createPullRequest: vi.fn(() => ({
               pullRequestId: 456,
               title: 'Title 1',
             })),
-            createPullRequestLabel: jest.fn(() => ({})),
-            getPullRequests: jest.fn(() => []),
-            updatePullRequest: jest.fn(() => ({
+            createPullRequestLabel: vi.fn(() => ({})),
+            getPullRequests: vi.fn(() => []),
+            updatePullRequest: vi.fn(() => ({
               pullRequestId: 456,
               title: 'Title 2',
             })),
@@ -1232,7 +1231,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn(() => ({}));
+      const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1248,7 +1247,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should close the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn(() => ({}));
+      const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1266,7 +1265,7 @@ describe('modules/platform/azure/index', () => {
 
     it('should reopen the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = jest.fn(() => ({}));
+      const updatePullRequest = vi.fn(() => ({}));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -1297,13 +1296,13 @@ describe('modules/platform/azure/index', () => {
         isFlagged: false,
         isRequired: false,
       };
-      const updateFn = jest.fn(() => prUpdateResult);
+      const updateFn = vi.fn(() => prUpdateResult);
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            updatePullRequest: jest.fn(() => prResult),
+            updatePullRequest: vi.fn(() => prResult),
             createPullRequestReviewer: updateFn,
-            getPullRequestById: jest.fn(() => ({
+            getPullRequestById: vi.fn(() => ({
               pullRequestId: prResult.pullRequestId,
               createdBy: prResult.createdBy,
             })),
@@ -1324,14 +1323,14 @@ describe('modules/platform/azure/index', () => {
     it('adds comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn(() => [{ id: 123 }]),
-        getThreads: jest.fn().mockReturnValue([
+        createThread: vi.fn(() => [{ id: 123 }]),
+        getThreads: vi.fn().mockReturnValue([
           {
             comments: [{ content: 'end-user comment', id: 1 }],
             id: 2,
           },
         ]),
-        updateComment: jest.fn(() => ({ id: 123 })),
+        updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
@@ -1346,8 +1345,8 @@ describe('modules/platform/azure/index', () => {
     it('updates comment if missing', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn(() => [{ id: 123 }]),
-        getThreads: jest.fn().mockReturnValue([
+        createThread: vi.fn(() => [{ id: 123 }]),
+        getThreads: vi.fn().mockReturnValue([
           {
             comments: [{ content: 'end-user comment', id: 1 }],
             id: 3,
@@ -1357,7 +1356,7 @@ describe('modules/platform/azure/index', () => {
             id: 4,
           },
         ]),
-        updateComment: jest.fn(() => ({ id: 123 })),
+        updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
@@ -1372,8 +1371,8 @@ describe('modules/platform/azure/index', () => {
     it('does nothing if comment exists and is the same', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn(() => [{ id: 123 }]),
-        getThreads: jest.fn().mockReturnValue([
+        createThread: vi.fn(() => [{ id: 123 }]),
+        getThreads: vi.fn().mockReturnValue([
           {
             comments: [{ content: 'end-user comment', id: 1 }],
             id: 3,
@@ -1383,7 +1382,7 @@ describe('modules/platform/azure/index', () => {
             id: 4,
           },
         ]),
-        updateComment: jest.fn(() => ({ id: 123 })),
+        updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
@@ -1398,14 +1397,14 @@ describe('modules/platform/azure/index', () => {
     it('does nothing if comment exists and is the same when there is no topic', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn(() => [{ id: 123 }]),
-        getThreads: jest.fn().mockReturnValue([
+        createThread: vi.fn(() => [{ id: 123 }]),
+        getThreads: vi.fn().mockReturnValue([
           {
             comments: [{ content: 'some\ncontent', id: 2 }],
             id: 4,
           },
         ]),
-        updateComment: jest.fn(() => ({ id: 123 })),
+        updateComment: vi.fn(() => ({ id: 123 })),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock as any);
       await azure.ensureComment({
@@ -1420,14 +1419,14 @@ describe('modules/platform/azure/index', () => {
     it('passes comment through massageMarkdown', async () => {
       await initRepo({ repository: 'some/repo' });
       const gitApiMock = {
-        createThread: jest.fn().mockResolvedValue([{ id: 123 }]),
-        getThreads: jest.fn().mockResolvedValue([
+        createThread: vi.fn().mockResolvedValue([{ id: 123 }]),
+        getThreads: vi.fn().mockResolvedValue([
           {
             comments: [{ content: 'end-user comment', id: 1 }],
             id: 2,
           },
         ]),
-        updateComment: jest.fn().mockResolvedValue({ id: 123 }),
+        updateComment: vi.fn().mockResolvedValue({ id: 123 }),
       };
       azureApi.gitApi.mockResolvedValue(partial<IGitApi>(gitApiMock));
 
@@ -1454,7 +1453,7 @@ describe('modules/platform/azure/index', () => {
 
     beforeEach(() => {
       gitApiMock = {
-        getThreads: jest.fn(() => [
+        getThreads: vi.fn(() => [
           {
             comments: [{ content: '### some-subject\n\nblabla' }],
             id: 123,
@@ -1464,7 +1463,7 @@ describe('modules/platform/azure/index', () => {
             id: 124,
           },
         ]),
-        updateThread: jest.fn(),
+        updateThread: vi.fn(),
       };
       azureApi.gitApi.mockImplementation(() => gitApiMock);
     });
@@ -1519,20 +1518,20 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createThread: jest.fn(() => [{ id: 123 }]),
-            getThreads: jest.fn(() => []),
+            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
+            createThread: vi.fn(() => [{ id: 123 }]),
+            getThreads: vi.fn(() => []),
           }) as any,
       );
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeamMembersWithExtendedProperties: jest.fn(() => [
+            getTeamMembersWithExtendedProperties: vi.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
-      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+      azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
         { id: 4, name: 'def' },
       ]);
@@ -1547,19 +1546,19 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createPullRequestReviewer: jest.fn(),
+            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
+            createPullRequestReviewer: vi.fn(),
           }) as any,
       );
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeamMembersWithExtendedProperties: jest.fn(() => [
+            getTeamMembersWithExtendedProperties: vi.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
-      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+      azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
         { id: 4, name: 'def' },
       ]);
@@ -1573,19 +1572,19 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createPullRequestReviewer: jest.fn(),
+            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
+            createPullRequestReviewer: vi.fn(),
           }) as any,
       );
       azureApi.coreApi.mockImplementation(
         () =>
           ({
-            getTeamMembersWithExtendedProperties: jest.fn(() => [
+            getTeamMembersWithExtendedProperties: vi.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
           }) as any,
       );
-      azureHelper.getAllProjectTeams = jest.fn().mockReturnValue([
+      azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
         { id: 4, name: 'def' },
       ]);
@@ -1618,11 +1617,11 @@ describe('modules/platform/azure/index', () => {
   describe('setBranchStatus', () => {
     it('should build and call the create status api properly', async () => {
       await initRepo({ repository: 'some/repo' });
-      const createCommitStatusMock = jest.fn();
+      const createCommitStatusMock = vi.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             createCommitStatus: createCommitStatusMock,
           }) as any,
       );
@@ -1650,11 +1649,11 @@ describe('modules/platform/azure/index', () => {
 
     it('should build and call the create status api properly with a complex context', async () => {
       await initRepo({ repository: 'some/repo' });
-      const createCommitStatusMock = jest.fn();
+      const createCommitStatusMock = vi.fn();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             createCommitStatus: createCommitStatusMock,
           }) as any,
       );
@@ -1687,13 +1686,13 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const updatePullRequestMock = jest.fn(() => ({
+      const updatePullRequestMock = vi.fn(() => ({
         status: 3,
       }));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequestById: jest.fn(() => ({
+            getPullRequestById: vi.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
               targetRefName: 'refs/heads/ding',
               title: 'title',
@@ -1702,7 +1701,7 @@ describe('modules/platform/azure/index', () => {
           }) as any,
       );
 
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
@@ -1741,13 +1740,13 @@ describe('modules/platform/azure/index', () => {
         const pullRequestIdMock = 12345;
         const branchNameMock = 'test';
         const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-        const updatePullRequestMock = jest.fn(() => ({
+        const updatePullRequestMock = vi.fn(() => ({
           status: 3,
         }));
         azureApi.gitApi.mockImplementationOnce(
           () =>
             ({
-              getPullRequestById: jest.fn(() => ({
+              getPullRequestById: vi.fn(() => ({
                 lastMergeSourceCommit: lastMergeSourceCommitMock,
                 targetRefName: 'refs/heads/ding',
                 title: 'title',
@@ -1756,7 +1755,7 @@ describe('modules/platform/azure/index', () => {
             }) as any,
         );
 
-        azureHelper.getMergeMethod = jest.fn().mockReturnValue(prMergeStrategy);
+        azureHelper.getMergeMethod = vi.fn().mockReturnValue(prMergeStrategy);
 
         const res = await azure.mergePr({
           branchName: branchNameMock,
@@ -1789,16 +1788,16 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getPullRequestById: jest.fn(() => ({
+            getPullRequestById: vi.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
             })),
-            updatePullRequest: jest
+            updatePullRequest: vi
               .fn()
               .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
           }) as any,
       );
 
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
@@ -1814,14 +1813,14 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementation(
         () =>
           ({
-            getPullRequestById: jest.fn(() => ({
+            getPullRequestById: vi.fn(() => ({
               lastMergeSourceCommit: { commitId: 'abcd1234' },
               targetRefName: 'refs/heads/ding',
             })),
-            updatePullRequest: jest.fn(),
+            updatePullRequest: vi.fn(),
           }) as any,
       );
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
@@ -1844,7 +1843,7 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const getPullRequestByIdMock = jest.fn(() => ({
+      const getPullRequestByIdMock = vi.fn(() => ({
         lastMergeSourceCommit: lastMergeSourceCommitMock,
         targetRefName: 'refs/heads/ding',
         status: 3,
@@ -1853,12 +1852,12 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
-            updatePullRequest: jest.fn(() => ({
+            updatePullRequest: vi.fn(() => ({
               status: 1,
             })),
           }) as any,
       );
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
 
@@ -1876,7 +1875,7 @@ describe('modules/platform/azure/index', () => {
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const expectedNumRetries = 5;
-      const getPullRequestByIdMock = jest.fn(() => ({
+      const getPullRequestByIdMock = vi.fn(() => ({
         lastMergeSourceCommit: lastMergeSourceCommitMock,
         targetRefName: 'refs/heads/ding',
         status: 1,
@@ -1885,12 +1884,12 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequestById: getPullRequestByIdMock,
-            updatePullRequest: jest.fn(() => ({
+            updatePullRequest: vi.fn(() => ({
               status: 1,
             })),
           }) as any,
       );
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
       const res = await azure.mergePr({
@@ -2046,7 +2045,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            deletePullRequestLabels: jest.fn(),
+            deletePullRequestLabels: vi.fn(),
           }) as any,
       );
       await azure.deleteLabel(1234, 'rebase');
@@ -2062,8 +2061,8 @@ describe('modules/platform/azure/index', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getItem: jest.fn(() =>
+        vi.fn().mockImplementationOnce(() => ({
+          getItem: vi.fn(() =>
             Promise.resolve({ content: JSON.stringify(data) }),
           ),
         })),
@@ -2074,8 +2073,8 @@ describe('modules/platform/azure/index', () => {
 
     it('returns null when file not found', async () => {
       azureApi.gitApi.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getItem: jest.fn(() => Promise.resolve(null)),
+        vi.fn().mockImplementationOnce(() => ({
+          getItem: vi.fn(() => Promise.resolve(null)),
         })),
       );
       const res = await azure.getJsonFile('file.json');
@@ -2090,8 +2089,8 @@ describe('modules/platform/azure/index', () => {
         }
       `;
       azureApi.gitApi.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getItem: jest.fn(() => Promise.resolve({ content: json5Data })),
+        vi.fn().mockImplementationOnce(() => ({
+          getItem: vi.fn(() => Promise.resolve({ content: json5Data })),
         })),
       );
       const res = await azure.getJsonFile('file.json5');
@@ -2102,7 +2101,7 @@ describe('modules/platform/azure/index', () => {
       const data = { foo: 'bar' };
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getItem: jest.fn(() =>
+          getItem: vi.fn(() =>
             Promise.resolve({ content: JSON.stringify(data) }),
           ),
         }),
@@ -2114,7 +2113,7 @@ describe('modules/platform/azure/index', () => {
     it('throws on malformed JSON', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getItemContent: jest.fn(() => Promise.resolve(Readable.from('!@#'))),
+          getItemContent: vi.fn(() => Promise.resolve(Readable.from('!@#'))),
         }),
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
@@ -2123,7 +2122,7 @@ describe('modules/platform/azure/index', () => {
     it('throws on errors', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getItemContent: jest.fn(() => {
+          getItemContent: vi.fn(() => {
             throw new Error('some error');
           }),
         }),
@@ -2133,13 +2132,13 @@ describe('modules/platform/azure/index', () => {
 
     it('supports fetch from another repo', async () => {
       const data = { foo: 'bar' };
-      const getItemFn = jest
+      const getItemFn = vi
         .fn()
         .mockResolvedValueOnce({ content: JSON.stringify(data) });
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getItem: getItemFn,
-          getRepositories: jest
+          getRepositories: vi
             .fn()
             .mockResolvedValue([
               { id: '123456', name: 'bar', project: { name: 'foo' } },
@@ -2154,7 +2153,7 @@ describe('modules/platform/azure/index', () => {
     it('returns null', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getRepositories: jest.fn(() => Promise.resolve([])),
+          getRepositories: vi.fn(() => Promise.resolve([])),
         }),
       );
       const res = await azure.getJsonFile('file.json', 'foo/bar');

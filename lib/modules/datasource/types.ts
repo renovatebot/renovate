@@ -51,6 +51,7 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  registryStrategy?: RegistryStrategy;
 }
 
 export interface Release {
@@ -92,6 +93,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  bumpedAt?: Timestamp;
 }
 
 export interface PostprocessReleaseConfig {

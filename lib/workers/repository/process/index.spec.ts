@@ -1,5 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { git, logger, mocked, platform, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
@@ -8,11 +6,12 @@ import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
+import { git, logger, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../../../util/git');
-jest.mock('./extract-update');
+vi.mock('./extract-update');
 
-const extract = mocked(_extractUpdate).extract;
+const extract = vi.mocked(_extractUpdate).extract;
 
 let config: RenovateConfig;
 
@@ -64,7 +63,7 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = jest
+      platform.getJsonFile = vi
         .fn()
         .mockResolvedValue({ extends: [':approveMajorUpdates'] });
       config.baseBranches = ['master', 'dev'];
@@ -87,7 +86,7 @@ describe('workers/repository/process/index', () => {
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = jest
+      platform.getJsonFile = vi
         .fn()
         .mockImplementation((fileName, repoName, branchName) => {
           if (branchName === 'dev') {

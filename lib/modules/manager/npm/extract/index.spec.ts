@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { extractAllPackageFiles } from '..';
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { ExtractConfig } from '../../types';
 import { postExtract } from './post';
 import * as npmExtract from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 const defaultExtractConfig = {
   skipInstalls: null,
@@ -22,8 +22,8 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
-    beforeEach(() => {
-      const realFs = jest.requireActual<typeof fs>('../../../../util/fs');
+    beforeEach(async () => {
+      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);

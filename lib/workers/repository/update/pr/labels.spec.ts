@@ -1,10 +1,10 @@
-import { platform } from '../../../../../test/util';
 import {
   areLabelsModified,
   getChangedLabels,
   prepareLabels,
   shouldUpdateLabels,
 } from './labels';
+import { platform } from '~test/util';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitlab', () => {
-        jest.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
+        vi.spyOn(platform, 'labelCharLimit').mockImplementationOnce(() => {
           return 255;
         });
         // platform.labelCharLimit.mockReturnValueOnce(255);

@@ -1,4 +1,3 @@
-import { mocked, platform } from '../../../../../../test/util';
 import type { PackageFile } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
@@ -10,30 +9,31 @@ import * as _header from './header';
 import * as _notes from './notes';
 import * as _table from './updates-table';
 import { getPrBody } from '.';
+import { platform } from '~test/util';
 
-jest.mock('./changelogs');
-const changelogs = mocked(_changelogs);
+vi.mock('./changelogs');
+const changelogs = vi.mocked(_changelogs);
 
-jest.mock('./config-description');
-const configDescription = mocked(_configDescription);
+vi.mock('./config-description');
+const configDescription = vi.mocked(_configDescription);
 
-jest.mock('./controls');
-const controls = mocked(_controls);
+vi.mock('./controls');
+const controls = vi.mocked(_controls);
 
-jest.mock('./footer');
-const footer = mocked(_footer);
+vi.mock('./footer');
+const footer = vi.mocked(_footer);
 
-jest.mock('./header');
-const header = mocked(_header);
+vi.mock('./header');
+const header = vi.mocked(_header);
 
-jest.mock('./notes');
-const notes = mocked(_notes);
+vi.mock('./notes');
+const notes = vi.mocked(_notes);
 
-jest.mock('./updates-table');
-const table = mocked(_table);
+vi.mock('./updates-table');
+const table = vi.mocked(_table);
 
-jest.mock('../../../../../util/template');
-const template = mocked(_template);
+vi.mock('../../../../../util/template');
+const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {
@@ -71,6 +71,8 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('massages upgrades', () => {
+      template.compile.mockImplementation((x) => x);
+
       const upgrade = {
         manager: 'some-manager',
         branchName: 'some-branch',
@@ -98,12 +100,27 @@ describe('workers/repository/update/pr/body/index', () => {
         homepage: 'https://example.com',
       };
 
+      const upgradeBitbucketServer = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://bitbucket.domain.org/projects/foo/repos/bar',
+        sourceDirectory: '/baz',
+        homepage: 'https://example.com',
+        changelogUrl:
+          'https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md',
+      };
+
       getPrBody(
         {
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [upgrade, upgrade1, upgradeBitbucket],
+          upgrades: [
+            upgrade,
+            upgrade1,
+            upgradeBitbucket,
+            upgradeBitbucketServer,
+          ],
         },
         {
           debugData: {
@@ -145,6 +162,63 @@ describe('workers/repository/update/pr/body/index', () => {
           '[homepage](https://example.com), [source](https://bitbucket.org/foo/bar/src/HEAD/baz), [changelog](https://bitbucket.org/foo/bar/src/main/CHANGELOG.md)',
         homepage: 'https://example.com',
         sourceUrl: 'https://bitbucket.org/foo/bar',
+      });
+      expect(upgradeBitbucketServer).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://bitbucket.domain.org/projects/foo/repos/bar/browse/baz), [changelog](https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md))',
+        references:
+          '[homepage](https://example.com), [source](https://bitbucket.domain.org/projects/foo/repos/bar/browse/baz), [changelog](https://bitbucket.domain.org/projects/foo/repos/bar/browse/CHANGELOG.md)',
+        homepage: 'https://example.com',
+        sourceUrl: 'https://bitbucket.domain.org/projects/foo/repos/bar',
+      });
+    });
+
+    it('templates changelogUrl', () => {
+      template.compile.mockImplementation((x) =>
+        x === '{{ testTemplate }}'
+          ? 'https://raw.githubusercontent.com/some/templated/CHANGELOG.md'
+          : x,
+      );
+
+      const upgrade = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        dependencyUrl: 'https://github.com/foo/bar',
+        sourceUrl: 'https://github.com/foo/bar',
+        sourceDirectory: '/baz',
+        changelogUrl: '{{ testTemplate }}',
+        homepage: 'https://example.com',
+      };
+
+      getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(upgrade).toMatchObject({
+        branchName: 'some-branch',
+        changelogUrl: '{{ testTemplate }}',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/some/templated/CHANGELOG.md))',
+        dependencyUrl: 'https://github.com/foo/bar',
+        homepage: 'https://example.com',
+        references:
+          '[homepage](https://example.com), [source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/some/templated/CHANGELOG.md)',
+        sourceDirectory: '/baz',
+        sourceUrl: 'https://github.com/foo/bar',
       });
     });
 
