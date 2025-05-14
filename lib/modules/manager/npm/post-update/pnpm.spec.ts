@@ -293,7 +293,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   "name": "parent",
   "version": "1.0.0",
   "engines": {
-    "pnpm": "=6.15.0"
+    "pnpm": "^6.0.0"
   },
   "engine-strict": true,
   "volta": {

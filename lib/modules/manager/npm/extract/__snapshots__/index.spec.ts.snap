@@ -525,9 +525,6 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts vo
   ],
   "extractedConstraints": {
     "node": "8.9.2",
-    "npm": "5.9.0",
-    "pnpm": "6.11.2",
-    "yarn": "1.12.3",
   },
   "managerData": {
     "hasPackageManager": false,
