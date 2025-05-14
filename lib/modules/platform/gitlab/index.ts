@@ -85,7 +85,6 @@ let config: {
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
-  author: string | null;
 } = {} as any;
 
 export function resetPlatform(): void {
@@ -140,7 +139,6 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
-      config.author = user.name;
       botUserName = user.name;
     }
     /* v8 ignore start: experimental feature */
@@ -169,7 +167,6 @@ export async function initPlatform({
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
 
-  config.author ??= username!;
   botUserName ??= username!;
 
   return platformConfig;
@@ -828,7 +825,7 @@ export async function updatePr({
   await GitlabPrCache.setPr(
     gitlabApi,
     config.repository,
-    config.author,
+    botUserName,
     updatedPr,
     !!config.ignorePrAuthor,
   );

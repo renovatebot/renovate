@@ -11,7 +11,6 @@ import type { GitLabMergeRequest } from './types';
 import { prInfo } from './utils';
 
 const http = new GitlabHttp();
-const ignorePrAuthor = false;
 
 const pr1: GitLabMergeRequest = {
   iid: 1,
@@ -71,12 +70,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
       .get('/projects/repo/merge_requests?per_page=100&scope=created_by_me')
       .reply(200, [pr1]);
 
-    const res = await GitlabPrCache.getPrs(
-      http,
-      'repo',
-      'some-author',
-      ignorePrAuthor,
-    );
+    const res = await GitlabPrCache.getPrs(http, 'repo', 'some-author', false);
 
     expect(res).toMatchObject([
       {
@@ -117,12 +111,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
       .get(`/projects/repo/merge_requests?per_page=100&scope=created_by_me`)
       .reply(200, [pr1]);
 
-    const res = await GitlabPrCache.getPrs(
-      http,
-      'repo',
-      'some-author',
-      ignorePrAuthor,
-    );
+    const res = await GitlabPrCache.getPrs(http, 'repo', 'some-author', false);
 
     expect(res).toMatchObject([
       {
@@ -163,12 +152,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
       .get(`/projects/repo/merge_requests?per_page=20&scope=created_by_me`)
       .reply(200, [pr2, pr1]);
 
-    const res = await GitlabPrCache.getPrs(
-      http,
-      'repo',
-      'some-author',
-      ignorePrAuthor,
-    );
+    const res = await GitlabPrCache.getPrs(http, 'repo', 'some-author', false);
 
     expect(res).toMatchObject([
       { number: 2, title: 'title' },
@@ -215,12 +199,7 @@ describe('modules/platform/gitlab/pr-cache', () => {
       },
     };
 
-    const res = await GitlabPrCache.getPrs(
-      http,
-      'repo',
-      'some-author',
-      ignorePrAuthor,
-    );
+    const res = await GitlabPrCache.getPrs(http, 'repo', 'some-author', false);
 
     expect(res).toMatchObject([
       { number: 3, title: 'title' },

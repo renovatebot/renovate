@@ -156,13 +156,6 @@ export class GitlabPrCache {
       }
 
       const uri = parseUrl(parseLinkHeader(res.headers.link)?.next?.url);
-      if (uri && http.baseUrl) {
-        if (process.env.GITLAB_IGNORE_REPO_URL) {
-          const defaultEndpoint = new URL(http.baseUrl);
-          uri.protocol = defaultEndpoint.protocol;
-          uri.host = defaultEndpoint.host;
-        }
-      }
       query = uri ? uri.search : null;
     }
 

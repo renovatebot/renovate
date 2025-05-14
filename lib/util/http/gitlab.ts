@@ -16,7 +16,7 @@ export interface GitlabHttpOptions extends HttpOptions {
 }
 
 export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
-  override get baseUrl(): string | undefined {
+  protected override get baseUrl(): string | undefined {
     return baseUrl;
   }
 
