@@ -91,7 +91,7 @@ export async function extractPackageFile(
   const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
   if (npmrcFileName) {
     let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (repoNpmrc && is.string(repoNpmrc)) {
+    if (is.string(repoNpmrc)) {
       if (is.string(config.npmrc) && !config.npmrcMerge) {
         logger.debug(
           { npmrcFileName },
