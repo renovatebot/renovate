@@ -303,7 +303,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.15.14",
+    "@types/node": "22.15.15",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/semver": "7.7.0",
