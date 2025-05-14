@@ -17,8 +17,10 @@ const DockerComposeService = z.object({
 const DockerComposeFileV1 = z.record(DockerComposeService);
 const DockerComposeFileModern = z
   .object({
-    // compose does not use this strictly, so we shouldn't be either
-    // https://docs.docker.com/compose/compose-file/04-version-and-name/#version-top-level-element
+    /**
+     *  compose does not use this strictly, so we shouldn't be either
+     *  https://docs.docker.com/compose/compose-file/04-version-and-name/#version-top-level-element
+     */
     version: z.string().optional(),
     services: z.record(DockerComposeService),
   })
