@@ -93,6 +93,7 @@ export interface RenovateSharedConfig {
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  skipArtifactUpdating?: boolean;
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;

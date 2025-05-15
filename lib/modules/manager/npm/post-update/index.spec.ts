@@ -559,6 +559,98 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('all upgrades have skipArtifactUpdating=true', async () => {
+      expect(
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+            upgrades: [
+              {
+                depName: 'postcss',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'package-lock.json',
+                },
+                rangeStrategy: 'widen',
+                skipArtifactUpdating: true,
+              },
+              {
+                depName: 'core-js',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'randomFolder/package-lock.json',
+                },
+                lockFiles: ['randomFolder/package-lock.json'],
+                rangeStrategy: 'pin',
+                skipArtifactUpdating: true,
+              },
+            ],
+          },
+          additionalFiles,
+        ),
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+    });
+
+    it.only('some upgrades have skipArtifactUpdating=true', async () => {
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        return Promise.resolve('');
+      });
+      expect(
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+            upgrades: [
+              {
+                depName: 'postcss',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'package-lock.json',
+                },
+                rangeStrategy: 'widen',
+              },
+              {
+                depName: 'core-js',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'randomFolder/package-lock.json',
+                },
+                lockFiles: ['randomFolder/package-lock.json'],
+                rangeStrategy: 'pin',
+                skipArtifactUpdating: true,
+              },
+            ],
+          },
+          additionalFiles,
+        ),
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'package-lock.json',
+            contents: '{}',
+          },
+        ],
+      });
+
+      expect(fs.readLocalFile).toHaveBeenCalledWith('.npmrc', 'utf8');
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
+      expect(fs.deleteLocalFile.mock.calls).toMatchObject([
+        ['packages/pnpm/.npmrc'],
+      ]);
+    });
+
     it('reuse existing up-to-date', async () => {
       expect(
         await getAdditionalFiles(

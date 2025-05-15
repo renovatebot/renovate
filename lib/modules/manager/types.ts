@@ -45,6 +45,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  skipArtifactUpdating?: boolean;
   lockFiles?: string[];
 }
 
@@ -152,6 +153,7 @@ export interface PackageDependency<T = Record<string, any>>
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
+  skipArtifactUpdating?: boolean;
   skipReason?: SkipReason;
   skipStage?: StageName;
   sourceLine?: number;
