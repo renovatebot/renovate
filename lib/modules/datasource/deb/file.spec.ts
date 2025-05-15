@@ -1,4 +1,4 @@
-import { copyFile } from 'fs';
+import { copyFile } from 'fs/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -34,55 +34,24 @@ describe('modules/datasource/deb/file', () => {
 
   describe('extract', () => {
     it('should support xz compression', async () => {
-      await copyFixtureToCache(
-        fixturePackagesArchiveXzPath,
-        packageArchiveCache,
-      );
+      await copyFile(fixturePackagesArchiveXzPath, packageArchiveCache);
       await extract(packageArchiveCache, 'xz', extractedPackageFile);
       const fileContent = await fs.readCacheFile(extractedPackageFile, 'utf8');
       expect(fileContent).toContain('Package:');
     });
 
     it('should support gz compression', async () => {
-      await copyFixtureToCache(
-        fixturePackagesArchiveGzPath,
-        packageArchiveCache,
-      );
+      await copyFile(fixturePackagesArchiveGzPath, packageArchiveCache);
       await extract(packageArchiveCache, 'gz', extractedPackageFile);
       const fileContent = await fs.readCacheFile(extractedPackageFile, 'utf8');
       expect(fileContent).toContain('Package:');
     });
 
     it('should support bz2 compression', async () => {
-      await copyFixtureToCache(
-        fixturePackagesArchiveBz2Path,
-        packageArchiveCache,
-      );
+      await copyFile(fixturePackagesArchiveBz2Path, packageArchiveCache);
       await extract(packageArchiveCache, 'bz2', extractedPackageFile);
       const fileContent = await fs.readCacheFile(extractedPackageFile, 'utf8');
       expect(fileContent).toContain('Package:');
     });
   });
 });
-
-/**
- * Copies a fixture file to the cache directory.
- *
- * @param fixturePath
- * @param cachePath
- * @returns
- */
-function copyFixtureToCache(
-  fixturePath: string,
-  cachePath: string,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    copyFile(fixturePath, cachePath, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
