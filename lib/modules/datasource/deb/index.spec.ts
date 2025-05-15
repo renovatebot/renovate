@@ -1,5 +1,5 @@
 import { createReadStream } from 'fs';
-import { copyFile } from 'fs-extra';
+import { copyFile } from 'fs/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
