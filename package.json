@@ -142,7 +142,7 @@
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "22.15.0",
+    "node": "22.15.1",
     "pnpm": "10.10.0"
   },
   "dependencies": {
@@ -169,7 +169,7 @@
     "@opentelemetry/resources": "2.0.0",
     "@opentelemetry/sdk-trace-base": "2.0.0",
     "@opentelemetry/sdk-trace-node": "2.0.0",
-    "@opentelemetry/semantic-conventions": "1.32.0",
+    "@opentelemetry/semantic-conventions": "1.33.0",
     "@pnpm/parse-overrides": "1001.0.0",
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.1.0",
@@ -242,7 +242,7 @@
     "prettier": "3.5.3",
     "protobufjs": "7.5.0",
     "punycode": "2.3.1",
-    "redis": "4.7.0",
+    "redis": "4.7.1",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.5.0",
@@ -264,7 +264,7 @@
     "zod": "3.24.4"
   },
   "optionalDependencies": {
-    "better-sqlite3": "11.9.1",
+    "better-sqlite3": "11.10.0",
     "openpgp": "6.1.0",
     "re2": "1.21.4"
   },
@@ -303,7 +303,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.15.15",
+    "@types/node": "22.15.16",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/semver": "7.7.0",
