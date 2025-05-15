@@ -1,7 +1,7 @@
 import { check } from './match-base-branches';
 
 describe('config/validation-helpers/match-base-branches', () => {
-  it('returns error when baseBranches is not defined', () => {
+  it('returns error when baseBranchPatterns is not defined', () => {
     const res = check({
       resolvedRule: { matchBaseBranches: ['develop'], addLabels: ['develop'] },
       currentPath: 'packageRules[0]',

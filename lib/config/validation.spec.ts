@@ -244,7 +244,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
-    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+    it('catches invalid matchBaseBranches when baseBranchPatterns is not defined', async () => {
       const config = {
         packageRules: [
           {
@@ -372,7 +372,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('catches invalid baseBranches regex', async () => {
+    it('catches invalid baseBranchPatterns regex', async () => {
       const config = {
         baseBranchPatterns: ['/***$}{]][/', '/branch/i'],
       };

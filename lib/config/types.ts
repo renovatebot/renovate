@@ -235,8 +235,6 @@ export interface RenovateConfig
   depName?: string;
   /** user configurable */
   baseBranchPatterns?: string[];
-  /** for internal use */
-  baseBranches?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;

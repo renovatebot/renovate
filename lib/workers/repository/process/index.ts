@@ -73,7 +73,7 @@ async function getBaseBranchConfig(
     }
 
     // baseBranches value should be based off the default branch
-    baseBranchConfig.baseBranches = config.baseBranches;
+    baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
   }
 
   if (config.baseBranchPatterns!.length > 1) {
@@ -125,13 +125,13 @@ export async function extractDependencies(
     GlobalConfig.get('platform') !== 'local' &&
     config.baseBranchPatterns?.length
   ) {
-    config.baseBranches = unfoldBaseBranches(
+    config.baseBranchPatterns = unfoldBaseBranches(
       config.defaultBranch!,
       config.baseBranchPatterns,
     );
-    logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
+    logger.debug({ baseBranches: config.baseBranchPatterns }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
-    for (const baseBranch of config.baseBranches) {
+    for (const baseBranch of config.baseBranchPatterns) {
       addMeta({ baseBranch });
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
@@ -141,7 +141,7 @@ export async function extractDependencies(
       }
     }
     addSplit('extract');
-    for (const baseBranch of config.baseBranches) {
+    for (const baseBranch of config.baseBranchPatterns) {
       if (await scm.branchExists(baseBranch)) {
         addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);

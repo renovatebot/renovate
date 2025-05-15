@@ -26,7 +26,7 @@ describe('workers/repository/process/index', () => {
       expect(res).toBeUndefined();
     });
 
-    it('processes baseBranches', async () => {
+    it('processes baseBranchPatterns', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranchPatterns = ['branch1', 'branch2'];
       scm.branchExists.mockResolvedValueOnce(false);
@@ -61,7 +61,7 @@ describe('workers/repository/process/index', () => {
       );
     });
 
-    it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
+    it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = vi
         .fn()
@@ -104,7 +104,7 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('processes baseBranches dryRun extract', async () => {
+    it('processes baseBranchPatterns dryRun extract', async () => {
       extract.mockResolvedValue({} as never);
       GlobalConfig.set({ dryRun: 'extract' });
       const res = await extractDependencies(config);
