@@ -48,6 +48,159 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts tools - mise registry tools', () => {
+      const content = codeBlock`
+      [tools]
+      actionlint = "1.7.7"
+      aws-cli = "2.25.10"
+      aws-vault = "6.6.1"
+      buf = "1.27.0"
+      consul = "1.14.3"
+      hivemind = "1.1.0"
+      jq = "1.7.1"
+      kafka = "apache-3.9.0"
+      localstack = "4.3.0"
+      opentofu = "1.6.1"
+      protoc = "30.2"
+      shellcheck = "0.10.0"
+      skeema = "1.12.3"
+      sops = "3.10.2"
+      stripe = "1.25.0"
+      terragrunt = "0.72.6"
+      tilt = "0.34.0"
+      tusd = "2.8.0"
+    `;
+      const result = extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.7.7',
+            datasource: 'github-releases',
+            depName: 'actionlint',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'rhysd/actionlint',
+          },
+          {
+            currentValue: '2.25.10',
+            datasource: 'github-tags',
+            depName: 'aws-cli',
+            packageName: 'aws/aws-cli',
+          },
+          {
+            currentValue: '6.6.1',
+            datasource: 'github-releases',
+            depName: 'aws-vault',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: '99designs/aws-vault',
+          },
+          {
+            currentValue: '1.27.0',
+            datasource: 'github-releases',
+            depName: 'buf',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'bufbuild/buf',
+          },
+          {
+            currentValue: '1.14.3',
+            datasource: 'github-releases',
+            depName: 'consul',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/consul',
+          },
+          {
+            currentValue: '1.1.0',
+            datasource: 'github-releases',
+            depName: 'hivemind',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'DarthSim/hivemind',
+          },
+          {
+            currentValue: '1.7.1',
+            datasource: 'github-releases',
+            depName: 'jq',
+            extractVersion: '^jq-v(?<version>\\S+)',
+            packageName: 'jqlang/jq',
+          },
+          {
+            currentValue: '3.9.0',
+            datasource: 'github-tags',
+            depName: 'kafka',
+            packageName: 'apache/kafka',
+          },
+          {
+            currentValue: '4.3.0',
+            datasource: 'github-releases',
+            depName: 'localstack',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'localstack/localstack',
+          },
+          {
+            currentValue: '1.6.1',
+            datasource: 'github-releases',
+            depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '30.2',
+            datasource: 'github-releases',
+            depName: 'protoc',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'protocolbuffers/protobuf',
+          },
+          {
+            currentValue: '0.10.0',
+            datasource: 'github-releases',
+            depName: 'shellcheck',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'koalaman/shellcheck',
+          },
+          {
+            currentValue: '1.12.3',
+            datasource: 'github-releases',
+            depName: 'skeema',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'skeema/skeema',
+          },
+          {
+            currentValue: '3.10.2',
+            datasource: 'github-releases',
+            depName: 'sops',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'getsops/sops',
+          },
+          {
+            currentValue: '1.25.0',
+            datasource: 'github-releases',
+            depName: 'stripe',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'stripe/stripe-cli',
+          },
+          {
+            currentValue: '0.72.6',
+            datasource: 'github-releases',
+            depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'gruntwork-io/terragrunt',
+          },
+          {
+            currentValue: '0.34.0',
+            datasource: 'github-releases',
+            depName: 'tilt',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'tilt-dev/tilt',
+          },
+          {
+            currentValue: '2.8.0',
+            datasource: 'github-releases',
+            depName: 'tusd',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'tus/tusd',
+          },
+        ],
+      });
+    });
+
     it('extracts tools - asdf plugins', () => {
       const content = codeBlock`
       [tools]

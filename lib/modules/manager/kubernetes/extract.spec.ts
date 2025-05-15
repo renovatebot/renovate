@@ -4,6 +4,7 @@ import { Fixtures } from '~test/fixtures';
 const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
+const underscoreTagFile = Fixtures.get('underscore-tag.yaml');
 const kubernetesRegistryAlias = Fixtures.get('kubernetes.registry-alias.yaml');
 const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 
@@ -88,6 +89,29 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: 'apps/v1',
           datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
+        },
+      ]);
+    });
+
+    it('extracts image tag when it contains underscores', () => {
+      const res = extractPackageFile(underscoreTagFile, 'file.yaml', {});
+      expect(res?.deps).toStrictEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'litellm_stable_release_branch-v1.67.0-stable',
+          datasource: 'docker',
+          depName: 'ghcr.io/berriai/litellm',
+          packageName: 'ghcr.io/berriai/litellm',
+          replaceString:
+            'ghcr.io/berriai/litellm:litellm_stable_release_branch-v1.67.0-stable',
+        },
+        {
+          currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
+          depName: 'Deployment',
           versioning: 'kubernetes-api',
         },
       ]);

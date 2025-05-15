@@ -19,6 +19,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
@@ -139,9 +140,10 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
+    const env = getEnv();
     /* v8 ignore start: experimental feature */
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } /* v8 ignore stop */ else {
       const version = (
         await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
@@ -273,16 +275,17 @@ function getRepoUrl(
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
+  const env = getEnv();
 
   if (
     gitUrl === 'endpoint' ||
-    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
+    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
-    if (process.env.GITLAB_IGNORE_REPO_URL) {
+    if (env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
         'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
       );
@@ -661,14 +664,15 @@ async function tryPrAutomerge(
         'running', // pipeline is running, no need to wait for it
       ];
       const desiredStatus = 'can_be_merged';
+      const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
-        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
       const mergeDelay = parseInteger(
-        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
+        env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
         250,
       );
 
@@ -1031,8 +1035,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
+  const env = getEnv();
   const retryTimes = parseInteger(
-    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
+    env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
     2,
   );
 
@@ -1054,7 +1059,7 @@ export async function setBranchStatus({
       }
       // give gitlab some time to create pipelines for the sha
       await setTimeout(
-        parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+        parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
       );
     }
   } catch (err) {
