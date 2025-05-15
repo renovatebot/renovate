@@ -242,7 +242,7 @@
     "prettier": "3.5.3",
     "protobufjs": "7.5.0",
     "punycode": "2.3.1",
-    "redis": "4.7.0",
+    "redis": "4.7.1",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.5.0",
