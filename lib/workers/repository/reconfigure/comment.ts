@@ -6,7 +6,6 @@ import type { PackageFile } from '../../../modules/manager/types';
 import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
-import { emojify } from '../../../util/emoji';
 import type { BranchConfig } from '../../types';
 import {
   getDepWarningsOnboardingPR,
@@ -29,8 +28,7 @@ export async function ensureReconfigurePrComment(
   let prCommentTemplate = `This is an reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
   // TODO #22198
-  prCommentTemplate += emojify(
-    `
+  prCommentTemplate += `
 ---
 {{PACKAGE FILES}}
 {{CONFIG}}
@@ -38,8 +36,7 @@ export async function ensureReconfigurePrComment(
 {{PRLIST}}
 {{WARNINGS}}
 {{ERRORS}}
-`,
-  );
+`;
   let prBody = prCommentTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
     let files: string[] = [];
