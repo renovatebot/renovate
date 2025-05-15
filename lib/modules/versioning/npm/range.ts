@@ -219,6 +219,9 @@ export function getNewValue({
     if (currentValue.endsWith('.0.0')) {
       const newMajor = toVersionMajor + 1;
       res = `<${newMajor}.0.0`;
+    } else if (currentValue.endsWith('.0')) {
+      const newMinor = toVersionMinor + 1;
+      res = `<${toVersionMajor}.${newMinor}${element.patch ? '.0' : ''}`;
     } else if (element.patch) {
       // TODO: types (#22198)
       res = `<${increment(newVersion, 'patch')!}`;

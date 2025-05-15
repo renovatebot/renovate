@@ -1505,7 +1505,8 @@ describe('modules/datasource/docker/index', () => {
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
-      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
+      const tags3 = [...range(20000, 20050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
@@ -1530,17 +1531,28 @@ describe('modules/datasource/docker/index', () => {
         .reply(
           200,
           { tags: tags2 },
-          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=20000>; rel="next", ',
+          },
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=20000')
+        .reply(
+          200,
+          { tags: tags3 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+          },
         )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/10050.0.0')
+        .get('/virtual-mirror/node/manifests/20050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'org.jfrog.io/virtual-mirror/node',
       });
-      expect(res?.releases).toHaveLength(10050);
+      expect(res?.releases).toHaveLength(20050);
     });
 
     it('uses lower tag limit for ECR deps', async () => {

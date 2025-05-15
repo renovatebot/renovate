@@ -50,7 +50,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      ttlMinutes: 0,
+      softTtlMinutes: 0,
       checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
     });
