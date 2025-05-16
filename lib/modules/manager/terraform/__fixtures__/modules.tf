@@ -62,7 +62,7 @@ module "task_definition" {
   source = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0"
   name   = "mytask"
   container_definitions = [
-  "${module.container_definition.json}"]
+    "${module.container_definition.json}"]
 }
 
 module "repo-with-dotgit" {
