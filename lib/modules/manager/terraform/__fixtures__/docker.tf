@@ -1,3 +1,8 @@
+# docker_registry_image data source
+data "docker_registry_image" "ubuntu" {
+  name = "ubuntu:precise"
+}
+
 # docker_image resources
 # https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/image
 resource "docker_image" "nginx" {
@@ -8,7 +13,7 @@ resource "docker_image" "invalid" {
 }
 
 resource "docker_image" "ignore_variable" {
-  name          = "${data.docker_registry_image.ubuntu.name}"
+  name          = data.docker_registry_image.ubuntu.name
   pull_triggers = ["${data.docker_registry_image.ubuntu.sha256_digest}"]
 }
 
