@@ -4,7 +4,6 @@ import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
 import * as configParser from '../../config';
-import { mergeChildConfig } from '../../config';
 import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
 import { validateConfigSecrets } from '../../config/secrets';
@@ -19,6 +18,7 @@ import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
 import { getProblems, logLevel, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
+import { getEnv } from '../../util/env';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -57,7 +57,7 @@ export async function getRepositoryConfig(
 }
 
 function getGlobalConfig(): Promise<RenovateConfig> {
-  return parseConfigs(process.env, process.argv);
+  return parseConfigs(getEnv(), process.argv);
 }
 
 function haveReachedLimits(): boolean {
@@ -94,21 +94,6 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   }
 }
 
-export async function resolveGlobalExtends(
-  globalExtends: string[],
-  ignorePresets?: string[],
-): Promise<AllConfig> {
-  try {
-    // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalExtends, ignorePresets };
-    const resolvedConfig = await resolveConfigPresets(config);
-    return resolvedConfig;
-  } catch (err) {
-    logger.error({ err }, 'Error resolving config preset');
-    throw new Error(CONFIG_PRESETS_INVALID);
-  }
-}
-
 export async function start(): Promise<number> {
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
@@ -123,27 +108,18 @@ export async function start(): Promise<number> {
   }
 
   let config: AllConfig;
+  const env = getEnv();
   try {
-    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
-      addSecretForSanitizing(process.env.AWS_SECRET_ACCESS_KEY, 'global');
+    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
+      addSecretForSanitizing(env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SESSION_TOKEN)) {
-      addSecretForSanitizing(process.env.AWS_SESSION_TOKEN, 'global');
+    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
+      addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
 
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
-      if (is.nonEmptyArray(config?.globalExtends)) {
-        // resolve global presets immediately
-        config = mergeChildConfig(
-          await resolveGlobalExtends(
-            config.globalExtends,
-            config.ignorePresets,
-          ),
-          config,
-        );
-      }
 
       // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
       GlobalConfig.set({

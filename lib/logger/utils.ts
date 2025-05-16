@@ -178,7 +178,7 @@ export function sanitizeValue(
     return value;
   }
 
-  if (is.function_(value)) {
+  if (is.function(value)) {
     return '[function]';
   }
 

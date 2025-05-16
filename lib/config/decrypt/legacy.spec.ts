@@ -1,5 +1,5 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { decryptConfig } from '../decrypt';
+import { decryptConfig, setPrivateKeys } from '../decrypt';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
 import { Fixtures } from '~test/fixtures';
@@ -14,28 +14,26 @@ describe('config/decrypt/legacy', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
+      setPrivateKeys(undefined, undefined);
     });
 
     it('handles invalid encrypted type', async () => {
       config.encrypted = 1;
-      GlobalConfig.set({ privateKey });
+      setPrivateKeys(privateKey, undefined);
       const res = await decryptConfig(config, repository);
       expect(res.encrypted).toBeUndefined();
     });
 
     it('handles invalid encrypted value', async () => {
       config.encrypted = { a: 1 };
-      GlobalConfig.set({ privateKey, privateKeyOld: 'invalid-key' });
+      setPrivateKeys(privateKey, 'invalid-key');
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         CONFIG_VALIDATION,
       );
     });
 
     it('replaces npm token placeholder in npmrc', async () => {
-      GlobalConfig.set({
-        privateKey: 'invalid-key',
-        privateKeyOld: privateKey,
-      }); // test old key failover
+      setPrivateKeys('invalid-key', privateKey); // test old key failover
       config.npmrc =
         '//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n';
       config.encrypted = {
@@ -48,7 +46,7 @@ describe('config/decrypt/legacy', () => {
     });
 
     it('appends npm token in npmrc', async () => {
-      GlobalConfig.set({ privateKey });
+      setPrivateKeys(privateKey, undefined);
       config.npmrc = 'foo=bar\n';
       config.encrypted = {
         npmToken:
@@ -60,7 +58,7 @@ describe('config/decrypt/legacy', () => {
     });
 
     it('decrypts nested', async () => {
-      GlobalConfig.set({ privateKey });
+      setPrivateKeys(privateKey, undefined);
       config.packageFiles = [
         {
           packageFile: 'package.json',

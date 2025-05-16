@@ -324,6 +324,10 @@
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
@@ -471,6 +475,7 @@
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
+    "pdfme": "https://github.com/pdfme/pdfme",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [

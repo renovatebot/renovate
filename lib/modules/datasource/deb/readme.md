@@ -43,7 +43,7 @@ First you would set a custom manager in your `renovate.json` file for `Dockerfil
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*?(suite=(?<suite>.*?))?\\s*depName=(?<depName>.*?)?\\sENV .*?_VERSION=\"(?<currentValue>.*)\""
       ],
