@@ -208,7 +208,6 @@ export function getExtractedConstraints(
 ): Record<string, string> {
   const extractedConstraints: Record<string, string> = {};
   const constraints = ['node', 'yarn', 'npm', 'pnpm', 'vscode'];
-
   for (const dep of deps) {
     if (
       !dep.skipReason &&
