@@ -142,12 +142,18 @@ export async function getConfiguredRegistries(
   }
 
   // Deduplicate registries
-  const registryUrls = registries.map((r) => r.url);
-  registries = registries.filter(
-    (r) =>
-      !registryUrls.includes(r.url + '#protocolVersion=2') &&
-      !registryUrls.includes(r.url + '#protocolVersion=3'),
+  const registryUrlsWithSourceMappings = registries.map(
+    (r) => r.sourceMappedPackagePatterns + r.url,
   );
+  registries = registries.filter((r) => {
+    const lookupKey = r.sourceMappedPackagePatterns + r.url;
+    return (
+      !registryUrlsWithSourceMappings.includes(
+        lookupKey + '#protocolVersion=2',
+      ) &&
+      !registryUrlsWithSourceMappings.includes(lookupKey + '#protocolVersion=3')
+    );
+  });
 
   return registries;
 }
