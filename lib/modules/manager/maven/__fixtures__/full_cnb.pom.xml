@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.2</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>test.example</groupId>
+	<artifactId>demo</artifactId>
+	<version>1.0.0</version>
+	<name>demo</name>
+	<description>Demo project for Spring Boot</description>
+	<properties>
+		<java.version>11</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<name>repository.local/demo-spring-boot</name>
+						<builder>paketobuildpacks/builder-jammy-base:0.4.316</builder>
+						<runImage>paketobuildpacks/run-noble-full:0.0.28</runImage>
+						<buildpacks>
+							<buildpack>paketo-buildpacks/nodejs@6.1.1</buildpack>
+							<buildpack>urn:cnb:builder:paketo-buildpacks/php@2.13.1</buildpack>
+							<buildpack>gcr.io/paketo-buildpacks/nodejs:1.8.0</buildpack>
+							<buildpack>
+								docker://docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138</buildpack>
+							<buildpack>
+								docker://docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a</buildpack>
+							<!-- This should resolve against docker.io -->
+							<buildpack>paketobuildpacks/java:12.1.0</buildpack>
+							<!-- This implicit latest reference should not fail the renovate run -->
+							<buildpack>paketobuildpacks/go</buildpack>
+						</buildpacks>
+					</image>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
