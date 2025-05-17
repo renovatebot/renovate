@@ -146,12 +146,8 @@ export async function getConfiguredRegistries(
     (r) => r.sourceMappedPackagePatterns + r.url,
   );
   registries = registries.filter((r) => {
-    const lookupKey = r.sourceMappedPackagePatterns + r.url;
-    return (
-      !registryUrlsWithSourceMappings.includes(
-        lookupKey + '#protocolVersion=2',
-      ) &&
-      !registryUrlsWithSourceMappings.includes(lookupKey + '#protocolVersion=3')
+    return !registryUrlsWithSourceMappings.includes(
+      r.sourceMappedPackagePatterns + r.url + '#protocolVersion=3',
     );
   });
 
