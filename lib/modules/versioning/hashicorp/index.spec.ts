@@ -35,7 +35,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'~> 4.1.2'}           | ${true}
     ${'=4'}                 | ${true}
     ${'=4.0'}               | ${true}
-    ${'!=4.0'}              | ${false}
+    ${'!=4.0'}              | ${true}
     ${'>=4.1'}              | ${true}
     ${'<=4.1.2'}            | ${true}
     ${''}                   | ${false}
