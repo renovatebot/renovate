@@ -596,7 +596,7 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
-    it.only('some upgrades have skipArtifactUpdating=true', async () => {
+    it('some upgrades have skipArtifactUpdating=true', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       fs.readLocalFile.mockImplementation((f): Promise<string> => {
         if (f === '.npmrc') {
