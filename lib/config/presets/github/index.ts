@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
@@ -26,7 +26,7 @@ export async function fetchJSONFile(
   let res: { body: { content: string } };
   try {
     res = await http.getJsonUnchecked(url, {
-      cacheProvider: memCacheProvider,
+      cacheProvider: repoCacheProvider,
     });
   } catch (err) {
     if (err instanceof ExternalHostError) {
