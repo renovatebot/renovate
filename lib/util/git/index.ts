@@ -238,7 +238,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables?
+  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...getEnv(),
     LANG: 'C.UTF-8',
@@ -581,7 +581,7 @@ export async function getFileList(): Promise<string[]> {
   const branch = config.currentBranch;
   let files: string;
   try {
-    files = await git.raw(['ls-tree', '-r', branch]);
+    files = await git.raw(['ls-tree', '-r', `refs/heads/${branch}`]);
     /* v8 ignore next 10 -- TODO: add test */
   } catch (err) {
     if (err.message?.includes('fatal: Not a valid object name')) {

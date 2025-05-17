@@ -511,11 +511,13 @@ For example, to bump versions only for updates in the `charts/` directory:
   "packageRules": [
     {
       "matchFileNames": ["charts/**"],
-      "bumpVersions": {
-        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
-        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
-        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
-      }
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
     }
   ]
 }
@@ -3712,7 +3714,7 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use handlebars templating in these commands.
+You can use Handlebars templating in these commands.
 They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
