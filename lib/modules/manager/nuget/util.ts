@@ -141,6 +141,14 @@ export async function getConfiguredRegistries(
     }
   }
 
+  // Deduplicate registries
+  const registryUrls = registries.map((r) => r.url);
+  registries = registries.filter(
+    (r) =>
+      !registryUrls.includes(r.url + '#protocolVersion=2') &&
+      !registryUrls.includes(r.url + '#protocolVersion=3'),
+  );
+
   return registries;
 }
 
