@@ -194,7 +194,7 @@ function resolveResourceManifest(
           }
           deps.push(dep);
         } else {
-          logger.debug('invalid or incomplete HelmRelease spec, skipping');
+          logger.debug(`invalid or incomplete ${resource.metadata.name} HelmRelease spec, skipping`);
         }
 
         if (resource.spec.values) {
