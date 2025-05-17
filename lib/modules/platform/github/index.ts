@@ -907,7 +907,7 @@ async function ensureBranchSha(
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
-    await githubApi.head(commitUrl, { memCache: false });
+    await githubApi.head(commitUrl);
   } catch (err) {
     logger.error({ err, sha, branchName }, 'Commit not found');
     throw err;
@@ -993,16 +993,12 @@ export async function tryReuseAutoclosedPr(
   }
 }
 
-async function getStatus(
-  branchName: string,
-  useCache = true,
-): Promise<CombinedBranchStatus> {
+async function getStatus(branchName: string): Promise<CombinedBranchStatus> {
   const branch = escapeHash(branchName);
   const url = `repos/${config.repository}/commits/${branch}/status`;
 
   const { body: status } =
     await githubApi.getJsonUnchecked<CombinedBranchStatus>(url, {
-      memCache: useCache,
       cacheProvider: repoCacheProvider,
     });
 
@@ -1120,9 +1116,10 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  const opts: GithubHttpOptions = useCache
-    ? { cacheProvider: memCacheProvider }
-    : { memCache: false };
+  const opts: GithubHttpOptions = {};
+  if (useCache) {
+    opts.cacheProvider = memCacheProvider;
+  }
 
   return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }
@@ -1193,7 +1190,7 @@ export async function setBranchStatus({
     await githubApi.postJson(url, { body: options });
 
     // update status cache
-    await getStatus(branchName, false);
+    await getStatus(branchName);
     await getStatusCheck(branchName, false);
   } catch (err) /* v8 ignore start */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');

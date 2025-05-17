@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
+import { clone } from '../../clone';
 import { HttpCacheStats } from '../../stats';
 import type { GotOptions, HttpResponse } from '../types';
-import { copyResponse } from '../util';
 import { type HttpCache, HttpCacheSchema } from './schema';
 import type { HttpCacheProvider } from './types';
 
@@ -56,7 +56,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
 
       HttpCacheStats.incRemoteMisses(url);
 
-      const httpResponse = copyResponse(resp, true);
+      const httpResponse = clone(resp);
       const timestamp = new Date().toISOString();
 
       const newHttpCache = HttpCacheSchema.parse({
@@ -90,10 +90,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
       HttpCacheStats.incRemoteHits(url);
-      const cachedResp = copyResponse(
-        httpCache.httpResponse as HttpResponse<T>,
-        true,
-      );
+      const cachedResp = clone(httpCache.httpResponse as HttpResponse<T>);
       cachedResp.authorization = resp.authorization;
       return cachedResp;
     }
