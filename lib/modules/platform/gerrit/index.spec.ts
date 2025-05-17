@@ -1,3 +1,4 @@
+import { stripIndent } from 'common-tags';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -588,6 +589,15 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
+  describe('deleteLabel()', () => {
+    it('deleteLabel() - deletes a label', async () => {
+      const pro = gerrit.deleteLabel(123456, 'hashtag1');
+      await expect(pro).resolves.toBeUndefined();
+      expect(clientMock.deleteHashtag).toHaveBeenCalledTimes(1);
+      expect(clientMock.deleteHashtag).toHaveBeenCalledWith(123456, 'hashtag1');
+    });
+  });
+
   describe('addReviewers()', () => {
     it('addReviewers() - add reviewers', async () => {
       await expect(
@@ -700,9 +710,47 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
-      expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
+      expect(
+        gerrit.massageMarkdown(
+          stripIndent`
+          Pull Request
+          PR
+          Branch creation
+          Disabled because a matching PR was automerged previously
+          Whenever PR becomes conflicted
+          close this Pull Request unmerged
+          Close this PR
+          you tick the rebase/retry checkbox
+          checking the rebase/retry box above
+          `,
+        ),
+      ).toBe(stripIndent`
+        change
+        change
+        Change creation
+        Disabled because a matching change was automerged previously
+        Whenever change becomes conflicted
+        abandon or vote this change with Code-Review -2
+        Abandon or vote this change with Code-Review -2
+        you add \`rebase!\` to the beginning of this change's commit message
+        adding \`rebase!\` to the beginning of this change's commit message
+        `);
     });
-    //TODO: add some tests for Gerrit-specific replacements..
+
+    it('massageMarkdown() with rebaseLabel', () => {
+      expect(
+        gerrit.massageMarkdown(
+          stripIndent`
+        you tick the rebase/retry checkbox
+        checking the rebase/retry box above
+        `,
+          'rebase',
+        ),
+      ).toBe(stripIndent`
+        you add the _rebase_ hashtag to this change
+        adding the _rebase_ hashtag to this change
+        `);
+    });
   });
 
   describe('currently unused/not-implemented functions', () => {
