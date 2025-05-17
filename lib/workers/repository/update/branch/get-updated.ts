@@ -500,7 +500,7 @@ async function managerUpdateArtifacts(
     } else {
       logger.debug(
         { manager, packageFileName: updateArtifact.packageFileName },
-        `running artifact updating because ${skipArtifactUpdatingCount} out of ${updatedDepsCount} updated dependencies have skipArtifactUpdating=true`,
+        `running artifact updating because ${updatedDepsCount - skipArtifactUpdatingCount} out of ${updatedDepsCount} updated dependencies have skipArtifactUpdating=false`,
       );
     }
   }
