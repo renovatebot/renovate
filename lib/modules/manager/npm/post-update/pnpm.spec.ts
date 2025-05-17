@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
@@ -256,6 +257,61 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       [
         {
           depType: 'packageManager',
+          depName: 'pnpm',
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'some-folder',
+          encoding: 'utf-8',
+          env: {
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+  });
+
+  it('uses volta version and puts it into constraint', async () => {
+    const execSnapshots = mockExecAll();
+    const configTemp = partial<PostUpdateConfig>();
+    const fileContent = codeBlock`
+    {
+  "name": "parent",
+  "version": "1.0.0",
+  "engines": {
+    "pnpm": "^6.0.0"
+  },
+  "engine-strict": true,
+  "volta": {
+    "pnpm": "6.15.0"
+  }
+}
+
+    `;
+    fs.readLocalFile
+      .mockResolvedValueOnce(fileContent)
+      .mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      configTemp,
+      [
+        {
+          depType: 'volta',
           depName: 'pnpm',
         },
       ],
