@@ -30,3 +30,11 @@ export const PullRequestActivity = z.union([
 ]);
 
 export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
+
+export const RestDetailedUser = z.object({
+  name: z.string(),
+  displayName: z.string(),
+  emailAddress: z.string(),
+});
+
+export type RestDetailedUser = z.infer<typeof RestDetailedUser>;
