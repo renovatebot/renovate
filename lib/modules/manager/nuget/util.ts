@@ -141,6 +141,16 @@ export async function getConfiguredRegistries(
     }
   }
 
+  // Deduplicate registries
+  const registryUrlsWithSourceMappings = registries.map(
+    (r) => r.sourceMappedPackagePatterns + r.url,
+  );
+  registries = registries.filter((r) => {
+    return !registryUrlsWithSourceMappings.includes(
+      r.sourceMappedPackagePatterns + r.url + '#protocolVersion=3',
+    );
+  });
+
   return registries;
 }
 
