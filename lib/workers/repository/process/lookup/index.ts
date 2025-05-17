@@ -197,6 +197,7 @@ export async function lookupUpdates(
         'registryUrl',
         'sourceDirectory',
         'homepage',
+        'changelogContent',
         'changelogUrl',
         'dependencyUrl',
         'lookupName',
