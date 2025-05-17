@@ -1891,6 +1891,13 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'abandonmentThreshold',
+    description:
+      'The package will be marked as abandoned if it has not been updated for this duration.',
+    type: 'string',
+    default: null,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
