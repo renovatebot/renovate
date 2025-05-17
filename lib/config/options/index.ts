@@ -3120,6 +3120,13 @@ const options: RenovateOptions[] = [
     default: false,
     globalOnly: true,
   },
+  {
+    name: 'skipArtifactUpdating',
+    description: 'If set, artifact updating will be skipped.',
+    type: 'boolean',
+    default: false,
+    globalOnly: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
