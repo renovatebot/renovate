@@ -715,9 +715,11 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('does not update artifacts when there are no updated deps and config.skipArtifactUpdating=true', async () => {
       const branchName = 'renovate/wheel-0.x';
-      const updateType = 'patch';
+      // Use lock file maintenance to attempt to update artifacts without any upgrades.
+      const updateType = 'lockFileMaintenance';
       const lockedVersion = '0.45.0';
       const newVersion = '0.45.1';
+      const currentValue = '==0.45.0';
       const currentPipCompileValue = '==0.45.0';
       const newRegexValue = newVersion;
       const newPipCompileValue = '==0.45.1';
@@ -747,7 +749,16 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.manager = 'regex';
       config.branchName = branchName;
       config.skipArtifactUpdating = true;
-
+      config.upgrades.push({
+        packageFileA,
+        lockFiles: [lockFileA],
+        manager: 'pip-compile',
+        updateType,
+        depName: 'alpha',
+        currentValue,
+        newVersion,
+        branchName,
+      });
       config.packageFiles = {
         'pip-compile': [
           {
