@@ -101,9 +101,9 @@ export class MigrationsService {
     ['masterIssue', 'dependencyDashboard'],
     ['masterIssueApproval', 'dependencyDashboardApproval'],
     ['masterIssueAutoclose', 'dependencyDashboardAutoclose'],
-    ['masterIssueHeader', 'dependencyDashboardHeader'],
-    ['masterIssueFooter', 'dependencyDashboardFooter'],
-    ['masterIssueTitle', 'dependencyDashboardTitle'],
+    ['masterIssueHeader', 'templateStrings.dashboardHeader'],
+    ['masterIssueFooter', 'templateStrings.dashboardFooter'],
+    ['masterIssueTitle', 'templateStrings.dashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
   ]);

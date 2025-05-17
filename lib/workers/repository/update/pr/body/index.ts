@@ -122,8 +122,8 @@ export function getPrBody(
   };
 
   let prBody = '';
-  if (branchConfig.prBodyTemplate) {
-    const prBodyTemplate = branchConfig.prBodyTemplate;
+  if (branchConfig.templateStrings?.prBody) {
+    const prBodyTemplate = branchConfig.templateStrings.prBody;
     prBody = template.compile(prBodyTemplate, content, false);
     prBody = prBody.trim();
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
