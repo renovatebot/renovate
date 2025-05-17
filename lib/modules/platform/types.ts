@@ -296,5 +296,5 @@ export interface PlatformScm {
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
-  mergeAndPush(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string, mergeStrategy: MergeStrategy): Promise<void>;
 }
