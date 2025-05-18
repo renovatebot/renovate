@@ -755,6 +755,15 @@ export async function lookupUpdates(
           /* istanbul ignore next */ update.updateType !== 'rollback',
       );
     }
+
+    const release = dependency?.releases.find(
+      (r) => r.version === res.updates[0].newValue,
+    );
+
+    if (release?.changelogContent) {
+      res.changelogContent = release.changelogContent;
+      res.changelogUrl = release.changelogUrl;
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       return Result.err(err);

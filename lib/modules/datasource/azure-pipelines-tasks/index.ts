@@ -73,11 +73,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
             isDeprecated: task.deprecated,
           };
 
-          if (release.changelogContent === undefined) {
-            release.changelogUrl = task.serverOwned
-              ? BUILT_IN_TASKS_CHANGELOG_URL
-              : undefined;
-          }
+          release.changelogUrl = task.serverOwned
+            ? BUILT_IN_TASKS_CHANGELOG_URL
+            : undefined;
 
           result.releases.push(release);
         });

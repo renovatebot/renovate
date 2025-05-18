@@ -15,6 +15,16 @@ export async function embedChangelog(
   } else {
     upgrade.logJSON = {
       hasReleaseNotes: true,
+      project: {
+        packageName: upgrade.packageName,
+        depName: upgrade.depName,
+        type: undefined!,
+        apiBaseUrl: undefined!,
+        baseUrl: undefined!,
+        repository: upgrade.repository!,
+        sourceUrl: upgrade.sourceUrl!,
+        sourceDirectory: upgrade.sourceDirectory,
+      },
       versions: [
         {
           changes: undefined!,
@@ -23,10 +33,10 @@ export async function embedChangelog(
           releaseNotes: {
             body: upgrade.changelogContent,
             notesSourceUrl: undefined!,
-            url: undefined!,
+            url: upgrade.changelogUrl!,
           },
           gitRef: undefined!,
-          version: undefined!,
+          version: upgrade.newVersion!,
         },
       ],
     };
