@@ -148,7 +148,7 @@ export async function getConfiguredRegistries(
     .map((r) => `${r.url}`);
   registries = registries.filter((r) => {
     return (
-      r.sourceMappedPackagePatterns ||
+      r.sourceMappedPackagePatterns ??
       !plainRegistryUrls.includes(`${r.url}#protocolVersion=3`)
     );
   });
