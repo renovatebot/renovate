@@ -85,6 +85,9 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+
+  bumpedAt?: Timestamp | null;
+  isAbandoned?: boolean;
 }
 
 export type PrBlockedBy =

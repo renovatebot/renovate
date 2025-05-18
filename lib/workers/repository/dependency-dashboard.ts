@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
@@ -324,6 +325,8 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
+  issueBody += getAbandonedPackagesMd(branches);
+
   const pendingApprovals = branches.filter(
     (branch) => branch.result === 'needs-approval',
   );
@@ -555,6 +558,54 @@ export async function ensureDependencyDashboard(
       confidential: config.confidential,
     });
   }
+}
+
+export function getAbandonedPackagesMd(branches: BranchConfig[]): string {
+  const abandonedPackages: Record<
+    string,
+    Record<string, string | undefined | null>
+  > = {};
+  let hasAbandonedPackages = false;
+
+  for (const branch of branches) {
+    for (const upgrade of branch.upgrades) {
+      if (upgrade.depName && upgrade.isAbandoned) {
+        hasAbandonedPackages = true;
+        const manager = upgrade.manager;
+        abandonedPackages[manager] = abandonedPackages[manager] || {};
+        abandonedPackages[manager][upgrade.depName] = upgrade.bumpedAt;
+      }
+    }
+  }
+
+  if (!hasAbandonedPackages) {
+    return '';
+  }
+
+  let abandonedMd = '> ℹ **Note**\n> \n';
+  abandonedMd +=
+    'These dependencies may be unmaintained due to lack of updates:\n\n';
+  abandonedMd += '| Datasource | Name | Last Updated |\n';
+  abandonedMd += '|------------|------|-------------|\n';
+
+  for (const manager of Object.keys(abandonedPackages).sort()) {
+    const deps = abandonedPackages[manager];
+    for (const depName of Object.keys(deps).sort()) {
+      const bumpedAt = deps[depName];
+      const formattedDate = bumpedAt
+        ? DateTime.fromISO(bumpedAt).toFormat('yyyy-MM-dd')
+        : 'unknown';
+      abandonedMd += `| ${manager} | \`${depName}\` | \`${formattedDate}\` |\n`;
+    }
+  }
+
+  abandonedMd += '\n';
+  abandonedMd +=
+    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n';
+  abandonedMd +=
+    'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
+
+  return abandonedMd + '\n';
 }
 
 function getFooter(config: RenovateConfig): string {

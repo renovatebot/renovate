@@ -1,5 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
+import { DateTime } from 'luxon';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -1654,6 +1655,111 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 
 </blockquote>
 </details>`);
+    });
+  });
+
+  describe('getAbandonedPackagesMd', () => {
+    const { getAbandonedPackagesMd } = dependencyDashboard;
+
+    it('returns empty string when branches array is empty', () => {
+      const branches: BranchConfig[] = [];
+      const result = getAbandonedPackagesMd(branches);
+      expect(result).toEqual('');
+    });
+
+    it('returns empty string when no packages are abandoned', () => {
+      const branches: BranchConfig[] = [
+        {
+          upgrades: [
+            { depName: 'package1', manager: 'npm', isAbandoned: false },
+            { depName: 'package2', manager: 'npm', isAbandoned: false },
+          ],
+        } as BranchConfig,
+      ];
+      const result = getAbandonedPackagesMd(branches);
+      expect(result).toEqual('');
+    });
+
+    it('returns markdown table with abandoned packages info', () => {
+      const today = DateTime.now().toISO();
+      const yesterday = DateTime.now().minus({ days: 1 }).toISO();
+
+      const branches: BranchConfig[] = [
+        {
+          upgrades: [
+            {
+              depName: 'package1',
+              manager: 'npm',
+              isAbandoned: true,
+              bumpedAt: today,
+            },
+            {
+              depName: 'package2',
+              manager: 'npm',
+              isAbandoned: false,
+            },
+          ],
+        } as BranchConfig,
+        {
+          upgrades: [
+            {
+              depName: 'package3',
+              manager: 'gradle',
+              isAbandoned: true,
+              bumpedAt: yesterday,
+            },
+            {
+              depName: 'package4',
+              manager: 'gradle',
+              isAbandoned: false,
+            },
+          ],
+        } as BranchConfig,
+      ];
+
+      const result = getAbandonedPackagesMd(branches);
+
+      // Format dates in the expected format for comparison
+      const formattedToday = DateTime.fromISO(today).toFormat('yyyy-MM-dd');
+      const formattedYesterday =
+        DateTime.fromISO(yesterday).toFormat('yyyy-MM-dd');
+
+      expect(result).toContain('ℹ **Note**');
+      expect(result).toContain(
+        'These dependencies may be unmaintained due to lack of updates:',
+      );
+      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain(
+        `| gradle | \`package3\` | \`${formattedYesterday}\` |`,
+      );
+      expect(result).toContain(
+        `| npm | \`package1\` | \`${formattedToday}\` |`,
+      );
+      expect(result).toContain(
+        'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`]',
+      );
+      expect(result).toContain(
+        'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.',
+      );
+    });
+
+    it('handles abandoned packages without bumpedAt date', () => {
+      const branches: BranchConfig[] = [
+        {
+          upgrades: [
+            {
+              depName: 'package1',
+              manager: 'npm',
+              isAbandoned: true,
+              bumpedAt: null,
+            },
+          ],
+        } as BranchConfig,
+      ];
+
+      const result = getAbandonedPackagesMd(branches);
+
+      expect(result).toContain(`| npm | \`package1\` | \`unknown\` |`);
     });
   });
 });
