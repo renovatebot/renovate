@@ -30,6 +30,7 @@ describe('workers/repository/changelog/index', () => {
         changelogContent: 'testContent',
         logJSON: {
           hasReleaseNotes: true,
+          project: {},
           versions: [
             {
               releaseNotes: {
