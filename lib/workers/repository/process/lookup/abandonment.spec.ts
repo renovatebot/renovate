@@ -17,10 +17,6 @@ describe('workers/repository/process/lookup/abandonment', () => {
       vi.setSystemTime(mockTime);
     });
 
-    afterAll(() => {
-      vi.useRealTimers();
-    });
-
     const config: LookupUpdateConfig = {
       datasource: 'npm',
       versioning: 'semver',
