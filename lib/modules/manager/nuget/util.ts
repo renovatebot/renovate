@@ -141,13 +141,15 @@ export async function getConfiguredRegistries(
     }
   }
 
-  // Deduplicate registries
-  const registryUrlsWithSourceMappings = registries.map(
-    (r) => r.sourceMappedPackagePatterns + r.url,
-  );
+  // Deduplicate registries with #procolVersion=3
+  // Keep any which include sourceMappedPackagePatterns
+  const plainRegistryUrls = registries
+    .filter((r) => !r.sourceMappedPackagePatterns)
+    .map((r) => `${r.url}`);
   registries = registries.filter((r) => {
-    return !registryUrlsWithSourceMappings.includes(
-      r.sourceMappedPackagePatterns + r.url + '#protocolVersion=3',
+    return (
+      r.sourceMappedPackagePatterns ||
+      !plainRegistryUrls.includes(`${r.url}#protocolVersion=3`)
     );
   });
 
