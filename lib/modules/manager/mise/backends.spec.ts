@@ -202,12 +202,20 @@ describe('modules/manager/mise/backends', () => {
       });
     });
 
-    it('should trim the leading v from version', () => {
-      expect(createUbiToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
+    it('should set extractVersion if the version does not have leading v', () => {
+      expect(createUbiToolConfig('cli/cli', '2.64.0', {})).toStrictEqual({
         packageName: 'cli/cli',
         datasource: 'github-releases',
         currentValue: '2.64.0',
         extractVersion: '^v?(?<version>.+)',
+      });
+    });
+
+    it('should not set extractVersion if the version has leading v', () => {
+      expect(createUbiToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
+        packageName: 'cli/cli',
+        datasource: 'github-releases',
+        currentValue: '2.64.0',
       });
     });
 
@@ -232,6 +240,45 @@ describe('modules/manager/mise/backends', () => {
         datasource: 'github-releases',
         currentValue: '1.10.17',
         extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should set extractVersion without v? when tag_regex is provided and version starts with v', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', 'v1.10.17', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        currentValue: '1.10.17',
+        extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should trim the leading ^ from tag_regex', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', 'v1.10.17', {
+          tag_regex: '^\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        currentValue: '1.10.17',
+        extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
+      });
+    });
+
+    it('should only trim the leading ^ from tag_regex when version starts with v', () => {
+      expect(
+        createUbiToolConfig('cargo-bins/cargo-binstall', 'v1.10.17', {
+          tag_regex: '^v\\d+\\.\\d+\\.',
+        }),
+      ).toStrictEqual({
+        packageName: 'cargo-bins/cargo-binstall',
+        datasource: 'github-releases',
+        currentValue: '1.10.17',
+        extractVersion: '^(?<version>v\\d+\\.\\d+\\.)',
       });
     });
 

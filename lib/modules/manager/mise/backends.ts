@@ -207,17 +207,33 @@ export function createUbiToolConfig(
   version: string,
   toolOptions: MiseToolOptionsSchema,
 ): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+
+  const hasVPrefix = version.startsWith('v');
+  const setsTagRegex = !hasVPrefix || is.string(toolOptions.tag_regex);
+
+  if (setsTagRegex) {
+    // By default, use a regex that matches any tag
+    let tagRegex = '.+';
+    // Filter versions by tag_regex if it is specified
+    // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
+    if (is.string(toolOptions.tag_regex)) {
+      // Remove the leading '^' if it exists to avoid duplication
+      tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
+      if (!hasVPrefix) {
+        // Remove the leading 'v?' if it exists to avoid duplication
+        tagRegex = tagRegex.replace(/^v\??/, '');
+      }
+    }
+
+    // Trim the 'v' prefix if the current version does not have it
+    extractVersion = `^${hasVPrefix ? '' : 'v?'}(?<version>${tagRegex})`;
+  }
+
   return {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
-    // Trim the leading 'v' from both the current and extracted version
-    currentValue: version.replace(/^v/, ''),
-    // Filter versions by tag_regex if it is specified
-    // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
-    extractVersion: `^v?(?<version>${
-      is.string(toolOptions.tag_regex)
-        ? toolOptions.tag_regex.replace(/^\^?v?\??/, '')
-        : '.+'
-    })`,
+    currentValue: version,
+    ...(is.string(extractVersion) ? { extractVersion } : {}),
   };
 }
