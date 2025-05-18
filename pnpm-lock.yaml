@@ -8862,7 +8862,7 @@ snapshots:
 
   '@types/lzma-native@4.0.4':
     dependencies:
-      '@types/node': 22.15.3
+      '@types/node': 22.15.17
 
   '@types/markdown-it@14.1.2':
     dependencies:
@@ -8926,7 +8926,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 22.15.3
+      '@types/node': 22.15.17
 
   '@types/tmp@0.2.6': {}
 
