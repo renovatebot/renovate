@@ -24,7 +24,7 @@ export const defaultConfig = {
   // However, when talking to crates.io,
   // the original version string is required otherwise not found.
   // We leverage extractVersion so the original could be kept in `versionOrig`.
-  extractVersion: '^(?<version>[^\+]+)',
+  extractVersion: '^(?<version>[^+]+)',
 };
 
 export const supportedDatasources = [CrateDatasource.id];
