@@ -110,7 +110,7 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((version) => {
         const release: Release = {
-          version: version.vers.replace(/\+.*$/, ''),
+          version: version.vers,
         };
         if (version.yanked) {
           release.isDeprecated = true;
@@ -390,8 +390,9 @@ export class CrateDatasource extends Datasource {
     namespace: `datasource-crate`,
     key: (
       { registryUrl, packageName }: PostprocessReleaseConfig,
-      { version }: Release,
-    ) => `postprocessRelease:${registryUrl}:${packageName}:${version}`,
+      { version, versionOrig }: Release,
+    ) =>
+      `postprocessRelease:${registryUrl}:${packageName}:${versionOrig ?? version}`,
     ttlMinutes: 7 * 24 * 60,
     cacheable: ({ registryUrl }: PostprocessReleaseConfig, _: Release) =>
       registryUrl === 'https://crates.io',
@@ -403,8 +404,8 @@ export class CrateDatasource extends Datasource {
     if (registryUrl !== 'https://crates.io') {
       return release;
     }
-
-    const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
+    const version = release.versionOrig ?? release.version;
+    const url = `https://crates.io/api/v1/crates/${packageName}/${version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
       { cacheProvider: memCacheProvider },

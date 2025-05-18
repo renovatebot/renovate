@@ -18,6 +18,13 @@ export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
   managerFilePatterns: ['/(^|/)Cargo\\.toml$/'],
   versioning: cargoVersioning.id,
+  // This is needed because Cargo doesn't like build metadata.
+  // See https://github.com/renovatebot/renovate/discussions/27086
+  //
+  // However, when talking to crates.io,
+  // the original version string is required otherwise not found.
+  // We leverage extractVersion so the original could be kept in `versionOrig`.
+  extractVersion: '^(?<version>[^\+]+)',
 };
 
 export const supportedDatasources = [CrateDatasource.id];
