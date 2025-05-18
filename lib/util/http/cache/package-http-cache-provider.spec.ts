@@ -50,7 +50,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
-      ttlMinutes: 0,
+      softTtlMinutes: 0,
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(200, 'new response');
 
@@ -69,6 +71,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
 
     const res = await http.getText(url, { cacheProvider });
@@ -90,6 +94,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
   it('handles cache miss', async () => {
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(200, 'fetched response', {
       etag: 'foobar',
@@ -118,6 +124,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: true,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response', {
@@ -135,6 +143,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: true,
+      checkCacheControlHeader: false,
     });
 
     httpMock.scope(url).get('').reply(200, 'private response');
@@ -155,6 +165,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
     });
 
@@ -174,6 +185,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
     });
 
@@ -198,6 +210,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
     };
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: '_test-namespace',
+      checkAuthorizationHeader: false,
+      checkCacheControlHeader: false,
     });
     httpMock.scope(url).get('').reply(500);
 
@@ -299,6 +313,8 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
       const cacheProvider = new PackageHttpCacheProvider({
         namespace: '_test-namespace',
+        checkAuthorizationHeader: false,
+        checkCacheControlHeader: true,
       });
 
       const response = {

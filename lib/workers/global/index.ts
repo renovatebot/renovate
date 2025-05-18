@@ -18,6 +18,7 @@ import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
 import { getProblems, logLevel, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
+import { getEnv } from '../../util/env';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -56,7 +57,7 @@ export async function getRepositoryConfig(
 }
 
 function getGlobalConfig(): Promise<RenovateConfig> {
-  return parseConfigs(process.env, process.argv);
+  return parseConfigs(getEnv(), process.argv);
 }
 
 function haveReachedLimits(): boolean {
@@ -107,12 +108,13 @@ export async function start(): Promise<number> {
   }
 
   let config: AllConfig;
+  const env = getEnv();
   try {
-    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
-      addSecretForSanitizing(process.env.AWS_SECRET_ACCESS_KEY, 'global');
+    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
+      addSecretForSanitizing(env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SESSION_TOKEN)) {
-      addSecretForSanitizing(process.env.AWS_SESSION_TOKEN, 'global');
+    if (is.nonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
+      addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
 
     await instrument('config', async () => {

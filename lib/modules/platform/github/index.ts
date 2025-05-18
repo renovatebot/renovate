@@ -25,6 +25,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
 import { coerceToNull } from '../../../util/coerce';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
@@ -215,7 +216,7 @@ export async function initPlatform({
     token,
   };
   if (
-    process.env.RENOVATE_X_GITHUB_HOST_RULES &&
+    getEnv().RENOVATE_X_GITHUB_HOST_RULES &&
     platformResult.endpoint === 'https://api.github.com/'
   ) {
     logger.debug('Adding GitHub token as GHCR password');
