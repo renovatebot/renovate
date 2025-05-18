@@ -623,6 +623,7 @@ describe('workers/repository/init/merge', () => {
           },
           staticConfig: {
             dependencyDashboard: true,
+            extends: ['group:springAmqp'],
             packageRules: [
               {
                 groupName: 'my-custom-socketio-override',
@@ -632,19 +633,26 @@ describe('workers/repository/init/merge', () => {
           },
           wantConfig: {
             dependencyDashboard: true,
-            description: ['Group socket.io packages.'],
+            description: [
+              'Group Java Spring AMQP packages.',
+              'Group socket.io packages.',
+            ],
             packageRules: [
+              {
+                groupName: 'spring amqp',
+                matchPackageNames: ['org.springframework.amqp:**'],
+              },
               {
                 groupName: 'socket.io packages',
                 matchPackageNames: ['socket.io**'],
               },
               {
-                groupName: 'high merge confidence',
-                matchConfidence: ['high', 'very high'],
-              },
-              {
                 groupName: 'my-custom-socketio-override',
                 matchPackageNames: ['socket.io**'],
+              },
+              {
+                groupName: 'high merge confidence',
+                matchConfidence: ['high', 'very high'],
               },
             ],
             renovateJsonPresent: true,
