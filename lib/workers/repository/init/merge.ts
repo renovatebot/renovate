@@ -61,13 +61,19 @@ export async function detectConfigFile(): Promise<string | null> {
   return null;
 }
 
-export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
+export async function detectRepoFileConfig(
+  branchName?: string,
+): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (is.nonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
-      configFileRaw = await platform.getRawFile(configFileName);
+      configFileRaw = await platform.getRawFile(
+        configFileName,
+        undefined,
+        branchName,
+      );
     } catch (err) {
       // istanbul ignore if
       if (err instanceof ExternalHostError) {
@@ -172,11 +178,12 @@ export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
 // Check for repository config
 export async function mergeRenovateConfig(
   config: RenovateConfig,
+  branchName?: string,
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
   if (config.requireConfig !== 'ignored') {
-    repoConfig = await detectRepoFileConfig();
+    repoConfig = await detectRepoFileConfig(branchName);
   }
   if (!repoConfig.configFileParsed && config.mode === 'silent') {
     logger.debug(
