@@ -153,7 +153,6 @@ export interface PackageDependency<T = Record<string, any>>
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
-  skipArtifactUpdating?: boolean;
   skipReason?: SkipReason;
   skipStage?: StageName;
   sourceLine?: number;
