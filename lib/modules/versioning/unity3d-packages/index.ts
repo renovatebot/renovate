@@ -32,20 +32,23 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     ];
     const isStable = !Unity3dPackagesVersioningApi.unstableRegex.test(label);
 
-    return { release, prerelease: isStable ? undefined : label, suffix: label };
+    return { release, prerelease: isStable ? undefined : label };
   }
 
   protected override _compareOther(
     _left: GenericVersion,
     _right: GenericVersion,
   ): number {
-    if (is.nonEmptyString(_left.suffix) && is.nonEmptyString(_right.suffix)) {
-      return _left.suffix.localeCompare(_right.suffix, undefined, {
+    if (
+      is.nonEmptyString(_left.prerelease) &&
+      is.nonEmptyString(_right.prerelease)
+    ) {
+      return _left.prerelease.localeCompare(_right.prerelease, undefined, {
         numeric: true,
       });
     } else if (
-      is.nonEmptyString(_left.suffix) &&
-      !is.nonEmptyString(_right.suffix)
+      is.nonEmptyString(_left.prerelease) &&
+      !is.nonEmptyString(_right.prerelease)
     ) {
       return 1;
     }
