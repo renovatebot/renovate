@@ -54,9 +54,6 @@ export function determineLockFileDirs(
   const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.skipArtifactUpdating) {
-      continue;
-    }
     if (
       upgrade.updateType === 'lockFileMaintenance' ||
       upgrade.isRemediation === true ||
@@ -71,7 +68,6 @@ export function determineLockFileDirs(
   if (
     config.upgrades.every(
       (upgrade: Upgrade) =>
-        upgrade.skipArtifactUpdating === true ||
         upgrade.updateType === 'lockFileMaintenance' ||
         upgrade.isLockfileUpdate,
     )
@@ -375,7 +371,7 @@ export async function getAdditionalFiles(
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
-  if (!config.updateLockFiles) {
+  if (!config.updateLockFiles || config.skipArtifactUpdating) {
     logger.debug('Skipping lock file generation');
     return { artifactErrors, updatedArtifacts };
   }

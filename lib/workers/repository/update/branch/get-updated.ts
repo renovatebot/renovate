@@ -472,37 +472,12 @@ async function managerUpdateArtifacts(
   manager: string,
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  const updatedDepsCount = updateArtifact.updatedDeps.length;
-  if (updatedDepsCount === 0) {
-    // When there are no updated dependencies, use the config's value.
-    if (updateArtifact.config.skipArtifactUpdating) {
-      logger.debug(
-        { manager, packageFileName: updateArtifact.packageFileName },
-        'skipping artifact updating because skipArtifactUpdating=true',
-      );
-      return null;
-    }
-  } else {
-    // When there are updated dependencies, use the dependency's value.
-    const skipArtifactUpdatingCount = updateArtifact.updatedDeps.filter(
-      (x) => x.skipArtifactUpdating,
-    ).length;
-
-    // If all dependencies want to skip artifact
-    // updating, then we skip it. If at least one
-    // of them wants to run it, then we run it.
-    if (skipArtifactUpdatingCount === updatedDepsCount) {
-      logger.debug(
-        { manager, packageFileName: updateArtifact.packageFileName },
-        'skipping artifact updating because all updated dependencies have skipArtifactUpdating=true',
-      );
-      return null;
-    } else {
-      logger.debug(
-        { manager, packageFileName: updateArtifact.packageFileName },
-        `running artifact updating because ${updatedDepsCount - skipArtifactUpdatingCount} out of ${updatedDepsCount} updated dependencies have skipArtifactUpdating=false`,
-      );
-    }
+  if (updateArtifact.config.skipArtifactUpdating) {
+    logger.debug(
+      { manager, packageFileName: updateArtifact.packageFileName },
+      'skipping artifact updating',
+    );
+    return null;
   }
 
   const updateArtifacts = get(manager, 'updateArtifacts');

@@ -713,76 +713,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    it('does not update artifacts when there are no updated deps and config.skipArtifactUpdating=true', async () => {
-      const branchName = 'renovate/wheel-0.x';
-      // Use lock file maintenance to attempt to update artifacts without any upgrades.
-      const updateType = 'lockFileMaintenance';
-      const lockedVersion = '0.45.0';
-      const newVersion = '0.45.1';
-      const currentValue = '==0.45.0';
-      const currentPipCompileValue = '==0.45.0';
-      const newRegexValue = newVersion;
-      const newPipCompileValue = '==0.45.1';
-
-      const packageFileA = 'requirements-a.in';
-      const lockFileA = 'requirements-a.txt';
-      const packageFileB = 'requirements-b.in';
-      const lockFileB = 'requirements-b.txt';
-
-      const regexWheelLookup: LookupUpdate = {
-        newVersion,
-        newValue: newRegexValue,
-        updateType,
-        branchName,
-      };
-
-      const pipCompileWheelLookup: LookupUpdate = {
-        ...regexWheelLookup,
-        newValue: newPipCompileValue,
-      };
-      const pipCompileWheelDep = {
-        currentValue: currentPipCompileValue,
-        lockedVersion,
-        updates: [pipCompileWheelLookup],
-      };
-
-      config.manager = 'regex';
-      config.branchName = branchName;
-      config.skipArtifactUpdating = true;
-      config.upgrades.push({
-        packageFileA,
-        lockFiles: [lockFileA],
-        manager: 'pip-compile',
-        updateType,
-        depName: 'alpha',
-        currentValue,
-        newVersion,
-        branchName,
-      });
-      config.packageFiles = {
-        'pip-compile': [
-          {
-            packageFile: packageFileA,
-            lockFiles: [lockFileA],
-            deps: [pipCompileWheelDep],
-          },
-          {
-            packageFile: packageFileB,
-            lockFiles: [lockFileB],
-            deps: [pipCompileWheelDep],
-          },
-        ],
-      };
-
-      pipCompile.updateArtifacts.mockResolvedValue([]);
-      autoReplace.doAutoReplace.mockResolvedValue('new content');
-
-      await getUpdatedPackageFiles(config);
-
-      expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
-    });
-
-    it('does not update artifacts when all updated deps have skipArtifactUpdating=true', async () => {
+    it('does not update artifacts when skipArtifactUpdating=true', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
       const lockedVersion = '0.45.0';
@@ -813,6 +744,7 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       config.manager = 'pip-compile';
       config.branchName = branchName;
+      config.skipArtifactUpdating = true;
       config.upgrades.push({
         packageFile,
         lockFiles: [lockFile],
@@ -822,7 +754,6 @@ describe('workers/repository/update/branch/get-updated', () => {
         currentValue,
         newVersion,
         branchName,
-        skipArtifactUpdating: true,
       });
       config.upgrades.push({
         packageFile,
@@ -833,7 +764,6 @@ describe('workers/repository/update/branch/get-updated', () => {
         currentValue,
         newVersion,
         branchName,
-        skipArtifactUpdating: true,
       });
 
       config.packageFiles = {
@@ -854,7 +784,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
     });
 
-    it('updates artifacts when only some updated deps have skipArtifactUpdating=true', async () => {
+    it('updates artifacts when skipArtifactUpdating=false', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
       const lockedVersion = '0.45.0';
@@ -904,7 +834,6 @@ describe('workers/repository/update/branch/get-updated', () => {
         currentValue,
         newVersion,
         branchName,
-        skipArtifactUpdating: true,
       });
 
       config.packageFiles = {

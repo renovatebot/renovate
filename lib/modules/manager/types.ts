@@ -326,4 +326,5 @@ export interface PostUpdateConfig<T = Record<string, any>>
   reuseExistingBranch?: boolean;
 
   isLockFileMaintenance?: boolean;
+  skipArtifactUpdating?: boolean;
 }
