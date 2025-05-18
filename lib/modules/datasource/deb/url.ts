@@ -1,4 +1,5 @@
 import { logger } from '../../../logger';
+import type { Http, HttpOptions } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 
 /**
@@ -14,6 +15,43 @@ import { joinUrlParts } from '../../../util/url';
 export function getBaseSuiteUrl(basePackageUrl: string): string {
   const urlParts = basePackageUrl.split('/');
   return urlParts.slice(0, urlParts.length - 2).join('/');
+}
+
+/**
+ * Checks if a packageUrl content has been modified since the specified timestamp.
+ *
+ * @param packageUrl - The URL to check.
+ * @param lastDownloadTimestamp - The timestamp of the last download.
+ * @returns True if the content has been modified, otherwise false.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
+ * @throws Error if the request fails.
+ */
+export async function checkIfModified(
+  packageUrl: string,
+  lastDownloadTimestamp: Date,
+  http: Http,
+): Promise<boolean> {
+  const options: HttpOptions = {
+    headers: {
+      'If-Modified-Since': lastDownloadTimestamp.toUTCString(),
+    },
+  };
+
+  const response = await http.head(packageUrl, options);
+  return response.statusCode !== 304;
+}
+
+/**
+ * Extract the relative package path from the base package URL.
+ * For example, given the URL 'https://deb.debian.org/debian/dists/bullseye/main/binary-amd64',
+ * will return 'main/binary-amd64'.
+ *
+ * @param basePackageUrl - The base URL of the package.
+ * @returns
+ */
+export function getPackagePath(basePackageUrl: string): string {
+  const urlParts = basePackageUrl.split('/');
+  return urlParts.slice(urlParts.length - 2, urlParts.length).join('/');
 }
 
 /**
