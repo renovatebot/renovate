@@ -3580,10 +3580,12 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = PackagistDatasource.id;
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
-      config.registryUrls = ['https://packagist.org'];
+      config.registryUrls = ['https://repo.packagist.org'];
       httpMock
-        .scope('https://packagist.org')
-        .get('/packages/foo/bar.json')
+        .scope('https://repo.packagist.org')
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
+        .get('/p2/foo/bar.json')
         .reply(404);
 
       const { updates } = await Result.wrap(
