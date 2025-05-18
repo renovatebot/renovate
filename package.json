@@ -266,7 +266,7 @@
   "optionalDependencies": {
     "better-sqlite3": "11.10.0",
     "openpgp": "6.1.0",
-    "re2": "1.21.4"
+    "re2": "1.21.5"
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.4",
