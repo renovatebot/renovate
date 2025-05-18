@@ -172,7 +172,7 @@ function getConfigFromTooling(
     (is.function(toolDefinition.config)
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
-  );
+  ); // Ensure null is returned instead of undefined
 }
 
 function createDependency(
