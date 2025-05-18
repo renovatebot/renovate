@@ -65,6 +65,21 @@ module "task_definition" {
     "${module.container_definition.json}"]
 }
 
+module "repo-with-dotgit" {
+  source = "git@git.example.com:group/repo/foo.git?depth=1&ref=v1.0.0"
+}
+
+module "repo-without-dotgit" {
+  source = "git@git.example.com:group/repo/foo?depth=1&ref=v1.0.0"
+}
+
+module "repo-with-dotgit-with-subfolder" {
+  source = "git@git.example.com:group/repo/foo.git//bar?depth=1&ref=bar-v1.0.0"
+}
+
+module "repo-without-dotgit-with-subfolder" {
+  source = "git@git.example.com:group/repo/foo//bar?depth=1&ref=bar-v1.0.0"
+}
 
 module "web_server_sg" {
   source = "terraform-aws-modules/security-group/aws//modules/http-80"
