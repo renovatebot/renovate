@@ -41,7 +41,7 @@ export function getPackageManagerVersion(
     const version = packageMgr?.version;
     if (version) {
       logger.debug(
-        `Found ${name} constraint in package.json devEigines: ${version}`,
+        `Found ${name} constraint in package.json devEngines: ${version}`,
       );
       return version;
     }
