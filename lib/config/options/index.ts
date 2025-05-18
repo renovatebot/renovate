@@ -1893,7 +1893,7 @@ const options: RenovateOptions[] = [
   {
     name: 'abandonmentThreshold',
     description:
-      'The package will be marked as abandoned if it has not been updated for this duration.',
+      'Flags packages that have not been updated within this period as abandoned.',
     type: 'string',
     default: null,
   },

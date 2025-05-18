@@ -696,13 +696,21 @@ export class DockerDatasource extends Datasource {
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
       if (isArtifactoryServer(res)) {
-        // Artifactory incorrectly returns a next link without the virtual repository name
-        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
-        url = linkHeader?.next?.last
-          ? `${url}&last=${linkHeader.next.last}`
-          : null;
+        // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
+        if (linkHeader?.next?.last) {
+          // parse the current URL, strip any old "last" param, then set the new one
+          const parsed: URL = new URL(url);
+          parsed.searchParams.delete('last');
+          parsed.searchParams.set('last', linkHeader.next.last);
+          url = parsed.href;
+        } else {
+          url = null;
+        }
+      } else if (linkHeader?.next?.url) {
+        // for the normal case we can still use URL to resolve relative-next
+        url = new URL(linkHeader.next.url, url).href;
       } else {
-        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
+        url = null;
       }
       page += 1;
     } while (url && page < pages);
