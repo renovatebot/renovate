@@ -3122,7 +3122,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'skipArtifactUpdating',
-    description: 'If set, artifact updating will be skipped.',
+    description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
     default: false,
     globalOnly: false,
