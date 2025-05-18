@@ -20,7 +20,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
-      authorization: false,
     });
 
     scope.get('/foo/bar').reply(304);
@@ -28,7 +27,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     expect(res2).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
-      authorization: false,
     });
   });
 
@@ -46,7 +44,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
-      authorization: false,
     });
 
     scope.get('/foo/bar').reply(304);
@@ -54,7 +51,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     expect(res2).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
-      authorization: false,
     });
   });
 
@@ -66,7 +62,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     expect(res1).toMatchObject({
       statusCode: 200,
       body: { msg: 'Hello, world!' },
-      authorization: false,
     });
 
     resetCache();
@@ -75,7 +70,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
     const res2 = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res2).toMatchObject({
       statusCode: 304,
-      authorization: false,
     });
   });
 
@@ -87,7 +81,6 @@ describe('util/http/cache/repository-http-cache-provider', () => {
 
     expect(res).toMatchObject({
       statusCode: 203,
-      authorization: false,
     });
   });
 

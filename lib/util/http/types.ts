@@ -28,7 +28,6 @@ export interface GotExtraOptions {
   token?: string;
   hostType?: string;
   enabled?: boolean;
-  memCache?: boolean;
   noAuth?: boolean;
   context?: GotContextOptions;
 }
@@ -63,7 +62,6 @@ export interface HttpOptions {
   throwHttpErrors?: boolean;
 
   token?: string;
-  memCache?: boolean;
   cacheProvider?: HttpCacheProvider;
   readOnly?: boolean;
 }
@@ -78,7 +76,7 @@ export interface HttpResponse<T = string> {
   statusCode: number;
   body: T;
   headers: HttpHeaders;
-  authorization?: boolean;
+  authorization?: true;
 }
 
 export type Task<T> = () => Promise<T>;

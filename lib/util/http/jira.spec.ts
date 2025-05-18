@@ -14,7 +14,6 @@ describe('util/http/jira', () => {
     setBaseUrl(siteUrl);
 
     expect(await api.postJson('some-path')).toEqual({
-      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
