@@ -40,7 +40,8 @@ export function calculateAbandonment(
   const abandonmentDate = bumpedAtDate.plus({
     milliseconds: abandonmentThresholdMs,
   });
-  const isAbandoned = abandonmentDate < DateTime.now();
+  const now = DateTime.local();
+  const isAbandoned = abandonmentDate < now;
   releaseResult.isAbandoned = isAbandoned;
 
   logger.trace(
@@ -50,7 +51,7 @@ export function calculateAbandonment(
       abandonmentThreshold,
       abandonmentThresholdMs,
       abandonmentDate: abandonmentDate.toISO(),
-      now: DateTime.now().toISO(),
+      now: now.toISO(),
       isAbandoned,
     },
     'Calculated abandonment status',
