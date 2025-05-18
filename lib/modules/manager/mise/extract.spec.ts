@@ -52,9 +52,11 @@ describe('modules/manager/mise/extract', () => {
       const content = codeBlock`
       [tools]
       actionlint = "1.7.7"
+      astro = "1.34.0"
       aws-cli = "2.25.10"
       aws-vault = "6.6.1"
       buf = "1.27.0"
+      ccache = "4.11.3"
       consul = "1.14.3"
       hivemind = "1.1.0"
       jq = "1.7.1"
@@ -62,6 +64,7 @@ describe('modules/manager/mise/extract', () => {
       localstack = "4.3.0"
       opentofu = "1.6.1"
       protoc = "30.2"
+      redis = "8.0.1"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -79,6 +82,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'actionlint',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'rhysd/actionlint',
+          },
+          {
+            currentValue: '1.34.0',
+            datasource: 'github-releases',
+            depName: 'astro',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'astronomer/astro-cli',
           },
           {
             currentValue: '2.25.10',
@@ -99,6 +109,13 @@ describe('modules/manager/mise/extract', () => {
             depName: 'buf',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'bufbuild/buf',
+          },
+          {
+            currentValue: '4.11.3',
+            datasource: 'github-releases',
+            depName: 'ccache',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'ccache/ccache',
           },
           {
             currentValue: '1.14.3',
@@ -147,6 +164,12 @@ describe('modules/manager/mise/extract', () => {
             depName: 'protoc',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'protocolbuffers/protobuf',
+          },
+          {
+            currentValue: '8.0.1',
+            datasource: 'github-releases',
+            depName: 'redis',
+            packageName: 'redis/redis',
           },
           {
             currentValue: '0.10.0',
