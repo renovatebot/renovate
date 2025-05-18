@@ -76,7 +76,8 @@ export function createCargoToolConfig(
     case 'branch':
       return {
         packageName: name,
-        skipReason: 'unsupported-version',
+        datasource: GitRefsDatasource.id,
+        currentValue: gitVersion,
       };
     case 'rev':
       return {

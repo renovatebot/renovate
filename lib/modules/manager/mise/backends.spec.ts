@@ -61,7 +61,8 @@ describe('modules/manager/mise/backends', () => {
         ),
       ).toStrictEqual({
         packageName: 'https://github.com/username/demo',
-        skipReason: 'unsupported-version',
+        currentValue: 'main',
+        datasource: 'git-refs',
       });
     });
 
