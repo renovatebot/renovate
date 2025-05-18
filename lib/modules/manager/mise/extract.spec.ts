@@ -370,8 +370,9 @@ describe('modules/manager/mise/extract', () => {
           },
           {
             depName: 'cargo:https://github.com/username/demo2',
+            currentValue: 'main',
             packageName: 'https://github.com/username/demo2',
-            skipReason: 'unsupported-version',
+            datasource: 'git-refs',
           },
           {
             depName: 'cargo:https://github.com/username/demo3',
@@ -527,10 +528,9 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'ubi:nekto/act',
-            currentValue: '0.2.70',
+            currentValue: 'v0.2.70',
             packageName: 'nekto/act',
             datasource: 'github-releases',
-            extractVersion: '^v?(?<version>.+)',
           },
           {
             depName: 'ubi:cli/cli',

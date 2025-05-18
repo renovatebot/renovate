@@ -215,7 +215,7 @@ describe('modules/manager/mise/backends', () => {
       expect(createUbiToolConfig('cli/cli', 'v2.64.0', {})).toStrictEqual({
         packageName: 'cli/cli',
         datasource: 'github-releases',
-        currentValue: '2.64.0',
+        currentValue: 'v2.64.0',
       });
     });
 
@@ -251,7 +251,7 @@ describe('modules/manager/mise/backends', () => {
       ).toStrictEqual({
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
-        currentValue: '1.10.17',
+        currentValue: 'v1.10.17',
         extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
       });
     });
@@ -264,7 +264,7 @@ describe('modules/manager/mise/backends', () => {
       ).toStrictEqual({
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
-        currentValue: '1.10.17',
+        currentValue: 'v1.10.17',
         extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
       });
     });
@@ -277,7 +277,7 @@ describe('modules/manager/mise/backends', () => {
       ).toStrictEqual({
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
-        currentValue: '1.10.17',
+        currentValue: 'v1.10.17',
         extractVersion: '^(?<version>v\\d+\\.\\d+\\.)',
       });
     });
