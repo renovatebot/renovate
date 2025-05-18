@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -32,6 +33,21 @@ export function getPackageManagerVersion(
   name: string,
   pkg: PackageJsonSchema,
 ): string | null {
+  if (pkg.devEngines?.packageManager) {
+    const packageManagers = is.array(pkg.devEngines.packageManager)
+      ? pkg.devEngines.packageManager
+      : [pkg.devEngines.packageManager];
+    const packageMgr = packageManagers.find((pm) => pm.name === name);
+    const version = packageMgr?.version;
+    if (version) {
+      logger.debug(
+        `Found ${name} constraint in package.json devEigines: ${version}`,
+      );
+      return version;
+    }
+
+    return null;
+  }
   if (pkg.packageManager?.name === name) {
     const version = pkg.packageManager.version;
     logger.debug(
