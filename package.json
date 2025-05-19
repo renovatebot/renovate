@@ -246,7 +246,7 @@
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.5.0",
-    "semver": "7.7.1",
+    "semver": "7.7.2",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.2",
