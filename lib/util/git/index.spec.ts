@@ -1226,5 +1226,60 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).trim();
       expect(branch).toBe('develop');
     });
+
+    it('should fetch from upstream and update local branch', async () => {
+      const newBase = await tmp.dir({ unsafeCleanup: true });
+      const upstream = Git(newBase.path);
+      await upstream.init();
+      defaultBranch = (await upstream.raw('branch', '--show-current')).trim();
+      await upstream.addConfig('user.email', 'other@example.com');
+      await upstream.addConfig('user.name', 'Other');
+      await fs.writeFile(newBase.path + '/past_file', 'past');
+      await upstream.addConfig('commit.gpgsign', 'false');
+      await upstream.add(['past_file']);
+      await upstream.commit('past message');
+      await upstream.raw(['checkout', '-B', defaultBranch]);
+
+      const upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
+      const upstreamRepo = Git(upstreamOrigin.path);
+      await upstreamRepo.clone(newBase.path, '.', ['--bare']);
+      await upstreamRepo.addConfig('commit.gpgsign', 'false');
+
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+
+      await git.initRepo({
+        url: origin.path,
+        defaultBranch,
+        upstreamUrl: upstreamOrigin.path,
+      });
+
+      await git.syncGit();
+      const tmpGit = Git(tmpDir.path);
+
+      // make sure origin exists ie. fork repo is cloned
+      const originRemote = (
+        await tmpGit.raw(['remote', 'get-url', 'origin'])
+      ).trim();
+      expect(originRemote.trim()).toBe(origin.path);
+
+      // make sure upstream exists
+      const upstreamRemote = (
+        await tmpGit.raw(['remote', 'get-url', 'upstream'])
+      ).trim();
+      expect(upstreamRemote).toBe(upstreamOrigin.path);
+
+      // verify fetch from upstream happened
+      // by checking the `upstream/main` branch in the forked repo's remote branches
+      const branches = await tmpGit.branch(['-r']);
+      expect(branches.all).toContain(`upstream/${defaultBranch}`);
+
+      // verify that the HEAD's match
+      const headSha = (await tmpGit.revparse(['HEAD'])).trim();
+      const upstreamSha = (
+        await tmpGit.revparse([`upstream/${defaultBranch}`])
+      ).trim();
+      expect(headSha).toBe(upstreamSha);
+    });
   });
 });

@@ -194,9 +194,11 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(): Promise<void> {
+async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
-  const opts = ['ls-remote', '--heads', config.url];
+  const url =
+    preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
+  const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
@@ -494,6 +496,25 @@ export async function syncGit(): Promise<void> {
     (await getDefaultBranch(git));
   /* v8 ignore next -- TODO: add test */
   delete getCache()?.semanticCommits;
+
+  if (config.upstreamUrl) {
+    logger.debug(`Resetting ${config.currentBranch} to upstream`);
+    await git.addRemote('upstream', config.upstreamUrl);
+    await git.fetch(['upstream']);
+    await resetToBranch(config.currentBranch);
+    const resetLog = await git.reset([
+      '--hard',
+      `upstream/${config.currentBranch}`,
+    ]);
+    logger.debug({ resetLog }, 'git reset log');
+    const pushLog = await git.push(['origin', config.currentBranch, '--force']);
+    logger.debug({ pushLog }, 'git push log');
+    await fetchBranchCommits(false);
+  }
+  config.currentBranchSha = (
+    await git.raw(['rev-parse', 'HEAD'])
+  ).trim() as LongCommitSha;
+  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
