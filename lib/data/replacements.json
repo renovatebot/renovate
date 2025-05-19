@@ -240,6 +240,18 @@
       }
     ]
   },
+  "eslint-config-standard-to-maintained-fork": {
+    "description": "Replace `eslint-config-standard` with a maintained fork: `@eslinter/eslint-config-standard`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["eslint-config-standard"],
+        "matchCurrentVersion": "^3.2.0",
+        "replacementName": "@eslinter/eslint-config-standard",
+        "replacementVersion": "0.1.2"
+      }
+    ]
+  },
   "eslint-config-standard-with-typescript-to-eslint-config-love": {
     "description": "`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.",
     "packageRules": [
