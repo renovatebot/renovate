@@ -184,12 +184,10 @@ function extractSteps(
   deps: PackageDependency<Record<string, any>>[],
 ): void {
   for (const step of steps) {
-    if (step.uses) {
-      const val = Result.parse(step, communityActions).unwrapOrNull();
-      if (val) {
-        deps.push(val);
-        continue;
-      }
+    const val = Result.parse(step, communityActions).unwrapOrNull();
+    if (val) {
+      deps.push(val);
+      continue;
     }
 
     for (const [action, versioning] of Object.entries(versionedActions)) {
