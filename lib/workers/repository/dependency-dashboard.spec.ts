@@ -1,6 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { DateTime } from 'luxon';
 import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -14,6 +13,7 @@ import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { asTimestamp } from '../../util/timestamp';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
@@ -1658,108 +1658,125 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
     });
   });
 
-  describe('getAbandonedPackagesMd', () => {
-    const { getAbandonedPackagesMd } = dependencyDashboard;
+  describe('getAbandonedPackagesMd()', () => {
+    it('returns empty string when no abandoned packages exist', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              { depName: 'lodash', isAbandoned: false },
+              { depName: 'express', isAbandoned: false },
+            ],
+          },
+        ],
+      };
 
-    it('returns empty string when branches array is empty', () => {
-      const branches: BranchConfig[] = [];
-      const result = getAbandonedPackagesMd(branches);
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
       expect(result).toEqual('');
     });
 
-    it('returns empty string when no packages are abandoned', () => {
-      const branches: BranchConfig[] = [
-        {
-          upgrades: [
-            { depName: 'package1', manager: 'npm', isAbandoned: false },
-            { depName: 'package2', manager: 'npm', isAbandoned: false },
-          ],
-        } as BranchConfig,
-      ];
-      const result = getAbandonedPackagesMd(branches);
-      expect(result).toEqual('');
-    });
+    it('returns formatted markdown when abandoned packages exist', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'abandoned-pkg',
+                isAbandoned: true,
+                bumpedAt: asTimestamp('2020-05-15T12:00:00.000Z')!,
+              },
+            ],
+          },
+        ],
+      };
 
-    it('returns markdown table with abandoned packages info', () => {
-      const today = DateTime.now().toISO();
-      const yesterday = DateTime.now().minus({ days: 1 }).toISO();
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
-      const branches: BranchConfig[] = [
-        {
-          upgrades: [
-            {
-              depName: 'package1',
-              manager: 'npm',
-              isAbandoned: true,
-              bumpedAt: today,
-            },
-            {
-              depName: 'package2',
-              manager: 'npm',
-              isAbandoned: false,
-            },
-          ],
-        } as BranchConfig,
-        {
-          upgrades: [
-            {
-              depName: 'package3',
-              manager: 'gradle',
-              isAbandoned: true,
-              bumpedAt: yesterday,
-            },
-            {
-              depName: 'package4',
-              manager: 'gradle',
-              isAbandoned: false,
-            },
-          ],
-        } as BranchConfig,
-      ];
-
-      const result = getAbandonedPackagesMd(branches);
-
-      // Format dates in the expected format for comparison
-      const formattedToday = DateTime.fromISO(today).toFormat('yyyy-MM-dd');
-      const formattedYesterday =
-        DateTime.fromISO(yesterday).toFormat('yyyy-MM-dd');
-
-      expect(result).toContain('ℹ **Note**');
-      expect(result).toContain(
-        'These dependencies may be unmaintained due to lack of updates:',
-      );
+      expect(result).toContain('> ℹ **Note**');
       expect(result).toContain('| Datasource | Name | Last Updated |');
-      expect(result).toContain(
-        `| gradle | \`package3\` | \`${formattedYesterday}\` |`,
-      );
-      expect(result).toContain(
-        `| npm | \`package1\` | \`${formattedToday}\` |`,
-      );
-      expect(result).toContain(
-        'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`]',
-      );
-      expect(result).toContain(
-        'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.',
-      );
+      expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
+      expect(result).toContain('abandonmentThreshold');
     });
 
-    it('handles abandoned packages without bumpedAt date', () => {
-      const branches: BranchConfig[] = [
-        {
-          upgrades: [
-            {
-              depName: 'package1',
-              manager: 'npm',
-              isAbandoned: true,
-              bumpedAt: null,
-            },
-          ],
-        } as BranchConfig,
-      ];
+    it('handles multiple abandoned packages across different managers', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'pkg1',
+                isAbandoned: true,
+                bumpedAt: asTimestamp('2021-01-10T10:00:00.000Z')!,
+              },
+              { depName: 'pkg2', isAbandoned: false },
+              {
+                depName: 'pkg3',
+                isAbandoned: true,
+                bumpedAt: asTimestamp('2020-11-05T15:30:00.000Z')!,
+              },
+            ],
+          },
+        ],
+        gradle: [
+          {
+            packageFile: 'build.gradle',
+            deps: [
+              {
+                depName: 'org.example:lib',
+                isAbandoned: true,
+                bumpedAt: asTimestamp('2019-07-22T08:15:00.000Z')!,
+              },
+            ],
+          },
+        ],
+      };
 
-      const result = getAbandonedPackagesMd(branches);
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
 
-      expect(result).toContain(`| npm | \`package1\` | \`unknown\` |`);
+      expect(result).toContain('| gradle | `org.example:lib` | `2019-07-22` |');
+      expect(result).toContain('| npm | `pkg1` | `2021-01-10` |');
+      expect(result).toContain('| npm | `pkg3` | `2020-11-05` |');
+      expect(result).not.toContain('pkg2');
+    });
+
+    it('displays "unknown" when bumpedAt is missing', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'pkg-with-date',
+                isAbandoned: true,
+                bumpedAt: asTimestamp('2021-03-17T14:30:00.000Z')!,
+              },
+              { depName: 'pkg-no-date', isAbandoned: true },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+
+      expect(result).toContain('| npm | `pkg-with-date` | `2021-03-17` |');
+      expect(result).toContain('| npm | `pkg-no-date` | `unknown` |');
+    });
+
+    it('handles empty deps array', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      expect(result).toEqual('');
     });
   });
 });

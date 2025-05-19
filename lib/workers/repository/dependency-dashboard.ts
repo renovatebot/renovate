@@ -202,7 +202,6 @@ export async function ensureDependencyDashboard(
   packageFiles: Record<string, PackageFile[]> = {},
   configMigrationRes: ConfigMigrationResult,
 ): Promise<void> {
-  logger.debug('ensureDependencyDashboard()');
   if (config.mode === 'silent') {
     logger.debug(
       'Dependency Dashboard issue is not created, updated or closed when mode=silent',
@@ -325,7 +324,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  issueBody += getAbandonedPackagesMd(branches);
+  issueBody += getAbandonedPackagesMd(packageFiles);
 
   const pendingApprovals = branches.filter(
     (branch) => branch.result === 'needs-approval',
@@ -560,20 +559,23 @@ export async function ensureDependencyDashboard(
   }
 }
 
-export function getAbandonedPackagesMd(branches: BranchConfig[]): string {
+export function getAbandonedPackagesMd(
+  packageFiles: Record<string, PackageFile[]>,
+): string {
   const abandonedPackages: Record<
     string,
     Record<string, string | undefined | null>
   > = {};
   let hasAbandonedPackages = false;
 
-  for (const branch of branches) {
-    for (const upgrade of branch.upgrades) {
-      if (upgrade.depName && upgrade.isAbandoned) {
-        hasAbandonedPackages = true;
-        const manager = upgrade.manager;
-        abandonedPackages[manager] = abandonedPackages[manager] || {};
-        abandonedPackages[manager][upgrade.depName] = upgrade.bumpedAt;
+  for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
+    for (const packageFile of managerPackageFiles) {
+      for (const dep of packageFile.deps || []) {
+        if (dep.depName && dep.isAbandoned) {
+          hasAbandonedPackages = true;
+          abandonedPackages[manager] = abandonedPackages[manager] || {};
+          abandonedPackages[manager][dep.depName] = dep.bumpedAt;
+        }
       }
     }
   }
