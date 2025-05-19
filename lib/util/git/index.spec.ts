@@ -1227,7 +1227,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(branch).toBe('develop');
     });
 
-    it('should add upstream, fetch, reset, and push correctly', async () => {
+    it('should fetch from upstream and update local branch', async () => {
       const newBase = await tmp.dir({ unsafeCleanup: true });
       const upstream = Git(newBase.path);
       await upstream.init();
@@ -1238,6 +1238,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       await upstream.addConfig('commit.gpgsign', 'false');
       await upstream.add(['past_file']);
       await upstream.commit('past message');
+      await upstream.raw(['checkout', '-B', defaultBranch]);
 
       const upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
       const upstreamRepo = Git(upstreamOrigin.path);
@@ -1271,11 +1272,13 @@ describe('util/git/index', { timeout: 10000 }, () => {
       // verify fetch from upstream happened
       // by checking the `upstream/main` branch in the forked repo's remote branches
       const branches = await tmpGit.branch(['-r']);
-      expect(branches.all).toContain('upstream/main');
+      expect(branches.all).toContain(`upstream/${defaultBranch}`);
 
-      // verify that the HEAD of forked repo's default branch is same as HEAD of upstream default branch
+      // verify that the HEAD's match
       const headSha = (await tmpGit.revparse(['HEAD'])).trim();
-      const upstreamSha = (await tmpGit.revparse(['upstream/main'])).trim();
+      const upstreamSha = (
+        await tmpGit.revparse([`upstream/${defaultBranch}`])
+      ).trim();
       expect(headSha).toBe(upstreamSha);
     });
   });
