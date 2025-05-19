@@ -114,6 +114,69 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
+    it('creates data files for commands', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: ['some-command'],
+            dataFiles: [
+              {
+                path: 'data.json',
+                template:
+                  '[{{#each upgrades}}{\"depName\": \"{{{depName}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]',
+              },
+            ],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+        2,
+        __dirname + '/data.json',
+        '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
+      );
+    });
+
     it('logs files which do not match fileFilters', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {

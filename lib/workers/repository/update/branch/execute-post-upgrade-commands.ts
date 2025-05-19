@@ -1,4 +1,5 @@
 // TODO #22198
+import path from 'path';
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
@@ -42,6 +43,7 @@ export async function postUpgradeCommandsExecutor(
       `Checking for post-upgrade tasks`,
     );
     const commands = upgrade.postUpgradeTasks?.commands;
+    const dataFiles = upgrade.postUpgradeTasks?.dataFiles ?? [];
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
@@ -58,6 +60,46 @@ export async function postUpgradeCommandsExecutor(
           }
           // TODO #22198
           await writeLocalFile(file.path, contents!);
+        }
+      }
+
+      for (const dataFile of dataFiles) {
+        if (!dataFile.path) {
+          logger.debug(
+            { template: dataFile.template },
+            'Ignoring post-upgrade commands data file due to missing file path',
+          );
+          continue;
+        }
+        if (!dataFile.template) {
+          logger.debug(
+            { path: dataFile.path },
+            'Ignoring post-upgrade command data file due to missing template',
+          );
+          continue;
+        }
+
+        const dataFilePath = path.isAbsolute(dataFile.path)
+          ? dataFile.path
+          : path.join(GlobalConfig.get('localDir') ?? '', dataFile.path);
+        const dataFileContent = compile(
+          dataFile.template,
+          mergeChildConfig(config, upgrade),
+        );
+
+        try {
+          await writeLocalFile(dataFilePath, dataFileContent);
+          logger.debug(
+            { path: dataFile.path, content: dataFileContent },
+            'Created post-upgrade command data file',
+          );
+        } catch (error) {
+          artifactErrors.push({
+            lockFile: upgrade.packageFile,
+            stderr: sanitize(
+              `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
+            ),
+          });
         }
       }
 

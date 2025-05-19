@@ -192,8 +192,14 @@ export interface LegacyAdminConfig {
 
 export type ExecutionMode = 'branch' | 'update';
 
+export interface DataFile {
+  path: string;
+  template: string;
+}
+
 export interface PostUpgradeTasks {
   commands?: string[];
+  dataFiles?: DataFile[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
 }
@@ -405,6 +411,7 @@ export type AllowedParents =
   | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
+  | 'dataFiles'
   | 'hostRules'
   | 'logLevelRemap'
   | 'packageRules'

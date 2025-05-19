@@ -173,6 +173,34 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'dataFiles',
+    description:
+      'A list of data files to be created from specified template for post-upgrade commands that are executed before a commit is made by Renovate.',
+    type: 'array',
+    subType: 'object',
+    parents: ['postUpgradeTasks'],
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'path',
+    description:
+      'Path where this data file for post-upgrade commands should be created.',
+    type: 'string',
+    parents: ['dataFiles'],
+    default: '',
+    cli: false,
+  },
+  {
+    name: 'template',
+    description:
+      'A template from which data file for post-upgrade commands should be created. Format is the same as in commands.',
+    type: 'string',
+    parents: ['dataFiles'],
+    default: '',
+    cli: false,
+  },
+  {
     name: 'fileFilters',
     description:
       'Files that match the glob pattern will be committed after running a post-upgrade task.',

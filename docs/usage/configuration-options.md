@@ -3708,7 +3708,7 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
@@ -3720,6 +3720,44 @@ They will be compiled _prior_ to the comparison against [`allowedCommands`](./se
 <!-- prettier-ignore -->
 !!! note
     Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### dataFiles
+
+A list of additional data files for the commands.
+The primary purpose of the data files is to store some update information in a file which would be consumed from a post-upgrade command.
+This is particulary useful if a post-upgrade command need to have a long line of arguments.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["my-script.py --data update-data.json"],
+    "dataFiles": [
+      {
+        "path": "update-data.json",
+        "template": "[{{#each upgrades}}{\"depName\": \"{{{depName}}}\", \"currentValue\": \"{{{currentValue}}}\", \"newValue\": \"{{{newValue}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]"
+      }
+    ],
+    "executionMode": "branch"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+   `dataFiles` are ignored if there is no `commands` configured.
+
+Each data file configuration consists of two fields:
+
+#### path
+
+Path to the data file including the file name.
+If the path is relative, e.g. `data.json`, then it will be evaluated against git repository root directory.
+
+#### template
+
+A template from which data file content is created.
+The template format is identical to the one in `commands`.
 
 ### executionMode
 
