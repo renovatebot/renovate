@@ -610,7 +610,7 @@ describe('workers/repository/init/merge', () => {
           },
         },
         {
-          name: 'it should merge both configs and and repo config is higher priority',
+          name: 'it should merge both configs and repo config is higher priority',
           currentConfig: {},
           repoFileConfig: {
             extends: ['group:socketio'],
