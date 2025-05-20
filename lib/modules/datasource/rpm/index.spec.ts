@@ -2,6 +2,22 @@ import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/rpm/index', () => {
+  const testReleases = {
+    releases: [
+      {
+        version: '1.0-2.azl3',
+      },
+      {
+        version: '1.1-1.azl3',
+      },
+      {
+        version: '1.1-2.azl3',
+      },
+      {
+        version: '1.2',
+      },
+    ],
+  };
   describe('getFilelistsXmlUrl', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
     let rpmDatasource: RpmDatasource;
@@ -116,22 +132,7 @@ describe('modules/datasource/rpm/index', () => {
         filelistsXmlUrl,
         packageName,
       );
-      expect(releases).toEqual({
-        releases: [
-          {
-            version: '1.0-2.azl3',
-          },
-          {
-            version: '1.1-1.azl3',
-          },
-          {
-            version: '1.1-2.azl3',
-          },
-          {
-            version: '1.2',
-          },
-        ],
-      });
+      expect(releases).toEqual(testReleases);
     });
 
     it('throws an error if filelists.xml is missing', async () => {
@@ -253,43 +254,23 @@ describe('modules/datasource/rpm/index', () => {
       vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockResolvedValue(
         'https://example.com/repo/repodata/',
       );
-      vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue({
-        releases: [
-          {
-            version: '1.0-2.azl3',
-          },
-          {
-            version: '1.1-1.azl3',
-          },
-          {
-            version: '1.1-2.azl3',
-          },
-          {
-            version: '1.2',
-          },
-        ],
-      });
+
+      vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue(
+        testReleases,
+      );
 
       const releases = await rpmDatasource.getReleases({
         registryUrl,
         packageName: 'example-package',
       });
-      expect(releases).toEqual({
-        releases: [
-          {
-            version: '1.0-2.azl3',
-          },
-          {
-            version: '1.1-1.azl3',
-          },
-          {
-            version: '1.1-2.azl3',
-          },
-          {
-            version: '1.2',
-          },
-        ],
-      });
+      expect(releases).toEqual(testReleases);
+      expect(rpmDatasource.getFilelistsXmlUrl).toHaveBeenCalledWith(
+        registryUrl,
+      );
+      expect(rpmDatasource.getReleasesByPackageName).toHaveBeenCalledWith(
+        'https://example.com/repo/repodata/',
+        'example-package',
+      );
     });
 
     it('throws an error if getFilelistsXmlUrl fails', async () => {
