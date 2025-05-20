@@ -1,11 +1,14 @@
-import { DOMParser } from '@xmldom/xmldom';
-import { r } from 'tar';
-import { code } from 'tar/types';
+import { XmlDocument } from 'xmldoc';
+import { cache } from '../../../util/cache/package/decorator';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
+
+  // repomd.xml is a standard file name in RPM repositories which contains metadata about the repository
+  static readonly repomdXmlFileName = 'repomd.xml';
 
   constructor() {
     super(RpmDatasource.id);
@@ -26,55 +29,64 @@ export class RpmDatasource extends Datasource {
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
+  @cache({
+    namespace: `datasource-${RpmDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => packageName,
+    ttlMinutes: 1440,
+  })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!registryUrl) {
+    if (!registryUrl || !packageName) {
       return null;
     }
-    // add a trailing slash if it doesn't exist
-    const normalizedRegistryUrl = registryUrl.endsWith('/')
-      ? registryUrl
-      : `${registryUrl}/`;
-    const filelistsXmlUrl = await this.getFilelistsXmlUrl(
-      normalizedRegistryUrl,
-    );
-    if (!filelistsXmlUrl) {
-      return null;
+    try {
+      const filelistsXmlUrl = await this.getFilelistsXmlUrl(
+        ensureTrailingSlash(registryUrl),
+      );
+      if (!filelistsXmlUrl) {
+        return null;
+      }
+      const release = await this.getReleasesByPackageName(
+        filelistsXmlUrl,
+        packageName,
+      );
+
+      return release;
+    } catch (err) {
+      this.handleGenericErrors(err);
     }
-
-    const release = await this.getReleasesByPackageName(
-      filelistsXmlUrl,
-      packageName,
-    );
-
-    return release;
   }
 
-  async getFilelistsXmlUrl(registryUrl: string): Promise<string> {
-    // check if registryUrl/repomd.xml exists
-    const repomdUrl = new URL('repomd.xml', registryUrl);
+  @cache({
+    namespace: `datasource-${RpmDatasource.id}`,
+    key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
+    ttlMinutes: 1440,
+  })
+  async getFilelistsXmlUrl(registryUrl: string): Promise<string | null> {
+    const repomdUrl = joinUrlParts(
+      registryUrl,
+      RpmDatasource.repomdXmlFileName,
+    );
     const response = await this.http.getText(repomdUrl.toString());
     if (response.statusCode !== 200) {
       throw new Error(
         `Failed to fetch repomd.xml from ${repomdUrl} (${response.statusCode})`,
       );
     }
-    if (!response.body) {
-      throw new Error(`Failed to fetch repomd.xml from ${repomdUrl}`);
-    }
-    // parse repomd.xml
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(response.body, 'text/xml');
-    const dataElements = xmlDoc.getElementsByTagName('data');
+
+    // parse repomd.xml using XmlDocument
+    const data = new XmlDocument(response.body);
+    const dataElements = data.childrenNamed('data');
+
     for (const dataElement of dataElements) {
-      if (dataElement.getAttribute('type') === 'filelists') {
-        const locationElement = dataElement.getElementsByTagName('location')[0];
+      if (dataElement.attr.type === 'filelists') {
+        const locationElement = dataElement.childNamed('location');
         if (!locationElement) {
           throw new Error(`No location element found in filelists.xml`);
         }
-        const href = locationElement.getAttribute('href');
+        const href = locationElement.attr.href;
         if (!href) {
           throw new Error(`No href found in filelists.xml`);
         }
@@ -83,74 +95,61 @@ export class RpmDatasource extends Datasource {
           /\/repodata\/?$/,
           '/',
         );
-        return new URL(href, registryUrlWithoutRepodata).toString();
+        return joinUrlParts(registryUrlWithoutRepodata, href);
       }
     }
-    throw new Error(`No filelists found in repomd.xml`);
+
+    return null;
   }
 
   async getReleasesByPackageName(
     filelistsXmlUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    try {
-      const response = await this.http.getText(filelistsXmlUrl);
-      if (response.statusCode !== 200) {
-        throw new Error(
-          `Failed to fetch filelists.xml from ${filelistsXmlUrl} (${response.statusCode})`,
-        );
-      }
-      if (!response.body) {
-        throw new Error(
-          `Failed to fetch filelists.xml from ${filelistsXmlUrl}`,
-        );
-      }
-      // parse filelists.xml
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(response.body, 'text/xml');
-      const filelists = xmlDoc.getElementsByTagName('filelists')[0];
-      if (!filelists) {
-        throw new Error(`No filelists found in filelists.xml`);
-      }
-      const packages = filelists.getElementsByTagName('package');
-      if (!packages) {
-        throw new Error(`No packages found in filelists.xml`);
-      }
-      const releases: Release[] = [];
-      for (const pkg of packages) {
-        const name = pkg.getAttribute('name');
-        if (!name) {
-          throw new Error(`No name found in package`);
-        }
-        if (name !== packageName) {
-          continue;
-        }
-        const version = pkg.getAttribute('version');
-        if (!version) {
-          throw new Error(`No version found in package`);
-        }
-
-        // check if the version isn't already in the releases
-        // One version could have multiple revisions or releases
-        // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3
-        // Here we only keep the version part
-        const existingRelease = releases.find(
-          (release) => release.version === version,
-        );
-        if (!existingRelease) {
-          releases.push({
-            version,
-          });
-        }
-      }
-      if (releases.length === 0) {
-        return null;
-      }
-      return {
-        releases,
-      };
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const response = await this.http.getText(filelistsXmlUrl);
+    if (response.statusCode !== 200) {
+      throw new Error(
+        `Failed to fetch filelists.xml from ${filelistsXmlUrl} (${response.statusCode})`,
+      );
     }
+    // parse filelists.xml
+    const data = new XmlDocument(response.body);
+    const packages = data.childrenNamed('package');
+    if (!packages) {
+      throw new Error(`No packages found in filelists.xml`);
+    }
+    const releases: Release[] = [];
+    for (const pkg of packages) {
+      const name = pkg.attr.name;
+      if (name !== packageName) {
+        continue;
+      }
+      const version = pkg.childNamed('version')?.attr?.ver ?? '';
+      const rel = pkg.childNamed('version')?.attr?.rel;
+      let versionWithRel = version;
+      if (rel) {
+        // if rel is present, we need to append it to the version. Otherwise, ignore it.
+        // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3 or 1.0.0
+        versionWithRel += `-${rel}`;
+      }
+
+      // check if the versionWithRel isn't already in the releases
+      // One versionWithRel could have multiple revisions or releases
+      // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3
+      const existingRelease = releases.find(
+        (release) => release.version === versionWithRel,
+      );
+      if (!existingRelease) {
+        releases.push({
+          version: versionWithRel,
+        });
+      }
+    }
+    if (releases.length === 0) {
+      return null;
+    }
+    return {
+      releases,
+    };
   }
 }
