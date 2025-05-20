@@ -31,13 +31,13 @@ export async function generateLoginCmd(
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${repository}`;
+    )} ${quote(repository)}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${repository}`;
+    )} ${quote(repository)}`;
   }
   return null;
 }
