@@ -36,8 +36,8 @@ const setupUVSchema = z
       depName: 'astral-sh/uv',
       versioning: npmVersioning.id,
       packageName: 'astral-sh/uv',
-      skipReason,
-      skipStage,
+    ...(skipStage && { skipStage }),
+    ...(skipReason && { skipReason }),
       currentValue: val.version,
       depType: 'uses-with',
     };
@@ -63,8 +63,8 @@ const setupPnpmSchema = z
       depName: 'pnpm',
       versioning: npmVersioning.id,
       packageName: 'pnpm',
-      skipReason,
-      skipStage,
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
       currentValue: val.version,
       depType: 'uses-with',
     };
@@ -89,8 +89,8 @@ const setupPDMSchema = z
       versioning: pep440versioning.id,
       packageName: 'pdm',
       currentValue: val.version,
-      skipStage,
-      skipReason,
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
       depType: 'uses-with',
     };
   });

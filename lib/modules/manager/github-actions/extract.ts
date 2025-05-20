@@ -184,9 +184,9 @@ function extractSteps(
   deps: PackageDependency<Record<string, any>>[],
 ): void {
   for (const step of steps) {
-    const val = Result.parse(step, communityActions).unwrapOrNull();
-    if (val) {
-      deps.push(val);
+    const res = communityActions.safeParse(step);
+    if (res.success) {
+      deps.push(res.data);
       continue;
     }
 
