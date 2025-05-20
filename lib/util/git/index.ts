@@ -621,6 +621,7 @@ export async function checkoutBranchFromRemote(
     return config.currentBranchSha;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- hard to test */
     if (errChecked) {
       throw errChecked;
     }
