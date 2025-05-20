@@ -57,21 +57,21 @@ const staticGroups = {
   apiPlatform: {
     description: 'Group PHP API Platform packages together.',
     packageRules: [
-        {
-            groupName: "api-platform packages",
-            groupSlug: "api-platform",
-            matchDatasources: ["packagist"],
-            matchPackageNames: [
-                "api-platform/*",
-                "!api-platform/admin-meta",
-                "!api-platform/admin-pack",
-                "!api-platform/api-pack",
-                "!api-platform/api-platform",
-                "!api-platform/parameter-validator",
-                "!api-platform/postman-collection-generator",
-                "!api-platform/schema-generator"
-            ],
-        },
+      {
+        groupName: 'api-platform packages',
+        groupSlug: 'api-platform',
+        matchDatasources: ['packagist'],
+        matchPackageNames: [
+          'api-platform/*',
+          '!api-platform/admin-meta',
+          '!api-platform/admin-pack',
+          '!api-platform/api-pack',
+          '!api-platform/api-platform',
+          '!api-platform/parameter-validator',
+          '!api-platform/postman-collection-generator',
+          '!api-platform/schema-generator',
+        ],
+      },
     ],
   },
   atlaskit: {
