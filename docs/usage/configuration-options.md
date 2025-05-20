@@ -1384,6 +1384,10 @@ The description field can be used inside any configuration object to add a human
 A description field embedded within a preset is also collated as part of the onboarding description unless the preset only consists of presets itself.
 Presets which consist only of other presets have their own description omitted from the onboarding description because they will be fully described by the preset descriptions within.
 
+## detectBaseBranchConfigFileName
+
+Set this option to true if the config file name in the base branches is different to the config file name in the default branch.
+
 ## digest
 
 Add to this object if you wish to define rules that apply only to PRs that update digests.
@@ -4361,8 +4365,9 @@ You can set this option to `false` if you wish to disable updating for pinned (s
 
 By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
 You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+You can also configure `useBaseBranchConfig=replace` to instruct Renovate to use the config from each base branch as is and not use the config in the default branch.
 
-The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
+By default, the config file name in the base branch must be the same as in the default branch and cannot be `package.json`. To allow a different config file name in the base branches, use the `detectBaseBranchConfigFileName` option.
 This scenario may be useful for testing the config changes in base branches instantly.
 
 ## userStrings

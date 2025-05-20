@@ -1,5 +1,6 @@
 // TODO #22198
 import { mergeChildConfig } from '../../../config';
+import { configFileNames } from '../../../config/app-strings';
 import { GlobalConfig } from '../../../config/global';
 import { resolveConfigPresets } from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
@@ -10,11 +11,15 @@ import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
+import { getEnv } from '../../../util/env';
 import { getBranchList } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
+import { parseConfigsUsingFile } from '../../global/config/parse';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
+import { initializeConfig } from '../init';
+import { detectVulnerabilityAlerts } from '../init/vulnerability';
 import type { ExtractResult } from './extract-update';
 import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
@@ -28,47 +33,48 @@ async function getBaseBranchConfig(
   let baseBranchConfig: RenovateConfig = clone(config);
 
   if (
-    config.useBaseBranchConfig === 'merge' &&
+    config.useBaseBranchConfig !== 'none' &&
     baseBranch !== config.defaultBranch
   ) {
     logger.debug(
       { baseBranch },
-      `Merging config from base branch because useBaseBranchConfig=merge`,
+      config.useBaseBranchConfig === 'merge'
+        ? `Merging config from base branch because useBaseBranchConfig=merge`
+        : `Replacing config with config from base branch because useBaseBranchConfig=${config.useBaseBranchConfig}`,
     );
 
-    // Retrieve config file name autodetected for this repo
-    const cache = getCache();
-    // TODO: types (#22198)
-    const configFileName = cache.configFileName!;
-
-    try {
-      baseBranchConfig = await platform.getJsonFile(
-        configFileName,
-        config.repository,
-        baseBranch,
-      );
-      logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch {
-      logger.error(
-        { configFileName, baseBranch },
-        `Error fetching config file from base branch - possible config name mismatch between branches?`,
-      );
-
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = 'config';
-      error.validationError = 'Error fetching config file';
-      error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
-      throw error;
-    }
-
+    baseBranchConfig = await getConfigFromBaseBranch(baseBranch, config);
     baseBranchConfig = await resolveConfigPresets(baseBranchConfig, config);
-    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+
+    switch (config.useBaseBranchConfig) {
+      case 'merge':
+        baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+        break;
+
+      case 'replace':
+        // Although we are replacing the config with the one from the
+        // base branch, we can't use the base branch config as is.
+        // We need to apply the defaults, environment and command
+        // line arguments to it, in the same way that they were
+        // applied to the config from the default branch.
+        baseBranchConfig = await parseConfigsUsingFile(
+          getEnv(),
+          process.argv,
+          baseBranchConfig,
+        );
+
+        // Once the default configuration has been created,
+        // there are some additional changes applied to it.
+        baseBranchConfig = initializeConfig(baseBranchConfig);
+        baseBranchConfig = await detectVulnerabilityAlerts(baseBranchConfig);
+        break;
+    }
 
     // istanbul ignore if
     if (config.printConfig) {
       logger.info(
         { config: baseBranchConfig },
-        'Base branch config after merge',
+        'Base branch config after ' + config.useBaseBranchConfig,
       );
     }
 
@@ -110,6 +116,63 @@ function unfoldBaseBranches(
   }
 
   return [...new Set(unfoldedList)];
+}
+
+async function getConfigFromBaseBranch(
+  baseBranch: string,
+  config: RenovateConfig,
+): Promise<RenovateConfig> {
+  // Retrieve config file name autodetected for this repo
+  const cache = getCache();
+  // TODO: types (#22198)
+  const defaultBranchConfigFileName = cache.configFileName!;
+
+  // If we are allowed to detect the config file on the base branch,
+  // then we will start by trying each possible config file name.
+  let fileNamesToTry: string[] = [];
+  if (config.detectBaseBranchConfigFileName) {
+    fileNamesToTry.push(...configFileNames);
+  }
+
+  // If the config file name from the default branch is not one
+  // that we are already going to try, then we'll try it last.
+  if (!fileNamesToTry.includes(defaultBranchConfigFileName)) {
+    fileNamesToTry.push(defaultBranchConfigFileName);
+  }
+
+  // Reading the config from `package.json`
+  // is not supported for base branches.
+  fileNamesToTry = fileNamesToTry.filter((x) => x !== 'package.json');
+
+  for (const fileName of fileNamesToTry) {
+    logger.debug({ baseBranch, fileName }, 'detecting base branch config');
+    try {
+      const baseBranchConfig = await platform.getJsonFile(
+        fileName,
+        config.repository,
+        baseBranch,
+      );
+      logger.debug(
+        { config: baseBranchConfig, fileName },
+        'Base branch config raw',
+      );
+      return baseBranchConfig;
+    } catch {
+      // A config file with this name does
+      // not exist. Try the next file name.
+    }
+  }
+
+  logger.error(
+    { defaultBranchConfigFileName, baseBranch },
+    `Error fetching config file from base branch - possible config name mismatch between branches?`,
+  );
+
+  const error = new Error(CONFIG_VALIDATION);
+  error.validationSource = 'config';
+  error.validationError = 'Error fetching config file';
+  error.validationMessage = `Error fetching config file \`${defaultBranchConfigFileName}\` from branch \`${baseBranch}\``;
+  throw error;
 }
 
 export async function extractDependencies(

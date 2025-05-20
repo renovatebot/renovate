@@ -16,7 +16,7 @@ import { initializeCaches, resetCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-function initializeConfig(config: RenovateConfig): RenovateConfig {
+export function initializeConfig(config: RenovateConfig): RenovateConfig {
   return {
     ...clone(config),
     errors: [],

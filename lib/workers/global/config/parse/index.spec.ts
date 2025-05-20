@@ -283,4 +283,39 @@ describe('workers/global/config/parse/index', () => {
       });
     });
   });
+
+  describe('.parseConfigsUsingFile(env, defaultArgv, fileConfig)', () => {
+    let configParser: typeof import('.');
+    let defaultArgv: string[];
+    let defaultEnv: NodeJS.ProcessEnv;
+
+    beforeEach(async () => {
+      configParser = await vi.importActual('./index');
+      defaultArgv = getArgv();
+      defaultEnv = {
+        RENOVATE_CONFIG_FILE: upath.resolve(
+          __dirname,
+          './__fixtures__/with-pr-title.js',
+        ),
+      };
+    });
+
+    it('uses given file config', async () => {
+      defaultArgv = defaultArgv.concat(['--pr-footer=custom']);
+      const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
+      const parsedConfig = await configParser.parseConfigsUsingFile(
+        env,
+        defaultArgv,
+        { prHeader: 'the header' },
+      );
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abc'],
+        ['prFooter', 'custom'],
+        ['prHeader', 'the header'],
+        // The PR title is in the config file specified via environment
+        // variable, and that config file should not have been loaded.
+        ['prTitle', null],
+      ]);
+    });
+  });
 });

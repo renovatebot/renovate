@@ -38,11 +38,19 @@ export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[],
 ): Promise<AllConfig> {
+  const fileConfig = await fileParser.getConfig(env);
+  return await parseConfigsUsingFile(env, argv, fileConfig);
+}
+
+export async function parseConfigsUsingFile(
+  env: NodeJS.ProcessEnv,
+  argv: string[],
+  fileConfig: AllConfig,
+): Promise<AllConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
   const defaultConfig = defaultsParser.getConfig();
-  const fileConfig = await fileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = await envParser.getConfig(env);
 
