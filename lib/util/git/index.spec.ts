@@ -1265,11 +1265,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     describe('syncForkWithUpstream()', () => {
       it('throws unknown error', async () => {
-        // const upstreamUrl = await createUpstream();
         tmpDir = await tmp.dir({ unsafeCleanup: true });
         GlobalConfig.set({ localDir: tmpDir.path });
 
-        // init fork repo
         await git.initRepo({
           url: origin.path,
           defaultBranch,
@@ -1283,7 +1281,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       it('syncs fork when local for branch absent', async () => {
-        // const upstreamUrl = await createUpstream();
         tmpDir = await tmp.dir({ unsafeCleanup: true });
         GlobalConfig.set({ localDir: tmpDir.path });
 
@@ -1304,7 +1301,6 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     describe('syncGit()', () => {
       it('should fetch from upstream and update local branch', async () => {
-        // const upstreamUrl = await createUpstream();
         tmpDir = await tmp.dir({ unsafeCleanup: true });
         GlobalConfig.set({ localDir: tmpDir.path });
 
