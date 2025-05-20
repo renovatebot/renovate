@@ -310,9 +310,10 @@ function applyPropsInternal(
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
   let sharedVariableName: string | null = null;
-  const currentValue = dep.currentValue!.replace(
-    regEx(/^\${[^}]*?}$/),
-    (substr) => {
+  let currentValue: string | null = null;
+
+  if (dep.currentValue) {
+    currentValue = dep.currentValue.replace(regEx(/^\${[^}]*?}$/), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
@@ -332,8 +333,8 @@ function applyPropsInternal(
         return propValue.val;
       }
       return substr;
-    },
-  );
+    });
+  }
 
   const result: PackageDependency = {
     ...dep,
