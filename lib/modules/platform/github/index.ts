@@ -709,7 +709,7 @@ export async function initRepo({
   parsedEndpoint.pathname = `${config.repository}.git`;
   const url = URL.format(parsedEndpoint);
   let upstreamUrl = undefined;
-  if (forkCreation) {
+  if (forkCreation && config.parentRepo) {
     parsedEndpoint.pathname = config.parentRepo + '.git';
     upstreamUrl = URL.format(parsedEndpoint);
   }
