@@ -1,7 +1,7 @@
 import { generateLoginCmd } from './common';
-import { RepositoryRule } from './types';
+import type { RepositoryRule } from './types';
 
-describe('generateLoginCmd', () => {
+describe('modules/manager/helmv3/common', () => {
   it('should generate a login command with username and password', async () => {
     const repositoryRule: RepositoryRule = {
       name: 'test-repo',
