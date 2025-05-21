@@ -1,7 +1,7 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
-import { stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
