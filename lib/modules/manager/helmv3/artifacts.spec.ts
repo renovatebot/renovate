@@ -123,7 +123,7 @@ describe('modules/manager/helmv3/artifacts', () => {
       `);
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execMocks = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(stripIndent`
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       dependencies:
       - name: renovate-test
         repository: oci://registry.gitlab.com/user/oci-helm-test
