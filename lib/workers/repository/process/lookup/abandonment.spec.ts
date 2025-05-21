@@ -27,7 +27,7 @@ describe('workers/repository/process/lookup/abandonment', () => {
     it('returns the original release result when no abandonment threshold is provided', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp('2022-01-01T00:00:00.000Z')!,
+        mostRecentTimestamp: asTimestamp('2022-01-01T00:00:00.000Z')!,
       };
 
       const result = calculateAbandonment(releaseResult, config);
@@ -39,7 +39,7 @@ describe('workers/repository/process/lookup/abandonment', () => {
     it('returns the original release result when abandonment threshold is invalid', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp('2022-01-01T00:00:00.000Z')!,
+        mostRecentTimestamp: asTimestamp('2022-01-01T00:00:00.000Z')!,
       };
 
       const result = calculateAbandonment(releaseResult, {
@@ -51,7 +51,7 @@ describe('workers/repository/process/lookup/abandonment', () => {
       expect(result.isAbandoned).toBeUndefined();
     });
 
-    it('returns the original release result when no bumpedAt timestamp is available', () => {
+    it('returns the original release result when no mostRecentTimestamp timestamp is available', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
       };
@@ -66,10 +66,10 @@ describe('workers/repository/process/lookup/abandonment', () => {
       expect(result.isAbandoned).toBeUndefined();
     });
 
-    it('marks a package as abandoned when bumpedAt plus threshold is before now', () => {
+    it('marks a package as abandoned when mostRecentTimestamp plus threshold is before now', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp('2020-01-01T00:00:00.000Z')!, // 3 years before mocked now
+        mostRecentTimestamp: asTimestamp('2020-01-01T00:00:00.000Z')!, // 3 years before mocked now
       };
 
       const result = calculateAbandonment(releaseResult, {
@@ -80,10 +80,10 @@ describe('workers/repository/process/lookup/abandonment', () => {
       expect(result.isAbandoned).toBe(true);
     });
 
-    it('does not mark a package as abandoned when bumpedAt plus threshold is after now', () => {
+    it('does not mark a package as abandoned when mostRecentTimestamp plus threshold is after now', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp('2022-06-01T00:00:00.000Z')!, // 6 months before mocked now
+        mostRecentTimestamp: asTimestamp('2022-06-01T00:00:00.000Z')!, // 6 months before mocked now
       };
 
       const result = calculateAbandonment(releaseResult, {
@@ -97,7 +97,7 @@ describe('workers/repository/process/lookup/abandonment', () => {
     it('preserves other properties in the release result', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp('2020-01-01T00:00:00.000Z')!,
+        mostRecentTimestamp: asTimestamp('2020-01-01T00:00:00.000Z')!,
         sourceUrl: 'https://github.com/some/repo',
         homepage: 'https://example.com',
         tags: { latest: '1.0.0' },
@@ -121,7 +121,7 @@ describe('workers/repository/process/lookup/abandonment', () => {
 
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }],
-        bumpedAt: asTimestamp(twoYearsAgo)!,
+        mostRecentTimestamp: asTimestamp(twoYearsAgo)!,
       };
 
       const result = calculateAbandonment(releaseResult, {

@@ -27,17 +27,17 @@ export function calculateAbandonment(
     return releaseResult;
   }
 
-  const { bumpedAt } = releaseResult;
-  if (!bumpedAt) {
+  const { mostRecentTimestamp } = releaseResult;
+  if (!mostRecentTimestamp) {
     logger.trace(
       { lookupName },
-      'No bumpedAt value found, skipping abandonment check',
+      'No mostRecentTimestamp value found, skipping abandonment check',
     );
     return releaseResult;
   }
-  const bumpedAtDate = DateTime.fromISO(bumpedAt);
+  const mostRecentTimestampDate = DateTime.fromISO(mostRecentTimestamp);
 
-  const abandonmentDate = bumpedAtDate.plus({
+  const abandonmentDate = mostRecentTimestampDate.plus({
     milliseconds: abandonmentThresholdMs,
   });
   const now = DateTime.local();
@@ -47,7 +47,7 @@ export function calculateAbandonment(
   logger.trace(
     {
       lookupName,
-      bumpedAt,
+      mostRecentTimestamp,
       abandonmentThreshold,
       abandonmentThresholdMs,
       abandonmentDate: abandonmentDate.toISO(),
