@@ -7,6 +7,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import type { Http } from '../../../util/http';
@@ -279,8 +280,8 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    // istanbul ignore if: experimental feature
-    if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
+    /* v8 ignore next 4 */
+    if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
     }

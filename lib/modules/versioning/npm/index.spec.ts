@@ -96,6 +96,23 @@ describe('modules/versioning/npm/index', () => {
   });
 
   it.each`
+    currentVersion | newVersion | expected
+    ${'0.0.1'}     | ${'0.0.2'} | ${true}
+    ${'0.0.1'}     | ${'0.2.0'} | ${true}
+    ${'0.0.1'}     | ${'1.0.0'} | ${true}
+    ${'1.0.0'}     | ${'1.0.0'} | ${false}
+    ${'1.0.0'}     | ${'2.0.0'} | ${true}
+    ${'2.0.0'}     | ${'1.0.0'} | ${true}
+    ${'2.0.0'}     | ${'2.0.1'} | ${false}
+    ${'2.0.0'}     | ${'2.1.0'} | ${false}
+  `(
+    'isBreaking("$currentVersion", "$newVersion") === $expected',
+    ({ currentVersion, newVersion, expected }) => {
+      expect(semver.isBreaking!(currentVersion, newVersion)).toBe(expected);
+    },
+  );
+
+  it.each`
     currentValue            | rangeStrategy        | currentVersion   | newVersion              | expected
     ${'=1.0.0'}             | ${'bump'}            | ${'1.0.0'}       | ${'1.1.0'}              | ${'=1.1.0'}
     ${'^1.0'}               | ${'bump'}            | ${'1.0.0'}       | ${'1.0.7'}              | ${'^1.0.7'}
@@ -118,6 +135,7 @@ describe('modules/versioning/npm/index', () => {
     ${'1.*'}                | ${'replace'}         | ${'1.0.0'}       | ${'2.1.0'}              | ${'2.*'}
     ${'~0.6.1'}             | ${'replace'}         | ${'0.6.8'}       | ${'0.7.0-rc.2'}         | ${'~0.7.0-rc'}
     ${'>= 0.1.21 < 0.2.0'}  | ${'bump'}            | ${'0.1.21'}      | ${'0.1.24'}             | ${'>= 0.1.24 < 0.2.0'}
+    ${'>= 0.1.21 < 0.2.0'}  | ${'widen'}           | ${'0.1.21'}      | ${'0.2.0'}              | ${'>= 0.1.21 < 0.3.0'}
     ${'>= 0.1.21 <= 0.2.0'} | ${'bump'}            | ${'0.1.21'}      | ${'0.1.24'}             | ${'>= 0.1.24 <= 0.2.0'}
     ${'>= 0.0.1 <= 0.1'}    | ${'bump'}            | ${'0.0.1'}       | ${'0.0.2'}              | ${'>= 0.0.2 <= 0.1'}
     ${'>= 0.0.1 < 0.1'}     | ${'bump'}            | ${'0.1.0'}       | ${'0.2.1'}              | ${'>= 0.2.1 < 0.3'}

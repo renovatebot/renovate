@@ -1,6 +1,6 @@
 [project]
 dependencies = [
-  "mkdocs-material==9.6.12",
+  "mkdocs-material==9.6.14",
   "mkdocs-awesome-pages-plugin==2.10.1",
 ]
 requires-python = ">=3.11"

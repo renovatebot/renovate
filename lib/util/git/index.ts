@@ -23,6 +23,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
+import { getEnv } from '../env';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
@@ -237,8 +238,9 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-    ...process.env,
+    ...getEnv(),
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
   });
@@ -386,7 +388,7 @@ export function isCloned(): boolean {
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     /* v8 ignore next 3 -- TODO: add test */
-    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+    if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
       await git.raw(['config', 'core.hooksPath', '/dev/null']);
     }
     return;
@@ -579,7 +581,7 @@ export async function getFileList(): Promise<string[]> {
   const branch = config.currentBranch;
   let files: string;
   try {
-    files = await git.raw(['ls-tree', '-r', branch]);
+    files = await git.raw(['ls-tree', '-r', `refs/heads/${branch}`]);
     /* v8 ignore next 10 -- TODO: add test */
   } catch (err) {
     if (err.message?.includes('fatal: Not a valid object name')) {

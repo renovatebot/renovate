@@ -10,6 +10,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -119,9 +120,10 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
+    const env = getEnv();
     /* v8 ignore start: experimental feature */
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } /* v8 ignore stop */ else {
       const { version } = (
         await bitbucketServerHttp.getJsonUnchecked<{ version: string }>(
