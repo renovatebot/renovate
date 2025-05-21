@@ -154,7 +154,7 @@ export async function updateArtifacts({
     if (is.truthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
       const isLockFileChanged =
-        !is.truthy(newHelmLockContent) ||
+        !is.string(newHelmLockContent) ||
         isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
         fileChanges.push({
