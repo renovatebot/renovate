@@ -585,6 +585,9 @@ describe('modules/manager/npm/post-update/index', () => {
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping lock file generation',
+      );
     });
 
     it('reuse existing up-to-date', async () => {
