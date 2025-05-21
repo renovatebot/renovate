@@ -113,7 +113,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   });
 
   it('returns null if only "generated" is changed', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(stripIndent`
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       dependencies:
       - name: renovate-test
         repository: oci://registry.gitlab.com/user/oci-helm-test
