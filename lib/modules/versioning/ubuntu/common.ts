@@ -1,11 +1,13 @@
 import { regEx } from '../../../util/regex';
 
+const regex = regEx(/^(?<codename>\w+)-(?<date>\d{8})(?<suffix>\.\d{1,2})?$/);
+
 function isDatedCodeName(input: string): boolean {
-  return regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).test(input);
+  return regex.test(input);
 }
 
 function getDatedContainerImageCodename(version: string): null | string {
-  const groups = regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).exec(version);
+  const groups = regex.exec(version);
   if (!groups?.groups) {
     return null;
   }
@@ -13,7 +15,7 @@ function getDatedContainerImageCodename(version: string): null | string {
 }
 
 function getDatedContainerImageVersion(version: string): null | number {
-  const groups = regEx(/^(?<codename>\w+)-(?<date>\d{8})$/).exec(version);
+  const groups = regex.exec(version);
   if (!groups?.groups) {
     return null;
   }
@@ -21,8 +23,18 @@ function getDatedContainerImageVersion(version: string): null | number {
   return parseInt(groups.groups.date, 10);
 }
 
+function getDatedContainerImageSuffix(version: string): null | string {
+  const groups = regex.exec(version);
+  if (!groups?.groups?.suffix) {
+    return null;
+  }
+
+  return groups.groups.suffix;
+}
+
 export {
   isDatedCodeName,
   getDatedContainerImageCodename,
   getDatedContainerImageVersion,
+  getDatedContainerImageSuffix,
 };

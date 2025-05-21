@@ -62,6 +62,13 @@ export function massageMarkdown(input: string): string {
   return input;
 }
 
+/**
+ * Unsed, no Dashboard
+ */
+export function maxBodyLength(): number {
+  return Infinity;
+}
+
 export function updatePr(): Promise<void> {
   return Promise.resolve();
 }

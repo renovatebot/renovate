@@ -16,7 +16,8 @@ import {
 } from '../../../../constants/error-messages';
 import { logger, removeMeta } from '../../../../logger';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -33,13 +34,14 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import { isLimitReached } from '../../../global/limits';
+import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
+import { bumpVersions } from './bump-versions';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
@@ -180,6 +182,9 @@ export async function processBranch(
       branchConfig.pendingChecks &&
       !dependencyDashboardCheck
     ) {
+      logger.debug(
+        `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
+      );
       return {
         branchExists: false,
         prNo: branchPr?.number,
@@ -208,9 +213,14 @@ export async function processBranch(
         };
       }
     }
+
+    logger.debug(
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+    );
+
     if (
       !branchExists &&
-      isLimitReached('Branches') &&
+      isLimitReached('Branches', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -255,7 +265,10 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(
+        config.branchName,
+        config.baseBranch,
+      );
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -463,7 +476,7 @@ export async function processBranch(
       );
       config.reuseExistingBranch = false;
     } else {
-      config = { ...config, ...(await shouldReuseExistingBranch(config)) };
+      config = await shouldReuseExistingBranch(config);
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
@@ -516,6 +529,9 @@ export async function processBranch(
         config.updatedArtifacts = updatedArtifacts;
         config.artifactErrors = artifactErrors;
       }
+
+      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+      await bumpVersions(config);
 
       removeMeta(['dep']);
 
@@ -594,14 +610,14 @@ export async function processBranch(
     }
 
     if (branchPr) {
-      const platformOptions = getPlatformPrOptions(config);
+      const platformPrOptions = getPlatformPrOptions(config);
       if (
-        platformOptions.usePlatformAutomerge &&
+        platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
         await platform.reattemptPlatformAutomerge({
           number: branchPr.number,
-          platformOptions,
+          platformPrOptions,
         });
       }
       // istanbul ignore if

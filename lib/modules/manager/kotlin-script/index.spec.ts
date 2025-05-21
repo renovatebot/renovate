@@ -1,11 +1,14 @@
 import { regEx } from '../../../util/regex';
+import { isRegexMatch } from '../../../util/string-match';
 import { defaultConfig } from '.';
 
 describe('modules/manager/kotlin-script/index', () => {
-  it('fileMatch regex is correct', () => {
-    expect(defaultConfig.fileMatch).toHaveLength(1);
-    defaultConfig.fileMatch.forEach((pattern) => {
-      expect(() => regEx(pattern)).not.toThrow();
+  it('managerFilePatterns regex is correct', () => {
+    expect(defaultConfig.managerFilePatterns).toHaveLength(1);
+    defaultConfig.managerFilePatterns.forEach((pattern) => {
+      if (isRegexMatch(pattern)) {
+        expect(() => regEx(pattern)).not.toThrow();
+      }
     });
   });
 });

@@ -1,6 +1,7 @@
 import * as memCache from '../../../util/cache/memory';
 import { getCache, resetCache } from '../../../util/cache/repository';
-import { GithubIssue, GithubIssueCache } from './issue';
+import type { GithubIssue } from './issue';
+import { GithubIssueCache } from './issue';
 
 describe('modules/platform/github/issue', () => {
   describe('GithubIssueCache', () => {
@@ -153,6 +154,32 @@ describe('modules/platform/github/issue', () => {
                 lastModified: '2020-01-02T00:00:00.000Z',
               },
             },
+          },
+        },
+      });
+    });
+
+    it('removes particular issue from the cache', () => {
+      cache.platform = {
+        github: {
+          issuesCache: {
+            '1': {
+              number: 1,
+              body: 'body-1',
+              state: 'open',
+              title: 'title-1',
+              lastModified: '2020-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      };
+
+      GithubIssueCache.deleteIssue(1);
+
+      expect(cache).toEqual({
+        platform: {
+          github: {
+            issuesCache: {},
           },
         },
       });

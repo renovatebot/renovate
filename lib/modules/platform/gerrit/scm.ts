@@ -53,7 +53,7 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions[change.current_revision];
-      return currentGerritPatchset.actions?.['rebase'].enabled === true;
+      return currentGerritPatchset.actions?.rebase.enabled === true;
     }
     return true;
   }
@@ -73,7 +73,8 @@ export class GerritScm extends DefaultGitScm {
       return !mergeInfo.mergeable;
     } else {
       logger.warn(
-        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`,
+        { branch, baseBranch },
+        'There is no open change with this branch',
       );
       return true;
     }
@@ -105,11 +106,19 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
 
     let hasChanges = true;
-    const origMsg =
+    const message =
       typeof commit.message === 'string' ? [commit.message] : commit.message;
+
+    // In Gerrit, the change subject/title is the first line of the commit message
+    if (commit.prTitle) {
+      const firstMessageLines = message[0].split('\n');
+      firstMessageLines[0] = commit.prTitle;
+      message[0] = firstMessageLines.join('\n');
+    }
+
     commit.message = [
-      ...origMsg,
-      `Change-Id: ${existingChange?.change_id ?? generateChangeId()}`,
+      ...message,
+      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${existingChange?.change_id ?? generateChangeId()}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {
@@ -121,21 +130,16 @@ export class GerritScm extends DefaultGitScm {
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); //avoid empty patchsets
       }
       if (hasChanges || commit.force) {
+        const pushOptions = ['notify=NONE'];
+        if (commit.autoApprove) {
+          pushOptions.push('label=Code-Review+2');
+        }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}%t=sourceBranch-${
-            commit.branchName
-          }`,
+          targetRef: `refs/for/${commit.baseBranch!}%${pushOptions.join(',')}`,
           files: commit.files,
         });
         if (pushResult) {
-          //existingChange was the old change before commit/push. we need to approve again, if it was previously approved from renovate
-          if (
-            existingChange &&
-            client.wasApprovedBy(existingChange, username)
-          ) {
-            await client.approveChange(existingChange._number);
-          }
           return commitSha;
         }
       }

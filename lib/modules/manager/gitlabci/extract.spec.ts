@@ -1,14 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { ExtractConfig, PackageDependency } from '../types';
-import {
-  extractFromImage,
-  extractFromJob,
-  extractFromServices,
-} from './extract';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 const config: ExtractConfig = {};
 
@@ -197,6 +192,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '31.65.1-slim',
           datasource: 'docker',
           depName: 'renovate/renovate',
+          packageName: 'renovate/renovate',
           depType: 'image-name',
           replaceString:
             '${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/renovate/renovate:31.65.1-slim',
@@ -209,6 +205,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '10.4.11',
           datasource: 'docker',
           depName: 'mariadb',
+          packageName: 'mariadb',
           depType: 'service-image',
           replaceString:
             '$CI_DEPENDENCY_PROXY_DIRECT_GROUP_IMAGE_PREFIX/mariadb:10.4.11',
@@ -221,6 +218,7 @@ describe('modules/manager/gitlabci/extract', () => {
           currentValue: '1.0.0',
           datasource: 'docker',
           depName: 'other/image1',
+          packageName: 'other/image1',
           depType: 'service-image',
           replaceString:
             '$CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/other/image1:1.0.0',
@@ -231,6 +229,7 @@ describe('modules/manager/gitlabci/extract', () => {
     it('extract images via registry aliases', () => {
       const registryAliases = {
         $CI_REGISTRY: 'registry.com',
+        $BUILD_IMAGES: 'registry.com/build-images',
         foo: 'foo.registry.com',
       };
       const res = extractPackageFile(
@@ -242,6 +241,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - foo/mariadb:10.4.11
           - name: $CI_REGISTRY/other/image1:1.0.0
             alias: imagealias1
+          - $BUILD_IMAGES/image2:1.0.0
       `,
         '',
         {
@@ -255,7 +255,8 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '31.65.1-slim',
           datasource: 'docker',
-          depName: 'registry.com/renovate/renovate',
+          depName: '$CI_REGISTRY/renovate/renovate',
+          packageName: 'registry.com/renovate/renovate',
           depType: 'image-name',
           replaceString: '$CI_REGISTRY/renovate/renovate:31.65.1-slim',
         },
@@ -265,7 +266,8 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '10.4.11',
           datasource: 'docker',
-          depName: 'foo.registry.com/mariadb',
+          depName: 'foo/mariadb',
+          packageName: 'foo.registry.com/mariadb',
           depType: 'service-image',
           replaceString: 'foo/mariadb:10.4.11',
         },
@@ -275,88 +277,29 @@ describe('modules/manager/gitlabci/extract', () => {
           currentDigest: undefined,
           currentValue: '1.0.0',
           datasource: 'docker',
-          depName: 'registry.com/other/image1',
+          depName: '$CI_REGISTRY/other/image1',
+          packageName: 'registry.com/other/image1',
           depType: 'service-image',
           replaceString: '$CI_REGISTRY/other/image1:1.0.0',
         },
+        {
+          autoReplaceStringTemplate:
+            '$BUILD_IMAGES/image2:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: '$BUILD_IMAGES/image2',
+          packageName: 'registry.com/build-images/image2',
+          depType: 'service-image',
+          replaceString: '$BUILD_IMAGES/image2:1.0.0',
+        },
       ]);
-    });
-
-    it('extracts from image', () => {
-      let expectedRes = {
-        autoReplaceStringTemplate:
-          '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-        currentDigest: undefined,
-        currentValue: 'test',
-        datasource: 'docker',
-        depName: 'image',
-        depType: 'image',
-        replaceString: 'image:test',
-      };
-
-      expect(extractFromImage('image:test')).toEqual(expectedRes);
-
-      expectedRes = { ...expectedRes, depType: 'image-name' };
-      expect(
-        extractFromImage({
-          name: 'image:test',
-        }),
-      ).toEqual(expectedRes);
-
-      expect(extractFromImage(undefined)).toBeNull();
-    });
-
-    it('extracts from services', () => {
-      const expectedRes = [
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test',
-          datasource: 'docker',
-          depName: 'image',
-          depType: 'service-image',
-          replaceString: 'image:test',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test2',
-          datasource: 'docker',
-          depName: 'image2',
-          depType: 'service-image',
-          replaceString: 'image2:test2',
-        },
-      ];
-      const services = ['image:test', 'image2:test2'];
-      expect(extractFromServices(undefined)).toBeEmptyArray();
-      expect(extractFromServices(services)).toEqual(expectedRes);
-      expect(
-        extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }]),
-      ).toEqual(expectedRes);
-    });
-
-    it('extracts from job object', () => {
-      const expectedRes = [
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'test',
-          datasource: 'docker',
-          depName: 'image',
-          depType: 'image',
-          replaceString: 'image:test',
-        },
-      ];
-      expect(extractFromJob(undefined)).toBeEmptyArray();
-      expect(extractFromJob({ image: 'image:test' })).toEqual(expectedRes);
     });
 
     it('extracts component references via registry aliases', () => {
       const registryAliases = {
         $CI_SERVER_HOST: 'gitlab.example.com',
+        $COMPONENT_REGISTRY: 'gitlab.example.com/a-group',
       };
       const content = codeBlock`
         include:
@@ -373,6 +316,7 @@ describe('modules/manager/gitlabci/extract', () => {
               malformed: true
           - component: $CI_SERVER_HOST/an-org/a-component@1.0
           - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+          - component: $COMPONENT_REGISTRY/a-project/a-component@1.0
       `;
       const res = extractPackageFile(content, '', {
         registryAliases,
@@ -413,6 +357,13 @@ describe('modules/manager/gitlabci/extract', () => {
           depName: 'an-org/a-project',
           depType: 'repository',
           registryUrls: ['https://other-gitlab.example.com'],
+        },
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'a-group/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
         },
       ]);
     });

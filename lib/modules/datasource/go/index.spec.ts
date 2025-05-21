@@ -1,24 +1,25 @@
-import { mockDeep } from 'jest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+const hostRules = vi.mocked(_hostRules);
 
-const getReleasesDirectMock = jest.fn();
+const getReleasesDirectMock = vi.fn();
 
-const getDigestGithubMock = jest.fn();
-const getDigestGitlabMock = jest.fn();
-const getDigestGitMock = jest.fn();
-const getDigestBitbucketMock = jest.fn();
-jest.mock('./releases-direct', () => {
+const getDigestGiteaMock = vi.fn();
+const getDigestGithubMock = vi.fn();
+const getDigestGitlabMock = vi.fn();
+const getDigestGitMock = vi.fn();
+const getDigestBitbucketMock = vi.fn();
+vi.mock('./releases-direct', () => {
   return {
-    GoDirectDatasource: jest.fn().mockImplementation(() => {
+    GoDirectDatasource: vi.fn().mockImplementation(() => {
       return {
         git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
+        gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
         github: { getDigest: (...args: any[]) => getDigestGithubMock(...args) },
         gitlab: { getDigest: (...args: any[]) => getDigestGitlabMock(...args) },
         bitbucket: {
@@ -30,10 +31,10 @@ jest.mock('./releases-direct', () => {
   };
 });
 
-const getReleasesProxyMock = jest.fn();
-jest.mock('./releases-goproxy', () => {
+const getReleasesProxyMock = vi.fn();
+vi.mock('./releases-goproxy', () => {
   return {
-    GoProxyDatasource: jest.fn().mockImplementation(() => {
+    GoProxyDatasource: vi.fn().mockImplementation(() => {
       return {
         getReleases: () => getReleasesProxyMock(),
       };
@@ -82,7 +83,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, '');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null,
+        undefined,
       );
       expect(res).toBeNull();
     });
@@ -94,7 +95,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, Fixtures.get('go-get-github.html'));
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null,
+        undefined,
       );
       expect(res).toBeNull();
     });
@@ -107,7 +108,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
-        null,
+        undefined,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -120,7 +121,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'renovatebot.com/abc/def' },
-        null,
+        undefined,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -187,11 +188,20 @@ describe('modules/datasource/go/index', () => {
         {
           packageName: 'bitbucket.org/golang/text',
         },
-        null,
+        undefined,
       );
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).toBeDefined();
+      expect(res).toBe('123');
+    });
+
+    it('support gitea digest', async () => {
+      getDigestGiteaMock.mockResolvedValueOnce('123');
+      const res = await datasource.getDigest(
+        {
+          packageName: 'gitea.com/go-chi/cache',
+        },
+        undefined,
+      );
+      expect(res).toBe('123');
     });
 
     describe('GOPROXY', () => {

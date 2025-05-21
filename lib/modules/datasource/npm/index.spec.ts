@@ -1,9 +1,9 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { NpmDatasource, setNpmrc } from '.';
+import * as httpMock from '~test/http-mock';
 
 const datasource = NpmDatasource.id;
 
@@ -40,10 +40,6 @@ describe('modules/datasource/npm/index', () => {
     };
   });
 
-  afterEach(() => {
-    delete process.env.RENOVATE_CACHE_NPM_MINUTES;
-  });
-
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
     missingVersions.versions = {};
@@ -59,10 +55,10 @@ describe('modules/datasource/npm/index', () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .reply(200, npmResponse, { 'Cache-control': 'public, expires=300' });
+      .reply(200, npmResponse, { 'Cache-Control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(res?.isPrivate).toBeFalse();
+    expect(res?.isPrivate).toBeUndefined();
   });
 
   it('should parse repo url', async () => {
@@ -329,7 +325,6 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
-    process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
     GlobalConfig.set({ exposeAllEnv: true });
 
     const npmrc = 'registry=${REGISTRY}';

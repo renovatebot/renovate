@@ -9,7 +9,7 @@ import { isDependencyString, versionLikeSubstring } from '../utils';
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
 export const LOCKFIlE_HEADER_TEXT = regEx(
-  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock) to regenerate this file/,
+  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock|writeVersionsLocks) to regenerate this file/,
 );
 
 /**
@@ -102,7 +102,7 @@ export function parseGcv(
           currentValue: propVerAndPos.version,
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
-          groupName: propDepGlob,
+          sharedVariableName: propDepGlob,
         } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later

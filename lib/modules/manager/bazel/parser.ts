@@ -1,4 +1,5 @@
-import { lang, lexer, parser, query as q } from 'good-enough-parser';
+import type { lexer, parser } from 'good-enough-parser';
+import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { hash } from '../../../util/hash';
@@ -252,7 +253,7 @@ function recordStartHandler(ctx: Ctx, { offset }: lexer.Token): Ctx {
 function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
   const ruleFragment = currentFragment(ctx);
   if (ruleFragment.type === 'record') {
-    ruleFragment.children['rule'] = { type: 'string', value, offset };
+    ruleFragment.children.rule = { type: 'string', value, offset };
   }
 
   return ctx;

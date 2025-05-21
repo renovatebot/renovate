@@ -7,15 +7,17 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
+export const displayName = 'pip-compile';
+export const url = 'https://pip-tools.readthedocs.io/en/latest/cli/pip-compile';
+export const categories: Category[] = ['python'];
+
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
   lockFileMaintenance: {
     enabled: true,
     branchTopic: 'pip-compile-refresh',
     commitMessageAction: 'Refresh pip-compile outputs',
   },
 };
-
-export const categories: Category[] = ['python'];
 
 export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

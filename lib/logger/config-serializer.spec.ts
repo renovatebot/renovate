@@ -6,7 +6,8 @@ describe('logger/config-serializer', () => {
       nottoken: 'b',
       prBody: 'foo',
     };
-    expect(configSerializer(config)).toMatchSnapshot({
+    expect(configSerializer(config)).toEqual({
+      nottoken: 'b',
       prBody: '[Template]',
     });
   });
@@ -15,8 +16,17 @@ describe('logger/config-serializer', () => {
     const config = {
       content: {},
     };
-    expect(configSerializer(config)).toMatchSnapshot({
+    expect(configSerializer(config)).toEqual({
       content: '[content]',
+    });
+  });
+
+  it('suppresses packageFiles', () => {
+    const config = {
+      packageFiles: [],
+    };
+    expect(configSerializer(config)).toEqual({
+      packageFiles: '[Array]',
     });
   });
 });

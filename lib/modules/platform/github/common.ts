@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { GithubHttp } from '../../../util/http/github';
 import { getPrBodyStruct } from '../pr-body';
+import type { MergePRConfig } from '../types';
 import type { GhPr, GhRestPr } from './types';
 
 export const githubApi = new GithubHttp();
@@ -56,4 +58,23 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
   }
 
   return result;
+}
+
+export function mapMergeStartegy(
+  strategy: MergePRConfig['strategy'],
+): string | undefined {
+  switch (strategy) {
+    case 'auto':
+      return undefined;
+    case 'fast-forward': {
+      logger.warn(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+      return undefined;
+    }
+    case 'merge-commit':
+      return 'merge';
+    default:
+      return strategy;
+  }
 }

@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import { DigestsConfig, ReleasesConfig } from '../schema';
@@ -17,11 +18,11 @@ import {
   CdnjsAPIVersionResponseSchema,
 } from './schema';
 
-export class CdnJsDatasource extends Datasource {
+export class CdnjsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
   constructor() {
-    super(CdnJsDatasource.id);
+    super(CdnjsDatasource.id);
   }
 
   override readonly customRegistrySupport = false;
@@ -33,8 +34,11 @@ export class CdnJsDatasource extends Datasource {
     'The source URL is determined from the `repository` field in the results.';
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
+    namespace: `datasource-${CdnjsDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => {
+      const library = packageName.split('/')[0];
+      return `getReleases:${library}`;
+    },
   })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
@@ -43,7 +47,11 @@ export class CdnJsDatasource extends Datasource {
 
         const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-        return this.http.getJsonSafe(url, CdnjsAPIVersionResponseSchema);
+        return this.http.getJsonSafe(
+          url,
+          { cacheProvider: memCacheProvider },
+          CdnjsAPIVersionResponseSchema,
+        );
       })
       .transform(({ versions, homepage, repository }): ReleaseResult => {
         const releases: Release[] = versions;
@@ -76,9 +84,9 @@ export class CdnJsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}-digest`,
+    namespace: `datasource-${CdnjsDatasource.id}`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
-      `${registryUrl}:${packageName}:${newValue}}`,
+      `getDigest:${registryUrl}:${packageName}:${newValue}}`,
   })
   override async getDigest(
     config: DigestConfig,

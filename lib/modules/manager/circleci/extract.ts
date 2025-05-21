@@ -1,85 +1,76 @@
 import { logger } from '../../../logger';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { Result } from '../../../util/result';
+import { parseSingleYaml } from '../../../util/yaml';
 import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
+import { CircleCiFile, type CircleCiOrb } from './schema';
+
+function extractDefinition(
+  deps: PackageDependency[],
+  definition: CircleCiOrb | CircleCiFile,
+  registryAliases: Record<string, string>,
+): void {
+  for (const [key, orb] of Object.entries(definition.orbs)) {
+    if (typeof orb === 'string') {
+      const [packageName, currentValue] = orb.split('@');
+
+      deps.push({
+        depName: key,
+        packageName,
+        depType: 'orb',
+        currentValue,
+        versioning: npmVersioning.id,
+        datasource: OrbDatasource.id,
+      });
+    } else {
+      extractDefinition(deps, orb, registryAliases);
+    }
+  }
+
+  // extract environments
+  const environments = [...definition.executors, ...definition.jobs];
+  for (const dockerImage of environments) {
+    deps.push({
+      ...getDep(dockerImage, true, registryAliases),
+      depType: 'docker',
+    });
+  }
+}
 
 export function extractPackageFile(
   content: string,
   packageFile?: string,
+  config?: ExtractConfig,
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-  try {
-    const lines = content.split(newlineRegex);
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      const line = lines[lineNumber];
-      const orbs = regEx(/^\s*orbs:\s*$/).exec(line);
-      if (orbs) {
-        logger.trace(`Matched orbs on line ${lineNumber}`);
-        let foundOrbOrNoop: boolean;
-        do {
-          foundOrbOrNoop = false;
-          const orbLine = lines[lineNumber + 1];
-          logger.trace(`orbLine: "${orbLine}"`);
-          const yamlNoop = regEx(/^\s*(#|$)/).exec(orbLine);
-          if (yamlNoop) {
-            logger.debug('orbNoop');
-            foundOrbOrNoop = true;
-            lineNumber += 1;
-            continue;
-          }
-          const orbMatch = regEx(/^\s+([^:]+):\s(.+?)(?:\s*#.*)?$/).exec(
-            orbLine,
-          );
-          if (orbMatch) {
-            logger.trace('orbMatch');
-            foundOrbOrNoop = true;
-            lineNumber += 1;
-            const depName = orbMatch[1];
-            const [orbName, currentValue] = orbMatch[2].split('@');
-            const dep: PackageDependency = {
-              depType: 'orb',
-              depName,
-              currentValue,
-              datasource: OrbDatasource.id,
-              packageName: orbName,
-              commitMessageTopic: '{{{depName}}} orb',
-              versioning: npmVersioning.id,
-            };
-            deps.push(dep);
-          }
-        } while (foundOrbOrNoop);
-      }
-      const match = regEx(/^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
-      if (match) {
-        const currentFrom = match[1];
-        const dep = getDep(currentFrom);
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'CircleCI docker image',
-        );
-        dep.depType = 'docker';
-        dep.versioning = 'docker';
-        if (
-          !dep.depName?.startsWith('ubuntu-') &&
-          !dep.depName?.startsWith('windows-server-') &&
-          !dep.depName?.startsWith('android-') &&
-          dep.depName !== 'android'
-        ) {
-          deps.push(dep);
-        }
-      }
-    }
-  } catch (err) /* istanbul ignore next */ {
+  const { val: parsed, err } = Result.wrap(() =>
+    CircleCiFile.parse(parseSingleYaml(content)),
+  ).unwrap();
+
+  if (err) {
     logger.debug({ err, packageFile }, 'Error extracting circleci images');
+    return null;
   }
+
+  const registryAliases = config?.registryAliases ?? {};
+  const deps: PackageDependency[] = [];
+  extractDefinition(deps, parsed, registryAliases);
+
+  for (const alias of parsed.aliases) {
+    deps.push({
+      ...getDep(alias, true, registryAliases),
+      depType: 'docker',
+    });
+  }
+
   if (!deps.length) {
     return null;
   }
+
   return { deps };
 }

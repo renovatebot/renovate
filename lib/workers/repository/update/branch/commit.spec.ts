@@ -1,8 +1,8 @@
-import { scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { LongCommitSha } from '../../../../util/git/types';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
+import { scm } from '~test/util';
 
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {
@@ -20,6 +20,7 @@ describe('workers/repository/update/branch/commit', () => {
         updatedPackageFiles: [],
         updatedArtifacts: [],
         upgrades: [],
+        platformCommit: 'auto',
       } satisfies BranchConfig;
       scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
       GlobalConfig.reset();
@@ -52,7 +53,7 @@ describe('workers/repository/update/branch/commit', () => {
             ],
             force: false,
             message: 'some commit message',
-            platformCommit: false,
+            platformCommit: 'auto',
           },
         ],
       ]);

@@ -1,14 +1,18 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string-match';
+import { asTimestamp } from '../../../util/timestamp';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -39,13 +43,12 @@ import {
 } from './common';
 import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
+import type { DistributionManifest, OciImageManifest } from './schema';
 import {
-  DistributionManifest,
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
-  OciImageManifest,
 } from './schema';
 
 const defaultConfig = {
@@ -83,7 +86,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
+    'The release timestamp is determined from the `tag_last_pushed` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -97,7 +100,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     tag: string,
-    mode: 'head' | 'get' = 'get',
+    mode: 'head' | 'getText' = 'getText',
   ): Promise<HttpResponse | null> {
     logger.debug(
       `getManifestResponse(${registryHost}, ${dockerRepository}, ${tag}, ${mode})`,
@@ -122,6 +125,7 @@ export class DockerDatasource extends Datasource {
       const manifestResponse = await this.http[mode](url, {
         headers,
         noAuth: true,
+        cacheProvider: memCacheProvider,
       });
       return manifestResponse;
     } catch (err) /* istanbul ignore next */ {
@@ -198,7 +202,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -243,7 +247,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
     );
-    // istanbul ignore if: Should never happen
+    /* v8 ignore next 4 -- should never happen */
     if (!headers) {
       logger.warn('No docker auth found - returning');
       return undefined;
@@ -290,7 +294,7 @@ export class DockerDatasource extends Datasource {
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!manifestResponse) {
       return null;
     }
@@ -455,6 +459,16 @@ export class DockerDatasource extends Datasource {
     tag: string,
   ): Promise<Record<string, string> | undefined> {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
+    // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
+    if (
+      getEnv().RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
+      registryHost === 'https://index.docker.io'
+    ) {
+      logger.debug(
+        'Docker Hub image - skipping label lookup due to RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP',
+      );
+      return {};
+    }
     // Docker Hub library images don't have labels we need
     if (
       registryHost === 'https://index.docker.io' &&
@@ -516,7 +530,7 @@ export class DockerDatasource extends Datasource {
             manifest.config.digest,
           );
 
-          // istanbul ignore if: should never happen
+          /* v8 ignore next 3 -- should never happen */
           if (!configResponse) {
             return labels;
           }
@@ -619,7 +633,7 @@ export class DockerDatasource extends Datasource {
 
       // typescript issue :-/
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const res = (await this.http.getJson<QuayRestDockerTags>(
+      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
         url,
       )) as HttpResponse<QuayRestDockerTags>;
       const pageTags = res.body.tags.map((tag) => tag.name);
@@ -656,14 +670,12 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
-      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
-      : 20;
+    const pages = GlobalConfig.get('dockerMaxPages', 20);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
       try {
-        res = await this.http.getJson<{ tags: string[] }>(url, {
+        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
           headers,
           noAuth: true,
         });
@@ -684,13 +696,21 @@ export class DockerDatasource extends Datasource {
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
       if (isArtifactoryServer(res)) {
-        // Artifactory incorrectly returns a next link without the virtual repository name
-        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
-        url = linkHeader?.next?.last
-          ? `${url}&last=${linkHeader.next.last}`
-          : null;
+        // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
+        if (linkHeader?.next?.last) {
+          // parse the current URL, strip any old "last" param, then set the new one
+          const parsed: URL = new URL(url);
+          parsed.searchParams.delete('last');
+          parsed.searchParams.set('last', linkHeader.next.last);
+          url = parsed.href;
+        } else {
+          url = null;
+        }
+      } else if (linkHeader?.next?.url) {
+        // for the normal case we can still use URL to resolve relative-next
+        url = new URL(linkHeader.next.url, url).href;
       } else {
-        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
+        url = null;
       }
       page += 1;
     } while (url && page < pages);
@@ -823,7 +843,7 @@ export class DockerDatasource extends Datasource {
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
-    const newTag = newValue ?? 'latest';
+    const newTag = is.nonEmptyString(newValue) ? newValue : 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
@@ -967,8 +987,10 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    let needNextPage: boolean = true;
-    while (needNextPage) {
+    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    let page = 0,
+      needNextPage = true;
+    while (needNextPage && page < maxPages) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
         .unwrap();
@@ -977,10 +999,10 @@ export class DockerDatasource extends Datasource {
         logger.debug({ err }, `Docker: error fetching data from DockerHub`);
         return null;
       }
+      page++;
+      const { results, next, count } = val;
 
-      const { results, next } = val;
-
-      needNextPage = cache.reconcile(results);
+      needNextPage = cache.reconcile(results, count);
 
       if (!next) {
         break;
@@ -993,13 +1015,10 @@ export class DockerDatasource extends Datasource {
 
     const items = cache.getItems();
     return items.map(
-      ({
-        name: version,
-        tag_last_pushed: releaseTimestamp,
-        digest: newDigest,
-      }) => {
+      ({ name: version, tag_last_pushed, digest: newDigest }) => {
         const release: Release = { version };
 
+        const releaseTimestamp = asTimestamp(tag_last_pushed);
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
         }
@@ -1066,7 +1085,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 
@@ -1089,9 +1108,9 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : findLatestStable(tags) ?? tags[tags.length - 1];
+      : (findLatestStable(tags) ?? tags[tags.length - 1]);
 
-    // istanbul ignore if: needs test
+    /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {
       return ret;
     }

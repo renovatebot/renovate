@@ -27,9 +27,10 @@ export interface PR {
   title: string;
   body: string;
   mergeable: boolean;
+  merged?: boolean;
   created_at: string;
   updated_at: string;
-  closed_at: string;
+  closed_at: string | null;
   diff_url: string;
   base?: {
     ref: string;
@@ -137,8 +138,8 @@ export interface CommitStatus {
   id: number;
   status: CommitStatusType;
   context: string;
-  description: string;
-  target_url: string;
+  description?: string;
+  target_url?: string;
   created_at: string;
 }
 
@@ -198,6 +199,7 @@ export interface PRUpdateParams {
 export interface PRMergeParams {
   Do: PRMergeMethod;
   merge_when_checks_succeed?: boolean;
+  delete_branch_after_merge?: boolean;
 }
 
 export type CommentCreateParams = CommentUpdateParams;

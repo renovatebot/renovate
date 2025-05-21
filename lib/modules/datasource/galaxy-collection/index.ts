@@ -39,7 +39,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases:${packageName}`,
   })
   async getReleases({
     packageName,
@@ -65,8 +65,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(baseUrl, GalaxyV3)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${baseUrl}`,
+          { url: baseUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();
@@ -80,8 +80,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(versionsUrl, GalaxyV3Versions)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${versionsUrl}`,
+          { url: versionsUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();
@@ -119,8 +119,9 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
-    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    namespace: `datasource-${GalaxyCollectionDatasource.id}`,
+    key: (_packageName: string, versionsUrl: string, basicRelease: Release) =>
+      `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
     ttlMinutes: 10080, // 1 week
   })
   async getVersionDetails(
@@ -135,8 +136,8 @@ export class GalaxyCollectionDatasource extends Datasource {
       .getJsonSafe(detailedVersionUrl, GalaxyV3DetailedVersion)
       .onError((err) => {
         logger.warn(
-          { datasource: this.id, packageName, err },
-          `Error fetching ${versionsUrl}`,
+          { url: versionsUrl, datasource: this.id, packageName, err },
+          'Error fetching from url',
         );
       })
       .unwrap();

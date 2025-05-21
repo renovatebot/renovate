@@ -11,9 +11,8 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import {
+import type {
   AzurePipelines,
-  AzurePipelinesYaml,
   Container,
   Deploy,
   Deployment,
@@ -22,6 +21,7 @@ import {
   Repository,
   Step,
 } from './schema';
+import { AzurePipelinesYaml } from './schema';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 

@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
+import type { XmlNode } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
-import { hasKey } from '../../../util/object';
-import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
@@ -20,15 +19,7 @@ import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
  * regarding to given version range.
  * 1.3.4 equals [1.3.4,)
- * Due to guarantee that an update of package version will result in its usage by the next restore + build operation,
- * only following constrained versions make sense
- * 1.3.4, [1.3.4], [1.3.4, ], [1.3.4, )
- * The update of the right boundary does not make sense regarding to the lowest version restore rule,
- * so we don't include it in the extracting regexp
  */
-const checkVersion = regEx(
-  `^\\s*(?:[[])?(?:(?<currentValue>[^"(,[\\]]+)\\s*(?:,\\s*[)\\]]|])?)\\s*$`,
-);
 const elemNames = new Set([
   'PackageReference',
   'PackageVersion',
@@ -36,12 +27,13 @@ const elemNames = new Set([
   'GlobalPackageReference',
 ]);
 
-function isXmlElem(node: XmlNode): boolean {
-  return hasKey('name', node);
+function isXmlElem(node: XmlNode): node is XmlElement {
+  return node instanceof XmlElement;
 }
 
 function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
   const results: NugetPackageDependency[] = [];
+  const vars = new Map<string, string>();
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
     const child = todo.pop()!;
@@ -53,31 +45,69 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       if (is.nonEmptyStringAndNotWhitespace(depName)) {
         results.push({ ...dep, depName, depType: 'docker' });
       }
-    }
-
-    if (elemNames.has(name)) {
+    } else if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
-      const version =
+
+      if (!depName) {
+        continue;
+      }
+
+      const dep: NugetPackageDependency = {
+        datasource: NugetDatasource.id,
+        depType: 'nuget',
+        depName,
+      };
+
+      let currentValue: string | undefined =
         attr?.Version ??
         attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');
-      const currentValue = is.nonEmptyStringAndNotWhitespace(version)
-        ? checkVersion.exec(version)?.groups?.currentValue?.trim()
-        : undefined;
-      if (depName && currentValue) {
-        results.push({
-          datasource: NugetDatasource.id,
-          depType: 'nuget',
-          depName,
-          currentValue,
-        });
+
+      if (!is.nonEmptyStringAndNotWhitespace(currentValue)) {
+        dep.skipReason = 'invalid-version';
       }
+
+      let sharedVariableName: string | undefined;
+
+      currentValue = currentValue
+        ?.trim()
+        ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+          sharedVariableName = key;
+          const val = vars.get(key);
+          if (val) {
+            return val;
+          }
+          return match;
+        });
+
+      if (sharedVariableName) {
+        if (currentValue === `$(${sharedVariableName})`) {
+          // this means that be failed to find/replace the variable
+          dep.skipReason = 'contains-variable';
+        } else {
+          dep.sharedVariableName = sharedVariableName;
+        }
+      }
+
+      dep.currentValue = currentValue;
+      results.push(dep);
     } else if (name === 'Sdk') {
       const depName = attr?.Name;
       const version = attr?.Version;
       // if sdk element is present it will always have the Name field but the Version is an optional field
+      if (depName && version) {
+        results.push({
+          depName,
+          currentValue: version,
+          depType: 'msbuild-sdk',
+          datasource: NugetDatasource.id,
+        });
+      }
+    } else if (name === 'Import') {
+      const depName = attr?.Sdk;
+      const version = attr?.Version;
       if (depName && version) {
         results.push({
           depName,
@@ -100,8 +130,21 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
             });
           }
         }
+
+        const propertyGroup = child.childNamed('PropertyGroup');
+        if (propertyGroup) {
+          for (const propChild of propertyGroup.children) {
+            if (isXmlElem(propChild)) {
+              const { name, val } = propChild;
+              if (!['Version', 'TargetFramework'].includes(name)) {
+                vars.set(name, val);
+              }
+            }
+          }
+        }
       }
-      todo.push(...(child.children.filter(isXmlElem) as XmlElement[]));
+
+      todo.push(...child.children.filter(isXmlElem));
     }
   }
   return results;
@@ -122,7 +165,7 @@ export async function extractPackageFile(
 
     try {
       manifest = JSON.parse(content);
-    } catch (err) {
+    } catch {
       logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }

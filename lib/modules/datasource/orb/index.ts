@@ -1,16 +1,20 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { asTimestamp } from '../../../util/timestamp';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { OrbResponse } from './types';
 
+const MAX_VERSIONS = 100;
+
 const query = `
-query($packageName: String!) {
+query($packageName: String!, $maxVersions: Int!) {
   orb(name: $packageName) {
     name,
     homeUrl,
     isPrivate,
-    versions {
+    versions(count: $maxVersions) {
       version,
       createdAt
     }
@@ -25,9 +29,10 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
+  override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -41,14 +46,14 @@ export class OrbDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
-    const url = `${registryUrl}graphql-unstable`;
+    const url = joinUrlParts(registryUrl, 'graphql-unstable');
     const body = {
       query,
-      variables: { packageName },
+      variables: { packageName, maxVersions: MAX_VERSIONS },
     };
     const res = (
       await this.http.postJson<OrbResponse>(url, {
@@ -67,7 +72,7 @@ export class OrbDatasource extends Datasource {
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
     const releases = orb.versions.map(({ version, createdAt }) => ({
       version,
-      releaseTimestamp: createdAt ?? null,
+      releaseTimestamp: asTimestamp(createdAt),
     }));
 
     const dep = { homepage, isPrivate: !!orb.isPrivate, releases };

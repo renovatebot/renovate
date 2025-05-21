@@ -19,6 +19,9 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
 }
 
 export function matchRegexOrGlob(input: string, pattern: string): boolean {
+  if (pattern === '*') {
+    return true;
+  }
   const predicate = getRegexOrGlobPredicate(pattern);
   return predicate(input);
 }
@@ -56,6 +59,13 @@ export function matchRegexOrGlobList(
   return true;
 }
 
+export function anyMatchRegexOrGlobList(
+  inputs: string[],
+  patterns: string[],
+): boolean {
+  return inputs.some((input) => matchRegexOrGlobList(input, patterns));
+}
+
 export const UUIDRegex = regEx(
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
 );
@@ -75,7 +85,7 @@ function parseRegexMatch(input: string): RegExp | null {
       .replace(configValStart, '')
       .replace(configValEnd, '');
     return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString);
-  } catch (err) {
+  } catch {
     // no-op
   }
   return null;

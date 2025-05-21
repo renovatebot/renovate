@@ -1,13 +1,9 @@
 import is from '@sindresorhus/is';
-import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
-import type {
-  RegexManagerConfig,
-  RegexManagerTemplates,
-} from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types/host-rules';
+import type { HostRule } from '../types';
+import { getExpression } from '../util/jsonata';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -15,6 +11,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match';
 import * as template from '../util/template';
+import { parseUrl } from '../util/url';
 import {
   hasValidSchedule,
   hasValidTimezone,
@@ -25,18 +22,26 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import { supportedDatasources } from './presets/internal/merge-confidence';
-import {
+import type {
   AllowedParents,
-  type RenovateConfig,
-  type RenovateOptions,
-  type StatusCheckKey,
-  type ValidationMessage,
-  type ValidationResult,
-  allowedStatusCheckStrings,
+  RenovateConfig,
+  RenovateOptions,
+  StatusCheckKey,
+  ValidationMessage,
+  ValidationResult,
 } from './types';
+import { allowedStatusCheckStrings } from './types';
 import * as managerValidator from './validation-helpers/managers';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
+import {
+  getParentName,
+  isFalseGlobal,
+  validateJSONataManagerFields,
+  validateNumber,
+  validatePlainObject,
+  validateRegexManagerFields,
+} from './validation-helpers/utils';
 
 const options = getOptions();
 
@@ -63,6 +68,7 @@ const ignoredNodes = [
   'vulnerabilityAlertsOnly',
   'vulnerabilityAlert',
   'isVulnerabilityAlert',
+  'vulnerabilityFixVersion', // not intended to be used by end users but may be by Mend apps
   'copyLocalLibs', // deprecated - functionality is now enabled by default
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
@@ -79,42 +85,6 @@ function isManagerPath(parentPath: string): boolean {
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
-}
-
-function validatePlainObject(val: Record<string, unknown>): true | string {
-  for (const [key, value] of Object.entries(val)) {
-    if (!is.string(value)) {
-      return key;
-    }
-  }
-  return true;
-}
-
-function validateNumber(
-  key: string,
-  val: unknown,
-  currentPath?: string,
-  subKey?: string,
-): ValidationMessage[] {
-  const errors: ValidationMessage[] = [];
-  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
-  if (is.number(val)) {
-    if (val < 0 && !optionAllowsNegativeIntegers.has(key)) {
-      errors.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${path}\` should be a positive integer. Found negative value instead.`,
-      });
-    }
-  } else {
-    errors.push({
-      topic: 'Configuration Error',
-      message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
-        val,
-      )} (${typeof val}).`,
-    });
-  }
-
-  return errors;
 }
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
@@ -183,16 +153,6 @@ function initOptions(): void {
   optionsInitialized = true;
 }
 
-export function getParentName(parentPath: string | undefined): string {
-  return parentPath
-    ? parentPath
-        .replace(regEx(/\.?encrypted$/), '')
-        .replace(regEx(/\[\d+\]$/), '')
-        .split('.')
-        .pop()!
-    : '.';
-}
-
 export async function validateConfig(
   configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
@@ -206,7 +166,7 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    // istanbul ignore if
+    /* v8 ignore next 7 -- TODO: add test */
     if (key === '__proto__') {
       errors.push({
         topic: 'Config security error',
@@ -261,16 +221,16 @@ export async function validateConfig(
         });
       }
     }
-    if (key === 'fileMatch') {
+    if (key === 'managerFilePatterns') {
       if (parentPath === undefined) {
         errors.push({
           topic: 'Config error',
-          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
+          message: `"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block`,
         });
       } else if (!isManagerPath(parentPath)) {
         warnings.push({
           topic: 'Config warning',
-          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
+          message: `"managerFilePatterns" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
@@ -297,7 +257,7 @@ export async function validateConfig(
           let res = template.compile((val as string).toString(), config, false);
           res = template.compile(res, config, false);
           template.compile(res, config, false);
-        } catch (err) {
+        } catch {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid template in config path: ${currentPath}`,
@@ -367,7 +327,8 @@ export async function validateConfig(
             });
           }
         } else if (type === 'integer') {
-          errors.push(...validateNumber(key, val, currentPath));
+          const allowsNegative = optionAllowsNegativeIntegers.has(key);
+          errors.push(...validateNumber(key, val, allowsNegative, currentPath));
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -431,27 +392,16 @@ export async function validateConfig(
               'matchDatasources',
               'matchDepTypes',
               'matchDepNames',
-              'matchDepPatterns',
-              'matchDepPrefixes',
               'matchPackageNames',
-              'matchPackagePatterns',
-              'matchPackagePrefixes',
-              'excludeDepNames',
-              'excludeDepPatterns',
-              'excludeDepPrefixes',
-              'excludePackageNames',
-              'excludePackagePatterns',
-              'excludePackagePrefixes',
-              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
-              'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
               'matchCurrentAge',
               'matchRepositories',
               'matchNewValue',
+              'matchJsonata',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -537,7 +487,8 @@ export async function validateConfig(
               const allowedKeys = [
                 'customType',
                 'description',
-                'fileMatch',
+                'fileFormat',
+                'managerFilePatterns',
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
@@ -569,10 +520,17 @@ export async function validateConfig(
                   is.nonEmptyString(customManager.customType) &&
                   isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                  if (is.nonEmptyArray(customManager.managerFilePatterns)) {
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
+                          customManager,
+                          currentPath,
+                          errors,
+                        );
+                        break;
+                      case 'jsonata':
+                        validateJSONataManagerFields(
                           customManager,
                           currentPath,
                           errors,
@@ -582,7 +540,7 @@ export async function validateConfig(
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty managerFilePatterns array`,
                     });
                   }
                 } else {
@@ -603,36 +561,20 @@ export async function validateConfig(
                 }
               }
             }
-            if (
-              [
-                'matchPackagePatterns',
-                'excludePackagePatterns',
-                'matchDepPatterns',
-                'excludeDepPatterns',
-              ].includes(key)
-            ) {
+            if (['matchPackageNames', 'matchDepNames'].includes(key)) {
+              const startPattern = regEx(/!?\//);
+              const endPattern = regEx(/\/g?i?$/);
               for (const pattern of val as string[]) {
-                if (pattern !== '*') {
+                if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
-                    regEx(pattern);
-                  } catch (e) {
+                    // regEx isn't aware of our !/ prefix but can handle the suffix
+                    regEx(pattern.replace(startPattern, '/'));
+                  } catch {
                     errors.push({
                       topic: 'Configuration Error',
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                     });
                   }
-                }
-              }
-            }
-            if (key === 'fileMatch') {
-              for (const fileMatch of val as string[]) {
-                try {
-                  regEx(fileMatch);
-                } catch (e) {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
-                  });
                 }
               }
             }
@@ -692,7 +634,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars =
                 configType === 'global'
-                  ? (config.allowedEnv as string[]) ?? []
+                  ? ((config.allowedEnv as string[]) ?? [])
                   : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
@@ -723,7 +665,7 @@ export async function validateConfig(
                   });
                 }
                 if (
-                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                  !(is.string(statusCheckValue) || null === statusCheckValue)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -810,9 +752,26 @@ export async function validateConfig(
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders =
         configType === 'global'
-          ? (config.allowedHeaders as string[]) ?? []
+          ? ((config.allowedHeaders as string[]) ?? [])
           : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
+        if (is.nonEmptyString(rule.matchHost)) {
+          if (rule.matchHost.includes('://')) {
+            if (parseUrl(rule.matchHost) === null) {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
+              });
+            }
+          }
+        } else if (is.emptyString(rule.matchHost)) {
+          errors.push({
+            topic: 'Configuration Error',
+            message:
+              'Invalid value for hostRules matchHost. It cannot be an empty string.',
+          });
+        }
+
         if (!rule.headers) {
           continue;
         }
@@ -832,79 +791,30 @@ export async function validateConfig(
         }
       }
     }
+
+    if (key === 'matchJsonata' && is.array(val, is.string)) {
+      for (const expression of val) {
+        const res = getExpression(expression);
+        if (res instanceof Error) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
+          });
+        }
+      }
+    }
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
-    // istanbul ignore else: currently never happen
     if (a.topic === b.topic) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next: currently never happen
     return a.topic > b.topic ? 1 : -1;
   }
 
   errors.sort(sortAll);
   warnings.sort(sortAll);
   return { errors, warnings };
-}
-
-function hasField(
-  customManager: Partial<RegexManagerConfig>,
-  field: string,
-): boolean {
-  const templateField = `${field}Template` as keyof RegexManagerTemplates;
-  return !!(
-    customManager[templateField] ??
-    customManager.matchStrings?.some((matchString) =>
-      matchString.includes(`(?<${field}>`),
-    )
-  );
-}
-
-function validateRegexManagerFields(
-  customManager: Partial<RegexManagerConfig>,
-  currentPath: string,
-  errors: ValidationMessage[],
-): void {
-  if (is.nonEmptyArray(customManager.matchStrings)) {
-    for (const matchString of customManager.matchStrings) {
-      try {
-        regEx(matchString);
-      } catch (err) {
-        logger.debug(
-          { err },
-          'customManager.matchStrings regEx validation error',
-        );
-        errors.push({
-          topic: 'Configuration Error',
-          message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
-        });
-      }
-    }
-  } else {
-    errors.push({
-      topic: 'Configuration Error',
-      message: `Each Custom Manager must contain a non-empty matchStrings array`,
-    });
-  }
-
-  const mandatoryFields = ['currentValue', 'datasource'];
-  for (const field of mandatoryFields) {
-    if (!hasField(customManager, field)) {
-      errors.push({
-        topic: 'Configuration Error',
-        message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
-      });
-    }
-  }
-
-  const nameFields = ['depName', 'packageName'];
-  if (!nameFields.some((field) => hasField(customManager, field))) {
-    errors.push({
-      topic: 'Configuration Error',
-      message: `Regex Managers must contain depName or packageName regex groups or templates`,
-    });
-  }
 }
 
 /**
@@ -919,6 +829,13 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
+  /* v8 ignore next 5 -- not testable yet */
+  if (getDeprecationMessage(key)) {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message: getDeprecationMessage(key)!,
+    });
+  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {
@@ -989,7 +906,8 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'integer') {
-      warnings.push(...validateNumber(key, val, currentPath));
+      const allowsNegative = optionAllowsNegativeIntegers.has(key);
+      warnings.push(...validateNumber(key, val, allowsNegative, currentPath));
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
@@ -1055,8 +973,15 @@ async function validateGlobalConfig(
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
+            const allowsNegative = optionAllowsNegativeIntegers.has(key);
             warnings.push(
-              ...validateNumber(key, subValue, currentPath, subKey),
+              ...validateNumber(
+                key,
+                subValue,
+                allowsNegative,
+                currentPath,
+                subKey,
+              ),
             );
           }
         } else {
@@ -1076,23 +1001,4 @@ async function validateGlobalConfig(
       }
     }
   }
-}
-
-/**  An option is a false global if it has the same name as a global only option
- *   but is actually just the field of a non global option or field an children of the non global option
- *   eg. token: it's global option used as the bot's token as well and
- *   also it can be the token used for a platform inside the hostRules configuration
- */
-function isFalseGlobal(optionName: string, parentPath?: string): boolean {
-  if (parentPath?.includes('hostRules')) {
-    if (
-      optionName === 'token' ||
-      optionName === 'username' ||
-      optionName === 'password'
-    ) {
-      return true;
-    }
-  }
-
-  return false;
 }

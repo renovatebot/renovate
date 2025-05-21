@@ -1,6 +1,8 @@
-import * as httpMock from '../../../../test/http-mock';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as http from '.';
+import { hostRules } from '~test/host-rules';
+import * as httpMock from '~test/http-mock';
 
 const host = 'https://my.server/';
 const filePath = '/test-preset.json';
@@ -45,6 +47,13 @@ describe('config/presets/http/index', () => {
       await expect(http.getPreset({ repo: 'malformed!' })).rejects.toThrow(
         PRESET_DEP_NOT_FOUND,
       );
+    });
+    it('throws external host error', async () => {
+      httpMock.scope(host).get(filePath).reply(404, {});
+
+      hostRules.add({ abortOnError: true });
+
+      await expect(http.getPreset({ repo })).rejects.toThrow(ExternalHostError);
     });
   });
 });

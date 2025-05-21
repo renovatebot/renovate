@@ -47,13 +47,16 @@ You can set alternative feeds:
 
 ```json
 {
-  "nuget": {
-    "registryUrls": [
-      "https://api.nuget.org/v3/index.json",
-      "https://example1.com/nuget/",
-      "https://example2.com/nuget/v3/index.json"
-    ]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["nuget"],
+      "registryUrls": [
+        "https://api.nuget.org/v3/index.json",
+        "https://example1.com/nuget/",
+        "https://example2.com/nuget/v3/index.json"
+      ]
+    }
+  ]
 }
 ```
 
@@ -65,6 +68,10 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 !!! warning
     If your project has lockfile(s), for example a `package.lock.json` file, then you must set alternate feed settings in the `NuGet.config` file only.
     `registryUrls` set in other files are **not** passed to the NuGet commands.
+
+<!-- prettier-ignore -->
+!!! note
+    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 
@@ -93,9 +100,12 @@ If a `v3` feed URL does not end with `index.json`, you must specify the version 
 
   ```json
   {
-    "nuget": {
-      "registryUrls": ["http://myV3feed#protocolVersion=3"]
-    }
+    "packageRules": [
+      {
+        "matchDatasources": ["nuget"],
+        "registryUrls": ["https://example1.com/nuget/#protocolVersion=3"]
+      }
+    ]
   }
   ```
 
@@ -118,13 +128,34 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
-If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
+If you use Azure DevOps:
+
+- set `matchHost` to `pkgs.dev.azure.com`
+- set the username, so Renovate can build the project when it creates the PR
 
 <!-- prettier-ignore -->
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
-    For Azure DevOps, you can use a PAT with `read` permissions on `Packaging` plus an empty username.
-    The generated `nuget.config` enforces basic authentication and cannot be overridden externally!
+    For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
+    The username of the PAT must match the username of the _user of the PAT_.
+    The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
+
+## Ignoring package files when using presets
+
+Because `nuget` manager has a dedicated `ignorePaths` entry in the `:ignoreModulesAndTests` preset, if you're using any presets that extend it (like `config:recommended`), you need to put your `ignorePaths` inside the `nuget` section for it to be merged.
+For example:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "nuget": {
+    "ignorePaths": ["IgnoreThisPackage/**"]
+  }
+}
+```
+
+Otherwise, all `nuget.ignorePaths` values in `:ignoreModulesAndTests` will override values you put inside `ignorePaths` at the top-level config.
 
 ## Future work
 

@@ -31,6 +31,8 @@ export const removedPresets: Record<string, string | null> = {
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
     'replacements:messageFormat-to-scoped',
+  'regexManagers:azurePipelinesVersions':
+    'customManagers:azurePipelinesVersions',
   'regexManagers:biomeVersions': 'customManagers:biomeVersions',
   'regexManagers:bitbucketPipelinesVersions':
     'customManagers:bitbucketPipelinesVersions',
@@ -42,6 +44,7 @@ export const removedPresets: Record<string, string | null> = {
     'customManagers:helmChartYamlAppVersions',
   'regexManagers:mavenPropertyVersions': 'customManagers:mavenPropertyVersions',
   'regexManagers:tfvarsVersions': 'customManagers:tfvarsVersions',
+  'workarounds:reduceRepologyServerLoad': null,
 };
 
 const renamedMonorepos: Record<string, string> = {
@@ -73,6 +76,7 @@ const renamedMonorepos: Record<string, string> = {
   Steeltoe: 'steeltoe',
   stryker: 'stryker-js',
   Swashbuckle: 'swashbuckle-aspnetcore',
+  nrwl: 'nx',
 };
 
 for (const [from, to] of Object.entries(renamedMonorepos)) {

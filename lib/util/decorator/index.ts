@@ -17,7 +17,7 @@ export interface DecoratorParameters<T, U extends any[] = any[]> {
   /**
    * A callback to call the decorated method with the current arguments.
    */
-  callback(): unknown;
+  callback(this: void): unknown;
 
   /**
    * Current call context.

@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject2toml = Fixtures.get('pyproject.2.toml');
@@ -51,7 +51,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(10);
+      expect(res?.deps).toHaveLength(7);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
@@ -60,7 +60,7 @@ describe('modules/manager/poetry/extract', () => {
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
       expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(8);
+      expect(res?.deps).toHaveLength(12);
     });
 
     it('handles case with no dependencies', async () => {
@@ -481,14 +481,38 @@ describe('modules/manager/poetry/extract', () => {
             depName: 'typer',
             currentValue: '^0.9.0',
             registryUrls: ['https://pypi.org/pypi/'],
+            managerData: {
+              sourceName: 'pypi',
+            },
           },
           {
             depName: 'requests-cache',
             currentValue: '^1.1.0',
             registryUrls: ['https://example.com'],
+            managerData: {
+              sourceName: 'artifactory',
+            },
           },
         ]);
       });
+    });
+
+    it('parses package file with template', async () => {
+      const content = codeBlock`
+            [tool.poetry]
+            name = "{{ name }}"
+            {# comment #}
+            [tool.poetry.dependencies]
+            python = "^3.9"
+            {{ foo }} = "{{ bar }}"
+            {% if foo %}
+            dep1 = "^1.0.0"
+            {% endif %}
+          `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps[0].depName).toBe('python');
+      expect(res?.deps[1].depName).toBe('dep1');
     });
   });
 });

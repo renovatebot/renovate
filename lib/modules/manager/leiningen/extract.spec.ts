@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { ClojureDatasource } from '../../datasource/clojure';
 import { extractFromVectors, extractVariables, trimAtKey } from './extract';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const leinProjectClj = Fixtures.get(`project.clj`);
 
@@ -38,7 +38,7 @@ describe('modules/manager/leiningen/extract', () => {
         datasource: ClojureDatasource.id,
         depName: 'foo:bar',
         currentValue: '1.2.3',
-        groupName: 'baz',
+        sharedVariableName: 'baz',
       },
     ]);
     expect(
@@ -86,7 +86,7 @@ describe('modules/manager/leiningen/extract', () => {
         {
           depName: 'clj-stacktrace:clj-stacktrace',
           currentValue: '0.2.4',
-          groupName: 'clj-stacktrace-version',
+          sharedVariableName: 'clj-stacktrace-version',
         },
         {
           depName: 'clj-time:clj-time',

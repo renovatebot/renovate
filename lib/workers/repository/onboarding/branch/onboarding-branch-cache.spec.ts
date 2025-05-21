@@ -1,4 +1,3 @@
-import { git, mocked, partial, scm } from '../../../../../test/util';
 import * as _cache from '../../../../util/cache/repository';
 import type {
   OnboardingBranchCache,
@@ -15,10 +14,10 @@ import {
   setOnboardingCache,
   setOnboardingConfigDetails,
 } from './onboarding-branch-cache';
+import { git, partial, scm } from '~test/util';
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/git');
-const cache = mocked(_cache);
+vi.mock('../../../../util/cache/repository');
+const cache = vi.mocked(_cache);
 
 describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
   describe('setOnboardingCache', () => {
@@ -147,7 +146,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       );
       scm.isBranchModified.mockResolvedValueOnce(false);
       expect(
-        await isOnboardingBranchModified('configure/renovate'),
+        await isOnboardingBranchModified('configure/renovate', 'main'),
       ).toBeFalse();
     });
 
@@ -165,7 +164,9 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         'new-onboarding-sha' as LongCommitSha,
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
-      expect(await isOnboardingBranchModified('configure/renovate')).toBeTrue();
+      expect(
+        await isOnboardingBranchModified('configure/renovate', 'main'),
+      ).toBeTrue();
     });
 
     it('returns cached value', async () => {
@@ -181,7 +182,9 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       git.getBranchCommit.mockReturnValueOnce(
         'onboarding-sha' as LongCommitSha,
       );
-      expect(await isOnboardingBranchModified('configure/renovate')).toBeTrue();
+      expect(
+        await isOnboardingBranchModified('configure/renovate', 'main'),
+      ).toBeTrue();
     });
   });
 

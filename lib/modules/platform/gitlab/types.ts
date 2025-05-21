@@ -23,6 +23,7 @@ export interface GitLabMergeRequest {
   iid: number;
   title: string;
   state: string;
+  created_at: string;
   source_branch: string;
   target_branch: string;
   description: string;
@@ -35,11 +36,13 @@ export interface GitLabMergeRequest {
   sha: LongCommitSha;
   head_pipeline?: {
     status: string;
+    sha: string;
   };
 }
 
 export interface GitlabPr extends Pr {
   headPipelineStatus?: string;
+  headPipelineSha?: string;
 }
 
 export interface UpdateMergeRequest {

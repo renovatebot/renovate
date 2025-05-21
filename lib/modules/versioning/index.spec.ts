@@ -1,7 +1,8 @@
 import { getOptions } from '../../config/options';
 import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
-import { GenericVersion, GenericVersioningApi } from './generic';
+import type { GenericVersion } from './generic';
+import { GenericVersioningApi } from './generic';
 import * as semverVersioning from './semver';
 import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
@@ -20,6 +21,7 @@ describe('modules/versioning/index', () => {
       'getNewValue',
       'getPatch',
       'getSatisfyingVersion',
+      'isBreaking',
       'isCompatible',
       'isGreaterThan',
       'isLessThanRange',
@@ -33,7 +35,7 @@ describe('modules/versioning/index', () => {
     ]);
   });
 
-  it('validates', () => {
+  it('validates', async () => {
     function validate(
       module: VersioningApi | VersioningApiConstructor,
       name: string,
@@ -49,7 +51,7 @@ describe('modules/versioning/index', () => {
     }
     const vers = allVersioning.getVersionings();
 
-    const loadedVers = loadModules(__dirname);
+    const loadedVers = await loadModules(__dirname);
     expect(Array.from(vers.keys())).toEqual(Object.keys(loadedVers));
 
     for (const name of vers.keys()) {
@@ -79,12 +81,15 @@ describe('modules/versioning/index', () => {
       'constructor',
       'hasOwnProperty',
       'isPrototypeOf',
+      'isBreaking',
       'propertyIsEnumerable',
       'should',
       'toLocaleString',
       'toString',
       'valueOf',
       'subset',
+      'intersects',
+      'isSame',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))
@@ -117,7 +122,7 @@ describe('modules/versioning/index', () => {
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = (await import(`./${supportedScheme}`)).api;
+        const apiOrCtor = (await import(`./${supportedScheme}/index.ts`)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }

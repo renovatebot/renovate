@@ -5,6 +5,10 @@
   "semanticCommitScope": "deps",
   "automergeType": "pr",
   "prCreation": "immediate",
+  "ignorePresets": [":ignoreModulesAndTests"],
+  "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
+  "rebaseWhen": "conflicted",
+  "baseBranches": ["$default", "next"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -31,20 +35,56 @@
     },
     {
       "description": "set fix scope for base image",
-      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
       "semanticCommitType": "fix"
     },
     {
-      "description": "set feat scope for base image major",
-      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "description": "set feat scope for base image major and minor",
+      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
+    },
+    {
+      "description": "use `feat` semantic commit scope with breaking change for for base image major",
+      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchUpdateTypes": ["major"],
+      "commitMessagePrefix": "feat(deps)!:"
+    },
+    {
+      "description": "allow prereleases for base image on next branch",
+      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchBaseBranches": ["next"],
+      "ignoreUnstable": false
+    },
+    {
+      "description": "set build scope for node updates",
+      "matchPackageNames": ["node"],
+      "matchFileNames": [".nvmrc", "tools/docker/Dockerfile"],
+      "semanticCommitType": "build"
+    },
+    {
+      "description": "set branch prefix for node major updates to split from minor updates",
+      "matchPackageNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "additionalBranchPrefix": "major"
+    },
+    {
+      "description": "disable some invalid deps from docs",
+      "matchPackageNames": ["my.old.registry/**", "my.new.registry/**"],
+      "matchFileNames": ["docs/**/*.md"],
+      "enabled": false
+    },
+    {
+      "description": "require approval on next branch",
+      "matchPackageNames": ["*"],
+      "matchBaseBranches": ["next"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["config/options/index.ts"],
+      "managerFilePatterns": ["config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"
       ],

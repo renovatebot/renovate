@@ -11,7 +11,7 @@ export function getBucket(
   config: BucketConfig,
   currentVersion: string,
   newVersion: string,
-  versioning: VersioningApi,
+  versioningApi: VersioningApi,
 ): string | null {
   const {
     separateMajorMinor,
@@ -22,8 +22,8 @@ export function getBucket(
   if (!separateMajorMinor) {
     return 'latest';
   }
-  const fromMajor = versioning.getMajor(currentVersion);
-  const toMajor = versioning.getMajor(newVersion);
+  const fromMajor = versioningApi.getMajor(currentVersion);
+  const toMajor = versioningApi.getMajor(newVersion);
 
   // istanbul ignore if: error case
   if (toMajor === null) {
@@ -41,8 +41,8 @@ export function getBucket(
 
   // If we reach here then we know it's non-major
 
-  const fromMinor = versioning.getMinor(currentVersion);
-  const toMinor = versioning.getMinor(newVersion);
+  const fromMinor = versioningApi.getMinor(currentVersion);
+  const toMinor = versioningApi.getMinor(newVersion);
 
   // istanbul ignore if: error case
   if (fromMinor === null || toMinor === null) {
@@ -66,7 +66,7 @@ export function getBucket(
 
   /* future option
   if (separateMultiplePatch) {
-    const toPatch = versioning.getPatch(newVersion);
+    const toPatch = versioningApi.getPatch(newVersion);
     if (toPatch !== null && separateMultiplePatch) {
       return `v${toMajor}.${toMinor}.${toPatch}`;
     }

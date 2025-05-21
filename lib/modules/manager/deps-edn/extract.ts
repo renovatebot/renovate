@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { ClojureDatasource } from '../../datasource/clojure';
 import { CLOJARS_REPO } from '../../datasource/clojure/common';
@@ -118,7 +119,7 @@ function resolveGitPackageFromEdnVal(
 
   dep.datasource = GitRefsDatasource.id;
   dep.packageName = gitUrl;
-  if (gitUrl.startsWith('https://')) {
+  if (isHttpUrl(gitUrl)) {
     dep.sourceUrl = gitUrl.replace(/\.git$/, '');
   }
 }
@@ -169,7 +170,7 @@ function extractDependency(
       dep.currentValue = gitTag;
     }
 
-    const gitSha = val['git/sha'] ?? val['sha'];
+    const gitSha = val['git/sha'] ?? val.sha;
     if (is.string(gitSha)) {
       dep.currentDigest = gitSha;
       dep.currentDigestShort = gitSha.slice(0, 7);
@@ -233,9 +234,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
   const mavenRegistries: string[] = [...Object.values(registryMap)];
 
-  deps.push(...extractSection(data['deps'], metadata, mavenRegistries));
+  deps.push(...extractSection(data.deps, metadata, mavenRegistries));
 
-  const aliases = data['aliases'];
+  const aliases = data.aliases;
   if (is.plainObject(aliases)) {
     for (const [depType, aliasSection] of Object.entries(aliases)) {
       if (is.plainObject(aliasSection)) {

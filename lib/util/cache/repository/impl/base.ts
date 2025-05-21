@@ -6,7 +6,8 @@ import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
 import { cleanupHttpCache } from '../http-cache';
-import { RepoCacheRecord, RepoCacheV13 } from '../schema';
+import type { RepoCacheRecord } from '../schema';
+import { RepoCacheV13 } from '../schema';
 import type { RepoCache, RepoCacheData } from '../types';
 
 export abstract class RepoCacheBase implements RepoCache {
@@ -54,6 +55,11 @@ export abstract class RepoCacheBase implements RepoCache {
         logger.debug(
           `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`,
         );
+        return;
+      }
+
+      if (!is.nonEmptyString(oldCache)) {
+        logger.debug('RepoCacheBase.load() - cache file is empty - skipping');
         return;
       }
 

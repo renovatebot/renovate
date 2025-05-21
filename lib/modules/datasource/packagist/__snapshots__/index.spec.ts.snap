@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/packagist/index getReleases adds packagist source implicitly 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > adds packagist source implicitly 1`] = `
 {
-  "registryUrl": "https://packagist.org",
+  "registryUrl": "https://repo.packagist.org",
   "releases": [
     {
       "gitRef": "v1.0",
@@ -104,9 +104,9 @@ exports[`modules/datasource/packagist/index getReleases adds packagist source im
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases processes real versioned data 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > processes real versioned data 1`] = `
 {
-  "registryUrl": "https://packagist.org",
+  "registryUrl": "https://repo.packagist.org",
   "releases": [
     {
       "gitRef": "v1.0",
@@ -208,7 +208,7 @@ exports[`modules/datasource/packagist/index getReleases processes real versioned
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports includes packages 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports includes packages 1`] = `
 {
   "homepage": "http://guzzlephp.org/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -353,7 +353,7 @@ exports[`modules/datasource/packagist/index getReleases supports includes packag
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports lazy repositories 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports lazy repositories 1`] = `
 {
   "registryUrl": "https://composer.renovatebot.com/composer/lazy",
   "releases": [
@@ -369,7 +369,7 @@ exports[`modules/datasource/packagist/index getReleases supports lazy repositori
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports plain packages 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports plain packages 1`] = `
 {
   "registryUrl": "https://composer.renovatebot.com",
   "releases": [
@@ -389,7 +389,7 @@ exports[`modules/datasource/packagist/index getReleases supports plain packages 
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports provider-includes 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports provider-includes 1`] = `
 {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -419,7 +419,7 @@ exports[`modules/datasource/packagist/index getReleases supports provider-includ
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports providers 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports providers 1`] = `
 {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
@@ -449,7 +449,7 @@ exports[`modules/datasource/packagist/index getReleases supports providers 1`] =
 }
 `;
 
-exports[`modules/datasource/packagist/index getReleases supports providers without a hash 1`] = `
+exports[`modules/datasource/packagist/index > getReleases > supports providers without a hash 1`] = `
 {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",

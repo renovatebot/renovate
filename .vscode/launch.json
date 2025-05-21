@@ -10,8 +10,8 @@
         "LOG_LEVEL": "debug"
       },
       "console": "integratedTerminal",
-      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "skipFiles": ["<node_internals>/**/*.js"]
+      "runtimeExecutable": "tsx",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
       "type": "node",
@@ -23,90 +23,28 @@
       },
       "preLaunchTask": "npm: clean-cache",
       "console": "integratedTerminal",
-      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "skipFiles": ["<node_internals>/**/*.js"]
+      "runtimeExecutable": "tsx",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Jest Current File",
-      "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "name": "Debug Current Test File",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
       "args": [
-        "--runInBand",
-        "--collectCoverage=false",
-        "--testTimeout=100000000",
-        "--runTestsByPath",
+        "run",
+        "--no-file-parallelism",
+        "--no-coverage",
+        "--test-timeout=0",
+        "--hook-timeout=0",
         "${relativeFile}"
       ],
       "env": {
-        "NODE_ENV": "test",
         "LOG_LEVEL": "debug"
       },
-      "console": "integratedTerminal",
-      "runtimeArgs": ["--preserve-symlinks"],
-      "skipFiles": ["<node_internals>/**/*.js"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Jest All",
-      "runtimeExecutable": "pnpm",
-      "program": "jest",
-      "args": [
-        "--runInBand",
-        "--collectCoverage=false",
-        "--testTimeout=100000000"
-      ],
-      "env": {
-        "NODE_ENV": "test",
-        "LOG_LEVEL": "debug"
-      },
-      "console": "integratedTerminal",
-      "runtimeArgs": ["--preserve-symlinks"],
-      "skipFiles": ["<node_internals>/**/*.js"]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Jest Current Folder",
-      "runtimeExecutable": "pnpm",
-      "program": "jest",
-      "args": [
-        "--runInBand",
-        "--collectCoverage=false",
-        "--testTimeout=100000000",
-        "--roots=${workspaceFolder}/${relativeFileDirname}"
-      ],
-      "console": "integratedTerminal",
-      "runtimeArgs": ["--preserve-symlinks"],
-      "skipFiles": ["<node_internals>/**/*.js"]
-    },
-    {
-      "type": "node",
-      "name": "vscode-jest-tests.v2",
-      "request": "launch",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "openOnSessionStart",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["--experimental-vm-modules"],
-      "program": "node_modules/jest/bin/jest.js",
-      "args": [
-        "--runInBand",
-        "--watchAll=false",
-        "--testTimeout=100000000",
-        "--coverage=false",
-        "--runTestsByPath",
-        "${jest.testFile}",
-        "--testNamePattern",
-        "${jest.testNamePattern}"
-      ],
-      "env": {
-        "NODE_ENV": "test",
-        "LOG_LEVEL": "trace",
-        "GIT_ALLOW_PROTOCOL": "file"
-      }
+      "console": "integratedTerminal"
     }
   ]
 }

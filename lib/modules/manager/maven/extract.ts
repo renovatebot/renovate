@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
@@ -25,7 +26,12 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
     project = new XmlDocument(raw);
-  } catch (err) {
+    if (raw.includes('\r\n')) {
+      logger.warn(
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+      );
+    }
+  } catch {
     logger.debug({ packageFile }, `Failed to parse as XML`);
     return null;
   }
@@ -49,7 +55,7 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
   let extensions: XmlDocument;
   try {
     extensions = new XmlDocument(raw);
-  } catch (err) {
+  } catch {
     logger.debug({ packageFile }, `Failed to parse as XML`);
     return null;
   }
@@ -159,7 +165,7 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
-  const alreadySeenProps: Set<string> = new Set();
+  const alreadySeenProps = new Set<string>();
 
   do {
     const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
@@ -194,7 +200,7 @@ function applyPropsInternal(
   let anyChange = false;
   let fatal = false;
 
-  const seenProps: Set<string> = new Set();
+  const seenProps = new Set<string>();
 
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${[^}]*?}/g), (substr) => {
@@ -213,12 +219,16 @@ function applyPropsInternal(
       return substr;
     });
 
-  const depName = replaceAll(dep.depName!);
+  let depName = dep.depName;
+  if (dep.depName) {
+    depName = replaceAll(dep.depName);
+  }
+
   const registryUrls = dep.registryUrls!.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
-  let groupName: string | null = null;
+  let sharedVariableName: string | null = null;
   const currentValue = dep.currentValue!.replace(
     regEx(/^\${[^}]*?}$/),
     (substr) => {
@@ -226,9 +236,7 @@ function applyPropsInternal(
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
-        if (!groupName) {
-          groupName = propKey;
-        }
+        sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
         propSource =
           propValue.packageFile ??
@@ -255,8 +263,8 @@ function applyPropsInternal(
     currentValue,
   };
 
-  if (groupName) {
-    result.groupName = groupName;
+  if (sharedVariableName) {
+    result.sharedVariableName = sharedVariableName;
   }
 
   if (propSource && depPackageFile !== propSource) {
@@ -289,6 +297,7 @@ interface MavenInterimPackageFile extends PackageFile {
 export function extractPackage(
   rawContent: string,
   packageFile: string,
+  _config: ExtractConfig,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -392,7 +401,7 @@ export function parseSettings(raw: string): XmlDocument | null {
   let settings: XmlDocument;
   try {
     settings = new XmlDocument(raw);
-  } catch (e) {
+  } catch {
     return null;
   }
   const { name, attr } = settings;
@@ -424,7 +433,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
-    const visitedPackages: Set<string> = new Set();
+    const visitedPackages = new Set<string>();
     let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
@@ -467,7 +476,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       const dep = applyProps(rawDep, name, extractedProps[name]);
       if (dep.depType === 'parent') {
         const parentPkg = extractedPackages[pkg.parent!];
-        if (parentPkg && !parentPkg.parent) {
+        const hasParentWithNoParent = parentPkg && !parentPkg.parent;
+        const hasParentWithExternalParent =
+          parentPkg && !packageFileNames.includes(parentPkg.parent!);
+        if (hasParentWithNoParent || hasParentWithExternalParent) {
           rootDeps.add(dep.depName!);
         }
       }
@@ -497,7 +509,9 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
       //Add Registry From SuperPom
-      dep.registryUrls!.push(MAVEN_REPO);
+      if (dep.datasource === MavenDatasource.id) {
+        dep.registryUrls!.push(MAVEN_REPO);
+      }
     });
   });
   return packageFiles;
@@ -528,7 +542,7 @@ export function extractExtensions(
 }
 
 export async function extractAllPackageFiles(
-  _config: ExtractConfig,
+  config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
@@ -557,7 +571,7 @@ export async function extractAllPackageFiles(
         logger.trace({ packageFile }, 'can not read extensions');
       }
     } else {
-      const pkg = extractPackage(content, packageFile);
+      const pkg = extractPackage(content, packageFile, config);
       if (pkg) {
         packages.push(pkg);
       } else {

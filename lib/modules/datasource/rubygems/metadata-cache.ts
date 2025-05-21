@@ -2,7 +2,8 @@ import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { toSha256 } from '../../../util/hash';
 import type { Http } from '../../../util/http';
-import { AsyncResult, Result } from '../../../util/result';
+import type { AsyncResult } from '../../../util/result';
+import { Result } from '../../../util/result';
 import { parseUrl } from '../../../util/url';
 import type { ReleaseResult } from '../types';
 import { getV1Releases } from './common';
@@ -21,12 +22,16 @@ function hashReleases(releases: ReleaseResult): string {
   return hashVersions(releases.releases.map((release) => release.version));
 }
 
-type CacheNotFoundError = { type: 'cache-not-found' };
-type CacheStaleError = {
+interface CacheNotFoundError {
+  type: 'cache-not-found';
+}
+interface CacheStaleError {
   type: 'cache-stale';
   cache: CacheRecord;
-};
-type CacheInvalidError = { type: 'cache-invalid' };
+}
+interface CacheInvalidError {
+  type: 'cache-invalid';
+}
 type CacheLoadError = CacheNotFoundError | CacheStaleError;
 type CacheError = CacheNotFoundError | CacheStaleError | CacheInvalidError;
 

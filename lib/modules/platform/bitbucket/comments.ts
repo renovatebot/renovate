@@ -24,7 +24,7 @@ async function getComments(
   prNo: number,
 ): Promise<Comment[]> {
   const comments = (
-    await bitbucketHttp.getJson<PagedResult<Comment>>(
+    await bitbucketHttp.getJsonUnchecked<PagedResult<Comment>>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
       {
         paginate: true,
@@ -120,10 +120,10 @@ export async function ensureComment({
       logger.debug('Comment is already update-to-date');
     }
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function reopenComments(
@@ -167,9 +167,9 @@ export async function ensureCommentRemoval(
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.warn({ err }, 'Error ensuring comment removal');
-  }
+  } /* v8 ignore stop */
 }
 
 function sanitizeCommentBody(body: string): string {

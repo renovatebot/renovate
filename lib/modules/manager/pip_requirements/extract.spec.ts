@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const requirements1 = Fixtures.get('requirements1.txt');
 const requirements2 = Fixtures.get('requirements2.txt');
@@ -203,6 +203,7 @@ some-package==0.3.1`;
             currentVersion: '20.3.0',
             datasource: 'pypi',
             depName: 'attrs',
+            packageName: 'attrs',
           },
         ],
       });

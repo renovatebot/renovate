@@ -1,16 +1,9 @@
-import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  fs,
-  git,
-  mocked,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { mock } from 'vitest-mock-extended';
 import { configFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
+  REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
@@ -25,19 +18,20 @@ import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
+import { fs, git, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 const configModule: any = _config;
 
-jest.mock('../../../../util/cache/repository');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('./config');
-jest.mock('./rebase');
-jest.mock('./onboarding-branch-cache');
+vi.mock('../../../../util/cache/repository');
+vi.mock('../../../../util/fs');
+vi.mock('./config');
+vi.mock('./rebase');
+vi.mock('./onboarding-branch-cache');
 
-const cache = mocked(_cache);
-const rebase = mocked(_rebase);
-const onboardingCache = mocked(_onboardingCache);
+const cache = vi.mocked(_cache);
+const rebase = vi.mocked(_rebase);
+const onboardingCache = vi.mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
@@ -59,7 +53,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
-      config.onboardingNoDeps = true;
+      config.onboardingNoDeps = 'enabled';
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
         REPOSITORY_NO_PACKAGE_FILES,
       );
@@ -69,6 +63,13 @@ describe('workers/repository/onboarding/branch/index', () => {
       config.isFork = true;
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
         REPOSITORY_FORKED,
+      );
+    });
+
+    it('throws if bot disabled', async () => {
+      config.enabled = false;
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        REPOSITORY_DISABLED_BY_CONFIG,
       );
     });
 
@@ -123,6 +124,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         renovateJsonPresent: true,
         warnings: [],
       };
+      delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(

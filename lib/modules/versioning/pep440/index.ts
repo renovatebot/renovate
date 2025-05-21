@@ -75,7 +75,13 @@ const equals = (version1: string, version2: string): boolean =>
   isVersion(version1) && isVersion(version2) && eq(version1, version2);
 
 function matches(version: string, range: string): boolean {
-  return isVersion(version) && isValid(range) && satisfies(version, range);
+  if (!isVersion(version)) {
+    return false;
+  }
+  if (isVersion(range)) {
+    return equals(version, range);
+  }
+  return isValid(range) && satisfies(version, range);
 }
 
 export const api: VersioningApi = {

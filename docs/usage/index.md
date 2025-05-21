@@ -1,4 +1,4 @@
-![Renovate banner](https://app.renovatebot.com/images/whitesource_renovate_660_220.jpg){ loading=lazy }
+![Renovate banner](./assets/images/mend-renovate-cli-banner.jpg){ loading=lazy }
 
 # Renovate documentation
 

@@ -7,7 +7,8 @@ import {
   isCustomManager,
 } from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,
@@ -47,6 +48,7 @@ export const CategoryNames: Record<Category, string> = {
   dotnet: '.NET',
   elixir: 'Elixir',
   golang: 'Go',
+  haskell: 'Haskell',
   helm: 'Helm',
   iac: 'Infrastructure as Code',
   java: 'Java',
@@ -72,7 +74,7 @@ export async function generateManagers(
 
   for (const [manager, definition] of allManagers) {
     const { defaultConfig, supportedDatasources, urls } = definition;
-    const { fileMatch } = defaultConfig as RenovateConfig;
+    const { managerFilePatterns } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
     const isCustomMgr = isCustomManager(manager);
 
@@ -118,20 +120,23 @@ export async function generateManagers(
           'If you find any bugs, please [create a new discussion first](https://github.com/renovatebot/renovate/discussions/new). If you find that it works well, then let us know too.\n\n';
       }
       md += '## File Matching\n\n';
-      if (!Array.isArray(fileMatch) || fileMatch.length === 0) {
+      if (
+        !Array.isArray(managerFilePatterns) ||
+        managerFilePatterns.length === 0
+      ) {
         md += `Because file names for \`${manager}\` cannot be easily determined automatically, Renovate will not attempt to match any \`${manager}\` files by default. `;
       } else {
         md += `By default, Renovate will check any files matching `;
-        if (fileMatch.length === 1) {
-          md += `the following regular expression: \`${fileMatch[0]}\`.\n\n`;
+        if (managerFilePatterns.length === 1) {
+          md += `the following regular expression: \`${managerFilePatterns[0]}\`.\n\n`;
         } else {
           md += `any of the following regular expressions:\n\n`;
           md += '```\n';
-          md += fileMatch.join('\n');
+          md += managerFilePatterns.join('\n');
           md += '\n```\n\n';
         }
       }
-      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](../index.md#file-matching).\n\n`;
+      md += `For details on how to extend a manager's \`managerFilePatterns\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
         .map(
@@ -140,11 +145,7 @@ export async function generateManagers(
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
-
-      if (urls?.length) {
-        md += '## References';
-        md += formatUrls(urls).replace('**References**:', '');
-      }
+      md += formatUrls(urls);
       md += '## Default config\n\n';
       md += '```json\n';
       md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';

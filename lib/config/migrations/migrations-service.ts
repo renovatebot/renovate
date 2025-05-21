@@ -22,6 +22,7 @@ import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
 import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
+import { FileMatchMigration } from './custom/file-match-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
@@ -38,8 +39,8 @@ import { PackageRulesMigration } from './custom/package-rules-migration';
 import { PackagesMigration } from './custom/packages-migration';
 import { PathRulesMigration } from './custom/path-rules-migration';
 import { PinVersionsMigration } from './custom/pin-versions-migration';
+import { PlatformCommitMigration } from './custom/platform-commit-migration';
 import { PostUpdateOptionsMigration } from './custom/post-update-options-migration';
-import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-warnings-migration';
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RecreateClosedMigration } from './custom/recreate-closed-migration';
@@ -61,6 +62,8 @@ import type { Migration, MigrationConstructor } from './types';
 
 export class MigrationsService {
   static readonly removedProperties: ReadonlySet<string> = new Set([
+    'allowCommandTemplating',
+    'allowPostUpgradeCommandTemplating',
     'deepExtract',
     'gitFs',
     'groupBranchName',
@@ -69,8 +72,10 @@ export class MigrationsService {
     'groupPrTitle',
     'lazyGrouping',
     'maintainYarnLock',
+    'raiseDeprecationWarnings',
     'statusCheckVerify',
     'supportPolicy',
+    'transitiveRemediation',
     'yarnCacheFolder',
     'yarnMaintenanceBranchName',
     'yarnMaintenanceCommitMessage',
@@ -80,6 +85,7 @@ export class MigrationsService {
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
+    ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],
     ['endpoints', 'hostRules'],
@@ -102,7 +108,7 @@ export class MigrationsService {
     ['regexManagers', 'customManagers'],
   ]);
 
-  static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
+  static readonly customMigrations: readonly MigrationConstructor[] = [
     AutomergeMajorMigration,
     AutomergeMigration,
     AutomergeMinorMigration,
@@ -129,7 +135,6 @@ export class MigrationsService {
     PathRulesMigration,
     PinVersionsMigration,
     PostUpdateOptionsMigration,
-    RaiseDeprecationWarningsMigration,
     RebaseConflictedPrs,
     RebaseStalePrsMigration,
     RenovateForkMigration,
@@ -157,9 +162,14 @@ export class MigrationsService {
     FetchReleaseNotesMigration,
     MatchManagersMigration,
     CustomManagersMigration,
+    PlatformCommitMigration,
+    FileMatchMigration,
   ];
 
-  static run(originalConfig: RenovateConfig): RenovateConfig {
+  static run(
+    originalConfig: RenovateConfig,
+    parentKey?: string,
+  ): RenovateConfig {
     const migratedConfig: RenovateConfig = {};
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
@@ -168,7 +178,7 @@ export class MigrationsService {
       const migration = MigrationsService.getMigration(migrations, key);
 
       if (migration) {
-        migration.run(value, key);
+        migration.run(value, key, parentKey);
 
         if (migration.deprecated) {
           delete migratedConfig[key];
@@ -189,7 +199,7 @@ export class MigrationsService {
   public static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig,
-  ): ReadonlyArray<Migration> {
+  ): readonly Migration[] {
     const migrations: Migration[] = [];
 
     for (const propertyName of MigrationsService.removedProperties) {
@@ -224,7 +234,7 @@ export class MigrationsService {
   }
 
   private static getMigration(
-    migrations: ReadonlyArray<Migration>,
+    migrations: readonly Migration[],
     key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {

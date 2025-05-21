@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { GoogleAuth } from 'google-auth-library';
 import { logger } from '../../logger';
+import type { HostRule } from '../../types';
 import type { HttpResponse } from '../../util/http/types';
 import { addSecretForSanitizing } from '../../util/sanitize';
 
@@ -12,7 +13,7 @@ export function isArtifactoryServer<T = unknown>(
   return is.string(res?.headers[JFROG_ARTIFACTORY_RES_HEADER]);
 }
 
-export async function getGoogleAuthToken(): Promise<string | null> {
+export async function getGoogleAuthHostRule(): Promise<HostRule | null> {
   try {
     const googleAuth: GoogleAuth = new GoogleAuth({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
@@ -21,7 +22,10 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     if (accessToken) {
       // sanitize token
       addSecretForSanitizing(accessToken);
-      return Buffer.from(`oauth2accesstoken:${accessToken}`).toString('base64');
+      return {
+        username: 'oauth2accesstoken',
+        password: accessToken,
+      };
     } else {
       logger.warn(
         'Could not retrieve access token using google-auth-library getAccessToken',
@@ -33,6 +37,18 @@ export async function getGoogleAuthToken(): Promise<string | null> {
     } else {
       throw err;
     }
+  }
+  return null;
+}
+
+export async function getGoogleAuthToken(): Promise<string | null> {
+  const rule = await getGoogleAuthHostRule();
+  if (rule) {
+    const token = Buffer.from(`${rule.username}:${rule.password}`).toString(
+      'base64',
+    );
+    addSecretForSanitizing(token);
+    return token;
   }
   return null;
 }

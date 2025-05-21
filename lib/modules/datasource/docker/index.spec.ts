@@ -1,24 +1,22 @@
-import {
-  ECRClient,
-  GetAuthorizationTokenCommand,
-  GetAuthorizationTokenCommandOutput,
-} from '@aws-sdk/client-ecr';
+import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
+import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
-import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
-const hostRules = mocked(_hostRules);
-const googleAuth = mocked(_googleAuth);
+const hostRules = vi.mocked(_hostRules);
+const googleAuth = vi.mocked(_googleAuth, true);
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
@@ -41,33 +39,17 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    GlobalConfig.reset();
     ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS;
+    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
   });
 
   describe('getDigest', () => {
-    it('returns null if no token', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get('/', undefined, { badheaders: ['authorization'] })
-        .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
-        .reply(401);
-      const res = await getDigest(
-        { datasource: 'docker', packageName: 'some-dep' },
-        'some-new-value',
-      );
-      expect(res).toBeNull();
-    });
-
     it('returns null if errored', async () => {
       httpMock
         .scope(baseUrl)
@@ -116,10 +98,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, { token: 'some-token' });
 
       hostRules.find.mockReturnValue({});
-      const res = await getDigest({
-        datasource: 'docker',
-        packageName: 'some-dep',
-      });
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+        },
+        '',
+      );
       expect(res).toBe('some-digest');
     });
 
@@ -255,6 +240,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
       });
@@ -294,6 +282,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
         sessionToken: 'some-session-token',
@@ -358,6 +349,33 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('supports ECR authentication for private repositories', async () => {
+      httpMock
+        .scope(amazonUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/node/manifests/some-tag')
+        .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
+        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+      hostRules.find.mockReturnValue({
+        username: 'AWS',
+        password: 'some-password',
+      });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
+        'some-tag',
+      );
+
+      expect(res).toBe('some-digest');
+    });
+
     it('supports Google ADC authentication for gcr', async () => {
       httpMock
         .scope(gcrUrl)
@@ -373,8 +391,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -405,8 +423,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -438,8 +456,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -469,8 +487,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -535,8 +553,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getDigest(
@@ -556,8 +574,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockRejectedValue('some-error'),
         })),
       );
       const res = await getDigest(
@@ -633,14 +651,20 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('should throw error for 429', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 429 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should throw error for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 504 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -1317,6 +1341,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1363,7 +1388,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1479,7 +1505,8 @@ describe('modules/datasource/docker/index', () => {
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
-      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
+      const tags3 = [...range(20000, 20050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
@@ -1504,17 +1531,28 @@ describe('modules/datasource/docker/index', () => {
         .reply(
           200,
           { tags: tags2 },
-          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=20000>; rel="next", ',
+          },
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=20000')
+        .reply(
+          200,
+          { tags: tags3 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+          },
         )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/10050.0.0')
+        .get('/virtual-mirror/node/manifests/20050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'org.jfrog.io/virtual-mirror/node',
       });
-      expect(res?.releases).toHaveLength(10050);
+      expect(res?.releases).toHaveLength(20050);
     });
 
     it('uses lower tag limit for ECR deps', async () => {
@@ -1870,11 +1908,11 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
@@ -1888,6 +1926,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,
@@ -1914,8 +1953,57 @@ describe('modules/datasource/docker/index', () => {
       ]);
     });
 
+    it('Uses custom page limit for Docker hub repository tags', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=3&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 4,
+              last_updated: '2020-01-01T00:00:00.000Z',
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.9.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+    });
+
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -1944,12 +2032,12 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
           next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          count: 2,
           results: [
             {
               id: 2,
@@ -1962,6 +2050,7 @@ describe('modules/datasource/docker/index', () => {
         })
         .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
+          count: 2,
           results: [
             {
               id: 1,
@@ -2015,6 +2104,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2029,6 +2119,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -2055,6 +2146,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       hostRules.find.mockReturnValue({});
       httpMock
         .scope(baseUrl)
@@ -2662,6 +2754,89 @@ describe('modules/datasource/docker/index', () => {
         {
           'org.opencontainers.image.source':
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+        },
+      );
+    });
+
+    it('uses annotations for docker hub', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/renovate/renovate/manifests/37.405.1-full')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest:
+              'sha256:a3e34dca3519abb558a58384414cc69b6afbbb80e3992064f3e1c24e069c9168',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'e11f9d9882395deaf5fbbb81b3327cb8c2ef069c',
+          },
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'renovate/renovate',
+          '37.405.1-full',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/renovatebot/renovate',
+        'org.opencontainers.image.revision':
+          'e11f9d9882395deaf5fbbb81b3327cb8c2ef069c',
+      });
+    });
+
+    it('skips docker hub labels', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+
+      httpMock.scope('https://index.docker.io/v2');
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'renovate/renovate',
+          '37.405.1-full',
+        ),
+      ).toEqual({});
+    });
+
+    it('does not skip non docker hub registry labels', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+          annotations: {
+            'org.opencontainers.image.source':
+              'https://github.com/renovatebot/renovate',
+            'org.opencontainers.image.revision':
+              'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+          },
+        });
+
+      expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
+        {
+          'org.opencontainers.image.source':
+            'https://github.com/renovatebot/renovate',
+          'org.opencontainers.image.revision':
+            'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
         },
       );
     });

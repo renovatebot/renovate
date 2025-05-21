@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid names 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > catches invalid names 1`] = `
 {
   "deps": [
     {
@@ -16,6 +16,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -26,7 +27,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engines 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts engines 1`] = `
 {
   "deps": [
     {
@@ -133,6 +134,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -143,7 +145,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-npmjs 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts non-npmjs 1`] = `
 {
   "deps": [
     {
@@ -312,6 +314,32 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "sourceUrl": "https://github.com/Owner/P",
       "versioning": "npm",
     },
+    {
+      "currentRawValue": "github:owner/q#semver:1.1.0",
+      "currentValue": "1.1.0",
+      "datasource": "github-tags",
+      "depName": "q",
+      "depType": "dependencies",
+      "gitRef": true,
+      "packageName": "owner/q",
+      "pinDigests": false,
+      "prettyDepType": "dependency",
+      "sourceUrl": "https://github.com/owner/q",
+      "versioning": "npm",
+    },
+    {
+      "currentRawValue": "github:owner/r#semver:^1.0.0",
+      "currentValue": "^1.0.0",
+      "datasource": "github-tags",
+      "depName": "r",
+      "depType": "dependencies",
+      "gitRef": true,
+      "packageName": "owner/r",
+      "pinDigests": false,
+      "prettyDepType": "dependency",
+      "sourceUrl": "https://github.com/owner/r",
+      "versioning": "npm",
+    },
   ],
   "extractedConstraints": {},
   "managerData": {
@@ -319,6 +347,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -329,7 +358,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm package alias 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts npm package alias 1`] = `
 {
   "deps": [
     {
@@ -401,6 +430,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
     "npmLock": "package-lock.json",
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -411,7 +441,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packageManager 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts packageManager 1`] = `
 {
   "deps": [
     {
@@ -432,6 +462,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -442,7 +473,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts volta 1`] = `
 {
   "deps": [
     {
@@ -500,6 +531,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -510,7 +542,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unspecified-version 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts volta yarn unspecified-version 1`] = `
 {
   "deps": [
     {
@@ -547,6 +579,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     "npmLock": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -557,7 +590,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock file 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds a lock file 1`] = `
 {
   "deps": [
     {
@@ -680,6 +713,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
     "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": "yarn.lock",
     "yarnZeroInstall": false,
@@ -690,7 +724,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex yarn workspaces 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds complex yarn workspaces 1`] = `
 {
   "deps": [],
   "extractedConstraints": {},
@@ -699,6 +733,27 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex y
     "npmLock": undefined,
     "packageJsonName": "@a/b",
     "pnpmShrinkwrap": undefined,
+    "workspaces": {
+      "nohoist": [
+        "**/react-native",
+        "**/react-native/**",
+        "**/react-native-scripts",
+        "**/react-native-scripts/**",
+        "**/polished",
+        "**/polished/**",
+        "**/react-native-linear-gradient",
+        "**/react-native-linear-gradient/**",
+        "**/react-native-*",
+        "**/react-native-*/**",
+        "**/react-native-vector-icons",
+        "**/react-native-vector-icons/**",
+        "**/styled-components",
+        "**/styled-components/**",
+      ],
+      "packages": [
+        "packages/*",
+      ],
+    },
     "workspacesPackages": [
       "packages/*",
     ],
@@ -711,7 +766,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex y
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies 1`] = `
 {
   "deps": [
     {
@@ -834,6 +889,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
     "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -844,7 +900,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies with resolution comments 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an array of dependencies with resolution comments 1`] = `
 {
   "deps": [
     {
@@ -949,6 +1005,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
     "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
+    "workspaces": [],
     "workspacesPackages": [],
     "yarnLock": undefined,
     "yarnZeroInstall": false,
@@ -959,7 +1016,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstalls false if Yarn zero-install is used 1`] = `
+exports[`modules/manager/npm/extract/index > .extractPackageFile() > sets skipInstalls false if Yarn zero-install is used 1`] = `
 {
   "deps": [
     {
@@ -1082,6 +1139,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
     "npmLock": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
+    "workspaces": undefined,
     "workspacesPackages": undefined,
     "yarnLock": "yarn.lock",
     "yarnZeroInstall": true,

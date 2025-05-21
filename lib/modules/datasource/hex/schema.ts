@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release, ReleaseResult } from '../types';
 
 export const HexRelease = z
@@ -8,16 +9,28 @@ export const HexRelease = z
     html_url: z.string().optional(),
     meta: z
       .object({
-        links: z.object({
-          Github: z.string(),
-        }),
+        links: z
+          .record(z.string())
+          .transform((links) =>
+            Object.fromEntries(
+              Object.entries(links).map(([key, value]) => [
+                key.toLowerCase(),
+                value,
+              ]),
+            ),
+          )
+          .pipe(
+            z.object({
+              github: z.string(),
+            }),
+          ),
       })
       .nullable()
       .catch(null),
     releases: LooseArray(
       z.object({
         version: z.string(),
-        inserted_at: z.string().optional(),
+        inserted_at: MaybeTimestamp,
       }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
     retirements: z
@@ -53,8 +66,8 @@ export const HexRelease = z
       releaseResult.homepage = hexResponse.html_url;
     }
 
-    if (hexResponse.meta?.links?.Github) {
-      releaseResult.sourceUrl = hexResponse.meta.links.Github;
+    if (hexResponse.meta?.links?.github) {
+      releaseResult.sourceUrl = hexResponse.meta.links.github;
     }
 
     return releaseResult;

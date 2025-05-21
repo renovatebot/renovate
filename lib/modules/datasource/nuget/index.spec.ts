@@ -1,25 +1,22 @@
 import { Readable } from 'stream';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _packageCache from '../../../util/cache/package';
-import * as _hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
 import { NugetDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { hostRules, logger } from '~test/util';
 
 const datasource = NugetDatasource.id;
 
-const hostRules: any = _hostRules;
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/cache/package', () => mockDeep());
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-
-jest.mock('../../../util/cache/package', () => mockDeep());
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');
 const pkgListV3Registration = Fixtures.get('nunit/v3_registration.json');
@@ -385,7 +382,7 @@ describe('modules/datasource/nuget/index', () => {
           'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
         expect(packageCache.set).toHaveBeenCalledWith(
-          'datasource-nuget',
+          'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
             cachedAt: expect.any(String),
@@ -455,7 +452,7 @@ describe('modules/datasource/nuget/index', () => {
           registryUrls: ['https://some-registry/v3/index.json'],
         });
         expect(packageCache.set).toHaveBeenCalledWith(
-          'datasource-nuget',
+          'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
             cachedAt: expect.any(String),
@@ -714,7 +711,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res?.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v3) nuspec fetch 404 error', async () => {
@@ -732,7 +729,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res?.sourceUrl).toBeUndefined();
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('processes real data (v2)', async () => {

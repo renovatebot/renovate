@@ -1,14 +1,10 @@
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../global';
 import * as npm from '.';
+import * as httpMock from '~test/http-mock';
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-  });
-
-  afterEach(() => {
-    delete process.env.RENOVATE_CACHE_NPM_MINUTES;
   });
 
   it('should throw if no package', async () => {

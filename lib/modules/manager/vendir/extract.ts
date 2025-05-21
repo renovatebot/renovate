@@ -11,17 +11,17 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import {
+import type {
   GitRefDefinition,
   GithubReleaseDefinition,
   HelmChartDefinition,
-  Vendir,
   VendirDefinition,
 } from './schema';
+import { Vendir } from './schema';
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,
-  aliases?: Record<string, string> | undefined,
+  aliases?: Record<string, string>,
 ): PackageDependency | null {
   if (isOCIRegistry(helmChart.repository.url)) {
     const dep = getDep(
@@ -32,7 +32,6 @@ export function extractHelmChart(
     return {
       ...dep,
       depName: helmChart.name,
-      packageName: dep.depName,
       depType: 'HelmChart',
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
@@ -83,7 +82,7 @@ export function parseVendir(
       customSchema: Vendir,
       removeTemplates: true,
     });
-  } catch (e) {
+  } catch {
     logger.debug({ packageFile }, 'Error parsing vendir.yml file');
     return null;
   }

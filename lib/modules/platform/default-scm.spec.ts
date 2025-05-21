@@ -1,8 +1,6 @@
-import { git, partial } from '../../../test/util';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import { DefaultGitScm } from './default-scm';
-
-jest.mock('../../util/git');
+import { git, partial } from '~test/util';
 
 describe('modules/platform/default-scm', () => {
   const defaultGitScm = new DefaultGitScm();
@@ -45,7 +43,7 @@ describe('modules/platform/default-scm', () => {
 
   it('delegate isBranchModified to util/git', async () => {
     git.isBranchModified.mockResolvedValueOnce(true);
-    await defaultGitScm.isBranchModified('branchName');
+    await defaultGitScm.isBranchModified('branchName', 'main');
     expect(git.isBranchModified).toHaveBeenCalledTimes(1);
   });
 

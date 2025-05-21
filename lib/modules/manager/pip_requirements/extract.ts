@@ -6,6 +6,7 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { extractPackageFileFlags } from './common';
 import type { PipRequirementsManagerData } from './types';
@@ -81,6 +82,7 @@ export function extractPackageFile(
       dep = {
         ...dep,
         depName,
+        packageName: normalizePythonDepName(depName),
         currentValue,
         datasource: PypiDatasource.id,
       };

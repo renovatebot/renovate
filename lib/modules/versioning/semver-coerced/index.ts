@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
-import semver, { SemVer } from 'semver';
+import type { SemVer } from 'semver';
+import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex';
+import { isBreaking as semverIsBreaking } from '../semver';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'semver-coerced';
@@ -21,10 +23,10 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const major = m.groups['major'];
-  const newMinor = m.groups['minor'] ?? '.0';
-  const newPatch = m.groups['patch'] ?? '.0';
-  const others = m.groups['others'] ?? '';
+  const major = m.groups.major;
+  const newMinor = m.groups.minor ?? '.0';
+  const newPatch = m.groups.patch ?? '.0';
+  const others = m.groups.others ?? '';
   const fixed = major + newMinor + newPatch + others;
   return stable.is(fixed);
 }
@@ -132,6 +134,16 @@ function getNewValue({
   return newVersion;
 }
 
+function isBreaking(version: string, current: string): boolean {
+  const coercedVersion = semver.coerce(version)?.toString();
+  const coercedCurrent = semver.coerce(current)?.toString();
+  return !!(
+    coercedVersion &&
+    coercedCurrent &&
+    semverIsBreaking(coercedVersion, coercedCurrent)
+  );
+}
+
 function isCompatible(version: string): boolean {
   return isVersion(version);
 }
@@ -141,6 +153,7 @@ export const api: VersioningApi = {
   getMajor,
   getMinor,
   getPatch,
+  isBreaking,
   isCompatible,
   isGreaterThan,
   isLessThanRange,

@@ -91,6 +91,12 @@ describe('modules/manager/npm/post-update/rules', () => {
 
           additionalYarnRcYml: {
             npmRegistries: {
+              '//https://registry.npmjs.org/': {
+                npmAuthToken: 'token123',
+              },
+              '//https://registry.other.org/': {
+                npmAuthIdent: 'basictoken123',
+              },
               '//registry.company.com/': {
                 npmAuthIdent: 'user123:pass123',
               },
@@ -115,6 +121,12 @@ describe('modules/manager/npm/post-update/rules', () => {
           ],
           "additionalYarnRcYml": {
             "npmRegistries": {
+              "//https://registry.npmjs.org/": {
+                "npmAuthToken": "token123",
+              },
+              "//https://registry.other.org/": {
+                "npmAuthIdent": "basictoken123",
+              },
               "//registry.company.com/": {
                 "npmAuthIdent": "user123:pass123",
               },
@@ -129,6 +141,51 @@ describe('modules/manager/npm/post-update/rules', () => {
         }
       `,
       );
+    });
+
+    it('uses rules without host type', () => {
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'sometoken',
+      });
+      const res = processHostRules();
+      expect(res).toEqual({
+        additionalNpmrcContent: [
+          '//registry.company.com/:_authToken=sometoken',
+        ],
+
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthToken: 'sometoken',
+            },
+          },
+        },
+      });
+    });
+
+    it('deduplicates host rules while prefering npm type ones', () => {
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'donotuseme',
+      });
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'useme',
+        hostType: 'npm',
+      });
+      const res = processHostRules();
+      expect(res).toEqual({
+        additionalNpmrcContent: ['//registry.company.com/:_authToken=useme'],
+
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthToken: 'useme',
+            },
+          },
+        },
+      });
     });
   });
 });

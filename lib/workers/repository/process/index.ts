@@ -15,7 +15,8 @@ import { addSplit } from '../../../util/split';
 import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
-import { ExtractResult, extract, lookup, update } from './extract-update';
+import type { ExtractResult } from './extract-update';
+import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(
@@ -47,7 +48,7 @@ async function getBaseBranchConfig(
         baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch (err) {
+    } catch {
       logger.error(
         { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,
@@ -113,12 +114,13 @@ function unfoldBaseBranches(
 
 export async function extractDependencies(
   config: RenovateConfig,
+  overwriteCache = true,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);
   let res: ExtractResult = {
     branches: [],
     branchList: [],
-    packageFiles: null!,
+    packageFiles: {},
   };
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
@@ -131,7 +133,7 @@ export async function extractDependencies(
       addMeta({ baseBranch });
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig);
+        extracted[baseBranch] = await extract(baseBranchConfig, overwriteCache);
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
       }
@@ -145,13 +147,16 @@ export async function extractDependencies(
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
         res.branches = res.branches.concat(baseBranchRes?.branches);
         res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+        if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+          // Use the first branch
+          res.packageFiles = baseBranchRes?.packageFiles;
+        }
       }
     }
     removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
-    const packageFiles = await extract(config);
+    const packageFiles = await extract(config, overwriteCache);
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;

@@ -1,5 +1,6 @@
 import * as semver from 'semver';
-import { SemVer, parseRange } from 'semver-utils';
+import type { SemVer } from 'semver-utils';
+import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger';
 import { coerceString } from '../../../util/string';
 import type { NewValueConfig } from '../types';

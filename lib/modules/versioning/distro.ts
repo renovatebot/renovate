@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
-import dataFiles, { DataFile } from '../../data-files.generated';
+import type { DataFile } from '../../data-files.generated';
+import dataFiles from '../../data-files.generated';
 
 export interface DistroSchedule {
   codename: string;
@@ -127,9 +128,7 @@ export class DistroInfo {
 
     // ubuntu: does not have eol_lts
     // debian: only "Stable" has no eol_lts, old and oldold has both
-    if (!end) {
-      end = endLts;
-    }
+    end ??= endLts;
 
     if (end) {
       const now = DateTime.now().toUTC();

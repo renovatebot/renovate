@@ -1,3 +1,4 @@
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages';
 import { logger } from '../../../../../logger';
@@ -84,19 +85,27 @@ export function extractPackageJson(
               ),
             );
           } else if (depType === 'pnpm' && depName === 'overrides') {
+            // pnpm overrides
+            // https://pnpm.io/package_json#pnpmoverrides
             for (const [overridesKey, overridesVal] of Object.entries(
               val as unknown as NpmPackageDependency,
             )) {
               if (is.string(overridesVal)) {
+                // Newer flat syntax: `parent>parent>child`
+                const packageName =
+                  parsePkgAndParentSelector(overridesKey).targetPkg.name;
                 dep = {
                   depName: overridesKey,
+                  packageName,
                   depType: 'pnpm.overrides',
-                  ...extractDependency(depName, overridesKey, overridesVal),
+                  ...extractDependency(depName, packageName, overridesVal),
                 };
                 setNodeCommitTopic(dep);
+                // TODO: Is this expected? It's always 'overrides'.
                 dep.prettyDepType = depTypes[depName];
                 deps.push(dep);
               } else if (is.object(overridesVal)) {
+                // Older nested object syntax: `parent: { parent: { child: version } }`
                 deps.push(
                   ...extractOverrideDepsRec(
                     [overridesKey],
@@ -134,6 +143,7 @@ export function extractPackageJson(
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager,
       ),
+      workspaces: packageJson.workspaces,
     },
   };
 }

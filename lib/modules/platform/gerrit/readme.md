@@ -3,11 +3,10 @@
 ## Supported Gerrit versions
 
 Renovate supports all Gerrit 3.x versions.
+
 Support for Gerrit is currently _experimental_, meaning that it _might_ still have some undiscovered bugs or design limitations, and that we _might_ need to change functionality in a non-backwards compatible manner in a non-major release.
 
-The current implementation uses Gerrit's "hashtags" feature.
-Therefore you must use a Gerrit version that uses the [NoteDB](https://gerrit-review.googlesource.com/Documentation/note-db.html) backend.
-We did not test Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`), but could work.
+Renovate stores its metadata in the _commit message footer_.
 
 ## Authentication
 
@@ -56,15 +55,3 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 
 - Creating issues (not a Gerrit concept)
 - Dependency Dashboard (needs issues first)
-
-## Known problems
-
-### PR title is different from first commit message
-
-Sometimes the PR title passed to the Gerrit platform code is different from the first line of the commit message.
-For example:
-
-- Commit-Message=`Update keycloak.version to v21`
-- Pull-Request-Title=`Update keycloak.version to v21 (major)`
-
-In this case the Gerrit-Platform implementation tries to detect this and change the commit-message in a second patch-set.

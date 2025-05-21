@@ -1,4 +1,10 @@
-import { coerceString, looseEquals, replaceAt } from './string';
+import {
+  capitalize,
+  coerceString,
+  looseEquals,
+  replaceAt,
+  stripTemplates,
+} from './string';
 
 describe('util/string', () => {
   describe('replaceAt', () => {
@@ -39,5 +45,42 @@ describe('util/string', () => {
     expect(coerceString(undefined)).toBe('');
     expect(coerceString(null)).toBe('');
     expect(coerceString(null, 'foo')).toBe('foo');
+  });
+
+  describe('stripTemplates', () => {
+    test.each`
+      input                                                        | expected
+      ${'This is {% template %} text.'}                            | ${'This is  text.'}
+      ${'This is {%` template `%} text.'}                          | ${'This is  text.'}
+      ${'Calculate {{ sum }} of numbers.'}                         | ${'Calculate  of numbers.'}
+      ${'Calculate {{` sum `}} of numbers.'}                       | ${'Calculate  of numbers.'}
+      ${'Text with {# comment #} embedded comment.'}               | ${'Text with  embedded comment.'}
+      ${'Start {{ value }} middle {% code %} end {# note #}.'}     | ${'Start  middle  end .'}
+      ${'Nested {{ {% pattern %} }} test.'}                        | ${'Nested  test.'}
+      ${'Line before {%\n  multi-line\n  pattern\n%} line after.'} | ${'Line before  line after.'}
+      ${'Plain text with no patterns.'}                            | ${'Plain text with no patterns.'}
+      ${'Overlap {# comment {% nested %} #} test.'}                | ${'Overlap  test.'}
+      ${'Unmatched {% pattern missing end.'}                       | ${'Unmatched {% pattern missing end.'}
+      ${'Unmatched pattern missing start %}.'}                     | ${'Unmatched pattern missing start %}.'}
+      ${'{{ first }}{% second %}{# third #}Final text.'}           | ${'Final text.'}
+      ${'Empty patterns {% %}{{ }}{# #}.'}                         | ${'Empty patterns .'}
+      ${'{% start %} Middle text {# end #}'}                       | ${' Middle text '}
+      ${'{% a %}{{ b }}{# c #}'}                                   | ${''}
+      ${'{%` only `%}{{` patterns `}}{# here #}'}                  | ${''}
+      ${'Escaped \\{% not a pattern %\\} text.'}                   | ${'Escaped \\{% not a pattern %\\} text.'}
+      ${'Content with escaped \\{\\{ braces \\}\\}.'}              | ${'Content with escaped \\{\\{ braces \\}\\}.'}
+      ${'Unicode {{ 🚀🌟 }} characters.'}                          | ${'Unicode  characters.'}
+      ${'Special {{ $^.*+?()[]{}|\\ }} characters.'}               | ${'Special  characters.'}
+      ${'{% entire text %}'}                                       | ${''}
+    `('"$input" -> "$expected"', ({ input, expected }) => {
+      expect(stripTemplates(input)).toBe(expected);
+    });
+  });
+
+  describe('capitalize', () => {
+    it('capitalizes', () => {
+      expect(capitalize('content')).toBe('Content');
+      expect(capitalize('Content')).toBe('Content');
+    });
   });
 });

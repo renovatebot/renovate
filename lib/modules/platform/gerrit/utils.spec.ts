@@ -1,7 +1,5 @@
-import { mocked, partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
 import type {
@@ -10,14 +8,15 @@ import type {
   GerritChangeMessageInfo,
   GerritChangeStatus,
   GerritLabelTypeInfo,
+  GerritRevisionInfo,
 } from './types';
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
+import { hostRules, partial } from '~test/util';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://gerrit.example.com';
-const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/utils', () => {
   beforeEach(() => {
@@ -83,13 +82,22 @@ describe('modules/platform/gerrit/utils', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         status: 'NEW',
-        hashtags: ['other', 'sourceBranch-renovate/dependency-1.x'],
         branch: 'main',
         subject: 'Fix for',
+        created: '2025-04-14 16:33:37.000000000',
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
           REMOVED: [],
           CC: [],
+        },
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit: {
+              message:
+                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+            },
+          }),
         },
         messages: [
           partial<GerritChangeMessageInfo>({
@@ -113,6 +121,7 @@ describe('modules/platform/gerrit/utils', () => {
         number: 123456,
         state: 'open',
         title: 'Fix for',
+        createdAt: '2025-04-14T16:33:37.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: ['username'],
@@ -122,11 +131,10 @@ describe('modules/platform/gerrit/utils', () => {
       });
     });
 
-    it('map a gerrit change without sourceBranch-tag and reviewers to Pr', () => {
+    it('map a gerrit change without source branch info and reviewers to Pr', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         status: 'NEW',
-        hashtags: ['other'],
         branch: 'main',
         subject: 'Fix for',
       });
@@ -145,23 +153,36 @@ describe('modules/platform/gerrit/utils', () => {
   });
 
   describe('extractSourceBranch()', () => {
-    it('without hashtags', () => {
+    it('no commit message', () => {
+      const change = partial<GerritChange>();
+      expect(utils.extractSourceBranch(change)).toBeUndefined();
+    });
+
+    it('commit message with no footer', () => {
       const change = partial<GerritChange>({
-        hashtags: undefined,
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit: {
+              message: 'some message...',
+            },
+          }),
+        },
       });
       expect(utils.extractSourceBranch(change)).toBeUndefined();
     });
 
-    it('no hashtag with "sourceBranch-" prefix', () => {
+    it('commit message with footer', () => {
       const change = partial<GerritChange>({
-        hashtags: ['other', 'another'],
-      });
-      expect(utils.extractSourceBranch(change)).toBeUndefined();
-    });
-
-    it('hashtag with "sourceBranch-" prefix', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['other', 'sourceBranch-renovate/dependency-1.x', 'another'],
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit: {
+              message:
+                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+            },
+          }),
+        },
       });
       expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
     });

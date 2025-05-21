@@ -2,6 +2,7 @@ import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
@@ -66,6 +67,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     sourceBranch: extractSourceBranch(change) ?? change.branch,
     targetBranch: change.branch,
     title: change.subject,
+    createdAt: change.created?.replace(' ', 'T'),
     reviewers:
       change.reviewers?.REVIEWER?.filter(
         (reviewer) => typeof reviewer.username === 'string',
@@ -77,7 +79,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
 }
 
 export function mapGerritChangeStateToPrState(
-  state: GerritChangeStatus,
+  state: GerritChangeStatus | 'UNKNOWN', // suppress default path code removal
 ): PrState {
   switch (state) {
     case 'NEW':
@@ -90,9 +92,17 @@ export function mapGerritChangeStateToPrState(
   return 'all';
 }
 export function extractSourceBranch(change: GerritChange): string | undefined {
-  return change.hashtags
-    ?.find((tag) => tag.startsWith('sourceBranch-'))
-    ?.replace('sourceBranch-', '');
+  let sourceBranch: string | undefined = undefined;
+
+  if (change.current_revision) {
+    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    const message = change.revisions[change.current_revision]?.commit?.message;
+    if (message) {
+      sourceBranch = re.exec(message)?.[1];
+    }
+  }
+
+  return sourceBranch ?? undefined;
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
@@ -106,7 +116,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
 }
 
 export function mapBranchStatusToLabel(
-  state: BranchStatus,
+  state: BranchStatus | 'UNKNOWN', // suppress default path code removal
   label: GerritLabelTypeInfo,
 ): number {
   const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
@@ -117,6 +127,6 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  // istanbul ignore next
+  /* v8 ignore next */
   return label.default_value;
 }

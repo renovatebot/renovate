@@ -1,4 +1,5 @@
-import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';
@@ -6,12 +7,21 @@ import type { BranchCache } from '../util/cache/repository/types';
 import { writeSystemFile } from '../util/fs';
 import { getS3Client, parseS3Url } from '../util/s3';
 import type { ExtractResult } from '../workers/repository/process/extract-update';
-import type { Report } from './types';
+import type { LibYearsWithStatus, Report } from './types';
 
 const report: Report = {
   problems: [],
   repositories: {},
 };
+
+/**
+ * Reset the report
+ * Should only be used for testing
+ */
+export function resetReport(): void {
+  report.problems = [];
+  report.repositories = {};
+}
 
 export function addBranchStats(
   config: RenovateConfig,
@@ -36,6 +46,19 @@ export function addExtractionStats(
   coerceRepo(config.repository!);
   report.repositories[config.repository!].packageFiles =
     extractResult.packageFiles;
+}
+
+export function addLibYears(
+  config: RenovateConfig,
+  libYearsWithDepCount: LibYearsWithStatus,
+): void {
+  if (is.nullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  report.repositories[config.repository!].libYearsWithStatus =
+    libYearsWithDepCount;
 }
 
 export function finalizeReport(): void {
@@ -89,7 +112,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
         ContentType: 'application/json',
       };
 
-      const client = getS3Client();
+      const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
     }

@@ -3,12 +3,11 @@ import type { RenovateConfig, RepoGlobalConfig } from './types';
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
+    'allowedCommands',
     'allowedEnv',
     'allowCustomCrateRegistries',
     'allowedHeaders',
-    'allowedPostUpgradeCommands',
     'allowPlugins',
-    'allowPostUpgradeCommandTemplating',
     'allowScripts',
     'binarySource',
     'cacheDir',
@@ -28,8 +27,6 @@ export class GlobalConfig {
     'localDir',
     'migratePresets',
     'presetCachePersistence',
-    'privateKey',
-    'privateKeyOld',
     'gitTimeout',
     'platform',
     'endpoint',
@@ -37,6 +34,10 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'dockerMaxPages',
+    's3Endpoint',
+    's3PathStyle',
+    'cachePrivatePackages',
   ];
 
   private static config: RepoGlobalConfig = {};
@@ -53,7 +54,9 @@ export class GlobalConfig {
     key?: Key,
     defaultValue?: RepoGlobalConfig[Key],
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
-    return key ? GlobalConfig.config[key] ?? defaultValue : GlobalConfig.config;
+    return key
+      ? (GlobalConfig.config[key] ?? defaultValue)
+      : GlobalConfig.config;
   }
 
   static set(config: RenovateConfig | RepoGlobalConfig): RenovateConfig {

@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import type { ReleaseResult } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as condaVersioningId } from '../../modules/versioning/conda';
 import { id as gradleVersioningId } from '../../modules/versioning/gradle';
 import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
@@ -14,6 +15,7 @@ import { id as pythonVersioningId } from '../../modules/versioning/python';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
 import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
+import { getEnv } from '../env';
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -35,13 +37,23 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
   composer: {
     datasource: 'github-releases',
-    packageName: 'composer/composer',
+    packageName: 'containerbase/composer-prebuild',
     versioning: composerVersioningId,
+  },
+  copier: {
+    datasource: 'pypi',
+    packageName: 'copier',
+    versioning: pep440VersioningId,
   },
   corepack: {
     datasource: 'npm',
     packageName: 'corepack',
     versioning: npmVersioningId,
+  },
+  devbox: {
+    datasource: 'github-releases',
+    packageName: 'jetify-com/devbox',
+    versioning: semverVersioningId,
   },
   dotnet: {
     datasource: 'dotnet-version',
@@ -63,9 +75,14 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: semverVersioningId,
   },
+  gleam: {
+    datasource: 'github-releases',
+    packageName: 'gleam-lang/gleam',
+    versioning: semverVersioningId,
+  },
   golang: {
-    datasource: 'golang-version',
-    packageName: 'golang',
+    datasource: 'github-releases',
+    packageName: 'containerbase/golang-prebuild',
     versioning: npmVersioningId,
   },
   gradle: {
@@ -111,18 +128,18 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   maven: {
-    datasource: 'maven',
-    packageName: 'org.apache.maven:maven',
+    datasource: 'github-releases',
+    packageName: 'containerbase/maven-prebuild',
     versioning: mavenVersioningId,
   },
   nix: {
-    datasource: 'github-tags',
-    packageName: 'NixOS/nix',
+    datasource: 'github-releases',
+    packageName: 'containerbase/nix-prebuild',
     versioning: semverVersioningId,
   },
   node: {
-    datasource: 'node-version',
-    packageName: 'node',
+    datasource: 'github-releases',
+    packageName: 'containerbase/node-prebuild',
     versioning: nodeVersioningId,
   },
   npm: {
@@ -156,6 +173,12 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'pnpm',
     versioning: npmVersioningId,
   },
+  pixi: {
+    datasource: 'github-releases',
+    packageName: 'prefix-dev/pixi',
+    versioning: condaVersioningId,
+    extractVersion: '^v(?<version>.*)$',
+  },
   poetry: {
     datasource: 'pypi',
     packageName: 'poetry',
@@ -176,6 +199,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'rust',
     versioning: semverVersioningId,
   },
+  uv: {
+    datasource: 'pypi',
+    packageName: 'uv',
+    versioning: pep440VersioningId,
+  },
   yarn: {
     datasource: 'npm',
     packageName: 'yarn',
@@ -192,8 +220,8 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
   flutter: {
-    datasource: 'flutter-version',
-    packageName: 'flutter',
+    datasource: 'github-releases',
+    packageName: 'containerbase/flutter-prebuild',
     versioning: npmVersioningId,
   },
   vendir: {
@@ -209,9 +237,7 @@ let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =
 async function getPkgReleases(
   toolConfig: ToolConfig,
 ): Promise<ReleaseResult | null> {
-  if (_getPkgReleases === null) {
-    _getPkgReleases = import('../../modules/datasource');
-  }
+  _getPkgReleases ??= import('../../modules/datasource/index.js');
   const { getPkgReleases } = await _getPkgReleases;
   return getPkgReleases(toolConfig);
 }
@@ -221,7 +247,7 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE;
+  return !!getEnv().CONTAINERBASE;
 }
 
 export function isDynamicInstall(
@@ -244,14 +270,14 @@ export function isDynamicInstall(
 
 function isStable(
   version: string,
-  versioning: allVersioning.VersioningApi,
+  versioningApi: allVersioning.VersioningApi,
   latest?: string,
 ): boolean {
-  if (!versioning.isStable(version)) {
+  if (!versioningApi.isStable(version)) {
     return false;
   }
   if (is.string(latest)) {
-    if (versioning.isGreaterThan(version, latest)) {
+    if (versioningApi.isGreaterThan(version, latest)) {
       return false;
     }
   }

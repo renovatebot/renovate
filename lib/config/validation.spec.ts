@@ -2,24 +2,9 @@ import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
+import { partial } from '~test/util';
 
 describe('config/validation', () => {
-  describe('getParentName()', () => {
-    it('ignores encrypted in root', () => {
-      expect(configValidation.getParentName('encrypted')).toBeEmptyString();
-    });
-
-    it('handles array types', () => {
-      expect(configValidation.getParentName('hostRules[1]')).toBe('hostRules');
-    });
-
-    it('handles encrypted within array types', () => {
-      expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
-        'hostRules',
-      );
-    });
-  });
-
   describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
@@ -101,6 +86,25 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
+    it('does not warn for valid platformConfig', async () => {
+      const config = {
+        platformConfig: 'auto',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('warns for invalid platformConfig', async () => {
+      const config = {
+        platformConfig: 'invalid',
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+    });
+
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
@@ -108,6 +112,20 @@ describe('config/validation', () => {
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('catches invalid jsonata expressions', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchJsonata: ['packageName = "foo"', '{{{something wrong}'],
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toHaveLength(1);
+      expect(errors[0].message).toContain('Invalid JSONata expression');
     });
 
     it('catches invalid allowedVersions regex', async () => {
@@ -287,6 +305,11 @@ describe('config/validation', () => {
             defaultRegistryUrlTemplate: [],
             transformTemplates: [{}],
           },
+          bar: {
+            description: 'foo',
+            defaultRegistryUrlTemplate: 'bar',
+            transformTemplates: ['foo = "bar"', 'bar[0'],
+          },
         },
       } as any;
       const { errors } = await configValidation.validateConfig('repo', config);
@@ -369,8 +392,11 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            matchPackagePatterns: ['*'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: [
+              '*',
+              '/abc ([a-z]+) ([a-z]+))/',
+              '!/abc ([a-z]+) ([a-z]+))/',
+            ],
             enabled: true,
           },
         ],
@@ -384,7 +410,7 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(3);
+      expect(errors).toHaveLength(4);
       expect(errors).toMatchSnapshot();
     });
 
@@ -477,18 +503,12 @@ describe('config/validation', () => {
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
-            excludePackageNames: ['foo'],
-            enabled: true,
-          },
-          {
             foo: 1,
           },
           'what?' as any,
           {
-            matchDepPatterns: 'abc ([a-z]+) ([a-z]+))',
-            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            excludeDepPatterns: ['abc ([a-z]+) ([a-z]+))'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: '/abc ([a-z]+) ([a-z]+))/',
+            matchDepNames: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
         ],
@@ -500,7 +520,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(15);
+      expect(errors).toHaveLength(12);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
@@ -552,13 +572,13 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors for unsafe fileMatches', async () => {
+    it('errors for unsafe managerFilePatterns', async () => {
       const config = {
         npm: {
-          fileMatch: ['abc ([a-z]+) ([a-z]+))'],
+          managerFilePatterns: ['/abc ([a-z]+) ([a-z]+))/'],
         },
         dockerfile: {
-          fileMatch: ['x?+'],
+          managerFilePatterns: ['/x?+/'],
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -570,12 +590,12 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('validates regEx for each fileMatch', async () => {
+    it('validates regEx for each managerFilePatterns of format regex', async () => {
       const config: RenovateConfig = {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['js', '***$}{]]['],
+            managerFilePatterns: ['/js/', '/***$}{]][/'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -592,12 +612,12 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if customManager has empty fileMatch', async () => {
+    it('errors if customManager has empty managerFilePatterns', async () => {
       const config = {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: [],
+            managerFilePatterns: [],
           },
         ],
       };
@@ -611,7 +631,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Custom Manager must contain a non-empty fileMatch array",
+            "message": "Each Custom Manager must contain a non-empty managerFilePatterns array",
             "topic": "Configuration Error",
           },
         ]
@@ -622,7 +642,7 @@ describe('config/validation', () => {
       const config = {
         customManagers: [
           {
-            fileMatch: ['some-file'],
+            managerFilePatterns: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -651,7 +671,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'unknown',
-            fileMatch: ['some-file'],
+            managerFilePatterns: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -680,15 +700,16 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['foo'],
+            managerFilePatterns: ['foo'],
             matchStrings: [],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             currentValueTemplate: 'baz',
           },
           {
-            customType: 'regex',
-            fileMatch: ['foo'],
+            customType: 'jsonata',
+            fileFormat: 'json',
+            managerFilePatterns: ['foo'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
             currentValueTemplate: 'baz',
@@ -705,7 +726,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Custom Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager \`matchStrings\` array must have at least one item.",
             "topic": "Configuration Error",
           },
           {
@@ -716,7 +737,7 @@ describe('config/validation', () => {
       `);
     });
 
-    it('errors if no customManager fileMatch', async () => {
+    it('errors if no customManager managerFilePatterns', async () => {
       const config = {
         customManagers: [
           {
@@ -740,7 +761,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -757,14 +778,68 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(1);
     });
 
-    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    it('error if no fileFormat in custom JSONata manager', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            managerFilePatterns: ['package.json'],
+            matchStrings: [
+              'packages.{"depName": name, "currentValue": version, "datasource": "npm"}',
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: 'Each JSONata manager must contain a fileFormat field.',
+        },
+      ]);
+    });
+
+    it('validates JSONata query for each matchStrings', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileFormat: 'json',
+            managerFilePatterns: ['package.json'],
+            matchStrings: ['packages.{'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `Invalid JSONata query for customManagers: \`packages.{\``,
+        },
+      ]);
+    });
+
+    // testing if we get all errors at once or not (possible), this does not include customType or managerFilePatterns
     // since they are common to all custom managers
     it('validates all possible regex manager options', async () => {
       const config: RenovateConfig = {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
           },
         ],
@@ -783,7 +858,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -792,14 +867,12 @@ describe('config/validation', () => {
             depTypeTemplate: 'apple',
           },
           {
-            customType: 'regex',
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
-            packageNameTemplate: 'foo',
-            datasourceTemplate: 'bar',
-            registryUrlTemplate: 'foobar',
-            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
-            depTypeTemplate: 'apple',
+            customType: 'jsonata',
+            fileFormat: 'json',
+            managerFilePatterns: ['package.json'],
+            matchStrings: [
+              'packages.{"depName": depName, "currentValue": version, "datasource": "npm"}',
+            ],
           },
         ],
       };
@@ -817,7 +890,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -840,7 +913,7 @@ describe('config/validation', () => {
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['Dockerfile'],
+            managerFilePatterns: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -855,6 +928,39 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if customManager fields are missing: JSONataManager', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
+          {
+            customType: 'jsonata',
+            fileFormat: 'json',
+            managerFilePatterns: ['package.json'],
+            matchStrings: ['packages'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain currentValueTemplate configuration or currentValue in the query `,
+        },
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain datasourceTemplate configuration or datasource in the query `,
+        },
+        {
+          topic: 'Configuration Error',
+          message: `JSONata Managers must contain depName or packageName in the query or their templates`,
+        },
+      ]);
     });
 
     it('ignore keys', async () => {
@@ -967,19 +1073,19 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if fileMatch has wrong parent', async () => {
+    it('errors if managerFilePatterns has wrong parent', async () => {
       const config: RenovateConfig = {
-        fileMatch: ['foo'],
+        managerFilePatterns: ['foo'],
         npm: {
-          fileMatch: ['package\\.json'],
+          managerFilePatterns: ['package\\.json'],
           minor: {
-            fileMatch: ['bar'],
+            managerFilePatterns: ['bar'],
           },
         },
         customManagers: [
           {
             customType: 'regex',
-            fileMatch: ['build.gradle'],
+            managerFilePatterns: ['build.gradle'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
             versioningTemplate: 'gradle',
@@ -1044,9 +1150,7 @@ describe('config/validation', () => {
 
     it('warns if only selectors in packageRules', async () => {
       const config = {
-        packageRules: [
-          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
-        ],
+        packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
@@ -1130,6 +1234,48 @@ describe('config/validation', () => {
           message:
             'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
           topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if invalid matchHost values in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: '://',
+            token: 'token',
+          },
+          {
+            matchHost: '',
+            token: 'token',
+          },
+          {
+            matchHost: undefined,
+            token: 'token',
+          },
+          {
+            hostType: 'github',
+            token: 'token',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Configuration option `hostRules[2].matchHost` should be a string',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value for hostRules matchHost. It cannot be an empty string.',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'hostRules matchHost `://` is not a valid URL.',
         },
       ]);
     });
@@ -1346,6 +1492,27 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
+    it('returns errors for invalid options', async () => {
+      const config = {
+        logFile: 'something',
+        logFileLevel: 'DEBUG',
+      };
+      const { errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message: 'Invalid configuration option: logFile',
+          topic: 'Configuration Error',
+        },
+        {
+          message: 'Invalid configuration option: logFileLevel',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     it('validates hostRules.headers', async () => {
       const config = {
         hostRules: [
@@ -1459,6 +1626,23 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    it('binarySource', async () => {
+      const config = {
+        binarySource: 'invalid' as never,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     describe('validates string type options', () => {
       it('binarySource', async () => {
         const config = {
@@ -1565,7 +1749,7 @@ describe('config/validation', () => {
           onboardingConfig: {
             extends: ['config:recommended'],
             binarySource: 'global', // should not allow globalOnly options inside onboardingConfig
-            fileMatch: ['somefile'], // invalid at top level
+            managerFilePatterns: ['somefile'], // invalid at top level
           },
         };
         const { warnings } = await configValidation.validateConfig(
@@ -1575,7 +1759,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
+              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
             topic: 'Config error',
           },
           {
@@ -1590,7 +1774,7 @@ describe('config/validation', () => {
           force: {
             extends: ['config:recommended'],
             binarySource: 'global',
-            fileMatch: ['somefile'], // invalid at top level
+            managerFilePatterns: ['somefile'], // invalid at top level
             constraints: {
               python: '2.7',
             },
@@ -1603,7 +1787,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
+              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
             topic: 'Config error',
           },
         ]);
@@ -1667,7 +1851,7 @@ describe('config/validation', () => {
 
     it('validates array type options', async () => {
       const config = {
-        allowedPostUpgradeCommands: ['cmd'],
+        allowedCommands: ['cmd'],
         checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
         mergeConfidenceDatasources: [1],
@@ -1886,6 +2070,77 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if no bumpVersion filePattern is provided', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          bumpType: 'patch',
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              bumpType: 'patch',
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allow bumpVersion ', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
     });
   });
 });

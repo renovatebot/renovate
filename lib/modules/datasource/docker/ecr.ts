@@ -1,4 +1,5 @@
-import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
+import type { ECRClientConfig } from '@aws-sdk/client-ecr';
+import { ECR } from '@aws-sdk/client-ecr';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { HttpError } from '../../../util/http';
@@ -16,7 +17,15 @@ export async function getECRAuthToken(
   opts: HostRule,
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
-  if (opts.username && opts.password) {
+  if (opts.username === `AWS` && opts.password) {
+    logger.trace(
+      `AWS user specified, encoding basic auth credentials for ECR registry`,
+    );
+    return Buffer.from(`AWS:${opts.password}`).toString('base64');
+  } else if (opts.username && opts.password) {
+    logger.trace(
+      `Using AWS accessKey to get Authorization token for ECR registry`,
+    );
     config.credentials = {
       accessKeyId: opts.username,
       secretAccessKey: opts.password,
@@ -49,7 +58,7 @@ export function isECRMaxResultsError(err: HttpError): boolean {
     resp?.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
     // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    resp.body?.['errors']?.[0]?.message?.includes(
+    resp.body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',
     )
   );

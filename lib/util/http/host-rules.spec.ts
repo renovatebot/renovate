@@ -2,13 +2,12 @@ import { GlobalConfig } from '../../config/global';
 import { bootstrap } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { dnsLookup } from './dns';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import type { GotOptions } from './types';
 
 const url = 'https://github.com';
 
-jest.mock('global-agent');
+vi.mock('global-agent');
 
 describe('util/http/host-rules', () => {
   const options: GotOptions = {
@@ -43,6 +42,11 @@ describe('util/http/host-rules', () => {
 
     hostRules.add({
       hostType: 'bitbucket',
+      token: 'cdef',
+    });
+
+    hostRules.add({
+      hostType: 'bitbucket-server',
       token: 'cdef',
     });
   });
@@ -121,22 +125,6 @@ describe('util/http/host-rules', () => {
     expect(applyHostRule(url, opts, hostRule)).toEqual({
       hostType: 'github',
       http2: true,
-      token: 'xxx',
-    });
-  });
-
-  it('uses dnsCache', () => {
-    hostRules.add({ dnsCache: true });
-
-    const opts = { ...options, token: 'xxx' };
-    const hostRule = findMatchingRule(url, opts);
-    expect(hostRule).toEqual({
-      dnsCache: true,
-      token: 'token',
-    });
-    expect(applyHostRule(url, opts, hostRule)).toMatchObject({
-      hostType: 'github',
-      lookup: dnsLookup,
       token: 'xxx',
     });
   });
@@ -511,6 +499,40 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('no fallback to bitbucket-server', () => {
+    hostRules.add({
+      hostType: 'bitbucket-server-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+    const opts = { ...options, hostType: 'bitbucket-server-tags' };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      password: 'xxx',
+      username: 'some',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'bitbucket-server-tags',
+      username: 'some',
+      password: 'xxx',
+    });
+  });
+
+  it('fallback to bitbucket-server', () => {
+    const opts = { ...options, hostType: 'bitbucket-server-tags' };
+    const hostRule = findMatchingRule(url, opts);
+    expect(hostRule).toEqual({
+      token: 'cdef',
+    });
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      context: {
+        authType: undefined,
+      },
+      hostType: 'bitbucket-server-tags',
+      token: 'cdef',
+    });
+  });
+
   it('no fallback to gitea', () => {
     hostRules.add({
       hostType: 'gitea-tags',
@@ -558,6 +580,41 @@ describe('util/http/host-rules', () => {
       headers: {
         'X-Auth-Token': 'token',
       },
+    });
+  });
+
+  it('should replace existing headers with host rule headers', () => {
+    GlobalConfig.set({ allowedHeaders: ['Accept'] });
+    const hostRule = {
+      matchHost: 'https://domain.com/all-versions',
+      headers: {
+        Accept: 'replacement',
+      },
+    };
+    const options = {
+      headers: {
+        Accept: 'default',
+      },
+    };
+    expect(applyHostRule(url, options, hostRule)).toEqual({
+      headers: {
+        Accept: 'replacement',
+      },
+    });
+  });
+
+  it('enabled=false with noAuth', () => {
+    hostRules.add({
+      hostType: 'docker',
+      enabled: false,
+    });
+
+    const opts = { ...options, hostType: 'docker', noAuth: true };
+    const hostRule = findMatchingRule(url, opts);
+    expect(applyHostRule(url, opts, hostRule)).toEqual({
+      hostType: 'docker',
+      noAuth: true,
+      enabled: false,
     });
   });
 });

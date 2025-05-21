@@ -1,6 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
-
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const droneciRegistryAlias = Fixtures.get('.drone2.yml');
 
@@ -31,7 +30,8 @@ describe('modules/manager/droneci/extract', () => {
           currentDigest: undefined,
           currentValue: '1.8.1-alpine',
           datasource: 'docker',
-          depName: 'my-quay-mirror.registry.com/elixir',
+          depName: 'quay.io/elixir',
+          packageName: 'my-quay-mirror.registry.com/elixir',
           replaceString: 'quay.io/elixir:1.8.1-alpine',
           depType: 'docker',
         },
@@ -54,6 +54,7 @@ describe('modules/manager/droneci/extract', () => {
           currentValue: '1.8.1-alpine',
           datasource: 'docker',
           depName: 'quay.io/elixir',
+          packageName: 'quay.io/elixir',
           replaceString: 'quay.io/elixir:1.8.1-alpine',
           depType: 'docker',
         },
@@ -76,7 +77,8 @@ describe('modules/manager/droneci/extract', () => {
           currentDigest: undefined,
           currentValue: '1.8.1-alpine',
           datasource: 'docker',
-          depName: 'my-quay-mirror.registry.com/elixir',
+          depName: 'quay.io/elixir',
+          packageName: 'my-quay-mirror.registry.com/elixir',
           replaceString: 'quay.io/elixir:1.8.1-alpine',
           depType: 'docker',
         },

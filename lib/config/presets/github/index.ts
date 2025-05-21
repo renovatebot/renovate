@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
@@ -14,7 +15,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | undefined,
+  tag?: string,
 ): Promise<Preset> {
   let ref = '';
   if (is.nonEmptyString(tag)) {
@@ -24,9 +25,10 @@ export async function fetchJSONFile(
   logger.trace({ url }, `Preset URL`);
   let res: { body: { content: string } };
   try {
-    res = await http.getJson(url);
+    res = await http.getJsonUnchecked(url, {
+      cacheProvider: repoCacheProvider,
+    });
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -42,7 +44,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | undefined,
+  tag?: string,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

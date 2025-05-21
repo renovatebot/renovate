@@ -16,23 +16,23 @@ function requestError(
 
 describe('util/http/retry-after', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe('wrapWithRetry', () => {
     it('works', async () => {
-      const task = jest.fn(() => Promise.resolve(42));
+      const task = vi.fn(() => Promise.resolve(42));
       const res = await wrapWithRetry(task, 'foobar', () => null, 60);
       expect(res).toBe(42);
       expect(task).toHaveBeenCalledTimes(1);
     });
 
     it('throws', async () => {
-      const task = jest.fn(() => Promise.reject(new Error('error')));
+      const task = vi.fn(() => Promise.reject(new Error('error')));
 
       await expect(
         wrapWithRetry(task, 'http://example.com', () => null, 60),
@@ -42,14 +42,14 @@ describe('util/http/retry-after', () => {
     });
 
     it('retries', async () => {
-      const task = jest
+      const task = vi
         .fn()
         .mockRejectedValueOnce(new Error('error-1'))
         .mockRejectedValueOnce(new Error('error-2'))
         .mockResolvedValueOnce(42);
 
       const p = wrapWithRetry(task, 'http://example.com', () => 1, 60);
-      await jest.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(2000);
 
       const res = await p;
       expect(res).toBe(42);
@@ -57,7 +57,7 @@ describe('util/http/retry-after', () => {
     });
 
     it('gives up after max retries', async () => {
-      const task = jest
+      const task = vi
         .fn()
         .mockRejectedValueOnce('error-1')
         .mockRejectedValueOnce('error-2')
@@ -67,14 +67,14 @@ describe('util/http/retry-after', () => {
       const p = wrapWithRetry(task, 'http://example.com', () => 1, 60).catch(
         (err) => err,
       );
-      await jest.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(2000);
 
       await expect(p).resolves.toBe('error-3');
       expect(task).toHaveBeenCalledTimes(3);
     });
 
     it('gives up when delay exceeds maxRetryAfter', async () => {
-      const task = jest.fn().mockRejectedValue('error');
+      const task = vi.fn().mockRejectedValue('error');
 
       const p = wrapWithRetry(task, 'http://example.com', () => 61, 60).catch(
         (err) => err,
@@ -120,7 +120,7 @@ describe('util/http/retry-after', () => {
     });
 
     it('returns delay in seconds from date', () => {
-      jest.setSystemTime(new Date('2020-01-01T00:00:00Z'));
+      vi.setSystemTime(new Date('2020-01-01T00:00:00Z'));
       expect(
         getRetryAfter(
           requestError({

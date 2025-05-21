@@ -1,4 +1,5 @@
 import AggregateError from 'aggregate-error';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
@@ -162,11 +163,9 @@ export class GithubGraphqlDatasourceFetcher<
 
     this.queryCount += 1;
 
-    if (this.isPersistent === undefined) {
-      // For values other than explicit `false`,
-      // we assume that items can not be cached.
-      this.isPersistent = data.repository.isRepoPrivate === false;
-    }
+    // For values other than explicit `false`,
+    // we assume that items can not be cached.
+    this.isPersistent ??= data.repository.isRepoPrivate === false;
 
     const res = data.repository.payload;
     return [res, null];
@@ -226,9 +225,14 @@ export class GithubGraphqlDatasourceFetcher<
     }
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    this._cacheStrategy = this.isPersistent
-      ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
-      : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+    const cachePrivatePackages = GlobalConfig.get(
+      'cachePrivatePackages',
+      false,
+    );
+    this._cacheStrategy =
+      cachePrivatePackages || this.isPersistent
+        ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
+        : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
     return this._cacheStrategy;
   }
 

@@ -13,9 +13,11 @@ describe('modules/datasource/github-runners/index', () => {
         releases: [
           { version: '16.04', isDeprecated: true },
           { version: '18.04', isDeprecated: true },
-          { version: '20.04' },
+          { version: '20.04', isDeprecated: true },
+          { version: '22.04-arm', isStable: false },
           { version: '22.04' },
-          { version: '24.04', isStable: false },
+          { version: '24.04-arm', isStable: false },
+          { version: '24.04' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
@@ -39,6 +41,9 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '14-xlarge' },
           { version: '14-large' },
           { version: '14' },
+          { version: '15-xlarge', isStable: false },
+          { version: '15-large', isStable: false },
+          { version: '15', isStable: false },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
@@ -53,8 +58,9 @@ describe('modules/datasource/github-runners/index', () => {
       expect(res).toMatchObject({
         releases: [
           { version: '2016', isDeprecated: true },
-          { version: '2019' },
+          { version: '2019', isDeprecated: true },
           { version: '2022' },
+          { version: '2025' },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
