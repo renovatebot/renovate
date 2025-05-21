@@ -277,3 +277,28 @@ It can be nice to get patch PRs when you're using automerge:
 - Get weekly updates for minor and major updates
 
 This means you barely notice Renovate during the week, while you still get the benefits of patch level updates.
+
+## What's the difference between `depName` and `packageName`?
+
+Renovate has two key ways of defining the name of a given dependency - the `depName` and `packageName`.
+
+The `depName` is the name of the dependency being updated. This is the "user facing" name for the dependency, which will be used by default and presented to the user in commit messages, the Dependency Dashboard and in Pull Requests/Merge Requests.
+
+The `packageName` is the full name that is used to look up the dependency in the package registry.
+
+It is _often_ the case that the two of these are identical, but not always.
+
+For instance, given the following Gradle plugin:
+
+```kotlin
+plugins {
+    id("com.gradle.develocity").version("3.18.1")
+}
+```
+
+Renovate will determine that this dependency has the following properties:
+
+- `depName=com.gradle.develocity`
+- `packageName: com.gradle.develocity:com.gradle.develocity.gradle.plugin`
+
+Whether the `depName` matches the `packageName` will depend on what package manager / package ecosystem you're using, or for instance could be different depending on if you are using Docker image proxying.
