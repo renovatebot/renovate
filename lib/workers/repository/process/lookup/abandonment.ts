@@ -44,6 +44,12 @@ export function calculateAbandonment(
   const isAbandoned = abandonmentDate < now;
   releaseResult.isAbandoned = isAbandoned;
 
+  if (isAbandoned) {
+    logger.debug(
+      `Package abandonment detected: ${config.packageName} (${config.datasource}) - most recent release: ${mostRecentTimestamp}`,
+    );
+  }
+
   logger.trace(
     {
       lookupName,
