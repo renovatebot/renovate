@@ -282,11 +282,14 @@ This means you barely notice Renovate during the week, while you still get the b
 
 Renovate has two key ways of defining the name of a given dependency - the `depName` and `packageName`.
 
-The `depName` is the name of the dependency being updated. This is the "user facing" name for the dependency, which will be used by default and presented to the user in commit messages, the Dependency Dashboard and in Pull Requests/Merge Requests.
+The `depName` is the short or "pretty" name of the dependency being updated.
+This is the "user facing" name for the dependency, which will be used by default and presented to the user in commit messages, the Dependency Dashboard and in Pull Requests/Merge Requests.
 
-The `packageName` is the full name that is used to look up the dependency in the package registry.
+The `packageName` is the full/exact name that is used to look up the dependency in the package registry.
 
 It is _often_ the case that the two of these are identical, but not always.
+
+`depName` is used for determining branch names and PR titles/content because it's the more user-friendly of the two.
 
 For instance, given the following Gradle plugin:
 
