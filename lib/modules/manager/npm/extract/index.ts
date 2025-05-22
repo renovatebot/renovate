@@ -217,7 +217,7 @@ export async function extractPackageFile(
         packageJson.packageManager,
       ),
       workspacesPackages,
-      npmrcFileName,
+      npmrcFileName, // store npmrc file name so we can later tell if it came from the workspace or not
     },
     skipInstalls,
     extractedConstraints,
