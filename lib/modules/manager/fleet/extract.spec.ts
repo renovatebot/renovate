@@ -147,7 +147,7 @@ kind: Fleet
           },
           {
             datasource: 'helm',
-            depName: 'targetCustomization-1',
+            depName: 'targetCustomization[0]',
             packageName: 'cert-manager',
             registryUrls: ['https://charts.jetstack.io'],
             depType: 'fleet',
