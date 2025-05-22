@@ -118,7 +118,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
       result.push({
         // overwrite name with customization name to allow splitting of PRs
         ...dep,
-        depName: custom.name ?? `targetCustomization-${index + 1}`, // if no name is provided, use the index
+        depName: custom.name ?? `targetCustomization[${index}]`, // if no name is provided, use the index
       });
     }
   }
