@@ -1262,6 +1262,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     afterAll(async () => {
       await upstreamBase?.cleanup();
       await upstreamOrigin?.cleanup();
+    });
+
+    afterEach(async () => {
       await tmpDir2?.cleanup();
     });
 
