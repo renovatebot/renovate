@@ -12,8 +12,7 @@ describe('generateLoginCmd', () => {
         password: 'testpass',
       },
     };
-    const command = 'helm registry login';
-    expect(await generateLoginCmd(repositoryRule, command)).toEqual(
+    expect(await generateLoginCmd(repositoryRule)).toEqual(
       'helm registry login --username testuser --password testpass example.com',
     );
   });
