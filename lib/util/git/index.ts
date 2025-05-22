@@ -618,6 +618,7 @@ export async function checkoutBranchFromRemote(
       await git.revparse('HEAD')
     ).trim() as LongCommitSha;
     logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
+    config.branchCommits[branchName] = config.currentBranchSha;
     return config.currentBranchSha;
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
