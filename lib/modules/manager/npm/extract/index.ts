@@ -217,6 +217,7 @@ export async function extractPackageFile(
         packageJson.packageManager,
       ),
       workspacesPackages,
+      npmrcFileName,
     },
     skipInstalls,
     extractedConstraints,
