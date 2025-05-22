@@ -1231,8 +1231,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   describe('forkMode - normal working', () => {
-    let upstreamBase: any;
-    let upstreamOrigin: any;
+    let upstreamBase: tmp.DirectoryResult;
+    let upstreamOrigin: tmp.DirectoryResult;
+    let tmpDir2: tmp.DirectoryResult;
 
     beforeAll(async () => {
       // create an upstream branch and one extra branch in it
@@ -1261,12 +1262,13 @@ describe('util/git/index', { timeout: 10000 }, () => {
     afterAll(async () => {
       await upstreamBase?.cleanup();
       await upstreamOrigin?.cleanup();
+      await tmpDir2?.cleanup();
     });
 
     describe('syncForkWithUpstream()', () => {
       it('throws unknown error', async () => {
-        tmpDir = await tmp.dir({ unsafeCleanup: true });
-        GlobalConfig.set({ localDir: tmpDir.path });
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
 
         await git.initRepo({
           url: origin.path,
@@ -1281,8 +1283,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
 
       it('syncs fork when local for branch absent', async () => {
-        tmpDir = await tmp.dir({ unsafeCleanup: true });
-        GlobalConfig.set({ localDir: tmpDir.path });
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
 
         // init fork repo
         await git.initRepo({
@@ -1301,8 +1303,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     describe('syncGit()', () => {
       it('should fetch from upstream and update local branch', async () => {
-        tmpDir = await tmp.dir({ unsafeCleanup: true });
-        GlobalConfig.set({ localDir: tmpDir.path });
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
 
         await git.initRepo({
           url: origin.path,
@@ -1311,7 +1313,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         });
 
         await git.syncGit();
-        const tmpGit = Git(tmpDir.path);
+        const tmpGit = Git(tmpDir2.path);
 
         // make sure origin exists ie. fork repo is cloned
         const originRemote = (
@@ -1344,9 +1346,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('forkMode - errors', () => {
     it('resetHardFromRemote()', async () => {
       const resetSpy = vi.spyOn(SimpleGit.prototype, 'reset');
-      resetSpy.mockImplementationOnce(() => {
-        throw new Error('reset error');
-      });
+      resetSpy.mockRejectedValueOnce(new Error('reset error'));
       await expect(git.resetHardFromRemote('branchName')).rejects.toThrow(
         'reset error',
       );
@@ -1354,9 +1354,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('forcePushToRemote()', async () => {
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
-      pushSpy.mockImplementationOnce(() => {
-        throw new Error('push error');
-      });
+      pushSpy.mockRejectedValueOnce(new Error('push error'));
       await expect(git.forcePushToRemote('branch', 'origin')).rejects.toThrow(
         'push error',
       );
@@ -1364,9 +1362,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('checkoutBranchFromRemote()', async () => {
       const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
-      checkoutSpy.mockImplementationOnce(() => {
-        throw new Error('checkout error');
-      });
+      checkoutSpy.mockRejectedValueOnce(new Error('checkout error'));
       await expect(
         git.checkoutBranchFromRemote('branch', 'upstream'),
       ).rejects.toThrow('checkout error');
@@ -1374,9 +1370,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('checkoutBranchFromRemote() - temporary error', async () => {
       const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
-      checkoutSpy.mockImplementationOnce(() => {
-        throw new Error('fatal: ambiguous argument');
-      });
+      checkoutSpy.mockRejectedValueOnce(new Error('fatal: ambiguous argument'));
       await expect(
         git.checkoutBranchFromRemote('branch', 'upstream'),
       ).rejects.toThrow(TEMPORARY_ERROR);

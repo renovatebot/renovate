@@ -515,7 +515,7 @@ export async function syncGit(): Promise<void> {
   }
 
   config.currentBranchSha = (
-    await git.raw(['rev-parse', 'HEAD'])
+    await git.revparse('HEAD')
   ).trim() as LongCommitSha;
   logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
@@ -615,7 +615,7 @@ export async function checkoutBranchFromRemote(
     );
     config.currentBranch = branchName;
     config.currentBranchSha = (
-      await git.raw(['rev-parse', 'HEAD'])
+      await git.revparse('HEAD')
     ).trim() as LongCommitSha;
     logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
     return config.currentBranchSha;
@@ -1479,7 +1479,7 @@ export async function listCommitTree(
   return result;
 }
 
-export async function localBranchExists(branchName: string): Promise<boolean> {
+async function localBranchExists(branchName: string): Promise<boolean> {
   await syncGit();
   const localBranches = await git.branchLocal();
   return localBranches.all.includes(branchName);
