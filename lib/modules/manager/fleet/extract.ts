@@ -109,8 +109,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
     const helmBlockContext: FleetHelmBlock = { ...doc.helm };
     delete helmBlockContext.version;
 
-    let index = 1; // start with index 1 for easier reading
-    for (const custom of doc.targetCustomizations) {
+    for (const [index, custom] of doc.targetCustomizations.entries()) {
       const dep = extractFleetHelmBlock({
         // merge base config with customization
         ...helmBlockContext,
@@ -119,9 +118,8 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
       result.push({
         // overwrite name with customization name to allow splitting of PRs
         ...dep,
-        depName: custom.name ?? `targetCustomization-${index}`, // if no name is provided, use the index
+        depName: custom.name ?? `targetCustomization-${index+1}`, // if no name is provided, use the index
       });
-      index++;
     }
   }
   return result;
