@@ -5,7 +5,7 @@ import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
 import type { ProviderLock } from '../../lockfile/types';
 import type { GenericImageResourceDef } from '../../types';
-import { generic_image_data_source, generic_image_resource } from './utils';
+import { generic_image_datasource, generic_image_resource } from './utils';
 
 export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -24,7 +24,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     );
 
     dependencies.push(
-      ...this.extractResources(hclMap.data, generic_image_data_source, config),
+      ...this.extractResources(hclMap.data, generic_image_datasource, config),
     );
 
     return dependencies;

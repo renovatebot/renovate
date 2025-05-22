@@ -35,7 +35,7 @@ const KubernetesJobTemplateInit = [
   'image',
 ];
 
-export const generic_image_data_source: GenericImageResourceDef[] = [
+export const generic_image_datasource: GenericImageResourceDef[] = [
   { type: 'docker_registry_image', path: ['name'] },
 ];
 
