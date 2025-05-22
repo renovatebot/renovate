@@ -484,6 +484,7 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
