@@ -217,8 +217,9 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-cache
-          restore-keys: eslint-cache-
+          # we need to add the hash because eslint cache doesn't detect plugin changes
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: pnpm eslint-ci
@@ -228,7 +229,7 @@ jobs:
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
@@ -252,8 +253,9 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-cache
-          restore-keys: prettier-cache-
+          # we need to add the hash because prettier cache doesn't detect plugin changes
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: |
@@ -269,7 +271,7 @@ jobs:
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
