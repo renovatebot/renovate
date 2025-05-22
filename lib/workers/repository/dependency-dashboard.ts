@@ -566,13 +566,13 @@ export function getAbandonedPackagesMd(
     string,
     Record<string, string | undefined | null>
   > = {};
-  let hasAbandonedPackages = false;
+  let abandonedCount = 0;
 
   for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
     for (const packageFile of managerPackageFiles) {
       for (const dep of packageFile.deps || []) {
         if (dep.depName && dep.isAbandoned) {
-          hasAbandonedPackages = true;
+          abandonedCount++;
           abandonedPackages[manager] = abandonedPackages[manager] || {};
           abandonedPackages[manager][dep.depName] = dep.mostRecentTimestamp;
         }
@@ -580,13 +580,16 @@ export function getAbandonedPackagesMd(
     }
   }
 
-  if (!hasAbandonedPackages) {
+  if (abandonedCount === 0) {
     return '';
   }
 
   let abandonedMd = '> ℹ **Note**\n> \n';
   abandonedMd +=
-    'These dependencies may be unmaintained due to lack of updates:\n\n';
+    'These dependencies have not received updates for an extended period and may be unmaintained:\n\n';
+
+  abandonedMd += '<details>\n';
+  abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
   abandonedMd += '| Datasource | Name | Last Updated |\n';
   abandonedMd += '|------------|------|-------------|\n';
 
@@ -601,7 +604,7 @@ export function getAbandonedPackagesMd(
     }
   }
 
-  abandonedMd += '\n';
+  abandonedMd += '\n</details>\n\n';
   abandonedMd +=
     'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n';
   abandonedMd +=
