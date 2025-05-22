@@ -1685,7 +1685,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
               {
                 depName: 'abandoned-pkg',
                 isAbandoned: true,
-                bumpedAt: asTimestamp('2020-05-15T12:00:00.000Z')!,
+                mostRecentTimestamp: asTimestamp('2020-05-15T12:00:00.000Z')!,
               },
             ],
           },
@@ -1709,13 +1709,13 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
               {
                 depName: 'pkg1',
                 isAbandoned: true,
-                bumpedAt: asTimestamp('2021-01-10T10:00:00.000Z')!,
+                mostRecentTimestamp: asTimestamp('2021-01-10T10:00:00.000Z')!,
               },
               { depName: 'pkg2', isAbandoned: false },
               {
                 depName: 'pkg3',
                 isAbandoned: true,
-                bumpedAt: asTimestamp('2020-11-05T15:30:00.000Z')!,
+                mostRecentTimestamp: asTimestamp('2020-11-05T15:30:00.000Z')!,
               },
             ],
           },
@@ -1727,7 +1727,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
               {
                 depName: 'org.example:lib',
                 isAbandoned: true,
-                bumpedAt: asTimestamp('2019-07-22T08:15:00.000Z')!,
+                mostRecentTimestamp: asTimestamp('2019-07-22T08:15:00.000Z')!,
               },
             ],
           },
@@ -1742,7 +1742,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
       expect(result).not.toContain('pkg2');
     });
 
-    it('displays "unknown" when bumpedAt is missing', () => {
+    it('displays "unknown" when mostRecentTimestamp is missing', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -1751,7 +1751,7 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
               {
                 depName: 'pkg-with-date',
                 isAbandoned: true,
-                bumpedAt: asTimestamp('2021-03-17T14:30:00.000Z')!,
+                mostRecentTimestamp: asTimestamp('2021-03-17T14:30:00.000Z')!,
               },
               { depName: 'pkg-no-date', isAbandoned: true },
             ],

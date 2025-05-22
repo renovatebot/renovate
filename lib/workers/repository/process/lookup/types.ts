@@ -76,6 +76,6 @@ export interface UpdateResult {
   currentVersionTimestamp?: string;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
-  bumpedAt?: Timestamp | null;
+  mostRecentTimestamp?: Timestamp | null;
   isAbandoned?: boolean;
 }

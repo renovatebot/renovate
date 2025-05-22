@@ -28,27 +28,33 @@ export function calculateAbandonment(
     return releaseResult;
   }
 
-  const { bumpedAt } = releaseResult;
-  if (!bumpedAt) {
+  const { mostRecentTimestamp } = releaseResult;
+  if (!mostRecentTimestamp) {
     logger.trace(
       { lookupName },
-      'No bumpedAt value found, skipping abandonment check',
+      'No mostRecentTimestamp value found, skipping abandonment check',
     );
     return releaseResult;
   }
-  const bumpedAtDate = DateTime.fromISO(bumpedAt);
+  const mostRecentTimestampDate = DateTime.fromISO(mostRecentTimestamp);
 
-  const abandonmentDate = bumpedAtDate.plus({
+  const abandonmentDate = mostRecentTimestampDate.plus({
     milliseconds: abandonmentThresholdMs,
   });
   const now = DateTime.local();
   const isAbandoned = abandonmentDate < now;
   releaseResult.isAbandoned = isAbandoned;
 
+  if (isAbandoned) {
+    logger.debug(
+      `Package abandonment detected: ${config.packageName} (${config.datasource}) - most recent release: ${mostRecentTimestamp}`,
+    );
+  }
+
   logger.trace(
     {
       lookupName,
-      bumpedAt,
+      mostRecentTimestamp,
       abandonmentThreshold,
       abandonmentThresholdMs,
       abandonmentDate: abandonmentDate.toISO(),
@@ -60,7 +66,7 @@ export function calculateAbandonment(
 
   if (isAbandoned) {
     const { datasource, packageName } = config;
-    AbandonedPackageStats.write(datasource, packageName, bumpedAt);
+    AbandonedPackageStats.write(datasource, packageName, mostRecentTimestamp);
   }
 
   return releaseResult;

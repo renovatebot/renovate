@@ -574,7 +574,7 @@ export function getAbandonedPackagesMd(
         if (dep.depName && dep.isAbandoned) {
           hasAbandonedPackages = true;
           abandonedPackages[manager] = abandonedPackages[manager] || {};
-          abandonedPackages[manager][dep.depName] = dep.bumpedAt;
+          abandonedPackages[manager][dep.depName] = dep.mostRecentTimestamp;
         }
       }
     }
@@ -593,9 +593,9 @@ export function getAbandonedPackagesMd(
   for (const manager of Object.keys(abandonedPackages).sort()) {
     const deps = abandonedPackages[manager];
     for (const depName of Object.keys(deps).sort()) {
-      const bumpedAt = deps[depName];
-      const formattedDate = bumpedAt
-        ? DateTime.fromISO(bumpedAt).toFormat('yyyy-MM-dd')
+      const mostRecentTimestamp = deps[depName];
+      const formattedDate = mostRecentTimestamp
+        ? DateTime.fromISO(mostRecentTimestamp).toFormat('yyyy-MM-dd')
         : 'unknown';
       abandonedMd += `| ${manager} | \`${depName}\` | \`${formattedDate}\` |\n`;
     }

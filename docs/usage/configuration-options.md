@@ -56,9 +56,9 @@ The `abandonmentThreshold` option allows Renovate to flag packages as abandoned 
 Renovate adds an `isAbandoned` boolean property to the package lookup result when:
 
 - `abandonmentThreshold` is defined (not `null`)
-- The package has a `bumpedAt` timestamp available from the datasource
+- The package has a `mostRecentTimestamp` timestamp available from the datasource
 
-The `bumpedAt` timestamp represents the release date of the highest version, but only if that version also has the most recent timestamp among all releases.
+The `mostRecentTimestamp` timestamp represents the release date of the highest version, but only if that version also has the most recent timestamp among all releases.
 This ensures abandonment detection is based on normal package release patterns.
 
 If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).

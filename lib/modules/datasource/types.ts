@@ -93,7 +93,7 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
-  bumpedAt?: Timestamp;
+  mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
 }
 

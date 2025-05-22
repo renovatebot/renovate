@@ -203,7 +203,7 @@ export async function lookupUpdates(
         'dependencyUrl',
         'lookupName',
         'packageScope',
-        'bumpedAt',
+        'mostRecentTimestamp',
         'isAbandoned',
       ]);
 
@@ -298,6 +298,9 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
+      }
+      if (allVersions.find((v) => v.version === compareValue)) {
+        currentVersion = compareValue!;
       }
       // TODO #22198
       currentVersion ??=

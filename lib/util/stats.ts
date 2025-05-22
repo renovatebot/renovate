@@ -492,7 +492,6 @@ export class HttpCacheStats {
 type ObsoleteCacheStats = Record<
   string,
   {
-    callsite?: string;
     count: number;
   }
 >;
@@ -503,38 +502,10 @@ export class ObsoleteCacheHitLogger {
     return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
   }
 
-  private static getCallsite(): string | undefined {
-    const _prepareStackTrace = Error.prepareStackTrace;
-    try {
-      let result: string | undefined;
-      Error.prepareStackTrace = (_, stack) => {
-        result = stack
-          .find((frame) => {
-            const callsite = frame.toString();
-            return (
-              !callsite.includes('lib/util/http') &&
-              !callsite.includes('lib/util/stats') &&
-              !callsite.includes('(node:')
-            );
-          })
-          ?.toString()
-          ?.replace(/:\d+(?::\d+)?\)$/, ')');
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      new Error().stack;
-
-      return result;
-    } finally {
-      Error.prepareStackTrace = _prepareStackTrace;
-    }
-  }
-
   static write(url: string): void {
     const data = this.getData();
     if (!data[url]) {
-      const callsite = this.getCallsite();
-      data[url] = { callsite, count: 0 };
+      data[url] = { count: 0 };
     }
     data[url].count++;
     memCache.set('obsolete-cache-stats', data);
@@ -553,7 +524,7 @@ export class ObsoleteCacheHitLogger {
 interface AbandonedPackage {
   datasource: string;
   packageName: string;
-  bumpedAt: string;
+  mostRecentTimestamp: string;
 }
 
 type AbandonedPackageReport = Record<string, Record<string, string>>;
@@ -570,10 +541,10 @@ export class AbandonedPackageStats {
   static write(
     datasource: string,
     packageName: string,
-    bumpedAt: string,
+    mostRecentTimestamp: string,
   ): void {
     const data = this.getData();
-    data.push({ datasource, packageName, bumpedAt });
+    data.push({ datasource, packageName, mostRecentTimestamp });
     this.setData(data);
   }
 
@@ -581,9 +552,9 @@ export class AbandonedPackageStats {
     const data = this.getData();
     const result: AbandonedPackageReport = {};
 
-    for (const { datasource, packageName, bumpedAt } of data) {
+    for (const { datasource, packageName, mostRecentTimestamp } of data) {
       result[datasource] ??= {};
-      result[datasource][packageName] = bumpedAt;
+      result[datasource][packageName] = mostRecentTimestamp;
     }
 
     const sortedResult: AbandonedPackageReport = {};

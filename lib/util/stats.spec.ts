@@ -608,17 +608,17 @@ describe('util/stats', () => {
         {
           datasource: 'npm',
           packageName: 'package1',
-          bumpedAt: '2023-01-01T00:00:00.000Z',
+          mostRecentTimestamp: '2023-01-01T00:00:00.000Z',
         },
         {
           datasource: 'npm',
           packageName: 'package2',
-          bumpedAt: '2023-02-01T00:00:00.000Z',
+          mostRecentTimestamp: '2023-02-01T00:00:00.000Z',
         },
         {
           datasource: 'docker',
           packageName: 'image1',
-          bumpedAt: '2023-03-01T00:00:00.000Z',
+          mostRecentTimestamp: '2023-03-01T00:00:00.000Z',
         },
       ]);
 

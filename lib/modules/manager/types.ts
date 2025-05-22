@@ -171,7 +171,7 @@ export interface PackageDependency<T = Record<string, any>>
    */
   registryStrategy?: RegistryStrategy;
 
-  bumpedAt?: Timestamp;
+  mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
 }
 
