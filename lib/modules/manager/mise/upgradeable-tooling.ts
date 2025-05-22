@@ -184,6 +184,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  astro: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'astronomer/astro-cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'aws-cli': {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -203,6 +211,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'bufbuild/buf',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ccache: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'ccache/ccache',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
     },
@@ -268,6 +284,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'protocolbuffers/protobuf',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  redis: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'redis/redis',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   shellcheck: {
