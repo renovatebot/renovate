@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
+import { coerceArray } from '../../util/array';
 import { regEx } from '../../util/regex';
 import { coerceString } from '../../util/string';
 import * as template from '../../util/template';
@@ -324,7 +325,9 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
 
-  issueBody += getAbandonedPackagesMd(packageFiles);
+  if (config.dependencyDashboardReportAbandonment) {
+    issueBody += getAbandonedPackagesMd(packageFiles);
+  }
 
   const pendingApprovals = branches.filter(
     (branch) => branch.result === 'needs-approval',
@@ -570,7 +573,7 @@ export function getAbandonedPackagesMd(
 
   for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
     for (const packageFile of managerPackageFiles) {
-      for (const dep of packageFile.deps || []) {
+      for (const dep of coerceArray(packageFile.deps)) {
         if (dep.depName && dep.isAbandoned) {
           abandonedCount++;
           abandonedPackages[manager] = abandonedPackages[manager] || {};

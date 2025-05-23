@@ -1898,6 +1898,13 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'dependencyDashboardReportAbandonment',
+    description:
+      'Flags packages that have not been updated within this period as abandoned.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
