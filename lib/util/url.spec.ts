@@ -2,6 +2,7 @@ import {
   createURLFromHostOrURL,
   ensurePathPrefix,
   ensureTrailingSlash,
+  getFilenameFromPath,
   getQueryString,
   isHttpUrl,
   joinUrlParts,
@@ -225,5 +226,74 @@ describe('util/url', () => {
       'https://domain.com/some/path',
     );
     expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
+  });
+
+  it('getFilenameFromPath handles regular paths', () => {
+    expect(getFilenameFromPath('file.txt')).toBe('file.txt');
+    expect(getFilenameFromPath('/path/to/file.txt')).toBe('file.txt');
+    expect(getFilenameFromPath('path/to/file.txt')).toBe('file.txt');
+    expect(getFilenameFromPath('/path/to/file')).toBe('file');
+    expect(getFilenameFromPath('/path/to/')).toBe('');
+    expect(getFilenameFromPath('/')).toBe('');
+  });
+
+  it('getFilenameFromPath handles URLs', () => {
+    expect(getFilenameFromPath('https://example.com/file.txt')).toBe(
+      'file.txt',
+    );
+    expect(getFilenameFromPath('https://example.com/path/to/file.txt')).toBe(
+      'file.txt',
+    );
+    expect(getFilenameFromPath('https://example.com/path/to/file')).toBe(
+      'file',
+    );
+    expect(getFilenameFromPath('https://example.com/path/to/')).toBe('');
+    expect(getFilenameFromPath('https://example.com/')).toBe('');
+  });
+
+  it('getFilenameFromPath handles URL-encoded paths', () => {
+    expect(
+      getFilenameFromPath('https://example.com/file%20with%20spaces.txt'),
+    ).toBe('file with spaces.txt');
+    expect(
+      getFilenameFromPath(
+        'https://example.com/path/to/file%20with%20spaces.txt',
+      ),
+    ).toBe('file with spaces.txt');
+    expect(
+      getFilenameFromPath('https://example.com/%40special%23chars.txt'),
+    ).toBe('@special#chars.txt');
+    expect(
+      getFilenameFromPath(
+        'https://example.com/path%2Fwith%2Fencoded%2Fslashes.txt',
+      ),
+    ).toBe('path/with/encoded/slashes.txt');
+    expect(getFilenameFromPath('/path/to/file%20with%20spaces.txt')).toBe(
+      'file with spaces.txt',
+    );
+    expect(getFilenameFromPath('file%20with%20spaces.txt')).toBe(
+      'file with spaces.txt',
+    );
+  });
+
+  it('getFilenameFromPath handles URLs with query parameters', () => {
+    expect(
+      getFilenameFromPath('https://example.com/file.txt?param=value'),
+    ).toBe('file.txt');
+    expect(
+      getFilenameFromPath(
+        'https://example.com/path/to/file.txt?param=value&another=123',
+      ),
+    ).toBe('file.txt');
+    expect(getFilenameFromPath('/path/to/file.txt?param=value')).toBe(
+      'file.txt',
+    );
+    expect(getFilenameFromPath('file.txt?param=value')).toBe('file.txt');
+  });
+
+  it('getFilenameFromPath handles invalid URLs gracefully', () => {
+    expect(getFilenameFromPath('http://[invalid')).toBe('[invalid');
+    expect(getFilenameFromPath('not a url or path')).toBe('not a url or path');
+    expect(getFilenameFromPath('')).toBe('');
   });
 });

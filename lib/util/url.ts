@@ -10,7 +10,10 @@ export function joinUrlParts(...parts: string[]): string {
 }
 
 export function ensurePathPrefix(url: string, prefix: string): string {
-  const parsed = new URL(url);
+  const parsed = parseUrl(url);
+  if (!parsed) {
+    return url;
+  }
   const fullPath = parsed.pathname + parsed.search;
   if (fullPath.startsWith(prefix)) {
     return url;
@@ -65,8 +68,11 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
     return path;
   }
 
-  const { origin } = is.string(baseUrl) ? new URL(baseUrl) : baseUrl;
-  return urlJoin(origin, path);
+  const parsedUrl = is.string(baseUrl) ? parseUrl(baseUrl) : baseUrl;
+  if (!parsedUrl) {
+    return path;
+  }
+  return urlJoin(parsedUrl.origin, path);
 }
 
 export function getQueryString(params: Record<string, any>): string {
@@ -131,6 +137,50 @@ export function parseLinkHeader(
     return null;
   }
   return _parseLinkHeader(linkHeader);
+}
+
+/**
+ * Extract the filename from a file path or URL.
+ * Works with paths that may have query parameters.
+ *
+ * @param pathOrUrl - The path or URL to extract the filename from
+ * @returns The extracted filename without query parameters
+ */
+export function getFilenameFromPath(pathOrUrl: string): string {
+  // Try to parse as URL first
+  const url = parseUrl(pathOrUrl);
+  if (url) {
+    const pathname = url.pathname;
+
+    // Extract the last part after the last slash
+    const lastSlashIndex = pathname.lastIndexOf('/');
+    if (lastSlashIndex >= 0) {
+      // Decode URL-encoded characters in the filename
+      return decodeURIComponent(pathname.substring(lastSlashIndex + 1));
+    }
+
+    return decodeURIComponent(pathname);
+  } else {
+    // Not a valid URL, treat as a file path
+    const pathWithoutQuery = pathOrUrl.split('?')[0];
+
+    // Extract the last part after the last slash
+    const lastSlashIndex = pathWithoutQuery.lastIndexOf('/');
+    if (lastSlashIndex >= 0) {
+      const filename = pathWithoutQuery.substring(lastSlashIndex + 1);
+      // Decode URL-encoded characters in the filename part
+      if (filename.includes('%')) {
+        return decodeURIComponent(filename);
+      }
+      return filename;
+    }
+
+    // Decode URL-encoded characters in the path
+    if (pathWithoutQuery.includes('%')) {
+      return decodeURIComponent(pathWithoutQuery);
+    }
+    return pathWithoutQuery;
+  }
 }
 
 /**
