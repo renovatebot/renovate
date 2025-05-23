@@ -4,8 +4,8 @@ Repositories that are NOT hosted on GitHub.com (Cloud) will require a token to a
 
 If a GitHub.com token is not provided, Renovate will continue to run, but with the following limitations
 
-* release notes and change logs might be missing from Renovate pull requests
-* updates will not be provided for packages that are only hosted on GitHub.com
+- release notes and change logs might be missing from Renovate pull requests
+- updates will not be provided for packages that are only hosted on GitHub.com
 
 ## Do I need to provide a GitHub.com token?
 
