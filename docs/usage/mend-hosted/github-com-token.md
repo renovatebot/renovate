@@ -54,7 +54,7 @@ Use the token generated in the previous step to provide a secret and host rule f
 4. Choose `ADD SECRET` and create a secret to store the token
    - Provide a `Secret Name` (e.g. `GITHUB_TOKEN`)
    - Store the GitHub.com token in the `Secret Value`
-6. Choose `ADD HOST RULE` and create a host rule for `github`
+5. Choose `ADD HOST RULE` and create a host rule for `github`
    - Select host type `github`
    - Select Secret Type as `Token`
    - Select the GitHub.com token as the secret
