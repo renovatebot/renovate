@@ -60,7 +60,7 @@ export interface BranchUpgradeConfig
   prHeader?: string;
   prFooter?: string;
   prBodyNotes?: string[];
-  prBodyTemplate?: string;
+  templateStrings?: Record<string, string>;
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;

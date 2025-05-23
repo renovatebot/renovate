@@ -263,9 +263,6 @@ export interface RenovateConfig
   dependencyDashboardAutoclose?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   packageFile?: string;
@@ -314,6 +311,7 @@ export interface RenovateConfig
   branchTopic?: string;
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
+  templateStrings?: Record<string, string>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;

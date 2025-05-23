@@ -279,6 +279,27 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'templateStrings',
+    description: 'Custom templates for user-facing strings.',
+    type: 'object',
+    mergeable: true,
+    cli: false,
+    env: false,
+    default: {
+      dashboardFooter: '',
+      dashboardHeader:
+        'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
+      dashboardTitle: 'Title for the Dependency Dashboard issue.',
+      prBody:
+        '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+      prFooter: '',
+      prHeader: '',
+    },
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'secrets',
     description: 'Object which holds secret name/value pairs.',
     type: 'object',
@@ -743,26 +764,6 @@ const options: RenovateOptions[] = [
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
     default: false,
-  },
-  {
-    name: 'dependencyDashboardTitle',
-    description: 'Title for the Dependency Dashboard issue.',
-    type: 'string',
-    default: `Dependency Dashboard`,
-  },
-  {
-    name: 'dependencyDashboardHeader',
-    description:
-      'Any text added here will be placed first in the Dependency Dashboard issue body.',
-    type: 'string',
-    default:
-      'This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.',
-  },
-  {
-    name: 'dependencyDashboardFooter',
-    description:
-      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
-    type: 'string',
   },
   {
     name: 'dependencyDashboardLabels',
@@ -2211,15 +2212,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     advancedUse: true,
-  },
-  {
-    name: 'prBodyTemplate',
-    description:
-      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
-    type: 'string',
-    default:
-      '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
-    cli: false,
   },
   {
     name: 'prTitle',
