@@ -764,6 +764,18 @@
       }
     ]
   },
+  "netlify-to-scoped": {
+    "description": "The Netlify API client has been renamed to `@netlify/api` (`netlify` is now used by the Netlify CLI).",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=13.3.5",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["netlify"],
+        "replacementName": "@netlify/api",
+        "replacementVersion": "14.0.1"
+      }
+    ]
+  },
   "now-to-vercel": {
     "description": "`now` was renamed to `vercel`.",
     "packageRules": [
