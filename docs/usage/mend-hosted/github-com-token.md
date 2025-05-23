@@ -19,7 +19,7 @@ If your repositories are hosted on Bitbucket or Azure DevOps, you will need to p
 
 If the GitHub.com token is not provided, a warning will be shown in the Developer Portal and in the Dependency Dashboard.
 
-[Show image of Portal warning about GitHub.com]
+![Portal warning about GitHub.com](../assets/images/github-token-warning.png)
 
 ## How to provide a GitHub.com token
 
@@ -37,7 +37,8 @@ The token requires no special access or permissions.
 7. Copy the token when it is presented on the screen.
 
 > [!NOTE]
-> !! Make sure to copy your personal access token now as you will not be able to see this again.
+>
+> Make sure to copy your personal access token now as you will not be able to see this again.
 
 ### Step 2: Add the token to the host-app credentials
 
