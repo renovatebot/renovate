@@ -93,6 +93,7 @@ export type PackageCacheNamespace =
   | 'datasource-python-version'
   | 'datasource-releases'
   | 'datasource-repology'
+  | 'datasource-rpm'
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-sbt-package'
