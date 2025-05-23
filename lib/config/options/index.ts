@@ -1900,7 +1900,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dependencyDashboardReportAbandonment',
     description:
-      'Flags packages that have not been updated within this period as abandoned.',
+      'Controls whether abandoned packages are reported in the dependency dashboard.',
     type: 'boolean',
     default: true,
   },
