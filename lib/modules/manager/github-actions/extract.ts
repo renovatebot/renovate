@@ -23,6 +23,46 @@ const actionRe = regEx(
   /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );
 
+//#region Container job regular expressions
+
+// This group of regexes is used to detect the container image in a GitHub
+// Actions [container job], keeping the comment so that it can be updated in the
+// same way as for `uses:`.
+//
+// The container image can be specified in two ways:
+//
+// - as a string, e.g
+//   ```yaml
+//   - container: 'foo/bar@sha256:123456' # v1.2.3
+//   ```
+// - as an object, e.g.
+//   ```yaml
+//   container:
+//     - image: 'foo/bar@sha256:123456' # v1.2.3
+//   ```
+//
+// [container job]: https://docs.github.com/en/actions/writing-workflows/choosing-where-your-workflow-runs/running-jobs-in-a-container
+
+// Match `- container:`
+const containerRe = regEx(/^\s*-?\s+?container\s*:\s*/);
+
+// Match `'foo/bar@sha256:123456' # v1.2.3`
+const containerImageRe = regEx(
+  /(?<replaceString>(?<quotes>['"]?)(?<currentValue>[^'"#\s]+)['"]?(?:(?<commentWhiteSpaces>\s+)?#\s*(?<tag>[^\s]+))?)/,
+);
+
+// Match `- container: 'foo/bar@sha256:123456' # v1.2.3`
+const fullContainerRe = regEx(
+  new RegExp(containerRe.source + containerImageRe.source),
+);
+
+// Match `image: 'foo/bar@sha256:123456' # v1.2.3`
+const containerObjectImageRe = regEx(
+  String.raw`^\s*image\s*:\s*` + containerImageRe.source,
+);
+
+//#endregion
+
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
 const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
 const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
@@ -57,8 +97,16 @@ function extractWithRegex(
     detectCustomGitHubRegistryUrlsForActions();
   logger.trace('github-actions.extractWithRegex()');
   const deps: PackageDependency[] = [];
+
+  // Track whether we are currently inside a container object.
+  let lastLineWasContainer = false;
+
   for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
+      continue;
+    }
+
+    if (line.trim() === '') {
       continue;
     }
 
@@ -114,7 +162,55 @@ function extractWithRegex(
       }
       deps.push(dep);
     }
+
+    const containerMatch = lastLineWasContainer
+      ? containerObjectImageRe.exec(line)
+      : fullContainerRe.exec(line);
+
+    const containerGroups = containerMatch?.groups;
+    if (containerGroups) {
+      const {
+        commentWhiteSpaces = '',
+        currentValue,
+        replaceString,
+        tag,
+        quotes = '',
+      } = containerGroups;
+      const dep: PackageDependency = getDep(currentValue);
+      // There are two ways image references can be specified.
+      //
+      // 1. Version inline: `foo/bar:v1.2.3@sha256:123456`. This case is easy: the reference
+      //    image is already in a format we understand.
+
+      // 2. Version in comment: `foo/bar@sha256:123456 # v1.2.3`. We extract the
+      //    version from the comment:
+      if (tag && !dep.currentValue) {
+        dep.currentValue = tag;
+        dep.autoReplaceStringTemplate = `${quotes}{{depName}}{{#if newDigest}}@{{newDigest}}{{#if newValue}}${quotes}${commentWhiteSpaces}#{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`;
+      }
+
+      dep.depType = 'container';
+      dep.replaceString = replaceString;
+
+      deps.push(dep);
+    }
+
+    /**
+     * Detect lines line
+     *
+     * - container:
+     *     image: 'foo/bar@sha256:123456' # v1.2.3
+     *
+     * by naively tracking if we are in a `container` object.
+     */
+    if (containerRe.test(line)) {
+      lastLineWasContainer = true;
+      continue;
+    }
+
+    lastLineWasContainer = false;
   }
+
   return deps;
 }
 
@@ -222,14 +318,6 @@ function extractWithYAMLParser(
     extractSteps(obj.runs.steps, deps);
   } else if ('jobs' in obj) {
     for (const job of Object.values(obj.jobs)) {
-      if (job.container) {
-        const dep = getDep(job.container, true, config.registryAliases);
-        if (dep) {
-          dep.depType = 'container';
-          deps.push(dep);
-        }
-      }
-
       for (const service of job.services) {
         const dep = getDep(service, true, config.registryAliases);
         if (dep) {

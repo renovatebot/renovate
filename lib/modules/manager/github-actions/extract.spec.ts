@@ -56,9 +56,8 @@ describe('modules/manager/github-actions/extract', () => {
         'workflow_1.yml',
       );
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6,
-      );
+      const filteredDeps = res?.deps.filter((d) => d.datasource === 'docker');
+      expect(filteredDeps).toHaveLength(12);
     });
 
     it('extracts multiple action tag lines from yaml configuration file', () => {
@@ -460,6 +459,34 @@ describe('modules/manager/github-actions/extract', () => {
           currentValue: 'prettier/v2.0.1',
           replaceString:
             'grafana/writers-toolkit@4b1248585248751e3b12fd020cf7ac91540ca09c # prettier/v2.0.1',
+        },
+        {
+          currentDigest:
+            'sha256:abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          currentValue: '1.21.6',
+          replaceString:
+            'nginx/nginx@sha256:abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef # 1.21.6',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          currentDigest:
+            'sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          currentValue: '1.21.8',
+          replaceString:
+            'nginx/nginx@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef # 1.21.8',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          currentDigest:
+            'sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          currentValue: '1.2.3',
+          // The version in the comment is not used - it's the one in the version string
+          replaceString:
+            'nginx/nginx:1.2.3@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef # 1.21.8',
+          datasource: 'docker',
+          depType: 'container',
         },
       ]);
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
