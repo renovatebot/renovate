@@ -8,6 +8,7 @@ import type {
 } from '../../../../modules/manager/types';
 import type { SkipReason } from '../../../../types';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types';
+import type { Timestamp } from '../../../../util/timestamp';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -75,4 +76,6 @@ export interface UpdateResult {
   currentVersionTimestamp?: string;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
+  mostRecentTimestamp?: Timestamp | null;
+  isAbandoned?: boolean;
 }
