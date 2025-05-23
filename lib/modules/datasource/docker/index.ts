@@ -670,7 +670,13 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = GlobalConfig.get('dockerMaxPages', 20);
+    const hostsNeedingAllPages = [
+      'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
+    ];
+    const pages = hostsNeedingAllPages.includes(registryHost)
+      ? 1000
+      : GlobalConfig.get('dockerMaxPages', 20);
+    logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
