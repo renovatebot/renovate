@@ -48,7 +48,7 @@ async function helmCommands(
 
   // if credentials for the registry have been found, log into it
   await pMap(registries, async (value) => {
-    const loginCmd = await generateLoginCmd(value, 'helm registry login');
+    const loginCmd = await generateLoginCmd(value);
     if (loginCmd) {
       cmd.push(loginCmd);
     }
