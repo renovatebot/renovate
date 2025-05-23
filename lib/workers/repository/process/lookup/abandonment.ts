@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { logger } from '../../../../logger';
 import type { ReleaseResult } from '../../../../modules/datasource/types';
 import { toMs } from '../../../../util/pretty-time';
+import { AbandonedPackageStats } from '../../../../util/stats';
 import type { LookupUpdateConfig } from './types';
 
 export function calculateAbandonment(
@@ -62,6 +63,11 @@ export function calculateAbandonment(
     },
     'Calculated abandonment status',
   );
+
+  if (isAbandoned) {
+    const { datasource, packageName } = config;
+    AbandonedPackageStats.write(datasource, packageName, mostRecentTimestamp);
+  }
 
   return releaseResult;
 }
