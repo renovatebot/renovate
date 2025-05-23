@@ -1,6 +1,6 @@
 # Purpose of GitHub.com Token
 
-Repositories that are NOT hosted on GitHub.com (Cloud) will require a token to access GitHub.com (Cloud) in order to retrieve release notes and change logs, plus some various packages.
+Repositories that are NOT hosted on GitHub.com (Cloud) will require a token to access GitHub to retrieve release notes and change logs, plus some package files.
 
 If a GitHub.com token is not provided, Renovate will continue to run, but with the following limitations
 
@@ -15,7 +15,7 @@ If your repositories are hosted on GitHub.com (Cloud) and you are using the Reno
 
 ### Bitbucket and Azure DevOps users
 
-If your repositories are hosted on Bitbucket or Azure DevOps, you will need to provide a GitHub.com token if you want to access your Renovate CRs/MRs to contain release notes and change logs, or if you want updates on packages that live exclusively on GitHub.com.
+If your repositories are hosted on Bitbucket or Azure DevOps, you will need to provide a GitHub.com token if you want your Renovate CRs/MRs to contain release notes and change logs, or if you want updates on packages that live exclusively on GitHub.com.
 
 If the GitHub.com token is not provided, a warning will be shown in the Developer Portal and in the Dependency Dashboard.
 
@@ -34,15 +34,19 @@ The token requires no special access or permissions.
 4. Provide a `Token name` (fine-grained) or `Note` (optional for classic token)
 5. Choose the expiration date. (No additional scopes or repository permissions are required.)
 6. Press `Generate token`
-7. Copy the token when it is presented on the screen.
+7. Copy the token when it is presented on the screen
 
-> [!NOTE]
+> [!IMPORTANT]
 >
 > Make sure to copy your personal access token now as you will not be able to see this again.
 
-### Step 2: Add the token to the host-app credentials
+### Step 2: Add the token to the Org/Repo credentials
 
-Use the token generated in the previous step to provide a secret and host rule for the Org or Repos
+Use the token generated in the previous step to provide a secret and host rule for the Org or Repos.
+
+> [!NOTE]
+>
+> If a GitHub.com token is added to the settings for an Org, Workspace or Project, the token will be inherited by of its all child repositories.
 
 1. Log in to [Developer Portal](https://developer.mend.io/)
 2. Navigate to the Settings for an Org/Workspace/Project or a Repo
@@ -59,9 +63,5 @@ Use the token generated in the previous step to provide a secret and host rule f
 * Select the GitHub.com token as the secret
 
 ![Add a Host Rule UI](../assets/images/add-github-token-host-rule.png)
-
-> [!NOTE]
->
-> If a GitHub.com token is added to the settings for an Org, Workspace or Project, the token will be inherited by all child repositories.
 
 For more information about providing Secrets and Host Rules in the Developer Portal UI, see the documentation about Credentials.
