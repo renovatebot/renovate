@@ -1,11 +1,11 @@
-# Purpose of GitHub.com Token
+# Purpose of github.com Token
 
-Repositories that are NOT hosted on GitHub.com (Cloud) will require a token to access GitHub to retrieve release notes and change logs, plus some package files.
+Users of Mend's Renovate apps on Bitbucket Cloud and Azure DevOps need to provide a github.com token retrieve release notes and changelogs, plus some package files.
 
-If a GitHub.com token is not provided, Renovate will continue to run, but with the following limitations
+If github.com credentials are not provided, Renovate will continue to run, but with the following limitations:
 
-- release notes and change logs might be missing from Renovate pull requests
-- updates will not be provided for packages that are only hosted on GitHub.com
+- release notes and changelogs will be disabled in Renovate pull requests
+- lookups for packages hosted on github.com may fail due to rate limiting
 
 ## Do I need to provide a GitHub.com token?
 
@@ -15,7 +15,7 @@ If your repositories are hosted on GitHub.com (Cloud) and you are using the Reno
 
 ### Bitbucket and Azure DevOps users
 
-If your repositories are hosted on Bitbucket or Azure DevOps, you will need to provide a GitHub.com token if you want your Renovate CRs/MRs to contain release notes and change logs, or if you want updates on packages that live exclusively on GitHub.com.
+If your repositories are hosted on Bitbucket or Azure DevOps, you will need to provide a GitHub.com token if you want your Renovate PRs to contain release notes and change logs, or if you want updates on packages that live exclusively on GitHub.com.
 
 If the GitHub.com token is not provided, a warning will be shown in the Developer Portal and in the Dependency Dashboard.
 
