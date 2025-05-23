@@ -28,6 +28,9 @@ describe('modules/datasource/rpm/index', () => {
     it('returns the correct filelists.xml URL', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <data type="primary">
+    <other name="other stuff"/>
+  </data>
   <data type="filelists">
     <location href="repodata/somesha256-filelists.xml.gz"/>
   </data>

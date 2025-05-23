@@ -48,12 +48,7 @@ export class RpmDatasource extends Datasource {
       if (!filelistsXmlUrl) {
         return null;
       }
-      const release = await this.getReleasesByPackageName(
-        filelistsXmlUrl,
-        packageName,
-      );
-
-      return release;
+      return await this.getReleasesByPackageName(filelistsXmlUrl, packageName);
     } catch (err) {
       this.handleGenericErrors(err);
     }
@@ -61,7 +56,8 @@ export class RpmDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ registryUrl }: GetReleasesConfig) => registryUrl ?? '',
+    key: ({ registryUrl }: GetReleasesConfig) =>
+      registryUrl ?? '__no_registry_url__',
     ttlMinutes: 1440,
   })
   async getFilelistsXmlUrl(registryUrl: string): Promise<string | null> {
@@ -77,26 +73,24 @@ export class RpmDatasource extends Datasource {
     }
 
     // parse repomd.xml using XmlDocument
-    const data = new XmlDocument(response.body);
-    const dataElements = data.childrenNamed('data');
+    const xml = new XmlDocument(response.body);
+    const filelistsData = xml.childWithAttribute('type', 'filelists');
 
-    for (const dataElement of dataElements) {
-      if (dataElement.attr.type === 'filelists') {
-        const locationElement = dataElement.childNamed('location');
-        if (!locationElement) {
-          throw new Error(`No location element found in filelists.xml`);
-        }
-        const href = locationElement.attr.href;
-        if (!href) {
-          throw new Error(`No href found in filelists.xml`);
-        }
-        // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
-        const registryUrlWithoutRepodata = registryUrl.replace(
-          /\/repodata\/?$/,
-          '/',
-        );
-        return joinUrlParts(registryUrlWithoutRepodata, href);
+    if (filelistsData) {
+      const locationElement = filelistsData.childNamed('location');
+      if (!locationElement) {
+        throw new Error(`No location element found in filelists.xml`);
       }
+      const href = locationElement.attr.href;
+      if (!href) {
+        throw new Error(`No href found in filelists.xml`);
+      }
+      // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
+      const registryUrlWithoutRepodata = registryUrl.replace(
+        /\/repodata\/?$/,
+        '/',
+      );
+      return joinUrlParts(registryUrlWithoutRepodata, href);
     }
 
     return null;
@@ -118,14 +112,15 @@ export class RpmDatasource extends Datasource {
     if (!packages) {
       throw new Error(`No packages found in filelists.xml`);
     }
-    const releases: Release[] = [];
+    const releases = new Map<string, Release>();
     for (const pkg of packages) {
       const name = pkg.attr.name;
       if (name !== packageName) {
         continue;
       }
-      const version = pkg.childNamed('version')?.attr?.ver ?? '';
-      const rel = pkg.childNamed('version')?.attr?.rel;
+      const versionElement = pkg.childNamed('version');
+      const version = versionElement?.attr?.ver ?? '';
+      const rel = versionElement?.attr?.rel;
       let versionWithRel = version;
       if (rel) {
         // if rel is present, we need to append it to the version. Otherwise, ignore it.
@@ -134,22 +129,20 @@ export class RpmDatasource extends Datasource {
       }
 
       // check if the versionWithRel isn't already in the releases
-      // One versionWithRel could have multiple revisions or releases
+      // One version could have multiple rel
+      // (note: this rel is the release/revision key in filelists.xml, not the release data type)
       // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3
-      const existingRelease = releases.find(
-        (release) => release.version === versionWithRel,
-      );
-      if (!existingRelease) {
-        releases.push({
+      if (!releases.has(versionWithRel)) {
+        releases.set(versionWithRel, {
           version: versionWithRel,
         });
       }
     }
-    if (releases.length === 0) {
+    if (releases.size === 0) {
       return null;
     }
     return {
-      releases,
+      releases: Array.from(releases.values()),
     };
   }
 }
