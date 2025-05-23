@@ -61,6 +61,11 @@ The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_D
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
+## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
+
+If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
+This is useful in environments where a user cannot approve its own PRs.
+
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS`
 
 If set to a positive integer, Renovate will use this as the number of attempts to check branch status before trying to add a status check.

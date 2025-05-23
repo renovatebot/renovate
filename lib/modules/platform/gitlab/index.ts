@@ -719,8 +719,8 @@ async function tryPrAutomerge(
 async function approveMr(mrNumber: number): Promise<void> {
   const env = getEnv();
   const opts: GitlabHttpOptions = {};
-  if (env.RENOVATE_X_GITLAB_AUTOMERGE_TOKEN) {
-    opts.token = env.RENOVATE_X_GITLAB_AUTOMERGE_TOKEN;
+  if (env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN) {
+    opts.token = env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
   }
   logger.debug(`approveMr(${mrNumber})`);
   try {
