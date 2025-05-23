@@ -1415,7 +1415,8 @@ The source of these CVEs is [OSV.dev](https://osv.dev/).
 
 Controls whether abandoned packages are reported in the dependency dashboard.
 
-When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration. This helps you identify dependencies that may need attention due to lack of maintenance.
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
 
 Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
