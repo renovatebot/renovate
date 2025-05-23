@@ -455,7 +455,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(docker, 'docker.tf', {
         registryAliases: { 'hub.proxy.test': 'index.docker.io' },
       });
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toMatchObject([
         {
@@ -511,6 +511,18 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'repo.mycompany.com:8080/foo-service',
           depType: 'docker_service',
           replaceString: 'repo.mycompany.com:8080/foo-service:v1',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'precise',
+          datasource: 'docker',
+          depName: 'ubuntu',
+          depType: 'docker_registry_image',
+          packageName: 'ubuntu',
+          replaceString: 'ubuntu:precise',
+          versioning: 'ubuntu',
         },
       ]);
     });
