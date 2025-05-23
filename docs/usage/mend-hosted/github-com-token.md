@@ -26,7 +26,7 @@ If the GitHub.com token is not provided, a warning will be shown in the Develope
 Renovate will accept a GitHub.com token from any GitHub user.
 The token requires no special access or permissions.
 
-### Step 1: Acquire a GitHub.com token:
+### Step 1: Acquire a GitHub.com token
 
 1. Log in to GitHub.com (any user)
 2. Navigate to [Personal access tokens](https://github.com/settings/tokens) in Developer settings
@@ -52,16 +52,13 @@ Use the token generated in the previous step to provide a secret and host rule f
 2. Navigate to the Settings for an Org/Workspace/Project or a Repo
 3. Go to the `Credentials` settings page
 4. Choose `ADD SECRET` and create a secret to store the token
-
-- Provide a `Secret Name` (e.g. `GITHUB_TOKEN`)
-- Store the GitHub.com token in the `Secret Value`
-
+   - Provide a `Secret Name` (e.g. `GITHUB_TOKEN`)
+   - Store the GitHub.com token in the `Secret Value`
 6. Choose `ADD HOST RULE` and create a host rule for `github`
-
-- Select host type `github`
-- Select Secret Type as `Token`
-- Select the GitHub.com token as the secret
+   - Select host type `github`
+   - Select Secret Type as `Token`
+   - Select the GitHub.com token as the secret
 
 ![Add a Host Rule UI](../assets/images/add-github-token-host-rule.png)
 
-For more information about providing Secrets and Host Rules in the Developer Portal UI, see the documentation about Credentials.
+For more information about providing Secrets and Host Rules in the Developer Portal UI, see the documentation for [Credentials](credentials.md).
