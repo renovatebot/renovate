@@ -882,7 +882,7 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
-        content = platform.massageMarkdown(content);
+        content = platform.massageMarkdown(content, config.rebaseLabel);
         if (
           !(
             config.suppressNotifications!.includes('artifactErrors') ||

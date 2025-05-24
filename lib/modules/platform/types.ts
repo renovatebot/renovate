@@ -242,7 +242,7 @@ export interface Platform {
   ensureIssue(
     issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
-  massageMarkdown(prBody: string): string;
+  massageMarkdown(prBody: string, rebaseLabel?: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
