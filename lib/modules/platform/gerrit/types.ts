@@ -40,6 +40,7 @@ export interface GerritChange {
   created: string;
   submittable?: boolean;
   _number: number;
+  hashtags: string[];
   labels?: Record<string, GerritLabelInfo>;
   reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>;
   messages?: GerritChangeMessageInfo[];
