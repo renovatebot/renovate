@@ -466,6 +466,11 @@ export function generateBranchConfig(
     (upgrade) => upgrade.skipInstalls !== false,
   );
 
+  // Artifact updating will only be skipped if every upgrade wants to skip it.
+  config.skipArtifactUpdating = config.upgrades.every(
+    (upgrade) => upgrade.skipArtifactUpdating === true,
+  );
+
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));

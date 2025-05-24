@@ -713,6 +713,147 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('does not update artifacts when skipArtifactUpdating=true', async () => {
+      const branchName = 'renovate/wheel-0.x';
+      const updateType = 'patch';
+      const lockedVersion = '0.45.0';
+      const newVersion = '0.45.1';
+      const currentValue = '==0.45.0';
+      const newRegexValue = newVersion;
+      const newValue = '==0.45.1';
+
+      const packageFile = 'requirements.in';
+      const lockFile = 'requirements.txt';
+
+      const regexWheelLookup: LookupUpdate = {
+        newVersion,
+        newValue: newRegexValue,
+        updateType,
+        branchName,
+      };
+
+      const pipCompileWheelLookup: LookupUpdate = {
+        ...regexWheelLookup,
+        newValue,
+      };
+      const pipCompileWheelDep = {
+        currentValue,
+        lockedVersion,
+        updates: [pipCompileWheelLookup],
+      };
+
+      config.manager = 'pip-compile';
+      config.branchName = branchName;
+      config.skipArtifactUpdating = true;
+      config.upgrades.push({
+        packageFile,
+        lockFiles: [lockFile],
+        manager: 'pip-compile',
+        updateType,
+        depName: 'alpha',
+        currentValue,
+        newVersion,
+        branchName,
+      });
+      config.upgrades.push({
+        packageFile,
+        lockFiles: [lockFile],
+        manager: 'pip-compile',
+        updateType,
+        depName: 'beta',
+        currentValue,
+        newVersion,
+        branchName,
+      });
+
+      config.packageFiles = {
+        'pip-compile': [
+          {
+            packageFile,
+            lockFiles: [lockFile],
+            deps: [pipCompileWheelDep],
+          },
+        ],
+      };
+
+      pipCompile.updateArtifacts.mockResolvedValue([]);
+      autoReplace.doAutoReplace.mockResolvedValue('new content');
+
+      await getUpdatedPackageFiles(config);
+
+      expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
+    });
+
+    it('updates artifacts when skipArtifactUpdating=false', async () => {
+      const branchName = 'renovate/wheel-0.x';
+      const updateType = 'patch';
+      const lockedVersion = '0.45.0';
+      const newVersion = '0.45.1';
+      const currentValue = '==0.45.0';
+      const newRegexValue = newVersion;
+      const newValue = '==0.45.1';
+
+      const packageFile = 'requirements.in';
+      const lockFile = 'requirements.txt';
+
+      const regexWheelLookup: LookupUpdate = {
+        newVersion,
+        newValue: newRegexValue,
+        updateType,
+        branchName,
+      };
+
+      const pipCompileWheelLookup: LookupUpdate = {
+        ...regexWheelLookup,
+        newValue,
+      };
+      const pipCompileWheelDep = {
+        currentValue,
+        lockedVersion,
+        updates: [pipCompileWheelLookup],
+      };
+
+      config.manager = 'pip-compile';
+      config.branchName = branchName;
+      config.upgrades.push({
+        packageFile,
+        lockFiles: [lockFile],
+        manager: 'pip-compile',
+        updateType,
+        depName: 'alpha',
+        currentValue,
+        newVersion,
+        branchName,
+      });
+      config.upgrades.push({
+        packageFile,
+        lockFiles: [lockFile],
+        manager: 'pip-compile',
+        updateType,
+        depName: 'beta',
+        currentValue,
+        newVersion,
+        branchName,
+      });
+
+      config.packageFiles = {
+        'pip-compile': [
+          {
+            packageFile,
+            lockFiles: [lockFile],
+            deps: [pipCompileWheelDep],
+          },
+        ],
+      };
+
+      pipCompile.updateArtifacts.mockResolvedValue([]);
+      autoReplace.doAutoReplace.mockResolvedValue('new content');
+
+      await getUpdatedPackageFiles(config);
+
+      expect(pipCompile.updateArtifacts).toHaveBeenCalledTimes(1);
+    });
+
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({
         packageFile: 'package.json',

@@ -559,6 +559,37 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
+    it('skip artifact updating', async () => {
+      expect(
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+            skipArtifactUpdating: true,
+            upgrades: [
+              {
+                depName: 'postcss',
+                isRemediation: true,
+                managerData: {
+                  npmLock: 'package-lock.json',
+                },
+                rangeStrategy: 'widen',
+              },
+            ],
+          },
+          additionalFiles,
+        ),
+      ).toStrictEqual({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      expect(spyNpm).not.toHaveBeenCalled();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping lock file generation',
+      );
+    });
+
     it('reuse existing up-to-date', async () => {
       expect(
         await getAdditionalFiles(

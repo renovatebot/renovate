@@ -472,6 +472,14 @@ async function managerUpdateArtifacts(
   manager: string,
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
+  if (updateArtifact.config.skipArtifactUpdating) {
+    logger.debug(
+      { manager, packageFileName: updateArtifact.packageFileName },
+      'skipping artifact updating',
+    );
+    return null;
+  }
+
   const updateArtifacts = get(manager, 'updateArtifacts');
   if (updateArtifacts) {
     return await updateArtifacts(updateArtifact);
