@@ -1,6 +1,7 @@
 import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
@@ -109,6 +110,45 @@ describe('modules/manager/helmv3/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('returns null if only "generated" is changed', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      dependencies:
+      - name: renovate-test
+        repository: oci://registry.gitlab.com/user/oci-helm-test
+        version: 0.1.0
+      digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+      generated: "2022-01-20T17:48:47.610371241+01:00"
+      `);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execMocks = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      dependencies:
+      - name: renovate-test
+        repository: oci://registry.gitlab.com/user/oci-helm-test
+        version: 0.1.0
+      digest: sha256:886f204516ea48785fe615d22071d742f7fb0d6519ed3cd274f4ec0978d8b82b
+      generated: "2025-01-20T17:48:47.610371241+01:00"
+      `);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config,
+      }),
+    ).toBeNull();
+    expect(execMocks).toBeArrayOfSize(2);
+    expect(execMocks[0].cmd).toBe(
+      'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+    );
+    expect(execMocks[1].cmd).toBe("helm dependency update ''");
   });
 
   it('returns updated Chart.lock', async () => {
