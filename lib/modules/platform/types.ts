@@ -242,7 +242,14 @@ export interface Platform {
   ensureIssue(
     issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
-  massageMarkdown(prBody: string, rebaseLabel?: string): string;
+  massageMarkdown(
+    prBody: string,
+    /**
+     * Useful for suggesting the use of rebase label when there is no better
+     * way, e.g. for Gerrit.
+     */
+    rebaseLabel?: string,
+  ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
