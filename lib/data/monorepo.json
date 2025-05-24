@@ -475,6 +475,7 @@
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
+    "pdfme": "https://github.com/pdfme/pdfme",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
@@ -483,6 +484,7 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",

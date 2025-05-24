@@ -753,6 +753,70 @@ describe('modules/manager/gradle/extract', () => {
         },
       ]);
     });
+
+    it('exclusiveContent with repeated repository definition', async () => {
+      const fsMock = {
+        'build.gradle': codeBlock`
+          repositories {
+            google()
+            exclusiveContent {
+              forRepository {
+                maven {
+                  url "https://artifactory.foo.bar/artifactory/test"
+                }
+              }
+              filter {
+                includeGroup "some.dll"
+              }
+            }
+            exclusiveContent {
+              forRepository {
+                maven {
+                  url "https://artifactory.foo.bar/artifactory/test"
+                }
+              }
+              filter {
+                includeGroup "foo.bar"
+              }
+            }
+          }
+
+          dependencies {
+            implementation "com.google.protobuf:protobuf-java:2.17.1"
+            implementation "foo.bar:protobuf-java:2.17.0"
+            implementation "some.dll:dll-1:1.0.0"
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+
+      expect(res).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'com.google.protobuf:protobuf-java',
+              currentValue: '2.17.1',
+              registryUrls: ['https://dl.google.com/android/maven2/'],
+            },
+            {
+              depName: 'foo.bar:protobuf-java',
+              currentValue: '2.17.0',
+              registryUrls: ['https://artifactory.foo.bar/artifactory/test'],
+            },
+            {
+              depName: 'some.dll:dll-1',
+              currentValue: '1.0.0',
+              registryUrls: ['https://artifactory.foo.bar/artifactory/test'],
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('version catalogs', () => {
