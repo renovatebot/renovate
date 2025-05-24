@@ -209,7 +209,7 @@ export type RenovateRepository =
       secrets?: Record<string, string>;
     };
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
+export type UseBaseBranchConfigType = 'merge' | 'replace' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
 export const allowedStatusCheckStrings = [
@@ -236,6 +236,7 @@ export interface RenovateConfig
   baseBranches?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
+  detectBaseBranchConfigFileName?: boolean;
   baseBranch?: string;
   defaultBranch?: string;
   branchList?: string[];

@@ -1074,8 +1074,15 @@ const options: RenovateOptions[] = [
     description:
       'Whether to read configuration from `baseBranches` instead of only the default branch.',
     type: 'string',
-    allowedValues: ['merge', 'none'],
+    allowedValues: ['merge', 'replace', 'none'],
     default: 'none',
+  },
+  {
+    name: 'detectBaseBranchConfigFileName',
+    description:
+      'Whether to detect the configuration file name on a base branch using the same logic that is used to detect the configuration file on the default branch.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'gitAuthor',
