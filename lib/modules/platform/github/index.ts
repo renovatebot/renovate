@@ -1947,10 +1947,10 @@ export function massageMarkdown(input: string): string {
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
     )
-    .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
-    .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
-    .replace('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
+    .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
+    .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
+    .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
+    .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, maxBodyLength());
 }
 
