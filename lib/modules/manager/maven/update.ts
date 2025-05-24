@@ -69,6 +69,25 @@ export function updateAtPosition(
     // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
+  } else if (
+    upgrade.datasource === 'docker' ||
+    upgrade.datasource === 'buildpacks-registry'
+  ) {
+    // In contrast to maven dependencies, cloud native buildpacks are not contained in specific version tags.
+    // Instead they are contained in the value of the buildpack tag and we have to update it differently.
+    let replacedPart = version;
+    if (currentValue) {
+      replacedPart = version.replace(currentValue, newValue!);
+    }
+    if (upgrade.currentDigest && upgrade.newDigest) {
+      replacedPart = replacedPart.replace(
+        upgrade.currentDigest,
+        upgrade.newDigest,
+      );
+    }
+    if (replacedPart !== version) {
+      return leftPart + replacedPart + restPart;
+    }
   }
   logger.debug({ depName, version, currentValue, newValue }, 'Unknown value');
   return null;
