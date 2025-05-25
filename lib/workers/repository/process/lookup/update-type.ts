@@ -15,6 +15,12 @@ export function getUpdateType(
   newVersion: string,
 ): UpdateType {
   if (
+    versioningApi.isSame &&
+    !versioningApi.isSame('major', newVersion, currentVersion)
+  ) {
+    return 'major';
+  }
+  if (
     versioningApi.getMajor(newVersion)! >
     versioningApi.getMajor(currentVersion)!
   ) {

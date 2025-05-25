@@ -1,8 +1,8 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {

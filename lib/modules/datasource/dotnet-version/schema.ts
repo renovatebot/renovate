@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
+import { MaybeTimestamp } from '../../../util/timestamp';
 import type { Release } from '../types';
 
 export const ReleasesIndex = z
@@ -15,7 +16,7 @@ export const ReleasesIndex = z
   .transform(({ 'releases-index': releasesIndex }) => releasesIndex);
 
 const ReleaseBase = z.object({
-  'release-date': z.string(),
+  'release-date': MaybeTimestamp,
   'release-notes': z.string(),
 });
 const ReleaseDetails = z.object({

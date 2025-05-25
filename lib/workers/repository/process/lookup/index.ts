@@ -19,6 +19,7 @@ import {
   getDatasourceFor,
   getDefaultVersioning,
 } from '../../../../modules/datasource/common';
+import { postprocessRelease } from '../../../../modules/datasource/postprocess-release';
 import { getRangeStrategy } from '../../../../modules/manager';
 import * as allVersioning from '../../../../modules/versioning';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
@@ -28,28 +29,43 @@ import { getElapsedDays } from '../../../../util/date';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
+import type { Timestamp } from '../../../../util/timestamp';
+import { calculateAbandonment } from './abandonment';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
+import { calculateLatestReleaseBump } from './timestamps';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
 } from './utils';
 
-function getTimestamp(
+async function getTimestamp(
+  config: LookupUpdateConfig,
   versions: Release[],
   version: string,
   versioningApi: allVersioning.VersioningApi,
-): string | null | undefined {
-  return versions.find(
+): Promise<Timestamp | null | undefined> {
+  const currentRelease = versions.find(
     (v) =>
       versioningApi.isValid(v.version) &&
       versioningApi.equals(v.version, version),
-  )?.releaseTimestamp;
+  );
+
+  if (!currentRelease) {
+    return null;
+  }
+
+  if (currentRelease.releaseTimestamp) {
+    return currentRelease.releaseTimestamp;
+  }
+
+  const remoteRelease = await postprocessRelease(config, currentRelease);
+  return remoteRelease?.releaseTimestamp;
 }
 
 export async function lookupUpdates(
@@ -59,8 +75,6 @@ export async function lookupUpdates(
   config.versioning ??= getDefaultVersioning(config.datasource);
 
   const versioningApi = allVersioning.get(config.versioning);
-  const unconstrainedValue =
-    !!config.lockedVersion && is.undefined(config.currentValue);
 
   let dependency: ReleaseResult | null = null;
   const res: UpdateResult = {
@@ -124,10 +138,14 @@ export async function lookupUpdates(
         );
       }
     }
+
     const isValid =
       is.string(compareValue) && versioningApi.isValid(compareValue);
 
-    if (unconstrainedValue || isValid) {
+    const unconstrainedValue =
+      !!config.lockedVersion && is.undefined(config.currentValue);
+
+    if (isValid || unconstrainedValue) {
       if (
         !config.updatePinnedDependencies &&
         // TODO #22198
@@ -140,6 +158,8 @@ export async function lookupUpdates(
       const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
         config,
       )
+        .transform((res) => calculateLatestReleaseBump(versioningApi, res))
+        .transform((res) => calculateAbandonment(res, config))
         .transform((res) => applyDatasourceFilters(res, config))
         .unwrap();
 
@@ -183,6 +203,8 @@ export async function lookupUpdates(
         'dependencyUrl',
         'lookupName',
         'packageScope',
+        'mostRecentTimestamp',
+        'isAbandoned',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -277,6 +299,9 @@ export async function lookupUpdates(
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
       }
+      if (allVersions.find((v) => v.version === compareValue)) {
+        currentVersion = compareValue!;
+      }
       // TODO #22198
       currentVersion ??=
         getCurrentVersion(
@@ -307,7 +332,8 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = getTimestamp(
+      const currentVersionTimestamp = await getTimestamp(
+        config,
         allVersions,
         currentVersion,
         versioningApi,
@@ -569,6 +595,12 @@ export async function lookupUpdates(
 
     if (isReplacementRulesConfigured(config)) {
       addReplacementUpdateIfValid(res.updates, config);
+    } else if (dependency?.replacementName && dependency.replacementVersion) {
+      res.updates.push({
+        updateType: 'replacement',
+        newName: dependency.replacementName,
+        newValue: dependency.replacementVersion,
+      });
     }
 
     // Record if the dep is fixed to a version
@@ -752,7 +784,6 @@ export async function lookupUpdates(
         rollbackPrs: config.rollbackPrs,
         isVulnerabilityAlert: config.isVulnerabilityAlert,
         updatePinnedDependencies: config.updatePinnedDependencies,
-        unconstrainedValue,
         err,
       },
       'lookupUpdates error',

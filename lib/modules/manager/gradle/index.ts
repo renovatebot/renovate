@@ -8,21 +8,23 @@ export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
 
+export const url =
+  'https://docs.gradle.org/current/userguide/getting_started_dep_man.html';
+export const categories: Category[] = ['java'];
+
 export const defaultConfig = {
-  fileMatch: [
-    '\\.gradle(\\.kts)?$',
-    '(^|/)gradle\\.properties$',
-    '(^|/)gradle/.+\\.toml$',
-    '(^|/)buildSrc/.+\\.kt$',
-    '\\.versions\\.toml$',
+  managerFilePatterns: [
+    '/\\.gradle(\\.kts)?$/',
+    '/(^|/)gradle\\.properties$/',
+    '/(^|/)gradle/.+\\.toml$/',
+    '/(^|/)buildSrc/.+\\.kt$/',
+    '/\\.versions\\.toml$/',
     // The two below is for gradle-consistent-versions plugin
-    `(^|/)versions.props$`,
-    `(^|/)versions.lock$`,
+    `/(^|/)versions.props$/`,
+    `/(^|/)versions.lock$/`,
   ],
   timeout: 600,
   versioning: gradleVersioning.id,
 };
-
-export const categories: Category[] = ['java'];
 
 export const supportedDatasources = [MavenDatasource.id];

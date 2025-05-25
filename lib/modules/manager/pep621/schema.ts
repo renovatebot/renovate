@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { LooseArray, Toml } from '../../../util/schema-utils';
+import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { PixiConfigSchema } from '../pixi/schema';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -35,17 +37,56 @@ const HatchSchema = z.object({
     .optional(),
 });
 
-// https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
-const UvSource = z.object({
-  git: z.string().optional(),
-  path: z.string().optional(),
-  url: z.string().optional(),
-  workspace: z.boolean().optional(),
+const UvIndexSource = z.object({
+  index: z.string(),
 });
+
+const UvGitSource = z.object({
+  git: z.string(),
+  rev: z.string().optional(),
+  tag: z.string().optional(),
+  branch: z.string().optional(),
+});
+export type UvGitSource = z.infer<typeof UvGitSource>;
+
+const UvUrlSource = z.object({
+  url: z.string(),
+});
+
+const UvPathSource = z.object({
+  path: z.string(),
+});
+
+const UvWorkspaceSource = z.object({
+  workspace: z.literal(true),
+});
+
+// https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
+const UvSource = z.union([
+  UvIndexSource,
+  UvGitSource,
+  UvUrlSource,
+  UvPathSource,
+  UvWorkspaceSource,
+]);
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
-  sources: z.record(z.string(), UvSource).optional(),
+  sources: LooseRecord(
+    // uv applies the same normalization as for Python dependencies on sources
+    z.string().transform((source) => normalizePythonDepName(source)),
+    UvSource,
+  ).optional(),
+  index: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.string(),
+        default: z.boolean().default(false),
+        explicit: z.boolean().default(false),
+      }),
+    )
+    .optional(),
 });
 
 export const PyProjectSchema = z.object({
@@ -63,8 +104,16 @@ export const PyProjectSchema = z.object({
       'build-backend': z.string().optional(),
     })
     .optional(),
+  'dependency-groups': z
+    .record(
+      z.string(),
+      // Skip non-string entries, like `{include-group = "typing"}`, as they are not dependencies.
+      LooseArray(z.string()),
+    )
+    .optional(),
   tool: z
     .object({
+      pixi: PixiConfigSchema.optional(),
       pdm: PdmSchema.optional(),
       hatch: HatchSchema.optional(),
       uv: UvSchema.optional(),

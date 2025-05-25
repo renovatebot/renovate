@@ -44,7 +44,19 @@ Renovate does not support:
 - Catalog versions using `reject`, and `rejectAll` constraints
 - Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
-- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](./configuration-options.md#filematch) configuration)
+- Catalogs outside the `gradle` folder, whose names do _not_ end in `.versions.toml` (unless overridden via [`managerFilePatterns`](./configuration-options.md#managerfilepatterns) configuration)
+
+### Gradle Plugin Support
+
+Renovate can also update [Gradle plugins](https://docs.gradle.org/current/userguide/plugins.html).
+It supports the `id(<pluginId>)` syntax as well as the `kotlin(<kotlinPluginId>)` shortcut for `id(org.jetbrains.kotlin.<kotlinPluginId>)`.
+
+For specifying `packageRules` it is important to know how `depName` and `packageName` are defined for a Gradle plugin:
+
+- The `depName` field is equal to `<pluginId>`
+- The `packageName` field is equal to `<pluginId>:<pluginId>.gradle.plugin`
+
+This is a direct consequence of the [Plugin Marker Artifact](https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_markers) naming convention.
 
 ## Gradle Wrapper
 

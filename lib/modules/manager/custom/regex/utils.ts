@@ -4,26 +4,13 @@ import { migrateDatasource } from '../../../../config/migrations/custom/datasour
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import type { PackageDependency } from '../../types';
+import type { ValidMatchFields } from '../utils';
+import { validMatchFields } from '../utils';
 import type {
   ExtractionTemplate,
   RegexManagerConfig,
   RegexManagerTemplates,
 } from './types';
-
-export const validMatchFields = [
-  'depName',
-  'packageName',
-  'currentValue',
-  'currentDigest',
-  'datasource',
-  'versioning',
-  'extractVersion',
-  'registryUrl',
-  'depType',
-  'indentation',
-] as const;
-
-type ValidMatchFields = (typeof validMatchFields)[number];
 
 function updateDependency(
   dependency: PackageDependency,
@@ -118,19 +105,4 @@ export function mergeExtractionTemplate(
     groups: mergeGroups(base.groups, addition.groups),
     replaceString: addition.replaceString ?? base.replaceString,
   };
-}
-
-export function isValidDependency({
-  depName,
-  currentValue,
-  currentDigest,
-  packageName,
-}: PackageDependency): boolean {
-  // check if all the fields are set
-  return (
-    (is.nonEmptyStringAndNotWhitespace(depName) ||
-      is.nonEmptyStringAndNotWhitespace(packageName)) &&
-    (is.nonEmptyStringAndNotWhitespace(currentDigest) ||
-      is.nonEmptyStringAndNotWhitespace(currentValue))
-  );
 }

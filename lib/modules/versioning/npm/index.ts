@@ -1,6 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
 import type { RangeStrategy } from '../../../types/versioning';
+import { isBreaking } from '../semver';
 import type { VersioningApi } from '../types';
 import { getNewValue } from './range';
 
@@ -34,6 +35,7 @@ const {
   gt: isGreaterThan,
   eq: equals,
   subset,
+  intersects,
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
@@ -53,6 +55,7 @@ export const api: VersioningApi = {
   getMinor,
   getNewValue,
   getPatch,
+  isBreaking,
   isCompatible: isVersion,
   isGreaterThan,
   isLessThanRange,
@@ -65,6 +68,7 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   sortVersions,
   subset,
+  intersects,
 };
 
 export default api;

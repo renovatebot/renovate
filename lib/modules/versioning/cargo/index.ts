@@ -1,3 +1,5 @@
+import { major as getMajor, minor as getMinor } from 'semver';
+import { is as isStable } from 'semver-stable';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
@@ -106,6 +108,9 @@ function getNewValue({
     res += newVersion;
     return res;
   }
+  if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
+    return currentValue;
+  }
   const newSemver = npm.getNewValue({
     currentValue: cargo2npm(currentValue),
     rangeStrategy,
@@ -142,12 +147,32 @@ function getNewValue({
     const components = currentValue.split('.').length;
     newCargo = withoutCaret.split('.').slice(0, components).join('.');
   }
+
   return newCargo;
+}
+
+function isBreaking(current: string, version: string): boolean {
+  // The change may be breaking if either version is unstable
+  if (!isStable(version) || !isStable(current)) {
+    return true;
+  }
+  const currentMajor = getMajor(current);
+  if (currentMajor === 0) {
+    if (getMinor(current) === 0) {
+      // This can only be non-breaking if they're the same version
+      return current !== version;
+    }
+    // v0.x updates are breaking if x changes
+    return getMinor(current) !== getMinor(version);
+  }
+  // Otherwise, only major updates are breaking
+  return currentMajor !== getMajor(version);
 }
 
 export const api: VersioningApi = {
   ...npm,
   getNewValue,
+  isBreaking,
   isLessThanRange,
   isSingleVersion,
   isValid,

@@ -23,6 +23,7 @@ export interface GitLabMergeRequest {
   iid: number;
   title: string;
   state: string;
+  created_at: string;
   source_branch: string;
   target_branch: string;
   description: string;

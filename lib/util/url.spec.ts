@@ -106,6 +106,7 @@ describe('util/url', () => {
     expect(isHttpUrl('ssh://github.com')).toBeFalse();
     expect(isHttpUrl('http://github.com')).toBeTrue();
     expect(isHttpUrl('https://github.com')).toBeTrue();
+    expect(isHttpUrl(new URL('https://github.com'))).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -116,6 +117,7 @@ describe('util/url', () => {
     expect(url?.protocol).toBe('https:');
     expect(url?.host).toBe('github.com');
     expect(url?.pathname).toBe('/renovatebot/renovate');
+    expect(parseUrl(url)).toBe(url);
   });
 
   it('trimTrailingSlash', () => {

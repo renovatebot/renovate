@@ -80,6 +80,7 @@ If Renovate finds a newer version, it updates `0.15.0` to match that version.
 #### `git_override`
 
 If Renovate finds a [`git_override`](https://bazel.build/rules/lib/globals/module#git_override), it ignores the related `bazel_dep` entry and instead evaluates the `commit` value at the specified `remote`.
+When using `git_override`, the `version` parameter on the `bazel_dep` is optional.
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
@@ -88,6 +89,13 @@ git_override(
     module_name = "cgrindel_bazel_starlib",
     commit = "fb47f0e9f7c376a7700fc9fe3319231ae57880df",
     remote = "https://github.com/cgrindel/bazel-starlib.git",
+)
+
+bazel_dep(name = "rules_foo")
+git_override(
+    module_name = "rules_foo",
+    remote = "https://github.com/foo/rules_foo.git",
+    commit = "8a1e9abe415eda7cd7f2a744fdac7499ce42cdca",
 )
 ```
 
@@ -101,12 +109,20 @@ Renovate only evaluates _two_ attributes from this declaration: `version` and `r
 If a `version` is specified, it overrides the version in the `bazel_dep`.
 In the following example, Renovate notices that the version is pinned to `1.2.3`.
 This results in `rules_foo` being ignored for update evaluation.
+When using `single_version_override`, the `version` parameter on the `bazel_dep` is optional.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.4")
 
 single_version_override(
   module_name = "rules_foo",
+  version = "1.2.3",
+)
+
+bazel_dep(name = "rules_bar")
+
+single_version_override(
+  module_name = "rules_bar",
   version = "1.2.3",
 )
 ```
@@ -128,6 +144,7 @@ single_version_override(
 
 If Renovate finds an [`archive_override`](https://bazel.build/rules/lib/globals/module#archive_override) or a [`local_path_override`](https://bazel.build/rules/lib/globals/module#local_path_override), it ignores the related `bazel_dep`.
 Because these declarations lack versionable attributes, Renovate does not update them.
+When using `archive_override` and `local_path_override`, the `version` parameter on the `bazel_dep` is optional.
 
 ```python
 bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -138,12 +155,34 @@ archive_override(
     "https://example.com/archive.tar.gz",
   ],
 )
+
+bazel_dep(name = "rules_bar")
+
+archive_override(
+  module_name = "rules_bar",
+  urls = [
+    "https://example.com/archive.tar.gz",
+  ],
+)
 ```
 
 #### `multiple_version_override`
 
 Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/globals/module#multiple_version_override).
 `multiple_version_override` does not affect the processing of version updates for a module.
+
+### `git_repository`
+
+If Renovate finds a [`git_repository`](https://bazel.build/rules/lib/repo/git#git_repository), it evaluates the `commit` value at the specified `remote`.
+`remote` is limited to github repos: `https://github.com/<owner>/<repo>.git`
+
+```python
+git_repository(
+    name = "rules_foo",
+    remote = "https://github.com/fooexample/rules_foo.git",
+    commit = "8c94e11c2b05b6f25ced5f23cd07d0cfd36edc1a",
+)
+```
 
 ## Legacy `WORKSPACE` files
 
@@ -160,7 +199,7 @@ Renovate extracts dependencies from the following repository rules:
 It also recognizes when these repository rule names are prefixed with an underscore.
 For example, `_http_archive` is treated the same as `http_archive`.
 
-### `git_repository`
+### `git_repository` (legacy)
 
 Renovate updates any `git_repository` declaration that has the following:
 

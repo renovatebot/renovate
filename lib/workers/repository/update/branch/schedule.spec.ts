@@ -109,7 +109,9 @@ describe('workers/repository/update/branch/schedule', () => {
     it('returns true if schedule uses cron syntax', () => {
       expect(schedule.hasValidSchedule(['* 5 * * *'])[0]).toBeTrue();
       expect(schedule.hasValidSchedule(['* * * * * 6L'])[0]).toBeTrue();
-      expect(schedule.hasValidSchedule(['* * */2 6#1'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['* * * */2 6#1'])[0]).toBeTrue();
+      expect(schedule.hasValidSchedule(['2 3 5 11 *'])[0]).toBeFalse();
+      expect(schedule.hasValidSchedule(['2 3 5 11'])[0]).toBeFalse();
     });
 
     it('massages schedules', () => {
@@ -140,11 +142,11 @@ describe('workers/repository/update/branch/schedule', () => {
     let config: RenovateConfig;
 
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
+      vi.setSystemTime(new Date('2017-06-30T10:50:00.000')); // Locally 2017-06-30 10:50am
 
       config = {};
     });
@@ -245,7 +247,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     describe('supports cron syntax on Sundays', () => {
       beforeEach(() => {
-        jest.setSystemTime(new Date('2023-01-08T10:50:00.000')); // Locally Sunday 8 January 2023 10:50am
+        vi.setSystemTime(new Date('2023-01-08T10:50:00.000')); // Locally Sunday 8 January 2023 10:50am
       });
 
       it('approves if the weekday is *', () => {
@@ -267,6 +269,52 @@ describe('workers/repository/update/branch/schedule', () => {
       });
     });
 
+    describe('supports L syntax in cron schedules', () => {
+      beforeEach(() => {
+        vi.setSystemTime(new Date('2024-10-31T10:50:00.000'));
+      });
+
+      it('supports last day of month', () => {
+        config.schedule = ['* * * L *'];
+        const res = schedule.isScheduledNow(config);
+        expect(res).toBeTrue();
+      });
+
+      it('supports last day of week', () => {
+        config.schedule = ['* * * * 4L'];
+        expect(schedule.isScheduledNow(config)).toBeTrue();
+
+        config.schedule = ['* * * * 5L'];
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
+    });
+
+    describe('supports # syntax in cron schedules', () => {
+      it('supports first Monday of month', () => {
+        vi.setSystemTime(new Date('2024-10-07T10:50:00.000'));
+        config.schedule = ['* * * * 1#1'];
+        expect(schedule.isScheduledNow(config)).toBeTrue();
+        config.schedule = ['* * * * 1#2'];
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
+    });
+
+    describe('handles schedule with Day Of Month and Day Of Week using AND logic', () => {
+      it.each`
+        datetime                     | expected
+        ${'2017-06-01T01:00:00.000'} | ${true}
+        ${'2017-06-15T01:01:00.000'} | ${true}
+        ${'2017-06-16T03:00:00.000'} | ${false}
+        ${'2017-06-04T04:01:00.000'} | ${false}
+        ${'2017-06-08T04:01:00.000'} | ${false}
+        ${'2017-06-29T04:01:00.000'} | ${false}
+      `('$sched, $tz, $datetime', ({ datetime, expected }) => {
+        config.schedule = ['* 0-5 1-7,15-22 * 4'];
+        vi.setSystemTime(new Date(datetime));
+        expect(schedule.isScheduledNow(config)).toBe(expected);
+      });
+    });
+
     describe('supports timezone', () => {
       it.each`
         sched                     | tz                  | datetime                          | expected
@@ -274,12 +322,34 @@ describe('workers/repository/update/branch/schedule', () => {
         ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
         ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T03:59:00.000+0900'} | ${true}
         ${'before 4am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T04:01:00.000+0900'} | ${false}
+        ${'* 16-23 * * *'}        | ${'Asia/Singapore'} | ${'2017-06-30T15:59:00.000+0800'} | ${false}
+        ${'* 16-23 * * *'}        | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
+        ${'* 0-3 * * 1'}          | ${'Asia/Tokyo'}     | ${'2017-06-26T03:58:00.000+0900'} | ${true}
+        ${'* 0-3 * * 1'}          | ${'Asia/Tokyo'}     | ${'2017-06-26T04:01:00.000+0900'} | ${false}
       `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
-        jest.setSystemTime(new Date(datetime));
+        vi.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
+    });
+
+    it('reject if day mismatch', () => {
+      config.schedule = ['* 10 21 * *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('reject if month mismatch', () => {
+      config.schedule = ['* 10 30 1 *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
+    });
+
+    it('reject if no schedule available', () => {
+      config.schedule = ['* * * 1 *'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBeFalse();
     });
 
     it('supports multiple schedules', () => {
@@ -332,63 +402,63 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
-      jest.setSystemTime(new Date('2017-10-01T05:26:06.000')); // Locally Sunday, 1 October 2017 05:26:06
+      vi.setSystemTime(new Date('2017-10-01T05:26:06.000')); // Locally Sunday, 1 October 2017 05:26:06
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('approves valid weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am (first Monday of the year)
+      vi.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am (first Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on weeks of year', () => {
       config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
-      jest.setSystemTime(new Date('2017-01-09T06:00:00.000')); // Locally Monday, 2 January 2017 6am (second Monday of the year)
+      vi.setSystemTime(new Date('2017-01-09T06:00:00.000')); // Locally Monday, 2 January 2017 6am (second Monday of the year)
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves on months of year', () => {
       config.schedule = ['of January'];
-      jest.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am
+      vi.setSystemTime(new Date('2017-01-02T06:00:00.000')); // Locally Monday, 2 January 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects on months of year', () => {
       config.schedule = ['of January'];
-      jest.setSystemTime(new Date('2017-02-02T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-02T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month', () => {
       config.schedule = ['every 3 months'];
-      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
+      vi.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month', () => {
       config.schedule = ['every 6 months'];
-      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
 
     it('approves schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      jest.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
+      vi.setSystemTime(new Date('2017-07-01T06:00:00.000')); // Locally Saturday, 1 July 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });
 
     it('rejects schedule longer than 1 month with day of month', () => {
       config.schedule = ['every 3 months on the first day of the month'];
-      jest.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
+      vi.setSystemTime(new Date('2017-02-01T06:00:00.000')); // Locally Thursday, 2 February 2017 6am
       const res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
     });
@@ -403,7 +473,7 @@ describe('workers/repository/update/branch/schedule', () => {
       ];
 
       cases.forEach(([datetime, expected]) => {
-        jest.setSystemTime(new Date(datetime));
+        vi.setSystemTime(new Date(datetime));
         expect(schedule.isScheduledNow(config)).toBe(expected);
       });
     });

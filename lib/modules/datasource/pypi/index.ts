@@ -3,9 +3,11 @@ import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { getEnv } from '../../../util/env';
 import { parse } from '../../../util/html';
 import type { OutgoingHttpHeaders } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { asTimestamp } from '../../../util/timestamp';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
@@ -26,7 +28,7 @@ export class PypiDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   static readonly defaultURL =
-    process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+    getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
   override readonly defaultRegistryUrls = [PypiDatasource.defaultURL];
 
   override readonly defaultVersioning = pep440.id;
@@ -66,13 +68,9 @@ export class PypiDatasource extends Datasource {
         // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
         dependency = await this.getDependency(normalizedLookupName, hostUrl);
       } catch (err) {
-        if (err.statusCode !== 404) {
-          throw err;
-        }
-
         // error contacting json-style api -- attempt to fallback to a simple-style api
         logger.trace(
-          { packageName, hostUrl },
+          { packageName, hostUrl, err },
           'Looking up pypi simple dependency via fallback',
         );
         dependency = await this.getSimpleDependency(
@@ -114,7 +112,9 @@ export class PypiDatasource extends Datasource {
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const headers = await this.getAuthHeaders(lookupUrl);
-    const rep = await this.http.getJson<PypiJSON>(lookupUrl, { headers });
+    const rep = await this.http.getJsonUnchecked<PypiJSON>(lookupUrl, {
+      headers,
+    });
     const dep = rep?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -175,7 +175,7 @@ export class PypiDatasource extends Datasource {
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
           version,
-          releaseTimestamp,
+          releaseTimestamp: asTimestamp(releaseTimestamp),
         };
         if (isDeprecated) {
           result.isDeprecated = isDeprecated;
@@ -260,7 +260,7 @@ export class PypiDatasource extends Datasource {
     );
     const dependency: ReleaseResult = { releases: [] };
     const headers = await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.get(lookupUrl, { headers });
+    const response = await this.http.getText(lookupUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');

@@ -1,4 +1,3 @@
-import { afterEach } from '@jest/globals';
 import { acquireLock, getMutex } from './mutex';
 
 describe('util/mutex', () => {

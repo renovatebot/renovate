@@ -30,19 +30,14 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const allowedPostUpgradeCommands = GlobalConfig.get(
-    'allowedPostUpgradeCommands',
-  );
-  const allowPostUpgradeCommandTemplating = GlobalConfig.get(
-    'allowPostUpgradeCommandTemplating',
-  );
+  const allowedCommands = GlobalConfig.get('allowedCommands');
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
     logger.trace(
       {
         tasks: upgrade.postUpgradeTasks,
-        allowedCommands: allowedPostUpgradeCommands,
+        allowedCommands,
       },
       `Checking for post-upgrade tasks`,
     );
@@ -50,7 +45,9 @@ export async function postUpgradeCommandsExecutor(
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
+      const previouslyModifiedFiles =
+        config.updatedPackageFiles!.concat(updatedArtifacts);
+      for (const file of previouslyModifiedFiles) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
@@ -65,16 +62,17 @@ export async function postUpgradeCommandsExecutor(
       }
 
       for (const cmd of commands) {
+        const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
+        if (compiledCmd !== cmd) {
+          logger.debug(
+            { rawCmd: cmd, compiledCmd },
+            'Post-upgrade command has been compiled',
+          );
+        }
         if (
-          allowedPostUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd),
-          )
+          allowedCommands!.some((pattern) => regEx(pattern).test(compiledCmd))
         ) {
           try {
-            const compiledCmd = allowPostUpgradeCommandTemplating
-              ? compile(cmd, mergeChildConfig(config, upgrade))
-              : cmd;
-
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
@@ -93,15 +91,15 @@ export async function postUpgradeCommandsExecutor(
         } else {
           logger.warn(
             {
-              cmd,
-              allowedPostUpgradeCommands,
+              cmd: compiledCmd,
+              allowedCommands,
             },
-            'Post-upgrade task did not match any on allowedPostUpgradeCommands list',
+            'Post-upgrade task did not match any on allowedCommands list',
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`,
+              `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
             ),
           });
         }
@@ -124,6 +122,29 @@ export async function postUpgradeCommandsExecutor(
         ...coerceArray(status.not_added),
         ...coerceArray(status.modified),
       ];
+      const changedFiles = [
+        ...addedOrModifiedFiles,
+        ...coerceArray(status.deleted),
+      ];
+
+      // Check for files which were previously deleted but have been re-added without modification
+      const previouslyDeletedFiles = updatedArtifacts.filter(
+        (ua) => ua.type === 'deletion',
+      );
+      for (const previouslyDeletedFile of previouslyDeletedFiles) {
+        if (!changedFiles.includes(previouslyDeletedFile.path)) {
+          logger.debug(
+            { file: previouslyDeletedFile.path },
+            'Previously deleted file has been restored without modification',
+          );
+          updatedArtifacts = updatedArtifacts.filter(
+            (ua) =>
+              !(
+                ua.type === 'deletion' && ua.path === previouslyDeletedFile.path
+              ),
+          );
+        }
+      }
 
       logger.trace({ addedOrModifiedFiles }, 'Added or modified files');
       logger.debug(
@@ -169,14 +190,20 @@ export async function postUpgradeCommandsExecutor(
       for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
-            logger.debug(
-              { file: relativePath, pattern },
-              'Post-upgrade file removed',
-            );
-            updatedArtifacts.push({
-              type: 'deletion',
-              path: relativePath,
-            });
+            if (
+              !updatedArtifacts.some(
+                (ua) => ua.path === relativePath && ua.type === 'deletion',
+              )
+            ) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file removed',
+              );
+              updatedArtifacts.push({
+                type: 'deletion',
+                path: relativePath,
+              });
+            }
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'addition' && ua.path === relativePath),

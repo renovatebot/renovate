@@ -162,5 +162,151 @@ describe('modules/manager/gomod/artifacts-extra', () => {
         ].join('\n'),
       );
     });
+
+    it('correctly identifies toolchain updates vs go version updates', () => {
+      const toolChainUpdategoModBefore = codeBlock`
+    go 1.22.0
+
+    toolchain go1.23.0
+
+    require (
+      github.com/foo/foo v1.0.0
+      github.com/bar/bar v2.0.0
+    )
+  `;
+
+      const toolChainUpdategoModAfter = codeBlock`
+    go 1.22.0
+
+    toolchain go1.24.0
+
+    // Note the order change
+    require (
+      github.com/bar/bar v2.2.2
+      github.com/foo/foo v1.1.1
+    )
+  `;
+      const res = getExtraDepsNotice(
+        toolChainUpdategoModBefore,
+        toolChainUpdategoModAfter,
+        [],
+      );
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 2 additional dependencies were updated',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `go (toolchain)`     | `1.23.0` -> `1.24.0` |',
+          '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('correctly identifies and distinguishes toolchain updates vs go version updates when both are present', () => {
+      const toolChainUpdategoModBefore = codeBlock`
+    go 1.22.0
+
+    toolchain go1.23.0
+
+    require (
+      github.com/foo/foo v1.0.0
+      github.com/bar/bar v2.0.0
+    )
+  `;
+
+      const toolChainUpdategoModAfter = codeBlock`
+    go 1.22.2
+
+    toolchain go1.24.0
+
+    // Note the order change
+    require (
+      github.com/bar/bar v2.2.2
+      github.com/foo/foo v1.1.1
+    )
+  `;
+      const res = getExtraDepsNotice(
+        toolChainUpdategoModBefore,
+        toolChainUpdategoModAfter,
+        [],
+      );
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 2 additional dependencies were updated',
+          '- The `go` directive was updated for compatibility reasons',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `go`                 | `1.22.0` -> `1.22.2` |',
+          '| `go (toolchain)`     | `1.23.0` -> `1.24.0` |',
+          '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('correctly handles the introduction of a toolchain directive by not indicating a change', () => {
+      const toolChainUpdategoModBefore = codeBlock`
+    go 1.22.0
+
+    require (
+      github.com/foo/foo v1.0.0
+      github.com/bar/bar v2.0.0
+    )
+  `;
+
+      const toolChainUpdategoModAfter = codeBlock`
+    go 1.22.0
+
+    toolchain go1.24.0
+
+    // Note the order change
+    require (
+      github.com/bar/bar v2.2.2
+      github.com/foo/foo v1.1.1
+    )
+  `;
+      const res = getExtraDepsNotice(
+        toolChainUpdategoModBefore,
+        toolChainUpdategoModAfter,
+        [],
+      );
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 2 additional dependencies were updated',
+          '',
+          '',
+          'Details:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
   });
 });

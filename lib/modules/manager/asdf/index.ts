@@ -14,9 +14,10 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version';
 export { extractPackageFile } from './extract';
 
 export const displayName = 'asdf';
+export const url = 'https://asdf-vm.com';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.tool-versions$'],
+  managerFilePatterns: ['/(^|/)\\.tool-versions$/'],
 };
 
 export const supportedDatasources = [

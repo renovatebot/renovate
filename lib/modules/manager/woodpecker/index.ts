@@ -4,10 +4,11 @@ import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 
-export const defaultConfig = {
-  fileMatch: ['^\\.woodpecker(?:/[^/]+)?\\.ya?ml$'],
-};
-
+export const url = 'https://woodpecker-ci.org';
 export const categories: Category[] = ['ci'];
+
+export const defaultConfig = {
+  managerFilePatterns: ['/^\\.woodpecker(?:/[^/]+)?\\.ya?ml$/'],
+};
 
 export const supportedDatasources = [DockerDatasource.id];

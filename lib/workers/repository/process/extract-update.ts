@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { scm } from '../../../modules/platform/scm';
+import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
@@ -13,10 +14,14 @@ import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { fetchUpdates } from './fetch';
+import { calculateLibYears } from './libyear';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
 import type { WriteUpdateResult } from './write';
 import { writeUpdates } from './write';
+
+// Increment this if needing to cache bust ALL extract caches
+export const EXTRACT_CACHE_REVISION = 1;
 
 export interface ExtractResult {
   branches: BranchConfig[];
@@ -69,7 +74,23 @@ export function isCacheExtractValid(
   configHash: string,
   cachedExtract?: BaseBranchCache,
 ): boolean {
-  if (!(cachedExtract?.sha && cachedExtract.configHash)) {
+  if (!cachedExtract) {
+    return false;
+  }
+
+  if (!cachedExtract.revision) {
+    logger.debug('Cached extract is missing revision, so cannot be used');
+    return false;
+  }
+
+  if (cachedExtract.revision !== EXTRACT_CACHE_REVISION) {
+    logger.debug(
+      `Extract cache revision has changed (old=${cachedExtract.revision}, new=${EXTRACT_CACHE_REVISION})`,
+    );
+    return false;
+  }
+
+  if (!(cachedExtract.sha && cachedExtract.configHash)) {
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
@@ -111,17 +132,21 @@ export function isCacheExtractValid(
 
 export async function extract(
   config: RenovateConfig,
+  overwriteCache = true,
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
   const baseBranchSha = await scm.getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
-  cache.scan ||= {};
+  cache.scan ??= {};
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
+  if (
+    overwriteCache &&
+    isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
+  ) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
@@ -140,13 +165,17 @@ export async function extract(
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
-    // TODO: fix types (#22198)
-    cache.scan[baseBranch!] = {
-      sha: baseBranchSha!,
-      configHash,
-      extractionFingerprints,
-      packageFiles,
-    };
+
+    if (overwriteCache) {
+      // TODO: fix types (#22198)
+      cache.scan[baseBranch!] = {
+        revision: EXTRACT_CACHE_REVISION,
+        sha: baseBranchSha!,
+        configHash,
+        extractionFingerprints,
+        packageFiles,
+      };
+    }
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
       ? config.baseBranches
@@ -191,6 +220,8 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  memCache.cleanDatasourceKeys();
+  calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,
     packageFiles,
@@ -208,7 +239,6 @@ export async function update(
   branches: BranchConfig[],
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
-  // istanbul ignore else
   if (config.repoIsOnboarded) {
     res = await writeUpdates(config, branches);
   }

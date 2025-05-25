@@ -9,12 +9,13 @@ import type {
   PackageDependency,
   PackageFile,
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
 import { coerceString } from '../../../../util/string';
-import type { BranchConfig } from '../../../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
@@ -231,7 +232,6 @@ export async function getUpdatedPackageFiles(
         }
       }
     } else {
-      const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
         let res = await doAutoReplace(
@@ -242,19 +242,7 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
-          if (
-            bumpPackageVersion &&
-            upgrade.bumpVersion &&
-            upgrade.packageFileVersion
-          ) {
-            const { bumpedContent } = await bumpPackageVersion(
-              res,
-              upgrade.packageFileVersion,
-              upgrade.bumpVersion,
-              packageFile,
-            );
-            res = bumpedContent;
-          }
+          res = await applyManagerBumpPackageVersion(res, upgrade);
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
           } else {
@@ -276,20 +264,7 @@ export async function getUpdatedPackageFiles(
         fileContent: packageFileContent!,
         upgrade,
       });
-      if (
-        newContent &&
-        bumpPackageVersion &&
-        upgrade.bumpVersion &&
-        upgrade.packageFileVersion
-      ) {
-        const { bumpedContent } = await bumpPackageVersion(
-          newContent,
-          upgrade.packageFileVersion,
-          upgrade.bumpVersion,
-          packageFile,
-        );
-        newContent = bumpedContent;
-      }
+      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -477,19 +452,16 @@ function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
   packageFileName: string,
-): BranchConfig {
-  const updatedConfig = { ...config };
+): UpdateArtifactsConfig {
+  // drop any lockFiles that happen to be defined on the branch config
+  const { lockFiles, ...updatedConfig } = config;
   if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (
-      packageFile &&
-      is.nonEmptyArray(updatedConfig.lockFiles) &&
-      is.nonEmptyArray(packageFile.lockFiles)
-    ) {
+    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
@@ -529,4 +501,28 @@ function processUpdateArtifactResults(
       }
     }
   }
+}
+
+async function applyManagerBumpPackageVersion(
+  packageFileContent: string | null,
+  upgrade: BranchUpgradeConfig,
+): Promise<string | null> {
+  const bumpPackageVersion = get(upgrade.manager, 'bumpPackageVersion');
+  if (
+    !bumpPackageVersion ||
+    !packageFileContent ||
+    !upgrade.bumpVersion ||
+    !upgrade.packageFileVersion
+  ) {
+    return packageFileContent;
+  }
+
+  const result = await bumpPackageVersion(
+    packageFileContent,
+    upgrade.packageFileVersion,
+    upgrade.bumpVersion,
+    upgrade.packageFile!,
+  );
+
+  return result.bumpedContent;
 }

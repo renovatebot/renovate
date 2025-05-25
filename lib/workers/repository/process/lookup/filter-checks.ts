@@ -65,16 +65,14 @@ export async function filterInternalChecks(
       candidateRelease = updatedCandidateRelease;
 
       // Now check for a minimumReleaseAge config
-      const {
-        minimumConfidence,
-        minimumReleaseAge,
-        releaseTimestamp,
-        version: newVersion,
-        updateType,
-      } = releaseConfig;
-      if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
+      const { minimumConfidence, minimumReleaseAge, updateType } =
+        releaseConfig;
+      if (
+        is.nonEmptyString(minimumReleaseAge) &&
+        candidateRelease.releaseTimestamp
+      ) {
         if (
-          getElapsedMs(releaseTimestamp) <
+          getElapsedMs(candidateRelease.releaseTimestamp) <
           coerceNumber(toMs(minimumReleaseAge), 0)
         ) {
           // Skip it if it doesn't pass checks
@@ -94,7 +92,7 @@ export async function filterInternalChecks(
             datasource!,
             depName!,
             currentVersion!,
-            newVersion,
+            candidateRelease.version,
             updateType!,
           )) ?? 'neutral';
         // TODO #22198

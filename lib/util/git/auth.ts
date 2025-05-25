@@ -1,7 +1,9 @@
+import is from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
+import { getEnv } from '../env';
 import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
 import { createURLFromHostOrURL, isHttpUrl } from '../url';
@@ -26,24 +28,26 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token && !(username && password)) {
     logger.warn(
-      // TODO: types (#22198)
-      `Could not create environment variable for ${matchHost!} as neither token or username and password was set`,
+      { host: matchHost },
+      `Could not create environment variable for host as neither token or username and password was set`,
     );
     return { ...environmentVariables };
   }
 
+  const env = getEnv();
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT ?? process.env.GIT_CONFIG_COUNT;
+    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
     gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${String(
-          process.env.GIT_CONFIG_COUNT,
-        )}. Ignoring it.`,
+        {
+          GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
+        },
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );
       gitConfigCount = 0;
     }
@@ -79,7 +83,7 @@ export function getGitAuthenticatedEnvironmentVariables(
       rule.insteadOf;
     gitConfigCount++;
   }
-  newEnvironmentVariables['GIT_CONFIG_COUNT'] = gitConfigCount.toString();
+  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
 }
@@ -91,9 +95,7 @@ function getAuthenticationRulesWithToken(
 ): AuthenticationRule[] {
   let token = authToken;
   let type = hostType;
-  if (!type) {
-    type = detectPlatform(url);
-  }
+  type ??= detectPlatform(url);
   if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
@@ -123,10 +125,13 @@ export function getAuthenticationRules(
     // https://github.com/IonicaBizau/git-url-parse/blob/28828546c148d58bbcff61409915a4e1e8f7eb11/lib/index.js#L304
     insteadUrl.source = 'bitbucket-server';
 
-    if (!sshPort) {
+    // sshPort is string, wrong type!
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72361
+    // https://github.com/IonicaBizau/parse-path/blob/87f71f273da90f85f6845937a70b7c032eeae4e3/lib/index.js#L45
+    if (!sshPort || is.emptyString(sshPort)) {
       // By default, bitbucket-server SSH port is 7999.
       // For non-default port, the generated auth config will likely be incorrect.
-      sshPort = 7999;
+      sshPort = '7999';
     }
   }
 

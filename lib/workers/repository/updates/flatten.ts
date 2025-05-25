@@ -4,11 +4,13 @@ import {
   mergeChildConfig,
 } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
 import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
+import * as template from '../../../util/template';
 import { parseUrl } from '../../../util/url';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
@@ -16,12 +18,13 @@ import { generateBranchName } from './branch-name';
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substring(1);
 
-function sanitizeDepName(depName: string): string {
+export function sanitizeDepName(depName: string): string {
   return depName
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')
     .replace(regEx(/\s+/g), '-')
+    .replace(regEx(/:/g), '-')
     .replace(regEx(/-+/), '-')
     .toLowerCase();
 }
@@ -57,6 +60,12 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
       ); // remove everything up to the last slash
     }
   }
+  if (updateConfig.sourceDirectory) {
+    updateConfig.sourceDirectory = template.compile(
+      updateConfig.sourceDirectory,
+      updateConfig,
+    );
+  }
   generateBranchName(updateConfig);
   return updateConfig;
 }
@@ -80,7 +89,6 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
-      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }
@@ -172,7 +180,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles || []) {
+        for (const lockFile of packageFileConfig.lockFiles ?? []) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]
@@ -209,8 +217,14 @@ export async function flattenUpdates(
       update.semanticCommits = semanticCommits;
     }
   }
-  return updates
-    .filter((update) => update.enabled)
+  const filteredUpdates = updates
+    .filter((update) => update.enabled !== false)
     .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
+  if (filteredUpdates.length < updates.length) {
+    logger.debug(
+      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
+    );
+  }
+  return filteredUpdates;
 }

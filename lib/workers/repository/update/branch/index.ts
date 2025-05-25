@@ -34,13 +34,14 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import { isLimitReached } from '../../../global/limits';
+import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
+import { bumpVersions } from './bump-versions';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
@@ -181,6 +182,9 @@ export async function processBranch(
       branchConfig.pendingChecks &&
       !dependencyDashboardCheck
     ) {
+      logger.debug(
+        `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
+      );
       return {
         branchExists: false,
         prNo: branchPr?.number,
@@ -209,9 +213,14 @@ export async function processBranch(
         };
       }
     }
+
+    logger.debug(
+      `Open PR Count: ${getCount('ConcurrentPRs')}, Existing Branch Count: ${getCount('Branches')}, Hourly PR Count: ${getCount('HourlyPRs')}`,
+    );
+
     if (
       !branchExists &&
-      isLimitReached('Branches') &&
+      isLimitReached('Branches', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -520,6 +529,9 @@ export async function processBranch(
         config.updatedArtifacts = updatedArtifacts;
         config.artifactErrors = artifactErrors;
       }
+
+      // modifies the file changes in place to allow having a version bump in a packageFile or artifact
+      await bumpVersions(config);
 
       removeMeta(['dep']);
 

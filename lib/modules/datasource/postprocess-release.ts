@@ -40,7 +40,7 @@ export async function postprocessRelease(
     return release;
   }
 
-  const registryUrl = config.registryUrl ?? null;
+  const registryUrl = config.registryUrl ?? config.registryUrls?.at(0) ?? null;
 
   try {
     const result = await ds.postprocessRelease(
@@ -50,7 +50,13 @@ export async function postprocessRelease(
 
     if (result === 'reject') {
       logger.debug(
-        { datasource, packageName, registryUrl, version: release.version },
+        {
+          datasource,
+          packageName,
+          registryUrl,
+          version: release.version,
+          versionOrig: release.versionOrig,
+        },
         'Rejected release',
       );
       return null;

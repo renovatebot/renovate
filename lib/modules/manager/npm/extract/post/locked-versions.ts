@@ -8,6 +8,9 @@ import { getNpmLock } from '../npm';
 import { getPnpmLock } from '../pnpm';
 import type { LockFile } from '../types';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn';
+
+const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
+
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
 ): Promise<void> {
@@ -121,14 +124,31 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
-        // TODO: types (#22198)
-        const lockedVersion = semver.valid(
-          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[relativeDir]?.[
-            depType!
-          ]?.[depName!],
-        );
-        if (is.string(lockedVersion)) {
-          dep.lockedVersion = lockedVersion;
+
+        const catalogName = pnpmCatalogDepTypeRe.exec(depType!)?.groups
+          ?.version;
+
+        if (catalogName) {
+          const lockedVersion = semver.valid(
+            lockFileCache[pnpmShrinkwrap].lockedVersionsWithCatalog?.[
+              catalogName
+            ]?.[depName!],
+          );
+
+          if (is.string(lockedVersion)) {
+            dep.lockedVersion = lockedVersion;
+          }
+        } else {
+          // TODO: types (#22198)
+          const lockedVersion = semver.valid(
+            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[
+              relativeDir
+            ]?.[depType!]?.[depName!],
+          );
+
+          if (is.string(lockedVersion)) {
+            dep.lockedVersion = lockedVersion;
+          }
         }
       }
     }

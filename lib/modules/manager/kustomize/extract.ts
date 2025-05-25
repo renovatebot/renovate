@@ -1,3 +1,4 @@
+import querystring from 'node:querystring';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -18,19 +19,19 @@ import type { HelmChart, Image, Kustomize } from './types';
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
 const gitUrl = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs with ".git" delimiter
 const dotGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs with "_git" delimiter
 const underscoreGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs having an extra "//"
 const gitUrlWithPath = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?(?<queryString>.+)$/,
 );
 
 export function extractResource(base: string): PackageDependency | null {
@@ -50,10 +51,20 @@ export function extractResource(base: string): PackageDependency | null {
     return null;
   }
 
-  const { path } = match.groups;
+  const { path, queryString } = match.groups;
+  const params = querystring.parse(queryString);
+  const refParam = Array.isArray(params.ref) ? params.ref[0] : params.ref;
+  const versionParam = Array.isArray(params.version)
+    ? params.version[0]
+    : params.version;
+  const currentValue = refParam ?? versionParam;
+  if (!currentValue) {
+    return null;
+  }
+
   if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
     return {
-      currentValue: match.groups.currentValue,
+      currentValue,
       datasource: GithubTagsDatasource.id,
       depName: match.groups.project.replace('.git', ''),
     };
@@ -63,7 +74,7 @@ export function extractResource(base: string): PackageDependency | null {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
     packageName: match.groups.url,
-    currentValue: match.groups.currentValue,
+    currentValue,
   };
 }
 
@@ -156,7 +167,6 @@ export function extractHelmChart(
     return {
       ...dep,
       depName: helmChart.name,
-      packageName: dep.depName,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,

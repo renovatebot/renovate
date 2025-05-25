@@ -132,6 +132,7 @@ describe('modules/versioning/cargo/index', () => {
     ${'5.0'}                 | ${'bump'}     | ${'5.0.0'}     | ${'6.1.7'}      | ${'6.1.7'}
     ${'0.5'}                 | ${'bump'}     | ${'0.5.0'}     | ${'0.5.1'}      | ${'0.5.1'}
     ${'0.5'}                 | ${'bump'}     | ${'0.5.0'}     | ${'0.6.1'}      | ${'0.6.1'}
+    ${'1.2'}                 | ${'replace'}  | ${'1.2.3'}     | ${'1.3.0'}      | ${'1.2'}
     ${'5.0'}                 | ${'replace'}  | ${'5.0.0'}     | ${'5.1.7'}      | ${'5.0'}
     ${'5.0'}                 | ${'replace'}  | ${'5.0.0'}     | ${'6.1.7'}      | ${'6.0'}
     ${'0.5'}                 | ${'replace'}  | ${'0.5.0'}     | ${'0.6.1'}      | ${'0.6'}
@@ -162,6 +163,28 @@ describe('modules/versioning/cargo/index', () => {
           newVersion,
         }),
       ).toBe(expected);
+    },
+  );
+
+  it.each`
+    currentVersion     | newVersion         | expected
+    ${'0.0.1'}         | ${'0.0.1'}         | ${false}
+    ${'0.0.1'}         | ${'0.0.2'}         | ${true}
+    ${'0.0.1'}         | ${'0.2.0'}         | ${true}
+    ${'0.0.1'}         | ${'1.0.0'}         | ${true}
+    ${'0.1.0'}         | ${'0.1.1'}         | ${false}
+    ${'0.1.0'}         | ${'0.2.0'}         | ${true}
+    ${'1.0.0-alpha.1'} | ${'1.0.0'}         | ${true}
+    ${'1.0.0-alpha.1'} | ${'1.0.0-alpha.2'} | ${true}
+    ${'1.0.0'}         | ${'2.0.0-alpha.1'} | ${true}
+    ${'1.0.0'}         | ${'1.0.0'}         | ${false}
+    ${'1.0.0'}         | ${'2.0.0'}         | ${true}
+    ${'2.0.0'}         | ${'2.0.1'}         | ${false}
+    ${'2.0.0'}         | ${'2.1.0'}         | ${false}
+  `(
+    'isBreaking("$currentVersion", "$newVersion") === $expected',
+    ({ currentVersion, newVersion, expected }) => {
+      expect(semver.isBreaking!(currentVersion, newVersion)).toBe(expected);
     },
   );
 });

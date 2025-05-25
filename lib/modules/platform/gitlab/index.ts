@@ -19,8 +19,11 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
+import type { GitlabHttpOptions } from '../../../util/http/gitlab';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseInteger } from '../../../util/number';
@@ -32,7 +35,6 @@ import {
   getQueryString,
   parseUrl,
 } from '../../../util/url';
-import { getPrBodyStruct } from '../pr-body';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -72,18 +74,29 @@ import type {
   MergeMethod,
   RepoResponse,
 } from './types';
+import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
 
 let config: {
   repository: string;
   email: string;
-  prList: any[] | undefined;
+  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
+  cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
 } = {} as any;
+
+export function resetPlatform(): void {
+  config = {} as any;
+  draftPrefix = DRAFT_PREFIX;
+  defaults.hostType = 'gitlab';
+  defaults.endpoint = 'https://gitlab.com/api/v4/';
+  defaults.version = '0.0.0';
+  setBaseUrl(defaults.endpoint);
+}
 
 const defaults = {
   hostType: 'gitlab',
@@ -92,9 +105,6 @@ const defaults = {
 };
 
 export const id = 'gitlab';
-
-const DRAFT_PREFIX = 'Draft: ';
-const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
 let draftPrefix = DRAFT_PREFIX;
 
@@ -119,7 +129,7 @@ export async function initPlatform({
   try {
     if (!gitAuthor) {
       const user = (
-        await gitlabApi.getJson<{
+        await gitlabApi.getJsonUnchecked<{
           email: string;
           name: string;
           id: number;
@@ -130,12 +140,15 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-    // istanbul ignore if: experimental feature
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
-    } else {
+    const env = getEnv();
+    /* v8 ignore start: experimental feature */
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
+    } /* v8 ignore stop */ else {
       const version = (
-        await gitlabApi.getJson<{ version: string }>('version', { token })
+        await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
+          token,
+        })
       ).body;
       gitlabVersion = version.version;
     }
@@ -169,13 +182,13 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     archived: false,
   };
   if (config?.topics?.length) {
-    queryParams['topic'] = config.topics.join(',');
+    queryParams.topic = config.topics.join(',');
   }
 
   const urls = [];
   if (config?.namespaces?.length) {
-    queryParams['with_shared'] = false;
-    queryParams['include_subgroups'] = true;
+    queryParams.with_shared = false;
+    queryParams.include_subgroups = true;
     urls.push(
       ...config.namespaces.map(
         (namespace) =>
@@ -193,7 +206,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJson<RepoResponse[]>(url, {
+          gitlabApi.getJsonUnchecked<RepoResponse[]>(url, {
             paginate: true,
           }),
         {
@@ -228,7 +241,9 @@ export async function getRawFile(
   const url =
     `projects/${repo}/repository/files/${escapedFileName}?ref=` +
     (branchOrTag ?? `HEAD`);
-  const res = await gitlabApi.getJson<{ content: string }>(url);
+  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+    cacheProvider: memCacheProvider,
+  });
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
   return str;
@@ -260,16 +275,17 @@ function getRepoUrl(
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
+  const env = getEnv();
 
   if (
     gitUrl === 'endpoint' ||
-    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
+    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
-    if (process.env.GITLAB_IGNORE_REPO_URL) {
+    if (env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
         'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
       );
@@ -280,8 +296,8 @@ function getRepoUrl(
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const url = URL.format({
       protocol:
-        protocol.slice(0, -1) ||
-        /* istanbul ignore next: should never happen */ 'https',
+        /* v8 ignore next: should never happen */
+        protocol.slice(0, -1) || 'https',
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,
@@ -302,6 +318,7 @@ function getRepoUrl(
 export async function initRepo({
   repository,
   cloneSubmodules,
+  cloneSubmodulesFilter,
   ignorePrAuthor,
   gitUrl,
   endpoint,
@@ -310,11 +327,12 @@ export async function initRepo({
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
+  config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
   try {
-    res = await gitlabApi.getJson<RepoResponse>(
+    res = await gitlabApi.getJsonUnchecked<RepoResponse>(
       `projects/${config.repository}`,
     );
     if (res.body.archived) {
@@ -346,11 +364,11 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    // istanbul ignore if
+    /* v8 ignore start */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
-    }
+    } /* v8 ignore stop */
     config.mergeMethod = res.body.merge_method || 'merge';
     if (res.body.squash_option) {
       config.squash =
@@ -365,7 +383,7 @@ export async function initRepo({
       ...config,
       url,
     });
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -384,7 +402,7 @@ export async function initRepo({
     }
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
-  }
+  } /* v8 ignore stop */
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
@@ -432,19 +450,22 @@ async function getStatus(
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
 
-    return (
-      await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
-        paginate: true,
-        memCache: useCache,
-      })
-    ).body;
-  } catch (err) /* istanbul ignore next */ {
+    const opts: GitlabHttpOptions = { paginate: true };
+    if (useCache) {
+      opts.cacheProvider = memCacheProvider;
+    } else {
+      opts.memCache = false;
+    }
+
+    return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
+      .body;
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
-  }
+  } /* v8 ignore stop */
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
@@ -472,14 +493,14 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
-  // istanbul ignore if
+  /* v8 ignore start */
   if (!is.array(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses',
     );
     return 'yellow';
-  }
+  } /* v8 ignore stop */
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
   const mr = await getBranchPr(branchName);
@@ -537,67 +558,42 @@ export async function getBranchStatus(
 
 // Pull Request
 
-function massagePr(prToModify: Pr): Pr {
-  const pr = prToModify;
-  if (pr.title.startsWith(DRAFT_PREFIX)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX.length);
-    pr.isDraft = true;
-  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
-    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
-    pr.isDraft = true;
-  }
-  return pr;
-}
-
 async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  // istanbul ignore if
+  /* v8 ignore start */
   if (!config.ignorePrAuthor) {
     searchParams.scope = 'created_by_me';
-  }
+  } /* v8 ignore stop */
   const query = getQueryString(searchParams);
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
-    const res = await gitlabApi.getJson<
+    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
+      urlString,
       {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }[]
-    >(urlString, { paginate: true });
-    return res.body.map((pr) =>
-      massagePr({
-        number: pr.iid,
-        sourceBranch: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      }),
+        paginate: true,
+      },
     );
-  } catch (err) /* istanbul ignore next */ {
+    return res.body.map((pr) => prInfo(pr));
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     }
     throw err;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await fetchPrList();
-  }
+  config.prList ??= await fetchPrList();
   return config.prList;
 }
 
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson<
+    const { body: rules } = await gitlabApi.getJsonUnchecked<
       {
         name: string;
         rule_type: string;
@@ -668,20 +664,21 @@ async function tryPrAutomerge(
         'running', // pipeline is running, no need to wait for it
       ];
       const desiredStatus = 'can_be_merged';
+      const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
-        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
       const mergeDelay = parseInteger(
-        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
+        env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
         250,
       );
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        const { body } = await gitlabApi.getJson<{
+        const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
           pipeline: {
@@ -734,15 +731,16 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
-  }
+  } /* v8 ignore stop */
 }
 
-async function approvePr(pr: number): Promise<void> {
+async function approveMr(mrNumber: number): Promise<void> {
+  logger.debug(`approveMr(${mrNumber})`);
   try {
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${pr}/approve`,
+      `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
@@ -764,7 +762,7 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<Pr & { iid: number }>(
+  const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
       body: {
@@ -778,21 +776,21 @@ export async function createPr({
       },
     },
   );
-  const pr = res.body;
-  pr.number = pr.iid;
-  pr.sourceBranch = sourceBranch;
-  // istanbul ignore if
+
+  const pr = prInfo(res.body);
+
+  /* v8 ignore start */
   if (config.prList) {
     config.prList.push(pr);
-  }
+  } /* v8 ignore stop */
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.iid);
+    await approveMr(pr.number);
   }
 
-  await tryPrAutomerge(pr.iid, platformPrOptions);
+  await tryPrAutomerge(pr.number, platformPrOptions);
 
-  return massagePr(pr);
+  return pr;
 }
 
 export async function getPr(iid: number): Promise<GitlabPr> {
@@ -800,22 +798,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
   const mr = await getMR(config.repository, iid);
 
   // Harmonize fields with GitHub
-  const pr: GitlabPr = {
-    sourceBranch: mr.source_branch,
-    targetBranch: mr.target_branch,
-    number: mr.iid,
-    bodyStruct: getPrBodyStruct(mr.description),
-    state: mr.state === 'opened' ? 'open' : mr.state,
-    headPipelineStatus: mr.head_pipeline?.status,
-    headPipelineSha: mr.head_pipeline?.sha,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    reviewers: mr.reviewers?.map(({ username }) => username),
-    title: mr.title,
-    labels: mr.labels,
-    sha: mr.sha,
-  };
-
-  return massagePr(pr);
+  return prInfo(mr);
 }
 
 export async function updatePr({
@@ -855,13 +838,33 @@ export async function updatePr({
     body.remove_labels = removeLabels;
   }
 
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    { body },
-  );
+  const updatedPrInfo = (
+    await gitlabApi.putJson<GitLabMergeRequest>(
+      `projects/${config.repository}/merge_requests/${iid}`,
+      { body },
+    )
+  ).body;
+
+  const updatedPr = prInfo(updatedPrInfo);
+
+  if (config.prList) {
+    const existingIndex = config.prList.findIndex(
+      (pr) => pr.number === updatedPr.number,
+    );
+    /* v8 ignore start: should not happen */
+    if (existingIndex === -1) {
+      logger.warn(
+        { pr: updatedPr },
+        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
+      );
+      config.prList.push(updatedPr);
+    } /* v8 ignore stop */ else {
+      config.prList[existingIndex] = updatedPr;
+    }
+  }
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(iid);
+    await approveMr(iid);
   }
 }
 
@@ -885,7 +888,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
       },
     );
     return true;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -897,7 +900,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     logger.debug({ err }, 'merge PR error');
     logger.debug('PR merge failed');
     return false;
-  }
+  } /* v8 ignore stop */
 }
 
 export function massageMarkdown(input: string): string {
@@ -923,6 +926,12 @@ export function maxBodyLength(): number {
   }
 }
 
+/* v8 ignore start: no need to test */
+export function labelCharLimit(): number {
+  return 255;
+}
+/* v8 ignore stop */
+
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -945,7 +954,7 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate MR list
-    const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+    const response = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
     );
 
@@ -955,18 +964,7 @@ export async function findPr({
       return null;
     }
 
-    // return the latest merge request
-    const mr = mrList[0];
-
-    // only pass necessary info
-    const pr: GitlabPr = {
-      sourceBranch: mr.source_branch,
-      number: mr.iid,
-      state: 'open',
-      title: mr.title,
-    };
-
-    return massagePr(pr);
+    return prInfo(mrList[0]);
   }
 
   const prList = await getPrList();
@@ -1016,9 +1014,12 @@ export async function setBranchStatus({
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
   const branchSha = git.getBranchCommit(branchName);
+  if (!branchSha) {
+    logger.warn('Failed to get the branch commit SHA');
+    return;
+  }
   // Now, check the statuses for that commit
-  // TODO: types (#22198)
-  const url = `projects/${config.repository}/statuses/${branchSha!}`;
+  const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';
   if (renovateState === 'yellow') {
     state = 'pending';
@@ -1035,26 +1036,44 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
-  if (branchSha) {
-    const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
-    await gitlabApi
-      .getJsonSafe(commitUrl, LastPipelineId)
-      .onValue((pipelineId) => {
-        options.pipeline_id = pipelineId;
-      });
+  const env = getEnv();
+  const retryTimes = parseInteger(
+    env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
+    2,
+  );
+
+  try {
+    for (let attempt = 1; attempt <= retryTimes + 1; attempt += 1) {
+      const commitUrl = `projects/${config.repository}/repository/commits/${branchSha}`;
+      await gitlabApi
+        .getJsonSafe(commitUrl, { memCache: false }, LastPipelineId)
+        .onValue((pipelineId) => {
+          options.pipeline_id = pipelineId;
+        });
+      if (options.pipeline_id !== undefined) {
+        break;
+      }
+      if (attempt >= retryTimes + 1) {
+        logger.debug(`Pipeline not yet created after ${attempt} attempts`);
+      } else {
+        logger.debug(`Pipeline not yet created. Retrying ${attempt}`);
+      }
+      // give gitlab some time to create pipelines for the sha
+      await setTimeout(
+        parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+      );
+    }
+  } catch (err) {
+    logger.debug({ err });
+    logger.warn('Failed to retrieve commit pipeline');
   }
 
   try {
-    // give gitlab some time to create pipelines for the sha
-    await setTimeout(
-      parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
-    );
-
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (
       err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending',
@@ -1066,7 +1085,7 @@ export async function setBranchStatus({
       logger.debug({ err });
       logger.warn('Failed to set branch status');
     }
-  }
+  } /* v8 ignore stop */
 }
 
 // Issue
@@ -1081,17 +1100,17 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);
-    const res = await gitlabApi.getJson<
+    const res = await gitlabApi.getJsonUnchecked<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
       memCache: false,
       paginate: true,
     });
-    // istanbul ignore if
+    /* v8 ignore start */
     if (!is.array(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
-    }
+    } /* v8 ignore stop */
     config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
@@ -1106,20 +1125,27 @@ export async function getIssue(
   useCache = true,
 ): Promise<Issue | null> {
   try {
+    const opts: GitlabHttpOptions = {};
+    /* v8 ignore start: temporary code */
+    if (useCache) {
+      opts.cacheProvider = memCacheProvider;
+    } else {
+      opts.memCache = false;
+    } /* v8 ignore stop */
     const issueBody = (
-      await gitlabApi.getJson<{ description: string }>(
+      await gitlabApi.getJsonUnchecked<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { memCache: useCache },
+        opts,
       )
     ).body.description;
     return {
       number,
       body: issueBody,
     };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
@@ -1131,10 +1157,10 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch /* istanbul ignore next */ {
+  } catch /* v8 ignore start */ {
     logger.warn('Error finding issue');
     return null;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function ensureIssue({
@@ -1149,12 +1175,10 @@ export async function ensureIssue({
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);
-    if (!issue) {
-      issue = issueList.find((i) => i.title === reuseTitle);
-    }
+    issue ??= issueList.find((i) => i.title === reuseTitle);
     if (issue) {
       const existingDescription = (
-        await gitlabApi.getJson<{ description: string }>(
+        await gitlabApi.getJsonUnchecked<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`,
         )
       ).body.description;
@@ -1187,13 +1211,13 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* v8 ignore stop */
   return null;
 }
 
@@ -1319,9 +1343,9 @@ export async function deleteLabel(
         body: { labels },
       },
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
-  }
+  } /* v8 ignore stop */
 }
 
 async function getComments(issueNo: number): Promise<GitlabComment[]> {
@@ -1329,7 +1353,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
   const comments = (
-    await gitlabApi.getJson<GitlabComment[]>(url, { paginate: true })
+    await gitlabApi.getJsonUnchecked<GitlabComment[]>(url, { paginate: true })
   ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
@@ -1388,9 +1412,12 @@ export async function ensureComment({
   if (topic) {
     logger.debug(`Ensuring comment "${massagedTopic!}" in #${number}`);
     body = `### ${topic}\n\n${sanitizedContent}`;
-    body = body
-      .replace(regEx(/Pull Request/g), 'Merge Request')
-      .replace(regEx(/PR/g), 'MR');
+    body = smartTruncate(
+      body
+        .replace(regEx(/Pull Request/g), 'Merge Request')
+        .replace(regEx(/PR/g), 'MR'),
+      maxBodyLength(),
+    );
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
@@ -1399,7 +1426,7 @@ export async function ensureComment({
     });
   } else {
     logger.debug(`Ensuring content-only comment in #${number}`);
-    body = `${sanitizedContent}`;
+    body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
       if (comment.body === body) {
         commentId = comment.id;

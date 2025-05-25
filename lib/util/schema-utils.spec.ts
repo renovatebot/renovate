@@ -7,10 +7,15 @@ import {
   LooseArray,
   LooseRecord,
   MultidocYaml,
+  NotCircular,
   Toml,
   UtcDate,
   Yaml,
+  multidocYaml,
+  withDebugMessage,
+  withTraceMessage,
 } from './schema-utils';
+import { logger } from '~test/util';
 
 describe('util/schema-utils', () => {
   describe('LooseArray', () => {
@@ -444,6 +449,26 @@ describe('util/schema-utils', () => {
     });
   });
 
+  describe('multidocYaml()', () => {
+    const Schema = multidocYaml().pipe(
+      z.array(
+        z.object({
+          foo: z.number(),
+        }),
+      ),
+    );
+
+    it('parses valid yaml', () => {
+      expect(
+        Schema.parse(codeBlock`
+          foo: 111
+          ---
+          foo: 222
+        `),
+      ).toEqual([{ foo: 111 }, { foo: 222 }]);
+    });
+  });
+
   describe('Toml', () => {
     const Schema = Toml.pipe(
       z.object({ foo: z.object({ bar: z.literal('baz') }) }),
@@ -491,6 +516,184 @@ describe('util/schema-utils', () => {
           ],
         },
         success: false,
+      });
+    });
+  });
+
+  describe('logging utils', () => {
+    it('logs debug message and returns fallback value', () => {
+      const Schema = z
+        .string()
+        .catch(withDebugMessage('default string', 'Debug message'));
+
+      const result = Schema.parse(42);
+
+      expect(result).toBe('default string');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(z.ZodError) },
+        'Debug message',
+      );
+    });
+
+    it('logs trace message and returns fallback value', () => {
+      const Schema = z
+        .string()
+        .catch(withTraceMessage('default string', 'Trace message'));
+
+      const result = Schema.parse(42);
+
+      expect(result).toBe('default string');
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        { err: expect.any(z.ZodError) },
+        'Trace message',
+      );
+    });
+  });
+
+  describe('NotCircular', () => {
+    it('allows non-circular primitive values', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      expect(Schema.parse(undefined)).toBeUndefined();
+      expect(Schema.parse(null)).toBeNull();
+      expect(Schema.parse(123)).toBe(123);
+      expect(Schema.parse('string')).toBe('string');
+      expect(Schema.parse(true)).toBe(true);
+    });
+
+    it('allows non-circular arrays', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      expect(Schema.parse([1, 2, 3])).toEqual([1, 2, 3]);
+      expect(Schema.parse([{ a: 1 }, { b: 2 }])).toEqual([{ a: 1 }, { b: 2 }]);
+      expect(
+        Schema.parse([
+          [1, 2],
+          [3, 4],
+        ]),
+      ).toEqual([
+        [1, 2],
+        [3, 4],
+      ]);
+    });
+
+    it('allows non-circular objects', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      expect(Schema.parse({ a: 1, b: 2 })).toEqual({ a: 1, b: 2 });
+      expect(Schema.parse({ a: { b: 1 }, c: { d: 2 } })).toEqual({
+        a: { b: 1 },
+        c: { d: 2 },
+      });
+    });
+
+    it('allows objects reuse', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      const reused = { value: 42 };
+      const obj = {
+        foo: reused,
+        bar: reused,
+      };
+
+      expect(Schema.parse(obj)).toEqual({
+        foo: { value: 42 },
+        bar: { value: 42 },
+      });
+    });
+
+    it('rejects circular objects', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      const obj: any = { a: 1 };
+      obj.self = obj;
+
+      expect(Schema.safeParse(obj)).toMatchObject({
+        success: false,
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'values cannot be circular data structures',
+              path: [],
+            },
+          ],
+        },
+      });
+    });
+
+    it('rejects circular arrays', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      const arr: any[] = [1, 2, 3];
+      arr.push(arr);
+
+      expect(Schema.safeParse(arr)).toMatchObject({
+        success: false,
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'values cannot be circular data structures',
+              path: [],
+            },
+          ],
+        },
+      });
+    });
+
+    it('rejects deeply nested circular references', () => {
+      const Schema = NotCircular.pipe(z.any());
+
+      const obj: any = {
+        a: {
+          b: {
+            c: {
+              d: {},
+            },
+          },
+        },
+      };
+
+      obj.a.b.c.d.circular = obj.a;
+
+      expect(Schema.safeParse(obj)).toMatchObject({
+        success: false,
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'values cannot be circular data structures',
+              path: [],
+            },
+          ],
+        },
+      });
+    });
+
+    it('can be combined with other schema types', () => {
+      const Schema = z.object({
+        data: NotCircular.pipe(z.any()),
+      });
+
+      expect(Schema.parse({ data: { a: 1, b: 2 } })).toEqual({
+        data: { a: 1, b: 2 },
+      });
+
+      const obj: any = { a: 1 };
+      obj.self = obj;
+
+      expect(Schema.safeParse({ data: obj })).toMatchObject({
+        success: false,
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'values cannot be circular data structures',
+              path: ['data'],
+            },
+          ],
+        },
       });
     });
   });

@@ -88,9 +88,7 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
       newVersion: '3.1.0',
       currentVersion: '3.0.0',
     };
-    jest
-      .spyOn(utilFns, 'extractLocks')
-      .mockReturnValueOnce(new Error() as never);
+    vi.spyOn(utilFns, 'extractLocks').mockReturnValueOnce(new Error() as never);
     expect(updateLockedDependency(config).status).toBe('update-failed');
   });
 });

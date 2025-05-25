@@ -27,7 +27,7 @@ import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
 import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { incLimitedValue, isLimitReached } from '../../../global/limits';
+import { incCountValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
@@ -43,6 +43,7 @@ import {
   generatePrBodyFingerprintConfig,
   validatePrCache,
 } from './pr-fingerprint';
+import { tryReuseAutoclosedPr } from './pr-reuse';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
@@ -138,7 +139,9 @@ export async function ensurePr(
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
-  const existingPr = await platform.getBranchPr(branchName, config.baseBranch);
+  const existingPr =
+    (await platform.getBranchPr(branchName, config.baseBranch)) ??
+    (await tryReuseAutoclosedPr(branchName));
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
@@ -307,12 +310,10 @@ export async function ensurePr(
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
-    if (!notesSourceUrl) {
-      // TODO: types (#22198)
-      notesSourceUrl = `${upgrade.sourceUrl!}${
-        upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
-      }`;
-    }
+    // TODO: types (#22198)
+    notesSourceUrl ??= `${upgrade.sourceUrl!}${
+      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+    }`;
 
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
@@ -479,7 +480,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isLimitReached('PullRequests') &&
+          isLimitReached('ConcurrentPRs', prConfig) &&
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
@@ -496,7 +497,8 @@ export async function ensurePr(
           milestone: config.milestone,
         });
 
-        incLimitedValue('PullRequests');
+        incCountValue('ConcurrentPRs');
+        incCountValue('HourlyPRs');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
@@ -570,7 +572,7 @@ export async function ensurePr(
       logger.debug('Passing error up');
       throw err;
     }
-    logger.error({ err }, 'Failed to ensure PR: ' + prTitle);
+    logger.warn({ err, prTitle }, 'Failed to ensure PR');
   }
   if (existingPr) {
     return { type: 'with-pr', pr: existingPr };

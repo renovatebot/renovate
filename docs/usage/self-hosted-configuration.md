@@ -21,47 +21,24 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPlugins
 
-## allowPostUpgradeCommandTemplating
+## allowScripts
 
-Let's look at an example of configuring packages with existing Angular migrations.
+## allowedCommands
 
-```javascript
-module.exports = {
-  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
-};
-```
+A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
 
-In the `renovate.json` file, define the commands and files to be included in the final commit.
+If you are using a template command, the regular expression should match the final resolved value.
+If this list is empty then no tasks will be executed.
 
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
+For example:
 
 ```json
 {
-  "packageRules": [
-    {
-      "matchPackageNames": ["@angular/core"],
-      "postUpgradeTasks": {
-        "commands": [
-          "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ]
-      }
-    }
-  ]
+  "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
-With this configuration, the executable command for `@angular/core` looks like this:
-
-```bash
-npm ci --ignore-scripts
-npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
-```
-
-If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
-
-## allowScripts
+This configuration option was formerly known as `allowedPostUpgradeCommands`.
 
 ## allowedEnv
 
@@ -129,19 +106,6 @@ module.exports = {
 };
 ```
 
-## allowedPostUpgradeCommands
-
-A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
-If this list is empty then no tasks will be executed.
-
-For example:
-
-```json
-{
-  "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
-}
-```
-
 ## autodiscover
 
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
@@ -151,7 +115,9 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
-It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
+
+This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
 
@@ -173,29 +139,20 @@ The configuration:
 
 ```json
 {
-  "autodiscoverFilter": ["my-org/*"]
+  "autodiscoverFilter": ["my-org/*", "!my-org/old-*"]
 }
 ```
 
-The search for repositories is case-insensitive.
+Glob patterns are case-insensitive.
 
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
-
-```json
-{
-  "autodiscoverFilter": ["/project/.*/"]
-}
-```
-
-You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": ["!/project/.*/"]
+  "autodiscoverFilter": ["/project/.*/", "!/project/old-/"]
 }
 ```
 
@@ -344,6 +301,90 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 }
 ```
 
+Valid codes for namespaces are as follows:
+
+- `changelog-bitbucket-notes@v2`
+- `changelog-bitbucket-release`
+- `changelog-gitea-notes@v2`
+- `changelog-gitea-release`
+- `changelog-github-notes@v2`
+- `changelog-github-release`
+- `changelog-gitlab-notes@v2`
+- `changelog-gitlab-release`
+- `datasource-artifactory`
+- `datasource-aws-machine-image`
+- `datasource-aws-rds`
+- `datasource-azure-bicep-resource`
+- `datasource-azure-pipelines-tasks`
+- `datasource-bazel`
+- `datasource-bitbucket-tags`
+- `datasource-bitrise`
+- `datasource-cdnjs`
+- `datasource-conan`
+- `datasource-conda`
+- `datasource-cpan`
+- `datasource-crate-metadata`
+- `datasource-crate`
+- `datasource-deb`
+- `datasource-deno`
+- `datasource-docker-architecture`
+- `datasource-docker-hub-cache`
+- `datasource-docker-digest`
+- `datasource-docker-hub-tags`
+- `datasource-docker-imageconfig`
+- `datasource-docker-labels`
+- `datasource-docker-releases-v2`
+- `datasource-docker-tags`
+- `datasource-dotnet-version`
+- `datasource-endoflife-date`
+- `datasource-galaxy-collection`
+- `datasource-galaxy`
+- `datasource-git-refs`
+- `datasource-git-tags`
+- `datasource-git`
+- `datasource-gitea-releases`
+- `datasource-gitea-tags`
+- `datasource-github-release-attachments`
+- `datasource-gitlab-packages`
+- `datasource-gitlab-releases`
+- `datasource-gitlab-tags`
+- `datasource-glasskube-packages`
+- `datasource-go-direct`
+- `datasource-go-proxy`
+- `datasource-go`
+- `datasource-golang-version`
+- `datasource-gradle-version`
+- `datasource-helm`
+- `datasource-hermit`
+- `datasource-hex`
+- `datasource-hexpm-bob`
+- `datasource-java-version`
+- `datasource-jenkins-plugins`
+- `datasource-maven:cache-provider`
+- `datasource-maven:postprocess-reject`
+- `datasource-node-version`
+- `datasource-npm:data`
+- `datasource-nuget-v3`
+- `datasource-orb`
+- `datasource-packagist`
+- `datasource-pod`
+- `datasource-python-version`
+- `datasource-releases`
+- `datasource-repology`
+- `datasource-ruby-version`
+- `datasource-rubygems`
+- `datasource-sbt-package`
+- `datasource-terraform-module`
+- `datasource-terraform-provider`
+- `datasource-terraform`
+- `datasource-unity3d`
+- `github-releases-datasource-v2`
+- `github-tags-datasource-v2`
+- `merge-confidence`
+- `preset`
+- `terraform-provider-hash`
+- `url-sha256`
+
 ## checkedBranches
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
@@ -411,9 +452,10 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
+- `RENOVATE_` prefix (at the moment this prefix optional, but usage of prefix will be required in the future)
 - Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
-- `matchHost`
+- `matchHost` (note: only domains or subdomains are supported - not `https://` URLs or anything with forward slashes)
 - Underscore (`_`)
 - Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
@@ -516,8 +558,6 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerMaxPages
-
-By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
 
 If set to an positive integer, Renovate will use this value as the maximum page number.
 Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
@@ -680,7 +720,6 @@ To handle the case where the underlying Git processes appear to hang, configure 
 ## gitUrl
 
 Override the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.
-Currently works for Bitbucket Server and GitLab only.
 
 Possible values:
 
@@ -690,7 +729,7 @@ Possible values:
 
 ## githubTokenWarn
 
-By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
+By default, Renovate logs and displays a warning when the `RENOVATE_GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
 Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
 
@@ -1062,6 +1101,28 @@ Used as an alternative to `privateKey`, if you want the key to be read from disk
 
 Used as an alternative to `privateKeyOld`, if you want the key to be read from disk instead.
 
+## processEnv
+
+Used to set environment variables through the configuration file instead of using actual environment variables.
+
+Example:
+
+```json
+{
+  "processEnv": {
+    "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
+    "AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "AWS_DEFAULT_REGION": "us-west-2"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+
+- All values must be provided as strings, e.g., `"true"` instead of `true`
+- Only supported in file configuration (not via CLI or environment).
+
 ## productLinks
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
@@ -1109,11 +1170,12 @@ Defines how the report is exposed:
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define more settings:
+Elements in the `repositories` array can be an object if you wish to define more settings.
+Example:
 
 ```js
 {
-  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
+  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
 }
 ```
 
@@ -1242,12 +1304,9 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 
 ## username
 
-You may need to set a `username` if you:
-
-- use the Bitbucket platform, or
-- use a self-hosted GitHub App with CLI (required)
-
-If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
+The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
+You don't need to configure `username` directly if you have already configured `token`.
+Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
 
 ## writeDiscoveredRepos
 

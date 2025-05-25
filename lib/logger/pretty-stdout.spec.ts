@@ -2,12 +2,12 @@ import chalk from 'chalk';
 import * as prettyStdout from './pretty-stdout';
 import type { BunyanRecord } from './types';
 
-jest.mock('chalk', () =>
-  ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
+vi.mock('chalk', () => ({
+  default: ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
     (r, c) => Object.defineProperty(r, c, { value: (s: string) => s }),
     {},
   ),
-);
+}));
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {

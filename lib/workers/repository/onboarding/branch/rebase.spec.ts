@@ -1,15 +1,15 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { mocked, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import * as memCache from '../../../../util/cache/memory';
 import { toSha256 } from '../../../../util/hash';
 import * as _config from './config';
 import { rebaseOnboardingBranch } from './rebase';
+import { scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-const configModule = mocked(_config);
+const configModule = vi.mocked(_config);
 
-jest.mock('./config');
+vi.mock('./config');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   beforeAll(() => {

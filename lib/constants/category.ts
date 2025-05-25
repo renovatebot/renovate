@@ -1,4 +1,3 @@
-// istanbul ignore next
 export const Categories = [
   'ansible',
   'batect',
@@ -12,6 +11,7 @@ export const Categories = [
   'dotnet',
   'elixir',
   'golang',
+  'haskell',
   'helm',
   'iac',
   'java',

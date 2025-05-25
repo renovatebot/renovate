@@ -1,17 +1,17 @@
-import { mocked, platform } from '../../../../test/util';
 import { GlobalConfig } from '../../global';
 import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
+import { platform } from '~test/util';
 
-jest.mock('../gitea');
-jest.mock('../github');
-jest.mock('../gitlab');
+vi.mock('../gitea');
+vi.mock('../github');
+vi.mock('../gitlab');
 
-const gitea = mocked(_gitea);
-const github = mocked(_github);
-const gitlab = mocked(_gitlab);
+const gitea = vi.mocked(_gitea);
+const github = vi.mocked(_github);
+const gitlab = vi.mocked(_gitlab);
 
 describe('config/presets/local/index', () => {
   beforeEach(() => {

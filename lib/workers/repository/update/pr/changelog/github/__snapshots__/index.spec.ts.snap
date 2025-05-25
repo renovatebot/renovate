@@ -1,11 +1,12 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON filters unnecessary warns 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > filters unnecessary warns 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
+    "depName": undefined,
     "packageName": "@renovate/no",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
@@ -59,12 +60,13 @@ exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON fi
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > supports github enterprise and github enterprise changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
@@ -118,12 +120,13 @@ exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON su
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > supports github enterprise and github.com changelog 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
@@ -177,12 +180,13 @@ exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON su
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON supports node engines 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > supports node engines 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
@@ -236,12 +240,13 @@ exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON su
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON uses GitHub tags 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > uses GitHub tags 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,
@@ -295,12 +300,13 @@ exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON us
 }
 `;
 
-exports[`workers/repository/update/pr/changelog/github/index getChangeLogJSON works without Github 1`] = `
+exports[`workers/repository/update/pr/changelog/github/index > getChangeLogJSON > works without Github 1`] = `
 {
   "hasReleaseNotes": true,
   "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "chalk/chalk",
     "sourceDirectory": undefined,

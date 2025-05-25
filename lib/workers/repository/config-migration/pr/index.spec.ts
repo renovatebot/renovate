@@ -1,9 +1,6 @@
 import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
-import { mock } from 'jest-mock-extended';
-import { Fixtures } from '../../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial, platform, scm } from '../../../../../test/util';
+import { mock } from 'vitest-mock-extended';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -12,9 +9,12 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
+import { Fixtures } from '~test/fixtures';
+import { partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/config-migration/pr/index', () => {
-  const spy = jest.spyOn(platform, 'massageMarkdown');
+  const spy = platform.massageMarkdown;
   const { configFileName, migratedContent } = Fixtures.getJson(
     './migrated-data.json',
   );

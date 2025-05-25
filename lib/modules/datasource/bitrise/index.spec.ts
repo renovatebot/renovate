@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
-import * as httpMock from '../../../../test/http-mock';
 import { toBase64 } from '../../../util/string';
 import { getPkgReleases } from '../index';
 import { BitriseDatasource } from './index';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/bitrise/index', () => {
   describe('getReleases()', () => {

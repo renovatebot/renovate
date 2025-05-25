@@ -8,12 +8,6 @@ Support for Gerrit is currently _experimental_, meaning that it _might_ still ha
 
 Renovate stores its metadata in the _commit message footer_.
 
-Previously Renovate stored metadata in Gerrit's _hashtags_.
-To keep backwards compatibility, Renovate still reads metadata from hashtags.
-But Renovate _always_ puts its metadata in the _commit message footer_!
-When the Renovate maintainers mark Gerrit support as stable, the maintainers will remove the "read metadata from hashtags" feature.
-This means changes without metadata in the commit message footer will be "forgotten" by Renovate.
-
 ## Authentication
 
 <figure markdown>
@@ -61,15 +55,3 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 
 - Creating issues (not a Gerrit concept)
 - Dependency Dashboard (needs issues first)
-
-## Known problems
-
-### PR title is different from first commit message
-
-Sometimes the PR title passed to the Gerrit platform code is different from the first line of the commit message.
-For example:
-
-- Commit-Message=`Update keycloak.version to v21`
-- Pull-Request-Title=`Update keycloak.version to v21 (major)`
-
-In this case the Gerrit-Platform implementation tries to detect this and change the commit-message in a second patch-set.

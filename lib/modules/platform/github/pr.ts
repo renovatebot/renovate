@@ -63,7 +63,7 @@ export async function getPrCache(
 
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
-      const opts: GithubHttpOptions = { paginate: false };
+      const opts: GithubHttpOptions = { paginate: false, memCache: false };
       if (pageIdx === 1) {
         opts.cacheProvider = repoCacheProvider;
         if (isInitial) {
@@ -75,7 +75,7 @@ export async function getPrCache(
       const perPage = isInitial ? 100 : 20;
       const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
-      const res = await http.getJson<GhRestPr[]>(urlPath, opts);
+      const res = await http.getJsonUnchecked<GhRestPr[]>(urlPath, opts);
       apiQuotaAffected = true;
       requestsTotal += 1;
 
@@ -111,10 +111,10 @@ export async function getPrCache(
       },
       `getPrList success`,
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, 'getPrList err');
     throw new ExternalHostError(err, 'github');
-  }
+  } /* v8 ignore stop */
 
   return prApiCache.getItems();
 }

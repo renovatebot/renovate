@@ -4,7 +4,9 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getNameWithNoVersion(name: string): string {
-  let nameNoVersion = name.split('/').slice(0, 3).join('/');
+  // remove version suffixes like /v1 or /v2
+  let nameNoVersion = name.replace(regEx(/\/v\d+$/), '');
+  // gopkg.in is a special case where the major version is added with a dot rather than a slash
   if (nameNoVersion.startsWith('gopkg.in')) {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
@@ -23,13 +25,13 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
-    // istanbul ignore if: should never happen
+    /* v8 ignore next 3 -- should never happen */
     if (!currentName || !upgrade.managerData) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    // istanbul ignore if: hard to test
+    /* v8 ignore next 4 -- hard to test */
     if (lines.length <= upgrade.managerData.lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;

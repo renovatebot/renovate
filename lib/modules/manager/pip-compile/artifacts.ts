@@ -2,6 +2,7 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
 import {
   deleteLocalFile,
@@ -27,9 +28,10 @@ import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
 function haveCredentialsInPipEnvironmentVariables(): boolean {
-  if (process.env.PIP_INDEX_URL) {
+  const env = getEnv();
+  if (env.PIP_INDEX_URL) {
     try {
-      const indexUrl = new URL(process.env.PIP_INDEX_URL);
+      const indexUrl = new URL(env.PIP_INDEX_URL);
       if (!!indexUrl.username || !!indexUrl.password) {
         return true;
       }
@@ -40,8 +42,8 @@ function haveCredentialsInPipEnvironmentVariables(): boolean {
   }
 
   try {
-    if (process.env.PIP_EXTRA_INDEX_URL) {
-      return process.env.PIP_EXTRA_INDEX_URL.split(' ')
+    if (env.PIP_EXTRA_INDEX_URL) {
+      return env.PIP_EXTRA_INDEX_URL.split(' ')
         .map((urlString) => new URL(urlString))
         .some((url) => !!url.username || !!url.password);
     }
@@ -57,7 +59,7 @@ export function constructPipCompileCmd(
   compileArgs: PipCompileArgs,
   upgradePackages: Upgrade[] = [],
 ): string {
-  if (compileArgs.isCustomCommand) {
+  if (compileArgs.commandType === 'custom') {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
@@ -68,6 +70,7 @@ export function constructPipCompileCmd(
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
+    compileArgs.commandType === 'pip-compile' &&
     !compileArgs.noEmitIndexUrl &&
     !compileArgs.emitIndexUrl &&
     haveCredentialsInPipEnvironmentVariables()
@@ -114,10 +117,12 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
-      const pythonVersion = extractPythonVersion(
-        existingOutput,
-        outputFileName,
-      );
+      let pythonVersion: string | undefined;
+      if (compileArgs.commandType === 'uv') {
+        pythonVersion = compileArgs.pythonVersion;
+      } else {
+        pythonVersion = extractPythonVersion(existingOutput, outputFileName);
+      }
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFiles: PackageFileContent[] = [];
@@ -137,6 +142,7 @@ export async function updateArtifacts({
       const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
+        compileArgs.commandType,
         cwd,
         getRegistryCredVarsFromPackageFiles(packageFiles),
         pythonVersion,

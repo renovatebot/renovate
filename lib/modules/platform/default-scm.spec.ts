@@ -1,8 +1,6 @@
-import { git, partial } from '../../../test/util';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import { DefaultGitScm } from './default-scm';
-
-jest.mock('../../util/git');
+import { git, partial } from '~test/util';
 
 describe('modules/platform/default-scm', () => {
   const defaultGitScm = new DefaultGitScm();
@@ -71,5 +69,17 @@ describe('modules/platform/default-scm', () => {
     git.mergeToLocal.mockResolvedValueOnce();
     await defaultGitScm.mergeToLocal('branchName');
     expect(git.mergeToLocal).toHaveBeenCalledWith('branchName');
+  });
+
+  it('does not sync fork with upstream', async () => {
+    git.getRemotes.mockResolvedValueOnce(['somebranch']);
+    await defaultGitScm.syncForkWithUpstream('branchName');
+    expect(git.syncForkWithUpstream).not.toHaveBeenCalled();
+  });
+
+  it('syncs fork with upstream', async () => {
+    git.getRemotes.mockResolvedValueOnce(['somebranch', 'upstream']);
+    await defaultGitScm.syncForkWithUpstream('branchName');
+    expect(git.syncForkWithUpstream).toHaveBeenCalledWith('branchName');
   });
 });

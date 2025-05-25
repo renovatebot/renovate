@@ -2,21 +2,21 @@ import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
 import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
-import * as httpMock from '../../../../test/http-mock';
-import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
-const hostRules = mocked(_hostRules);
-const googleAuth = mocked(_googleAuth);
+const hostRules = vi.mocked(_hostRules);
+const googleAuth = vi.mocked(_googleAuth, true);
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('google-auth-library');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
 
@@ -98,10 +98,13 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, { token: 'some-token' });
 
       hostRules.find.mockReturnValue({});
-      const res = await getDigest({
-        datasource: 'docker',
-        packageName: 'some-dep',
-      });
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+        },
+        '',
+      );
       expect(res).toBe('some-digest');
     });
 
@@ -237,6 +240,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
       });
@@ -276,6 +282,9 @@ describe('modules/datasource/docker/index', () => {
       const ecr = ecrMock.call(0).thisValue as ECRClient;
       expect(await ecr.config.region()).toBe('us-east-1');
       expect(await ecr.config.credentials()).toEqual({
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
         accessKeyId: 'some-username',
         secretAccessKey: 'some-password',
         sessionToken: 'some-session-token',
@@ -382,8 +391,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -414,8 +423,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -447,8 +456,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -478,8 +487,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue('some-token'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('some-token'),
         })),
       );
 
@@ -544,8 +553,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockResolvedValue(undefined),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockResolvedValue(undefined),
         })),
       );
       const res = await getDigest(
@@ -565,8 +574,8 @@ describe('modules/datasource/docker/index', () => {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
       googleAuth.GoogleAuth.mockImplementationOnce(
-        jest.fn().mockImplementationOnce(() => ({
-          getAccessToken: jest.fn().mockRejectedValue('some-error'),
+        vi.fn().mockImplementationOnce(() => ({
+          getAccessToken: vi.fn().mockRejectedValue('some-error'),
         })),
       );
       const res = await getDigest(
@@ -642,14 +651,20 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('should throw error for 429', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 429 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should throw error for 5xx', async () => {
-      httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .replyWithError(httpMock.error({ statusCode: 504 }));
       await expect(
         getDigest({ datasource: 'docker', packageName: 'some-dep' }, 'latest'),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -1490,7 +1505,8 @@ describe('modules/datasource/docker/index', () => {
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
-      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
+      const tags3 = [...range(20000, 20050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
@@ -1515,17 +1531,28 @@ describe('modules/datasource/docker/index', () => {
         .reply(
           200,
           { tags: tags2 },
-          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=20000>; rel="next", ',
+          },
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=20000')
+        .reply(
+          200,
+          { tags: tags3 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+          },
         )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/10050.0.0')
+        .get('/virtual-mirror/node/manifests/20050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'org.jfrog.io/virtual-mirror/node',
       });
-      expect(res?.releases).toHaveLength(10050);
+      expect(res?.releases).toHaveLength(20050);
     });
 
     it('uses lower tag limit for ECR deps', async () => {
@@ -1924,6 +1951,56 @@ describe('modules/datasource/docker/index', () => {
           releaseTimestamp: '2021-01-01T00:00:00.000Z',
         },
       ]);
+    });
+
+    it('Uses custom page limit for Docker hub repository tags', async () => {
+      GlobalConfig.set({ dockerMaxPages: 2 });
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        })
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: `${dockerHubUrl}/library/node/tags?page=3&page_size=1000&ordering=last_updated`,
+          results: [
+            {
+              id: 4,
+              last_updated: '2020-01-01T00:00:00.000Z',
+              name: '0.9.0',
+              tag_last_pushed: '2020-01-01T00:00:00.000Z',
+              digest: 'bbb',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.9.0',
+            releaseTimestamp: '2020-01-01T00:00:00.000Z',
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {

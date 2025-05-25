@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
@@ -13,6 +14,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { findDependencies } from '../helm-values/extract';
 import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { extractImage } from '../kustomize/extract';
 import type {
@@ -21,7 +23,11 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isSystemManifest, systemManifestHeaderRegex } from './common';
+import {
+  collectHelmRepos,
+  isSystemManifest,
+  systemManifestHeaderRegex,
+} from './common';
 import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
@@ -97,8 +103,41 @@ function resolveGitRepositoryPerSourceTag(
 
   dep.datasource = GitTagsDatasource.id;
   dep.packageName = gitUrl;
-  if (gitUrl.startsWith('https://')) {
+  if (isHttpUrl(gitUrl)) {
     dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+  }
+}
+
+function resolveHelmRepository(
+  dep: PackageDependency,
+  matchingRepositories: HelmRepository[],
+  registryAliases: Record<string, string> | undefined,
+): void {
+  if (matchingRepositories.length) {
+    dep.registryUrls = matchingRepositories
+      .map((repo) => {
+        if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
+          // Change datasource to Docker
+          dep.datasource = DockerDatasource.id;
+          // Ensure the URL is a valid OCI path
+          dep.packageName = getDep(
+            `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
+            false,
+            registryAliases,
+          ).packageName;
+          return null;
+        } else {
+          return repo.spec.url;
+        }
+      })
+      .filter(is.string);
+
+    // if registryUrls is empty, delete it from dep
+    if (!dep.registryUrls?.length) {
+      delete dep.registryUrls;
+    }
+  } else {
+    dep.skipReason = 'unknown-registry';
   }
 }
 
@@ -126,51 +165,77 @@ function resolveResourceManifest(
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
+        if (resource.spec.chartRef) {
+          logger.trace(
+            'HelmRelease using chartRef was found, skipping as version will be handled via referenced resource directly',
+          );
+        } else if (resource.spec.chart) {
+          const chartSpec = resource.spec.chart.spec;
+          const depName = chartSpec.chart;
+          const dep: PackageDependency = {
+            depName,
+            currentValue: resource.spec.chart.spec.version,
+            datasource: HelmDatasource.id,
+          };
+
+          if (depName.startsWith('./')) {
+            dep.skipReason = 'local-chart';
+            delete dep.datasource;
+          } else {
+            const matchingRepositories = helmRepositories.filter(
+              (rep) =>
+                rep.kind === chartSpec.sourceRef?.kind &&
+                rep.metadata.name === chartSpec.sourceRef.name &&
+                rep.metadata.namespace ===
+                  (chartSpec.sourceRef.namespace ??
+                    resource.metadata?.namespace),
+            );
+            resolveHelmRepository(dep, matchingRepositories, registryAliases);
+          }
+          deps.push(dep);
+        } else {
+          logger.debug(
+            `invalid or incomplete ${resource.metadata.name} HelmRelease spec, skipping`,
+          );
+        }
+
+        if (resource.spec.values) {
+          logger.trace('detecting dependencies in HelmRelease values');
+          deps.push(...findDependencies(resource.spec.values, registryAliases));
+        }
+        break;
+      }
+
+      case 'HelmChart': {
+        if (resource.spec.sourceRef.kind === 'GitRepository') {
+          logger.trace(
+            'HelmChart using GitRepository was found, skipping as version will be handled via referenced resource directly',
+          );
+          continue;
+        }
+
         const dep: PackageDependency = {
-          depName: resource.spec.chart.spec.chart,
-          currentValue: resource.spec.chart.spec.version,
-          datasource: HelmDatasource.id,
+          depName: resource.spec.chart,
         };
 
-        const matchingRepositories = helmRepositories.filter(
-          (rep) =>
-            rep.kind === resource.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
-            rep.metadata.namespace ===
-              (resource.spec.chart.spec.sourceRef.namespace ??
-                resource.metadata?.namespace),
-        );
-        if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories
-            .map((repo) => {
-              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
-                // Change datasource to Docker
-                dep.datasource = DockerDatasource.id;
-                // Ensure the URL is a valid OCI path
-                dep.packageName = getDep(
-                  `${removeOCIPrefix(repo.spec.url)}/${
-                    resource.spec.chart.spec.chart
-                  }`,
-                  false,
-                  registryAliases,
-                ).depName;
-                return null;
-              } else {
-                return repo.spec.url;
-              }
-            })
-            .filter(is.string);
+        if (resource.spec.sourceRef.kind === 'HelmRepository') {
+          dep.currentValue = resource.spec.version;
+          dep.datasource = HelmDatasource.id;
 
-          // if registryUrls is empty, delete it from dep
-          if (!dep.registryUrls?.length) {
-            delete dep.registryUrls;
-          }
+          const matchingRepositories = helmRepositories.filter(
+            (rep) =>
+              rep.kind === resource.spec.sourceRef?.kind &&
+              rep.metadata.name === resource.spec.sourceRef.name &&
+              rep.metadata.namespace === resource.metadata?.namespace,
+          );
+          resolveHelmRepository(dep, matchingRepositories, registryAliases);
         } else {
-          dep.skipReason = 'unknown-registry';
+          dep.skipReason = 'unsupported-datasource';
         }
         deps.push(dep);
         break;
       }
+
       case 'GitRepository': {
         const dep: PackageDependency = {
           depName: resource.metadata.name,
@@ -182,7 +247,7 @@ function resolveResourceManifest(
           dep.datasource = GitRefsDatasource.id;
           dep.packageName = gitUrl;
           dep.replaceString = resource.spec.ref.commit;
-          if (gitUrl.startsWith('https://')) {
+          if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
         } else if (resource.spec.ref?.tag) {
@@ -244,14 +309,7 @@ export function extractPackageFile(
   if (!manifest) {
     return null;
   }
-  const helmRepositories: HelmRepository[] = [];
-  if (manifest.kind === 'resource') {
-    for (const resource of manifest.resources) {
-      if (resource.kind === 'HelmRepository') {
-        helmRepositories.push(resource);
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos([manifest]);
   let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
@@ -285,16 +343,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  const helmRepositories: HelmRepository[] = [];
-  for (const manifest of manifests) {
-    if (manifest.kind === 'resource') {
-      for (const resource of manifest.resources) {
-        if (resource.kind === 'HelmRepository') {
-          helmRepositories.push(resource);
-        }
-      }
-    }
-  }
+  const helmRepositories = collectHelmRepos(manifests);
 
   for (const manifest of manifests) {
     let deps: PackageDependency[] | null = null;

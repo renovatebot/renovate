@@ -75,7 +75,7 @@ describe('config/migrations/migrations-service', () => {
       public static override getMigrations(
         original: RenovateConfig,
         migrated: RenovateConfig,
-      ): ReadonlyArray<Migration> {
+      ): readonly Migration[] {
         return [new CustomMigration(original, migrated)];
       }
     }

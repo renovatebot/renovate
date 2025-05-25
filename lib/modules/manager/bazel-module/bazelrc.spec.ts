@@ -1,8 +1,16 @@
 import { codeBlock } from 'common-tags';
-import { fs } from '../../../../test/util';
-import { BazelOption, CommandEntry, ImportEntry, parse, read } from './bazelrc';
+import {
+  BazelOption,
+  CommandEntry,
+  ImportEntry,
+  expandWorkspacePath,
+  parse,
+  read,
+  sanitizeOptions,
+} from './bazelrc';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
@@ -54,13 +62,13 @@ describe('modules/manager/bazel-module/bazelrc', () => {
   it('parse', () => {
     const input = codeBlock`
         # Bob's Bazel option defaults
-        
+
         startup --host_jvm_args=-XX:-UseParallelGC
         import /home/bobs_project/bazelrc
         build --show_timestamps --keep_going --jobs 600
         build --color=yes
         query --keep_going
-        
+
         # Definition of --config=memcheck
         build:memcheck --strip=never --test_timeout=3600
 
@@ -242,6 +250,111 @@ describe('modules/manager/bazel-module/bazelrc', () => {
       expect(result).toEqual([
         new CommandEntry('build', [new BazelOption('jobs', '600')]),
       ]);
+    });
+
+    it('when bazelrc has %workspace% paths in options', async () => {
+      const workspaceDir = '/tmp/workspace';
+      mockReadLocalFile({
+        '/tmp/workspace/.bazelrc': codeBlock`
+          build --output_base=%workspace%/bazel-out
+          `,
+      });
+      mockIsValidLocalPath({
+        '/tmp/workspace/.bazelrc': true,
+        '/tmp/workspace/bazel-out': true,
+      });
+      const result = await read(workspaceDir);
+      expect(result).toEqual([
+        new CommandEntry('build', [
+          new BazelOption('output_base', '/tmp/workspace/bazel-out'),
+        ]),
+      ]);
+    });
+
+    it('when bazelrc has %workspace% paths in imported files', async () => {
+      const workspaceDir = '/tmp/workspace';
+      mockReadLocalFile({
+        '/tmp/workspace/.bazelrc': codeBlock`
+          import %workspace%/shared.bazelrc
+          `,
+        '/tmp/workspace/shared.bazelrc': codeBlock`
+          build --output_base=%workspace%/bazel-out
+          build --test_output=%workspace%/test-results
+          `,
+      });
+      mockIsValidLocalPath({
+        '/tmp/workspace/.bazelrc': true,
+        '/tmp/workspace/shared.bazelrc': true,
+        '/tmp/workspace/bazel-out': true,
+        '/tmp/workspace/test-results': true,
+      });
+      const result = await read(workspaceDir);
+      expect(result).toEqual([
+        new CommandEntry('build', [
+          new BazelOption('output_base', '/tmp/workspace/bazel-out'),
+        ]),
+        new CommandEntry('build', [
+          new BazelOption('test_output', '/tmp/workspace/test-results'),
+        ]),
+      ]);
+    });
+  });
+
+  describe('expandWorkspacePath', () => {
+    it('should return original value if no workspace path', () => {
+      expect(expandWorkspacePath('--some-option', '/workspace')).toBe(
+        '--some-option',
+      );
+    });
+
+    it('should expand valid workspace path', () => {
+      fs.isValidLocalPath.mockImplementation((path: string) => {
+        return path === '/workspace' || path === '/workspace/some/path';
+      });
+      const workspaceDir = '/workspace';
+      const value = '%workspace%/some/path';
+      const expected = '/workspace/some/path';
+      expect(expandWorkspacePath(value, workspaceDir)).toBe(expected);
+    });
+
+    it('should throw error for invalid workspace path', () => {
+      const workspaceDir = '/workspace';
+      const value = '%workspace%/../../outside';
+      expect(expandWorkspacePath(value, workspaceDir)).toBeNull();
+    });
+  });
+
+  describe('sanitizeOptions', () => {
+    it('should handle options without values', () => {
+      const options = [new BazelOption('build')];
+      expect(sanitizeOptions(options, '/workspace')).toEqual(options);
+    });
+
+    it('should expand valid workspace paths', () => {
+      fs.isValidLocalPath.mockImplementation((path: string) => {
+        return (
+          path === '/workspace' ||
+          path === '/workspace/some/path' ||
+          path === '/workspace/other/path'
+        );
+      });
+      const options = [
+        new BazelOption('build', '%workspace%/some/path'),
+        new BazelOption('test', '%workspace%/other/path'),
+      ];
+      const result = sanitizeOptions(options, '/workspace');
+      expect(result).toEqual([
+        new BazelOption('build', '/workspace/some/path'),
+        new BazelOption('test', '/workspace/other/path'),
+      ]);
+    });
+
+    it('should throw error for invalid workspace paths', () => {
+      const options = [
+        new BazelOption('build', '%workspace%/valid/path'),
+        new BazelOption('test', '%workspace%/../../invalid'),
+      ];
+      expect(sanitizeOptions(options, '/workspace')).toEqual([]);
     });
   });
 });

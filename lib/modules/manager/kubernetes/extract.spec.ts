@@ -1,9 +1,10 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
+const underscoreTagFile = Fixtures.get('underscore-tag.yaml');
 const kubernetesRegistryAlias = Fixtures.get('kubernetes.registry-alias.yaml');
 const otherYamlFile = Fixtures.get('gitlab-ci.yaml');
 
@@ -28,6 +29,7 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: '1.7.9',
           datasource: 'docker',
           depName: 'nginx',
+          packageName: 'nginx',
           replaceString: 'nginx:1.7.9',
         },
         {
@@ -37,6 +39,7 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: '1.22.1',
           datasource: 'docker',
           depName: 'nginx',
+          packageName: 'nginx',
           replaceString: 'nginx:1.22.1',
         },
         {
@@ -46,6 +49,7 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: 'v1.11.1',
           datasource: 'docker',
           depName: 'k8s.gcr.io/kube-proxy-amd64',
+          packageName: 'k8s.gcr.io/kube-proxy-amd64',
           replaceString: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
         },
         {
@@ -77,6 +81,7 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: 'v2.1.0',
           datasource: 'docker',
           depName: 'quay.io/external_storage/local-volume-provisioner',
+          packageName: 'quay.io/external_storage/local-volume-provisioner',
           replaceString:
             'quay.io/external_storage/local-volume-provisioner:v2.1.0',
         },
@@ -84,6 +89,29 @@ describe('modules/manager/kubernetes/extract', () => {
           currentValue: 'apps/v1',
           datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
+        },
+      ]);
+    });
+
+    it('extracts image tag when it contains underscores', () => {
+      const res = extractPackageFile(underscoreTagFile, 'file.yaml', {});
+      expect(res?.deps).toStrictEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'litellm_stable_release_branch-v1.67.0-stable',
+          datasource: 'docker',
+          depName: 'ghcr.io/berriai/litellm',
+          packageName: 'ghcr.io/berriai/litellm',
+          replaceString:
+            'ghcr.io/berriai/litellm:litellm_stable_release_branch-v1.67.0-stable',
+        },
+        {
+          currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
+          depName: 'Deployment',
           versioning: 'kubernetes-api',
         },
       ]);
@@ -115,7 +143,8 @@ kind: ConfigMap
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/node',
+            depName: 'quay.io/node',
+            packageName: 'my-quay-mirror.registry.com/node',
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -137,6 +166,7 @@ kind: ConfigMap
             currentValue: '0.0.1',
             datasource: 'docker',
             depName: 'quay.io/node',
+            packageName: 'quay.io/node',
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -158,7 +188,8 @@ kind: ConfigMap
             currentDigest: undefined,
             currentValue: '0.0.1',
             datasource: 'docker',
-            depName: 'my-quay-mirror.registry.com/node',
+            depName: 'quay.io/node',
+            packageName: 'my-quay-mirror.registry.com/node',
             replaceString: 'quay.io/node:0.0.1',
           },
         ],
@@ -180,6 +211,7 @@ kind: ConfigMap
             currentValue: undefined,
             datasource: 'docker',
             depName: 'busybox',
+            packageName: 'busybox',
             replaceString: 'busybox',
           },
         ],
