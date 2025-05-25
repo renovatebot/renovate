@@ -112,7 +112,7 @@ export class CrateDatasource extends Datasource {
         const release: Release = {
           version: version.vers.replace(/\+.*$/, ''),
         };
-        if release.version != version.vers {
+        if (release.version != version.vers) {
           release.versionOrig = version.vers;
         }
         if (version.yanked) {
