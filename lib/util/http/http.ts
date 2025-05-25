@@ -674,9 +674,12 @@ export abstract class HttpBase<
     const url = arg1;
     let schema: Schema;
     let httpOptions: Opts | undefined;
+    let headers;
     if (arg3) {
       schema = arg3;
+      headers = (arg2 as Opts)?.headers;
       httpOptions = arg2 as Opts;
+      delete httpOptions.headers;
     } else {
       schema = arg2 as Schema;
     }
@@ -686,12 +689,15 @@ export abstract class HttpBase<
       method: 'get',
       headers: {
         'Content-Type': 'application/toml',
-        ...httpOptions?.headers,
+        ...headers,
       },
     };
 
     const res = await this.getText(url, opts);
-    const body = await schema.parseAsync(parseToml(res.body));
-    return { ...res, body };
+    if (schema) {
+      res.body = await schema.parseAsync(parseToml(res.body));
+    }
+
+    return res;
   }
 }

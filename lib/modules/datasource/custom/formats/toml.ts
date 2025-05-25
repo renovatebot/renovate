@@ -7,11 +7,6 @@ export class TomlFetcher implements CustomDatasourceFetcher {
   async fetch(http: Http, registryURL: string): Promise<unknown> {
     const response = await http.getToml(registryURL);
 
-    const contentType = response.headers['content-type'];
-    if (!contentType?.startsWith('application/toml')) {
-      return null;
-    }
-
     return parseToml(response.body);
   }
 

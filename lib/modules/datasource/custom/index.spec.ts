@@ -459,34 +459,6 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-    it('return null if toml fetcher responds with incorrect headers', async () => {
-      const toml = codeBlock`
-        [[releases]]
-        version = "1.0.0"
-        [[releases]]
-        version = "2.0.0"
-        [[releases]]
-        version = "3.0.0"
-      `;
-
-      httpMock.scope('https://example.com').get('/v1').reply(200, toml, {
-        'Content-Type': 'application/invalid',
-      });
-
-      const result = await getPkgReleases({
-        datasource: `${CustomDatasource.id}.foo`,
-        packageName: 'myPackage',
-        customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://example.com/v1',
-            format: 'toml',
-          },
-        },
-      });
-
-      expect(result).toBeNull();
-    });
-
     it('return releases for json file directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
