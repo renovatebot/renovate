@@ -333,7 +333,7 @@
     "husky": "9.1.7",
     "jest-extended": "4.0.2",
     "lint-staged": "15.5.2",
-    "markdownlint-cli2": "0.17.2",
+    "markdownlint-cli2": "0.18.1",
     "memfs": "4.17.2",
     "nock": "14.0.4",
     "npm-run-all2": "7.0.2",
