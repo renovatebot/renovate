@@ -96,6 +96,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 
 If set, Renovate will persist repository cache locally after uploading to S3.
 
+## `RENOVATE_X_SKIP_DANGLING_CONTAINERS`
+
+If set, Renovate will skip dangling container cleanup when `binarySource=docker`.
+
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.

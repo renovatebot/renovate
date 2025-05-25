@@ -150,6 +150,18 @@ describe('util/exec/docker/index', () => {
       expect(execSnapshots).toBeEmpty();
     });
 
+    it('short-circuits if RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS is set', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ binarySource: 'docker' });
+      process.env.RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS = 'true';
+      await removeDanglingContainers();
+      expect(execSnapshots).toBeEmpty();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping removal of dangling containers due to RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS env var',
+      );
+      delete process.env.RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS;
+    });
+
     it('handles insufficient memory error', async () => {
       const err: Error & { errno: string } = new Error() as never;
       err.errno = 'ENOMEM';
