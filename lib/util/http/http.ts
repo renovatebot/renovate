@@ -659,7 +659,7 @@ export abstract class HttpBase<
 
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
-    schema: Schema,
+    schema?: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
