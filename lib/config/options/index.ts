@@ -3125,7 +3125,6 @@ const options: RenovateOptions[] = [
     description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
     default: false,
-    globalOnly: false,
   },
 ];
 
