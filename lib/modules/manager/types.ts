@@ -171,6 +171,9 @@ export interface PackageDependency<T = Record<string, any>>
    * override data source's default strategy.
    */
   registryStrategy?: RegistryStrategy;
+
+  mostRecentTimestamp?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {

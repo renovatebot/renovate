@@ -161,6 +161,7 @@ export abstract class HttpBase<
     const { cacheProvider } = options;
 
     const memCacheKey =
+      !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
