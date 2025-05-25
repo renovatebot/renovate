@@ -17,12 +17,14 @@ import {
   REPOSITORY_EMPTY,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
+  UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
+import { getEnv } from '../env';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
@@ -193,9 +195,11 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
-async function fetchBranchCommits(): Promise<void> {
+async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
-  const opts = ['ls-remote', '--heads', config.url];
+  const url =
+    preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
+  const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
       // TODO: types (#22198)
@@ -237,8 +241,9 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  // TODO: safe to pass all env variables? use `getChildEnv` instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
-    ...process.env,
+    ...getEnv(),
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
   });
@@ -269,8 +274,7 @@ async function cleanLocalBranches(): Promise<void> {
   const existingBranches = (await git.raw(['branch']))
     .split(newlineRegex)
     .map((branch) => branch.trim())
-    .filter((branch) => branch.length)
-    .filter((branch) => !branch.startsWith('* '));
+    .filter((branch) => branch.length > 0 && !branch.startsWith('* '));
   logger.debug({ existingBranches });
   for (const branchName of existingBranches) {
     await deleteLocalBranch(branchName);
@@ -387,7 +391,7 @@ export function isCloned(): boolean {
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
     /* v8 ignore next 3 -- TODO: add test */
-    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+    if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
       await git.raw(['config', 'core.hooksPath', '/dev/null']);
     }
     return;
@@ -405,15 +409,12 @@ export async function syncGit(): Promise<void> {
   if (await fs.pathExists(gitHead)) {
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
-      await resetToBranch(await getDefaultBranch(git));
       const fetchStart = Date.now();
-      await gitRetry(() => git.pull());
-      await gitRetry(() => git.fetch());
+      await gitRetry(() => git.fetch(['--prune', 'origin']));
       config.currentBranch =
         config.currentBranch || (await getDefaultBranch(git));
       await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
-      await gitRetry(() => git.raw(['remote', 'prune', 'origin']));
       const durationMs = Math.round(Date.now() - fetchStart);
       logger.info({ durationMs }, 'git fetch completed');
       clone = false;
@@ -496,6 +497,27 @@ export async function syncGit(): Promise<void> {
     (await getDefaultBranch(git));
   /* v8 ignore next -- TODO: add test */
   delete getCache()?.semanticCommits;
+
+  // If upstreamUrl is set then the bot is running in fork mode
+  // The "upstream" remote is the original repository which was forked from
+  if (config.upstreamUrl) {
+    logger.debug(
+      `Bringing default branch up-to-date with upstream, to get latest config`,
+    );
+    // Add remote if it does not exist
+    const remotes = await git.getRemotes(true);
+    if (!remotes.some((remote) => remote.name === 'upstream')) {
+      logger.debug("Adding remote 'upstream'");
+      await git.addRemote('upstream', config.upstreamUrl);
+    }
+    await syncForkWithUpstream(config.currentBranch);
+    await fetchBranchCommits(false);
+  }
+
+  config.currentBranchSha = (
+    await git.revparse('HEAD')
+  ).trim() as LongCommitSha;
+  logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
 }
 
 export async function getRepoStatus(path?: string): Promise<StatusResult> {
@@ -560,7 +582,10 @@ export async function checkoutBranch(
     ).trim() as LongCommitSha;
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
-      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+      logger.debug(
+        { branchName, latestCommitDate, sha: config.currentBranchSha },
+        'latest commit',
+      );
     }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
@@ -578,12 +603,68 @@ export async function checkoutBranch(
   }
 }
 
+export async function checkoutBranchFromRemote(
+  branchName: string,
+  remoteName: string,
+): Promise<LongCommitSha> {
+  logger.debug(`Checking out branch ${branchName} from remote ${remoteName}`);
+  await syncGit();
+  try {
+    await gitRetry(() =>
+      git.checkoutBranch(branchName, `${remoteName}/${branchName}`),
+    );
+    config.currentBranch = branchName;
+    config.currentBranchSha = (
+      await git.revparse('HEAD')
+    ).trim() as LongCommitSha;
+    logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
+    config.branchCommits[branchName] = config.currentBranchSha;
+    return config.currentBranchSha;
+  } catch (err) {
+    const errChecked = checkForPlatformFailure(err);
+    /* v8 ignore next 3 -- hard to test */
+    if (errChecked) {
+      throw errChecked;
+    }
+    if (err.message?.includes('fatal: ambiguous argument')) {
+      logger.warn({ err }, 'Failed to checkout branch');
+      throw new Error(TEMPORARY_ERROR);
+    }
+    throw err;
+  }
+}
+
+export async function resetHardFromRemote(
+  remoteAndBranch: string,
+): Promise<void> {
+  try {
+    const resetLog = await git.reset(['--hard', remoteAndBranch]);
+    logger.debug({ resetLog }, 'git reset log');
+  } catch (err) {
+    logger.error({ err }, 'Error during git reset --hard');
+    throw err;
+  }
+}
+
+export async function forcePushToRemote(
+  branchName: string,
+  remote: string,
+): Promise<void> {
+  try {
+    const pushLog = await git.push([remote, branchName, '--force']);
+    logger.debug({ pushLog }, 'git push log');
+  } catch (err) {
+    logger.error({ err }, 'Error during git push --force');
+    throw err;
+  }
+}
+
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
   let files: string;
   try {
-    files = await git.raw(['ls-tree', '-r', branch]);
+    files = await git.raw(['ls-tree', '-r', `refs/heads/${branch}`]);
     /* v8 ignore next 10 -- TODO: add test */
   } catch (err) {
     if (err.message?.includes('fatal: Not a valid object name')) {
@@ -1397,4 +1478,53 @@ export async function listCommitTree(
     }
   }
   return result;
+}
+
+async function localBranchExists(branchName: string): Promise<boolean> {
+  await syncGit();
+  const localBranches = await git.branchLocal();
+  return localBranches.all.includes(branchName);
+}
+
+/**
+ * Synchronize a forked branch with its upstream counterpart.
+ *
+ * syncForkWithUpstream updates the fork's branch, to match the corresponding branch in the upstream repository.
+ * The steps are:
+ * 1. Check if the branch exists locally.
+ * 2. If the branch exists locally: checkout the local branch.
+ * 3. If the branch does _not_ exist locally: checkout the upstream branch.
+ * 4. Reset the local branch to match the upstream branch.
+ * 5. Force push the (updated) local branch to the origin repository.
+ *
+ * @param {string} branchName - The name of the branch to synchronize.
+ * @returns {Promise<LongCommitSha>} - A promise that resolves to True if the synchronization is successful, or `false` if an error occurs.
+ */
+export async function syncForkWithUpstream(
+  branchName: string,
+): Promise<LongCommitSha> {
+  const remotes = await getRemotes();
+  if (!remotes.some((r) => r === 'upstream')) {
+    throw new Error('No remote named "upstream" exists, cannot sync fork');
+  }
+  try {
+    await git.fetch(['upstream']);
+    if (await localBranchExists(branchName)) {
+      await checkoutBranch(branchName);
+    } else {
+      await checkoutBranchFromRemote(branchName, `upstream`);
+    }
+    await resetHardFromRemote(`upstream/${branchName}`);
+    await forcePushToRemote(branchName, 'origin');
+    // Get long Git SHA
+    return (await git.revparse([branchName])) as LongCommitSha;
+  } catch (err) {
+    logger.error({ err }, 'Error synchronizing fork');
+    throw new Error(UNKNOWN_ERROR);
+  }
+}
+
+export async function getRemotes(): Promise<string[]> {
+  const remotes = await git.getRemotes();
+  return remotes.map((remote) => remote.name);
 }

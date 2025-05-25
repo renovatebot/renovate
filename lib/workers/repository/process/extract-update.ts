@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { scm } from '../../../modules/platform/scm';
+import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
@@ -131,6 +132,7 @@ export function isCacheExtractValid(
 
 export async function extract(
   config: RenovateConfig,
+  overwriteCache = true,
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
@@ -141,7 +143,10 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
+  if (
+    overwriteCache &&
+    isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
+  ) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
@@ -160,14 +165,17 @@ export async function extract(
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
-    // TODO: fix types (#22198)
-    cache.scan[baseBranch!] = {
-      revision: EXTRACT_CACHE_REVISION,
-      sha: baseBranchSha!,
-      configHash,
-      extractionFingerprints,
-      packageFiles,
-    };
+
+    if (overwriteCache) {
+      // TODO: fix types (#22198)
+      cache.scan[baseBranch!] = {
+        revision: EXTRACT_CACHE_REVISION,
+        sha: baseBranchSha!,
+        configHash,
+        extractionFingerprints,
+        packageFiles,
+      };
+    }
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
       ? config.baseBranches
@@ -212,6 +220,7 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  memCache.cleanDatasourceKeys();
   calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
     config,

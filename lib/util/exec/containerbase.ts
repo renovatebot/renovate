@@ -15,6 +15,7 @@ import { id as pythonVersioningId } from '../../modules/versioning/python';
 import { id as rubyVersioningId } from '../../modules/versioning/ruby';
 import { id as semverVersioningId } from '../../modules/versioning/semver';
 import { id as semverCoercedVersioningId } from '../../modules/versioning/semver-coerced';
+import { getEnv } from '../env';
 import type { Opt, ToolConfig, ToolConstraint } from './types';
 
 const allToolConfig: Record<string, ToolConfig> = {
@@ -176,6 +177,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
     versioning: condaVersioningId,
+    extractVersion: '^v(?<version>.*)$',
   },
   poetry: {
     datasource: 'pypi',
@@ -245,7 +247,7 @@ export function supportsDynamicInstall(toolName: string): boolean {
 }
 
 export function isContainerbase(): boolean {
-  return !!process.env.CONTAINERBASE;
+  return !!getEnv().CONTAINERBASE;
 }
 
 export function isDynamicInstall(
