@@ -338,13 +338,6 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-export async function deleteLabel(
-  number: number,
-  label: string,
-): Promise<void> {
-  await client.deleteHashtag(number, label);
-}
-
 export async function addReviewers(
   number: number,
   reviewers: string[],
@@ -404,9 +397,7 @@ export function massageMarkdown(prBody: string, rebaseLabel?: string): string {
     )
     .replace(
       'you tick the rebase/retry checkbox',
-      rebaseLabel
-        ? `you add the _${rebaseLabel}_ hashtag to this change`
-        : 'you add "rebase!" at the beginning of the commit message',
+      `you add the _${rebaseLabel}_ hashtag to this change`,
     )
     .replace(
       'checking the rebase/retry box above',
@@ -420,6 +411,13 @@ export function massageMarkdown(prBody: string, rebaseLabel?: string): string {
 
 export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
+}
+
+export async function deleteLabel(
+  number: number,
+  label: string,
+): Promise<void> {
+  await client.deleteHashtag(number, label);
 }
 
 export function ensureCommentRemoval(

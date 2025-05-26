@@ -1,4 +1,4 @@
-import { stripIndent } from 'common-tags';
+import { codeBlock } from 'common-tags';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -712,29 +712,13 @@ describe('modules/platform/gerrit/index', () => {
     it('massageMarkdown()', () => {
       expect(
         gerrit.massageMarkdown(
-          stripIndent`
-        Pull Requests
-        you tick the rebase/retry checkbox
-        checking the rebase/retry box above
-        `,
-        ),
-      ).toBe(stripIndent`
-        Change-Requests
-        you add "rebase!" at the beginning of the commit message
-        adding "rebase!" at the beginning of the commit message
-        `);
-    });
-
-    it('massageMarkdown() with rebaseLabel', () => {
-      expect(
-        gerrit.massageMarkdown(
-          stripIndent`
+          codeBlock`
         you tick the rebase/retry checkbox
         checking the rebase/retry box above
         `,
           'rebase',
         ),
-      ).toBe(stripIndent`
+      ).toBe(codeBlock`
         you add the _rebase_ hashtag to this change
         adding the _rebase_ hashtag to this change
         `);
