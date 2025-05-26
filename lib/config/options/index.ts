@@ -2037,7 +2037,7 @@ const options: RenovateOptions[] = [
   {
     name: 'automergeMergeCommitMessage',
     description:
-      'Optional merge commit message to use when using automerge with automergeType=branch and automergeStrategy is `merge-commit` or `squash`. If not set, the default commit messages from git will be used.',
+      'Optional merge commit message to use when using automerge with automergeType=branch and automergeStrategy is `merge-commit` or `squash`. If not set, git will use its default merge commit message.',
     type: 'string',
     default: null,
   },
