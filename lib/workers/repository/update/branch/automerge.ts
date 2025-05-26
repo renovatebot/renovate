@@ -49,6 +49,7 @@ export async function tryBranchAutomerge(
         await scm.mergeAndPush(
           config.branchName!,
           config.automergeStrategy ?? 'auto',
+          config.automergeCommitMessage,
         );
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');

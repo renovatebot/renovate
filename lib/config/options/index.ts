@@ -2035,6 +2035,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'automergeCommitMessage',
+    description: 'Optional commit message to use when automerging',
+    type: 'string',
+    default: null,
+  },
+  {
     name: 'automergeType',
     description: 'How to automerge, if enabled.',
     type: 'string',
@@ -2044,7 +2050,7 @@ const options: RenovateOptions[] = [
   {
     name: 'automergeStrategy',
     description:
-      'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
+      'The merge strategy to use when automerging PRs. Used only if `automergeType=branch` or `automergeType=pr.',
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',

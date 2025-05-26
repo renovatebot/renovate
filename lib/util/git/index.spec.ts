@@ -440,23 +440,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('mergeBranch(branchName, fast-forward)', () => {
     it('should perform a branch merge with fast-forward', async () => {
-      await git.mergeBranch('renovate/future_branch', 'auto');
-      const merged = await Git(origin.path).branch([
-        '--verbose',
-        '--merged',
-        defaultBranch,
-      ]);
-      expect(merged.all).toContain('renovate/future_branch');
-    });
-
-    it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found', 'auto')).rejects.toThrow();
-    });
-  });
-
-  describe('mergeBranch(branchName, merge-commit)', () => {
-    it('should perform a branch merge with merge commit', async () => {
-      await git.mergeBranch('renovate/future_branch', 'merge-commit');
+      await git.mergeBranch('renovate/future_branch', 'auto', null);
       const merged = await Git(origin.path).branch([
         '--verbose',
         '--merged',
@@ -467,14 +451,32 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('should throw if branch merge throws', async () => {
       await expect(
-        git.mergeBranch('not_found', 'merge-commit'),
+        git.mergeBranch('not_found', 'auto', null),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('mergeBranch(branchName, merge-commit)', () => {
+    it('should perform a branch merge with merge commit', async () => {
+      await git.mergeBranch('renovate/future_branch', 'merge-commit', null);
+      const merged = await Git(origin.path).branch([
+        '--verbose',
+        '--merged',
+        defaultBranch,
+      ]);
+      expect(merged.all).toContain('renovate/future_branch');
+    });
+
+    it('should throw if branch merge throws', async () => {
+      await expect(
+        git.mergeBranch('not_found', 'merge-commit', null),
       ).rejects.toThrow();
     });
   });
 
   describe('mergeBranch(branchName, squash)', () => {
     it('should perform a branch merge with squash', async () => {
-      await git.mergeBranch('renovate/future_branch', 'squash');
+      await git.mergeBranch('renovate/future_branch', 'squash', null);
       const unmerged = await Git(origin.path).branch([
         '--verbose',
         '--no-merged',
@@ -492,7 +494,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found', 'squash')).rejects.toThrow();
+      await expect(
+        git.mergeBranch('not_found', 'squash', null),
+      ).rejects.toThrow();
     });
   });
 

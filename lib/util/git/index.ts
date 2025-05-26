@@ -886,6 +886,7 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
 export async function mergeBranch(
   branchName: string,
   mergeStrategy: MergeStrategy,
+  commitMessage: string | null,
 ): Promise<void> {
   let status: StatusResult | undefined;
   try {
@@ -910,15 +911,12 @@ export async function mergeBranch(
     ) {
       await gitRetry(() => git.merge(['--ff-only', branchName]));
     } else if (mergeStrategy === 'merge-commit') {
-      await gitRetry(() =>
-        git.merge([
-          '--no-ff',
-          '--no-edit',
-          '-m',
-          'Automerge branch ' + branchName + ' by Renovate Bot',
-          branchName,
-        ]),
-      );
+      let commandOptions = ['--no-ff', '--no-edit'];
+      if (commitMessage) {
+        commandOptions = commandOptions.concat(['-m', commitMessage]);
+      }
+      commandOptions.push(branchName);
+      await gitRetry(() => git.merge(commandOptions));
     } else if (mergeStrategy === 'squash') {
       // Create a squash commit
       await gitRetry(() => git.merge(['--squash', branchName]));
