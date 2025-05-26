@@ -56,6 +56,7 @@ bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+clusterctl 1.9.8
 conftest 0.56.0
 container-structure-test 1.19.2
 cosign 2.2.4
@@ -231,6 +232,13 @@ dummy 1.2.3
             versioning:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$',
             depName: 'clojure',
+          },
+          {
+            currentValue: '1.9.8',
+            datasource: 'github-releases',
+            packageName: 'kubernetes-sigs/cluster-api',
+            depName: 'clusterctl',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '0.56.0',
