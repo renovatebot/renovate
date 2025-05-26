@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { detectPlatform, parseJson } from './common';
 import * as hostRules from './host-rules';
 import { logger } from '~test/util';
@@ -33,6 +34,16 @@ const validJsoncString = `
   "name": "John Doe",
   "age": 30,
   "city": "New York"
+}
+`;
+
+const jsoncString = codeBlock`
+{
+  // This is a comment (valid in JSONC, invalid in JSON5 when outside object properties)
+  "name": "Alice", // inline comment is valid in JSONC but not in JSON5
+  "age": 25,       // JSON5 supports trailing commas, so this line is okay in both
+  "city": "Atlanta",
+  // JSONC allows comments here too
 }
 `;
 
@@ -107,6 +118,14 @@ describe('util/common', () => {
         name: 'John Doe',
         age: 30,
         city: 'New York',
+      });
+    });
+
+    it('supports jsonc', () => {
+      expect(parseJson(jsoncString, 'renovate.json')).toEqual({
+        name: 'Alice',
+        age: 25,
+        city: 'Atlanta',
       });
     });
 

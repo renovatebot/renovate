@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import JSON5 from 'json5';
 import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
@@ -8,6 +7,7 @@ import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
+import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
 import { regEx } from '../../../util/regex';
@@ -100,7 +100,7 @@ export async function validateReconfigureBranch(
 
   let configFileParsed: any;
   try {
-    configFileParsed = JSON5.parse(configFileRaw);
+    configFileParsed = parseJson(configFileRaw, configFileName);
     // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
     if (configFileName === 'package.json') {
       configFileParsed = configFileParsed.renovate;
