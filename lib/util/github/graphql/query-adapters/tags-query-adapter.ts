@@ -77,6 +77,7 @@ function transform(item: GithubGraphqlTag): GithubTagItem | null {
   if (!res.success) {
     return null;
   }
+
   const { version, target } = item;
   if (target.type === 'Commit') {
     const releaseTimestamp = target.releaseTimestamp;
