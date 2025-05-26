@@ -137,6 +137,22 @@ kind: Fleet
             depType: 'fleet',
             skipReason: 'unspecified-version',
           },
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            datasource: 'helm',
+            depName: 'targetCustomization[0]',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+            skipReason: 'unspecified-version',
+          },
         ]);
       });
 

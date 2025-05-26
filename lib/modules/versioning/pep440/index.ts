@@ -81,7 +81,7 @@ function matches(version: string, range: string): boolean {
   if (isVersion(range)) {
     return equals(version, range);
   }
-  return isValid(range) && satisfies(version, range);
+  return isValid(range) && satisfies(version, range, { prereleases: true });
 }
 
 export const api: VersioningApi = {

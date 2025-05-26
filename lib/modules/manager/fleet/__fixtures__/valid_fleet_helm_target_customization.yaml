@@ -1,3 +1,5 @@
+# This should generate two dependencies with different versions
+# one with v1.8.0 and one with v1.9.2
 defaultNamespace: cert-manager
 helm:
   chart: cert-manager
@@ -11,6 +13,8 @@ targetCustomizations:
     helm:
       version: "v1.9.2"
 ---
+# This should generate two dependencies with different repos
+# one with https://charts.jetstack.io and one with https://charts.example.com
 defaultNamespace: cert-manager
 helm:
   chart: cert-manager
@@ -26,6 +30,7 @@ targetCustomizations:
       repo: https://charts.example.com
 
 ---
+# This should generate one dependency and a skipped dependency, as there is no version
 defaultNamespace: cert-manager
 helm:
   chart: cert-manager
@@ -37,4 +42,19 @@ helm:
 targetCustomizations:
   - name: cluster1
     values:
+      some: customization
+
+---
+# This is a valid target customization with no name
+# It should generate one valid dependency, and one skipped dependency, like the one above
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: custom-cert-manager
+  version: v1.8.0
+  values:
+    installCRDs: true
+targetCustomizations:
+  - values:
       some: customization
