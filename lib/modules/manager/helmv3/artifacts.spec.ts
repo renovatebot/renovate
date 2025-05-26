@@ -1141,11 +1141,16 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('prevents injections', async () => {
     const username = 'user';
     const password = 'pass>word';
+    mockEcrAuthResolve({
+      authorizationData: [
+        { authorizationToken: toBase64(username + ':' + password) },
+      ],
+    });
+
     hostRules.add({
-      username,
-      password,
+      token: 'some-session-token',
       hostType: 'docker',
-      matchHost: 'charts.bitnami.com',
+      matchHost: '123456789.dkr.ecr.us-east-1.amazonaws.com',
     });
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1ECR as never);
@@ -1157,12 +1162,12 @@ describe('modules/manager/helmv3/artifacts', () => {
     await helmv3.updateArtifacts({
       packageFileName: 'Chart.yaml',
       updatedDeps: [{}],
-      newPackageFileContent: `dependencies: { repository: oci://charts.bitnami.com/bitnami || date }`,
+      newPackageFileContent: `dependencies: { repository: oci://123456789.dkr.ecr.us-east-1.amazonaws.com/bitnami || date }`,
       config: { ...config },
     });
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `helm registry login --username ${username} --password '${password}' 'charts.bitnami.com/bitnami || date'`,
+        cmd: `helm registry login --username ${username} --password '${password}' '123456789.dkr.ecr.us-east-1.amazonaws.com/bitnami || date'`,
       },
       {
         cmd: "helm dependency update ''",
