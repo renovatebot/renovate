@@ -1910,11 +1910,11 @@ describe('modules/platform/azure/index', () => {
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const bypassReasonMock = 'Bypassed by Renovate';
 
-      const updatePullRequestMock = jest.fn().mockResolvedValueOnce({});
+      const updatePullRequestMock = vi.fn().mockResolvedValueOnce({});
 
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequestById: jest.fn().mockResolvedValue({
+          getPullRequestById: vi.fn().mockResolvedValue({
             lastMergeSourceCommit: lastMergeSourceCommitMock,
             targetRefName: 'refs/heads/ding',
             title: 'title',
@@ -1925,7 +1925,7 @@ describe('modules/platform/azure/index', () => {
 
       azureApi.policyApi.mockResolvedValueOnce(
         partial<IPolicyApi>({
-          getPolicyEvaluations: jest.fn().mockResolvedValue([
+          getPolicyEvaluations: vi.fn().mockResolvedValue([
             {
               configuration: {
                 settings: undefined,
@@ -1941,7 +1941,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
 
@@ -1979,11 +1979,11 @@ describe('modules/platform/azure/index', () => {
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
 
-      const updatePullRequestMock = jest.fn().mockResolvedValue({});
+      const updatePullRequestMock = vi.fn().mockResolvedValue({});
 
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
-          getPullRequestById: jest.fn().mockResolvedValue({
+          getPullRequestById: vi.fn().mockResolvedValue({
             lastMergeSourceCommit: lastMergeSourceCommitMock,
             targetRefName: 'refs/heads/ding',
             title: 'title',
@@ -1994,7 +1994,7 @@ describe('modules/platform/azure/index', () => {
 
       azureApi.policyApi.mockResolvedValueOnce(
         partial<IPolicyApi>({
-          getPolicyEvaluations: jest.fn().mockResolvedValue([
+          getPolicyEvaluations: vi.fn().mockResolvedValue([
             {
               configuration: {
                 settings: undefined,
@@ -2010,7 +2010,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      azureHelper.getMergeMethod = jest
+      azureHelper.getMergeMethod = vi
         .fn()
         .mockResolvedValueOnce(GitPullRequestMergeStrategy.Squash);
 
