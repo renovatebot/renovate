@@ -151,8 +151,7 @@ This option _adds_ to the existing reviewer list, rather than _replacing_ it lik
 Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
 For example, when adding focused reviewers for a specific package group.
 
-Please note that Reviewers are only added during creation of a PR, but are not
-modified afterwards.
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 ## assignAutomerge
 
@@ -2375,8 +2374,7 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 }
 ```
 
-Please note that Reviewers are only added during creation of a PR, but are not
-modified afterwards.
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 ## ignoreScripts
 
@@ -4164,8 +4162,7 @@ For example: if the username or team name is `bar` then you would set the config
 }
 ```
 
-Please note that Reviewers are only added during creation of a PR, but are not
-modified afterwards.
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 ## reviewersFromCodeOwners
 
@@ -4177,8 +4174,7 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
-Please note that Reviewers are only added during creation of a PR, but are not
-modified afterwards.
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 <!-- prettier-ignore -->
 !!! note
