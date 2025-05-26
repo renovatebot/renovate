@@ -252,13 +252,14 @@ Example use:
 Use this only if you configure `automergeType="branch"` and `automergeStrategy` is `merge-commit` or `squash`.
 
 When you configure renovate bot to not open a PR, but to merge directly into the base branch, you can use this option to set the commit message for the merge commit.
-This can be useful if you want to differentiate between renovate automerge commits and other (merge) commits. If omitted, the default commit messages from git will be used.
+This can be useful if you want to differentiate between renovate automerge commits and other (merge) commits.
+If omitted, git will use its default merge commit message.
+If you need the Merge Commit message to use semantic commits, you will need to add it into this field, e.g. `"chore: merge commit by Renovate"`.
 
 Example use:
 
 ```json
 {
-  "automerge": true,
   "automergeType": "branch",
   "automergeStrategy": "merge-commit",
   "automergeMergeCommitMessage": "Automerge by Renovate Bot"
