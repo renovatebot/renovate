@@ -119,6 +119,7 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
+  logger.debug('getDefaultBranch()');
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
@@ -136,6 +137,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     return res.replace('origin/', '').trim();
     /* v8 ignore start -- TODO: add test */
   } catch (err) {
+    logger.debug({ err }, 'Error getting default branch');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -148,7 +150,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       throw new Error(REPOSITORY_EMPTY);
     }
     if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
-      logger.warn({ err }, 'Error getting default branch');
+      logger.warn('Error getting default branch');
       throw new Error(TEMPORARY_ERROR);
     }
     throw err;
@@ -199,6 +201,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
   const url =
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
+  logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
@@ -402,11 +405,14 @@ export async function syncGit(): Promise<void> {
   }
   gitInitialized = true;
   const localDir = GlobalConfig.get('localDir')!;
-  logger.debug(`Initializing git repository into ${localDir}`);
+  logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.pathExists(gitHead)) {
+    logger.debug(
+      `syncGit(): Found existing git repository, attempting git fetch`,
+    );
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
@@ -423,7 +429,7 @@ export async function syncGit(): Promise<void> {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
-      logger.info({ err }, 'git fetch error');
+      logger.info({ err }, 'git fetch error, falling back to git clone');
     }
   }
   if (clone) {
@@ -1503,6 +1509,9 @@ async function localBranchExists(branchName: string): Promise<boolean> {
 export async function syncForkWithUpstream(
   branchName: string,
 ): Promise<LongCommitSha> {
+  logger.debug(
+    `Synchronizing fork with "upstream" remote for branch ${branchName}`,
+  );
   const remotes = await getRemotes();
   if (!remotes.some((r) => r === 'upstream')) {
     throw new Error('No remote named "upstream" exists, cannot sync fork');
