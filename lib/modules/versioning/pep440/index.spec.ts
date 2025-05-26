@@ -10,6 +10,7 @@ describe('modules/versioning/pep440/index', () => {
     ${'==1.2.3'}                                     | ${true}
     ${'==1.2.3.0'}                                   | ${true}
     ${'==1.2.3rc0'}                                  | ${true}
+    ${'==1.2.3b0'}                                   | ${true}
     ${'~=1.2.3'}                                     | ${true}
     ${'==1.2.*'}                                     | ${true}
     ${'>1.2.3'}                                      | ${true}
@@ -39,11 +40,12 @@ describe('modules/versioning/pep440/index', () => {
   });
 
   it.each`
-    a          | b             | expected
-    ${'1.0'}   | ${'>=1.0.0'}  | ${true}
-    ${'3.0.0'} | ${'3.0.0'}    | ${true}
-    ${'1.6.2'} | ${'<2.2.1.0'} | ${true}
-    ${'>=3.8'} | ${'>=3.9'}    | ${false}
+    a           | b                   | expected
+    ${'1.0'}    | ${'>=1.0.0'}        | ${true}
+    ${'3.0.0'}  | ${'3.0.0'}          | ${true}
+    ${'1.6.2'}  | ${'<2.2.1.0'}       | ${true}
+    ${'>=3.8'}  | ${'>=3.9'}          | ${false}
+    ${'0.43b0'} | ${'>=0.43b0, <1.0'} | ${true}
   `('matches($a, $b) === $expected', ({ a, b, expected }) => {
     expect(pep440.matches(a, b)).toBe(expected);
   });
@@ -52,6 +54,7 @@ describe('modules/versioning/pep440/index', () => {
     version       | isSingle
     ${'1.2.3'}    | ${true}
     ${'1.2.3rc0'} | ${true}
+    ${'1.2.3b0'}  | ${true}
     ${'==1.2.3'}  | ${true}
     ${'==1.2'}    | ${true}
     ${'== 1.2.3'} | ${true}

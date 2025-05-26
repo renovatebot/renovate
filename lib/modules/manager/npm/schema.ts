@@ -23,6 +23,7 @@ export const PackageJsonSchema = z.object({
   devDependencies: LooseRecord(z.string()).optional(),
   peerDependencies: LooseRecord(z.string()).optional(),
   packageManager: PackageManagerSchema.optional(),
+  volta: LooseRecord(z.string()).optional(),
 });
 
 export type PackageJsonSchema = z.infer<typeof PackageJsonSchema>;

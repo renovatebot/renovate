@@ -5,3 +5,4 @@ nav:
   - 'Job Scheduling': 'job-scheduling.md'
   - 'Credentials': 'credentials.md'
   - 'Migrating Secrets': 'migrating-secrets.md'
+  - 'Github.com Token': 'github-com-token.md'

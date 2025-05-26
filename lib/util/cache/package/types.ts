@@ -16,6 +16,11 @@ export interface DecoratorCachedRecord {
   cachedAt: string;
 }
 
+/* IMPORTANT:
+ * These namespaces below are used as part of the cacheTtlOverride feature
+ * It's OK to add to them (e.g. for new datasources) but we should avoid
+ * backwards-incompatible changes in non-major releases
+ */
 export type PackageCacheNamespace =
   | '_test-namespace'
   | 'changelog-bitbucket-notes@v2'
