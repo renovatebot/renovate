@@ -301,4 +301,5 @@ export interface PlatformScm {
     mergeStrategy: MergeStrategy,
     commitMessage?: string,
   ): Promise<void>;
+  syncForkWithUpstream?(baseBranch: string): Promise<void>;
 }
