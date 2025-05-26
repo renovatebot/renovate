@@ -66,6 +66,8 @@ const retryCount = 5;
 const delaySeconds = 3;
 const delayFactor = 2;
 
+export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
+
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   let round = 0;
@@ -508,13 +510,13 @@ export async function syncGit(): Promise<void> {
   // The "upstream" remote is the original repository which was forked from
   if (config.upstreamUrl) {
     logger.debug(
-      `Bringing default branch up-to-date with upstream, to get latest config`,
+      `Bringing default branch up-to-date with ${RENOVATE_FORK_UPSTREAM}, to get latest config`,
     );
     // Add remote if it does not exist
     const remotes = await git.getRemotes(true);
-    if (!remotes.some((remote) => remote.name === 'upstream')) {
-      logger.debug("Adding remote 'upstream'");
-      await git.addRemote('upstream', config.upstreamUrl);
+    if (!remotes.some((remote) => remote.name === RENOVATE_FORK_UPSTREAM)) {
+      logger.debug(`Adding remote ${RENOVATE_FORK_UPSTREAM}`);
+      await git.addRemote(RENOVATE_FORK_UPSTREAM, config.upstreamUrl);
     }
     await syncForkWithUpstream(config.currentBranch);
     await fetchBranchCommits(false);
@@ -1510,20 +1512,20 @@ export async function syncForkWithUpstream(
   branchName: string,
 ): Promise<LongCommitSha> {
   logger.debug(
-    `Synchronizing fork with "upstream" remote for branch ${branchName}`,
+    `Synchronizing fork with "${RENOVATE_FORK_UPSTREAM}" remote for branch ${branchName}`,
   );
   const remotes = await getRemotes();
-  if (!remotes.some((r) => r === 'upstream')) {
-    throw new Error('No remote named "upstream" exists, cannot sync fork');
+  if (!remotes.some((r) => r === RENOVATE_FORK_UPSTREAM)) {
+    throw new Error('No upstream remote exists, cannot sync fork');
   }
   try {
-    await git.fetch(['upstream']);
+    await git.fetch([RENOVATE_FORK_UPSTREAM]);
     if (await localBranchExists(branchName)) {
       await checkoutBranch(branchName);
     } else {
-      await checkoutBranchFromRemote(branchName, `upstream`);
+      await checkoutBranchFromRemote(branchName, RENOVATE_FORK_UPSTREAM);
     }
-    await resetHardFromRemote(`upstream/${branchName}`);
+    await resetHardFromRemote(`${RENOVATE_FORK_UPSTREAM}/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
     // Get long Git SHA
     return (await git.revparse([branchName])) as LongCommitSha;
