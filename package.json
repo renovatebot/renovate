@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Automated dependency updates. Flexible so you don't need to be.",
-  "version": "0.0.0-semantic-release",
+  "version": "39.264.1",
   "type": "commonjs",
   "bin": {
     "renovate": "dist/renovate.js",
