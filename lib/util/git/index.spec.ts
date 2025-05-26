@@ -476,7 +476,11 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('mergeBranch(branchName, squash)', () => {
     it('should perform a branch merge with squash', async () => {
-      await git.mergeBranch('renovate/future_branch', 'squash', null);
+      await git.mergeBranch(
+        'renovate/future_branch',
+        'squash',
+        'Automerge by Renovate Bot',
+      );
       const unmerged = await Git(origin.path).branch([
         '--verbose',
         '--no-merged',
@@ -484,9 +488,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ]);
       expect(unmerged.all).toContain('renovate/future_branch');
       const commits = await Git(origin.path).log();
-      expect(commits.latest?.message).toEqual(
-        'Automerge branch renovate/future_branch by Renovate Bot',
-      );
+      expect(commits.latest?.message).toEqual('Automerge by Renovate Bot');
       // Show that the commit contains the files future_file and future_file2
       const files = await Git(origin.path).show(['--name-only', 'HEAD']);
       expect(files).toContain('future_file');
