@@ -1,10 +1,10 @@
-import URL from 'node:url';
-import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import URL from 'node:url';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
+import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -370,8 +370,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
+  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
