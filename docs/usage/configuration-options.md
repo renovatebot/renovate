@@ -4319,7 +4319,7 @@ When this option is set, Renovate won't attempt to update artifacts such as lock
 
 <!-- prettier-ignore -->
 !!! note
-    When this option is set against individual package rules, and upgrades are grouped, artifact updating will only be skipped if every upgrade in a branch wants to skip it.
+    When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
 
 ## skipInstalls
 
