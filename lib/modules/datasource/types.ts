@@ -82,8 +82,8 @@ export interface ReleaseResult {
   isPrivate?: boolean;
   releases: Release[];
   tags?: Record<string, string> | undefined;
-  // URL metadata
   changelogContent?: string;
+  // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string | undefined;
