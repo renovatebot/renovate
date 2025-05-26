@@ -247,12 +247,12 @@ Example use:
 }
 ```
 
-## automergeCommitMessage
+## automergeMergeCommitMessage
 
-Use this only if you configure `automergeType="branch"` and `automergeStrategy="merge-commit"`.
+Use this only if you configure `automergeType="branch"` and `automergeStrategy` is `merge-commit` or `squash`.
 
 When you configure renovate bot to not open a PR, but to merge directly into the base branch, you can use this option to set the commit message for the merge commit.
-This can be useful if you want to differentiate between renovate automerge commits and other (merge) commits.
+This can be useful if you want to differentiate between renovate automerge commits and other (merge) commits. If omitted, the default commit messages from git will be used.
 
 Example use:
 
@@ -261,7 +261,7 @@ Example use:
   "automerge": true,
   "automergeType": "branch",
   "automergeStrategy": "merge-commit",
-  "automergeCommitBody": "Automerge by Renovate Bot"
+  "automergeMergeCommitMessage": "Automerge by Renovate Bot"
 }
 ```
 

@@ -2035,8 +2035,9 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'automergeCommitMessage',
-    description: 'Optional commit message to use when automerging',
+    name: 'automergeMergeCommitMessage',
+    description:
+      'Optional merge commit message to use when using automerge with automergeType=branch and automergeStrategy is `merge-commit` or `squash`. If not set, the default commit messages from git will be used.',
     type: 'string',
     default: null,
   },
@@ -2050,7 +2051,7 @@ const options: RenovateOptions[] = [
   {
     name: 'automergeStrategy',
     description:
-      'The merge strategy to use when automerging PRs. Used only if `automergeType=branch` or `automergeType=pr.',
+      'The merge strategy to use when `automergeType` is `branch` or `pr`.',
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',

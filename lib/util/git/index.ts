@@ -921,9 +921,12 @@ export async function mergeBranch(
       // Create a squash commit
       await gitRetry(() => git.merge(['--squash', branchName]));
       // Commit the squash commit
-      await gitRetry(() =>
-        git.commit('Automerge branch ' + branchName + ' by Renovate Bot'),
-      );
+      if (commitMessage) {
+        await gitRetry(() => git.commit(commitMessage));
+      } else {
+        // Use the default commit message for the squash commit from git
+        await gitRetry(() => git.raw(['commit', '--no-edit']));
+      }
     }
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');

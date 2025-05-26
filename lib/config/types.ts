@@ -35,7 +35,7 @@ export interface RenovateSharedConfig {
   addLabels?: string[];
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
-  automergeCommitMessage?: string;
+  automergeMergeCommitMessage?: string;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
   bumpVersions?: BumpVersionConfig[];
