@@ -30,6 +30,7 @@ const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');
 const jsYamlChangelogMd = Fixtures.get('js-yaml.md');
 const yargsChangelogMd = Fixtures.get('yargs.md');
+const releasePlanChangelogMd = Fixtures.get('release-plan.md');
 const adapterutilsChangelogMd = Fixtures.get('adapter-utils.md');
 const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md');
 
@@ -1479,6 +1480,36 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           notesSourceUrl:
             'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md',
           url: 'https://gitlab.com/itentialopensource/adapter-utils/blob/HEAD/CHANGELOG.md#4330-05-15-2020',
+        });
+      });
+
+      it('parses when version contained in the body 15.3.0', async () => {
+        httpMock
+          .scope('https://api.github.com')
+          .get('/repos/embroider-build/release-plan')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/embroider-build/release-plan/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/embroider-build/release-plan/git/blobs/abcd')
+          .reply(200, {
+            content: toBase64(releasePlanChangelogMd),
+          });
+        const res = await getReleaseNotesMd(
+          {
+            ...githubProject,
+            repository: 'embroider-build/release-plan',
+          },
+          partial<ChangeLogRelease>({
+            version: '0.14.0',
+            gitRef: '0.14.0',
+          }),
+        );
+        versionTwoNotes = res!;
+
+        expect(res).toMatchSnapshot({
+          notesSourceUrl:
+            'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md',
+          url: 'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md#Release-2025-03-03',
         });
       });
 
