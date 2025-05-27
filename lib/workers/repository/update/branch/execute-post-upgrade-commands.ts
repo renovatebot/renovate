@@ -122,18 +122,17 @@ export async function postUpgradeCommandsExecutor(
         ...coerceArray(status.not_added),
         ...coerceArray(status.modified),
       ];
-
-      logger.trace({ addedOrModifiedFiles }, 'Added or modified files');
-      logger.debug(
-        `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
-      );
+      const changedFiles = [
+        ...addedOrModifiedFiles,
+        ...coerceArray(status.deleted),
+      ];
 
       // Check for files which were previously deleted but have been re-added without modification
       const previouslyDeletedFiles = updatedArtifacts.filter(
         (ua) => ua.type === 'deletion',
       );
       for (const previouslyDeletedFile of previouslyDeletedFiles) {
-        if (!addedOrModifiedFiles.includes(previouslyDeletedFile.path)) {
+        if (!changedFiles.includes(previouslyDeletedFile.path)) {
           logger.debug(
             { file: previouslyDeletedFile.path },
             'Previously deleted file has been restored without modification',
@@ -146,6 +145,11 @@ export async function postUpgradeCommandsExecutor(
           );
         }
       }
+
+      logger.trace({ addedOrModifiedFiles }, 'Added or modified files');
+      logger.debug(
+        `Checking ${addedOrModifiedFiles.length} added or modified files for post-upgrade changes`,
+      );
 
       for (const relativePath of addedOrModifiedFiles) {
         let fileMatched = false;
@@ -186,14 +190,20 @@ export async function postUpgradeCommandsExecutor(
       for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
-            logger.debug(
-              { file: relativePath, pattern },
-              'Post-upgrade file removed',
-            );
-            updatedArtifacts.push({
-              type: 'deletion',
-              path: relativePath,
-            });
+            if (
+              !updatedArtifacts.some(
+                (ua) => ua.path === relativePath && ua.type === 'deletion',
+              )
+            ) {
+              logger.debug(
+                { file: relativePath, pattern },
+                'Post-upgrade file removed',
+              );
+              updatedArtifacts.push({
+                type: 'deletion',
+                path: relativePath,
+              });
+            }
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'addition' && ua.path === relativePath),

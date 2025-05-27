@@ -19,7 +19,7 @@ describe('util/github/graphql/index', () => {
                   version: '1.2.3',
                   target: {
                     type: 'Tag',
-                    target: { oid: 'abc123' },
+                    target: { type: 'Commit', oid: 'abc123' },
                     tagger: { releaseTimestamp: '2022-09-24' },
                   },
                 },
