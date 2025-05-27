@@ -344,5 +344,11 @@ export async function mergeStaticRepoEnvConfig(
     return config;
   }
 
-  return mergeChildConfig(config, repoEnvConfig);
+  // merge extends
+  if (is.nonEmptyArray(repoEnvConfig.extends)) {
+    config.extends = [...repoEnvConfig.extends, ...(config.extends ?? [])];
+    delete repoEnvConfig.extends;
+  }
+  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG
+  return mergeChildConfig(repoEnvConfig, config);
 }
