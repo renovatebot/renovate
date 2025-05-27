@@ -77,6 +77,26 @@ describe('modules/datasource/rpm/index', () => {
       );
     });
 
+    it('throws an error if no location element is found', async () => {
+      const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
+<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <data type="filelists">
+    <non-location href="repodata/somesha256-filelists.xml.gz"/>
+  </data>
+</repomd>`;
+
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+
+      await expect(
+        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+      ).rejects.toThrow(
+        'No location element found in https://example.com/repo/repodata/repomd.xml',
+      );
+    });
+
     it('throws an error if location href is missing', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
@@ -295,6 +315,15 @@ describe('modules/datasource/rpm/index', () => {
     it('returns null if registryUrl is not provided', async () => {
       const releases = await rpmDatasource.getReleases({
         registryUrl: undefined,
+        packageName: 'example-package',
+      });
+      expect(releases).toBeNull();
+    });
+
+    it('returns null if filelistsXmlUrl is empty', async () => {
+      vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockResolvedValue(null);
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: 'someurl',
         packageName: 'example-package',
       });
       expect(releases).toBeNull();
