@@ -163,6 +163,12 @@ export class RpmDatasource extends Datasource {
       }
       const versionElement = pkg.childNamed('version');
       const version = versionElement?.attr?.ver ?? '';
+      if (!version) {
+        logger.debug(
+          `No version found for package ${name} in ${filelistsXmlUrl}`,
+        );
+        continue;
+      }
       const rel = versionElement?.attr?.rel;
       let versionWithRel = version;
       if (rel) {

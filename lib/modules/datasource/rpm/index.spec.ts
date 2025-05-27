@@ -31,6 +31,14 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if repomd.xml is missing', async () => {
+      httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
+
+      await expect(
+        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+      ).rejects.toThrow(`Response code 404 (Not Found)`);
+    });
+
+    it('throws an error if http.getText fails', async () => {
       httpMock
         .scope(registryUrl)
         .get('/repomd.xml')
@@ -38,7 +46,7 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getFilelistsXmlUrl(registryUrl),
-      ).rejects.toThrow(`Network error`);
+      ).rejects.toThrow('Network error');
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
@@ -256,6 +264,27 @@ describe('modules/datasource/rpm/index', () => {
           packageName,
         ),
       ).toBeNull();
+    });
+
+    it('returns an empty array if version is not found in a version element', async () => {
+      const filelistsXml = `
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists">
+  <package pkgid="someid" name="${packageName}" arch="x86_64">
+    <version epoch="0"/>
+    <file>example-file</file>
+  </package>
+</filelists>
+`;
+      httpMock
+        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-filelists.xml.gz')
+        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+      const releases = await rpmDatasource.getReleasesByPackageName(
+        filelistsXmlUrl,
+        packageName,
+      );
+      expect(releases).toBeNull();
     });
 
     // this is most likely a bug in the RPM XML file, but we can still handle it gracefully
