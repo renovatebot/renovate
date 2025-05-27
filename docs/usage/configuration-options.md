@@ -4314,7 +4314,7 @@ But if you set `separateMultipleMinor=true` then you get separate PRs for each m
 
 ## skipArtifactUpdating
 
-Use this option in cases where automatic artifact updating by Renovate fails or is incorrect, or you have custom needs.
+Use this option when automatic artifact updating fails, is incorrect, or not needed.  
 When this option is set, Renovate won't attempt to update artifacts such as lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
 
 <!-- prettier-ignore -->
