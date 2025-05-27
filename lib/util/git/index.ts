@@ -1542,8 +1542,8 @@ export async function getRemotes(): Promise<string[]> {
     const remotes = await git.getRemotes();
     logger.debug(`Found remotes: ${remotes.map((r) => r.name).join(', ')}`);
     return remotes.map((remote) => remote.name);
-  } catch (err) {
+  } catch (err) /* v8 ignore start */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
-  }
+  } /* v8 ignore stop */
 }
