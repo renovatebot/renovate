@@ -41,7 +41,23 @@ describe('modules/datasource/rpm/index', () => {
       ).rejects.toThrow(`Network error`);
     });
 
-    it('returns null if no filelists data is found', async () => {
+    it('throws an error if repomdXml is not in XML format', async () => {
+      const repomdXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
+<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <data type="filelists">
+    <location href="repodata/somesha256-filelists.xml.gz"/>
+  </data>
+</repomd>`;
+      httpMock
+        .scope(registryUrl)
+        .get('/repomd.xml')
+        .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+      await expect(
+        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+      ).rejects.toThrow(`is not in XML format.`);
+    });
+
+    it('throws an error if no filelists data is found', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
   <data type="non-filelists">
@@ -54,7 +70,11 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      expect(await rpmDatasource.getFilelistsXmlUrl(registryUrl)).toBeNull();
+      await expect(
+        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+      ).rejects.toThrow(
+        'No filelists data found in https://example.com/repo/repodata/repomd.xml',
+      );
     });
 
     it('throws an error if location href is missing', async () => {
@@ -72,7 +92,9 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getFilelistsXmlUrl(registryUrl),
-      ).rejects.toThrow(`No href found in filelists.xml`);
+      ).rejects.toThrow(
+        `No href found in https://example.com/repo/repodata/repomd.xml`,
+      );
     });
   });
 
@@ -138,11 +160,11 @@ describe('modules/datasource/rpm/index', () => {
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .replyWithError('Network error');
+        .reply(404, 'Not Found');
 
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrow(`Network error`);
+      ).rejects.toThrow(`Response code 404 (Not Found)`);
     });
 
     it('throws an error if response.body is empty', async () => {
@@ -154,6 +176,44 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
       ).rejects.toThrowError();
+    });
+
+    it('throws error if filelistsXmlUrl is not in XML format', async () => {
+      const filelistsXml = `
+<?invalidxml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists">
+  <package pkgid="someid" name="other-package" arch="x86_64">
+    <version epoch="0" ver="1.0" rel="2.azl3"/>
+    <file>example-file</file>
+  </package>
+</filelists>
+`;
+      httpMock
+        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-filelists.xml.gz')
+        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+      await expect(
+        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
+      ).rejects.toThrow(`is not in XML format.`);
+    });
+
+    it('returns null if no element package is found in filelists.xml', async () => {
+      const filelistsXml = `
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists">
+  <nonpackage pkgid="someid" name="nonpackage" arch="x86_64">
+    <version epoch="0" ver="1.0" rel="2.azl3"/>
+    <file>example-file</file>
+  </nonpackage>
+</filelists>
+`;
+      httpMock
+        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-filelists.xml.gz')
+        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+      await expect(
+        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
+      ).rejects.toThrow(`No packages found in ${filelistsXmlUrl}`);
     });
 
     it('returns null if the specific packageName is not found in filelists.xml', async () => {

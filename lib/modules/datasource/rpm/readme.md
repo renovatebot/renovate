@@ -2,7 +2,8 @@ This datasource `rpm` returns releases of the RPM packages.
 It assumes the RPM repository is following the RPM standard and by default it has a repomd.xml in the directory provided by user in the `registryUrl`.
 According to this Pulp project doc, <https://docs.pulpproject.org/en/2.10/plugins/pulp_rpm/tech-reference/rpm.html>,
 
-> repomd.xml is the metadata file that clients use to discover what repository metadata files exist in the repository. It should always be located at repodata/repomd.xml relative to the root of the repository.
+> repomd.xml is the metadata file that clients use to discover what repository metadata files exist in the repository.
+> It should always be located at repodata/repomd.xml relative to the root of the repository.
 
 ## Set URL when using an RPM repository
 
@@ -12,10 +13,10 @@ To use an RPM repository with the datasource, you must set a `registryUrl` with 
 
 If we have
 
-- `http://example.com/repo/repomd.xml`
-- `http://example.com/repo/<SHA256>-filelists.xml` where `<SHA256>` is a dynamically generated SHA256 pattern.
+- `http://example.com/repo/repodata/repomd.xml`
+- `http://example.com/repo/repodata/<SHA256>-filelists.xml` where `<SHA256>` is a dynamically generated SHA256 pattern.
 
-Then the `registryUrl` should set as `http://example.com/repo/` or `http://example.com/repo`.
+Then the `registryUrl` should set as `http://example.com/repo/repodata/` or `http://example.com/repo/repodata`.
 
 ## Usage Example
 
@@ -42,14 +43,15 @@ where the versioning format could be `<semantic version>-<revision or release>`,
         "path_to_manifest_json"
       ],
       "matchStringsStrategy": "any",
-      "registryUrl": "http://example.com/repo/",
+      "registryUrl": "http://example.com/repo/repodata/",
       "datasourceTemplate": "rpm"
     }
   ]
 }
 ```
 
-Note: In this example, the `registryUrl` is a static URL. You can also use `registryUrlTemplate` with variables and have it resolved at runtime.
+Note: In this example, the `registryUrl` is a static URL.
+You can also use `registryUrlTemplate` with variables and have it resolved at runtime.
 
 In an RPM repository, the `<SHA256>-filelists.xml` looks like this:
 
@@ -73,4 +75,7 @@ In an RPM repository, the `<SHA256>-filelists.xml` looks like this:
 </filelists>
 ```
 
-You can see that `ver` and `rel` (release/revision) is stored separately. But the RPM datasource implementation will combine these together as `ver-rel`. That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if `rel` is available. Or just `1.1.0` if `rel` is not available.
+You can see that `ver` and `rel` (release/revision) is stored separately.
+But the RPM datasource implementation will combine these together as `ver-rel`.
+That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if `rel` is available.
+Or just `1.1.0` if `rel` is not available.

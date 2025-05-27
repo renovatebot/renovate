@@ -1,4 +1,5 @@
 import { XmlDocument } from 'xmldoc';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
@@ -42,9 +43,7 @@ export class RpmDatasource extends Datasource {
       return null;
     }
     try {
-      const filelistsXmlUrl = await this.getFilelistsXmlUrl(
-        ensureTrailingSlash(registryUrl),
-      );
+      const filelistsXmlUrl = await this.getFilelistsXmlUrl(registryUrl);
       if (!filelistsXmlUrl) {
         return null;
       }
@@ -62,58 +61,102 @@ export class RpmDatasource extends Datasource {
   })
   async getFilelistsXmlUrl(registryUrl: string): Promise<string | null> {
     const repomdUrl = joinUrlParts(
-      registryUrl,
+      ensureTrailingSlash(registryUrl),
       RpmDatasource.repomdXmlFileName,
     );
-    const response = await this.http.getText(repomdUrl.toString());
-    if (response.statusCode !== 200) {
+    let response;
+    try {
+      response = await this.http.getText(repomdUrl.toString());
+    } catch (err) {
+      logger.error(
+        `Failed to fetch ${repomdUrl}: ${err instanceof Error ? err.message : err}`,
+      );
+      throw err as Error;
+    }
+
+    // check if repomd.xml is in XML format
+    if (!response.body.startsWith('<?xml')) {
+      logger.error(
+        `${repomdUrl} is not in XML format. Response body: ${response.body}`,
+      );
       throw new Error(
-        `Failed to fetch repomd.xml from ${repomdUrl} (${response.statusCode})`,
+        `${repomdUrl} is not in XML format. Response body: ${response.body}`,
       );
     }
 
     // parse repomd.xml using XmlDocument
     const xml = new XmlDocument(response.body);
+
     const filelistsData = xml.childWithAttribute('type', 'filelists');
 
-    if (filelistsData) {
-      const locationElement = filelistsData.childNamed('location');
-      if (!locationElement) {
-        throw new Error(`No location element found in filelists.xml`);
-      }
-      const href = locationElement.attr.href;
-      if (!href) {
-        throw new Error(`No href found in filelists.xml`);
-      }
-      // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
-      const registryUrlWithoutRepodata = registryUrl.replace(
-        /\/repodata\/?$/,
-        '/',
+    if (!filelistsData) {
+      logger.error(
+        `No filelists data found in ${repomdUrl}, xml contents: ${response.body}`,
       );
-      return joinUrlParts(registryUrlWithoutRepodata, href);
+      throw new Error(`No filelists data found in ${repomdUrl}`);
     }
 
-    return null;
+    const locationElement = filelistsData.childNamed('location');
+    if (!locationElement) {
+      throw new Error(`No location element found in ${repomdUrl}`);
+    }
+    const href = locationElement.attr.href;
+    if (!href) {
+      throw new Error(`No href found in ${repomdUrl}`);
+    }
+    // replace trailing "repodata/" from registryUrl, if it exists, with a "/" because href includes "repodata/"
+    const registryUrlWithoutRepodata = registryUrl.replace(
+      /\/repodata\/?$/,
+      '/',
+    );
+    return joinUrlParts(registryUrlWithoutRepodata, href);
   }
 
   async getReleasesByPackageName(
     filelistsXmlUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    const response = await this.http.getText(filelistsXmlUrl);
-    if (response.statusCode !== 200) {
+    let response;
+    try {
+      response = await this.http.getText(filelistsXmlUrl);
+    } catch (err) {
+      logger.error(
+        `Failed to fetch ${filelistsXmlUrl}: ${
+          err instanceof Error ? err.message : err
+        }`,
+      );
+      throw err as Error;
+    }
+
+    // check if filelistsXmlUrl is in XML format
+    if (
+      !(
+        response.body.startsWith('<?xml') || response.body.startsWith('\n<?xml')
+      )
+    ) {
+      logger.error(
+        `${filelistsXmlUrl} is not in XML format. Response body: ${response.body}`,
+      );
       throw new Error(
-        `Failed to fetch filelists.xml from ${filelistsXmlUrl} (${response.statusCode})`,
+        `${filelistsXmlUrl} is not in XML format. Response body: ${response.body}`,
       );
     }
+
     // parse filelists.xml
     const data = new XmlDocument(response.body);
     const packages = data.childrenNamed('package');
-    if (!packages) {
-      throw new Error(`No packages found in filelists.xml`);
+    if (!packages || packages.length === 0) {
+      logger.error(
+        `No packages found in ${filelistsXmlUrl}, xml contents: ${response.body}`,
+      );
+      throw new Error(`No packages found in ${filelistsXmlUrl}`);
     }
     const releases = new Map<string, Release>();
+    logger.info(`Found ${packages.length} packages in ${filelistsXmlUrl}`);
     for (const pkg of packages) {
+      logger.info(
+        `Checking package ${pkg.attr.name} for releases in ${filelistsXmlUrl}`,
+      );
       const name = pkg.attr.name;
       if (name !== packageName) {
         continue;
@@ -125,8 +168,14 @@ export class RpmDatasource extends Datasource {
       if (rel) {
         // if rel is present, we need to append it to the version. Otherwise, ignore it.
         // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3 or 1.0.0
+        logger.info(
+          `Found version ${version} with rel ${rel} for package ${name}`,
+        );
         versionWithRel += `-${rel}`;
       }
+      logger.info(
+        `Found version ${versionWithRel} for package ${name} in ${filelistsXmlUrl}`,
+      );
 
       // check if the versionWithRel isn't already in the releases
       // One version could have multiple rel
@@ -139,6 +188,9 @@ export class RpmDatasource extends Datasource {
       }
     }
     if (releases.size === 0) {
+      logger.error(
+        `No releases found for package ${packageName} in ${filelistsXmlUrl}`,
+      );
       return null;
     }
     return {
