@@ -178,7 +178,7 @@ describe('modules/datasource/rpm/index', () => {
       ).rejects.toThrowError();
     });
 
-    it('throws error if filelistsXmlUrl is not in XML format', async () => {
+    it('throws an error if filelistsXmlUrl is not in XML format', async () => {
       const filelistsXml = `
 <?invalidxml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
@@ -354,7 +354,7 @@ describe('modules/datasource/rpm/index', () => {
 
     it('throws an error if getFilelistsXmlUrl fails', async () => {
       vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockRejectedValue(
-        new Error('Network error'),
+        new Error('Something wrong'),
       );
 
       await expect(
@@ -362,7 +362,7 @@ describe('modules/datasource/rpm/index', () => {
           registryUrl,
           packageName: 'example-package',
         }),
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow('Something wrong');
     });
 
     it('throws an error if getReleasesByPackageName fails', async () => {
@@ -370,7 +370,7 @@ describe('modules/datasource/rpm/index', () => {
         'https://example.com/repo/repodata/',
       );
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockRejectedValue(
-        new Error('Network error'),
+        new Error('Something wrong'),
       );
 
       await expect(
@@ -378,7 +378,7 @@ describe('modules/datasource/rpm/index', () => {
           registryUrl,
           packageName: 'example-package',
         }),
-      ).rejects.toThrow('Network error');
+      ).rejects.toThrow('Something wrong');
     });
   });
 });
