@@ -66,6 +66,8 @@ const retryCount = 5;
 const delaySeconds = 3;
 const delayFactor = 2;
 
+export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
+
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
 export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   let round = 0;
@@ -119,6 +121,7 @@ async function isDirectory(dir: string): Promise<boolean> {
 }
 
 async function getDefaultBranch(git: SimpleGit): Promise<string> {
+  logger.debug('getDefaultBranch()');
   // see https://stackoverflow.com/a/62352647/3005034
   try {
     let res = await git.raw(['rev-parse', '--abbrev-ref', 'origin/HEAD']);
@@ -136,6 +139,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
     return res.replace('origin/', '').trim();
     /* v8 ignore start -- TODO: add test */
   } catch (err) {
+    logger.debug({ err }, 'Error getting default branch');
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
@@ -148,7 +152,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
       throw new Error(REPOSITORY_EMPTY);
     }
     if (err.message.includes("fatal: ambiguous argument 'origin/HEAD'")) {
-      logger.warn({ err }, 'Error getting default branch');
+      logger.warn('Error getting default branch');
       throw new Error(TEMPORARY_ERROR);
     }
     throw err;
@@ -199,6 +203,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
   const url =
     preferUpstream && config.upstreamUrl ? config.upstreamUrl : config.url;
+  logger.debug(`fetchBranchCommits(): url=${url}`);
   const opts = ['ls-remote', '--heads', url];
   if (config.extraCloneOpts) {
     Object.entries(config.extraCloneOpts).forEach((e) =>
@@ -402,11 +407,14 @@ export async function syncGit(): Promise<void> {
   }
   gitInitialized = true;
   const localDir = GlobalConfig.get('localDir')!;
-  logger.debug(`Initializing git repository into ${localDir}`);
+  logger.debug(`syncGit(): Initializing git repository into ${localDir}`);
   const gitHead = upath.join(localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.pathExists(gitHead)) {
+    logger.debug(
+      `syncGit(): Found existing git repository, attempting git fetch`,
+    );
     try {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
@@ -423,7 +431,7 @@ export async function syncGit(): Promise<void> {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
-      logger.info({ err }, 'git fetch error');
+      logger.info({ err }, 'git fetch error, falling back to git clone');
     }
   }
   if (clone) {
@@ -502,13 +510,13 @@ export async function syncGit(): Promise<void> {
   // The "upstream" remote is the original repository which was forked from
   if (config.upstreamUrl) {
     logger.debug(
-      `Bringing default branch up-to-date with upstream, to get latest config`,
+      `Bringing default branch up-to-date with ${RENOVATE_FORK_UPSTREAM}, to get latest config`,
     );
     // Add remote if it does not exist
     const remotes = await git.getRemotes(true);
-    if (!remotes.some((remote) => remote.name === 'upstream')) {
-      logger.debug("Adding remote 'upstream'");
-      await git.addRemote('upstream', config.upstreamUrl);
+    if (!remotes.some((remote) => remote.name === RENOVATE_FORK_UPSTREAM)) {
+      logger.debug(`Adding remote ${RENOVATE_FORK_UPSTREAM}`);
+      await git.addRemote(RENOVATE_FORK_UPSTREAM, config.upstreamUrl);
     }
     await syncForkWithUpstream(config.currentBranch);
     await fetchBranchCommits(false);
@@ -1503,18 +1511,21 @@ async function localBranchExists(branchName: string): Promise<boolean> {
 export async function syncForkWithUpstream(
   branchName: string,
 ): Promise<LongCommitSha> {
+  logger.debug(
+    `Synchronizing fork with "${RENOVATE_FORK_UPSTREAM}" remote for branch ${branchName}`,
+  );
   const remotes = await getRemotes();
-  if (!remotes.some((r) => r === 'upstream')) {
-    throw new Error('No remote named "upstream" exists, cannot sync fork');
+  if (!remotes.some((r) => r === RENOVATE_FORK_UPSTREAM)) {
+    throw new Error('No upstream remote exists, cannot sync fork');
   }
   try {
-    await git.fetch(['upstream']);
+    await git.fetch([RENOVATE_FORK_UPSTREAM]);
     if (await localBranchExists(branchName)) {
       await checkoutBranch(branchName);
     } else {
-      await checkoutBranchFromRemote(branchName, `upstream`);
+      await checkoutBranchFromRemote(branchName, RENOVATE_FORK_UPSTREAM);
     }
-    await resetHardFromRemote(`upstream/${branchName}`);
+    await resetHardFromRemote(`${RENOVATE_FORK_UPSTREAM}/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
     // Get long Git SHA
     return (await git.revparse([branchName])) as LongCommitSha;
