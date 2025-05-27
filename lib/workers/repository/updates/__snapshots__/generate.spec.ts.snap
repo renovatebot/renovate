@@ -27,8 +27,8 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "skipArtifactUpdating": false,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -118,8 +118,8 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "skipArtifactUpdating": false,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -199,8 +199,8 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": true,
   "releaseTimestamp": undefined,
-  "skipArtifactUpdating": false,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -247,8 +247,8 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyNewVersion": "v1.0.1",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "skipArtifactUpdating": false,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",

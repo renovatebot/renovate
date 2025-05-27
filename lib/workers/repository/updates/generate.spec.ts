@@ -1653,7 +1653,7 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
-    it('sets skipArtifactUpdating to false when all upgrades do not specify a value', () => {
+    it('sets updateLockFiles to true when no upgrades specify a value', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1703,11 +1703,11 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        skipArtifactUpdating: false,
+        updateLockFiles: true,
       });
     });
 
-    it('sets skipArtifactUpdating to true when all upgrades specify true', () => {
+    it('sets updateLockFiles to false when all upgrades specify false', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1727,7 +1727,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.0',
           newValue: '1.2.0',
           updateType: 'minor' as UpdateType,
-          skipArtifactUpdating: true,
+          updateLockFiles: false,
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1739,7 +1739,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.0.0',
           newValue: '1.0.0',
           updateType: 'major' as UpdateType,
-          skipArtifactUpdating: true,
+          updateLockFiles: false,
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1751,7 +1751,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.3',
           newValue: '1.2.3',
           updateType: 'patch' as UpdateType,
-          skipArtifactUpdating: true,
+          updateLockFiles: false,
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1760,11 +1760,11 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        skipArtifactUpdating: true,
+        updateLockFiles: false,
       });
     });
 
-    it('sets skipArtifactUpdating to false when not all upgrades specify true', () => {
+    it('sets updateLockFiles to true when not all upgrades specify false', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1784,7 +1784,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.0',
           newValue: '1.2.0',
           updateType: 'minor' as UpdateType,
-          skipArtifactUpdating: true,
+          updateLockFiles: false,
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1807,7 +1807,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.3',
           newValue: '1.2.3',
           updateType: 'patch' as UpdateType,
-          skipArtifactUpdating: true,
+          updateLockFiles: false,
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1816,7 +1816,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        skipArtifactUpdating: false,
+        updateLockFiles: true,
       });
     });
   });

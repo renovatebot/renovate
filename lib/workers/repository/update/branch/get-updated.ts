@@ -474,7 +474,7 @@ async function managerUpdateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   const updateArtifacts = get(manager, 'updateArtifacts');
   if (updateArtifacts) {
-    if (updateArtifact.config.skipArtifactUpdating) {
+    if (updateArtifact.config.updateLockFiles === false) {
       logger.debug(
         { manager, packageFileName: updateArtifact.packageFileName },
         'skipping artifact updating',

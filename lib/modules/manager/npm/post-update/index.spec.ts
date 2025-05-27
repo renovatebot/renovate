@@ -559,14 +559,13 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
-    it('skip artifact updating', async () => {
+    it('skip lock file updating', async () => {
       expect(
         await getAdditionalFiles(
           {
             ...updateConfig,
-            updateLockFiles: true,
+            updateLockFiles: false,
             reuseExistingBranch: true,
-            skipArtifactUpdating: true,
             upgrades: [
               {
                 depName: 'postcss',

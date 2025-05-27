@@ -4312,15 +4312,6 @@ By default, Renovate skips versions in between, like `python@v3.10.x`.
 
 But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
 
-## skipArtifactUpdating
-
-Use this option when automatic artifact updating fails, is incorrect, or not needed.  
-When this option is set, Renovate won't attempt to update artifacts such as lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
-
-<!-- prettier-ignore -->
-!!! note
-    When this option is used in package rules, along with grouped upgrades, artifact updating will only be skipped if every upgrade in the grouped branch wants to skip it.
-
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
@@ -4389,6 +4380,13 @@ In such case dependency versions won't be updated by Renovate.
 To opt in to letting Renovate update internal package versions normally, set this configuration option to true.
 
 ## updateLockFiles
+
+Set this to false when automatic lock file updating fails, is incorrect, or not needed.
+When this option is set to false, Renovate won't attempt to update lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
+
+<!-- prettier-ignore -->
+!!! note
+    When this option is used in package rules, along with grouped upgrades, lock file updating will only be disabled if every upgrade in the grouped branch wants to disable it.
 
 ## updateNotScheduled
 

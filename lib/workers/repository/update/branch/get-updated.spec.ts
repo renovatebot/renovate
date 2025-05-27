@@ -713,7 +713,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    it('does not update artifacts when skipArtifactUpdating=true', async () => {
+    it('does not update artifacts when updateLockFiles=false', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
       const lockedVersion = '0.45.0';
@@ -744,7 +744,7 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       config.manager = 'pip-compile';
       config.branchName = branchName;
-      config.skipArtifactUpdating = true;
+      config.updateLockFiles = false;
       config.upgrades.push({
         packageFile,
         lockFiles: [lockFile],
@@ -784,7 +784,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
     });
 
-    it('updates artifacts when skipArtifactUpdating=false', async () => {
+    it('updates artifacts when updateLockFiles=true', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
       const lockedVersion = '0.45.0';

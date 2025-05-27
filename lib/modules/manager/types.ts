@@ -45,7 +45,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
-  skipArtifactUpdating?: boolean;
+  updateLockFiles?: boolean;
   lockFiles?: string[];
 }
 
@@ -328,5 +328,4 @@ export interface PostUpdateConfig<T = Record<string, any>>
   reuseExistingBranch?: boolean;
 
   isLockFileMaintenance?: boolean;
-  skipArtifactUpdating?: boolean;
 }
