@@ -1383,17 +1383,13 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).rejects.toThrow(TEMPORARY_ERROR);
     });
 
-    it('syncForkWithRemote() - throws error if no upstream exists', async () => {
+    it('syncForkWithRemote() - returns if no upstream exists', async () => {
       await git.initRepo({
         url: origin.path,
         defaultBranch,
       });
 
-      await git.syncGit();
-
-      await expect(git.syncForkWithUpstream(defaultBranch)).rejects.toThrow(
-        'No upstream remote exists, cannot sync fork',
-      );
+      await expect(git.syncForkWithUpstream(defaultBranch)).toResolve();
     });
   });
 });

@@ -1516,6 +1516,7 @@ export async function syncForkWithUpstream(branchName: string): Promise<void> {
     `Synchronizing fork with "${RENOVATE_FORK_UPSTREAM}" remote for branch ${branchName}`,
   );
   const remotes = await getRemotes();
+  /* v8 ignore next 3 -- this should not be possible if upstreamUrl exists */
   if (!remotes.some((r) => r === RENOVATE_FORK_UPSTREAM)) {
     throw new Error('No upstream remote exists, cannot sync fork');
   }
@@ -1528,7 +1529,7 @@ export async function syncForkWithUpstream(branchName: string): Promise<void> {
     }
     await resetHardFromRemote(`${RENOVATE_FORK_UPSTREAM}/${branchName}`);
     await forcePushToRemote(branchName, 'origin');
-  } catch (err) {
+  } catch (err) /* v8 ignore next 3 -- shouldn't happen */ {
     logger.error({ err }, 'Error synchronizing fork');
     throw new Error(UNKNOWN_ERROR);
   }
