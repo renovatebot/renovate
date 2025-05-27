@@ -1897,6 +1897,13 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'dependencyDashboardReportAbandonment',
+    description:
+      'Controls whether abandoned packages are reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'internalChecksAsSuccess',
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',

@@ -1411,6 +1411,15 @@ This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
+## dependencyDashboardReportAbandonment
+
+Controls whether abandoned packages are reported in the dependency dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
@@ -2502,28 +2511,29 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-- `.terraform.lock.hcl`
-- `Cargo.lock`
-- `Chart.lock`
-- `composer.lock`
-- `conan.lock`
-- `flake.lock`
-- `Gemfile.lock`
-- `gradle.lockfile`
-- `jsonnetfile.lock.json`
-- `manifest.toml`
-- `package-lock.json`
-- `packages.lock.json`
-- `pdm.lock`
-- `Pipfile.lock`
-- `pnpm-lock.yaml`
-- `poetry.lock`
-- `pubspec.lock`
-- `pyproject.toml`
-- `requirements.txt`
-- `uv.lock`
-- `yarn.lock`
-- `pixi.lock`
+| Manager           | Lockfile                                           |
+| ----------------- | -------------------------------------------------- |
+| `bun`             | `bun.lockb`, `bun.lock`                            |
+| `bundler`         | `Gemfile.lock`                                     |
+| `cargo`           | `Cargo.lock`                                       |
+| `composer`        | `composer.lock`                                    |
+| `conan`           | `conan.lock`                                       |
+| `devbox`          | `devbox.lock`                                      |
+| `gleam`           | `manifest.toml`                                    |
+| `gradle`          | `gradle.lockfile`                                  |
+| `helmv3`          | `Chart.lock`                                       |
+| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
+| `mix`             | `mix.lock`                                         |
+| `nix`             | `flake.lock`                                       |
+| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
+| `nuget`           | `packages.lock.json`                               |
+| `pep621`          | `pdm.lock`, `uv.lock`                              |
+| `pip-compile`     | `requirements.txt`                                 |
+| `pipenv`          | `Pipfile.lock`                                     |
+| `pixi`            | `pixi.lock`                                        |
+| `poetry`          | `poetry.lock`                                      |
+| `pub`             | `pubspec.lock`                                     |
+| `terraform`       | `.terraform.lock.hcl`                              |
 
 Support for new lock files may be added via feature request.
 
