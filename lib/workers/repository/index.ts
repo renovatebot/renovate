@@ -1,8 +1,7 @@
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
-import { applySecretsToConfig } from '../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
-import { applyVariablesToConfig } from '../../config/variables';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -50,11 +49,11 @@ export async function renovateRepository(
 ): Promise<ProcessResult | undefined> {
   splitInit();
   let config = GlobalConfig.set(
-    applyVariablesToConfig(
-      applySecretsToConfig(repoConfig, undefined, false),
-      undefined,
-      false,
-    ),
+    applySecretsAndVariablesToConfig({
+      config: repoConfig,
+      deleteVariables: false,
+      deleteSecrets: false,
+    }),
   );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });

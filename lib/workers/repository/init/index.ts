@@ -1,7 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
-import { applyVariablesToConfig } from '../../../config/variables';
 import { logger } from '../../../logger';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
 import { platform } from '../../../modules/platform';
@@ -65,8 +64,9 @@ export async function initRepo(
   }
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
-  config = applySecretsToConfig(config);
-  config = applyVariablesToConfig(config);
+  config = applySecretsAndVariablesToConfig({
+    config,
+  });
   setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if

@@ -6,13 +6,12 @@ import upath from 'upath';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
-import { validateConfigSecrets } from '../../config/secrets';
+import { validateConfigSecretsAndVariables } from '../../config/secrets';
 import type {
   AllConfig,
   RenovateConfig,
   RenovateRepository,
 } from '../../config/types';
-import { validateConfigVariables } from '../../config/variables';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
@@ -145,8 +144,7 @@ export async function start(): Promise<number> {
       checkEnv();
 
       // validate secrets and variables. Will throw and abort if invalid
-      validateConfigSecrets(config);
-      validateConfigVariables(config);
+      validateConfigSecretsAndVariables(config);
     });
 
     // autodiscover repositories (needs to come after platform initialization)

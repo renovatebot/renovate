@@ -6,9 +6,8 @@ import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import { parseFileConfig } from '../../../config/parse';
 import * as presets from '../../../config/presets';
-import { applySecretsToConfig } from '../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
-import { applyVariablesToConfig } from '../../../config/variables';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -256,14 +255,18 @@ export async function mergeRenovateConfig(
     );
     npmApi.setNpmrc(resolvedConfig.npmrc);
   }
-  resolvedConfig = applySecretsToConfig(
-    resolvedConfig,
-    mergeChildConfig(config.secrets ?? {}, resolvedConfig.secrets ?? {}),
-  );
-  resolvedConfig = applyVariablesToConfig(
-    resolvedConfig,
-    mergeChildConfig(config.variables ?? {}, resolvedConfig.variables ?? {}),
-  );
+  resolvedConfig = applySecretsAndVariablesToConfig({
+    config: resolvedConfig,
+    secrets: mergeChildConfig(
+      config.secrets ?? {},
+      resolvedConfig.secrets ?? {},
+    ),
+    variables: mergeChildConfig(
+      config.variables ?? {},
+      resolvedConfig.variables ?? {},
+    ),
+  });
+
   // istanbul ignore if
   if (resolvedConfig.hostRules) {
     logger.debug('Setting hostRules from config');
