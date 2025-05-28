@@ -18,7 +18,7 @@ const variableTemplateRegex = regEx(
   `{{ variables\\.(${variableNamePattern}) }}`,
 );
 
-const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
+export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {
     name: 'secrets',
     nameRegex: secretNameRegex,
