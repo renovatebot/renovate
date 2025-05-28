@@ -663,33 +663,26 @@ export abstract class HttpBase<
   ): Promise<HttpResponse<Infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     url: string,
-    options: Opts,
+    options: JSONOpts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
   async getToml<Schema extends ZodType<any, any, any>>(
     arg1: string,
-    arg2?: Opts | Schema,
+    arg2?: JSONOpts | Schema,
     arg3?: Schema,
   ): Promise<HttpResponse<Infer<Schema>>> {
-    const url = arg1;
-    let schema: Schema;
-    let httpOptions: Opts | undefined;
-    let headers;
-    if (arg3) {
-      schema = arg3;
-      headers = (arg2 as Opts)?.headers;
-      httpOptions = arg2 as Opts;
-      delete httpOptions.headers;
-    } else {
-      schema = arg2 as Schema;
-    }
+    const { url, schema, httpOptions } = this.resolveArgs<Infer<Schema>>(
+      arg1,
+      arg2,
+      arg3,
+    );
 
     const opts: InternalHttpOptions = {
       ...httpOptions,
       method: 'get',
       headers: {
         'Content-Type': 'application/toml',
-        ...headers,
+        ...httpOptions?.headers,
       },
     };
 
