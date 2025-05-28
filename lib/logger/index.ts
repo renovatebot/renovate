@@ -12,7 +12,6 @@ import { RenovateLogger } from './renovate-logger';
 import type {
   AdditionalFieldsMap,
   BunyanRecord,
-  Exact,
   FatalCode,
   Logger,
 } from './types';
@@ -22,6 +21,7 @@ import {
   validateLogLevel,
   withSanitizer,
 } from './utils';
+import { Exact } from '../types/exact';
 
 const problems = new ProblemStream();
 let stdoutLevel = validateLogLevel(getEnv('LOG_LEVEL'), 'info');
