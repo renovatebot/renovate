@@ -4,6 +4,7 @@ import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger';
 import { generateConfig } from './config';
 import { generateDatasources } from './datasources';
+import { generateErrors } from './errors';
 import { getOpenGitHubItems } from './github-query-items';
 import { generateManagers } from './manager';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins';
@@ -65,6 +66,10 @@ export async function generateDocs(root = 'tmp', pack = true): Promise<void> {
     // self-hosted-configuration
     logger.info('* self-hosted-configuration');
     await generateConfig(dist, true);
+
+    // errors
+    logger.info('* errors');
+    await generateErrors(dist);
 
     // json-schema
     logger.info('* json-schema');

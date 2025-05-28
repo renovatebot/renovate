@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
+import { logFatal, logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
@@ -256,7 +256,10 @@ export async function parseAndValidateOrExit(
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
   } catch (err) {
-    logger.fatal({ err }, `Could not parse ${configEnvKey}`);
+    logFatal('CONFIG_ENV_PARSE_ERROR', {
+      envName: configEnvKey,
+      errorMessage: err.message,
+    });
     process.exit(1);
   }
 }

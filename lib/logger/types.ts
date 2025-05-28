@@ -1,5 +1,6 @@
 import type { Stream } from 'node:stream';
 import type { LogLevel, LogLevelString } from 'bunyan';
+import type { LOG_CODES } from './error-codes';
 
 export interface LogError {
   level: LogLevel;
@@ -45,3 +46,16 @@ export interface LogLevelRemap {
   matchMessage: string;
   newLogLevel: LogLevelString;
 }
+
+export type FatalCode = keyof (typeof LOG_CODES)['fatal'];
+
+export type AdditionalFieldsMap = {
+  [C in FatalCode]: {
+    [K in keyof (typeof LOG_CODES)['fatal'][C]['additionalFields']]: unknown;
+  };
+};
+
+// ── “Exact Object” helper: no more and no fewer keys than expected ──────────
+export type Exact<S, A extends S> =
+  // keep the legal properties
+  A & Record<Exclude<keyof A, keyof S>, never>; // …and forbid anything that A has but S hasn’t

@@ -128,21 +128,34 @@ describe('workers/global/config/parse/file', () => {
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
+        {
+          errCode: 'CONFIG_FILE_PARSE_ERROR',
+          errorMessage:
+            'Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined',
+          fileName: expect.any(String), // The fileName will be the tmp file created
+        },
+        'Configuration file parse error',
       );
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
 
     it.each([
-      ['invalid config file type', './file.txt'],
-      ['missing config file type', './file'],
+      ['Configuration file parse error', './file.txt'],
+      ['Configuration file parse error', './file'],
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
       fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledWith(1);
-      expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
+      expect(logger.fatal).toHaveBeenCalledWith(
+        {
+          errCode: 'CONFIG_FILE_PARSE_ERROR',
+          errorMessage: 'Unsupported file type',
+          fileName: expect.any(String),
+        },
+        'Configuration file parse error',
+      );
       fs.unlinkSync(configFile);
     });
 
