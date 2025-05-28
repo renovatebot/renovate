@@ -1,3 +1,8 @@
+/**
+ * This module defines error codes for logging purposes.
+ * Each error code includes a message, description, and additional fields for context.
+ * The structure is designed to be used with a logging system that can interpret these codes.
+ */
 export const LOG_CODES = {
   fatal: {
     CONFIG_ENV_PARSE_ERROR: {
@@ -49,6 +54,16 @@ export const LOG_CODES = {
         'An unexpected error occurred that was not handled by the application. This may indicate a bug or an unhandled exception.',
       additionalFields: {
         err: 'The error object containing details about the unexpected error.',
+      },
+    },
+  },
+  error: {
+    UNHANDLED_REJECTION: {
+      message: 'Unhandled promise rejection',
+      description:
+        'A JavaScript promise was rejected but no error handler was attached to handle the rejection. This should never happen and should be reported as a bug.',
+      additionalFields: {
+        err: 'The error object containing details about the unhandled rejection.',
       },
     },
   },

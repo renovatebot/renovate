@@ -48,9 +48,18 @@ export interface LogLevelRemap {
 }
 
 export type FatalCode = keyof (typeof LOG_CODES)['fatal'];
+export type ErrorCode = keyof (typeof LOG_CODES)['error'];
 
-export type AdditionalFieldsMap = {
+type FatalFields = {
   [C in FatalCode]: {
     [K in keyof (typeof LOG_CODES)['fatal'][C]['additionalFields']]: unknown;
   };
 };
+
+type ErrorFields = {
+  [C in ErrorCode]: {
+    [K in keyof (typeof LOG_CODES)['error'][C]['additionalFields']]: unknown;
+  };
+};
+
+export type AdditionalFieldsMap = FatalFields & ErrorFields;
