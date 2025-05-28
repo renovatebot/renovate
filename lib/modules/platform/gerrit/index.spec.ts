@@ -131,6 +131,14 @@ describe('modules/platform/gerrit/index', () => {
         { branchName: '', label: '-2', state: 'open' },
       ]);
       expect(clientMock.abandonChange.mock.calls).toEqual([[1], [2]]);
+      expect(clientMock.addMessage.mock.calls[0]).toEqual([
+        1,
+        'This change has been abandoned as it was voted with Code-Review -2.',
+      ]);
+      expect(clientMock.addMessage.mock.calls[1]).toEqual([
+        2,
+        'This change has been abandoned as it was voted with Code-Review -2.',
+      ]);
     });
   });
 
