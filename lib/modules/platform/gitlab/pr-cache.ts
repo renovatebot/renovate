@@ -136,7 +136,7 @@ export class GitlabPrCache {
     logger.debug('Syncing PR list');
     const searchParams = {
       per_page: this.items.length ? '20' : '100',
-    } as any;
+    } as Record<string, string>;
     if (!this.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
