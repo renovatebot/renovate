@@ -1,10 +1,11 @@
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getEnv } from '../env';
 import type { FileChange } from './types';
 
 export function checkForPlatformFailure(err: Error): Error | null {
-  if (process.env.NODE_ENV === 'test') {
+  if (getEnv().NODE_ENV === 'test') {
     return null;
   }
   const externalHostFailureStrings = [

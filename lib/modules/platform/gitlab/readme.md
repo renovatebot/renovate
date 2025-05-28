@@ -46,16 +46,12 @@ We refer to personal access tokens, project access tokens and group access token
 For real runs, give the access token these scopes:
 
 - `api`
-- `write_repository`
-- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 #### Permissions for access tokens on dry runs
 
 For dry runs, give the access token these scopes:
 
 - `read_api`
-- `read_repository`
-- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 #### Letting Renovate use your access token
 
