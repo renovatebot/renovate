@@ -119,13 +119,12 @@ export async function initRepo({
     label: '-2',
   });
   for (const change of rejectedChanges) {
-    await client.abandonChange(change._number);
-    logger.info(
-      `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
-    );
-    await client.addMessage(
+    await client.abandonChange(
       change._number,
       'This change has been abandoned as it was voted with Code-Review -2.',
+    );
+    logger.info(
+      `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
   const repoConfig: RepoResult = {
