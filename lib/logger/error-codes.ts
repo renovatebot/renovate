@@ -58,6 +58,38 @@ export const LOG_CODES = {
     },
   },
   error: {
+    DATASOURCE_PACKAGE_NAME_MISSING: {
+      message: 'Datasource request missing packageName',
+      description:
+        'A datasource function was called without providing a package name. This is likely a bug in the datasource implementation.',
+      additionalFields: {
+        datasource: 'The name of the datasource that was called.',
+        method: 'The method of the datasource that was called.',
+      },
+    },
+    DATASOURCE_REGISTRY_URL_MISSING: {
+      message: 'Datasource request missing registryUrl',
+      description:
+        'A datasource function was called without providing a registry URL. This is likely a bug in the datasource implementation.',
+      additionalFields: {
+        datasource: 'The name of the datasource that was called.',
+        method: 'The method of the datasource that was called.',
+      },
+    },
+    GET_REPOS_ERROR: {
+      message: 'Error retrieving repositories list',
+      description:
+        'An error occurred while trying to retrieve the list of repositories.',
+      additionalFields: {},
+    },
+    REPO_NOT_FOUND: {
+      message: 'Repository not found',
+      description:
+        'The specified repository could not be found. This may be due to an incorrect repository name or the repository being deleted.',
+      additionalFields: {
+        repository: 'The name of the repository that was not found.',
+      },
+    },
     UNHANDLED_REJECTION: {
       message: 'Unhandled promise rejection',
       description:

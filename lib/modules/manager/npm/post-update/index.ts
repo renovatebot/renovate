@@ -303,7 +303,7 @@ async function updateYarnOffline(
       }
     }
   } catch (err) {
-    logger.error({ err }, 'Error updating yarn offline packages');
+    logger.warn({ err }, 'Error updating yarn offline packages');
   }
 }
 
@@ -356,7 +356,7 @@ export async function updateYarnBinary(
       },
     );
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error updating Yarn binary');
+    logger.warn({ err }, 'Error updating Yarn binary');
   }
   return existingYarnrcYmlContent && yarnrcYml;
 }

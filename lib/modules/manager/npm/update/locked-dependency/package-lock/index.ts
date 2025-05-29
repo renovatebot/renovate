@@ -261,7 +261,7 @@ export async function updateLockedDependency(
     }
     return { status: 'updated', files };
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'updateLockedDependency() error');
+    logger.warn({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
   }
 }

@@ -9,7 +9,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
@@ -112,12 +112,13 @@ export async function initRepo({
   try {
     repo = await client.getRepositoryInfo(repository);
   } catch (err) {
-    logger.error({ err }, 'Could not find repository');
+    logger.debug({ err }, 'Failed to get repository info');
+    logError('REPO_NOT_FOUND', { repository });
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
   if (!repo?.repositoryMetadata) {
-    logger.error({ repository }, 'Could not find repository');
+    logError('REPO_NOT_FOUND', { repository });
     throw new Error(REPOSITORY_NOT_FOUND);
   }
   logger.debug({ repositoryDetails: repo }, 'Repository details');
@@ -224,7 +225,7 @@ export async function findPr({
         break;
     }
   } catch (err) {
-    logger.error({ err }, 'findPr error');
+    logger.warn({ err }, 'findPr error');
   }
   if (prsFiltered.length === 0) {
     return null;
@@ -283,8 +284,9 @@ export async function getRepos(): Promise<string[]> {
   try {
     reposRes = await client.listRepositories();
     //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
-  } catch (error) {
-    logger.error({ error }, 'Could not retrieve repositories');
+  } catch (err) {
+    logger.debug({ err }, 'Failed to retrieve repositories');
+    logError('GET_REPOS_ERROR', {});
     return [];
   }
 

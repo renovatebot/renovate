@@ -15,7 +15,7 @@ import {
   REPOSITORY_NOT_FOUND,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
@@ -220,7 +220,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       .filter((repo) => !repo.mirror || config?.includeMirrors)
       .map((repo) => repo.path_with_namespace);
   } catch (err) {
-    logger.error({ err }, `GitLab getRepos error`);
+    logger.debug({ err }, 'Failed to retrieve repositories');
+    logError('GET_REPOS_ERROR', {});
     throw err;
   }
 }

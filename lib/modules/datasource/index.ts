@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
-import { logger } from '../../logger';
+import { logError, logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
@@ -45,7 +45,7 @@ const cacheNamespace = 'datasource-releases';
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
-function logError(datasource: string, packageName: string, err: any): void {
+function logProblem(datasource: string, packageName: string, err: any): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, packageName, url }, 'Datasource 404');
@@ -374,7 +374,7 @@ async function fetchReleases(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logError(datasource.id, config.packageName, err);
+    logProblem(datasource.id, config.packageName, err);
   }
   if (!dep || dequal(dep, { releases: [] })) {
     return null;
@@ -415,7 +415,10 @@ export function getRawPkgReleases(
 
   const packageName = config.packageName;
   if (!packageName) {
-    logger.error({ config }, 'Datasource getReleases without packageName');
+    logError('DATASOURCE_PACKAGE_NAME_MISSING', {
+      datasource: config.datasource,
+      method: 'getReleases',
+    });
     return AsyncResult.err('no-package-name');
   }
 

@@ -8,7 +8,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
@@ -397,7 +397,8 @@ const platform: Platform = {
         });
       }
     } catch (err) {
-      logger.error({ err }, 'Gitea getRepos() error');
+      logger.debug({ err }, 'Failed to retrieve repositories');
+      logError('GET_REPOS_ERROR', {});
       throw err;
     }
   },
