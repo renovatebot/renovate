@@ -477,7 +477,7 @@ async function managerUpdateArtifacts(
     if (updateArtifact.config.updateLockFiles === false) {
       logger.debug(
         { manager, packageFileName: updateArtifact.packageFileName },
-        'skipping artifact updating',
+        'Skipping artifact update',
       );
     } else {
       return await updateArtifacts(updateArtifact);
