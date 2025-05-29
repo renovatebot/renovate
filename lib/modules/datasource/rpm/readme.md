@@ -43,15 +43,12 @@ where the versioning format could be `<semantic version>-<revision or release>`,
         "path_to_manifest_json"
       ],
       "matchStringsStrategy": "any",
-      "registryUrl": "http://example.com/repo/repodata/",
+      "registryUrlTemplate": "http://example.com/repo/repodata/",
       "datasourceTemplate": "rpm"
     }
   ]
 }
 ```
-
-Note: In this example, the `registryUrl` is a static URL.
-You can also use `registryUrlTemplate` with variables and have it resolved at runtime.
 
 In an RPM repository, the `<SHA256>-filelists.xml` looks like this:
 

@@ -1,8 +1,9 @@
+import { gzipSync } from 'node:zlib';
 import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/rpm/index', () => {
-  describe('getFilelistsXmlUrl', () => {
+  describe('getFilelistsGzipUrl', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
     let rpmDatasource: RpmDatasource;
     beforeEach(() => {
@@ -20,10 +21,10 @@ describe('modules/datasource/rpm/index', () => {
       httpMock
         .scope(registryUrl)
         .get('/repomd.xml')
-        .reply(200, repomdXml, { 'Content-Type': 'text/xml' });
+        .reply(200, repomdXml, { 'Content-Type': 'application/gzip' });
 
       const filelistsXmlUrl =
-        await rpmDatasource.getFilelistsXmlUrl(registryUrl);
+        await rpmDatasource.getFilelistsGzipUrl(registryUrl);
 
       expect(filelistsXmlUrl).toBe(
         'https://example.com/repo/repodata/somesha256-filelists.xml.gz',
@@ -34,7 +35,7 @@ describe('modules/datasource/rpm/index', () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow(`Response code 404 (Not Found)`);
     });
 
@@ -45,7 +46,7 @@ describe('modules/datasource/rpm/index', () => {
         .replyWithError('Network error');
 
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow('Network error');
     });
 
@@ -61,7 +62,7 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow(`is not in XML format.`);
     });
 
@@ -79,7 +80,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow(
         'No filelists data found in https://example.com/repo/repodata/repomd.xml',
       );
@@ -99,7 +100,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow(
         'No location element found in https://example.com/repo/repodata/repomd.xml',
       );
@@ -119,7 +120,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsXmlUrl(registryUrl),
+        rpmDatasource.getFilelistsGzipUrl(registryUrl),
       ).rejects.toThrow(
         `No href found in https://example.com/repo/repodata/repomd.xml`,
       );
@@ -158,10 +159,14 @@ describe('modules/datasource/rpm/index', () => {
   </package>
 </filelists>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       const releases = await rpmDatasource.getReleasesByPackageName(
         filelistsXmlUrl,
         packageName,
@@ -184,7 +189,7 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if filelists.xml is missing', async () => {
+    it('throws an error if somesha256-filelists.xml.gz is not found', async () => {
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
@@ -199,11 +204,13 @@ describe('modules/datasource/rpm/index', () => {
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, '', { 'Content-Type': 'text/xml' });
+        .reply(200, '', { 'Content-Type': 'application/gzip' });
 
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(
+        'Empty response body from getting ' + filelistsXmlUrl + '.',
+      );
     });
 
     it('throws an error if filelistsXmlUrl is not in XML format', async () => {
@@ -216,10 +223,14 @@ describe('modules/datasource/rpm/index', () => {
   </package>
 </filelists>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
       ).rejects.toThrow(`is not in XML format.`);
@@ -235,10 +246,14 @@ describe('modules/datasource/rpm/index', () => {
   </nonpackage>
 </filelists>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
       ).rejects.toThrow(`No packages found in ${filelistsXmlUrl}`);
@@ -254,10 +269,14 @@ describe('modules/datasource/rpm/index', () => {
   </package>
 </filelists>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       expect(
         await rpmDatasource.getReleasesByPackageName(
           filelistsXmlUrl,
@@ -276,10 +295,14 @@ describe('modules/datasource/rpm/index', () => {
   </package>
 </filelists>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       const releases = await rpmDatasource.getReleasesByPackageName(
         filelistsXmlUrl,
         packageName,
@@ -311,10 +334,14 @@ describe('modules/datasource/rpm/index', () => {
     <file>example-file</file>
   </package>
 `;
+      // gzip the filelistsXml content
+      const gzippedFilelistsXml = gzipSync(filelistsXml);
       httpMock
         .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
         .get('/somesha256-filelists.xml.gz')
-        .reply(200, filelistsXml, { 'Content-Type': 'text/xml' });
+        .reply(200, gzippedFilelistsXml, {
+          'Content-Type': 'application/gzip',
+        });
       const releases = await rpmDatasource.getReleasesByPackageName(
         filelistsXmlUrl,
         packageName,
@@ -350,7 +377,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if filelistsXmlUrl is empty', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockResolvedValue(null);
+      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(null);
       const releases = await rpmDatasource.getReleases({
         registryUrl: 'someurl',
         packageName: 'example-package',
@@ -367,8 +394,8 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns the correct releases', async () => {
-      //mock the getFilelistsXmlUrl method to return the filelistsXmlUrl
-      vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockResolvedValue(
+      //mock the getFilelistsGzipUrl method to return the filelistsXmlUrl
+      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(
         'https://example.com/repo/repodata/',
       );
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue({
@@ -410,8 +437,8 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if getFilelistsXmlUrl fails', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockRejectedValue(
+    it('throws an error if getFilelistsGzipUrl fails', async () => {
+      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockRejectedValue(
         new Error('Something wrong'),
       );
 
@@ -424,7 +451,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if getReleasesByPackageName fails', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsXmlUrl').mockResolvedValue(
+      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(
         'https://example.com/repo/repodata/',
       );
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockRejectedValue(
