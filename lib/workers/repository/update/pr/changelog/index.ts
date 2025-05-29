@@ -47,7 +47,7 @@ export async function getChangeLogJSON(
 
     return await changeLogSource.getChangeLogJSON(config);
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ config, err }, 'getChangeLogJSON error');
+    logger.warn({ config, err }, 'getChangeLogJSON error');
     return null;
   }
 }

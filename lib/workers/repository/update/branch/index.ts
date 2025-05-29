@@ -944,7 +944,7 @@ export async function processBranch(
       throw err;
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
-    logger.error({ err }, `Error ensuring PR`);
+    logger.warn({ err }, `Error ensuring PR`);
   }
   if (!branchExists) {
     return {
