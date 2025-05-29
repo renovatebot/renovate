@@ -1764,60 +1764,63 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
-    it('sets updateLockFiles to true when not all upgrades specify false', () => {
-      const commonOptions = {
-        ...requiredDefaultOptions,
-        manager: 'some-manager',
-        branchName: 'deps',
-        groupName: 'deps',
-        group: {
-          commitMessageTopic: '{{{groupName}}}',
-          commitMessagePrefix:
-            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
-        },
-      };
+    it.each([true, false])(
+      'sets updateLockFiles to true when not all upgrades specify false and first is $0',
+      (first) => {
+        const commonOptions = {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          groupName: 'deps',
+          group: {
+            commitMessageTopic: '{{{groupName}}}',
+            commitMessagePrefix:
+              '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+          },
+        };
 
-      const branch = [
-        {
-          ...commonOptions,
-          depName: 'dep1',
-          newVersion: '1.2.0',
-          newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
-          updateLockFiles: false,
-          fileReplacePosition: 1,
-          prBodyDefinitions: {
-            Issue: 'I1',
+        const branch = [
+          {
+            ...commonOptions,
+            depName: 'dep1',
+            newVersion: '1.2.0',
+            newValue: '1.2.0',
+            updateType: 'minor' as UpdateType,
+            updateLockFiles: first,
+            fileReplacePosition: 1,
+            prBodyDefinitions: {
+              Issue: 'I1',
+            },
           },
-        },
-        {
-          ...commonOptions,
-          depName: 'dep2',
-          newVersion: '1.0.0',
-          newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
-          fileReplacePosition: 2,
-          prBodyDefinitions: {
-            Issue: 'I2',
+          {
+            ...commonOptions,
+            depName: 'dep2',
+            newVersion: '1.0.0',
+            newValue: '1.0.0',
+            updateType: 'major' as UpdateType,
+            fileReplacePosition: 2,
+            prBodyDefinitions: {
+              Issue: 'I2',
+            },
           },
-        },
-        {
-          ...commonOptions,
-          depName: 'dep3',
-          newVersion: '1.2.3',
-          newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
-          updateLockFiles: false,
-          fileReplacePosition: 0,
-          prBodyDefinitions: {
-            Issue: 'I3',
+          {
+            ...commonOptions,
+            depName: 'dep3',
+            newVersion: '1.2.3',
+            newValue: '1.2.3',
+            updateType: 'patch' as UpdateType,
+            updateLockFiles: false,
+            fileReplacePosition: 0,
+            prBodyDefinitions: {
+              Issue: 'I3',
+            },
           },
-        },
-      ] satisfies BranchUpgradeConfig[];
-      const res = generateBranchConfig(branch);
-      expect(res).toMatchObject({
-        updateLockFiles: true,
-      });
-    });
+        ] satisfies BranchUpgradeConfig[];
+        const res = generateBranchConfig(branch);
+        expect(res).toMatchObject({
+          updateLockFiles: true,
+        });
+      },
+    );
   });
 });
