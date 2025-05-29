@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import * as git from '../../../util/git';
 import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
@@ -6,6 +7,7 @@ import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
 import type { GerritFindPRConfig } from './types';
+import { convertGerritDateToISO } from './utils';
 
 let repository: string;
 let username: string;
@@ -37,6 +39,22 @@ export class GerritScm extends DefaultGitScm {
       return change.current_revision as LongCommitSha;
     }
     return git.getBranchCommit(branchName);
+  }
+
+  override async getBranchUpdateDate(
+    branchName: string,
+  ): Promise<DateTime | null> {
+    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
+    const change = await client
+      .findChanges(repository, searchConfig, true)
+      .then((res) => res.pop());
+    if (change) {
+      const date = convertGerritDateToISO(
+        change.revisions[change.current_revision].created,
+      )!;
+      return DateTime.fromISO(date, { zone: 'utc' });
+    }
+    return git.getBranchUpdateDate(branchName);
   }
 
   override async isBranchBehindBase(

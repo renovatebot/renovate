@@ -64,6 +64,7 @@ export function getExpectedPrList(
   }
   // TODO: type (#22198)
   const prHourlyLimit = config.prHourlyLimit!;
+  // TODO consider commitHourlyLimit
   if (
     prHourlyLimit > 0 &&
     prHourlyLimit < 5 &&

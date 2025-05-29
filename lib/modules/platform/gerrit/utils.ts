@@ -67,7 +67,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     sourceBranch: extractSourceBranch(change) ?? change.branch,
     targetBranch: change.branch,
     title: change.subject,
-    createdAt: change.created?.replace(' ', 'T'),
+    createdAt: convertGerritDateToISO(change.created),
     reviewers:
       change.reviewers?.REVIEWER?.filter(
         (reviewer) => typeof reviewer.username === 'string',
@@ -129,4 +129,12 @@ export function mapBranchStatusToLabel(
   }
   /* v8 ignore next */
   return label.default_value;
+}
+
+// Convert Gerrit date format to ISO format
+export function convertGerritDateToISO(
+  // Optionality is only for simplifying tests
+  date: string | undefined,
+): string | undefined {
+  return date?.replace(' ', 'T');
 }

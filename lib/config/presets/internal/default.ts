@@ -198,6 +198,7 @@ export const presets: Record<string, Preset> = {
       '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{footer}}}',
   },
   disableRateLimiting: {
+    commitHourlyLimit: 0,
     description: 'Remove hourly and concurrent rate limits.',
     prConcurrentLimit: 0,
     prHourlyLimit: 0,
@@ -481,6 +482,7 @@ export const presets: Record<string, Preset> = {
   prHourlyLimitNone: {
     description: 'Removes rate limit for PR creation per hour.',
     prHourlyLimit: 0,
+    // TODO consider commitHourlyLimit
   },
   prImmediately: {
     description: 'Raise PRs immediately (after branch is created).',
