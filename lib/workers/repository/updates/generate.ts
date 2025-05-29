@@ -467,11 +467,9 @@ export function generateBranchConfig(
   );
 
   // Lock file updating will only be disabled if every upgrade wants to disable it.
-   if (config.upgrades.every(
+  config.updateLockFiles = !config.upgrades.every(
     (upgrade) => upgrade.updateLockFiles === false,
-  )) {
-    config.updateLockFiles = false;
-  }
+  );
 
   const tableRows = config.upgrades
     .map(getTableValues)
