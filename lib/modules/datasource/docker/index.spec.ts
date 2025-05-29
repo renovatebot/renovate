@@ -1580,58 +1580,59 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
-    it('uses lower tag limit for ECR Public deps', async () => {
-      httpMock
-        .scope('https://public.ecr.aws')
-        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
-        })
-        .get('/token?service=public.ecr.aws&scope=aws')
-        .reply(200, { token: 'test' });
-      httpMock
-        .scope('https://public.ecr.aws', {
-          reqheaders: {
-            authorization: 'Bearer test',
-          },
-        })
-        // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
-        // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
-        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
-        .reply(200, { tags: ['some'] }, {});
+    it.each([{ host: 'public.ecr.aws' }, { host: 'ecr-public.aws.com' }])(
+      'uses lower tag limit for ECR Public deps for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}`)
+          .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+          .reply(401, '', {
+            'www-authenticate': `Bearer realm="https://${host}/token",service="public.ecr.aws",scope="aws"`,
+          })
+          .get('/token?service=public.ecr.aws&scope=aws')
+          .reply(200, { token: 'test' });
+        httpMock
+          .scope(`https://${host}`, {
+            reqheaders: {
+              authorization: 'Bearer test',
+            },
+          })
+          // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
+          // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+          .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {});
 
-      httpMock
-        .scope('https://public.ecr.aws')
-        .get('/v2/')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
-        })
-        .get(
-          '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull',
-        )
-        .reply(200, { token: 'test' });
-      httpMock
-        .scope('https://public.ecr.aws', {
-          reqheaders: {
-            authorization: 'Bearer test',
-          },
-        })
-        .get('/v2/amazonlinux/amazonlinux/manifests/some')
-        .reply(200);
+        httpMock
+          .scope(`https://${host}`)
+          .get('/v2/')
+          .reply(401, '', {
+            'www-authenticate': `Bearer realm="https://${host}/token",service="public.ecr.aws",scope="aws"`,
+          })
+          .get(
+            '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull',
+          )
+          .reply(200, { token: 'test' });
+        httpMock
+          .scope(`https://${host}`, {
+            reqheaders: {
+              authorization: 'Bearer test',
+            },
+          })
+          .get('/v2/amazonlinux/amazonlinux/manifests/some')
+          .reply(200);
 
-      expect(
-        await getPkgReleases({
-          datasource: DockerDatasource.id,
-          packageName: 'public.ecr.aws/amazonlinux/amazonlinux',
-        }),
-      ).toEqual({
-        lookupName: 'amazonlinux/amazonlinux',
-        registryUrl: 'https://public.ecr.aws',
-        releases: [],
-      });
-    });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            packageName: `${host}/amazonlinux/amazonlinux`,
+          }),
+        ).toEqual({
+          lookupName: 'amazonlinux/amazonlinux',
+          registryUrl: `https://${host}`,
+          releases: [],
+        });
+      },
+    );
 
     describe('when making requests that interact with an ECR proxy', () => {
       it('resolves requests to ECR proxy', async () => {

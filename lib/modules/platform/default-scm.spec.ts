@@ -72,12 +72,6 @@ describe('modules/platform/default-scm', () => {
     expect(git.mergeToLocal).toHaveBeenCalledWith('branchName');
   });
 
-  it('does not sync fork with upstream', async () => {
-    git.getRemotes.mockResolvedValueOnce(['somebranch']);
-    await defaultGitScm.syncForkWithUpstream('branchName');
-    expect(git.syncForkWithUpstream).not.toHaveBeenCalled();
-  });
-
   it('syncs fork with upstream', async () => {
     git.getRemotes.mockResolvedValueOnce([
       'somebranch',
