@@ -9,11 +9,14 @@ import type { ExecResult } from '../exec/types';
 import { newlineRegex, regEx } from '../regex';
 import { addSecretForSanitizing } from '../sanitize';
 
-type PrivateKeyFormat = 'gpg' | 'ssh';
+type PrivateKeyFormat = 'gpg' | 'ssh' | 'x509';
 
 const sshKeyRegex = regEx(
   /-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----.*?-----END ([A-Z]+ )?PRIVATE KEY-----/,
   's',
+);
+const x509KeyRegex = regEx(
+  /-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s,
 );
 
 let gitPrivateKey: PrivateKey | undefined;
@@ -114,8 +117,32 @@ class SSHKey extends PrivateKey {
   }
 }
 
+class X509Key extends PrivateKey {
+  protected readonly gpgFormat = 'x509';
+
+  constructor(key: string) {
+    super(key.trim());
+  }
+
+  protected async importKey(): Promise<string | undefined> {
+    const keyFileName = upath.join(os.tmpdir() + '/git-private-x509.key');
+    await fs.outputFile(keyFileName, this.key);
+    const { stdout, stderr } = await exec(`gpgsm --import ${keyFileName}`);
+    logger.debug({ stdout, stderr }, 'X.509 private key import result');
+    await fs.remove(keyFileName);
+    // gpgsm does not output a key id in the same way; log and return filename
+    return keyFileName;
+  }
+}
+
 function getPrivateKeyFormat(key: string): PrivateKeyFormat {
-  return sshKeyRegex.test(key) ? 'ssh' : 'gpg';
+  if (x509KeyRegex.test(key)) {
+    return 'x509';
+  }
+  if (sshKeyRegex.test(key)) {
+    return 'ssh';
+  }
+  return 'gpg';
 }
 
 function createPrivateKey(key: string): PrivateKey {
@@ -126,6 +153,9 @@ function createPrivateKey(key: string): PrivateKey {
     case 'ssh':
       logger.debug('gitPrivateKey: SSH key detected');
       return new SSHKey(key);
+    case 'x509':
+      logger.debug('gitPrivateKey: x.509 key detected');
+      return new X509Key(key);
   }
 }
 
