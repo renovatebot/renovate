@@ -72,7 +72,8 @@ export class RpmDatasource extends Datasource {
       response = await this.http.getText(repomdUrl.toString());
     } catch (err) {
       logger.warn(
-        `Failed to fetch ${repomdUrl}: ${err instanceof Error ? err.message : err}`,
+        { datasource: 'rpm', url: repomdUrl, err },
+        'Failed to fetch datasource url',
       );
       throw err as Error;
     }
@@ -80,7 +81,8 @@ export class RpmDatasource extends Datasource {
     // check if repomd.xml is in XML format
     if (!response.body.startsWith('<?xml')) {
       logger.warn(
-        `${repomdUrl} is not in XML format. Response body: ${response.body}`,
+        { datasource: RpmDatasource.id, url: repomdUrl },
+        'Invalid response format',
       );
       throw new Error(
         `${repomdUrl} is not in XML format. Response body: ${response.body}`,
@@ -203,7 +205,7 @@ export class RpmDatasource extends Datasource {
       }
     }
     if (releases.size === 0) {
-      logger.warn(
+      logger.debug(
         `No releases found for package ${packageName} in ${filelistsGzipUrl}`,
       );
       return null;
