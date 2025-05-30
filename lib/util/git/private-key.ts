@@ -127,7 +127,7 @@ class X509Key extends PrivateKey {
   protected async importKey(): Promise<string | undefined> {
     const keyFileName = upath.join(os.tmpdir() + '/git-private-x509.key');
     await fs.outputFile(keyFileName, this.key);
-    const { stdout, stderr } = await exec(`gpgsm --import ${keyFileName}`);
+    const { stdout, stderr } = await exec(['gpgsm', '--import', keyFileName]);
     logger.debug({ stdout, stderr }, 'X.509 private key import result');
     await fs.remove(keyFileName);
     // gpgsm does not output a key id in the same way; log and return filename
