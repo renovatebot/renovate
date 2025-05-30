@@ -467,9 +467,24 @@ export function generateBranchConfig(
   );
 
   // Lock file updating will only be disabled if every upgrade wants to disable it.
-  config.updateLockFiles = !config.upgrades.every(
-    (upgrade) => upgrade.updateLockFiles === false,
-  );
+  const numberOfUpgradesToUpdateLockFiles = config.upgrades.filter(
+    (upgrade) => upgrade.updateLockFiles !== false,
+  ).length;
+  config.updateLockFiles = numberOfUpgradesToUpdateLockFiles > 0;
+  if (
+    numberOfUpgradesToUpdateLockFiles > 0 &&
+    numberOfUpgradesToUpdateLockFiles < config.upgrades.length
+  ) {
+    logger.debug(
+      {
+        upgrades: config.upgrades.map((upgrade) => ({
+          depName: upgrade.depName,
+          updateLockFiles: upgrade.updateLockFiles,
+        })),
+      },
+      'Mixed `updateLockFiles` values in upgrades. Lock files will be updated.',
+    );
+  }
 
   const tableRows = config.upgrades
     .map(getTableValues)

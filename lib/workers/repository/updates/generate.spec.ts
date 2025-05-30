@@ -5,6 +5,7 @@ import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
+import { logger } from '~test/util';
 
 const {
   commitMessage,
@@ -1705,6 +1706,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         updateLockFiles: true,
       });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it('sets updateLockFiles to false when all upgrades specify false', () => {
@@ -1762,6 +1764,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         updateLockFiles: false,
       });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it.each([true, false])(
@@ -1820,6 +1823,16 @@ describe('workers/repository/updates/generate', () => {
         expect(res).toMatchObject({
           updateLockFiles: true,
         });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            upgrades: [
+              { depName: 'dep3', updateLockFiles: false },
+              { depName: 'dep2', updateLockFiles: undefined },
+              { depName: 'dep1', updateLockFiles: first },
+            ],
+          },
+          'Mixed `updateLockFiles` values in upgrades. Lock files will be updated.',
+        );
       },
     );
   });
