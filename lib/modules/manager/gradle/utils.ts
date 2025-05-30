@@ -36,24 +36,17 @@ export function versionLikeSubstring(
 }
 
 export function isDependencyString(input: string): boolean {
-  const parts = input.split(':');
+  const [depNotation, ...extra] = input.split('@');
+  if (extra.length > 1) {
+    return false;
+  }
+
+  const parts = depNotation.split(':');
   if (parts.length !== 3 && parts.length !== 4) {
     return false;
   }
-  const [groupId, artifactId, versionPart, optionalClassifier] = parts;
 
-  if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
-    return false;
-  }
-
-  let version = versionPart;
-  if (versionPart.includes('@')) {
-    const [actualVersion, ...rest] = versionPart.split('@');
-    if (rest.length !== 1) {
-      return false;
-    }
-    version = actualVersion;
-  }
+  const [groupId, artifactId, version, classifier] = parts;
 
   return !!(
     groupId &&
@@ -61,6 +54,7 @@ export function isDependencyString(input: string): boolean {
     version &&
     artifactRegex.test(groupId) &&
     artifactRegex.test(artifactId) &&
+    (!classifier || artifactRegex.test(classifier)) &&
     version === versionLikeSubstring(version)
   );
 }
@@ -72,8 +66,8 @@ export function parseDependencyString(
     return null;
   }
 
-  const [groupId, artifactId, fullValue] = input.split(':');
-  const [currentValue, dataType] = fullValue.split('@');
+  const [depNotation, dataType] = input.split('@');
+  const [groupId, artifactId, currentValue] = depNotation.split(':');
 
   return {
     depName: `${groupId}:${artifactId}`,
