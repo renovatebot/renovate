@@ -32,7 +32,7 @@ export async function generateLoginCmd(
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${repository}`;
+    )} ${quote(repository)}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
@@ -40,7 +40,7 @@ export async function generateLoginCmd(
     const hostPart = repository.split('/')[0];
     const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${hostPart}`;
+    )} ${quote(hostPart)}`;
     logger.trace({ cmd }, 'Generated Helm registry login command');
     return cmd;
   }
