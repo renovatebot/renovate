@@ -1303,6 +1303,77 @@ None detected
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
+
+        it('handles missing version/digest values correctly', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithMissingVersions = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'dep-with-version-only',
+                    currentValue: '1.0.0',
+                  },
+                  {
+                    depName: 'dep-with-digest-only',
+                    currentDigest: 'sha256:1234567890',
+                  },
+                  {
+                    depName: 'dep-with-version-and-digest',
+                    currentValue: '2.0.0',
+                    currentDigest: 'sha256:0987654321',
+                  },
+                  {
+                    depName: 'dep-with-locked-version-only',
+                    lockedVersion: '3.0.0',
+                  },
+                  {
+                    depName: 'dep-with-no-version-info',
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithMissingVersions);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithMissingVersions,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const dashboardBody = platform.ensureIssue.mock.calls[0][0].body;
+
+          // Version only case
+          expect(dashboardBody).toInclude('`dep-with-version-only 1.0.0`');
+
+          // Digest only case
+          expect(dashboardBody).toInclude(
+            '`dep-with-digest-only sha256:1234567890`',
+          );
+
+          // Version and digest case
+          expect(dashboardBody).toInclude(
+            '`dep-with-version-and-digest 2.0.0@sha256:0987654321`',
+          );
+
+          // Locked version fallback case
+          expect(dashboardBody).toInclude(
+            '`dep-with-locked-version-only lock file @ 3.0.0`',
+          );
+
+          // No version info case
+          expect(dashboardBody).toInclude(
+            '`dep-with-no-version-info unknown version`',
+          );
+
+          // Verify no 'undefined' appears in the output
+          expect(dashboardBody).not.toInclude('undefined');
+
+          // same with dry run
+          await dryRun(branches, platform, 0, 1);
+        });
       });
 
       describe('multi base branch repo', () => {

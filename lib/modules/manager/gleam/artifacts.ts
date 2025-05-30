@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -54,7 +55,10 @@ export async function updateArtifacts(
       ? []
       : updatedDeps.map((dep) => dep.depName).filter(is.string);
 
-    const updateCommand = ['gleam deps update', ...packagesToUpdate].join(' ');
+    const updateCommand = [
+      'gleam deps update',
+      ...packagesToUpdate.map(quote),
+    ].join(' ');
     await exec(updateCommand, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!newLockFileContent) {

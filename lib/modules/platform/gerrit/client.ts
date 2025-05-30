@@ -103,8 +103,13 @@ class GerritClient {
     return mergeable.body;
   }
 
-  async abandonChange(changeNumber: number): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/abandon`);
+  async abandonChange(changeNumber: number, message?: string): Promise<void> {
+    await this.gerritHttp.postJson(`a/changes/${changeNumber}/abandon`, {
+      body: {
+        message,
+        notify: 'OWNER_REVIEWERS', // Avoids notifying cc's
+      },
+    });
   }
 
   async submitChange(changeNumber: number): Promise<GerritChange> {

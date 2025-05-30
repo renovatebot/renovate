@@ -57,6 +57,7 @@ describe('modules/manager/gradle/utils', () => {
       ${'foo.foo:bar.bar:1.2.3'}               | ${true}
       ${'foo.bar:baz:1.2.3'}                   | ${true}
       ${'foo.bar:baz:1.2.3:linux-cpu-x86_64'}  | ${true}
+      ${'foo.bar:baz:1.2.3:sources@zip'}       | ${true}
       ${'foo:bar:1.2.3@zip'}                   | ${true}
       ${'foo:bar:x86@x86'}                     | ${true}
       ${'foo.bar:baz:1.2.+'}                   | ${true}
@@ -86,6 +87,8 @@ describe('modules/manager/gradle/utils', () => {
       ${'foo:bar:1.2.+'}          | ${{ depName: 'foo:bar', currentValue: '1.2.+' }}
       ${'foo.bar:baz:[1.6.0, ]'}  | ${{ depName: 'foo.bar:baz', currentValue: '[1.6.0, ]' }}
       ${'foo:bar:1.2.3@zip'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+      ${'foo:bar:1.2.3:docs'}     | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'foo:bar:1.2.3:docs@jar'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'jar' }}
       ${'foo:bar:baz:qux'}        | ${null}
       ${'foo:bar:baz:qux:quux'}   | ${null}
       ${"foo:bar:1.2.3'"}         | ${null}
