@@ -111,7 +111,7 @@ export function parseJsonWithFallback(
     parsedJson = JSON5.parse(content);
     logger.warn(
       { context },
-      'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
+      'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
     );
   }
 

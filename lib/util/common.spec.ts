@@ -133,7 +133,7 @@ describe('util/common', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
     });
 
-    it('catches and warns if content parsing failed with JSON.parse but not with JSON5.parse', () => {
+    it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
       expect(parseJson(onlyJson5parsableString, 'renovate.json')).toEqual({
         name: 'Bob',
         age: 35,
@@ -142,7 +142,7 @@ describe('util/common', () => {
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { context: 'renovate.json' },
-        'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
+        'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
       );
     });
 
