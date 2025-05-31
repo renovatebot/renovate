@@ -135,6 +135,7 @@ describe('util/exec/docker/index', () => {
   describe('removeDanglingContainers', () => {
     beforeEach(() => {
       GlobalConfig.set({ binarySource: 'docker' });
+      delete process.env.RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS;
     });
 
     it('short-circuits in non-Docker environment', async () => {
@@ -142,6 +143,17 @@ describe('util/exec/docker/index', () => {
       GlobalConfig.set({ binarySource: 'global' });
       await removeDanglingContainers();
       expect(execSnapshots).toBeEmpty();
+    });
+
+    it('short-circuits if RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS is set', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ binarySource: 'docker' });
+      process.env.RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS = 'true';
+      await removeDanglingContainers();
+      expect(execSnapshots).toBeEmpty();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping removal of dangling containers due to RENOVATE_DOCKER_SKIP_DANGLING_CONTAINERS env var',
+      );
     });
 
     it('handles insufficient memory error', async () => {
