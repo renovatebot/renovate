@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import { repoFingerprint } from '../util';
@@ -597,6 +598,15 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
+  describe('deleteLabel()', () => {
+    it('deleteLabel() - deletes a label', async () => {
+      const pro = gerrit.deleteLabel(123456, 'hashtag1');
+      await expect(pro).resolves.toBeUndefined();
+      expect(clientMock.deleteHashtag).toHaveBeenCalledTimes(1);
+      expect(clientMock.deleteHashtag).toHaveBeenCalledWith(123456, 'hashtag1');
+    });
+  });
+
   describe('addReviewers()', () => {
     it('addReviewers() - add reviewers', async () => {
       await expect(
@@ -709,8 +719,20 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
-      expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
+      expect(
+        gerrit.massageMarkdown(
+          codeBlock`
+        you tick the rebase/retry checkbox
+        checking the rebase/retry box above
+        `,
+          'rebase',
+        ),
+      ).toBe(codeBlock`
+        you add the _rebase_ hashtag to this change
+        adding the _rebase_ hashtag to this change
+        `);
     });
+
     //TODO: add some tests for Gerrit-specific replacements..
   });
 
