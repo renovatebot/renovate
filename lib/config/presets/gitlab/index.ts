@@ -4,6 +4,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
+import { getFilenameFromPath, parseUrl } from '../../../util/url';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
@@ -52,7 +53,73 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.body, fileName);
+  // Extract the actual filename without path or query parameters
+  const cleanFileName = extractFilenameFromGitLabPath(fileName);
+
+  return parsePreset(res.body, cleanFileName);
+}
+
+/**
+ * Extracts the actual filename from a GitLab path, which could be:
+ * - A simple filename: "renovate.json5"
+ * - A path: "path/to/renovate.json5"
+ * - A URL-encoded path: "src%2Frenovate%2Fconfig.json5"
+ * - A GitLab API URL: "https://gitlab.example.com/api/v4/projects/13083/repository/files/renovate.json5?ref=main"
+ *
+ * @param fileName - The filename or path to extract from
+ * @returns The extracted filename without path or query parameters
+ */
+function extractFilenameFromGitLabPath(fileName: string): string {
+  // Fast path for simple filenames without path separators
+  if (
+    !fileName.includes('/') &&
+    !fileName.includes('%2F') &&
+    !fileName.includes('?')
+  ) {
+    return fileName;
+  }
+
+  let pathWithoutQuery = fileName;
+
+  // Handle URL or path with query parameters
+  try {
+    // Try parsing as URL first
+    const url = fileName.startsWith('http') ? parseUrl(fileName) : null;
+    if (url) {
+      // If it's a valid URL, extract just the pathname
+      pathWithoutQuery = url.pathname;
+    } else {
+      // Otherwise just remove query parameters
+      pathWithoutQuery = fileName.split('?')[0];
+    }
+  } catch (error) {
+    // If URL parsing fails, just remove query parameters
+    pathWithoutQuery = fileName.split('?')[0];
+  }
+
+  // Handle GitLab "/raw" suffix that's appended to the filename
+  if (pathWithoutQuery.endsWith('/raw')) {
+    pathWithoutQuery = pathWithoutQuery.substring(
+      0,
+      pathWithoutQuery.length - 4,
+    );
+  }
+
+  // Handle URL-encoded paths (like "src%2Frenovate%2Fconfig.json5")
+  if (pathWithoutQuery.includes('%2F')) {
+    const decodedPath = decodeURIComponent(pathWithoutQuery);
+    const lastSlashIndex = decodedPath.lastIndexOf('/');
+    return lastSlashIndex >= 0
+      ? decodedPath.substring(lastSlashIndex + 1)
+      : decodedPath;
+  }
+
+  // Otherwise use the generic helper for paths with slashes
+  if (pathWithoutQuery.includes('/')) {
+    return getFilenameFromPath(pathWithoutQuery);
+  }
+
+  return pathWithoutQuery;
 }
 
 export function getPresetFromEndpoint(
