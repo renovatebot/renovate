@@ -417,6 +417,30 @@ describe('modules/datasource/crate/index', () => {
     it('fetches releaseTimestamp', async () => {
       httpMock
         .scope(API_BASE_URL)
+        .get('/crates/clap/4.5.17')
+        .reply(200, {
+          version: {
+            created_at: '2024-09-04T19:16:41.355243+00:00',
+          },
+        });
+
+      const res = await datasource.postprocessRelease(
+        {
+          packageName: 'clap',
+          registryUrl: 'https://crates.io',
+        },
+        { version: '4.5.17' },
+      );
+
+      expect(res).toEqual({
+        version: '4.5.17',
+        releaseTimestamp: '2024-09-04T19:16:41.355Z',
+      });
+    });
+
+    it('fetches releaseTimestamp for version with metadata', async () => {
+      httpMock
+        .scope(API_BASE_URL)
         .get('/crates/clap/4.5.17+metadata')
         .reply(200, {
           version: {
