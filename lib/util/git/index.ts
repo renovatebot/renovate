@@ -1,10 +1,10 @@
-import URL from 'node:url';
-import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import URL from 'node:url';
 import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
+import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
@@ -25,8 +25,10 @@ import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
+import { getChildEnv } from '../exec/utils';
 import { newlineRegex, regEx } from '../regex';
 import { matchRegexOrGlobList } from '../string-match';
+import { getGitEnvironmentVariables } from './auth';
 import { parseGitAuthor } from './author';
 import {
   getCachedBehindBaseResult,
@@ -368,6 +370,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
+  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -381,7 +384,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.submoduleUpdate(['--init', '--recursive', submodule]),
+        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
