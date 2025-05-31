@@ -1,6 +1,7 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
+import type { LongCommitSha } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
@@ -10,9 +11,18 @@ import type {
   GerritChange,
   GerritChangeStatus,
   GerritLabelTypeInfo,
+  GerritRequestDetail,
 } from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
+  'MESSAGES', // to get the pr body
+  'LABELS', // to get the reviewers
+  'DETAILED_ACCOUNTS', // to get the reviewers usernames
+  'CURRENT_REVISION', // to get the commit message
+  'COMMIT_FOOTERS', // to get the commit message
+] as const;
 
 export function getGerritRepoUrl(repository: string, endpoint: string): string {
   // Find options for current host and determine Git endpoint
@@ -44,43 +54,53 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   return url.toString();
 }
 
-export function mapPrStateToGerritFilter(state?: PrState): string {
+export function mapPrStateToGerritFilter(state?: PrState): string | null {
   switch (state) {
-    case 'closed':
-      return 'status:closed';
     case 'merged':
       return 'status:merged';
-    case '!open':
-      return '-status:open';
     case 'open':
       return 'status:open';
+    case 'closed':
+      return 'status:abandoned';
+    case '!open':
+      return '-status:open';
     case 'all':
     default:
-      return '-is:wip';
+      return null;
   }
 }
 
-export function mapGerritChangeToPr(change: GerritChange): Pr {
+export function mapGerritChangeToPr(
+  change: GerritChange,
+  knownProperties?: {
+    sourceBranch?: string;
+    prBody?: string;
+  },
+): Pr | null {
+  const sourceBranch =
+    knownProperties?.sourceBranch ?? extractSourceBranch(change);
+  if (!sourceBranch) {
+    return null;
+  }
   return {
     number: change._number,
     state: mapGerritChangeStateToPrState(change.status),
-    sourceBranch: extractSourceBranch(change) ?? change.branch,
+    sourceBranch,
     targetBranch: change.branch,
     title: change.subject,
     createdAt: change.created?.replace(' ', 'T'),
     reviewers:
-      change.reviewers?.REVIEWER?.filter(
-        (reviewer) => typeof reviewer.username === 'string',
-      ).map((reviewer) => reviewer.username!) ?? [],
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
-      hash: hashBody(findPullRequestBody(change)),
+      hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
+    sha: change.current_revision as LongCommitSha,
   };
 }
 
 export function mapGerritChangeStateToPrState(
-  state: GerritChangeStatus | 'UNKNOWN', // suppress default path code removal
-): PrState {
+  state: GerritChangeStatus,
+): 'merged' | 'open' | 'closed' {
   switch (state) {
     case 'NEW':
       return 'open';
@@ -89,14 +109,15 @@ export function mapGerritChangeStateToPrState(
     case 'ABANDONED':
       return 'closed';
   }
-  return 'all';
 }
+
 export function extractSourceBranch(change: GerritChange): string | undefined {
   let sourceBranch: string | undefined = undefined;
 
   if (change.current_revision) {
     const re = regEx(/^Renovate-Branch: (.+)$/m);
-    const message = change.revisions[change.current_revision]?.commit?.message;
+    const currentRevision = change.revisions![change.current_revision];
+    const message = currentRevision.commit_with_footers;
     if (message) {
       sourceBranch = re.exec(message)?.[1];
     }
