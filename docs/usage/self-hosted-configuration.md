@@ -695,9 +695,16 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 
 ## gitPrivateKey
 
-This is a private PGP or SSH key for signing Git commits.
+This is a private PGP, SSH, or x.509 key for signing Git commits.
+
+Renovate automatically detects the key format and uses the appropriate signing method:
+
+- **PGP keys**: Uses `gpg` for import and sets `gpg.format` to `openpgp`
+- **SSH keys**: Uses `ssh-keygen` for key handling and sets `gpg.format` to `ssh`
+- **x.509 certificates**: Uses `gpgsm` for import and sets `gpg.format` to `x509`
 
 For PGP, it should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
+For x.509, provide the certificate in PEM format with `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----` boundaries.
 Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
 
 <!-- prettier-ignore -->
@@ -707,7 +714,7 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before) when using PGP
+1. Run `gpg import` (for PGP), `gpgsm --import` (for x.509), or prepare SSH keys (for SSH)
 1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
 
 The `git` commands are run locally in the cloned repo instead of globally.
