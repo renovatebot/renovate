@@ -12,6 +12,7 @@ import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import {
+  getCommitsHourlyCount,
   getConcurrentBranchesCount,
   getConcurrentPrsCount,
   getPrHourlyCount,
@@ -134,6 +135,9 @@ export async function writeUpdates(
 
   const prsThisHourCount = await getPrHourlyCount(config);
   setCount('HourlyPRs', prsThisHourCount);
+
+  const commitsThisHourCount = await getCommitsHourlyCount(branches);
+  setCount('HourlyCommits', commitsThisHourCount);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
