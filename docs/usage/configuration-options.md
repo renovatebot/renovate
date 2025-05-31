@@ -2890,7 +2890,7 @@ Renovate calculates the valid syntax for this at runtime, because it depends on 
 
 #### Using regular expressions
 
-You can use Regular Expressions in the `allowedVersion` config.
+You can use Regular Expressions in the `allowedVersions` config.
 You must _begin_ and _end_ your Regular Expression with the `/` character!
 
 For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
