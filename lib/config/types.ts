@@ -97,6 +97,7 @@ export interface RenovateSharedConfig {
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
+  updateLockFiles?: boolean;
 }
 
 // Config options used only within the global worker

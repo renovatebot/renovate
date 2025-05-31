@@ -28,6 +28,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "recreateClosed": false,
   "releaseTimestamp": undefined,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -118,6 +119,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "recreateClosed": false,
   "releaseTimestamp": undefined,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -198,6 +200,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "recreateClosed": true,
   "releaseTimestamp": undefined,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -245,6 +248,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "recreateClosed": false,
   "releaseTimestamp": undefined,
   "skipInstalls": true,
+  "updateLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",

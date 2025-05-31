@@ -5,6 +5,7 @@ import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
+import { logger } from '~test/util';
 
 const {
   commitMessage,
@@ -1652,5 +1653,187 @@ describe('workers/repository/updates/generate', () => {
         prTitle: 'I3 I2 I1 Update deps',
       });
     });
+
+    it('sets updateLockFiles to true when no upgrades specify a value', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+        groupName: 'deps',
+        group: {
+          commitMessageTopic: '{{{groupName}}}',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+        },
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        updateLockFiles: true,
+      });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
+    });
+
+    it('sets updateLockFiles to false when all upgrades specify false', () => {
+      const commonOptions = {
+        ...requiredDefaultOptions,
+        manager: 'some-manager',
+        branchName: 'deps',
+        groupName: 'deps',
+        group: {
+          commitMessageTopic: '{{{groupName}}}',
+          commitMessagePrefix:
+            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+        },
+      };
+
+      const branch = [
+        {
+          ...commonOptions,
+          depName: 'dep1',
+          newVersion: '1.2.0',
+          newValue: '1.2.0',
+          updateType: 'minor' as UpdateType,
+          updateLockFiles: false,
+          fileReplacePosition: 1,
+          prBodyDefinitions: {
+            Issue: 'I1',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep2',
+          newVersion: '1.0.0',
+          newValue: '1.0.0',
+          updateType: 'major' as UpdateType,
+          updateLockFiles: false,
+          fileReplacePosition: 2,
+          prBodyDefinitions: {
+            Issue: 'I2',
+          },
+        },
+        {
+          ...commonOptions,
+          depName: 'dep3',
+          newVersion: '1.2.3',
+          newValue: '1.2.3',
+          updateType: 'patch' as UpdateType,
+          updateLockFiles: false,
+          fileReplacePosition: 0,
+          prBodyDefinitions: {
+            Issue: 'I3',
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        updateLockFiles: false,
+      });
+      expect(logger.logger.debug).not.toHaveBeenCalled();
+    });
+
+    it.each([true, false])(
+      'sets updateLockFiles to true when not all upgrades specify false and first is $0',
+      (first) => {
+        const commonOptions = {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          groupName: 'deps',
+          group: {
+            commitMessageTopic: '{{{groupName}}}',
+            commitMessagePrefix:
+              '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
+          },
+        };
+
+        const branch = [
+          {
+            ...commonOptions,
+            depName: 'dep1',
+            newVersion: '1.2.0',
+            newValue: '1.2.0',
+            updateType: 'minor' as UpdateType,
+            updateLockFiles: first,
+            fileReplacePosition: 1,
+            prBodyDefinitions: {
+              Issue: 'I1',
+            },
+          },
+          {
+            ...commonOptions,
+            depName: 'dep2',
+            newVersion: '1.0.0',
+            newValue: '1.0.0',
+            updateType: 'major' as UpdateType,
+            fileReplacePosition: 2,
+            prBodyDefinitions: {
+              Issue: 'I2',
+            },
+          },
+          {
+            ...commonOptions,
+            depName: 'dep3',
+            newVersion: '1.2.3',
+            newValue: '1.2.3',
+            updateType: 'patch' as UpdateType,
+            updateLockFiles: false,
+            fileReplacePosition: 0,
+            prBodyDefinitions: {
+              Issue: 'I3',
+            },
+          },
+        ] satisfies BranchUpgradeConfig[];
+        const res = generateBranchConfig(branch);
+        expect(res).toMatchObject({
+          updateLockFiles: true,
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            upgrades: [
+              { depName: 'dep3', updateLockFiles: false },
+              { depName: 'dep2', updateLockFiles: undefined },
+              { depName: 'dep1', updateLockFiles: first },
+            ],
+          },
+          'Mixed `updateLockFiles` values in upgrades. Lock files will be updated.',
+        );
+      },
+    );
   });
 });

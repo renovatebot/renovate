@@ -45,6 +45,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  updateLockFiles?: boolean;
   lockFiles?: string[];
 }
 

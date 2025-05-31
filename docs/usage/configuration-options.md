@@ -4391,6 +4391,13 @@ To opt in to letting Renovate update internal package versions normally, set thi
 
 ## updateLockFiles
 
+Set this to false when automatic lock file updating fails, is incorrect, or not needed.
+When this option is set to false, Renovate won't attempt to update lock files, so you will need to update them yourself, either manually or through secondary automation such as CI workflows.
+
+<!-- prettier-ignore -->
+!!! note
+    When this option is used in package rules, along with grouped upgrades, lock file updating will only be disabled if every upgrade in the grouped branch wants to disable it.
+
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates".
