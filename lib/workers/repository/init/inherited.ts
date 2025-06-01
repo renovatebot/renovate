@@ -104,7 +104,7 @@ export async function mergeInheritedConfig(
   let filteredConfig = removeGlobalConfig(decryptedConfig, true);
   if (!dequal(decryptedConfig, filteredConfig)) {
     logger.debug(
-      { inheritedConfig, filteredConfig },
+      { inheritedConfig: decryptedConfig, filteredConfig },
       'Removed global config from inherited config.',
     );
   }
@@ -145,7 +145,7 @@ export async function mergeInheritedConfig(
   filteredConfig = removeGlobalConfig(decryptedConfig, true);
   if (!dequal(decryptedConfig, filteredConfig)) {
     logger.debug(
-      { inheritedConfig: resolvedConfig, filteredConfig },
+      { inheritedConfig: decryptedConfig, filteredConfig },
       'Removed global config from inherited config presets.',
     );
   }
