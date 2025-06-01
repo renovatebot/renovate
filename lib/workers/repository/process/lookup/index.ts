@@ -366,16 +366,12 @@ export async function lookupUpdates(
         rangeStrategy === 'pin' &&
         !versioningApi.isSingleVersion(compareValue)
       ) {
+        const newValue =
+          versioningApi.getPinnedValue?.(currentVersion) ?? currentVersion;
         res.updates.push({
           updateType: 'pin',
           isPin: true,
-          // TODO: newValue can be null! (#22198)
-          newValue: versioningApi.getNewValue({
-            currentValue: compareValue,
-            rangeStrategy,
-            currentVersion,
-            newVersion: currentVersion,
-          })!,
+          newValue,
           newVersion: currentVersion,
           newMajor: versioningApi.getMajor(currentVersion)!,
         });
