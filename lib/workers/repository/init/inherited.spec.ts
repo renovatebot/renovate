@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
 import { hostRules, platform } from '~test/util';
+import * as decrypt from '../../../config/decrypt';
 
 vi.mock('../../../config/presets');
 
@@ -108,6 +109,55 @@ describe('workers/repository/init/inherited', () => {
       {
         matchHost: 'some-host-url',
         token: 'some-token',
+      },
+    ]);
+    expect(res.hostRules).toBeUndefined();
+  });
+
+  it('should decrypt encrypted values from inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      `{
+        "hostRules": [
+          {
+            "matchHost": "some-host-url",
+            "encrypted": {
+              "token": "some-secret-token"
+            }
+          }
+        ]
+      }`,
+    );
+
+    function mockDecrypt(config: any): any {
+      if (Array.isArray(config)) {
+        return config.map(mockDecrypt);
+      } else if (config !== null && typeof config === 'object') {
+        let newObj: any = {};
+
+        for (const [key, value] of Object.entries(config)) {
+          if (key === 'encrypted' && value && typeof value === 'object') {
+            const unwrapped = mockDecrypt(value);
+            // Merge unwrapped encrypted properties into the parent
+            newObj = { ...newObj, ...unwrapped };
+          } else {
+            newObj[key] = mockDecrypt(value);
+          }
+        }
+        return newObj;
+      } else {
+        return config; // primitive values
+      }
+    }
+
+    vi.spyOn(decrypt, 'decryptConfig').mockImplementation(mockDecrypt);
+
+    const res = await mergeInheritedConfig({
+      ...config,
+    });
+    expect(hostRules.getAll()).toMatchObject([
+      {
+        matchHost: 'some-host-url',
+        token: 'some-secret-token',
       },
     ]);
     expect(res.hostRules).toBeUndefined();
