@@ -128,28 +128,14 @@ describe('workers/repository/init/inherited', () => {
       }`,
     );
 
-    function mockDecrypt(config: any): any {
-      if (Array.isArray(config)) {
-        return config.map(mockDecrypt);
-      } else if (config !== null && typeof config === 'object') {
-        let newObj: any = {};
-
-        for (const [key, value] of Object.entries(config)) {
-          if (key === 'encrypted' && value && typeof value === 'object') {
-            const unwrapped = mockDecrypt(value);
-            // Merge unwrapped encrypted properties into the parent
-            newObj = { ...newObj, ...unwrapped };
-          } else {
-            newObj[key] = mockDecrypt(value);
-          }
-        }
-        return newObj;
-      } else {
-        return config; // primitive values
-      }
-    }
-
-    vi.spyOn(decrypt, 'decryptConfig').mockImplementation(mockDecrypt);
+    vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+      hostRules: [
+        {
+          matchHost: 'some-host-url',
+          token: 'some-secret-token',
+        },
+      ],
+    });
 
     const res = await mergeInheritedConfig({
       ...config,
