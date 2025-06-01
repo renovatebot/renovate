@@ -1445,7 +1445,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchSourceUrls',
-    description: 'A list of source URLs to match against. Each element can be a string, glob pattern or regex',
+    description: 'A list of exact match URLs or URL patterns to match sourceUrl against.',
     type: 'array',
     subType: 'string',
     allowString: true,
