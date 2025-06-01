@@ -3,18 +3,13 @@
   "title": "Exceptions for abandoned packages",
   "description": "Community-sourced overrides for packages that appear abandoned but are still maintained",
   "type": "object",
-  "definitions": {
-    "datasourceConfig": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    }
-  },
   "properties": {
     "$schema": { "type": "string" }
   },
   "additionalProperties": {
-    "$ref": "#/definitions/datasourceConfig"
+    "type": "object",
+    "additionalProperties": {
+      "type": "string"
+    }
   }
 }
