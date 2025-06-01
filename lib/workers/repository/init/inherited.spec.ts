@@ -1,3 +1,4 @@
+import * as decrypt from '../../../config/decrypt';
 import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import * as validation from '../../../config/validation';
@@ -9,7 +10,6 @@ import {
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
 import { hostRules, platform } from '~test/util';
-import * as decrypt from '../../../config/decrypt';
 
 vi.mock('../../../config/presets');
 
