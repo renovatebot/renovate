@@ -614,8 +614,8 @@ importers:
         specifier: 6.1.1
         version: 6.1.1
       re2:
-        specifier: 1.21.5
-        version: 1.21.5
+        specifier: 1.22.0
+        version: 1.22.0
 
 packages:
 
@@ -5255,8 +5255,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  re2@1.21.5:
-    resolution: {integrity: sha512-ud7gX1bO6K4+l2YVUxZjOPCiyCBZvmi7XUnGArSk3rGIvsZW35jX3pjGs8zQiTumOpgbxHCZI1ivB1VO7i4MFw==}
+  re2@1.22.0:
+    resolution: {integrity: sha512-tmgBh4Ttx41cpM3DQ4VrFpXF287/0ZpXUu+Zq9Q6xsJDG7XP9Xa0Wrc9pRJUzk8uLddg1J7Krlcp4WIV9Xg0Qg==}
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
@@ -12041,7 +12041,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.21.5:
+  re2@1.22.0:
     dependencies:
       install-artifact-from-github: 1.4.0
       nan: 2.22.2
