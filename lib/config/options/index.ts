@@ -939,7 +939,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'gitCredentials',
+    name: 'gitCredentialPassing',
     description: 'Method to pass credentials to Git.',
     stage: 'repository',
     type: 'string',

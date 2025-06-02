@@ -95,7 +95,7 @@ export async function globalInitialize(
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
 
-  if (config.gitCredentials === 'store') {
+  if (config.gitCredentialPassing === 'store') {
     logger.debug('Enable the Git credential store');
     await enableCredentialStore();
 
