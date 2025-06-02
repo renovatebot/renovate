@@ -214,5 +214,92 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
     });
+    it('retains previously deleted files too', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'dependencies/Chart.yaml',
+            contents: '[content]',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'dependencies/Chart.lock',
+            contents: '[content]',
+          },
+          {
+            type: 'addition',
+            path: 'dependencies/charts/ingress-nginx-4.12.2.tgz',
+            contents: '[content]',
+          },
+          {
+            type: 'deletion',
+            path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          not_added: ['dependencies/charts/ingress-nginx-4.12.2.tgz'],
+          conflicted: [],
+          created: [],
+          deleted: ['dependencies/charts/ingress-nginx-4.12.0.tgz'],
+          modified: [
+            'dependencies/Chart.lock',
+            'dependencies/Chart.yaml',
+            'resources/helmfile.yaml',
+          ],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toMatchObject([
+        {
+          type: 'addition',
+          path: 'dependencies/Chart.lock',
+          contents: '[content]',
+        },
+        {
+          type: 'addition',
+          path: 'dependencies/charts/ingress-nginx-4.12.2.tgz',
+          contents: '[content]',
+        },
+        {
+          type: 'deletion',
+          path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
+        },
+      ]);
+    });
   });
 });
