@@ -1,3 +1,5 @@
+import os from 'os';
+import path from 'path';
 import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
@@ -1840,6 +1842,9 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
+        env: {
+          RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: '',
+        },
       });
     });
 
@@ -1967,9 +1972,15 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
         cwd: '/localDir',
+        env: {
+          RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: '',
+        },
       });
       expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
         cwd: '/localDir',
+        env: {
+          RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: '',
+        },
       });
       expect(exec.exec).toHaveBeenCalledTimes(2);
       const calledWithConfig = commit.commitFilesToBranch.mock.calls[0][0];
@@ -2115,6 +2126,9 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
         cwd: '/localDir',
+        env: {
+          RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: '',
+        },
       });
       expect(exec.exec).toHaveBeenCalledTimes(1);
       expect(
@@ -2123,6 +2137,104 @@ describe('workers/repository/update/branch/index', () => {
           'modified_file',
         ),
       ).toBe('modified file content');
+    });
+
+    it('executes post-upgrade tasks with propagated post-upgrade file path via env variable', async () => {
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      });
+      scm.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        }),
+      );
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+      });
+
+      const inconfig: BranchConfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo hardcoded-string'],
+          dataFileTemplate:
+            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{\/unless}}{{\/each}}]',
+          executionMode: 'branch',
+        },
+      };
+
+      const result = await branchWorker.processBranch(inconfig);
+      expect(result).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: null,
+      });
+
+      expect(exec.exec).toHaveBeenCalledTimes(1);
+
+      const execPathParam = exec.exec.mock.calls[0][0];
+      expect(execPathParam).toEqual('echo hardcoded-string');
+
+      const execOptionsParam = exec.exec.mock.calls[0][1];
+      expect(execOptionsParam).toBeDefined();
+      expect(execOptionsParam?.cwd).toEqual('/localDir');
+      const dataFileFullPathRegex = new RegExp(
+        `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}\.tmp$`,
+      );
+      expect(
+        execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
+      ).toMatch(dataFileFullPathRegex);
     });
 
     it('returns when rebaseWhen=never', async () => {
