@@ -99,7 +99,6 @@ describe('workers/repository/onboarding/branch/index', () => {
             return Promise.resolve(null);
           },
         );
-
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
         const file = scm.commitAndPush.mock.calls[0][0]

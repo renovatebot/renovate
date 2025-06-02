@@ -1445,7 +1445,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchSourceUrls',
-    description: 'A list of source URLs to exact match against.',
+    description:
+      'A list of exact match URLs (or URL patterns) to match sourceUrl against.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1889,6 +1890,20 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'abandonmentThreshold',
+    description:
+      'Flags packages that have not been updated within this period as abandoned.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'dependencyDashboardReportAbandonment',
+    description:
+      'Controls whether abandoned packages are reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'internalChecksAsSuccess',
