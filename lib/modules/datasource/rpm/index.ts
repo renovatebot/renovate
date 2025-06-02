@@ -3,7 +3,7 @@ import { promisify } from 'util';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
+import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 const gunzipAsync = promisify(gunzip);
@@ -34,7 +34,7 @@ export class RpmDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ packageName }: GetReleasesConfig) => packageName,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) => packageName,
     ttlMinutes: 1440,
   })
   async getReleases({
@@ -64,7 +64,7 @@ export class RpmDatasource extends Datasource {
   })
   async getFilelistsGzipUrl(registryUrl: string): Promise<string | null> {
     const repomdUrl = joinUrlParts(
-      ensureTrailingSlash(registryUrl),
+      registryUrl,
       RpmDatasource.repomdXmlFileName,
     );
     let response;

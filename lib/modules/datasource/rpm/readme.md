@@ -42,7 +42,6 @@ where the versioning format could be `<semantic version>-<revision or release>`,
       "fileMatch": [
         "path_to_manifest_json"
       ],
-      "matchStringsStrategy": "any",
       "registryUrlTemplate": "http://example.com/repo/repodata/",
       "datasourceTemplate": "rpm"
     }

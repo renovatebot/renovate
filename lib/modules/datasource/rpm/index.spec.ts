@@ -5,10 +5,7 @@ import * as httpMock from '~test/http-mock';
 describe('modules/datasource/rpm/index', () => {
   describe('getFilelistsGzipUrl', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
-    let rpmDatasource: RpmDatasource;
-    beforeEach(() => {
-      rpmDatasource = new RpmDatasource();
-    });
+    const rpmDatasource = new RpmDatasource();
 
     it('returns the correct filelists.xml URL', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -129,13 +126,9 @@ describe('modules/datasource/rpm/index', () => {
 
   describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
-    let rpmDatasource: RpmDatasource;
-    let filelistsXmlUrl: string;
-    beforeEach(() => {
-      rpmDatasource = new RpmDatasource();
-      filelistsXmlUrl =
-        'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
-    });
+    const rpmDatasource = new RpmDatasource();
+    const filelistsXmlUrl =
+      'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
 
     it('returns the correct releases', async () => {
       const filelistsXml = `
@@ -363,10 +356,7 @@ describe('modules/datasource/rpm/index', () => {
   });
   describe('getReleases', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
-    let rpmDatasource: RpmDatasource;
-    beforeEach(() => {
-      rpmDatasource = new RpmDatasource();
-    });
+    const rpmDatasource = new RpmDatasource();
 
     it('returns null if registryUrl is not provided', async () => {
       const releases = await rpmDatasource.getReleases({
