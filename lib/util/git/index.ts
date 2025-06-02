@@ -199,6 +199,10 @@ export async function validateGitVersion(): Promise<boolean> {
   return true;
 }
 
+export async function enableCredentialStore(): Promise<void> {
+  await simpleGit().addConfig('credential.helper', 'store', true, 'global');
+}
+
 async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   config.branchCommits = {};
   const url =

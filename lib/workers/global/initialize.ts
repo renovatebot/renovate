@@ -1,4 +1,7 @@
+import { promises as fs } from 'fs';
 import os from 'node:os';
+import { homedir } from 'os';
+import { join } from 'path';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
@@ -8,7 +11,7 @@ import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
-import { validateGitVersion } from '../../util/git';
+import { enableCredentialStore, validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setHttpRateLimits } from '../../util/http/rate-limits';
 import { initMergeConfidence } from '../../util/merge-confidence';
@@ -91,6 +94,22 @@ export async function globalInitialize(
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
+
+  if (config.gitCredentials === 'store') {
+    logger.debug('Enable the Git credential store');
+    await enableCredentialStore();
+
+    const lines: string[] = [];
+    for (const host of config.hostRules ?? []) {
+      lines.push(`https://oauth2:${host.token}@${host.matchHost}`);
+    }
+    const credentialsPath = join(homedir(), '.git-credentials');
+    await fs.writeFile(credentialsPath, lines.join('\n') + '\n', {
+      mode: 0o600,
+      encoding: 'utf-8',
+    });
+  }
+
   return config;
 }
 

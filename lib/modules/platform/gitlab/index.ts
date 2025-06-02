@@ -266,6 +266,7 @@ function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>,
+  gitCredentials: string,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -280,6 +281,8 @@ function getRepoUrl(
     url: defaults.endpoint,
   });
   const env = getEnv();
+
+  const authData = gitCredentials === 'url' ? `oauth2:${opts.token!}` : null;
 
   if (
     gitUrl === 'endpoint' ||
@@ -303,7 +306,7 @@ function getRepoUrl(
         /* v8 ignore next: should never happen */
         protocol.slice(0, -1) || 'https',
       // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
+      auth: authData,
       host,
       pathname: `${newPathname}/${repository}.git`,
     });
@@ -314,7 +317,9 @@ function getRepoUrl(
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   // TODO: types (#22198)
-  repoUrl.auth = `oauth2:${opts.token!}`;
+  // au: URL-based authentication (token) injected here
+  repoUrl.auth = authData;
+
   return URL.format(repoUrl);
 }
 
@@ -327,12 +332,14 @@ export async function initRepo({
   gitUrl,
   endpoint,
   includeMirrors,
+  gitCredentials,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = ignorePrAuthor;
+  config.gitCredentials = gitCredentials;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -381,7 +388,7 @@ export async function initRepo({
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     logger.debug('Enabling Git FS');
-    const url = getRepoUrl(repository, gitUrl, res);
+    const url = getRepoUrl(repository, gitUrl, res, gitCredentials);
     await git.initRepo({
       ...config,
       url,
