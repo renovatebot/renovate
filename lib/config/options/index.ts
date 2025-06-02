@@ -173,6 +173,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'dataFileTemplate',
+    description: 'A template to create post-upgrade command data file from.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    default: '',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'fileFilters',
     description:
       'Files that match the glob pattern will be committed after running a post-upgrade task.',

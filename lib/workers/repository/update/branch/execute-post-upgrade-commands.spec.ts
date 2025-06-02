@@ -1,3 +1,5 @@
+import os from 'os';
+import path from 'path';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -112,6 +114,122 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates data file for commands', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            dataFileTemplate:
+              '[{{#each upgrades}}{\"depName\": \"{{{depName}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      const dataFileFullPathRegex = `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}\.tmp$`;
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.writeFile).toHaveBeenCalledTimes(1);
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.stringMatching(dataFileFullPathRegex),
+        '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
+      );
+      expect(fs.deleteFile).toHaveBeenCalledTimes(1);
+      expect(fs.deleteFile).toHaveBeenCalledWith(
+        expect.stringMatching(dataFileFullPathRegex),
+      );
+
+      const writeFilePathParam = fs.writeFile.mock.calls[0][0];
+      const deleteFilePathParam = fs.deleteFile.mock.calls[0][0];
+      expect(writeFilePathParam).toEqual(deleteFilePathParam);
+    });
+
+    it('should not create data file if no commands given', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: [],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.writeFile).not.toHaveBeenCalled();
+      expect(fs.deleteFile).not.toHaveBeenCalled();
     });
 
     it('logs files which do not match fileFilters', async () => {

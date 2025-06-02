@@ -1,3 +1,6 @@
+import os from 'os';
+import path from 'path';
+import crypto from 'crypto';
 // TODO #22198
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
@@ -10,6 +13,8 @@ import {
   localPathIsFile,
   readLocalFile,
   writeLocalFile,
+  writeFile,
+  deleteFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -42,6 +47,7 @@ export async function postUpgradeCommandsExecutor(
       `Checking for post-upgrade tasks`,
     );
     const commands = upgrade.postUpgradeTasks?.commands;
+    const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
@@ -61,6 +67,40 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
+      let dataFilePath = '';
+      if (dataFileTemplate) {
+        const dataFileContent = compile(
+          dataFileTemplate,
+          mergeChildConfig(config, upgrade),
+        );
+        logger.debug(
+          { dataFileTemplate },
+          'Processed post-upgrade commands data file template.',
+        );
+
+        const tmpDir = os.tmpdir();
+        const dataFileName = `renovate-post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
+        dataFilePath = path.join(tmpDir, dataFileName);
+
+        try {
+          await writeFile(dataFilePath, dataFileContent);
+
+          logger.debug(
+            { dataFilePath, dataFileContent },
+            'Created post-upgrade commands data file.',
+          );
+        } catch (error) {
+          // Reset the data file path to prevent clean up attempt.
+          dataFilePath = '';
+
+          artifactErrors.push({
+            stderr: sanitize(
+              `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
+            ),
+          });
+        }
+      }
+
       for (const cmd of commands) {
         const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
         if (compiledCmd !== cmd) {
@@ -76,6 +116,7 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
+              env: { RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath },
             });
 
             logger.debug(
@@ -100,6 +141,24 @@ export async function postUpgradeCommandsExecutor(
             lockFile: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
+            ),
+          });
+        }
+      }
+
+      if (dataFilePath) {
+        // Clean up data file after post-upgrade commands ran.
+        try {
+          await deleteFile(dataFilePath);
+
+          logger.debug(
+            { dataFilePath },
+            'Removed post-upgrade commands data file.',
+          );
+        } catch (error) {
+          artifactErrors.push({
+            stderr: sanitize(
+              `Failed to remove post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
             ),
           });
         }
