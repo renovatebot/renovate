@@ -33,7 +33,7 @@ export function getPackageManagerVersion(
   name: string,
   pkg: PackageJsonSchema,
 ): string | null {
-    if (pkg.volta?.[name]) {
+  if (pkg.volta?.[name]) {
     const version = pkg.volta[name];
     logger.debug(`Found ${name} constraint in package.json volta: ${version}`);
 
@@ -51,8 +51,6 @@ export function getPackageManagerVersion(
       );
       return version;
     }
-
-    return null;
   }
   if (pkg.packageManager?.name === name) {
     const version = pkg.packageManager.version;
