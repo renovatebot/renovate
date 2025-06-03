@@ -29,6 +29,24 @@ ARG TAG=3.19.4
 FROM alpine:${TAG}
 ```
 
+Renovate supports variables with default values (using the `:-` syntax) when they're configured with registry aliases:
+
+```dockerfile
+FROM ${CI_REGISTRY:-}alpine:3.19.4
+```
+
+```json
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "my-registry.io"
+  }
+}
+```
+
+This works with both formats, regardless of whether the registry alias ends with a slash or not:
+- Without slash in the variable: `${CI_REGISTRY:-}/alpine:3.19.4`
+- With slash in the variable: `${CI_REGISTRY:-}alpine:3.19.4`
+
 #### `COPY --from` support
 
 Renovate can update images referenced in `COPY --from` directives.

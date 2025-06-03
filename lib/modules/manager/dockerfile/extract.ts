@@ -179,16 +179,24 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    if (currentFrom.startsWith(`${name}/`)) {
-      const depName = currentFrom.substring(name.length + 1);
+    // Check for two possible formats:
+    // 1. Variable followed by slash: "${VAR}/image"
+    // 2. Variable including a slash: "${VAR}image"
+    if (currentFrom.startsWith(`${name}/`) || currentFrom.startsWith(name)) {
+      const depNameStartIndex = currentFrom.startsWith(`${name}/`) ? name.length + 1 : name.length;
+      const depName = currentFrom.substring(depNameStartIndex);
+      const valueWithSlash = value.endsWith('/') ? value : `${value}/`;
       const dep = {
-        ...getDep(`${value}/${depName}`, false),
+        ...getDep(`${valueWithSlash}${depName}`, false),
         replaceString: currentFrom,
       };
       // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(value)) {
+      if (dep.depName?.startsWith(valueWithSlash)) {
         dep.packageName = dep.depName;
-        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
+        // Keep original name and path structure in the depName
+        if (currentFrom.includes(':')) {
+          dep.depName = currentFrom.substring(0, currentFrom.indexOf(':'));
+        }
       }
       if (specifyReplaceString) {
         dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);

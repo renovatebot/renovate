@@ -50,6 +50,8 @@ describe('modules/manager/gitlabci/utils', () => {
       ${'multiple aliases'}        | ${{ foo: 'foo.registry.com', bar: 'bar.registry.com' }} | ${'foo/image:1.0'}            | ${{ depName: 'foo/image', packageName: 'foo.registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `foo/image${versionAndDigestTemplate}` }}
       ${'aliased variable'}        | ${{ $CI_REGISTRY: 'registry.com' }}                     | ${'$CI_REGISTRY/image:1.0'}   | ${{ depName: '$CI_REGISTRY/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$CI_REGISTRY/image${versionAndDigestTemplate}` }}
       ${'variables with brackets'} | ${{ '${CI_REGISTRY}': 'registry.com' }}                 | ${'${CI_REGISTRY}/image:1.0'} | ${{ depName: '${CI_REGISTRY}/image', packageName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: `$\{CI_REGISTRY}/image${versionAndDigestTemplate}` }}
+      ${'variables with default and slash'} | ${{ '${CI_REGISTRY:-}': 'registry.com' }}      | ${'${CI_REGISTRY:-}/image:1.0'} | ${{ currentValue: '1.0' }}
+      ${'variables with default no slash'} | ${{ '${CI_REGISTRY:-}': 'registry.com/' }}      | ${'${CI_REGISTRY:-}image:1.0'} | ${{ currentValue: '1.0' }}
       ${'not aliased variable'}    | ${{}}                                                   | ${'$CI_REGISTRY/image:1.0'}   | ${{ autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
       ${'plain image'}             | ${{}}                                                   | ${'registry.com/image:1.0'}   | ${{ depName: 'registry.com/image', currentValue: '1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
     `(
