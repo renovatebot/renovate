@@ -484,6 +484,7 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
@@ -508,6 +509,7 @@
       "https://github.com/remix-run/react-router"
     ],
     "react-spectrum": "https://github.com/adobe/react-spectrum",
+    "react-spring": "https://github.com/pmndrs/react-spring",
     "reactivestack-cookies": "https://github.com/reactivestack/cookies",
     "reakit": "https://github.com/reakit/reakit",
     "redwood": "https://github.com/redwoodjs/redwood",
@@ -558,7 +560,11 @@
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
     "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
-    "surveyjs": "https://github.com/surveyjs/surveyjs",
+    "surveyjs": [
+      "https://github.com/surveyjs/surveyjs",
+      "https://github.com/surveyjs/survey-library",
+      "https://github.com/surveyjs/survey-creator"
+    ],
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
@@ -567,6 +573,7 @@
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
+    "tanstack-virtual": "https://github.com/TanStack/virtual",
     "tauri": "https://github.com/tauri-apps/tauri",
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",

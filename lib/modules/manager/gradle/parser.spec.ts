@@ -386,6 +386,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'"foo:bar:1.2.3"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'"foo:bar:1.2+"'}            | ${{ depName: 'foo:bar', currentValue: '1.2+' }}
         ${'"foo:bar:1.2.3@zip"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+        ${'"foo:bar:1.2.3:docs@jar"'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'jar' }}
         ${'"foo:bar1:1"'}              | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 10 } }}
         ${'"foo:bar:[1.2.3, )"'}       | ${{ depName: 'foo:bar', currentValue: '[1.2.3, )', managerData: { fileReplacePosition: 9 } }}
         ${'"foo:bar:[1.2.3, 1.2.4)"'}  | ${{ depName: 'foo:bar', currentValue: '[1.2.3, 1.2.4)', managerData: { fileReplacePosition: 9 } }}
