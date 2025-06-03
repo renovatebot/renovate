@@ -999,13 +999,19 @@ export async function mergeBranch(
       mergeStrategy === 'rebase' ||
       mergeStrategy === 'auto'
     ) {
-      logger.debug(`Performing ff-only merge because mergeStrategy=${mergeStrategy}`);
+      logger.debug(
+        `Performing ff-only merge because mergeStrategy=${mergeStrategy}`,
+      );
       await gitRetry(() => git.merge(['--ff-only', branchName]));
     } else if (mergeStrategy === 'merge-commit') {
-      logger.debug(`Performing merge commit because mergeStrategy=${mergeStrategy}`);
+      logger.debug(
+        `Performing merge commit because mergeStrategy=${mergeStrategy}`,
+      );
       await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
     } else if (mergeStrategy === 'squash') {
-      logger.debug(`Performing squash then merge because mergeStrategy=${mergeStrategy}`);
+      logger.debug(
+        `Performing squash then merge because mergeStrategy=${mergeStrategy}`,
+      );
       // Create a squash commit
       await gitRetry(() => git.merge(['--squash', branchName]));
       // Commit the squash commit
