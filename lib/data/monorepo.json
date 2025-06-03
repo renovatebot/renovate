@@ -560,7 +560,11 @@
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
     "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
-    "surveyjs": "https://github.com/surveyjs/surveyjs",
+    "surveyjs": [
+      "https://github.com/surveyjs/surveyjs",
+      "https://github.com/surveyjs/survey-library",
+      "https://github.com/surveyjs/survey-creator"
+    ],
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
