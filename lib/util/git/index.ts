@@ -1005,6 +1005,7 @@ export async function mergeBranch(
       logger.debug(`Performing merge commit because mergeStrategy=${mergeStrategy}`);
       await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
     } else if (mergeStrategy === 'squash') {
+      logger.debug(`Performing squash then merge because mergeStrategy=${mergeStrategy}`);
       // Create a squash commit
       await gitRetry(() => git.merge(['--squash', branchName]));
       // Commit the squash commit
