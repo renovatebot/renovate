@@ -1002,6 +1002,7 @@ export async function mergeBranch(
       logger.debug(`Performing ff-only merge because mergeStrategy=${mergeStrategy}`);
       await gitRetry(() => git.merge(['--ff-only', branchName]));
     } else if (mergeStrategy === 'merge-commit') {
+      logger.debug(`Performing merge commit because mergeStrategy=${mergeStrategy}`);
       await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
     } else if (mergeStrategy === 'squash') {
       // Create a squash commit
