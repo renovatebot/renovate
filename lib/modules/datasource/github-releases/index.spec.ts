@@ -1,13 +1,12 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
-import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import type { Timestamp } from '../../../util/timestamp';
 import { GithubReleasesDatasource } from '.';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('modules/datasource/github-releases/index', () => {
 
   describe('getReleases', () => {
     it('returns releases', async () => {
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           url: 'https://example.com',
@@ -98,7 +97,7 @@ describe('modules/datasource/github-releases/index', () => {
     const newDigest = 'sha-of-v15';
 
     beforeEach(() => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',

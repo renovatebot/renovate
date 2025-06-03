@@ -12,10 +12,11 @@ import type { RepositoryRule } from './types';
 
 export async function generateLoginCmd(
   repositoryRule: RepositoryRule,
-  loginCMD: string,
 ): Promise<string | null> {
+  logger.trace({ repositoryRule }, 'Generating Helm registry login command');
   const { hostRule, repository } = repositoryRule;
   const { username, password } = hostRule;
+  const loginCMD = 'helm registry login';
   if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
     const [, region] = coerceArray(ecrRegex.exec(repository));
@@ -31,13 +32,17 @@ export async function generateLoginCmd(
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${repository}`;
+    )} ${quote(repository)}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
-    return `${loginCMD} --username ${quote(username)} --password ${quote(
+    // Split off any path as it's not valid for the helm registry login command
+    const hostPart = repository.split('/')[0];
+    const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${repository}`;
+    )} ${quote(hostPart)}`;
+    logger.trace({ cmd }, 'Generated Helm registry login command');
+    return cmd;
   }
   return null;
 }

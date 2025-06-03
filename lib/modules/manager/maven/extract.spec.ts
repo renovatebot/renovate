@@ -1,7 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
-import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractExtensions,
@@ -9,8 +6,10 @@ import {
   extractRegistries,
   resolveParents,
 } from './extract';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const simpleContent = Fixtures.get('simple.pom.xml');
 const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
@@ -21,14 +20,14 @@ const profileSettingsContent = Fixtures.get('profile.settings.xml');
 describe('modules/manager/maven/extract', () => {
   describe('extractPackage', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage('', 'some-file')).toBeNull();
-      expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
-      expect(extractPackage('<foobar></foobar>', 'some-file')).toBeNull();
-      expect(extractPackage('<project></project>', 'some-file')).toBeNull();
+      expect(extractPackage('', 'some-file', {})).toBeNull();
+      expect(extractPackage('invalid xml content', 'some-file', {})).toBeNull();
+      expect(extractPackage('<foobar></foobar>', 'some-file', {})).toBeNull();
+      expect(extractPackage('<project></project>', 'some-file', {})).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractPackage(simpleContent, 'some-file');
+      const res = extractPackage(simpleContent, 'some-file', {});
       expect(res).toMatchObject({
         datasource: 'maven',
         deps: [
@@ -236,18 +235,22 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('extract dependencies with windows line endings', () => {
-      const logSpy = jest.spyOn(logger, 'warn');
       extractPackage(
         '<?xml version="1.0" encoding="UTF-8"?> \r\n',
         'some-file',
+        {},
       );
-      expect(logSpy).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
       );
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
+      const res = extractPackage(
+        Fixtures.get('minimum.pom.xml'),
+        'some-file',
+        {},
+      );
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],
@@ -261,6 +264,7 @@ describe('modules/manager/maven/extract', () => {
       const res = extractPackage(
         Fixtures.get(`minimum_snapshot.pom.xml`),
         'some-file',
+        {},
       );
       expect(res).toEqual({
         datasource: 'maven',
@@ -277,6 +281,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -291,6 +296,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('multiple_usages_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -305,6 +311,7 @@ describe('modules/manager/maven/extract', () => {
       const packages = extractPackage(
         Fixtures.get('infinite_recursive_props.pom.xml'),
         'some-file',
+        {},
       );
       const [{ deps }] = resolveParents([packages!]);
       expect(deps).toMatchObject([
@@ -809,6 +816,48 @@ describe('modules/manager/maven/extract', () => {
         ]);
         expect(res).toMatchObject([
           { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
+      it('should skip root pom.xml when it has an external parent', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+            <parent>
+              <groupId>org.acme</groupId>
+              <artifactId>external-parent</artifactId>
+              <version>1.0.0</version>
+            </parent>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const res = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(res).toMatchObject([
+          {
+            packageFile: 'pom.xml',
+            deps: [{ depName: 'org.acme:external-parent', depType: 'parent' }],
+          },
           {
             packageFile: 'foo.bar/pom.xml',
             deps: [{ depName: 'org.example:root', depType: 'parent-root' }],

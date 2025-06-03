@@ -7,5 +7,5 @@ export function getCombinedKey(
   namespace: PackageCacheNamespace,
   key: string,
 ): CombinedKey {
-  return `global%%${namespace}%%${key}`;
+  return `datasource-mem:pkg-fetch:${namespace}:${key}`;
 }

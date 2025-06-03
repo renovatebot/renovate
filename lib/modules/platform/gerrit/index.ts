@@ -119,7 +119,13 @@ export async function initRepo({
     label: '-2',
   });
   for (const change of rejectedChanges) {
-    await client.abandonChange(change._number);
+    await client.abandonChange(
+      change._number,
+      'This change has been abandoned as it was voted with Code-Review -2.',
+    );
+    logger.info(
+      `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
+    );
   }
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
@@ -160,9 +166,6 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
       TAG_PULL_REQUEST_BODY,
     );
   }
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(prConfig.number);
-  }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
   }
@@ -195,9 +198,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  if (prConfig.platformPrOptions?.autoApprove) {
-    await client.approveChange(pr._number);
-  }
   return getPr(pr._number);
 }
 

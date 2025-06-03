@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  BITBUCKET_SERVER_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -12,8 +13,9 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
+import type { InternalHttpOptions } from './http';
 import { keepAliveAgents } from './keep-alive';
-import type { GotOptions, InternalHttpOptions } from './types';
+import type { GotOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
@@ -97,6 +99,21 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `bitbucket-server` hostType
+  if (
+    hostType &&
+    BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'bitbucket-server'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'bitbucket-server',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   // Fallback to `gitea` hostType
   if (
     hostType &&
@@ -121,7 +138,12 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   options: GotOptions,
   hostRule: HostRule,
 ): GotOptions {
-  const { username, password, token, enabled, authType } = hostRule;
+  if (hostRule.enabled === false) {
+    options.enabled = false;
+    return options;
+  }
+
+  const { username, password, token, authType } = hostRule;
   const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
@@ -142,8 +164,6 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
     options.context = { ...options.context, authType };
-  } else if (enabled === false) {
-    options.enabled = false;
   } else {
     logger.once.debug(`hostRules: no authentication for ${host}`);
   }

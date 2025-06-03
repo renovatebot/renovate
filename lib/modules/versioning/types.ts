@@ -58,6 +58,8 @@ export interface VersioningApi {
    */
   isCompatible(version: string, current?: string): boolean;
 
+  isBreaking?(current: string, version: string): boolean;
+
   // digestion of version
 
   getMajor(version: string | SemVer): null | number;
@@ -126,6 +128,11 @@ export interface VersioningApi {
   subset?(subRange: string, superRange: string): boolean | undefined;
 
   /**
+   * Checks whether subRange intersects superRange.
+   */
+  intersects?(subRange: string, superRange: string): boolean;
+
+  /**
    * Return whether unstable-to-unstable upgrades within the same major version are allowed.
    */
   allowUnstableMajorUpgrades?: boolean;
@@ -137,6 +144,4 @@ export interface VersioningApi {
   isSame?(type: 'major' | 'minor' | 'patch', a: string, b: string): boolean;
 }
 
-export interface VersioningApiConstructor {
-  new (config?: string): VersioningApi;
-}
+export type VersioningApiConstructor = new (config?: string) => VersioningApi;

@@ -4,16 +4,16 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
 import * as fileUtils from './file';
-import { getBaseReleaseUrl } from './url';
+import { getBaseSuiteUrl } from './url';
 import { DebDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { fs } from '~test/util';
 
 const debBaseUrl = 'http://deb.debian.org';
 
@@ -31,7 +31,7 @@ describe('modules/datasource/deb/index', () => {
   let extractedPackageFile: string;
 
   beforeEach(async () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     debDatasource = new DebDatasource();
     cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
@@ -363,6 +363,8 @@ describe('modules/datasource/deb/index', () => {
       mockFetchInReleaseContent('wrong-hash', ...packageArgs, true);
 
       await expect(
+        // TODO: method is private, so needs better testing
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, ...packageArgs),
         ),
@@ -382,6 +384,8 @@ describe('modules/datasource/deb/index', () => {
       mockFetchInReleaseContent('wrong-hash', 'bullseye', 'main', 'amd64');
 
       await expect(
+        // TODO: method is private, so needs better testing
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
@@ -389,7 +393,7 @@ describe('modules/datasource/deb/index', () => {
     });
 
     it('should throw error for when extracting fails', async () => {
-      jest.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
+      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
 
       httpMock
         .scope(debBaseUrl)
@@ -403,6 +407,8 @@ describe('modules/datasource/deb/index', () => {
       );
 
       await expect(
+        // TODO: method is private, so needs better testing
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         debDatasource['downloadAndExtractPackage'](
           getComponentUrl(debBaseUrl, 'bullseye', 'main', 'amd64'),
         ),
@@ -418,6 +424,8 @@ describe('modules/datasource/deb/index', () => {
         .reply(200);
 
       await expect(
+        // TODO: method is private, so needs better testing
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         debDatasource['checkIfModified'](
           getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
@@ -432,6 +440,8 @@ describe('modules/datasource/deb/index', () => {
         .replyWithError('Unexpected Error');
 
       await expect(
+        // TODO: method is private, so needs better testing
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         debDatasource['checkIfModified'](
           getPackageUrl(debBaseUrl, 'stable', 'non-free', 'amd64'),
           new Date(),
@@ -495,7 +505,7 @@ function mockFetchInReleaseContent(
   release: string,
   component: string,
   arch: string,
-  error: boolean = false,
+  error = false,
 ) {
   const packageIndexPath = `${component}/binary-${arch}/Packages.gz`;
 
@@ -507,7 +517,7 @@ function mockFetchInReleaseContent(
   const mockCall = httpMock
     .scope(debBaseUrl)
     .get(
-      getBaseReleaseUrl(getComponentUrl('', release, component, arch)) +
+      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
         '/InRelease',
     );
 

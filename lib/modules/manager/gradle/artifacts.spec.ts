@@ -1,20 +1,6 @@
 import os from 'node:os';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import {
-  env,
-  fs,
-  git,
-  logger,
-  mockedFunction,
-  partial,
-  scm,
-} from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -23,11 +9,12 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git, logger, partial, scm } from '~test/util';
 
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/exec/env');
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -39,7 +26,7 @@ const adminConfig: RepoGlobalConfig = {
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
-const osPlatformSpy = jest.spyOn(os, 'platform');
+const osPlatformSpy = vi.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
@@ -54,7 +41,7 @@ describe('modules/manager/gradle/artifacts', () => {
     resetPrefetchedImages();
 
     // java
-    mockedFunction(getPkgReleases).mockResolvedValue({
+    vi.mocked(getPkgReleases).mockResolvedValue({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },
@@ -79,8 +66,7 @@ describe('modules/manager/gradle/artifacts', () => {
       }),
     );
 
-    // TODO: fix types, jest is using wrong overload (#22198)
-    fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
       let content = '';
       if (fileName === 'gradle.lockfile') {
         content = 'New gradle.lockfile';

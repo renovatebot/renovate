@@ -1,5 +1,4 @@
 import ini from 'ini';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as _sanitize from '../../../util/sanitize';
 import {
@@ -8,9 +7,9 @@ import {
   setNpmrc,
 } from './npmrc';
 
-jest.mock('../../../util/sanitize');
+vi.mock('../../../util/sanitize');
 
-const sanitize = mocked(_sanitize);
+const sanitize = vi.mocked(_sanitize);
 
 describe('modules/datasource/npm/npmrc', () => {
   beforeEach(() => {

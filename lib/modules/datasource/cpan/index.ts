@@ -31,7 +31,7 @@ export class CpanDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -81,9 +81,7 @@ export class CpanDatasource extends Datasource {
     let latestVersion: string | null = null;
     if (releases) {
       for (const release of releases) {
-        if (!latestDistribution) {
-          latestDistribution = release.distribution;
-        }
+        latestDistribution ??= release.distribution;
         if (!latestVersion && release.isLatest) {
           latestVersion = release.version;
         }

@@ -1,11 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -14,15 +8,16 @@ import * as _hostRules from '../../../util/host-rules';
 import { CrateDatasource } from '../../datasource/crate';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git } from '~test/util';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http');
+vi.mock('../../../util/fs');
 
 process.env.CONTAINERBASE = 'true';
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig = {
@@ -144,7 +139,7 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { rust: '1.65.0' } },
       }),
     ).toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
@@ -423,7 +418,11 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          constraints: { rust: '1.65.0' },
+        },
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

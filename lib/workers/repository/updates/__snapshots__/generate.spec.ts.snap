@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles @types specially (reversed) 1`] = `
 {
   "addLabels": [],
   "automerge": false,
@@ -14,6 +14,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "displayFrom": "",
   "displayPending": "",
   "displayTo": "0.6.0",
+  "isBreaking": false,
   "labels": [
     "a",
     "c",
@@ -26,6 +27,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipInstalls": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -83,13 +85,18 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles @types specially 1`] = `
 {
   "addLabels": [],
   "automerge": false,
   "branchName": "some-branch",
   "commitBodyTable": true,
-  "commitMessage": "\\n\\n| datasource | package         | from  | to    |\\n| ---------- | --------------- | ----- | ----- |\\n| npm        | @types/some-dep | 0.5.7 | 0.5.8 |\\n",
+  "commitMessage": "
+
+| datasource | package         | from  | to    |
+| ---------- | --------------- | ----- | ----- |
+| npm        | @types/some-dep | 0.5.7 | 0.5.8 |
+",
   "constraints": {},
   "datasource": "npm",
   "depName": "some-dep",
@@ -100,6 +107,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "displayPending": "",
   "displayTo": "0.6.0",
   "hasTypes": true,
+  "isBreaking": false,
   "isRange": false,
   "labels": [],
   "manager": "some-manager",
@@ -109,6 +117,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipInstalls": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -166,7 +175,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileMaintenance 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles lockFileMaintenance 1`] = `
 {
   "addLabels": [],
   "automerge": false,
@@ -179,6 +188,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "displayFrom": "",
   "displayPending": "",
   "displayTo": "",
+  "isBreaking": false,
   "isLockFileMaintenance": true,
   "labels": [],
   "manager": "some-manager",
@@ -187,6 +197,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prettyDepType": "dependency",
   "recreateClosed": true,
   "releaseTimestamp": undefined,
+  "skipInstalls": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -204,7 +215,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles lockFileUpdate 1`] = `
+exports[`workers/repository/updates/generate > generateBranchConfig() > handles lockFileUpdate 1`] = `
 {
   "addLabels": [],
   "automerge": false,
@@ -219,6 +230,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "displayFrom": "1.0.0",
   "displayPending": "",
   "displayTo": "1.0.1",
+  "isBreaking": false,
   "isLockfileUpdate": true,
   "isRange": false,
   "labels": [],
@@ -232,6 +244,7 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prettyNewVersion": "v1.0.1",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipInstalls": true,
   "upgrades": [
     {
       "branchName": "some-branch",

@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import { DateTime } from 'luxon';
 import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger';

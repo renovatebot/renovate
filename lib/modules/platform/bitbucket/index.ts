@@ -6,7 +6,9 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import type { BitbucketHttpOptions } from '../../../util/http/bitbucket';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
@@ -57,6 +59,11 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: Config = {} as any;
 
+export function resetPlatform(): void {
+  config = {} as any;
+  renovateUserUuid = null;
+}
+
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 const pathSeparator = '/';
@@ -82,9 +89,7 @@ export async function initPlatform({
   }
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
-  const options: HttpOptions = {
-    memCache: false,
-  };
+  const options: HttpOptions = { memCache: false };
   if (token) {
     options.token = token;
   } else {
@@ -139,10 +144,10 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
     }
 
     return repos.map(({ owner, name }) => `${owner}/${name}`);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
-  }
+  } /* v8 ignore stop */
 }
 
 export async function getRawFile(
@@ -164,9 +169,8 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url, {
+  const res = await bitbucketHttp.getText(url, {
     cacheProvider: repoCacheProvider,
-    memCache: true,
   });
   return res.body;
 }
@@ -233,13 +237,13 @@ export async function initRepo({
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
-  }
+  } /* v8 ignore stop */
 
   const { hostname } = URL.parse(defaults.endpoint);
 
@@ -273,7 +277,7 @@ export async function initRepo({
   return repoConfig;
 }
 
-// istanbul ignore next
+/* v8 ignore start */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -282,7 +286,7 @@ function matchesState(state: string, desiredState: string): boolean {
     return state !== desiredState.substring(1);
   }
   return state === desiredState;
-}
+} /* v8 ignore stop */
 
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
@@ -306,6 +310,7 @@ export async function findPr({
     const prs = (
       await bitbucketHttp.getJsonUnchecked<PagedResult<PrResponse>>(
         `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
+        { cacheProvider: memCacheProvider },
       )
     ).body.values;
 
@@ -365,13 +370,14 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
     await bitbucketHttp.getJsonUnchecked<PrResponse>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      { cacheProvider: memCacheProvider },
     )
   ).body;
 
-  // istanbul ignore if
+  /* v8 ignore start */
   if (!pr) {
     return null;
-  }
+  } /* v8 ignore stop */
 
   const res: Pr = {
     ...utils.prInfo(pr),
@@ -399,13 +405,14 @@ async function getBranchCommit(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName,
         )}`,
+        { cacheProvider: memCacheProvider },
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return undefined;
-  }
+  } /* v8 ignore stop */
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -423,13 +430,17 @@ async function getStatus(
   memCache = true,
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
+  const opts: BitbucketHttpOptions = { paginate: true };
+  /* v8 ignore start: temporary code */
+  if (memCache) {
+    opts.cacheProvider = memCacheProvider;
+  } else {
+    opts.memCache = false;
+  } /* v8 ignore stop */
   return (
     await bitbucketHttp.getJsonUnchecked<PagedResult<BitbucketStatus>>(
       `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
-      {
-        paginate: true,
-        memCache,
-      },
+      opts,
     )
   ).body.values;
 }
@@ -499,7 +510,8 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl ?? /* istanbul ignore next */ 'https://bitbucket.org';
+  /* v8 ignore next */
+  const url = targetUrl ?? 'https://bitbucket.org';
 
   const body = {
     name: context,
@@ -517,7 +529,11 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; title: string; content?: { raw: string } };
+interface BbIssue {
+  id: number;
+  title: string;
+  content?: { raw: string };
+}
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
@@ -533,23 +549,24 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
       (
         await bitbucketHttp.getJsonUnchecked<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`,
+          { cacheProvider: memCacheProvider },
         )
-      ).body.values || /* istanbul ignore next */ []
+      ).body.values /* v8 ignore start */ || [] /* v8 ignore stop */
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
-  }
+  } /* v8 ignore stop */
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
-  /* istanbul ignore if */
+  /* v8 ignore start */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot findIssue');
     return null;
-  }
+  } /* v8 ignore stop */
   const issues = await findOpenIssues(title);
   if (!issues.length) {
     return null;
@@ -598,12 +615,12 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  /* istanbul ignore if */
+  /* v8 ignore start */
   if (!config.has_issues) {
-    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.debug('Issues are disabled - cannot ensureIssue');
     logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
-  }
+  } /* v8 ignore stop */
   try {
     let issues = await findOpenIssues(title);
     const description = massageMarkdown(sanitize(body));
@@ -652,17 +669,17 @@ export async function ensureIssue({
       );
       return 'created';
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
-  }
+  } /* v8 ignore stop */
   return null;
 }
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
@@ -685,14 +702,14 @@ export async function getIssueList(): Promise<Issue[]> {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
-}
+} /* v8 ignore stop */
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  /* istanbul ignore if */
+  /* v8 ignore start */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
-  }
+  } /* v8 ignore stop */
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
@@ -739,10 +756,10 @@ export async function addReviewers(
   );
 }
 
-/* istanbul ignore next */
+/* v8 ignore start */
 export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
-}
+} /* v8 ignore stop */
 
 export function ensureComment({
   number,
@@ -790,7 +807,7 @@ async function sanitizeReviewers(
           const reviewerUser = (
             await bitbucketHttp.getJsonUnchecked<Account>(
               `/2.0/users/${reviewer.uuid}`,
-              { memCache: true },
+              { cacheProvider: memCacheProvider },
             )
           ).body;
 
@@ -845,7 +862,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
-      { memCache: true },
+      { cacheProvider: memCacheProvider },
     );
 
     return true;
@@ -885,6 +902,7 @@ export async function createPr({
         `/2.0/repositories/${config.repository}/effective-default-reviewers`,
         {
           paginate: true,
+          cacheProvider: memCacheProvider,
         },
       )
     ).body;
@@ -931,7 +949,7 @@ export async function createPr({
       await autoResolvePrTasks(pr);
     }
     return pr;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
@@ -962,7 +980,7 @@ export async function createPr({
       }
       return pr;
     }
-  }
+  } /* v8 ignore stop */
 }
 
 async function autoResolvePrTasks(pr: Pr): Promise<void> {
@@ -1103,10 +1121,10 @@ export async function mergePr({
       },
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* v8 ignore start */ {
     logger.debug({ err }, `PR merge error`);
     logger.info({ pr: prNo }, 'PR automerge failed');
     return false;
-  }
+  } /* v8 ignore stop */
   return true;
 }

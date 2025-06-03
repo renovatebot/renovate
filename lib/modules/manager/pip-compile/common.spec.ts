@@ -1,5 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
-import { hostRules } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { logger } from '../../../logger';
 import {
   allowedOptions,
@@ -9,8 +8,9 @@ import {
   matchManager,
 } from './common';
 import { inferCommandExecDir } from './utils';
+import { hostRules } from '~test/util';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#
@@ -149,7 +149,7 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
-    it.each(allowedOptions['uv'])(
+    it.each(allowedOptions.uv)(
       'returned sourceFiles must not contain options (uv)',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
@@ -188,7 +188,6 @@ describe('modules/manager/pip-compile/common', () => {
     it('extracts Python version from valid header', () => {
       expect(
         extractPythonVersion(
-          'pip-compile',
           getCommandInHeader('pip-compile reqs.in'),
           'reqs.txt',
         ),
@@ -196,13 +195,7 @@ describe('modules/manager/pip-compile/common', () => {
     });
 
     it('returns undefined if version cannot be extracted', () => {
-      expect(
-        extractPythonVersion('pip-compile', '', 'reqs.txt'),
-      ).toBeUndefined();
-    });
-
-    it('returns undefined if the command type is uv', () => {
-      expect(extractPythonVersion('uv', '', 'reqs.txt')).toBeUndefined();
+      expect(extractPythonVersion('', 'reqs.txt')).toBeUndefined();
     });
   });
 

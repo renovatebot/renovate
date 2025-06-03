@@ -1,12 +1,14 @@
 import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
-import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { DataListener, RawExecOptions } from './types';
+import { partial } from '~test/util';
 
-jest.mock('node:child_process');
-const spawn = mockedFunction(_spawn);
+vi.mock('node:child_process');
+vi.unmock('./common');
+
+const spawn = vi.mocked(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
 type NoArgListener = () => void;
@@ -330,11 +332,11 @@ describe('util/exec/common', () => {
   });
 
   describe('handle gpid', () => {
-    const killSpy = jest.spyOn(process, 'kill');
+    const killSpy = vi.spyOn(process, 'kill');
 
     afterEach(() => {
       delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {

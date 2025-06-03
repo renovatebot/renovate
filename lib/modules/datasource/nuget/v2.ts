@@ -26,7 +26,7 @@ export class NugetV2Api {
     )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
     while (pkgUrlList !== null) {
       // typescript issue
-      const pkgVersionsListRaw = await http.get(pkgUrlList);
+      const pkgVersionsListRaw = await http.getText(pkgUrlList);
       const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
       const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
@@ -47,7 +47,7 @@ export class NugetV2Api {
             'IsLatestVersion',
           );
           if (pkgIsLatestVersion === 'true') {
-            dep['tags'] = { latest: removeBuildMeta(`${version}`) };
+            dep.tags = { latest: removeBuildMeta(`${version}`) };
             const projectUrl = this.getPkgProp(pkgInfo, 'ProjectUrl');
             if (projectUrl) {
               dep.sourceUrl = massageUrl(projectUrl);

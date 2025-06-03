@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/clojure/index falls back to next registry url 1`] = `
+exports[`modules/datasource/clojure/index > falls back to next registry url 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -34,10 +34,14 @@ exports[`modules/datasource/clojure/index falls back to next registry url 1`] = 
       "version": "2.0.0",
     },
   ],
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
-exports[`modules/datasource/clojure/index ignores unsupported protocols 1`] = `
+exports[`modules/datasource/clojure/index > ignores unsupported protocols 1`] = `
 [
   {
     "version": "0.0.1",
@@ -66,7 +70,7 @@ exports[`modules/datasource/clojure/index ignores unsupported protocols 1`] = `
 ]
 `;
 
-exports[`modules/datasource/clojure/index returns releases from custom repository 1`] = `
+exports[`modules/datasource/clojure/index > returns releases from custom repository 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -101,10 +105,14 @@ exports[`modules/datasource/clojure/index returns releases from custom repositor
       "version": "2.0.0",
     },
   ],
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
-exports[`modules/datasource/clojure/index skips registry with invalid XML 1`] = `
+exports[`modules/datasource/clojure/index > skips registry with invalid XML 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -138,10 +146,14 @@ exports[`modules/datasource/clojure/index skips registry with invalid XML 1`] = 
       "version": "2.0.0",
     },
   ],
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;
 
-exports[`modules/datasource/clojure/index skips registry with invalid metadata structure 1`] = `
+exports[`modules/datasource/clojure/index > skips registry with invalid metadata structure 1`] = `
 {
   "display": "org.example:package",
   "group": "org.example",
@@ -175,5 +187,9 @@ exports[`modules/datasource/clojure/index skips registry with invalid metadata s
       "version": "2.0.0",
     },
   ],
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
 }
 `;

@@ -37,4 +37,20 @@ interface RepoReport {
   problems: BunyanRecord[];
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
+  libYearsWithStatus?: LibYearsWithStatus;
+}
+
+export interface LibYearsWithStatus {
+  libYears: LibYears;
+  dependencyStatus: DependencyStatus;
+}
+
+export interface LibYears {
+  total: number;
+  managers: Record<string, number>;
+}
+
+export interface DependencyStatus {
+  outdated: number;
+  total: number;
 }

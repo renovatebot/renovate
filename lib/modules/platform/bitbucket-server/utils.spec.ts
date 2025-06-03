@@ -1,5 +1,4 @@
 import type { Response } from 'got';
-import { partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type {
   BbsRestRepo,
@@ -12,6 +11,9 @@ import {
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils';
+import { partial } from '~test/util';
+
+vi.unmock('../../../util/git');
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -62,6 +64,7 @@ function infoMock(
     }
     return {
       id: 123,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
@@ -71,6 +74,7 @@ function infoMock(
     // if ssh and https are both turned off
     return {
       id: 1,
+      slug: repositorySlug,
       project: { key: projectKey },
       origin: { name: repositorySlug, slug: repositorySlug },
       links: { clone: undefined },

@@ -240,7 +240,7 @@ function getLockedDependencyVersions(
     )) {
       let version: string;
       if (is.object(versionCarrier)) {
-        version = versionCarrier['version'];
+        version = versionCarrier.version;
       } else {
         version = versionCarrier;
       }

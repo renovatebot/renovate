@@ -1,23 +1,22 @@
-import { mockDeep } from 'jest-mock-extended';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import * as _hostRules from '../../../util/host-rules';
 import { GoDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-const hostRules = mocked(_hostRules);
+vi.mock('../../../util/host-rules', () => mockDeep());
+const hostRules = vi.mocked(_hostRules);
 
-const getReleasesDirectMock = jest.fn();
+const getReleasesDirectMock = vi.fn();
 
-const getDigestGiteaMock = jest.fn();
-const getDigestGithubMock = jest.fn();
-const getDigestGitlabMock = jest.fn();
-const getDigestGitMock = jest.fn();
-const getDigestBitbucketMock = jest.fn();
-jest.mock('./releases-direct', () => {
+const getDigestGiteaMock = vi.fn();
+const getDigestGithubMock = vi.fn();
+const getDigestGitlabMock = vi.fn();
+const getDigestGitMock = vi.fn();
+const getDigestBitbucketMock = vi.fn();
+vi.mock('./releases-direct', () => {
   return {
-    GoDirectDatasource: jest.fn().mockImplementation(() => {
+    GoDirectDatasource: vi.fn().mockImplementation(() => {
       return {
         git: { getDigest: (...args: any[]) => getDigestGitMock(...args) },
         gitea: { getDigest: (...args: any[]) => getDigestGiteaMock(...args) },
@@ -32,10 +31,10 @@ jest.mock('./releases-direct', () => {
   };
 });
 
-const getReleasesProxyMock = jest.fn();
-jest.mock('./releases-goproxy', () => {
+const getReleasesProxyMock = vi.fn();
+vi.mock('./releases-goproxy', () => {
   return {
-    GoProxyDatasource: jest.fn().mockImplementation(() => {
+    GoProxyDatasource: vi.fn().mockImplementation(() => {
       return {
         getReleases: () => getReleasesProxyMock(),
       };

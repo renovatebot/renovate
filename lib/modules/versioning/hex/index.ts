@@ -89,16 +89,16 @@ function getNewValue({
 
     if (regEx(/~>\s*(\d+\.\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/[\^~]\s*(\d+\.\d+\.\d+)/),
+        regEx(/[\^~]\s*(\d+\.\d+\.\d+)/g),
         (_str, p1: string) => `~> ${p1}`,
       );
     } else if (regEx(/~>\s*(\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/\^\s*(\d+\.\d+)(\.\d+)?/),
+        regEx(/\^\s*(\d+\.\d+)(\.\d+)?/g),
         (_str, p1: string) => `~> ${p1}`,
       );
     } else {
-      newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/), '~> $1');
+      newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/g), '~> $1');
     }
     if (npm.isVersion(newSemver)) {
       newSemver = `== ${newSemver}`;

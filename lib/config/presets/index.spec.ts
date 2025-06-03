@@ -1,8 +1,9 @@
-import { mockDeep } from 'jest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import { mocked } from '../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
+import { PLATFORM_RATE_LIMIT_EXCEEDED } from '../../constants/error-messages';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as _packageCache from '../../util/cache/package';
+import { setCustomEnv } from '../../util/env';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
 import * as _github from './github';
@@ -15,16 +16,18 @@ import {
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
 } from './util';
 import * as presets from '.';
+import { Fixtures } from '~test/fixtures';
+import { logger } from '~test/util';
 
-jest.mock('./npm');
-jest.mock('./github');
-jest.mock('./local');
-jest.mock('../../util/cache/package', () => mockDeep());
+vi.mock('./npm');
+vi.mock('./github');
+vi.mock('./local');
+vi.mock('../../util/cache/package', () => mockDeep());
 
-const npm = mocked(_npm);
-const local = mocked(_local);
-const gitHub = mocked(_github);
-const packageCache = mocked(_packageCache);
+const npm = vi.mocked(_npm);
+const local = vi.mocked(_local);
+const gitHub = vi.mocked(_github);
+const packageCache = vi.mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -83,9 +86,25 @@ describe('config/presets/index', () => {
       expect(res).toEqual({ foo: 1 });
     });
 
+    it('skips duplicate resolves', async () => {
+      config.extends = ['local>some/repo:a', 'local>some/repo:b'];
+      local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
+      local.getPreset.mockResolvedValueOnce({ extends: ['local>some/repo:c'] });
+      local.getPreset.mockResolvedValueOnce({ foo: 1 });
+      expect(await presets.resolveConfigPresets(config)).toEqual({
+        foo: 1,
+      });
+      expect(local.getPreset).toHaveBeenCalledTimes(3);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Already seen preset local>some/repo:c in [local>some/repo:a, local>some/repo:c]',
+      );
+    });
+
     it('throws if invalid preset file', async () => {
       config.foo = 1;
-      config.extends = ['notfound'];
+      config.extends = ['local>some/repo'];
+
+      local.getPreset.mockResolvedValueOnce({ extends: ['notfound'] });
       let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
@@ -95,7 +114,8 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        "Cannot find preset's package (notfound)",
+        "Cannot find preset's package (notfound)." +
+          ' Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -312,7 +332,7 @@ describe('config/presets/index', () => {
     });
 
     it('resolves self-hosted preset with templating', async () => {
-      GlobalConfig.set({ customEnvVariables: { GIT_REF: 'abc123' } });
+      setCustomEnv({ GIT_REF: 'abc123' });
       config.extends = ['local>username/preset-repo#{{ env.GIT_REF }}'];
       local.getPreset.mockImplementationOnce(({ tag }) =>
         tag === 'abc123'
@@ -463,6 +483,24 @@ describe('config/presets/index', () => {
       });
 
       expect(packageCache.set.mock.calls[0][3]).toBe(60);
+    });
+
+    it('throws', async () => {
+      config.extends = ['local>username/preset-repo'];
+
+      local.getPreset.mockRejectedValueOnce(
+        new ExternalHostError(new Error('whoops')),
+      );
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        ExternalHostError,
+      );
+
+      local.getPreset.mockRejectedValueOnce(
+        new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+      );
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+      );
     });
   });
 

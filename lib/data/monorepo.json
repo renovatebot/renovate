@@ -83,6 +83,7 @@
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "cake": "https://github.com/cake-build/cake",
+    "cake-issues": "https://github.com/cake-contrib/Cake.Issues",
     "capacitor": "https://github.com/ionic-team/capacitor",
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
     "chromely": "https://github.com/chromelyapps/Chromely",
@@ -278,7 +279,10 @@
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
-      "https://github.com/dotnet/sdk"
+      "https://github.com/dotnet/sdk",
+      "https://github.com/dotnet/windowsdesktop",
+      "https://github.com/dotnet/winforms",
+      "https://github.com/dotnet/wpf"
     ],
     "dotnet-azure-ad-identitymodel-extensions": "https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet",
     "dotnet-azure-ad-microsoft-identity-web": "https://github.com/AzureAD/microsoft-identity-web",
@@ -320,6 +324,10 @@
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
@@ -346,6 +354,7 @@
     "infrastructure-ui": "https://github.com/instructure/instructure-ui",
     "ionic-native": "https://github.com/ionic-team/ionic-native",
     "istanbuljs": "https://github.com/istanbuljs/istanbuljs",
+    "istio": "https://github.com/istio/istio",
     "jackson": [
       "https://github.com/FasterXML/jackson",
       "https://github.com/FasterXML/jackson-annotations",
@@ -354,7 +363,8 @@
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
       "https://github.com/FasterXML/jackson-jaxrs-providers",
-      "https://github.com/FasterXML/jackson-module-kotlin"
+      "https://github.com/FasterXML/jackson-module-kotlin",
+      "https://github.com/FasterXML/jackson-module-scala"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
@@ -433,6 +443,7 @@
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly",
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
+    "njson-schema": "https://github.com/RicoSuter/NJsonSchema",
     "nswag": "https://github.com/RicoSuter/NSwag",
     "nuget": "https://github.com/NuGet/NuGet.Client",
     "nuke-build": "https://github.com/nuke-build/nuke",
@@ -464,6 +475,7 @@
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
+    "pdfme": "https://github.com/pdfme/pdfme",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
@@ -472,6 +484,7 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
@@ -496,6 +509,7 @@
       "https://github.com/remix-run/react-router"
     ],
     "react-spectrum": "https://github.com/adobe/react-spectrum",
+    "react-spring": "https://github.com/pmndrs/react-spring",
     "reactivestack-cookies": "https://github.com/reactivestack/cookies",
     "reakit": "https://github.com/reakit/reakit",
     "redwood": "https://github.com/redwoodjs/redwood",
@@ -524,6 +538,7 @@
     "sentry-rust": "https://github.com/getsentry/sentry-rust",
     "serde": "https://github.com/serde-rs/serde",
     "serenity-js": "https://github.com/serenity-js/serenity-js",
+    "servicestack": "https://github.com/ServiceStack/ServiceStack",
     "shedlock": "https://github.com/lukas-krecan/ShedLock",
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
@@ -537,6 +552,7 @@
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
+    "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
     "storybook": "https://github.com/storybookjs/storybook",
     "storybook-react-native": "https://github.com/storybookjs/react-native",
@@ -553,6 +569,7 @@
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
+    "tanstack-virtual": "https://github.com/TanStack/virtual",
     "tauri": "https://github.com/tauri-apps/tauri",
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
@@ -564,6 +581,7 @@
     "testcontainers-node": "https://github.com/testcontainers/testcontainers-node",
     "theme-ui": "https://github.com/system-ui/theme-ui",
     "tika": "https://github.com/apache/tika",
+    "timvir": "https://github.com/timvir/timvir",
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
@@ -617,8 +635,10 @@
     "ngrx": "https://github.com/ngrx/",
     "nx": "https://github.com/nrwl/nx",
     "octokit": "https://github.com/octokit/",
+    "php-enqueue": "https://github.com/php-enqueue/",
     "semantic-release": "https://github.com/semantic-release/",
-    "swc": "https://github.com/swc-project/"
+    "swc": "https://github.com/swc-project/",
+    "twig": "https://github.com/twigphp/"
   },
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],

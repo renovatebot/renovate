@@ -1,8 +1,5 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -10,14 +7,17 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, git, partial } from '~test/util';
 
 process.env.CONTAINERBASE = 'true';
 
-jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env', () => mockDeep());
-jest.mock('../../../util/http', () => mockDeep());
-jest.mock('../../../util/fs', () => mockDeep());
-jest.mock('../../../util/git', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
+vi.mock('../../../util/exec/env', () => mockDeep());
+vi.mock('../../../util/http', () => mockDeep());
+vi.mock('../../../util/fs', () => mockDeep());
+vi.mock('../../../util/git', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -139,7 +139,7 @@ describe('modules/manager/vendir/artifacts', () => {
         packageFileName: 'vendir.yml',
         updatedDeps: [],
         newPackageFileContent: vendirFile,
-        config: { ...config, updateType: 'lockFileMaintenance' },
+        config: { ...config, isLockFileMaintenance: true },
       }),
     ).toEqual([
       {

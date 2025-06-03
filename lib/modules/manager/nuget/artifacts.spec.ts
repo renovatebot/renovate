@@ -1,21 +1,20 @@
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, scm } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, scm } from '~test/util';
 
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/git');
-jest.mock('./util');
+vi.mock('../../../util/exec/env');
+vi.mock('../../../util/fs');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('./util');
 
-const { getDefaultRegistries, findGlobalJson } = mocked(util);
+const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -29,9 +28,11 @@ const adminConfig: RepoGlobalConfig = {
 const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/nuget/artifacts', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     const realFs =
-      jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+      await vi.importActual<typeof import('../../../util/fs')>(
+        '../../../util/fs',
+      );
     getDefaultRegistries.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);

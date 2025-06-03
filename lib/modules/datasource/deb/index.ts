@@ -14,7 +14,7 @@ import { cacheSubDir, packageKeys, requiredPackageKeys } from './common';
 import { extract, getFileCreationTime } from './file';
 import { formatReleaseResult, releaseMetaInformationMatches } from './release';
 import type { PackageDescription } from './types';
-import { constructComponentUrls, getBaseReleaseUrl } from './url';
+import { constructComponentUrls, getBaseSuiteUrl } from './url';
 
 export class DebDatasource extends Datasource {
   static readonly id = 'deb';
@@ -47,8 +47,7 @@ export class DebDatasource extends Datasource {
    *
    * The following query parameters are required:
    * - components: comma separated list of components
-   * - suite: stable, oldstable or other alias for a release, either this or release must be given
-   * - release: buster, etc.
+   * - suite: stable, oldstable or other alias for a release, either this or release must be given like buster
    * - binaryArch: e.g. amd64 resolves to http://deb.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
   override readonly defaultRegistryUrls = [
@@ -127,7 +126,7 @@ export class DebDatasource extends Datasource {
     compressedFile: string,
     lastDownloadTimestamp?: Date,
   ): Promise<boolean> {
-    const baseReleaseUrl = getBaseReleaseUrl(basePackageUrl);
+    const baseSuiteUrl = getBaseSuiteUrl(basePackageUrl);
     const packageUrl = joinUrlParts(basePackageUrl, `Packages.${compression}`);
     let needsToDownload = true;
 
@@ -153,11 +152,11 @@ export class DebDatasource extends Datasource {
     let inReleaseContent = '';
 
     try {
-      inReleaseContent = await this.fetchInReleaseFile(baseReleaseUrl);
+      inReleaseContent = await this.fetchInReleaseFile(baseSuiteUrl);
     } catch (error) {
       // This is expected to fail for Artifactory if GPG verification is not enabled
       logger.debug(
-        { url: baseReleaseUrl, err: error },
+        { url: baseSuiteUrl, err: error },
         'Could not fetch InRelease file',
       );
     }
@@ -167,7 +166,7 @@ export class DebDatasource extends Datasource {
       const expectedChecksum = parseChecksumsFromInRelease(
         inReleaseContent,
         // path to the Package.gz file
-        packageUrl.replace(`${baseReleaseUrl}/`, ''),
+        packageUrl.replace(`${baseSuiteUrl}/`, ''),
       );
       if (actualChecksum !== expectedChecksum) {
         await fs.rmCache(compressedFile);
@@ -179,15 +178,15 @@ export class DebDatasource extends Datasource {
   }
 
   /**
-   * Fetches the content of the InRelease file from the given base release URL.
+   * Fetches the content of the InRelease file from the given base suite URL.
    *
-   * @param baseReleaseUrl - The base URL of the release (e.g., 'https://deb.debian.org/debian/dists/bullseye').
+   * @param baseReleaseUrl - The base URL of the suite (e.g., 'https://deb.debian.org/debian/dists/bullseye').
    * @returns resolves to the content of the InRelease file.
    * @throws An error if the InRelease file could not be downloaded.
    */
   private async fetchInReleaseFile(baseReleaseUrl: string): Promise<string> {
     const inReleaseUrl = joinUrlParts(baseReleaseUrl, 'InRelease');
-    const response = await this.http.get(inReleaseUrl);
+    const response = await this.http.getText(inReleaseUrl);
     return response.body;
   }
 
@@ -236,7 +235,7 @@ export class DebDatasource extends Datasource {
   })
   async parseExtractedPackageIndex(
     extractedFile: string,
-    lastTimestamp: Date,
+    _lastTimestamp: Date,
   ): Promise<Record<string, PackageDescription[]>> {
     // read line by line to avoid high memory consumption as the extracted Packages
     // files can be multiple MBs in size
@@ -307,7 +306,7 @@ export class DebDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

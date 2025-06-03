@@ -1,11 +1,12 @@
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
+  TEMPORARY_ERROR,
+  UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { newlineRegex, regEx } from '../regex';
 import * as _behindBaseCache from './behind-base-branch-cache';
@@ -14,21 +15,22 @@ import * as _modifiedCache from './modified-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
+import { logger } from '~test/util';
 
-jest.mock('./conflicts-cache');
-jest.mock('./behind-base-branch-cache');
-jest.mock('./modified-cache');
-jest.mock('timers/promises');
-jest.mock('../cache/repository');
-const behindBaseCache = mocked(_behindBaseCache);
-const conflictsCache = mocked(_conflictsCache);
-const modifiedCache = mocked(_modifiedCache);
+vi.mock('./conflicts-cache');
+vi.mock('./behind-base-branch-cache');
+vi.mock('./modified-cache');
+vi.mock('timers/promises');
+vi.mock('../cache/repository');
+vi.unmock('.');
+
+const behindBaseCache = vi.mocked(_behindBaseCache);
+const conflictsCache = vi.mocked(_conflictsCache);
+const modifiedCache = vi.mocked(_modifiedCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
-describe('util/git/index', () => {
-  jest.setTimeout(60000);
-
+describe('util/git/index', { timeout: 10000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -97,6 +99,8 @@ describe('util/git/index', () => {
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
     await repo.checkout(defaultBranch);
+
+    expect(git.getBranchList()).toBeEmptyArray();
   });
 
   let tmpDir: tmp.DirectoryResult;
@@ -127,7 +131,7 @@ describe('util/git/index', () => {
   afterEach(async () => {
     await tmpDir?.cleanup();
     await origin?.cleanup();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -137,7 +141,7 @@ describe('util/git/index', () => {
 
   describe('gitRetry', () => {
     it('returns result if git returns successfully', async () => {
-      const gitFunc = jest.fn().mockImplementation((args) => {
+      const gitFunc = vi.fn().mockImplementation((args) => {
         if (args === undefined) {
           return 'some result';
         } else {
@@ -151,7 +155,7 @@ describe('util/git/index', () => {
 
     it('retries the func call if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest
+      const gitFunc = vi
         .fn()
         .mockImplementationOnce(() => {
           throw new Error('The remote end hung up unexpectedly');
@@ -166,7 +170,7 @@ describe('util/git/index', () => {
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = jest.fn().mockImplementation(() => {
+      const gitFunc = vi.fn().mockImplementation(() => {
         throw new Error('The remote end hung up unexpectedly');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
@@ -176,7 +180,7 @@ describe('util/git/index', () => {
     });
 
     it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
-      const gitFunc = jest.fn().mockImplementationOnce(() => {
+      const gitFunc = vi.fn().mockImplementationOnce(() => {
         throw new Error('some error');
       });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
@@ -274,6 +278,7 @@ describe('util/git/index', () => {
         cloneSubmodulesFilter: ['file'],
         url: base.path,
       });
+      expect(git.isCloned()).toBeFalse();
       await git.syncGit();
       expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toEqual([
@@ -451,7 +456,7 @@ describe('util/git/index', () => {
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
       expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
@@ -472,7 +477,7 @@ describe('util/git/index', () => {
     });
 
     it('should add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
         'push',
@@ -483,7 +488,7 @@ describe('util/git/index', () => {
     });
 
     it('should not add no verify flag', async () => {
-      const rawSpy = jest.spyOn(SimpleGit.prototype, 'raw');
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       setNoVerify(['push']);
       await git.deleteBranch('renovate/something');
       expect(rawSpy).toHaveBeenCalledWith([
@@ -676,8 +681,8 @@ describe('util/git/index', () => {
     });
 
     it('does not pass --no-verify', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -706,8 +711,8 @@ describe('util/git/index', () => {
     });
 
     it('passes --no-verify to commit', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -737,8 +742,8 @@ describe('util/git/index', () => {
     });
 
     it('passes --no-verify to push', async () => {
-      const commitSpy = jest.spyOn(SimpleGit.prototype, 'commit');
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const commitSpy = vi.spyOn(SimpleGit.prototype, 'commit');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       const files: FileChange[] = [
         {
@@ -1084,10 +1089,10 @@ describe('util/git/index', () => {
     it('creates custom section for renovate ref', async () => {
       const commit = git.getBranchCommit('develop')!;
 
-      await git.pushCommitToRenovateRef(commit, 'bar/baz', 'foo');
+      await git.pushCommitToRenovateRef(commit, 'bar/baz');
 
       const renovateRefs = await lsRenovateRefs();
-      expect(renovateRefs).toContain('refs/renovate/foo/bar/baz');
+      expect(renovateRefs).toContain('refs/renovate/branches/bar/baz');
     });
 
     it('clears pushed Renovate refs', async () => {
@@ -1104,13 +1109,18 @@ describe('util/git/index', () => {
     it('clears remote Renovate refs', async () => {
       const commit = git.getBranchCommit('develop')!;
       const tmpGit = Git(tmpDir.path);
-      await tmpGit.raw(['update-ref', 'refs/renovate/aaa', commit]);
-      await tmpGit.raw(['push', '--force', 'origin', 'refs/renovate/aaa']);
+      await tmpGit.raw(['update-ref', 'refs/renovate/branches/aaa', commit]);
+      await tmpGit.raw([
+        'push',
+        '--force',
+        'origin',
+        'refs/renovate/branches/aaa',
+      ]);
 
       await git.pushCommitToRenovateRef(commit, 'bbb');
-      await git.pushCommitToRenovateRef(commit, 'ccc', 'branches');
+      await git.pushCommitToRenovateRef(commit, 'ccc');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       expect(await lsRenovateRefs()).not.toBeEmpty();
       await git.clearRenovateRefs();
@@ -1133,7 +1143,7 @@ describe('util/git/index', () => {
       await git.pushCommitToRenovateRef(commit, 'bar');
       await git.pushCommitToRenovateRef(commit, 'baz');
 
-      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
       pushSpy.mockImplementationOnce(() => {
         throw new Error(
           'remote: Repository policies do not allow pushes that update more than 2 branches or tags.',
@@ -1217,6 +1227,169 @@ describe('util/git/index', () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+  });
+
+  describe('forkMode - normal working', () => {
+    let upstreamBase: tmp.DirectoryResult;
+    let upstreamOrigin: tmp.DirectoryResult;
+    let tmpDir2: tmp.DirectoryResult;
+
+    beforeAll(async () => {
+      // create an upstream branch and one extra branch in it
+      upstreamBase = await tmp.dir({ unsafeCleanup: true });
+      const upstream = Git(upstreamBase.path);
+      await upstream.init();
+      const defaultUpsBranch = (
+        await upstream.raw('branch', '--show-current')
+      ).trim();
+      await upstream.addConfig('user.email', 'other@example.com');
+      await upstream.addConfig('user.name', 'Other');
+      await fs.writeFile(upstreamBase.path + '/past_file', 'past');
+      await upstream.addConfig('commit.gpgsign', 'false');
+      await upstream.add(['past_file']);
+      await upstream.commit('past message');
+      await upstream.raw(['checkout', '-B', defaultUpsBranch]);
+      await upstream.checkout(['-b', 'develop', defaultUpsBranch]);
+
+      // clone of upstream on local path
+      upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
+      const upstreamRepo = Git(upstreamOrigin.path);
+      await upstreamRepo.clone(upstreamBase.path, '.', ['--bare']);
+      await upstreamRepo.addConfig('commit.gpgsign', 'false');
+    });
+
+    afterAll(async () => {
+      await upstreamBase?.cleanup();
+      await upstreamOrigin?.cleanup();
+    });
+
+    afterEach(async () => {
+      await tmpDir2?.cleanup();
+    });
+
+    describe('syncForkWithUpstream()', () => {
+      it('throws unknown error', async () => {
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
+
+        await git.initRepo({
+          url: origin.path,
+          defaultBranch,
+          upstreamUrl: upstreamOrigin.path,
+        });
+
+        await git.syncGit();
+        await expect(
+          git.syncForkWithUpstream('non-existing-branch'),
+        ).rejects.toThrow(UNKNOWN_ERROR);
+      });
+
+      it('syncs fork when local for branch absent', async () => {
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
+
+        // init fork repo
+        await git.initRepo({
+          url: origin.path,
+          defaultBranch,
+          upstreamUrl: upstreamOrigin.path,
+        });
+
+        await git.syncGit();
+        await expect(git.syncForkWithUpstream('develop')).toResolve();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Checking out branch develop from remote renovate-fork-upstream',
+        );
+      });
+    });
+
+    describe('syncGit()', () => {
+      it('should fetch from upstream and update local branch', async () => {
+        tmpDir2 = await tmp.dir({ unsafeCleanup: true });
+        GlobalConfig.set({ localDir: tmpDir2.path });
+
+        await git.initRepo({
+          url: origin.path,
+          defaultBranch,
+          upstreamUrl: upstreamOrigin.path,
+        });
+
+        await git.syncGit();
+        const tmpGit = Git(tmpDir2.path);
+
+        // make sure origin exists ie. fork repo is cloned
+        const originRemote = (
+          await tmpGit.raw(['remote', 'get-url', 'origin'])
+        ).trim();
+        expect(originRemote.trim()).toBe(origin.path);
+
+        // make sure upstream exists
+        const upstreamRemote = (
+          await tmpGit.raw(['remote', 'get-url', git.RENOVATE_FORK_UPSTREAM])
+        ).trim();
+        expect(upstreamRemote).toBe(upstreamOrigin.path);
+
+        // verify fetch from upstream happened
+        // by checking the `${RENOVATE_FORK_UPSTREAM}/main` branch in the forked repo's remote branches
+        const branches = await tmpGit.branch(['-r']);
+        expect(branches.all).toContain(
+          `${git.RENOVATE_FORK_UPSTREAM}/${defaultBranch}`,
+        );
+
+        // verify that the HEAD's match
+        const headSha = (await tmpGit.revparse(['HEAD'])).trim();
+        const upstreamSha = (
+          await tmpGit.revparse([
+            `${git.RENOVATE_FORK_UPSTREAM}/${defaultBranch}`,
+          ])
+        ).trim();
+        expect(headSha).toBe(upstreamSha);
+      });
+    });
+  });
+
+  // for coverage mostly
+  describe('forkMode - errors', () => {
+    it('resetHardFromRemote()', async () => {
+      const resetSpy = vi.spyOn(SimpleGit.prototype, 'reset');
+      resetSpy.mockRejectedValueOnce(new Error('reset error'));
+      await expect(git.resetHardFromRemote('branchName')).rejects.toThrow(
+        'reset error',
+      );
+    });
+
+    it('forcePushToRemote()', async () => {
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+      pushSpy.mockRejectedValueOnce(new Error('push error'));
+      await expect(git.forcePushToRemote('branch', 'origin')).rejects.toThrow(
+        'push error',
+      );
+    });
+
+    it('checkoutBranchFromRemote()', async () => {
+      const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
+      checkoutSpy.mockRejectedValueOnce(new Error('checkout error'));
+      await expect(
+        git.checkoutBranchFromRemote('branch', git.RENOVATE_FORK_UPSTREAM),
+      ).rejects.toThrow('checkout error');
+    });
+
+    it('checkoutBranchFromRemote() - temporary error', async () => {
+      const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
+      checkoutSpy.mockRejectedValueOnce(new Error('fatal: ambiguous argument'));
+      await expect(
+        git.checkoutBranchFromRemote('branch', git.RENOVATE_FORK_UPSTREAM),
+      ).rejects.toThrow(TEMPORARY_ERROR);
+    });
+
+    it('syncForkWithRemote() - returns if no upstream exists', async () => {
+      await git.initRepo({
+        url: origin.path,
+        defaultBranch,
+      });
+
+      await expect(git.syncForkWithUpstream(defaultBranch)).toResolve();
     });
   });
 });
