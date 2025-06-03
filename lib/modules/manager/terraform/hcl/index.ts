@@ -6,7 +6,16 @@ export async function parseHCL(
   fileName: string,
 ): Promise<TerraformDefinitionFile | null> {
   try {
-    return await parse(fileName, content);
+    if (fileName.endsWith('.tf') || fileName.endsWith('.hcl')) {
+      return await parse(fileName, content);
+    } else if (
+      fileName.endsWith('.tf.json') ||
+      fileName.endsWith('.hcl.json')
+    ) {
+      return parseJSON(content);
+    } else {
+      return null;
+    }
   } catch /* istanbul ignore next */ {
     return null;
   }
