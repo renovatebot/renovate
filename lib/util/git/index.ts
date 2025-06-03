@@ -999,6 +999,7 @@ export async function mergeBranch(
       mergeStrategy === 'rebase' ||
       mergeStrategy === 'auto'
     ) {
+      logger.debug(`Performing ff-only merge because mergeStrategy=${mergeStrategy}`);
       await gitRetry(() => git.merge(['--ff-only', branchName]));
     } else if (mergeStrategy === 'merge-commit') {
       await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
