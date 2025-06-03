@@ -18,7 +18,7 @@
     "angularfire": "https://github.com/angular/angularfire",
     "angularjs": "https://github.com/angular/angular.js",
     "apollo-server": "https://github.com/apollographql/apollo-server",
-    "apolloclient": "https://github.com/apollographql/apollo-client",
+    "apolloclient": "https://github.com/apollographql/apollo-client",s
     "applicationinsights-dotnet": "https://github.com/Microsoft/ApplicationInsights-dotnet",
     "arcus.background-jobs": "https://github.com/arcus-azure/arcus.backgroundjobs",
     "arcus.event-grid": "https://github.com/arcus-azure/arcus.eventgrid",
@@ -529,6 +529,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "scalar": "https://github.com/scalar/scalar",
     "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
