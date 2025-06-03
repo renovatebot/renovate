@@ -647,6 +647,7 @@ export class DockerDatasource extends Datasource {
   private async getDockerApiTags(
     registryHost: string,
     dockerRepository: string,
+    currentVersion?: string,
   ): Promise<string[] | null> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
@@ -656,8 +657,14 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
+    // Add the last parameter if currentVersion is provided to optimize tag fetching for Quay
+    const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
+      registryHost,
+    );
     let url: string | null =
-      `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+      isQuay && currentVersion
+        ? `${registryHost}/${dockerRepository}/tags/list?n=${limit}&last=${currentVersion}`
+        : `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
@@ -725,12 +732,17 @@ export class DockerDatasource extends Datasource {
 
   @cache({
     namespace: 'datasource-docker-tags',
-    key: (registryHost: string, dockerRepository: string) =>
-      `${registryHost}:${dockerRepository}`,
+    key: (
+      registryHost: string,
+      dockerRepository: string,
+      currentVersion?: string,
+    ) =>
+      `${registryHost}:${dockerRepository}${currentVersion ? `:${currentVersion}` : ''}`,
   })
   async getTags(
     registryHost: string,
     dockerRepository: string,
+    currentVersion?: string,
   ): Promise<string[] | null> {
     try {
       const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
@@ -738,9 +750,31 @@ export class DockerDatasource extends Datasource {
       );
       let tags: string[] | null;
       if (isQuay) {
-        tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
+        try {
+          // Due to pagination and sorting limits on Quay standard v2 API we try the v1 API first
+          tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
+        } catch (err) {
+          // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
+          if (err.statusCode === 401) {
+            logger.debug(
+              { registryHost, dockerRepository, err },
+              'Quay v1 API unauthorized, falling back to Docker v2 API',
+            );
+            tags = await this.getDockerApiTags(
+              registryHost,
+              dockerRepository,
+              currentVersion,
+            );
+          } else {
+            throw err;
+          }
+        }
       } else {
-        tags = await this.getDockerApiTags(registryHost, dockerRepository);
+        tags = await this.getDockerApiTags(
+          registryHost,
+          dockerRepository,
+          currentVersion,
+        );
       }
       return tags;
     } catch (_err) /* istanbul ignore next */ {
@@ -1066,6 +1100,7 @@ export class DockerDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
+    currentValue,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
@@ -1079,7 +1114,7 @@ export class DockerDatasource extends Datasource {
 
     const getTags = (): TagsResultType =>
       Result.wrapNullable(
-        this.getTags(registryHost, dockerRepository),
+        this.getTags(registryHost, dockerRepository, currentValue),
         'tags-error' as const,
       ).transform((tags) => tags.map((version) => ({ version })));
 
