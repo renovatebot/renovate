@@ -207,11 +207,9 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
     );
   }
-  const createdMs = DateTime.fromISO(change.created.replace(' ', 'T'), {
-    zone: 'utc',
-  }).toMillis();
-  const fiveMinutesAgoMs = DateTime.utc().minus({ minutes: 5 }).toMillis();
-  if (createdMs < fiveMinutesAgoMs) {
+  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
+  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
+  if (created < fiveMinutesAgo) {
     throw new Error(
       `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
     );
