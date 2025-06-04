@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
@@ -257,9 +258,7 @@ export async function getPrList(): Promise<Pr[]> {
     branchName: '',
     requestDetails: REQUEST_DETAILS_FOR_PRS,
   });
-  return changes
-    .map((change) => mapGerritChangeToPr(change))
-    .filter((pr) => pr !== null);
+  return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
