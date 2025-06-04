@@ -278,7 +278,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tools/**/*.{ts,js,mjs,cjs}'],
+    files: [
+      '*.config.{cjs,cts,js,mjs,mts,ts}',
+      'tools/**/*.{cjs,cts,js,mjs,mts,ts}',
+    ],
 
     languageOptions: {
       globals: {
