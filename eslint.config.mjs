@@ -8,7 +8,7 @@ import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-const jsFiles = { files: ['**/*.{js,cjs,mjs,ts}'] };
+const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
 export default tseslint.config(
   {
