@@ -3,6 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -266,7 +267,6 @@ function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>,
-  gitCredentialPassing: string,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -283,7 +283,9 @@ function getRepoUrl(
   const env = getEnv();
 
   const authData =
-    gitCredentialPassing === 'url' ? `oauth2:${opts.token!}` : null;
+    GlobalConfig.get('gitCredentialPassing') === 'url'
+      ? `oauth2:${opts.token!}`
+      : null;
 
   if (
     gitUrl === 'endpoint' ||
@@ -318,7 +320,6 @@ function getRepoUrl(
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   // TODO: types (#22198)
-  // au: URL-based authentication (token) injected here
   repoUrl.auth = authData;
 
   return URL.format(repoUrl);
@@ -333,14 +334,12 @@ export async function initRepo({
   gitUrl,
   endpoint,
   includeMirrors,
-  gitCredentialPassing,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = ignorePrAuthor;
-  config.gitCredentialPassing = gitCredentialPassing;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -389,7 +388,7 @@ export async function initRepo({
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     logger.debug('Enabling Git FS');
-    const url = getRepoUrl(repository, gitUrl, res, gitCredentialPassing);
+    const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
       ...config,
       url,

@@ -1,4 +1,3 @@
-import { promises as fs } from 'fs';
 import os from 'node:os';
 import { homedir } from 'os';
 import { join } from 'path';
