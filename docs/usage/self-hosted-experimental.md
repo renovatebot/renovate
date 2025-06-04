@@ -54,17 +54,17 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
+
+If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
+This is useful in environments where a user cannot approve its own PRs.
+
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
 If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
 The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
-
-## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
-
-If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
-This is useful in environments where a user cannot approve its own PRs.
 
 ## `RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS`
 
