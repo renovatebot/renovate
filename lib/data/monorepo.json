@@ -529,6 +529,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "scalar": "https://github.com/scalar/scalar",
     "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
