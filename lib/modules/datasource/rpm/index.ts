@@ -163,9 +163,9 @@ export class RpmDatasource extends Datasource {
       throw new Error(`No packages found in ${filelistsGzipUrl}`);
     }
     const releases: Record<string, Release> = {};
-    logger.info(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
+    logger.debug(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
     for (const pkg of packages) {
-      logger.info(
+      logger.debug(
         `Checking package ${pkg.attr.name} for releases in ${filelistsGzipUrl}`,
       );
       const name = pkg.attr.name;
@@ -185,12 +185,12 @@ export class RpmDatasource extends Datasource {
       if (rel) {
         // if rel is present, we need to append it to the version. Otherwise, ignore it.
         // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3 or 1.0.0
-        logger.info(
+        logger.debug(
           `Found version ${version} with rel ${rel} for package ${name}`,
         );
         versionWithRel += `-${rel}`;
       }
-      logger.info(
+      logger.debug(
         `Found version ${versionWithRel} for package ${name} in ${filelistsGzipUrl}`,
       );
 
