@@ -45,11 +45,11 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
   }
 }
 
-export function validateConfigSecrets(config: AllConfig): void {
+function validateConfigSecrets(config: AllConfig): void {
   validateNestedInterpolatedValues(config, 'secrets');
 }
 
-export function validateConfigVariables(config: AllConfig): void {
+function validateConfigVariables(config: AllConfig): void {
   validateNestedInterpolatedValues(config, 'variables');
 }
 
@@ -72,7 +72,7 @@ export function applySecretsToConfig(
   );
 }
 
-export function applyVariablesToConfig(
+function applyVariablesToConfig(
   config: RenovateConfig,
   variables = config.variables,
   deleteVariables = true,
