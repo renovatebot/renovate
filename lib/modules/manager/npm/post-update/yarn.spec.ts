@@ -635,6 +635,84 @@ describe('modules/manager/npm/post-update/yarn', () => {
     ]);
   });
 
+  it('uses devEngine.packageManager(object) instead of corepack', async () => {
+    // sanity check for later refactorings
+    expect(plocktest1YarnLockV1).toBeTruthy();
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "devEngines": {"packageManager": { "name": "yarn", "version": "1.22.19" } }, "packageManager": "yarn@1.22.18", "dependencies": { "chalk": "^2.4.1" } }',
+        'yarn.lock': plocktest1YarnLockV1,
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '1.22.19' }, { version: '2.4.3' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe(plocktest1YarnLockV1);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool yarn-slim 1.22.19', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
+  it('uses devEngine.packageManager(array) instead of corepack', async () => {
+    // sanity check for later refactorings
+    expect(plocktest1YarnLockV1).toBeTruthy();
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "devEngines": {"packageManager": [{ "name": "yarn", "version": "1.22.19" }] }, "packageManager": "yarn@1.22.18", "dependencies": { "chalk": "^2.4.1" } }',
+        'yarn.lock': plocktest1YarnLockV1,
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '1.22.19' }, { version: '2.4.3' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe(plocktest1YarnLockV1);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool yarn-slim 1.22.19', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
   it('patches local yarn', async () => {
     // sanity check for later refactorings
     expect(plocktest1YarnLockV1).toBeTruthy();

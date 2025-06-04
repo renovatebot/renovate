@@ -328,6 +328,8 @@ const platform: Platform = {
       config.mergeMethod = 'squash';
     } else if (repo.allow_merge_commits) {
       config.mergeMethod = 'merge';
+    } else if (repo.allow_fast_forward_only_merge) {
+      config.mergeMethod = 'fast-forward';
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',

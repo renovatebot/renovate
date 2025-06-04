@@ -674,4 +674,31 @@ describe('modules/manager/kustomize/artifacts', () => {
     expect(fs.deleteLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toBeEmptyArray();
   });
+
+  it('prevents injections', async () => {
+    const execSnapshots = mockExecAll();
+    fs.localPathExists.mockResolvedValueOnce(false);
+
+    expect(
+      await kustomize.updateArtifacts({
+        packageFileName,
+        updatedDeps: [
+          {
+            depType: 'HelmChart',
+            depName: 'example && ls -lart; ',
+            currentVersion: '1.0.0',
+            registryUrls: ['https://github.com.com/example/example'],
+            datasource: HelmDatasource.id,
+          },
+        ],
+        newPackageFileContent,
+        config,
+      }),
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm pull --untar --untardir 'charts/example && ls -lart; -1.0.0' --version 1.0.0 --repo https://github.com.com/example/example 'example && ls -lart; '",
+      },
+    ]);
+  });
 });

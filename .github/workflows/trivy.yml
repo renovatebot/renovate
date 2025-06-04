@@ -25,13 +25,13 @@ jobs:
         with:
           show-progress: false
 
-      - uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # 0.30.0
+      - uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # 0.31.0
         with:
           image-ref: ghcr.io/renovatebot/renovate:${{ matrix.tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
-      - uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
+      - uses: github/codeql-action/upload-sarif@fca7ace96b7d713c7035871441bd52efbe39e27e # v3.28.19
         with:
           sarif_file: trivy-results.sarif
           category: 'docker-image-${{ matrix.tag }}'

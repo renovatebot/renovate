@@ -55,6 +55,8 @@ async function bumpVersion(
   packageFiles: Record<string, FileChange[]>,
   artifactFiles: Record<string, FileChange[]>,
 ): Promise<void> {
+  const rawBumpType = config.bumpType ?? 'patch';
+
   const bumpVersionsDescr = config.name
     ? `bumpVersions(${config.name})`
     : 'bumpVersions';
@@ -113,7 +115,7 @@ async function bumpVersion(
       // getting new version
       let newVersion: string | null = null;
       try {
-        const bumpType = compile(config.bumpType, branchConfig);
+        const bumpType = compile(rawBumpType, branchConfig);
         newVersion = inc(version, bumpType as ReleaseType);
       } catch (e) {
         addArtifactError(

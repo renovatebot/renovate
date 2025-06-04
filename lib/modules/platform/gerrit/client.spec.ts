@@ -190,9 +190,23 @@ describe('modules/platform/gerrit/client', () => {
     it('abandon', async () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/abandon')
+        .post('/a/changes/123456/abandon', {
+          notify: 'OWNER_REVIEWERS',
+        })
         .reply(200, gerritRestResponse({}), jsonResultHeader);
       await expect(client.abandonChange(123456)).toResolve();
+    });
+    it('abandon with message', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/abandon', {
+          message: 'The abandon reason is important.',
+          notify: 'OWNER_REVIEWERS',
+        })
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
+      await expect(
+        client.abandonChange(123456, 'The abandon reason is important.'),
+      ).toResolve();
     });
   });
 

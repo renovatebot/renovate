@@ -136,7 +136,13 @@ export async function writeExistingFiles(
     const basedir = upath.dirname(packageFile.packageFile!);
     const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
-    if (is.string(npmrc)) {
+    // Write out the file unless the npmrc came from the workspace
+    // npmrcFilename will be set whenever the file was read from disk during extract
+    if (
+      is.string(npmrc) &&
+      (npmrcFilename === packageFile.managerData.npmrcFileName ||
+        !packageFile.managerData.npmrcFileName)
+    ) {
       try {
         await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
       } catch (err) /* istanbul ignore next */ {
