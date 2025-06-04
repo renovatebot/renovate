@@ -1,4 +1,7 @@
 import { DateTime } from 'luxon';
+import type { RenovateConfig } from '../../../config/types';
+import { addLibYears } from '../../../instrumentation/reporting';
+import type { LibYearsWithStatus } from '../../../instrumentation/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 
@@ -11,7 +14,9 @@ interface DepInfo {
   outdated?: boolean;
   libYear?: number;
 }
+
 export function calculateLibYears(
+  config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>,
 ): void {
   if (!packageFiles) {
@@ -36,7 +41,7 @@ export function calculateLibYears(
 
         depInfo.outdated = true;
         if (!dep.currentVersionTimestamp) {
-          logger.debug(`No currentVersionTimestamp for ${dep.depName}`);
+          logger.once.debug(`No currentVersionTimestamp for ${dep.depName}`);
           allDeps.push(depInfo);
           continue;
         }
@@ -47,7 +52,7 @@ export function calculateLibYears(
 
         for (const update of dep.updates) {
           if (!update.releaseTimestamp) {
-            logger.debug(
+            logger.once.debug(
               `No releaseTimestamp for ${dep.depName} update to ${update.newVersion}`,
             );
             continue;
@@ -68,17 +73,26 @@ export function calculateLibYears(
       }
     }
   }
+  const libYearsWithStatus = getLibYears(allDeps);
+  logger.debug(libYearsWithStatus, 'Repository libYears');
 
+  addLibYears(config, libYearsWithStatus);
+}
+
+function getLibYears(allDeps: DepInfo[]): LibYearsWithStatus {
   const [totalDepsCount, outdatedDepsCount, totalLibYears] = getCounts(allDeps);
-  logger.debug(
-    {
-      managerLibYears: getManagerLibYears(allDeps),
-      totalLibYears,
-      totalDepsCount,
-      outdatedDepsCount,
+  const managerLibYears = getManagerLibYears(allDeps);
+
+  return {
+    libYears: {
+      managers: managerLibYears,
+      total: totalLibYears,
     },
-    'Repository libYears',
-  );
+    dependencyStatus: {
+      outdated: outdatedDepsCount,
+      total: totalDepsCount,
+    },
+  };
 }
 
 function getManagerLibYears(deps: DepInfo[]): Record<string, number> {

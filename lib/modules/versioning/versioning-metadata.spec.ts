@@ -37,13 +37,12 @@ describe('modules/versioning/versioning-metadata', () => {
     });
 
     it('contains mandatory fields', async () => {
-      const versioningObj = await import(`./${versioning}`);
+      const versioningObj = await import(`./${versioning}/index.ts`);
       expect(versioningObj.id).toEqual(versioning);
       expect(versioningObj.displayName).toBeDefined();
       expect(versioningObj.urls).toBeArray();
       expect(versioningObj.supportsRanges).toBeBoolean();
       if (versioningObj.supportsRanges === true) {
-        // eslint-disable-next-line jest/no-conditional-expect
         expect(versioningObj.supportedRangeStrategies).toBeArrayOfStrings();
       }
     });

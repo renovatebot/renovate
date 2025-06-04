@@ -1,10 +1,6 @@
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
-import type { RenovateConfig } from '../../../test/util';
-import { logger, mocked } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import * as _presets from '../../config/presets';
-import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
@@ -12,33 +8,36 @@ import * as repositoryWorker from '../repository';
 import * as configParser from './config/parse';
 import * as limits from './limits';
 import * as globalWorker from '.';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-jest.mock('../repository');
-jest.mock('../../util/fs');
-jest.mock('../../config/presets');
+vi.mock('../repository');
+vi.mock('../../util/fs');
 
-jest.mock('fs-extra', () => {
-  const realFs = jest.requireActual<typeof fs>('fs-extra');
+vi.mock('fs-extra', async () => {
+  const realFs = await vi.importActual<typeof fs>('fs-extra');
   return {
-    ensureDir: jest.fn(),
-    remove: jest.fn(),
-    readFile: jest.fn((file: string, options: any) => {
-      if (file.endsWith('.wasm.gz')) {
-        return realFs.readFile(file, options);
-      }
-      return undefined;
-    }),
-    writeFile: jest.fn(),
-    outputFile: jest.fn(),
+    default: {
+      ensureDir: vi.fn(),
+      remove: vi.fn(),
+      readFile: vi.fn((file: string, options: any) => {
+        if (file.endsWith('.wasm.gz')) {
+          return realFs.readFile(file, options);
+        }
+        return undefined;
+      }),
+      writeFile: vi.fn(),
+      outputFile: vi.fn(),
+    },
   };
 });
 
-// imports are readonly
-const presets = mocked(_presets);
+// TODO: why do we need git here?
+vi.unmock('../../util/git');
 
-const addSecretForSanitizing = jest.spyOn(secrets, 'addSecretForSanitizing');
-const parseConfigs = jest.spyOn(configParser, 'parseConfigs');
-const initPlatform = jest.spyOn(platform, 'initPlatform');
+const addSecretForSanitizing = vi.spyOn(secrets, 'addSecretForSanitizing');
+const parseConfigs = vi.spyOn(configParser, 'parseConfigs');
+const initPlatform = vi.spyOn(platform, 'initPlatform');
 
 describe('workers/global/index', () => {
   beforeEach(() => {
@@ -89,31 +88,6 @@ describe('workers/global/index', () => {
     expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
   });
 
-  it('resolves global presets immediately', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      repositories: [],
-      globalExtends: [':pinVersions'],
-      hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
-    });
-    presets.resolveConfigPresets.mockResolvedValueOnce({});
-    await expect(globalWorker.start()).resolves.toBe(0);
-    expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
-      extends: [':pinVersions'],
-    });
-    expect(parseConfigs).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws if global presets could not be resolved', async () => {
-    presets.resolveConfigPresets.mockImplementationOnce(() => {
-      throw new Error('some-error');
-    });
-    await expect(
-      globalWorker.resolveGlobalExtends(['some-preset']),
-    ).rejects.toThrow(CONFIG_PRESETS_INVALID);
-    expect(presets.resolveConfigPresets).toHaveBeenCalled();
-    expect(parseConfigs).not.toHaveBeenCalled();
-  });
-
   it('handles zero repos', async () => {
     parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -153,7 +127,7 @@ describe('workers/global/index', () => {
   });
 
   it('processes repositories break', async () => {
-    const isLimitReached = jest.spyOn(limits, 'isLimitReached');
+    const isLimitReached = vi.spyOn(limits, 'isLimitReached');
     isLimitReached.mockReturnValue(true);
     parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',

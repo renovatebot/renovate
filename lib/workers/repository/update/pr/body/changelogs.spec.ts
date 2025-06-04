@@ -1,9 +1,8 @@
-import { mocked } from '../../../../../../test/util';
 import * as _template from '../../../../../util/template';
 import { getChangelogs } from './changelogs';
 
-jest.mock('../../../../../util/template');
-const template = mocked(_template);
+vi.mock('../../../../../util/template');
+const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
   it('returns empty string when there is no release notes', () => {

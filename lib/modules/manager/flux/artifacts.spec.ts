@@ -1,9 +1,9 @@
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 describe('modules/manager/flux/artifacts', () => {
   beforeAll(() => {

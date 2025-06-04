@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
+import { parse as parseToml } from '../../../../util/toml';
 import { parseYaml } from '../../../../util/yaml';
 import type { PackageFileContent } from '../../types';
 import { validMatchFields } from '../utils';
@@ -29,6 +30,9 @@ export async function extractPackageFile(
         break;
       case 'yaml':
         json = parseYaml(content);
+        break;
+      case 'toml':
+        json = parseToml(content);
         break;
     }
   } catch (err) {

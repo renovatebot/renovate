@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls for GitLab 1`] = `
+exports[`modules/datasource/metadata > Should handle failed parsing of sourceUrls for GitLab 1`] = `
 {
   "releases": [
     {
@@ -16,7 +16,7 @@ exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls 
 }
 `;
 
-exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls for other 1`] = `
+exports[`modules/datasource/metadata > Should handle failed parsing of sourceUrls for other 1`] = `
 {
   "releases": [
     {
@@ -32,7 +32,7 @@ exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls 
 }
 `;
 
-exports[`modules/datasource/metadata Should handle manualChangelogUrls 1`] = `
+exports[`modules/datasource/metadata > Should handle manualChangelogUrls 1`] = `
 {
   "changelogUrl": "https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt",
   "releases": [
@@ -57,7 +57,7 @@ exports[`modules/datasource/metadata Should handle manualChangelogUrls 1`] = `
 }
 `;
 
-exports[`modules/datasource/metadata Should handle manualSourceUrls 1`] = `
+exports[`modules/datasource/metadata > Should handle manualSourceUrls 1`] = `
 {
   "releases": [
     {
@@ -81,7 +81,7 @@ exports[`modules/datasource/metadata Should handle manualSourceUrls 1`] = `
 }
 `;
 
-exports[`modules/datasource/metadata Should handle non-url 1`] = `
+exports[`modules/datasource/metadata > Should handle non-url 1`] = `
 {
   "releases": [
     {
@@ -96,7 +96,7 @@ exports[`modules/datasource/metadata Should handle non-url 1`] = `
 }
 `;
 
-exports[`modules/datasource/metadata Should handle parsing of sourceUrls correctly 1`] = `
+exports[`modules/datasource/metadata > Should handle parsing of sourceUrls correctly 1`] = `
 {
   "releases": [
     {
@@ -120,7 +120,7 @@ exports[`modules/datasource/metadata Should handle parsing of sourceUrls correct
 }
 `;
 
-exports[`modules/datasource/metadata Should handle parsing of sourceUrls correctly for GitLab also 1`] = `
+exports[`modules/datasource/metadata > Should handle parsing of sourceUrls correctly for GitLab also 1`] = `
 {
   "releases": [
     {
@@ -136,7 +136,7 @@ exports[`modules/datasource/metadata Should handle parsing of sourceUrls correct
 }
 `;
 
-exports[`modules/datasource/metadata Should massage github sourceUrls 1`] = `
+exports[`modules/datasource/metadata > Should massage github sourceUrls 1`] = `
 {
   "releases": [
     {

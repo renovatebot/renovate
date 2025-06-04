@@ -151,7 +151,7 @@ export const Repos = z
     }
 
     if (packagist && repoUrls.length) {
-      repoUrls.push('https://packagist.org');
+      repoUrls.push('https://repo.packagist.org');
     }
     const registryUrls = repoUrls.length ? repoUrls : null;
 
@@ -244,9 +244,7 @@ export const ComposerExtract = z
               .pipe(Json)
               .pipe(Lockfile)
               .nullable()
-              .catch(
-                withDebugMessage(null, 'Composer: lockfile parsing error'),
-              ),
+              .catch(withDebugMessage(null, 'Composer: does not match schema')),
           ]),
         ),
     }),

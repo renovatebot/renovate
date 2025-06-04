@@ -1,4 +1,4 @@
-import { hostRules, mocked, platform } from '../../../../test/util';
+import * as decrypt from '../../../config/decrypt';
 import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import * as validation from '../../../config/validation';
@@ -9,10 +9,11 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { mergeInheritedConfig } from './inherited';
+import { hostRules, platform } from '~test/util';
 
-jest.mock('../../../config/presets');
+vi.mock('../../../config/presets');
 
-const presets = mocked(presets_);
+const presets = vi.mocked(presets_);
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
@@ -113,6 +114,41 @@ describe('workers/repository/init/inherited', () => {
     expect(res.hostRules).toBeUndefined();
   });
 
+  it('should decrypt encrypted values from inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      `{
+        "hostRules": [
+          {
+            "matchHost": "some-host-url",
+            "encrypted": {
+              "token": "some-secret-token"
+            }
+          }
+        ]
+      }`,
+    );
+
+    vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+      hostRules: [
+        {
+          matchHost: 'some-host-url',
+          token: 'some-secret-token',
+        },
+      ],
+    });
+
+    const res = await mergeInheritedConfig({
+      ...config,
+    });
+    expect(hostRules.getAll()).toMatchObject([
+      {
+        matchHost: 'some-host-url',
+        token: 'some-secret-token',
+      },
+    ]);
+    expect(res.hostRules).toBeUndefined();
+  });
+
   it('should apply secrets to inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
       `{
@@ -159,8 +195,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -198,8 +233,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest
-      .spyOn(validation, 'validateConfig')
+    vi.spyOn(validation, 'validateConfig')
       .mockResolvedValueOnce({
         warnings: [],
         errors: [],
@@ -237,7 +271,7 @@ describe('workers/repository/init/inherited', () => {
     platform.getRawFile.mockResolvedValue(
       '{"labels":["test"],"extends":[":automergeAll"]}',
     );
-    jest.spyOn(validation, 'validateConfig').mockResolvedValue({
+    vi.spyOn(validation, 'validateConfig').mockResolvedValue({
       warnings: [],
       errors: [],
     });

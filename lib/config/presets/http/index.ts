@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { Http } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseUrl } from '../../../util/url';
 import type { Preset, PresetConfig } from '../types';
@@ -20,9 +21,8 @@ export async function getPreset({
   }
 
   try {
-    response = await http.get(url);
+    response = await http.getText(url, { cacheProvider: memCacheProvider });
   } catch (err) {
-    // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {
       throw err;
     }

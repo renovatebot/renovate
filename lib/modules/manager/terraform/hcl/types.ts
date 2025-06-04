@@ -2,6 +2,7 @@ export interface TerraformDefinitionFile {
   terraform?: TerraformBlock[];
   module?: Record<string, TerraformModule[]>;
   resource?: TerraformResources;
+  data?: Record<string, unknown>; // generic docker data sources
   provider?: Record<string, TerraformProvider[]>;
 }
 
@@ -10,9 +11,10 @@ export interface TerraformBlock {
   required_version?: string;
 }
 
-export interface TerraformRequiredProviderBlock {
-  [s: string]: TerraformRequiredProvider | string;
-}
+export type TerraformRequiredProviderBlock = Record<
+  string,
+  TerraformRequiredProvider | string
+>;
 
 export interface TerraformRequiredProvider {
   source?: string;

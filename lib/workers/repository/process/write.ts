@@ -25,13 +25,7 @@ export function generateCommitFingerprintConfig(
   const res = branch.upgrades.map((upgrade) => {
     const filteredUpgrade = {} as UpgradeFingerprintConfig;
     for (const field of upgradeFingerprintFields) {
-      // TS cannot narrow the type here
-      // I am not sure if this is the best way suggestions welcome
-      if (field !== 'env' && is.string(upgrade[field])) {
-        filteredUpgrade[field] = upgrade[field];
-      } else if (is.plainObject(upgrade[field])) {
-        filteredUpgrade.env = upgrade[field] as Record<string, string>;
-      }
+      filteredUpgrade[field] = upgrade[field];
     }
     return filteredUpgrade;
   });
@@ -145,7 +139,7 @@ export async function writeUpdates(
     const { baseBranch, branchName } = branch;
     const meta: Record<string, string> = { branch: branchName };
     if (config.baseBranches?.length && baseBranch) {
-      meta['baseBranch'] = baseBranch;
+      meta.baseBranch = baseBranch;
     }
     addMeta(meta);
     const branchExisted = await scm.branchExists(branchName);

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > bumps versions in autoReplace managers 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -16,7 +16,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() b
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > bumps versions in updateDependency managers 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -32,7 +32,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() b
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles autoreplace base updated 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -48,7 +48,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles autoreplace branch needs update 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles autoreplace branch needs update 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -64,7 +64,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles content change 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -80,7 +80,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles git submodules 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles git submodules 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -96,7 +96,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles isRemediation rebase 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles isRemediation rebase 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -112,7 +112,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles isRemediation success 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles isRemediation success 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -128,7 +128,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles lock file errors 1`] = `
 {
   "artifactErrors": [
     {
@@ -149,7 +149,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles lock files 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -171,7 +171,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles lockFileMaintenance 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -187,7 +187,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance error 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > handles lockFileMaintenance error 1`] = `
 {
   "artifactErrors": [
     {
@@ -202,7 +202,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > update artifacts on update-lockfile strategy 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],
@@ -224,7 +224,7 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() u
 }
 `;
 
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy with no updateLockedDependency 1`] = `
+exports[`workers/repository/update/branch/get-updated > getUpdatedPackageFiles() > update artifacts on update-lockfile strategy with no updateLockedDependency 1`] = `
 {
   "artifactErrors": [],
   "artifactNotices": [],

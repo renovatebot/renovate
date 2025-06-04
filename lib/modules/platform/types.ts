@@ -98,7 +98,7 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-export type PlatformPrOptions = {
+export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
@@ -108,7 +108,7 @@ export type PlatformPrOptions = {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-};
+}
 
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -299,4 +299,5 @@ export interface PlatformScm {
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
+  syncForkWithUpstream?(baseBranch: string): Promise<void>;
 }

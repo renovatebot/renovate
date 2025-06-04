@@ -147,7 +147,7 @@ export class UvProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
-    const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+    const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'uv.lock');
@@ -177,7 +177,6 @@ export class UvProcessor implements PyProjectProcessor {
         cwdFile: packageFileName,
         extraEnv,
         docker: {},
-        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, uvConstraint],
       };
 
@@ -232,7 +231,7 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        deps.push(dep.depName!.split('/')[1]);
+        deps.push(dep.depName!);
         break;
       }
       case depTypes.uvDevDependencies:
@@ -285,7 +284,8 @@ async function getUvExtraIndexUrl(
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
-      return !sources || !(dep.packageName! in sources);
+      const packageName = dep.packageName!;
+      return !sources || !(packageName in sources);
     })
     .flatMap((dep) => dep.registryUrls)
     .filter(is.string)
@@ -341,6 +341,11 @@ async function getUvIndexCredentials(
     const parsedUrl = parseUrl(url);
     // istanbul ignore if
     if (!parsedUrl) {
+      continue;
+    }
+
+    // If no name is provided for the index, authentication information must be passed through alternative methods
+    if (!name) {
       continue;
     }
 

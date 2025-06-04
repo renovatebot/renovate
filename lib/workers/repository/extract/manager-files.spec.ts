@@ -1,15 +1,15 @@
-import { fs, mocked, partial } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../modules/manager/html';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+import { fs, partial } from '~test/util';
 
-jest.mock('./file-match');
-jest.mock('../../../modules/manager/html');
-jest.mock('../../../util/fs');
+vi.mock('./file-match');
+vi.mock('../../../modules/manager/html');
+vi.mock('../../../util/fs');
 
-const fileMatch = mocked(_fileMatch);
-const html = mocked(_html);
+const fileMatch = vi.mocked(_fileMatch);
+const html = vi.mocked(_html);
 
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
@@ -51,7 +51,7 @@ describe('workers/repository/extract/manager-files', () => {
       };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
-      html.extractPackageFile = jest.fn(() => ({
+      html.extractPackageFile = vi.fn(() => ({
         deps: [{}, { replaceString: 'abc', packageName: 'p' }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);

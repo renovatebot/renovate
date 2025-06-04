@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { getEnv } from '../../../util/env';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { api as versioning } from '../../versioning/cargo';
 import type {
@@ -25,7 +26,7 @@ const DEFAULT_REGISTRY_ID = 'crates-io';
 
 function getCargoIndexEnv(registryName: string): string | null {
   const registry = registryName.toUpperCase().replaceAll('-', '_');
-  return process.env[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
+  return getEnv()[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
 }
 
 function extractFromSection(
@@ -124,7 +125,7 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
 function resolveRegistryIndex(
   registryName: string,
   config: CargoConfig,
-  originalNames: Set<string> = new Set(),
+  originalNames = new Set<string>(),
 ): CargoRegistryUrl {
   // if we have a source replacement, follow that.
   // https://doc.rust-lang.org/cargo/reference/source-replacement.html

@@ -1,5 +1,4 @@
 import { quote } from 'shlex';
-import type { UserEnv } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -18,7 +17,6 @@ import { extractLockFileContentVersions } from './locked-version';
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
-  userConfiguredEnv: UserEnv,
   constraint: string | undefined,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
@@ -31,7 +29,6 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
-    userConfiguredEnv,
     extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
@@ -42,7 +39,6 @@ async function cargoUpdate(
 async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
-  userConfiguredEnv: UserEnv,
   constraint: string | undefined,
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.
@@ -63,7 +59,6 @@ async function cargoUpdatePrecise(
   }
 
   const execOptions: ExecOptions = {
-    userConfiguredEnv,
     extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
@@ -104,7 +99,7 @@ async function updateArtifactsImpl(
     return null;
   }
 
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
   if (!isLockFileMaintenance && !updatedDeps?.length) {
     logger.debug('No more dependencies to update');
     return [
@@ -123,12 +118,7 @@ async function updateArtifactsImpl(
     logger.debug('Updating ' + lockFileName);
 
     if (isLockFileMaintenance) {
-      await cargoUpdate(
-        packageFileName,
-        true,
-        config.env ?? {},
-        config.constraints?.rust,
-      );
+      await cargoUpdate(packageFileName, true, config.constraints?.rust);
     } else {
       const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
       if (missingDep) {
@@ -138,18 +128,12 @@ async function updateArtifactsImpl(
           { dependency: missingDep.depName },
           'Missing locked version for dependency',
         );
-        await cargoUpdate(
-          packageFileName,
-          false,
-          config.env ?? {},
-          config.constraints?.rust,
-        );
+        await cargoUpdate(packageFileName, false, config.constraints?.rust);
       } else {
         // If all dependencies have locked versions then update them precisely.
         await cargoUpdatePrecise(
           packageFileName,
           updatedDeps,
-          config.env ?? {},
           config.constraints?.rust,
         );
       }

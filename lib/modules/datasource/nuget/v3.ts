@@ -7,10 +7,12 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import type { Http } from '../../../util/http';
 import { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
@@ -40,7 +42,7 @@ export class NugetV3Api {
       resultCacheKey,
     );
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -51,10 +53,12 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
-      // istanbul ignore else: currently not testable
       if (!servicesIndexRaw) {
-        servicesIndexRaw = (await http.getJsonUnchecked<ServicesIndexRaw>(url))
-          .body;
+        servicesIndexRaw = (
+          await http.getJsonUnchecked<ServicesIndexRaw>(url, {
+            cacheProvider: memCacheProvider,
+          })
+        ).body;
         await packageCache.set(
           NugetV3Api.cacheNamespace,
           responseCacheKey,
@@ -209,7 +213,9 @@ export class NugetV3Api {
           // TODO: types (#22198)
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.get(nuspecUrl);
+        const metaresult = await http.getText(nuspecUrl, {
+          cacheProvider: memCacheProvider,
+        });
         const nuspec = new XmlDocument(metaresult.body);
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
@@ -247,7 +253,6 @@ export class NugetV3Api {
       }
     }
 
-    // istanbul ignore else: not easy testable
     if (homepage) {
       // only assign if not assigned
       dep.sourceUrl ??= homepage;
@@ -275,8 +280,8 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    // istanbul ignore if: experimental feature
-    if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
+    /* v8 ignore next 4 */
+    if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
     }

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/helm-requirements/extract extractPackageFile() ensure that currentValue is string 1`] = `
+exports[`modules/manager/helm-requirements/extract > extractPackageFile() > ensure that currentValue is string 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -16,7 +16,7 @@ exports[`modules/manager/helm-requirements/extract extractPackageFile() ensure t
 }
 `;
 
-exports[`modules/manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
+exports[`modules/manager/helm-requirements/extract > extractPackageFile() > parses simple requirements.yaml correctly 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -38,7 +38,7 @@ exports[`modules/manager/helm-requirements/extract extractPackageFile() parses s
 }
 `;
 
-exports[`modules/manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
+exports[`modules/manager/helm-requirements/extract > extractPackageFile() > resolves aliased registry urls 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -60,7 +60,7 @@ exports[`modules/manager/helm-requirements/extract extractPackageFile() resolves
 }
 `;
 
-exports[`modules/manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
+exports[`modules/manager/helm-requirements/extract > extractPackageFile() > skips invalid registry urls 1`] = `
 {
   "datasource": "helm",
   "deps": [
@@ -89,7 +89,7 @@ exports[`modules/manager/helm-requirements/extract extractPackageFile() skips in
 }
 `;
 
-exports[`modules/manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
+exports[`modules/manager/helm-requirements/extract > extractPackageFile() > skips local dependencies 1`] = `
 {
   "datasource": "helm",
   "deps": [

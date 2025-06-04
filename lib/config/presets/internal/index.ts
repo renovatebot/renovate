@@ -41,7 +41,5 @@ export function getPreset({
   repo,
   presetName,
 }: PresetConfig): Preset | undefined {
-  return groups[repo] && presetName
-    ? groups[repo][presetName]
-    : /* istanbul ignore next */ undefined;
+  return groups[repo] && presetName ? groups[repo][presetName] : undefined;
 }

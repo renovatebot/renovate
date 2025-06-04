@@ -53,7 +53,9 @@ export class PdmProcessor implements PyProjectProcessor {
       registryUrls.push(source.url);
     }
     for (const dep of deps) {
-      dep.registryUrls = [...registryUrls];
+      if (dep.datasource === PypiDatasource.id) {
+        dep.registryUrls = [...registryUrls];
+      }
     }
 
     return deps;
@@ -96,7 +98,7 @@ export class PdmProcessor implements PyProjectProcessor {
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
-    const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+    const { isLockFileMaintenance } = config;
 
     // abort if no lockfile is defined
     const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
@@ -124,7 +126,6 @@ export class PdmProcessor implements PyProjectProcessor {
         cwdFile: packageFileName,
         extraEnv,
         docker: {},
-        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
 

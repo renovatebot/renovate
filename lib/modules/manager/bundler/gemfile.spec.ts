@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractLockFileEntries } from './locked-version';
+import { Fixtures } from '~test/fixtures';
 
 const gemLockFile = Fixtures.get('Gemfile.rails.lock');
 

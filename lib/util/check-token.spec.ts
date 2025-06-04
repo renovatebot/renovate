@@ -1,5 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
-import { hostRules, logger } from '../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../config/global';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
@@ -13,8 +12,9 @@ import {
   isGithubServerToServerToken,
   takePersonalAccessTokenIfPossible,
 } from './check-token';
+import { hostRules, logger } from '~test/util';
 
-jest.mock('./host-rules', () => mockDeep());
+vi.mock('./host-rules', () => mockDeep());
 
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {

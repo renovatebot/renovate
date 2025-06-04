@@ -68,7 +68,7 @@ export class GitRefsDatasource extends GitDatasource {
   ): Promise<string | null> {
     const rawRefs: RawRefs[] | null = await this.getRawRefs({ packageName });
 
-    // istanbul ignore if
+    /* v8 ignore next 3 -- TODO: add test */
     if (!rawRefs) {
       return null;
     }

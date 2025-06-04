@@ -1,14 +1,15 @@
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { Lockfile, PackageFile } from './schema';
 import {
   extractConstraints,
   getComposerArguments,
+  getComposerUpdateArguments,
   requireComposerDependencyInstallation,
 } from './utils';
 
-jest.mock('../../datasource', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
 
 describe('modules/manager/composer/utils', () => {
   beforeEach(() => {
@@ -174,6 +175,19 @@ describe('modules/manager/composer/utils', () => {
       );
     });
 
+    it('disables only extension and library platform requirements with ^2.1', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.1' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
     it('disables only extension and library platform requirements with 2.2.0', () => {
       expect(
         getComposerArguments(
@@ -194,6 +208,32 @@ describe('modules/manager/composer/utils', () => {
             composerIgnorePlatformReqs: [],
           },
           { toolName: 'composer', constraint: '^2.2' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
+    it('disables only extension and library platform requirements with 2.3.0', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '2.3.0' },
+        ),
+      ).toBe(
+        " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
+      );
+    });
+
+    it('disables only extension and library platform requirements with ^2.3', () => {
+      expect(
+        getComposerArguments(
+          {
+            composerIgnorePlatformReqs: [],
+          },
+          { toolName: 'composer', constraint: '^2.3' },
         ),
       ).toBe(
         " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
@@ -275,6 +315,48 @@ describe('modules/manager/composer/utils', () => {
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
       );
     });
+  });
+
+  describe('getComposerUpdateArguments', () => {
+    it.each`
+      constraint
+      ${'2.6.0'}
+      ${'<=2.6'}
+      ${'<2.7'}
+    `(
+      'does not request an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        );
+      },
+    );
+
+    it.each`
+      constraint
+      ${'2.7.0'}
+      ${'2.8.0'}
+      ${'3.0.0'}
+      ${'^2.6'}
+      ${'^2.7'}
+      ${'^2.8'}
+      ${'^3.0'}
+      ${'>=2.6'}
+      ${'>=2.7'}
+      ${'>=2.8'}
+      ${'>=3.0'}
+    `(
+      'requests an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
+        );
+      },
+    );
   });
 
   describe('requireComposerDependencyInstallation', () => {

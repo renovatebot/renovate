@@ -6,7 +6,6 @@ export interface BbsConfig {
   fileList: any[];
   mergeMethod: string;
   owner: string;
-  prList: BbsPr[];
   projectKey: string;
   repository: string;
   repositorySlug: string;
@@ -35,8 +34,10 @@ export interface BbsRestUserRef {
   user: BbsRestUser;
 }
 
+// https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp280
 export interface BbsRestPr {
   createdDate: string;
+  updatedDate: number;
   description: string;
   fromRef: BbsRestBranchRef;
   id: number;
@@ -49,8 +50,9 @@ export interface BbsRestPr {
 
 export interface BbsRestRepo {
   id: number;
+  slug: string;
   project: { key: string };
-  origin: { name: string; slug: string };
+  origin?: { name: string; slug: string }; // only present in forks
   links: {
     clone?: { href: string; name: string }[];
   };
@@ -69,4 +71,10 @@ export interface BitbucketErrorResponse {
 
 export interface BitbucketError extends HTTPError {
   readonly response: Response<BitbucketErrorResponse>;
+}
+
+export interface BbsPrCacheData {
+  items: Record<number, BbsPr>;
+  updatedDate: number | null;
+  author: string | null;
 }

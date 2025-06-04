@@ -42,7 +42,6 @@ const renameKeys = {
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
-  allowPostUpgradeCommandTemplating: 'allowCommandTemplating',
   allowedPostUpgradeCommands: 'allowedCommands',
 };
 
@@ -202,12 +201,13 @@ export async function getConfig(
     }
   }
 
-  if (env.GITHUB_COM_TOKEN) {
+  const githubComToken = env.GITHUB_COM_TOKEN ?? env.RENOVATE_GITHUB_COM_TOKEN;
+  if (githubComToken) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
       hostType: 'github',
       matchHost: 'github.com',
-      token: env.GITHUB_COM_TOKEN,
+      token: githubComToken,
     });
   }
 

@@ -11,7 +11,7 @@
     "zone.js": "https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md"
   },
   "pypi": {
-    "beautifulsoup4": "https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG",
+    "beautifulsoup4": "https://git.launchpad.net/beautifulsoup/tree/CHANGELOG",
     "flake8": "https://flake8.pycqa.org/en/latest/release-notes/index.html",
     "django-storages": "https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst",
     "lxml": "https://git.launchpad.net/lxml/plain/CHANGES.txt",

@@ -48,4 +48,8 @@ export class DefaultGitScm implements PlatformScm {
   mergeToLocal(branchName: string): Promise<void> {
     return git.mergeToLocal(branchName);
   }
+
+  syncForkWithUpstream(branchName: string): Promise<void> {
+    return git.syncForkWithUpstream(branchName);
+  }
 }

@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
+import { api as gradleVersioning } from '../../versioning/gradle';
 import type { PackageDependency } from '../types';
 import type {
   GradleManagerData,
@@ -11,7 +12,7 @@ const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
-const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
+const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+ ]+)');
 
 // Extracts version-like and range-like strings from the beginning of input
 export function versionLikeSubstring(
@@ -22,8 +23,12 @@ export function versionLikeSubstring(
   }
 
   const match = versionLikeRegex.exec(input);
-  const version = match?.groups?.version;
+  const version = match?.groups?.version?.trim();
   if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  if (!gradleVersioning.isValid(version)) {
     return null;
   }
 
@@ -31,24 +36,17 @@ export function versionLikeSubstring(
 }
 
 export function isDependencyString(input: string): boolean {
-  const parts = input.split(':');
+  const [depNotation, ...extra] = input.split('@');
+  if (extra.length > 1) {
+    return false;
+  }
+
+  const parts = depNotation.split(':');
   if (parts.length !== 3 && parts.length !== 4) {
     return false;
   }
-  const [groupId, artifactId, versionPart, optionalClassifier] = parts;
 
-  if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
-    return false;
-  }
-
-  let version = versionPart;
-  if (versionPart.includes('@')) {
-    const [actualVersion, ...rest] = versionPart.split('@');
-    if (rest.length !== 1) {
-      return false;
-    }
-    version = actualVersion;
-  }
+  const [groupId, artifactId, version, classifier] = parts;
 
   return !!(
     groupId &&
@@ -56,6 +54,7 @@ export function isDependencyString(input: string): boolean {
     version &&
     artifactRegex.test(groupId) &&
     artifactRegex.test(artifactId) &&
+    (!classifier || artifactRegex.test(classifier)) &&
     version === versionLikeSubstring(version)
   );
 }
@@ -67,8 +66,8 @@ export function parseDependencyString(
     return null;
   }
 
-  const [groupId, artifactId, fullValue] = input.split(':');
-  const [currentValue, dataType] = fullValue.split('@');
+  const [depNotation, dataType] = input.split('@');
+  const [groupId, artifactId, currentValue] = depNotation.split(':');
 
   return {
     depName: `${groupId}:${artifactId}`,

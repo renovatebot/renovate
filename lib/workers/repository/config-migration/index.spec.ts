@@ -1,16 +1,16 @@
 import type { Indent } from 'detect-indent';
-import { Fixtures } from '../../../../test/fixtures';
-import { mockedFunction, partial } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import type { Pr } from '../../../modules/platform/types';
 import { checkConfigMigrationBranch } from './branch';
 import { MigratedDataFactory } from './branch/migrated-data';
 import { ensureConfigMigrationPr } from './pr';
 import { configMigration } from './index';
+import { Fixtures } from '~test/fixtures';
+import { partial } from '~test/util';
 
-jest.mock('./pr');
-jest.mock('./branch');
-jest.mock('./branch/migrated-data');
+vi.mock('./pr');
+vi.mock('./branch');
+vi.mock('./branch/migrated-data');
 
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
@@ -22,7 +22,7 @@ const config = {
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
-    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
+    vi.mocked(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,
       indent: partial<Indent>(),
@@ -39,7 +39,7 @@ describe('workers/repository/config-migration/index', () => {
 
   it('skips pr creation when migration is not needed', async () => {
     const branchList: string[] = [];
-    mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue(null);
+    vi.mocked(MigratedDataFactory.getAsync).mockResolvedValue(null);
     const res = await configMigration(config, branchList);
     expect(res).toMatchObject({ result: 'no-migration' });
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
@@ -48,11 +48,11 @@ describe('workers/repository/config-migration/index', () => {
 
   it('creates migration pr if needed', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({
+    vi.mocked(checkConfigMigrationBranch).mockResolvedValue({
       migrationBranch: branchName,
       result: 'migration-branch-exists',
     });
-    mockedFunction(ensureConfigMigrationPr).mockResolvedValue(
+    vi.mocked(ensureConfigMigrationPr).mockResolvedValue(
       partial<Pr>({ number: 1 }),
     );
     const res = await configMigration(config, branchList);
@@ -63,11 +63,11 @@ describe('workers/repository/config-migration/index', () => {
 
   it('returns add-checkbox if migration pr exists but is created by another user', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({
+    vi.mocked(checkConfigMigrationBranch).mockResolvedValue({
       migrationBranch: branchName,
       result: 'migration-branch-exists',
     });
-    mockedFunction(ensureConfigMigrationPr).mockResolvedValue(null);
+    vi.mocked(ensureConfigMigrationPr).mockResolvedValue(null);
     const res = await configMigration(config, branchList);
     expect(res).toMatchObject({ result: 'add-checkbox' });
     expect(branchList).toContainEqual(branchName);
@@ -76,11 +76,11 @@ describe('workers/repository/config-migration/index', () => {
 
   it('returns pr-modified incase the migration pr has been modified', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({
+    vi.mocked(checkConfigMigrationBranch).mockResolvedValue({
       migrationBranch: branchName,
       result: 'migration-branch-modified',
     });
-    mockedFunction(ensureConfigMigrationPr).mockResolvedValue(
+    vi.mocked(ensureConfigMigrationPr).mockResolvedValue(
       partial<Pr>({
         number: 1,
       }),
@@ -93,7 +93,7 @@ describe('workers/repository/config-migration/index', () => {
 
   it('returns add-checkbox if migration is needed but not demanded', async () => {
     const branchList: string[] = [];
-    mockedFunction(checkConfigMigrationBranch).mockResolvedValue({
+    vi.mocked(checkConfigMigrationBranch).mockResolvedValue({
       result: 'no-migration-branch',
     });
     const res = await configMigration(config, branchList);

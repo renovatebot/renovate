@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
-import { resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from '.';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
@@ -24,28 +23,31 @@ function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
   return null;
 }
 
-function resolveUrl(path: string, base: string): URL {
-  const resolvedUrlString = resolveBaseUrl(base, path);
-  return new URL(resolvedUrlString);
-}
+export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
 
-export class GiteaHttp extends Http<GiteaHttpOptions> {
   constructor(hostType?: string, options?: HttpOptions) {
     super(hostType ?? 'gitea', options);
   }
 
-  protected override async request<T>(
-    path: string,
-    options?: InternalHttpOptions & GiteaHttpOptions,
+  protected override async requestJsonUnsafe<T = unknown>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<GiteaHttpOptions>,
   ): Promise<HttpResponse<T>> {
-    const resolvedUrl = resolveUrl(path, options?.baseUrl ?? baseUrl);
+    const resolvedUrl = this.resolveUrl(options.url, options.httpOptions);
     const opts = {
-      baseUrl,
       ...options,
+      url: resolvedUrl,
     };
-    const res = await super.request<T>(resolvedUrl, opts);
+    const res = await super.requestJsonUnsafe<T>(method, opts);
     const pc = getPaginationContainer<T>(res.body);
-    if (opts.paginate && pc) {
+    if (opts.httpOptions?.paginate && pc) {
+      delete opts.httpOptions.cacheProvider;
+      opts.httpOptions.memCache = false;
+
+      delete opts.httpOptions.paginate;
       const total = parseInt(res.headers['x-total-count'] as string, 10);
       let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
 
@@ -53,7 +55,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions> {
         nextPage += 1;
         resolvedUrl.searchParams.set('page', nextPage.toString());
 
-        const nextRes = await super.request<T>(resolvedUrl.toString(), opts);
+        const nextRes = await super.requestJsonUnsafe<T>(method, opts);
         const nextPc = getPaginationContainer<T>(nextRes.body);
         if (nextPc === null) {
           break;

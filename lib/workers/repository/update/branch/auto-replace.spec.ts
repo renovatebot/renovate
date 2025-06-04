@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../../test/fixtures';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
 import type { BranchUpgradeConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
+import { Fixtures } from '~test/fixtures';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
   `../../../../modules/manager/html`,
 );
 
-jest.mock('../../../../util/fs');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -748,6 +748,76 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.updateType = 'replacement';
       upgrade.newName = 'iteratec/juice-balancer';
       upgrade.newValue = 'v5.1.0';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue),
+      );
+    });
+
+    it('updates with helm value image/repository wrong version', async () => {
+      const yml = codeBlock`
+        parser:
+          test: 3.14.3
+          image:
+              repository: docker.io/securecodebox/parser-nmap
+              tag: 2.14.3
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'docker.io/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'iteratec/juice-balancer';
+      upgrade.newValue = 'v5.1.0';
+      upgrade.packageFile = 'values.yml';
+      await expect(
+        doAutoReplace(upgrade, yml, reuseExistingBranch),
+      ).rejects.toThrowError(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('updates with helm value image/repository prefix replacement', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+            repository: example.org/securecodebox/parser-nmap
+            tag: 3.14.3
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'example.org/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'docker.example.org/securecodebox/parser-nmap';
+      upgrade.newValue = 'v5.1.0';
+      upgrade.packageFile = 'values.yml';
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        yml
+          .replace(upgrade.depName, upgrade.newName)
+          .replace(upgrade.currentValue, upgrade.newValue),
+      );
+    });
+
+    it('updates with helm value image/repository version prefix replacement', async () => {
+      const yml = codeBlock`
+        parser:
+          image:
+            tag: 3.14.3
+            repository: docker.io/securecodebox/parser-nmap
+      `;
+      upgrade.manager = 'helm-values';
+      upgrade.depName = 'docker.io/securecodebox/parser-nmap';
+      upgrade.replaceString = '3.14.3';
+      upgrade.currentValue = '3.14.3';
+      upgrade.depIndex = 0;
+      upgrade.updateType = 'replacement';
+      upgrade.newName = 'iteratec/juice-balancer';
+      upgrade.newValue = 'v3.14.3';
       upgrade.packageFile = 'values.yml';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(

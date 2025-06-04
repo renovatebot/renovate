@@ -53,7 +53,7 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions[change.current_revision];
-      return currentGerritPatchset.actions?.['rebase'].enabled === true;
+      return currentGerritPatchset.actions?.rebase.enabled === true;
     }
     return true;
   }
@@ -130,19 +130,16 @@ export class GerritScm extends DefaultGitScm {
         hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); //avoid empty patchsets
       }
       if (hasChanges || commit.force) {
+        const pushOptions = ['notify=NONE'];
+        if (commit.autoApprove) {
+          pushOptions.push('label=Code-Review+2');
+        }
         const pushResult = await git.pushCommit({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${commit.baseBranch!}%notify=NONE`,
+          targetRef: `refs/for/${commit.baseBranch!}%${pushOptions.join(',')}`,
           files: commit.files,
         });
         if (pushResult) {
-          //existingChange was the old change before commit/push. we need to approve again, if it was previously approved from renovate
-          if (
-            existingChange &&
-            client.wasApprovedBy(existingChange, username)
-          ) {
-            await client.approveChange(existingChange._number);
-          }
           return commitSha;
         }
       }

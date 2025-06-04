@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts all dependencies 1`] = `
 [
   {
     "currentValue": "1.0.0",
@@ -15,56 +15,56 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
-    "currentValue": "undefined",
+    "currentValue": undefined,
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
     "skipReason": "invalid-version",
   },
   {
+    "currentValue": "[1.2.3, 3.2.1)",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "[1.2.3, 3.2.1]",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "(1.2.3, 3.2.1)",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "(1.2.3,)",
     "datasource": "nuget",
     "depName": "NotUpdatable2",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "[,1.2.3)",
     "datasource": "nuget",
     "depName": "NotUpdatable1",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3,)",
     "datasource": "nuget",
     "depName": "Range3",
     "depType": "nuget",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3,]",
     "datasource": "nuget",
     "depName": "Range2",
     "depType": "nuget",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3]",
     "datasource": "nuget",
     "depName": "Range1",
     "depType": "nuget",
@@ -124,10 +124,11 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
+    "currentValue": "$(UnknownVariable)",
     "datasource": "nuget",
     "depName": "Microsoft.AspNetCore.Hosting",
     "depType": "nuget",
-    "skipReason": "invalid-version",
+    "skipReason": "contains-variable",
   },
   {
     "currentValue": "4.5.0",
@@ -146,7 +147,7 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
 ]
 `;
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts all dependencies from global packages file 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts all dependencies from global packages file 1`] = `
 [
   {
     "currentValue": "1.0.0",
@@ -155,49 +156,49 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
     "depType": "nuget",
   },
   {
+    "currentValue": "[1.2.3, 3.2.1)",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "[1.2.3, 3.2.1]",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "(1.2.3, 3.2.1)",
     "datasource": "nuget",
     "depName": "NotUpdatable3",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "(1.2.3,)",
     "datasource": "nuget",
     "depName": "NotUpdatable2",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
+    "currentValue": "[,1.2.3)",
     "datasource": "nuget",
     "depName": "NotUpdatable1",
     "depType": "nuget",
-    "skipReason": "invalid-version",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3,)",
     "datasource": "nuget",
     "depName": "Range3",
     "depType": "nuget",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3,]",
     "datasource": "nuget",
     "depName": "Range2",
     "depType": "nuget",
   },
   {
-    "currentValue": "1.2.3",
+    "currentValue": "[1.2.3]",
     "datasource": "nuget",
     "depName": "Range1",
     "depType": "nuget",
@@ -283,7 +284,7 @@ exports[`modules/manager/nuget/extract extractPackageFile() extracts all depende
 ]
 `;
 
-exports[`modules/manager/nuget/extract extractPackageFile() extracts package version dependency 1`] = `
+exports[`modules/manager/nuget/extract > extractPackageFile() > extracts package version dependency 1`] = `
 [
   {
     "currentValue": "4.5.0",

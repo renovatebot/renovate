@@ -6,10 +6,10 @@ export const TokenType = {
   String: 2,
 };
 
-type Token = {
+interface Token {
   type: number;
   val: string | number;
-};
+}
 
 function iterateChars(
   str: string,

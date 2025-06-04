@@ -83,7 +83,7 @@ export type OciImageManifest = z.infer<typeof OciImageManifest>;
  */
 export const OciImageIndexManifest = ManifestObject.extend({
   mediaType: z.literal('application/vnd.oci.image.index.v1+json'),
-  manifests: z.array(
+  manifests: LooseArray(
     Descriptor.extend({
       mediaType: z.enum([
         'application/vnd.oci.image.manifest.v1+json',
@@ -170,7 +170,8 @@ export const DockerHubTagsPage = z.object({
   count: z.number(),
   next: z.string().nullable().catch(null),
   results: LooseArray(DockerHubTag, {
-    onError: /* istanbul ignore next */ ({ error }) => {
+    /* v8 ignore next 6 -- TODO: add test */
+    onError: ({ error }) => {
       logger.debug(
         { error },
         'Docker: Failed to parse some tags from Docker Hub',
