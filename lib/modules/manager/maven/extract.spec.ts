@@ -299,6 +299,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'paketobuildpacks/builder-jammy-base',
           replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
           fileReplacePosition: 1273,
+          versioning: 'docker',
         },
         {
           autoReplaceStringTemplate:
@@ -309,6 +310,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'paketobuildpacks/run-noble-full',
           replaceString: 'paketobuildpacks/run-noble-full:0.0.28',
           fileReplacePosition: 1343,
+          versioning: 'docker',
         },
         {
           autoReplaceStringTemplate:
@@ -327,6 +329,7 @@ describe('modules/manager/maven/extract', () => {
           fileReplacePosition: 1566,
           packageName: 'gcr.io/paketo-buildpacks/nodejs',
           replaceString: 'gcr.io/paketo-buildpacks/nodejs:1.8.0',
+          versioning: 'docker',
         },
         {
           autoReplaceStringTemplate:
@@ -340,6 +343,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'docker.io/paketobuildpacks/python',
           replaceString:
             'docker.io/paketobuildpacks/python:2.22.1@sha256:2c27cd0b4482a4aa5aeb38104f6d934511cd87c1af34a10d1d6cdf2d9d16f138',
+          versioning: 'docker',
         },
         {
           autoReplaceStringTemplate:
@@ -352,6 +356,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'docker.io/paketobuildpacks/ruby',
           replaceString:
             'docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
+          versioning: 'docker',
         },
         {
           autoReplaceStringTemplate:
@@ -362,6 +367,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'paketobuildpacks/java',
           replaceString: 'paketobuildpacks/java:12.1.0',
           fileReplacePosition: 2001,
+          versioning: 'docker',
         },
       ]);
     });
@@ -390,6 +396,7 @@ describe('modules/manager/maven/extract', () => {
           packageName: 'paketobuildpacks/builder-jammy-base',
           replaceString: 'paketobuildpacks/builder-jammy-base:0.4.316',
           fileReplacePosition: 1273,
+          versioning: 'docker',
         },
       ]);
     });
