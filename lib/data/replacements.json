@@ -1058,6 +1058,19 @@
         "replacementName": "@tsconfig/node24",
         "replacementVersion": "24.0.0"
       }
+    ],
+    "customManagers": [
+      {
+        "customType": "regex",
+        "managerFilePatterns": ["/^tsconfig\\.json$/"],
+        "matchStrings": [
+          "\"extends\":\\s*\"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json\""
+        ],
+        "autoReplaceStringTemplate": "\"extends\": \"@tsconfig/node{{{major}}}/tsconfig.json\"",
+        "depNameTemplate": "{{{depName}}}",
+        "currentValueTemplate": "{{{major}}}",
+        "datasourceTemplate": "npm"
+      }
     ]
   },
   "typeorm-seeding-to-scoped": {
