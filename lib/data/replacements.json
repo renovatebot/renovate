@@ -1062,7 +1062,7 @@
     "customManagers": [
       {
         "customType": "regex",
-        "managerFilePatterns": ["/^tsconfig\\.json$/"],
+        "managerFilePatterns": ["/(^|/)tsconfig\\.json$/"],
         "matchStrings": [
           "\"extends\":\\s*\"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json\""
         ],
