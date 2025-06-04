@@ -84,8 +84,8 @@ export function matchesHost(url: string, matchHost: string): boolean {
   }
 
   const parsedMatchHost = parseUrl(matchHost);
-  if (isHttpUrl(url) && parsedMatchHost && isHttpUrl(matchHost)) {
-    return parsedUrl.href.startsWith(parsedMatchHost.href);
+  if (isHttpUrl(parsedUrl) && isHttpUrl(parsedMatchHost)) {
+    return parsedUrl.href.startsWith(parsedMatchHost!.href);
   }
 
   const { hostname } = parsedUrl;
