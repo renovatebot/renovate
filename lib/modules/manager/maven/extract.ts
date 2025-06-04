@@ -7,6 +7,7 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
+import { id as dockerVersioningId } from '../../versioning/docker';
 import {
   BUILDPACK_REGISTRY_PREFIX,
   DOCKER_PREFIX,
@@ -97,6 +98,8 @@ function getCNBDependencies(
         true,
         config.registryAliases,
       );
+      dep.versioning = dockerVersioningId;
+
       dep.fileReplacePosition = node.position;
       if (dep.currentValue || dep.currentDigest) {
         deps.push(dep);
