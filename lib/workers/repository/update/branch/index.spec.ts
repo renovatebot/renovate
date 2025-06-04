@@ -2230,7 +2230,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(execOptionsParam).toBeDefined();
       expect(execOptionsParam?.cwd).toEqual('/localDir');
       const dataFileFullPathRegex = new RegExp(
-        `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}\.tmp$`,
+        `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
       );
       expect(
         execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,

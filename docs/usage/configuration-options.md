@@ -3771,10 +3771,10 @@ They will be compiled _prior_ to the comparison against [`allowedCommands`](./se
 ### dataFileTemplate
 
 A template to create data file from.
-The template uses the same fromat as `commands`.
+The template uses the same format as `commands`.
 The data file is created as a temporary file and the path to the data file is stored in the `RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE` environment variable avaliable to each post-upgrade command.
 The primary purpose of the data file is to store some update information in a file which would be consumed from a post-upgrade command.
-This is particulary useful if a post-upgrade command need to have a long line of arguments.
+This is particularly useful if a post-upgrade command needs to have a long line of arguments.
 Example:
 
 ```json

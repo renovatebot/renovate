@@ -13,8 +13,8 @@ import {
   localPathIsFile,
   readLocalFile,
   writeLocalFile,
-  writeFile,
-  deleteFile,
+  writeSystemFile,
+  deleteSystemFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -83,7 +83,7 @@ export async function postUpgradeCommandsExecutor(
         dataFilePath = path.join(tmpDir, dataFileName);
 
         try {
-          await writeFile(dataFilePath, dataFileContent);
+          await writeSystemFile(dataFilePath, dataFileContent);
 
           logger.debug(
             { dataFilePath, dataFileContent },
@@ -149,7 +149,7 @@ export async function postUpgradeCommandsExecutor(
       if (dataFilePath) {
         // Clean up data file after post-upgrade commands ran.
         try {
-          await deleteFile(dataFilePath);
+          await deleteSystemFile(dataFilePath);
 
           logger.debug(
             { dataFilePath },

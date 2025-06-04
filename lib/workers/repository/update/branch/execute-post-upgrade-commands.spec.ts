@@ -168,18 +168,18 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       const dataFileFullPathRegex = `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}\.tmp$`;
 
       expect(res.updatedArtifacts).toHaveLength(0);
-      expect(fs.writeFile).toHaveBeenCalledTimes(1);
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(fs.writeSystemFile).toHaveBeenCalledTimes(1);
+      expect(fs.writeSystemFile).toHaveBeenCalledWith(
         expect.stringMatching(dataFileFullPathRegex),
         '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
       );
-      expect(fs.deleteFile).toHaveBeenCalledTimes(1);
-      expect(fs.deleteFile).toHaveBeenCalledWith(
+      expect(fs.deleteSystemFile).toHaveBeenCalledTimes(1);
+      expect(fs.deleteSystemFile).toHaveBeenCalledWith(
         expect.stringMatching(dataFileFullPathRegex),
       );
 
-      const writeFilePathParam = fs.writeFile.mock.calls[0][0];
-      const deleteFilePathParam = fs.deleteFile.mock.calls[0][0];
+      const writeFilePathParam = fs.writeSystemFile.mock.calls[0][0];
+      const deleteFilePathParam = fs.writeSystemFile.mock.calls[0][0];
       expect(writeFilePathParam).toEqual(deleteFilePathParam);
     });
 
@@ -228,8 +228,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
 
       expect(res.updatedArtifacts).toHaveLength(0);
-      expect(fs.writeFile).not.toHaveBeenCalled();
-      expect(fs.deleteFile).not.toHaveBeenCalled();
+      expect(fs.writeSystemFile).not.toHaveBeenCalled();
+      expect(fs.deleteSystemFile).not.toHaveBeenCalled();
     });
 
     it('logs files which do not match fileFilters', async () => {

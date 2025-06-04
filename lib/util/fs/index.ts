@@ -56,23 +56,12 @@ export async function readLocalSymlink(
   }
 }
 
-export async function writeFile(
-  fileName: string,
-  fileContent: string | Buffer,
-): Promise<void> {
-  await fs.outputFile(fileName, fileContent);
-}
-
 export async function writeLocalFile(
   fileName: string,
   fileContent: string | Buffer,
 ): Promise<void> {
   const localFileName = ensureLocalPath(fileName);
   await fs.outputFile(localFileName, fileContent);
-}
-
-export async function deleteFile(fileName: string): Promise<void> {
-  await fs.remove(fileName);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
@@ -350,6 +339,10 @@ export async function writeSystemFile(
   data: string | Buffer,
 ): Promise<void> {
   await fs.outputFile(fileName, data);
+}
+
+export async function deleteSystemFile(fileName: string): Promise<void> {
+  await fs.remove(fileName);
 }
 
 export async function getLocalFiles(
