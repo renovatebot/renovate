@@ -43,18 +43,20 @@ export type GerritRequestDetail =
   | 'COMMIT_FOOTERS';
 
 export interface GerritChange {
-  _number: number;
   branch: string;
   change_id: string;
-  created: string;
-  status: GerritChangeStatus;
   subject: string;
+  status: GerritChangeStatus;
+  created: string;
+  /** Requires o=SUBMITTABLE. */
+  submittable?: boolean;
+  _number: number;
+  /** Requires o=LABELS. */
+  labels?: Record<string, GerritLabelInfo>;
   /** Requires o=LABELS. */
   reviewers?: {
     REVIEWER?: GerritAccountInfo[];
   };
-  /** Requires o=LABELS. */
-  labels?: Record<string, GerritLabelInfo>;
   /** Requires o=MESSAGES. */
   messages?: GerritChangeMessageInfo[];
   /** Requires o=CURRENT_REVISION. */
@@ -64,8 +66,6 @@ export interface GerritChange {
    * Requires o=CURRENT_REVISION.
    */
   revisions?: Record<string, GerritRevisionInfo>;
-  /** Requires o=SUBMITTABLE. */
-  submittable?: boolean;
   /**
    * Potential consistency issues with the change (not related to labels).
    * Requires o=CHECKS. */
