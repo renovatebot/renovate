@@ -162,7 +162,7 @@ export class RpmDatasource extends Datasource {
       );
       throw new Error(`No packages found in ${filelistsGzipUrl}`);
     }
-    const releases = new Map<string, Release>();
+    const releases: Record<string, Release> = {};
     logger.info(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
     for (const pkg of packages) {
       logger.info(
@@ -198,20 +198,23 @@ export class RpmDatasource extends Datasource {
       // One version could have multiple rel
       // (note: this rel is the release/revision key in filelists.xml, not the release data type)
       // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3
-      if (!releases.has(versionWithRel)) {
-        releases.set(versionWithRel, {
+      if (!releases[versionWithRel]) {
+        releases[versionWithRel] = {
           version: versionWithRel,
-        });
+        };
       }
     }
-    if (releases.size === 0) {
+    // if no releases were found for the package, return null
+    if (Object.keys(releases).length === 0) {
       logger.debug(
         `No releases found for package ${packageName} in ${filelistsGzipUrl}`,
       );
       return null;
     }
     return {
-      releases: Array.from(releases.values()),
+      releases: Object.values(releases).map((release) => ({
+        version: release.version,
+      })),
     };
   }
 }
