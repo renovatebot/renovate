@@ -1,14 +1,8 @@
-import dataFiles from '../../../data-files.generated';
+import data from '../../../data/abandonments.json';
 import type { PackageRule } from '../../types';
 import type { Preset } from '../types';
 
-/* v8 ignore start: not testable */
 function loadAbandonmentPresets(): Record<string, Preset> {
-  const data: Record<string, Record<string, string>> = JSON.parse(
-    dataFiles.get('data/abandonment-config.json')!,
-  );
-  delete data.$schema;
-
   const packageRules: PackageRule[] = [
     {
       matchPackageNames: ['*'],
@@ -17,6 +11,10 @@ function loadAbandonmentPresets(): Record<string, Preset> {
   ];
 
   for (const [datasource, datasourceAbandonments] of Object.entries(data)) {
+    if (datasource === '$schema') {
+      continue;
+    }
+
     for (const [packageName, threshold] of Object.entries(
       datasourceAbandonments,
     )) {
@@ -33,6 +31,5 @@ function loadAbandonmentPresets(): Record<string, Preset> {
     recommended: { packageRules },
   };
 }
-/* v8 ignore stop */
 
 export const presets: Record<string, Preset> = loadAbandonmentPresets();

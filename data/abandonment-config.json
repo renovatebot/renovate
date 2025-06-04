@@ -1,6 +1,0 @@
-{
-  "$schema": "./abandonment-config.schema.json",
-  "npm": {
-    "lodash": "6 years"
-  }
-}
