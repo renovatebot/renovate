@@ -298,8 +298,7 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
-      }
-      if (allVersions.find((v) => v.version === compareValue)) {
+      } else if (allVersions.find((v) => v.version === compareValue)) {
         currentVersion = compareValue!;
       }
       // TODO #22198
