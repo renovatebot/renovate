@@ -1,4 +1,3 @@
-import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 // TODO #22198
@@ -15,6 +14,7 @@ import {
   writeLocalFile,
   writeSystemFile,
   deleteSystemFile,
+  privateCacheDir,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -78,9 +78,8 @@ export async function postUpgradeCommandsExecutor(
           'Processed post-upgrade commands data file template.',
         );
 
-        const tmpDir = os.tmpdir();
         const dataFileName = `renovate-post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
-        dataFilePath = path.join(tmpDir, dataFileName);
+        dataFilePath = path.join(privateCacheDir(), dataFileName);
 
         try {
           await writeSystemFile(dataFilePath, dataFileContent);

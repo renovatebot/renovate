@@ -1,5 +1,5 @@
-import os from 'os';
 import path from 'path';
+import { dir } from 'tmp-promise';
 import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
@@ -2182,6 +2182,16 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
 
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const privateCacheDir = path.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+        cacheDir: privateCacheDir,
+      });
+
       fs.readLocalFile
         .mockResolvedValueOnce('modified file content')
         .mockResolvedValueOnce('this file will not exists');
@@ -2191,16 +2201,10 @@ describe('workers/repository/update/branch/index', () => {
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(privateCacheDir);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
-      GlobalConfig.set({
-        ...adminConfig,
-        allowedCommands: ['^echo hardcoded-string$'],
-        trustLevel: 'high',
-        localDir: '/localDir',
-      });
 
       const inconfig: BranchConfig = {
         ...config,
@@ -2229,12 +2233,12 @@ describe('workers/repository/update/branch/index', () => {
       const execOptionsParam = exec.exec.mock.calls[0][1];
       expect(execOptionsParam).toBeDefined();
       expect(execOptionsParam?.cwd).toEqual('/localDir');
-      const dataFileFullPathRegex = new RegExp(
-        `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+      const dataFileRegex = new RegExp(
+        `^.*${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
       );
       expect(
         execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
-      ).toMatch(dataFileFullPathRegex);
+      ).toMatch(dataFileRegex);
     });
 
     it('returns when rebaseWhen=never', async () => {

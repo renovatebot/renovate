@@ -177,7 +177,6 @@ const options: RenovateOptions[] = [
     description: 'A template to create post-upgrade command data file from.',
     type: 'string',
     parents: ['postUpgradeTasks'],
-    default: '',
     cli: false,
     env: false,
   },

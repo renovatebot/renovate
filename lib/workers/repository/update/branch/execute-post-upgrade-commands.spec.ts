@@ -1,5 +1,5 @@
-import os from 'os';
 import path from 'path';
+import { dir } from 'tmp-promise';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -149,8 +149,11 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           deleted: [],
         }),
       );
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = path.join(tmpDir.path, 'cache');
       GlobalConfig.set({
         localDir: __dirname,
+        cacheDir: cacheDir,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -159,23 +162,24 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
 
       const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
         commands,
         config,
       );
 
-      const dataFileFullPathRegex = `^${os.tmpdir()}${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}\.tmp$`;
+      const dataFileRegex = `^.*${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}.tmp$`;
 
       expect(res.updatedArtifacts).toHaveLength(0);
       expect(fs.writeSystemFile).toHaveBeenCalledTimes(1);
       expect(fs.writeSystemFile).toHaveBeenCalledWith(
-        expect.stringMatching(dataFileFullPathRegex),
+        expect.stringMatching(dataFileRegex),
         '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
       );
       expect(fs.deleteSystemFile).toHaveBeenCalledTimes(1);
       expect(fs.deleteSystemFile).toHaveBeenCalledWith(
-        expect.stringMatching(dataFileFullPathRegex),
+        expect.stringMatching(dataFileRegex),
       );
 
       const writeFilePathParam = fs.writeSystemFile.mock.calls[0][0];
@@ -211,8 +215,11 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           deleted: [],
         }),
       );
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = path.join(tmpDir.path, 'cache');
       GlobalConfig.set({
         localDir: __dirname,
+        cacheDir: cacheDir,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -221,6 +228,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       fs.localPathExists
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
 
       const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
         commands,
