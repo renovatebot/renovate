@@ -13,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import * as yaml from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
@@ -152,7 +153,9 @@ export async function updateArtifacts({
 
     if (is.truthy(existingLockFileContent)) {
       const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newHelmLockContent;
+      const isLockFileChanged =
+        !is.string(newHelmLockContent) ||
+        isHelmLockChanged(existingLockFileContent, newHelmLockContent);
       if (isLockFileChanged) {
         fileChanges.push({
           file: {
@@ -217,4 +220,9 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+function isHelmLockChanged(oldContent: string, newContent: string): boolean {
+  const regex = regEx(/^generated: ".+"$/m);
+  return newContent.replace(regex, '') !== oldContent.replace(regex, '');
 }

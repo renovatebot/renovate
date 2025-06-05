@@ -6,7 +6,7 @@ describe('util/http/queue', () => {
     clear();
     hostRules.clear();
     hostRules.add({
-      matchHost: 'https://example.com',
+      matchHost: 'example.com',
       concurrentRequestLimit: 143,
     });
   });
