@@ -3,6 +3,8 @@ import { promisify } from 'util';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { HttpResponse } from '../../../util/http';
+import { Http } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -34,7 +36,8 @@ export class RpmDatasource extends Datasource {
    */
   @cache({
     namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ registryUrl, packageName }: GetReleasesConfig) => packageName,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl}:${packageName}`,
     ttlMinutes: 1440,
   })
   async getReleases({
@@ -58,8 +61,7 @@ export class RpmDatasource extends Datasource {
   // Fetches the filelists.xml.gz URL from the repomd.xml file.
   @cache({
     namespace: `datasource-${RpmDatasource.id}`,
-    key: ({ registryUrl }: GetReleasesConfig) =>
-      registryUrl ?? '__no_registry_url__',
+    key: (registryUrl: string) => registryUrl,
     ttlMinutes: 1440,
   })
   async getFilelistsGzipUrl(registryUrl: string): Promise<string | null> {
@@ -67,20 +69,11 @@ export class RpmDatasource extends Datasource {
       registryUrl,
       RpmDatasource.repomdXmlFileName,
     );
-    let response;
-    try {
-      response = await this.http.getText(repomdUrl.toString());
-    } catch (err) {
-      logger.warn(
-        { datasource: 'rpm', url: repomdUrl, err },
-        'Failed to fetch datasource url',
-      );
-      throw err as Error;
-    }
+    const response = await this.http.getText(repomdUrl.toString());
 
     // check if repomd.xml is in XML format
     if (!response.body.startsWith('<?xml')) {
-      logger.warn(
+      logger.debug(
         { datasource: RpmDatasource.id, url: repomdUrl },
         'Invalid response format',
       );
@@ -95,7 +88,7 @@ export class RpmDatasource extends Datasource {
     const filelistsData = xml.childWithAttribute('type', 'filelists');
 
     if (!filelistsData) {
-      logger.warn(
+      logger.debug(
         `No filelists data found in ${repomdUrl}, xml contents: ${response.body}`,
       );
       throw new Error(`No filelists data found in ${repomdUrl}`);
@@ -121,13 +114,13 @@ export class RpmDatasource extends Datasource {
     filelistsGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
-    let response;
-    let decompressedBuffer;
+    let response: HttpResponse<Buffer>;
+    let decompressedBuffer: Buffer;
     try {
       // filelistsXmlUrl is a .gz file, need to extract it before parsing
       response = await this.http.getBuffer(filelistsGzipUrl);
       if (response.body.length === 0) {
-        logger.warn(`Empty response body from getting ${filelistsGzipUrl}.`);
+        logger.debug(`Empty response body from getting ${filelistsGzipUrl}.`);
         throw new Error(
           `Empty response body from getting ${filelistsGzipUrl}.`,
         );
@@ -135,7 +128,7 @@ export class RpmDatasource extends Datasource {
       // decompress the gzipped file
       decompressedBuffer = await gunzipAsync(response.body);
     } catch (err) {
-      logger.warn(
+      logger.debug(
         `Failed to fetch or decompress ${filelistsGzipUrl}: ${
           err instanceof Error ? err.message : err
         }`,
@@ -145,7 +138,7 @@ export class RpmDatasource extends Datasource {
     const xmlString = decompressedBuffer.toString('utf8');
     // check if filelistsXmlUrl is in XML format
     if (!(xmlString.startsWith('<?xml') || xmlString.startsWith('\n<?xml'))) {
-      logger.warn(
+      logger.debug(
         `Decompressed ${filelistsGzipUrl} is not in XML format. Contents: ${xmlString}`,
       );
       throw new Error(
@@ -157,15 +150,15 @@ export class RpmDatasource extends Datasource {
     const data = new XmlDocument(xmlString);
     const packages = data.childrenNamed('package');
     if (!packages || packages.length === 0) {
-      logger.warn(
+      logger.debug(
         `No packages found in ${filelistsGzipUrl}, xml contents: ${xmlString}`,
       );
       throw new Error(`No packages found in ${filelistsGzipUrl}`);
     }
     const releases: Record<string, Release> = {};
-    logger.debug(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
+    logger.trace(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
     for (const pkg of packages) {
-      logger.debug(
+      logger.trace(
         `Checking package ${pkg.attr.name} for releases in ${filelistsGzipUrl}`,
       );
       const name = pkg.attr.name;
@@ -175,7 +168,7 @@ export class RpmDatasource extends Datasource {
       const versionElement = pkg.childNamed('version');
       const version = versionElement?.attr?.ver ?? '';
       if (!version) {
-        logger.debug(
+        logger.trace(
           `No version found for package ${name} in ${filelistsGzipUrl}`,
         );
         continue;
@@ -185,12 +178,12 @@ export class RpmDatasource extends Datasource {
       if (rel) {
         // if rel is present, we need to append it to the version. Otherwise, ignore it.
         // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3 or 1.0.0
-        logger.debug(
+        logger.trace(
           `Found version ${version} with rel ${rel} for package ${name}`,
         );
         versionWithRel += `-${rel}`;
       }
-      logger.debug(
+      logger.trace(
         `Found version ${versionWithRel} for package ${name} in ${filelistsGzipUrl}`,
       );
 
@@ -206,7 +199,7 @@ export class RpmDatasource extends Datasource {
     }
     // if no releases were found for the package, return null
     if (Object.keys(releases).length === 0) {
-      logger.debug(
+      logger.trace(
         `No releases found for package ${packageName} in ${filelistsGzipUrl}`,
       );
       return null;
