@@ -65,7 +65,7 @@ For example:
       "customType": "regex",
       "managerFilePatterns": ["**.yaml"],
       "matchStrings": [
-        ".*rdsFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
+        ".*rdsFilter=(?<packageName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
       ],
       "datasourceTemplate": "aws-rds"
     }
@@ -93,7 +93,7 @@ Here is the Renovate configuration to use Terraform, `aws-rds` and Aurora MySQL:
       "customType": "regex",
       "managerFilePatterns": ["/.+\\.tf$/"],
       "matchStrings": [
-        "\\s*#\\s*renovate:\\s*rdsFilter=(?<lookupName>.+?) depName=(?<depName>.*) versioning=(?<versioning>.*)\\s*.*_version\\s*=\\s*\"(?<currentValue>.*)\""
+        "\\s*#\\s*renovate:\\s*rdsFilter=(?<packageName>.+?) depName=(?<depName>.*) versioning=(?<versioning>.*)\\s*.*_version\\s*=\\s*\"(?<currentValue>.*)\""
       ],
       "datasourceTemplate": "aws-rds"
     }
