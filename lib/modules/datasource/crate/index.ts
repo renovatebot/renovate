@@ -324,26 +324,52 @@ export class CrateDatasource extends Datasource {
           ...simpleGitConfig(),
           maxConcurrentProcesses: 1,
         }).env(getChildEnv());
-        const clonePromise = git.clone(registryFetchUrl, clonePath, {
-          '--depth': 1,
-        });
+
+        const clone = async (): Promise<string> => {
+          const innerClonePromise = git.clone(registryFetchUrl, clonePath, {
+            '--depth': 1,
+          });
+          try {
+            return await innerClonePromise;
+          } catch (err) {
+            if (
+              err.message.includes(
+                'fatal: dumb http transport does not support shallow capabilities',
+              )
+            ) {
+              logger.info(
+                { packageName, registryFetchUrl },
+                'failed to shallow clone git registry, doing full clone',
+              );
+              const innerClonePromise = git.clone(registryFetchUrl, clonePath);
+              try {
+                return await innerClonePromise;
+              } catch (err) {
+                logger.warn(
+                  { err, packageName, registryFetchUrl },
+                  'failed cloning git registry',
+                );
+                memCache.set(cacheKeyForError, err);
+
+                throw new Error(err);
+              }
+            } else {
+              logger.warn(
+                { err, packageName, registryFetchUrl },
+                'failed cloning git registry',
+              );
+              memCache.set(cacheKeyForError, err);
+
+              throw new Error(err);
+            }
+          }
+        };
+        const clonePromise = clone();
 
         memCache.set(
           cacheKey,
           clonePromise.then(() => clonePath).catch(() => null),
         );
-
-        try {
-          await clonePromise;
-        } catch (err) {
-          logger.warn(
-            { err, packageName, registryFetchUrl },
-            'failed cloning git registry',
-          );
-          memCache.set(cacheKeyForError, err);
-
-          return null;
-        }
       }
 
       if (!clonePath) {
