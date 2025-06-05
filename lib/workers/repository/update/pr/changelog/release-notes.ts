@@ -389,8 +389,8 @@ export async function getReleaseNotesMd(
               };
             }
           }
-          // Look for version in body - useful for monorepos. First check for "Releases (yyyy-mm-dd)" heading
-          const releasesRegex = regEx(/Releases ([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
           if (packageName && heading.search(releasesRegex) !== -1) {
             // Now check if any line contains both the package name and the version
             const bodyLines = body.match(/^.*([\n\r]+|$)/gm) ?? [];
