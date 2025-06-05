@@ -55,6 +55,7 @@ export interface GetPkgReleasesConfig {
 }
 
 export interface Release {
+  changelogContent?: string;
   changelogUrl?: string;
   checksumUrl?: string;
   downloadUrl?: string;
@@ -81,6 +82,7 @@ export interface ReleaseResult {
   isPrivate?: boolean;
   releases: Release[];
   tags?: Record<string, string> | undefined;
+  changelogContent?: string;
   // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
