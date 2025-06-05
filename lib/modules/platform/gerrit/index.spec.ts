@@ -45,6 +45,7 @@ describe('modules/platform/gerrit/index', () => {
 
   beforeAll(() => {
     vi.useFakeTimers();
+    vi.setSystemTime(t0.toMillis());
   });
 
   beforeEach(async () => {
@@ -279,10 +280,6 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('createPr()', () => {
-    beforeEach(() => {
-      vi.setSystemTime(t0.toMillis());
-    });
-
     it('createPr() - no existing found => rejects', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
