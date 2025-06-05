@@ -1506,11 +1506,12 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         );
         versionTwoNotes = res!;
 
-        expect(res).toMatchSnapshot({
-          notesSourceUrl:
-            'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md',
-          url: 'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md#Release-2025-03-03',
-        });
+        expect(res?.notesSourceUrl).toStrictEqual(
+          'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md',
+        );
+        expect(res?.url).toStrictEqual(
+          'https://github.com/embroider-build/release-plan/blob/HEAD/CHANGELOG.md#Release-2025-03-03',
+        );
       });
 
       it('handles gitlab sourceDirectory', async () => {
