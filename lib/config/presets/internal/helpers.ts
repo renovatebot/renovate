@@ -35,8 +35,8 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         extends: ['helpers:pinGitHubActionDigests'],
-        versioning: 'npm',
         rangeStrategy: 'pin',
+        versioning: 'npm',
       },
     ],
   },
