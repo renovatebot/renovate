@@ -110,9 +110,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     // Convert CODEOWNERS file into list of matching rules
     const cleanedLines = parseCodeOwnersContent(codeOwnersFile);
 
-    const fileOwnerRules = platform.extractRulesFromCodeOwnersLines
-      ? platform.extractRulesFromCodeOwnersLines(cleanedLines)
-      : cleanedLines.map(extractOwnersFromLine);
+    const fileOwnerRules = platform.extractRulesFromCodeOwnersLines?.extractRulesFromCodeOwnersLines(cleanedLines) ??cleanedLines.map(extractOwnersFromLine);
 
     logger.debug(
       { prFiles, fileOwnerRules },
