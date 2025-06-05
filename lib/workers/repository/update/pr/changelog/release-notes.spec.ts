@@ -1483,7 +1483,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         });
       });
 
-      it('parses when version contained in the body 15.3.0', async () => {
+      it('parses when version contained in the body 0.14.0', async () => {
         httpMock
           .scope('https://api.github.com')
           .get('/repos/embroider-build/release-plan')
@@ -1498,6 +1498,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           {
             ...githubProject,
             repository: 'embroider-build/release-plan',
+            packageName: 'release-plan',
           },
           partial<ChangeLogRelease>({
             version: '0.14.0',
