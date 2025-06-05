@@ -31,13 +31,12 @@ export const presets: Record<string, Preset> = {
     ],
   },
   pinGitHubActionDigestsToSemver: {
-    description: 'Convert pinned GitHub Action digests to SemVer.',
+    description: 'Pin `github-action` digests and versions.',
     packageRules: [
       {
         extends: ['helpers:pinGitHubActionDigests'],
-        extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
-        versioning:
-          'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+        versioning: 'npm',
+        rangeStrategy: 'pin',
       },
     ],
   },
