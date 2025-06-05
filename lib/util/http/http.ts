@@ -13,8 +13,8 @@ import * as memCache from '../cache/memory';
 import { getEnv } from '../env';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
-import { parse as parseToml } from '../toml';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
 import { applyAuthorization, removeAuthorization } from './auth';
@@ -686,9 +686,11 @@ export abstract class HttpBase<
       },
     };
 
-    const res = await this.getText(url, opts);
+    const res: any = await this.getText(url, opts);
     if (schema) {
-      res.body = await schema.parseAsync(parseToml(res.body));
+      res.body = await Toml.pipe(schema).parseAsync(res.body);
+    } else {
+      res.body = await Toml.parseAsync(res.body);
     }
 
     return res;
