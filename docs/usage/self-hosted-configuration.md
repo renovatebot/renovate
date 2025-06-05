@@ -688,15 +688,9 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 
 ## gitCredentialPassing
 
-The method of passing repository credentials to Git. Uses the
-URL-embedded credentials by default or when set to `url`, or the
-[Git Credential Store](https://git-scm.com/docs/git-credential-store)
-when set to `store`.
+The method of passing repository credentials to Git. Uses the URL-embedded credentials by default or when set to `url`, or the [Git Credential Store](https://git-scm.com/docs/git-credential-store) when set to `store`.
 
-Using the Git Credential Store works around a
-[long-standing and well-known issue in Git and its underlying libcurl](https://docs.gitlab.com/integration/kerberos/#http-git-access-with-kerberos-token-passwordless-authentication),
-which causes authentication with a Kerberos-enabled GitLab instance to
-always fail.
+Using the Git Credential Store works around a [long-standing and well-known issue in Git and its underlying libcurl](https://docs.gitlab.com/integration/kerberos/#http-git-access-with-kerberos-token-passwordless-authentication), which causes authentication with a Kerberos-enabled GitLab instance to always fail.
 
 ## gitNoVerify
 
