@@ -175,9 +175,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('formats without prettier if in .renovaterc', async () => {
-      const migratedDataRenovaterc = vi
-        .mocked(scm.getFileList)
-        .mockResolvedValue(['.prettierrc']);
+      vi.mocked(scm.getFileList).mockResolvedValue(['.prettierrc']);
       await MigratedDataFactory.getAsync();
       await expect(
         MigratedDataFactory.applyPrettierFormatting({
