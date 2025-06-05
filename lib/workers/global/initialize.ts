@@ -1,6 +1,5 @@
 import os from 'node:os';
 import { homedir } from 'os';
-import { join } from 'path';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
@@ -102,7 +101,7 @@ export async function globalInitialize(
     for (const host of config.hostRules ?? []) {
       lines.push(`https://oauth2:${host.token}@${host.matchHost}`);
     }
-    const credentialsPath = join(homedir(), '.git-credentials');
+    const credentialsPath = upath.join(homedir(), '.git-credentials');
     await fs.writeFile(credentialsPath, lines.join('\n') + '\n', {
       mode: 0o600,
       encoding: 'utf-8',
