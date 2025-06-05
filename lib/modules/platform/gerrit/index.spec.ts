@@ -39,6 +39,14 @@ vi.mock('./client');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
+  const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
+    zone: 'utc',
+  }) as DateTime<true>;
+
+  beforeAll(() => {
+    vi.useFakeTimers();
+  });
+
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
       username: 'user',
@@ -271,20 +279,8 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('createPr()', () => {
-    const t0 = DateTime.fromISO('2025-04-14T16:33:37.000000000', {
-      zone: 'utc',
-    }) as DateTime<true>;
-
-    beforeAll(() => {
-      vi.useFakeTimers();
-    });
-
     beforeEach(() => {
       vi.setSystemTime(t0.toMillis());
-    });
-
-    afterAll(() => {
-      vi.useRealTimers();
     });
 
     it('createPr() - no existing found => rejects', async () => {
