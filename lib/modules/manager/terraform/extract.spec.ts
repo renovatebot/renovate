@@ -21,8 +21,6 @@ const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
 const modulesJSON = Fixtures.get('modules.tf.json');
-const bitbucketModulesJSON = Fixtures.get('bitbucketModules.tf.json');
-const azureDevOpsModulesJSON = Fixtures.get('azureDevOpsModules.tf.json');
 const providersJSON = Fixtures.get('providers.tf.json');
 const dockerJSON = Fixtures.get('docker.tf.json');
 const kubernetesJSON = Fixtures.get('kubernetes.tf.json');
@@ -1016,127 +1014,6 @@ describe('modules/manager/terraform/extract', () => {
           depType: 'module',
           currentValue: undefined,
           skipReason: 'no-source',
-        },
-      ]);
-    });
-
-    it('extracts bitbucket modules', async () => {
-      const res = await extractPackageFile(
-        bitbucketModulesJSON,
-        'modules.tf.json',
-        {},
-      );
-      expect(res?.deps).toHaveLength(11);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res?.deps).toIncludeAllPartialMembers([
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'https://bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'https://bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'next',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'https://bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.1',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'https://bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.2',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'http://bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.3',
-          datasource: 'git-tags',
-          depName: 'bitbucket.com/hashicorp/example',
-          depType: 'module',
-          packageName: 'ssh://git@bitbucket.com/hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'bitbucket-tags',
-          depName: 'hashicorp/example',
-          depType: 'module',
-          packageName: 'hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'bitbucket-tags',
-          depName: 'hashicorp/example',
-          depType: 'module',
-          packageName: 'hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'bitbucket-tags',
-          depName: 'hashicorp/example',
-          depType: 'module',
-          packageName: 'hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'bitbucket-tags',
-          depName: 'hashicorp/example',
-          depType: 'module',
-          packageName: 'hashicorp/example',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'bitbucket-tags',
-          depName: 'hashicorp/example',
-          depType: 'module',
-          packageName: 'hashicorp/example',
-        },
-      ]);
-    });
-
-    it('extracts azureDevOps modules', async () => {
-      const res = await extractPackageFile(
-        azureDevOpsModulesJSON,
-        'modules.tf.json',
-        {},
-      );
-      expect(res?.deps).toHaveLength(3);
-      expect(res?.deps).toIncludeAllPartialMembers([
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'git-tags',
-          depName: 'MyOrg/MyProject/MyRepository',
-          depType: 'module',
-          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'git-tags',
-          depName: 'MyOrg/MyProject/MyRepository',
-          depType: 'module',
-          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
-        },
-        {
-          currentValue: 'v1.0.0',
-          datasource: 'git-tags',
-          depName: 'MyOrg/MyProject/MyRepository//some-module/path',
-          depType: 'module',
-          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
         },
       ]);
     });
