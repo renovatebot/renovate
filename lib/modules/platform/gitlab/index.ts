@@ -135,22 +135,11 @@ export async function initPlatform({
   if (gitCredentialPassing === 'store') {
     logger.debug('Enable the Git credential store');
     await git.enableCredentialStore();
-    const credentialsPath = upath.join(homedir(), '.git-credentials');
-    const endpointUrl = new URL.URL(defaults.endpoint);
+    const data = new URL.URL(defaults.endpoint);
     try {
-      await fs.writeFile(
-        credentialsPath,
-        `https://oauth2:${token}@${endpointUrl.host}\n`,
-        {
-          mode: 0o600,
-          encoding: 'utf-8',
-        },
-      );
+      await git.updateCredentialStore(`https://oauth2:${token}@${data.host}`);
     } catch (err) {
-      logger.fatal(
-        { credentialsPath, err },
-        `Cannot write file ${credentialsPath}:`,
-      );
+      logger.fatal({ err }, `Cannot update the Git credentials store: ${err}`);
       process.exit(1);
     }
   }
