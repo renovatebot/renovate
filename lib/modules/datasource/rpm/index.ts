@@ -1,5 +1,7 @@
+import { Readable } from 'node:stream';
 import { gunzip } from 'node:zlib';
 import { promisify } from 'util';
+import * as expat from 'node-expat';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -134,70 +136,75 @@ export class RpmDatasource extends Datasource {
       );
       throw err;
     }
-    const xmlString = decompressedBuffer.toString('utf8');
-    // check if filelistsXmlUrl is in XML format
-    if (!(xmlString.startsWith('<?xml') || xmlString.startsWith('\n<?xml'))) {
-      logger.debug(
-        `Decompressed ${filelistsGzipUrl} is not in XML format. Contents: ${xmlString}`,
-      );
-      throw new Error(
-        `Decompressed ${filelistsGzipUrl} is not in XML format. Contents: ${xmlString}`,
-      );
-    }
 
-    // parse filelists.xml
-    const data = new XmlDocument(xmlString);
-    const packages = data.childrenNamed('package');
-    if (!packages || packages.length === 0) {
-      logger.debug(
-        `No packages found in ${filelistsGzipUrl}, xml contents: ${xmlString}`,
-      );
-      throw new Error(`No packages found in ${filelistsGzipUrl}`);
-    }
+    // Use XML streaming parser to handle large XML files efficiently
+    // If the file is too large (e.g., > 512MB), node.js doesn't support it natively.
+    // Therefore, we use a streaming parser to handle the XML file.
+    // This allows us to parse the XML file without loading the entire file into memory.
     const releases: Record<string, Release> = {};
-    logger.trace(`Found ${packages.length} packages in ${filelistsGzipUrl}`);
-    for (const pkg of packages) {
-      logger.trace(
-        `Checking package ${pkg.attr.name} for releases in ${filelistsGzipUrl}`,
-      );
-      const name = pkg.attr.name;
-      if (name !== packageName) {
-        continue;
-      }
-      const versionElement = pkg.childNamed('version');
-      const version = versionElement?.attr?.ver ?? '';
-      if (!version) {
-        logger.trace(
-          `No version found for package ${name} in ${filelistsGzipUrl}`,
-        );
-        continue;
-      }
-      const rel = versionElement?.attr?.rel;
-      let versionWithRel = version;
-      if (rel) {
-        // if rel is present, we need to append it to the version. Otherwise, ignore it.
-        // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3 or 1.0.0
-        logger.trace(
-          `Found version ${version} with rel ${rel} for package ${name}`,
-        );
-        versionWithRel += `-${rel}`;
-      }
-      logger.trace(
-        `Found version ${versionWithRel} for package ${name} in ${filelistsGzipUrl}`,
-      );
+    let foundAny = false;
+    let insideTargetPackage = false;
+    let versionAttrs: { ver?: string; rel?: string } = {};
 
-      // check if the versionWithRel isn't already in the releases
-      // One version could have multiple rel
-      // (note: this rel is the release/revision key in filelists.xml, not the release data type)
-      // e.g. 1.0.0-1, 1.0.0-2, 1.0.0-3
-      if (!releases[versionWithRel]) {
-        releases[versionWithRel] = {
-          version: versionWithRel,
-        };
-      }
-    }
-    // if no releases were found for the package, return null
-    if (Object.keys(releases).length === 0) {
+    // Wrap parsing in a Promise for proper async handling
+    await new Promise<void>((resolve, reject) => {
+      const xmlStream = Readable.from(decompressedBuffer);
+      const parser = new expat.Parser('UTF-8');
+
+      parser.on('startElement', (name: string, attrs: any) => {
+        if (name === 'package') {
+          insideTargetPackage = attrs.name === packageName;
+          versionAttrs = {};
+        } else if (insideTargetPackage && name === 'version') {
+          versionAttrs = attrs;
+        }
+      });
+
+      parser.on('endElement', (tagName: string) => {
+        if (tagName === 'package') {
+          if (insideTargetPackage && versionAttrs.ver) {
+            let versionWithRel = versionAttrs.ver ?? '';
+            if (versionAttrs.rel ?? false) {
+              versionWithRel += `-${versionAttrs.rel}`;
+            }
+            if (!releases[versionWithRel]) {
+              releases[versionWithRel] = { version: versionWithRel };
+              foundAny = true;
+            }
+          }
+          insideTargetPackage = false;
+          versionAttrs = {};
+        }
+      });
+
+      parser.on('error', (err: Error) => {
+        parser.removeAllListeners();
+        xmlStream.destroy();
+        logger.debug(
+          `XmlStream parsing error in ${filelistsGzipUrl}: ${err.message}`,
+        );
+        reject(err);
+      });
+
+      xmlStream.on('data', (chunk) => {
+        try {
+          parser.write(chunk);
+        } catch (err) {
+          xmlStream.destroy();
+          throw err;
+        }
+      });
+      xmlStream.on('end', () => {
+        parser.removeAllListeners();
+        resolve();
+      });
+      xmlStream.on('error', (err) => {
+        parser.removeAllListeners();
+        reject(err);
+      });
+    });
+
+    if (!foundAny) {
       logger.trace(
         `No releases found for package ${packageName} in ${filelistsGzipUrl}`,
       );

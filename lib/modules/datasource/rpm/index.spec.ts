@@ -131,8 +131,7 @@ describe('modules/datasource/rpm/index', () => {
       'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
 
     it('returns the correct releases', async () => {
-      const filelistsXml = `
-<?xml version="1.0" encoding="UTF-8"?>
+      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <package pkgid="someid" name="${packageName}" arch="x86_64">
     <version epoch="0" ver="1.0" rel="2.azl3"/>
@@ -206,9 +205,8 @@ describe('modules/datasource/rpm/index', () => {
       );
     });
 
-    it('throws an error if filelistsXmlUrl is not in XML format', async () => {
-      const filelistsXml = `
-<?invalidxml version="1.0" encoding="UTF-8"?>
+    it('returns null if filelistsXmlUrl is not in XML format', async () => {
+      const filelistsXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <package pkgid="someid" name="other-package" arch="x86_64">
     <version epoch="0" ver="1.0" rel="2.azl3"/>
@@ -224,14 +222,15 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, gzippedFilelistsXml, {
           'Content-Type': 'application/gzip',
         });
-      await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrow(`is not in XML format.`);
+      const result = await rpmDatasource.getReleasesByPackageName(
+        filelistsXmlUrl,
+        packageName,
+      );
+      expect(result).toBeNull();
     });
 
     it('returns null if no element package is found in filelists.xml', async () => {
-      const filelistsXml = `
-<?xml version="1.0" encoding="UTF-8"?>
+      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <nonpackage pkgid="someid" name="nonpackage" arch="x86_64">
     <version epoch="0" ver="1.0" rel="2.azl3"/>
@@ -247,14 +246,15 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, gzippedFilelistsXml, {
           'Content-Type': 'application/gzip',
         });
-      await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrow(`No packages found in ${filelistsXmlUrl}`);
+      const result = await rpmDatasource.getReleasesByPackageName(
+        filelistsXmlUrl,
+        packageName,
+      );
+      expect(result).toBeNull();
     });
 
     it('returns null if the specific packageName is not found in filelists.xml', async () => {
-      const filelistsXml = `
-<?xml version="1.0" encoding="UTF-8"?>
+      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <package pkgid="someid" name="other-package" arch="x86_64">
     <version epoch="0" ver="1.0" rel="2.azl3"/>
@@ -279,8 +279,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns an empty array if version is not found in a version element', async () => {
-      const filelistsXml = `
-<?xml version="1.0" encoding="UTF-8"?>
+      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <package pkgid="someid" name="${packageName}" arch="x86_64">
     <version epoch="0"/>
@@ -307,8 +306,7 @@ describe('modules/datasource/rpm/index', () => {
     it('returns an array of releases without duplicate versionWithRel', async () => {
       const filelistsXmlUrl =
         'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
-      const filelistsXml = `
-<?xml version="1.0" encoding="UTF-8"?>
+      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <filelists xmlns="http://linux.duke.edu/metadata/filelists">
   <package pkgid="someid" name="${packageName}" arch="x86_64">
     <version epoch="0" ver="1.0" rel="2.dupl"/>
@@ -326,6 +324,7 @@ describe('modules/datasource/rpm/index', () => {
     <version epoch="0" ver="1.1" rel="2.azl3"/>
     <file>example-file</file>
   </package>
+</filelists>
 `;
       // gzip the filelistsXml content
       const gzippedFilelistsXml = gzipSync(filelistsXml);
@@ -354,6 +353,7 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
   });
+
   describe('getReleases', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
     const rpmDatasource = new RpmDatasource();
