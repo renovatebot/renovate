@@ -2183,13 +2183,13 @@ describe('workers/repository/update/branch/index', () => {
       );
 
       const tmpDir = await dir({ unsafeCleanup: true });
-      const privateCacheDir = path.join(tmpDir.path, 'cache');
+      const cacheDir = path.join(tmpDir.path, 'cache');
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
         trustLevel: 'high',
         localDir: '/localDir',
-        cacheDir: privateCacheDir,
+        cacheDir: cacheDir,
       });
 
       fs.readLocalFile
@@ -2201,7 +2201,7 @@ describe('workers/repository/update/branch/index', () => {
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fs.privateCacheDir.mockReturnValue(privateCacheDir);
+      fs.ensureCacheDir.mockResolvedValue(cacheDir);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2216,29 +2216,33 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
 
-      const result = await branchWorker.processBranch(inconfig);
-      expect(result).toEqual({
-        branchExists: true,
-        updatesVerified: true,
-        prNo: undefined,
-        result: 'done',
-        commitSha: null,
-      });
+      try {
+        const result = await branchWorker.processBranch(inconfig);
+        expect(result).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'done',
+          commitSha: null,
+        });
 
-      expect(exec.exec).toHaveBeenCalledTimes(1);
+        expect(exec.exec).toHaveBeenCalledTimes(1);
 
-      const execPathParam = exec.exec.mock.calls[0][0];
-      expect(execPathParam).toEqual('echo hardcoded-string');
+        const execPathParam = exec.exec.mock.calls[0][0];
+        expect(execPathParam).toEqual('echo hardcoded-string');
 
-      const execOptionsParam = exec.exec.mock.calls[0][1];
-      expect(execOptionsParam).toBeDefined();
-      expect(execOptionsParam?.cwd).toEqual('/localDir');
-      const dataFileRegex = new RegExp(
-        `^.*${path.sep}renovate-post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
-      );
-      expect(
-        execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
-      ).toMatch(dataFileRegex);
+        const execOptionsParam = exec.exec.mock.calls[0][1];
+        expect(execOptionsParam).toBeDefined();
+        expect(execOptionsParam?.cwd).toEqual('/localDir');
+        const dataFileRegex = new RegExp(
+          `^.*${path.sep}data-file-[a-f0-9]{16}.tmp$`,
+        );
+        expect(
+          execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
+        ).toMatch(dataFileRegex);
+      } finally {
+        tmpDir.cleanup();
+      }
     });
 
     it('returns when rebaseWhen=never', async () => {

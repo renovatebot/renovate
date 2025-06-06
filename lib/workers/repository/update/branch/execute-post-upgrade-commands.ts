@@ -14,7 +14,7 @@ import {
   writeLocalFile,
   writeSystemFile,
   deleteSystemFile,
-  privateCacheDir,
+  ensureCacheDir,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -78,8 +78,11 @@ export async function postUpgradeCommandsExecutor(
           'Processed post-upgrade commands data file template.',
         );
 
-        const dataFileName = `renovate-post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
-        dataFilePath = path.join(privateCacheDir(), dataFileName);
+        const dataFileName = `data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
+        const dataFilesCacheDir = await ensureCacheDir(
+          'post-upgrade-data-files',
+        );
+        dataFilePath = path.join(dataFilesCacheDir, dataFileName);
 
         try {
           await writeSystemFile(dataFilePath, dataFileContent);
