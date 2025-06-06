@@ -8,7 +8,7 @@ import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
-import { enableCredentialStore, validateGitVersion } from '../../util/git';
+import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setHttpRateLimits } from '../../util/http/rate-limits';
 import { initMergeConfidence } from '../../util/merge-confidence';
