@@ -74,7 +74,7 @@ COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline; \
+  pnpm install --prod --offline --ignore-scripts; \
   pnpm rebuild re2 better-sqlite3; \
   true
 
@@ -110,7 +110,7 @@ RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repo
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:');"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
