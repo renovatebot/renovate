@@ -3,7 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import semver from 'semver';
-import type { Options, SimpleGit } from 'simple-git';
+import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
@@ -1255,18 +1255,19 @@ export async function pushCommit({
   logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
-    const extraArgs = ['--force-with-lease', '-u'];
+    const gitOptions: TaskOptions = {
+      '--force-with-lease': null,
+      '-u': null,
+    };
     if (getNoVerify().includes('push')) {
-      extraArgs.push('--no-verify');
+      gitOptions['--no-verify'] = null;
     }
     if (pushOptions) {
-      for (const pushOption of pushOptions) {
-        extraArgs.push('--push-option', pushOption);
-      }
+      gitOptions['--push-option'] = pushOptions;
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, extraArgs),
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, gitOptions),
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');

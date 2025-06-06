@@ -769,7 +769,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        expect.arrayContaining(['--no-verify']),
+        expect.objectContaining({ '--no-verify': null }),
       );
     });
 
@@ -1247,12 +1247,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledWith(
         'origin',
         `${defaultBranch}:${defaultBranch}`,
-        expect.arrayContaining([
-          '--push-option',
-          'ci.skip',
-          '--push-option',
-          'foo=bar',
-        ]),
+        expect.objectContaining({
+          '--push-option': ['ci.skip', 'foo=bar'],
+        }),
       );
     });
   });
