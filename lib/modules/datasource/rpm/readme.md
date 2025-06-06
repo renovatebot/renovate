@@ -75,3 +75,9 @@ You can see that `ver` and `rel` (release/revision) is stored separately.
 But the RPM datasource implementation will combine these together as `ver-rel`.
 That's why in the `manifest.json` above, the version is defined as `1.0.0-1`, if `rel` is available.
 Or just `1.1.0` if `rel` is not available.
+
+## Limitation and Consideration
+
+In real-world scenarios, the decompressed filelist XML file from an RPM repository can exceed 512MB. Node.js has a limitation where a single string cannot be larger than 512MB by default. To address this, instead of loading and parsing the entire XML file as a string, this implementation uses XML streaming, which processes the file incrementally and avoids memory issues with large files.
+
+While XML streaming is a practical solution for handling very large XML files in Node.js, there may be even more efficient or robust approaches for extreme cases (e.g., using native modules, SAX parsers, or external tools). If you have suggestions or improvements for handling huge XML files, contributions and ideas are welcome.
