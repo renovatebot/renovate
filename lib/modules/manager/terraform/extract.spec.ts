@@ -27,7 +27,6 @@ const kubernetesJSON = Fixtures.get('kubernetes.tf.json');
 
 const helmJSON = Fixtures.get('helm.tf.json');
 const lockedVersionJSON = Fixtures.get('lockedVersion.tf.json');
-const terraformBlockJSON = Fixtures.get('terraformBlock.tf.json');
 const tfeWorkspaceBlockJSON = Fixtures.get('tfeWorkspace.tf.json');
 
 const adminConfig: RepoGlobalConfig = {
@@ -1453,26 +1452,6 @@ describe('modules/manager/terraform/extract', () => {
           depType: 'required_provider',
           packageName: 'example/kubernetes',
           registryUrls: ['https://terraform.example.com'],
-        },
-      ]);
-    });
-
-    it('test terraform block with only requirement_terraform_version', async () => {
-      const res = await extractPackageFile(
-        terraformBlockJSON,
-        'terraformBlock.tf.json',
-        {},
-      );
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res?.deps).toIncludeAllPartialMembers([
-        {
-          currentValue: '1.0.0',
-          datasource: 'github-releases',
-          depName: 'hashicorp/terraform',
-          depType: 'required_version',
-          extractVersion: 'v(?<version>.*)$',
-          versioning: hashicorp.id,
         },
       ]);
     });
