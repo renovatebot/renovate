@@ -75,7 +75,7 @@ COPY --link . ./
 # install npm packages
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+  pnpm rebuild re2 better-sqlite3 node-expat; \
   true
 
 # --------------------------------------
