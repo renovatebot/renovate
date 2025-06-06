@@ -272,6 +272,9 @@ importers:
       neotraverse:
         specifier: 0.6.18
         version: 0.6.18
+      node-expat:
+        specifier: 2.4.1
+        version: 2.4.1
       node-html-parser:
         specifier: 7.0.1
         version: 7.0.1
@@ -465,6 +468,9 @@ importers:
       '@types/node':
         specifier: 22.15.24
         version: 22.15.24
+      '@types/node-expat':
+        specifier: 2.3.5
+        version: 2.3.5
       '@types/parse-link-header':
         specifier: 2.0.3
         version: 2.0.3
@@ -2130,6 +2136,9 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
+
+  '@types/node-expat@2.3.5':
+    resolution: {integrity: sha512-6h0OrKm8vYz4wo+YIUmG3kTHQ0FByYStTXKqKSaVlqSuayk0TQ1SNoG3tmc89Fa2nQ/x/3wx6zwzZ4i/J3tJnw==}
 
   '@types/node@22.15.24':
     resolution: {integrity: sha512-w9CZGm9RDjzTh/D+hFwlBJ3ziUaVw7oufKA3vOFSOZlzmW9AkZnfjPb+DLnrV6qtgL/LNmP0/2zBNCFHL3F0ng==}
@@ -4756,6 +4765,9 @@ packages:
   node-emoji@2.2.0:
     resolution: {integrity: sha512-Z3lTE9pLaJF47NyMhd4ww1yFTAP8YhYI8SleJiHzM46Fgpm5cnNzSl9XfzFNqbaz+VlJrIj3fXQ4DeN1Rjm6cw==}
     engines: {node: '>=18'}
+
+  node-expat@2.4.1:
+    resolution: {integrity: sha512-uWgvQLgo883NKIL+66oJsK9ysKK3ej0YjVCPBZzO/7wMAuH68/Yb7+JwPWNaVq0yPaxrb48AoEXfYEc8gsmFbg==}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -8656,6 +8668,10 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
+  '@types/node-expat@2.3.5':
+    dependencies:
+      '@types/node': 22.15.24
+
   '@types/node@22.15.24':
     dependencies:
       undici-types: 6.21.0
@@ -9156,7 +9172,6 @@ snapshots:
   bindings@1.5.0:
     dependencies:
       file-uri-to-path: 1.0.0
-    optional: true
 
   bl@4.1.0:
     dependencies:
@@ -10108,8 +10123,7 @@ snapshots:
     dependencies:
       flat-cache: 4.0.1
 
-  file-uri-to-path@1.0.0:
-    optional: true
+  file-uri-to-path@1.0.0: {}
 
   fill-range@7.1.1:
     dependencies:
@@ -11580,8 +11594,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nan@2.22.2:
-    optional: true
+  nan@2.22.2: {}
 
   nanoid@3.3.11: {}
 
@@ -11628,6 +11641,11 @@ snapshots:
       char-regex: 1.0.2
       emojilib: 2.4.0
       skin-tone: 2.0.0
+
+  node-expat@2.4.1:
+    dependencies:
+      bindings: 1.5.0
+      nan: 2.22.2
 
   node-fetch@2.7.0(encoding@0.1.13):
     dependencies:
