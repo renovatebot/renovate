@@ -25,7 +25,7 @@ const DockerComposeFileModern = z
     services: z.record(DockerComposeService),
   })
   // using catchall to capture fields starting with `x-` and collecting them in `extensions` field
-  // might need to replace this with something better once zodv4 is stable
+  // might need to replace this with something better once zod v4 is stable
   .catchall(z.unknown())
   .transform(
     (
