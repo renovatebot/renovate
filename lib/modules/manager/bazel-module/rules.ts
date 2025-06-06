@@ -239,7 +239,7 @@ export function toPackageDependencies(
 }
 
 export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
-  rule: z.literal('git_repository'),
+  rule: z.union([z.literal('git_repository'), z.literal('new_git_repository')]),
   children: z.object({
     name: StringFragmentSchema,
     remote: StringFragmentSchema,
