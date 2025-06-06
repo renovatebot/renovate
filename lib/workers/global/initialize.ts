@@ -1,5 +1,4 @@
 import os from 'node:os';
-import { homedir } from 'os';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';

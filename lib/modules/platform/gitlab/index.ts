@@ -117,6 +117,7 @@ export async function initPlatform({
   username,
   token,
   gitAuthor,
+  gitCredentialPassing,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -131,19 +132,27 @@ export async function initPlatform({
     endpoint: defaults.endpoint,
   };
 
-  if (GlobalConfig.get('gitCredentialPassing') === 'store') {
+  if (gitCredentialPassing === 'store') {
     logger.debug('Enable the Git credential store');
     await git.enableCredentialStore();
-
-    const lines: string[] = [];
-    for (const host of hostRules.getAll() ?? []) {
-      lines.push(`https://oauth2:${host.token}@${host.matchHost}`);
-    }
     const credentialsPath = upath.join(homedir(), '.git-credentials');
-    await fs.writeFile(credentialsPath, lines.join('\n') + '\n', {
-      mode: 0o600,
-      encoding: 'utf-8',
-    });
+    const endpointUrl = new URL.URL(defaults.endpoint);
+    try {
+      await fs.writeFile(
+        credentialsPath,
+        `https://oauth2:${token}@${endpointUrl.host}\n`,
+        {
+          mode: 0o600,
+          encoding: 'utf-8',
+        },
+      );
+    } catch (err) {
+      logger.fatal(
+        { credentialsPath, err },
+        `Cannot write file ${credentialsPath}:`,
+      );
+      process.exit(1);
+    }
   }
 
   let gitlabVersion: string;
