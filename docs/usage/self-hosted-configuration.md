@@ -1166,7 +1166,7 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle). For authentication, the default credential provider chain for the AWS SDK is used, or if set, the `RENOVATE_S3_*` environment variables. For more details on authentication, see the [repository cache authentication section](#repositorycachetype).
 
 ## repositories
 
@@ -1193,9 +1193,26 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 }
 ```
 
+You can also provide AWS credentials directly in the S3 URI:
+
+```ts title="Set repositoryCacheType to an S3 URI with credentials"
+{
+  repositoryCacheType: 's3://ACCESS_KEY:SECRET_KEY@bucket-name';
+}
+```
+
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+
+**Authentication:**
+
+- In cases where the default AWS credentials are already used for another purpose (such as AWS ECR lookups), you may need to specify separate credentials for S3 repository, Renovate supports the following S3-specific environment variables for this purpose:
+  - `RENOVATE_S3_AWS_ACCESS_KEY_ID`
+  - `RENOVATE_S3_AWS_SECRET_ACCESS_KEY`
+  - `RENOVATE_S3_AWS_REGION`
+- These variables are only supported as environment variables, not as CLI arguments or config file options. This is intentional for security and to avoid conflicts with other AWS services.
+- If these variables are not set, Renovate will fall back to the AWS SDK's default credential provider chain as mentioned above (which may use global AWS environment variables, shared credentials files, or cloud instance metadata).
 
 <!-- prettier-ignore -->
 !!! tip
