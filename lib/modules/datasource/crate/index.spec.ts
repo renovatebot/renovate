@@ -420,9 +420,20 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(2);
-      expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(res).toMatchObject({
+        dependencyUrl: 'https://github.com/mcorbin/testregistry/mypkg',
+        registryUrl: 'https://github.com/mcorbin/testregistry',
+        releases: [
+          {
+            version: '0.1.0',
+          },
+          {
+            version: '0.1.1',
+          },
+        ],
+      });
     });
   });
 

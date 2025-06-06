@@ -305,18 +305,3 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: lib
   "sourceUrl": "https://github.com/rust-lang/libc",
 }
 `;
-
-exports[`modules/datasource/crate/index > getReleases > retries if shallow fails because of dumb http git repo 1`] = `
-{
-  "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
-  "registryUrl": "https://github.com/mcorbin/testregistry",
-  "releases": [
-    {
-      "version": "0.1.0",
-    },
-    {
-      "version": "0.1.1",
-    },
-  ],
-}
-`;
