@@ -23,6 +23,7 @@ export interface GitLabMergeRequest {
   iid: number;
   title: string;
   state: string;
+  created_at: string;
   source_branch: string;
   target_branch: string;
   description: string;
@@ -37,6 +38,7 @@ export interface GitLabMergeRequest {
     status: string;
     sha: string;
   };
+  updated_at: string;
 }
 
 export interface GitlabPr extends Pr {
@@ -76,4 +78,10 @@ export interface GitlabUserStatus {
   message_html?: string;
   emoji?: string;
   availability: 'not_set' | 'busy';
+}
+
+export interface GitlabPrCacheData {
+  items: Record<number, GitlabPr>;
+  updated_at: string | null;
+  author: string | null;
 }

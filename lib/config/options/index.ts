@@ -132,8 +132,6 @@ const options: RenovateOptions[] = [
     description:
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
-    default: 'patch',
-    allowedValues: ['major', 'minor', 'patch', 'prerelease'],
     parents: ['bumpVersions'],
   },
   {
@@ -149,7 +147,6 @@ const options: RenovateOptions[] = [
     description:
       'A name for the bumpVersion config. This is used for logging and debugging.',
     type: 'string',
-    default: null,
     parents: ['bumpVersions'],
   },
   {
@@ -544,7 +541,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.21',
+    default: 'ghcr.io/containerbase/sidecar:13.8.23',
     globalOnly: true,
   },
   {
@@ -1176,6 +1173,7 @@ const options: RenovateOptions[] = [
       'helmv3',
       'kubernetes',
       'kustomize',
+      'maven',
       'terraform',
       'vendir',
       'woodpecker',
@@ -1446,7 +1444,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchSourceUrls',
-    description: 'A list of source URLs to exact match against.',
+    description:
+      'A list of exact match URLs (or URL patterns) to match sourceUrl against.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1890,6 +1889,20 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'abandonmentThreshold',
+    description:
+      'Flags packages that have not been updated within this period as abandoned.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'dependencyDashboardReportAbandonment',
+    description:
+      'Controls whether abandoned packages are reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'internalChecksAsSuccess',

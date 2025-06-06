@@ -100,6 +100,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
@@ -169,6 +170,9 @@ export interface PackageDependency<T = Record<string, any>>
    * override data source's default strategy.
    */
   registryStrategy?: RegistryStrategy;
+
+  mostRecentTimestamp?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {

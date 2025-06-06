@@ -49,6 +49,43 @@ When an array or object configuration option is `mergeable`, it means that value
 
 ---
 
+## abandonmentThreshold
+
+The `abandonmentThreshold` option allows Renovate to flag packages as abandoned when they haven't received updates for a specified period of time.
+
+Renovate adds an `isAbandoned` boolean property to the package lookup result when:
+
+- `abandonmentThreshold` is defined (not `null`)
+- The package has a `mostRecentTimestamp` timestamp available from the datasource
+
+The `mostRecentTimestamp` timestamp represents the release date of the highest version, but only if that version also has the most recent timestamp among all releases.
+This ensures abandonment detection is based on normal package release patterns.
+
+If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).
+
+This option accepts time duration strings like `1 year`, `6 months`, `90 days`, etc.
+
+Example usage:
+
+```json
+{
+  "abandonmentThreshold": "2 years"
+}
+```
+
+You can also apply this setting selectively using `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "abandonmentThreshold": "1 year"
+    }
+  ]
+}
+```
+
 ## addLabels
 
 The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
@@ -113,6 +150,8 @@ This option _adds_ to the existing reviewer list, rather than _replacing_ it lik
 
 Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
 For example, when adding focused reviewers for a specific package group.
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 ## assignAutomerge
 
@@ -514,11 +553,13 @@ For example, to bump versions only for updates in the `charts/` directory:
   "packageRules": [
     {
       "matchFileNames": ["charts/**"],
-      "bumpVersions": {
-        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
-        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
-        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
-      }
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
     }
   ]
 }
@@ -1374,6 +1415,15 @@ You will only get OSV-based vulnerability alerts for direct dependencies.
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
+
+## dependencyDashboardReportAbandonment
+
+Controls whether abandoned packages are reported in the dependency dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
 ## dependencyDashboardTitle
 
@@ -2336,6 +2386,8 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## ignoreScripts
 
 By default, Renovate will disable package manager scripts.
@@ -2466,28 +2518,29 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-- `.terraform.lock.hcl`
-- `Cargo.lock`
-- `Chart.lock`
-- `composer.lock`
-- `conan.lock`
-- `flake.lock`
-- `Gemfile.lock`
-- `gradle.lockfile`
-- `jsonnetfile.lock.json`
-- `manifest.toml`
-- `package-lock.json`
-- `packages.lock.json`
-- `pdm.lock`
-- `Pipfile.lock`
-- `pnpm-lock.yaml`
-- `poetry.lock`
-- `pubspec.lock`
-- `pyproject.toml`
-- `requirements.txt`
-- `uv.lock`
-- `yarn.lock`
-- `pixi.lock`
+| Manager           | Lockfile                                           |
+| ----------------- | -------------------------------------------------- |
+| `bun`             | `bun.lockb`, `bun.lock`                            |
+| `bundler`         | `Gemfile.lock`                                     |
+| `cargo`           | `Cargo.lock`                                       |
+| `composer`        | `composer.lock`                                    |
+| `conan`           | `conan.lock`                                       |
+| `devbox`          | `devbox.lock`                                      |
+| `gleam`           | `manifest.toml`                                    |
+| `gradle`          | `gradle.lockfile`                                  |
+| `helmv3`          | `Chart.lock`                                       |
+| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
+| `mix`             | `mix.lock`                                         |
+| `nix`             | `flake.lock`                                       |
+| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
+| `nuget`           | `packages.lock.json`                               |
+| `pep621`          | `pdm.lock`, `uv.lock`                              |
+| `pip-compile`     | `requirements.txt`                                 |
+| `pipenv`          | `Pipfile.lock`                                     |
+| `pixi`            | `pixi.lock`                                        |
+| `poetry`          | `poetry.lock`                                      |
+| `pub`             | `pubspec.lock`                                     |
+| `terraform`       | `.terraform.lock.hcl`                              |
 
 Support for new lock files may be added via feature request.
 
@@ -2838,9 +2891,13 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+<!-- prettier-ignore -->
+!!! warning
+    `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
+
 #### Using regular expressions
 
-You can use Regular Expressions in the `allowedVersion` config.
+You can use Regular Expressions in the `allowedVersions` config.
 You must _begin_ and _end_ your Regular Expression with the `/` character!
 
 For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
@@ -3361,6 +3418,10 @@ For more details on supported syntax see Renovate's [string pattern matching doc
     When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
     Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
+<!-- prettier-ignore -->
+!!! warning
+    `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
+
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
 ```json
@@ -3715,7 +3776,7 @@ The `postUpgradeTasks` configuration consists of three fields:
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use handlebars templating in these commands.
+You can use Handlebars templating in these commands.
 They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
@@ -4122,6 +4183,8 @@ For example: if the username or team name is `bar` then you would set the config
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
@@ -4131,6 +4194,8 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 <!-- prettier-ignore -->
 !!! note
