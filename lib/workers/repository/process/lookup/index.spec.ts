@@ -3685,6 +3685,23 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('prefers lockedVersion', async () => {
+      // Contrived test to check that lockedVersion is preferred over currentValue
+      config.currentValue = '1.3.0';
+      config.lockedVersion = '1.4.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.currentVersion).toEqual('1.4.1');
+      expect(res.updates).toHaveLength(0);
+    });
+
     it('ignores deprecated when it is not the latest', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q2';
