@@ -289,7 +289,7 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return is.function_(datasource.defaultRegistryUrls)
+    return is.function(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
@@ -300,7 +300,7 @@ function resolveRegistryUrls(
   } else if (is.nonEmptyArray(defaultRegistryUrls)) {
     resolvedUrls = [...defaultRegistryUrls];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (is.function_(datasource.defaultRegistryUrls)) {
+  } else if (is.function(datasource.defaultRegistryUrls)) {
     resolvedUrls = [...datasource.defaultRegistryUrls()];
     resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
   } else if (is.nonEmptyArray(datasource.defaultRegistryUrls)) {
@@ -388,7 +388,7 @@ function fetchCachedReleases(
   config: GetReleasesInternalConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `${cacheNamespace}${datasource}${packageName}${config.registryStrategy}${String(
+  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${String(
     registryUrls,
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once

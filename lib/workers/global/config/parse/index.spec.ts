@@ -1,12 +1,18 @@
 import upath from 'upath';
+import * as _decrypt from '../../../../config/decrypt';
+import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
 import { getCustomEnv } from '../../../../util/env';
 import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
+import * as httpMock from '~test/http-mock';
 
 vi.mock('../../../../modules/datasource/npm');
 vi.mock('../../../../util/fs');
+vi.mock('../../../../config/decrypt');
 vi.mock('./host-rules-from-env');
+
+const decrypt = vi.mocked(_decrypt);
 
 const { hostRulesFromEnv } = vi.mocked(_hostRulesFromEnv);
 
@@ -109,7 +115,8 @@ describe('workers/global/config/parse/index', () => {
       const expected = await readSystemFile(privateKeyPath, 'utf8');
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
-      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
+      expect(parsedConfig.privateKey).toBeUndefined();
+      expect(decrypt.setPrivateKeys).toHaveBeenCalledWith(expected, undefined);
     });
 
     it('supports Bitbucket username/password', async () => {
@@ -163,6 +170,54 @@ describe('workers/global/config/parse/index', () => {
       defaultArgv = defaultArgv.concat(['--dry-run=true']);
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed).toContainEntries([['dryRun', 'full']]);
+    });
+
+    it('resolves global presets', async () => {
+      // The remote preset defined in globalExtends of the config file
+      httpMock
+        .scope('http://example.com/')
+        .get('/config.json')
+        .reply(200, { repositories: ['g/r1', 'g/r2'], druRun: 'full' });
+
+      // Mock the default config file to return a preset
+      const defaultConfig = upath.join(__dirname, '__fixtures__/default.js');
+      vi.doMock(defaultConfig, () => ({
+        default: {
+          globalExtends: ['http://example.com/config.json', ':pinVersions'],
+          dryRun: 'extract',
+        },
+      }));
+
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+      vi.doUnmock(defaultConfig);
+
+      // Remote preset in globalExtends should be resolved
+      expect(parsedConfig).toContainEntries([
+        ['repositories', ['g/r1', 'g/r2']],
+      ]);
+      // :pinVersion in globalExtends should be resolved
+      expect(parsedConfig).toContainEntries([['rangeStrategy', 'pin']]);
+      // `globalExtends` should be an empty array after merging
+      expect(parsedConfig).toContainEntries([['globalExtends', []]]);
+      // `dryRun` from globalExtends should be overwritten with value defined in config file
+      expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
+    });
+
+    it('throws exception if global presets cannot be resolved', async () => {
+      httpMock
+        .scope('http://example.com/')
+        .get('/config.json')
+        .reply(404, 'Not Found');
+
+      await expect(
+        configParser.resolveGlobalExtends([
+          'http://example.com/config.json',
+          ':pinVersions',
+        ]),
+      ).rejects.toThrow(CONFIG_PRESETS_INVALID);
     });
 
     it('cli dryRun replaced to full', async () => {

@@ -324,6 +324,10 @@
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
@@ -471,6 +475,7 @@
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
+    "pdfme": "https://github.com/pdfme/pdfme",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
@@ -479,6 +484,7 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
@@ -503,6 +509,7 @@
       "https://github.com/remix-run/react-router"
     ],
     "react-spectrum": "https://github.com/adobe/react-spectrum",
+    "react-spring": "https://github.com/pmndrs/react-spring",
     "reactivestack-cookies": "https://github.com/reactivestack/cookies",
     "reakit": "https://github.com/reakit/reakit",
     "redwood": "https://github.com/redwoodjs/redwood",
@@ -522,6 +529,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "scalar": "https://github.com/scalar/scalar",
     "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
@@ -553,7 +561,11 @@
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
     "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
-    "surveyjs": "https://github.com/surveyjs/surveyjs",
+    "surveyjs": [
+      "https://github.com/surveyjs/surveyjs",
+      "https://github.com/surveyjs/survey-library",
+      "https://github.com/surveyjs/survey-creator"
+    ],
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
@@ -562,6 +574,7 @@
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
+    "tanstack-virtual": "https://github.com/TanStack/virtual",
     "tauri": "https://github.com/tauri-apps/tauri",
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",

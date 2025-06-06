@@ -489,7 +489,7 @@ private-package==1.2.3
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["requirements.in"]
+    "managerFilePatterns": ["requirements.in"]
   },
   "hostRules": [
     {

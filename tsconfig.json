@@ -32,10 +32,14 @@
     "node_modules",
     "./.cache",
     "./dist",
+    "./.pnpm-store/",
+    "./.venv/",
     "**/__mocks__/*",
+    "**/__fixtures__/*",
     "coverage",
     "config.js",
     "tmp",
+    "tools/mkdocs/docs",
     "tools/mkdocs/site"
   ],
   "ts-node": {
