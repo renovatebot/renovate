@@ -92,22 +92,6 @@ export async function globalInitialize(
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
-
-  if (config.gitCredentialPassing === 'store') {
-    logger.debug('Enable the Git credential store');
-    await enableCredentialStore();
-
-    const lines: string[] = [];
-    for (const host of config.hostRules ?? []) {
-      lines.push(`https://oauth2:${host.token}@${host.matchHost}`);
-    }
-    const credentialsPath = upath.join(homedir(), '.git-credentials');
-    await fs.writeFile(credentialsPath, lines.join('\n') + '\n', {
-      mode: 0o600,
-      encoding: 'utf-8',
-    });
-  }
-
   return config;
 }
 
