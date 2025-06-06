@@ -1526,6 +1526,8 @@ Defines how the report is exposed:
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
 - `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
 
+Authentication for `s3`: The default credential provider chain for the AWS SDK is used, or if set, the `RENOVATE_S3_*` environment variables. For more details on authentication, see the [repository cache authentication section](#repositorycachetype).
+
 ## `repositories`
 
 The `repositories` array can contain a mix of repository names, and objects which can override Global and Repo configuration for a specified repository.
@@ -1569,6 +1571,16 @@ This is useful if you want to keep a local copy of the cache for debugging purpo
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+
+### Authentication
+
+- In cases where the default AWS credentials are already used for another purpose (such as AWS ECR lookups), you may need to specify separate credentials for S3 repository, Renovate supports the following S3-specific environment variables for this purpose:
+  - `RENOVATE_S3_AWS_ACCESS_KEY_ID`
+  - `RENOVATE_S3_AWS_SECRET_ACCESS_KEY`
+  - `RENOVATE_S3_AWS_REGION`
+- These variables are only supported as environment variables, not as CLI arguments or config file options. This is intentional for security and to avoid conflicts with other AWS services.
+- If these variables are not set, Renovate will fall back to the AWS SDK's default credential provider chain as mentioned above (which may use global AWS environment variables, shared credentials files, or cloud instance metadata).
+- Credentials coming from `hostRules` take precedence over these environment variables.
 
 !!! tip
   If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
