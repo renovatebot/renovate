@@ -9,7 +9,9 @@ import type { HttpResponse } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+
 const gunzipAsync = promisify(gunzip);
+
 export class RpmDatasource extends Datasource {
   static readonly id = 'rpm';
 
