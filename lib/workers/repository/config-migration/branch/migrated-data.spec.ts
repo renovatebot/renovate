@@ -174,6 +174,17 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       ).resolves.toEqual(formatted);
     });
 
+    it('formats without prettier if in .renovaterc', async () => {
+      vi.mocked(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      await MigratedDataFactory.getAsync();
+      await expect(
+        MigratedDataFactory.applyPrettierFormatting({
+          ...migratedData,
+          filename: '.renovaterc',
+        }),
+      ).resolves.toEqual(migratedData.content);
+    });
+
     it('formats when finds prettier config inside the package.json file', async () => {
       const formatted = formattedMigratedData.content;
       vi.mocked(detectRepoFileConfig).mockResolvedValueOnce({
