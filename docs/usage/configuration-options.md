@@ -2846,7 +2846,10 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match) or a regex pattern. See the [pattern matching docs](https://docs.renovatebot.com/string-pattern-matching) for details.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` glob (which can include an exact file name match) or RE2 regex.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
+
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -3194,7 +3197,9 @@ Invalid if used outside of a `packageRule`.
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob or regex pattern matching against the dependency's package file and also lock file if one exists.  See the [pattern matching docs](https://docs.renovatebot.com/string-pattern-matching) for details.
+Renovate will compare `matchFileNames` glob or RE2 regex matching against the dependency's package file and also lock file if one exists.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
