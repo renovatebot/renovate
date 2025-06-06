@@ -602,7 +602,7 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('returns if commit limit exceeded', async () => {
+    it('returns if commits per run limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
       });
@@ -611,6 +611,25 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       scm.branchExists.mockResolvedValue(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'commit-limit-reached',
+      });
+    });
+
+    it('returns if commits hourly limit exceeded', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(false);
       limits.isLimitReached.mockReturnValueOnce(true);
       expect(await branchWorker.processBranch(config)).toEqual({

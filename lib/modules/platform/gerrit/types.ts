@@ -61,6 +61,7 @@ export interface GerritRevisionInfo {
    * The Git reference for the patch set.
    */
   ref: string;
+  created: string;
   actions?: Record<string, GerritActionInfo>;
   commit: GerritCommitInfo;
 }
