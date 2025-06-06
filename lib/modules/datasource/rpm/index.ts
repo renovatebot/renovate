@@ -187,12 +187,7 @@ export class RpmDatasource extends Datasource {
       });
 
       xmlStream.on('data', (chunk) => {
-        try {
-          parser.write(chunk);
-        } catch (err) {
-          xmlStream.destroy();
-          throw err;
-        }
+        parser.write(chunk);
       });
       xmlStream.on('end', () => {
         parser.removeAllListeners();
