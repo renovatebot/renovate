@@ -273,7 +273,7 @@ importers:
         specifier: 0.6.18
         version: 0.6.18
       node-expat:
-        specifier: ^2.4.1
+        specifier: 2.4.1
         version: 2.4.1
       node-html-parser:
         specifier: 7.0.1
