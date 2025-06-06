@@ -8719,7 +8719,7 @@ snapshots:
 
   '@types/node-expat@2.3.5':
     dependencies:
-      '@types/node': 22.15.27
+      '@types/node': 22.15.29
 
   '@types/node@22.15.29':
     dependencies:
