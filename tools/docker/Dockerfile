@@ -110,7 +110,7 @@ RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repo
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:');require('node-expat');"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:');new require('node-expat');"; \
   true
 
 LABEL \
