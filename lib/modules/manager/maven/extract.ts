@@ -141,7 +141,7 @@ function getAllCNBDependencies(
   if (!imageNode) {
     return null;
   }
-  const builder: PackageDependency[] = getCNBDependencies(
+  const builder = getCNBDependencies(
     imageNode.childrenNamed('builder'),
     config,
   );
