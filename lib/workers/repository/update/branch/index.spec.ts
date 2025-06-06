@@ -2201,7 +2201,7 @@ describe('workers/repository/update/branch/index', () => {
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
-      fs.ensureCacheDir.mockResolvedValue(cacheDir);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -2235,7 +2235,7 @@ describe('workers/repository/update/branch/index', () => {
         expect(execOptionsParam).toBeDefined();
         expect(execOptionsParam?.cwd).toEqual('/localDir');
         const dataFileRegex = new RegExp(
-          `^.*${path.sep}data-file-[a-f0-9]{16}.tmp$`,
+          `^.*${path.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
         );
         expect(
           execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,

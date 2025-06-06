@@ -13,8 +13,7 @@ import {
   readLocalFile,
   writeLocalFile,
   writeSystemFile,
-  deleteSystemFile,
-  ensureCacheDir,
+  privateCacheDir,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -78,11 +77,8 @@ export async function postUpgradeCommandsExecutor(
           'Processed post-upgrade commands data file template.',
         );
 
-        const dataFileName = `data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
-        const dataFilesCacheDir = await ensureCacheDir(
-          'post-upgrade-data-files',
-        );
-        dataFilePath = path.join(dataFilesCacheDir, dataFileName);
+        const dataFileName = `post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
+        dataFilePath = path.join(privateCacheDir(), dataFileName);
 
         try {
           await writeSystemFile(dataFilePath, dataFileContent);
@@ -92,9 +88,6 @@ export async function postUpgradeCommandsExecutor(
             'Created post-upgrade commands data file.',
           );
         } catch (error) {
-          // Reset the data file path to prevent clean up attempt.
-          dataFilePath = '';
-
           artifactErrors.push({
             stderr: sanitize(
               `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
@@ -143,24 +136,6 @@ export async function postUpgradeCommandsExecutor(
             lockFile: upgrade.packageFile,
             stderr: sanitize(
               `Post-upgrade command '${compiledCmd}' has not been added to the allowed list in allowedCommands`,
-            ),
-          });
-        }
-      }
-
-      if (dataFilePath) {
-        // Clean up data file after post-upgrade commands ran.
-        try {
-          await deleteSystemFile(dataFilePath);
-
-          logger.debug(
-            { dataFilePath },
-            'Removed post-upgrade commands data file.',
-          );
-        } catch (error) {
-          artifactErrors.push({
-            stderr: sanitize(
-              `Failed to remove post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
             ),
           });
         }

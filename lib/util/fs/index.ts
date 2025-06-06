@@ -341,10 +341,6 @@ export async function writeSystemFile(
   await fs.outputFile(fileName, data);
 }
 
-export async function deleteSystemFile(fileName: string): Promise<void> {
-  await fs.remove(fileName);
-}
-
 export async function getLocalFiles(
   fileNames: string[],
 ): Promise<Record<string, string | null>> {
