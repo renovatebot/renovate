@@ -145,11 +145,11 @@ function getAllCNBDependencies(
     imageNode.childrenNamed('builder'),
     config,
   );
-  const runImage: PackageDependency[] = getCNBDependencies(
+  const runImage = getCNBDependencies(
     imageNode.childrenNamed('runImage'),
     config,
   );
-  const buildpacks: PackageDependency[] = getCNBDependencies(
+  const buildpacks = getCNBDependencies(
     imageNode.childNamed('buildpacks')?.childrenNamed('buildpack') ?? [],
     config,
   );
