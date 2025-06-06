@@ -319,52 +319,12 @@ export class CrateDatasource extends Datasource {
           { clonePath, registryFetchUrl },
           `Cloning private cargo registry`,
         );
-
-        const git = Git({
-          ...simpleGitConfig(),
-          maxConcurrentProcesses: 1,
-        }).env(getChildEnv());
-
-        const clone = async (): Promise<string> => {
-          const innerClonePromise = git.clone(registryFetchUrl, clonePath, {
-            '--depth': 1,
-          });
-          try {
-            return await innerClonePromise;
-          } catch (err) {
-            if (
-              err.message.includes(
-                'fatal: dumb http transport does not support shallow capabilities',
-              )
-            ) {
-              logger.info(
-                { packageName, registryFetchUrl },
-                'failed to shallow clone git registry, doing full clone',
-              );
-              const innerClonePromise = git.clone(registryFetchUrl, clonePath);
-              try {
-                return await innerClonePromise;
-              } catch (err) {
-                logger.warn(
-                  { err, packageName, registryFetchUrl },
-                  'failed cloning git registry',
-                );
-                memCache.set(cacheKeyForError, err);
-
-                throw new Error(err);
-              }
-            } else {
-              logger.warn(
-                { err, packageName, registryFetchUrl },
-                'failed cloning git registry',
-              );
-              memCache.set(cacheKeyForError, err);
-
-              throw new Error(err);
-            }
-          }
-        };
-        const clonePromise = clone();
+        const clonePromise = CrateDatasource.clone(
+          registryFetchUrl,
+          clonePath,
+          packageName,
+          cacheKeyForError,
+        );
 
         memCache.set(
           cacheKey,
@@ -386,6 +346,56 @@ export class CrateDatasource extends Datasource {
     }
 
     return registry;
+  }
+
+  private static async clone(
+    registryFetchUrl: string,
+    clonePath: string,
+    packageName: string,
+    cacheKeyForError: string,
+  ): Promise<string> {
+    const git = Git({
+      ...simpleGitConfig(),
+      maxConcurrentProcesses: 1,
+    }).env(getChildEnv());
+
+    const innerClonePromise = git.clone(registryFetchUrl, clonePath, {
+      '--depth': 1,
+    });
+    try {
+      return await innerClonePromise;
+    } catch (err) {
+      if (
+        err.message.includes(
+          'fatal: dumb http transport does not support shallow capabilities',
+        )
+      ) {
+        logger.info(
+          { packageName, registryFetchUrl },
+          'failed to shallow clone git registry, doing full clone',
+        );
+        const innerClonePromise = git.clone(registryFetchUrl, clonePath);
+        try {
+          return await innerClonePromise;
+        } catch (err) {
+          logger.warn(
+            { err, packageName, registryFetchUrl },
+            'failed cloning git registry',
+          );
+          memCache.set(cacheKeyForError, err);
+
+          throw new Error(err);
+        }
+      } else {
+        logger.warn(
+          { err, packageName, registryFetchUrl },
+          'failed cloning git registry',
+        );
+        memCache.set(cacheKeyForError, err);
+
+        throw new Error(err);
+      }
+    }
   }
 
   private static areReleasesCacheable(
