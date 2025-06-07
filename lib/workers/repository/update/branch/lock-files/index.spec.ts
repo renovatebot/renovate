@@ -87,8 +87,8 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       vi.spyOn(lockFiles, 'determineLockFileDirs');
     });
 
-    it('returns no error and empty lockfiles if updateLockFiles false', async () => {
-      config.updateLockFiles = false;
+    it('returns no error and empty lockfiles if skipArtifactsUpdate is true', async () => {
+      config.skipArtifactsUpdate = true;
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toEqual({ artifactErrors: [], updatedArtifacts: [] });
     });

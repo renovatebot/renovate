@@ -466,23 +466,22 @@ export function generateBranchConfig(
     (upgrade) => upgrade.skipInstalls !== false,
   );
 
-  // Lock file updating will only be disabled if every upgrade wants to disable it.
-  const numberOfUpgradesToUpdateLockFiles = config.upgrades.filter(
-    (upgrade) => upgrade.updateLockFiles !== false,
-  ).length;
-  config.updateLockFiles = numberOfUpgradesToUpdateLockFiles > 0;
+  // Artifact updating will only be skipped if every upgrade wants to skip it.
+  config.skipArtifactsUpdate = config.upgrades.every(
+    (upgrade) => upgrade.skipArtifactsUpdate,
+  );
   if (
-    numberOfUpgradesToUpdateLockFiles > 0 &&
-    numberOfUpgradesToUpdateLockFiles < config.upgrades.length
+    !config.skipArtifactsUpdate &&
+    config.upgrades.some((upgrade) => upgrade.updateLockFiles)
   ) {
     logger.debug(
       {
         upgrades: config.upgrades.map((upgrade) => ({
           depName: upgrade.depName,
-          updateLockFiles: upgrade.updateLockFiles,
+          skipArtifactsUpdate: upgrade.skipArtifactsUpdate,
         })),
       },
-      'Mixed `updateLockFiles` values in upgrades. Lock files will be updated.',
+      'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
     );
   }
 

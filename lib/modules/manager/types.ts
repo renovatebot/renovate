@@ -45,7 +45,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
-  updateLockFiles?: boolean;
+  skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
 }
 
@@ -316,6 +316,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
   constraints?: Record<string, string> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
+  skipArtifactsUpdate?: boolean;
   skipInstalls?: boolean | null;
   ignoreScripts?: boolean;
 

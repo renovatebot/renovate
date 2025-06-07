@@ -713,7 +713,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    it('does not update artifacts when updateLockFiles=false', async () => {
+    it('does not update artifacts when skipArtifactsUpdate=true', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
       const lockedVersion = '0.45.0';
@@ -744,7 +744,7 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       config.manager = 'pip-compile';
       config.branchName = branchName;
-      config.updateLockFiles = false;
+      config.skipArtifactsUpdate = true;
       config.upgrades.push({
         packageFile,
         lockFiles: [lockFile],
@@ -784,75 +784,79 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
     });
 
-    it('updates artifacts when updateLockFiles=true', async () => {
-      const branchName = 'renovate/wheel-0.x';
-      const updateType = 'patch';
-      const lockedVersion = '0.45.0';
-      const newVersion = '0.45.1';
-      const currentValue = '==0.45.0';
-      const newRegexValue = newVersion;
-      const newValue = '==0.45.1';
+    it.each([false, undefined])(
+      'updates artifacts when skipArtifactsUpdate=$0',
+      async (skipArtifactsUpdate) => {
+        const branchName = 'renovate/wheel-0.x';
+        const updateType = 'patch';
+        const lockedVersion = '0.45.0';
+        const newVersion = '0.45.1';
+        const currentValue = '==0.45.0';
+        const newRegexValue = newVersion;
+        const newValue = '==0.45.1';
 
-      const packageFile = 'requirements.in';
-      const lockFile = 'requirements.txt';
+        const packageFile = 'requirements.in';
+        const lockFile = 'requirements.txt';
 
-      const regexWheelLookup: LookupUpdate = {
-        newVersion,
-        newValue: newRegexValue,
-        updateType,
-        branchName,
-      };
+        const regexWheelLookup: LookupUpdate = {
+          newVersion,
+          newValue: newRegexValue,
+          updateType,
+          branchName,
+        };
 
-      const pipCompileWheelLookup: LookupUpdate = {
-        ...regexWheelLookup,
-        newValue,
-      };
-      const pipCompileWheelDep = {
-        currentValue,
-        lockedVersion,
-        updates: [pipCompileWheelLookup],
-      };
+        const pipCompileWheelLookup: LookupUpdate = {
+          ...regexWheelLookup,
+          newValue,
+        };
+        const pipCompileWheelDep = {
+          currentValue,
+          lockedVersion,
+          updates: [pipCompileWheelLookup],
+        };
 
-      config.manager = 'pip-compile';
-      config.branchName = branchName;
-      config.upgrades.push({
-        packageFile,
-        lockFiles: [lockFile],
-        manager: 'pip-compile',
-        updateType,
-        depName: 'alpha',
-        currentValue,
-        newVersion,
-        branchName,
-      });
-      config.upgrades.push({
-        packageFile,
-        lockFiles: [lockFile],
-        manager: 'pip-compile',
-        updateType,
-        depName: 'beta',
-        currentValue,
-        newVersion,
-        branchName,
-      });
+        config.manager = 'pip-compile';
+        config.branchName = branchName;
+        config.skipArtifactsUpdate = skipArtifactsUpdate;
+        config.upgrades.push({
+          packageFile,
+          lockFiles: [lockFile],
+          manager: 'pip-compile',
+          updateType,
+          depName: 'alpha',
+          currentValue,
+          newVersion,
+          branchName,
+        });
+        config.upgrades.push({
+          packageFile,
+          lockFiles: [lockFile],
+          manager: 'pip-compile',
+          updateType,
+          depName: 'beta',
+          currentValue,
+          newVersion,
+          branchName,
+        });
 
-      config.packageFiles = {
-        'pip-compile': [
-          {
-            packageFile,
-            lockFiles: [lockFile],
-            deps: [pipCompileWheelDep],
-          },
-        ],
-      };
+        config.packageFiles = {
+          'pip-compile': [
+            {
+              packageFile,
+              lockFiles: [lockFile],
+              deps: [pipCompileWheelDep],
+            },
+          ],
+        };
 
-      pipCompile.updateArtifacts.mockResolvedValue([]);
-      autoReplace.doAutoReplace.mockResolvedValue('new content');
+        pipCompile.updateArtifacts.mockResolvedValue([]);
+        autoReplace.doAutoReplace.mockResolvedValue('new content');
 
-      await getUpdatedPackageFiles(config);
+        await getUpdatedPackageFiles(config);
 
-      expect(pipCompile.updateArtifacts).toHaveBeenCalledTimes(1);
-    });
+        expect(pipCompile.updateArtifacts).toHaveBeenCalledTimes(1);
+      },
+    );
 
     it('attempts updateLockedDependency and handles unsupported', async () => {
       config.upgrades.push({

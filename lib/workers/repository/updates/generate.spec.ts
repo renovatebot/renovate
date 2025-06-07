@@ -1654,7 +1654,7 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
-    it('sets updateLockFiles to true when no upgrades specify a value', () => {
+    it('sets skipArtifactsUpdate to false when no upgrades specify a value', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1704,12 +1704,12 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        updateLockFiles: true,
+        skipArtifactsUpdate: true,
       });
       expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
-    it('sets updateLockFiles to false when all upgrades specify false', () => {
+    it('sets skipArtifactsUpdate to true when all upgrades specify true', () => {
       const commonOptions = {
         ...requiredDefaultOptions,
         manager: 'some-manager',
@@ -1729,7 +1729,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.0',
           newValue: '1.2.0',
           updateType: 'minor' as UpdateType,
-          updateLockFiles: false,
+          skipArtifactsUpdate: true,
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1741,7 +1741,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.0.0',
           newValue: '1.0.0',
           updateType: 'major' as UpdateType,
-          updateLockFiles: false,
+          skipArtifactsUpdate: true,
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1753,7 +1753,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '1.2.3',
           newValue: '1.2.3',
           updateType: 'patch' as UpdateType,
-          updateLockFiles: false,
+          skipArtifactsUpdate: true,
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1762,13 +1762,13 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        updateLockFiles: false,
+        skipArtifactsUpdate: true,
       });
       expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it.each([true, false])(
-      'sets updateLockFiles to true when not all upgrades specify false and first is $0',
+      'sets skipArtifactsUpdate to false when not all upgrades specify true and first is $0',
       (first) => {
         const commonOptions = {
           ...requiredDefaultOptions,
@@ -1789,7 +1789,7 @@ describe('workers/repository/updates/generate', () => {
             newVersion: '1.2.0',
             newValue: '1.2.0',
             updateType: 'minor' as UpdateType,
-            updateLockFiles: first,
+            skipArtifactsUpdate: first,
             fileReplacePosition: 1,
             prBodyDefinitions: {
               Issue: 'I1',
@@ -1812,7 +1812,7 @@ describe('workers/repository/updates/generate', () => {
             newVersion: '1.2.3',
             newValue: '1.2.3',
             updateType: 'patch' as UpdateType,
-            updateLockFiles: false,
+            skipArtifactsUpdate: false,
             fileReplacePosition: 0,
             prBodyDefinitions: {
               Issue: 'I3',
@@ -1821,17 +1821,17 @@ describe('workers/repository/updates/generate', () => {
         ] satisfies BranchUpgradeConfig[];
         const res = generateBranchConfig(branch);
         expect(res).toMatchObject({
-          updateLockFiles: true,
+          skipArtifactsUpdate: false,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             upgrades: [
-              { depName: 'dep3', updateLockFiles: false },
-              { depName: 'dep2', updateLockFiles: undefined },
-              { depName: 'dep1', updateLockFiles: first },
+              { depName: 'dep3', skipArtifactsUpdate: false },
+              { depName: 'dep2', skipArtifactsUpdate: undefined },
+              { depName: 'dep1', skipArtifactsUpdate: first },
             ],
           },
-          'Mixed `updateLockFiles` values in upgrades. Lock files will be updated.',
+          'Mixed `skipArtifactsUpdate` values in upgrades. Lock files will be updated.',
         );
       },
     );

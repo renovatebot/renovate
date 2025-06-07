@@ -175,7 +175,7 @@ export const presets: Record<string, Preset> = {
   },
   disableLockFiles: {
     description: 'Disable lock file updates.',
-    updateLockFiles: false,
+    skipArtifactsUpdate: true,
   },
   disableMajorUpdates: {
     description: 'Disable `major` updates.',
