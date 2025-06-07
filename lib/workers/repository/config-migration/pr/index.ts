@@ -64,7 +64,7 @@ ${
   }
   logger.trace({ prBody }, 'prBody');
 
-  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
+  prBody = platform.massageMarkdown(prBody);
 
   if (existingPr) {
     logger.debug('Found open migration PR');

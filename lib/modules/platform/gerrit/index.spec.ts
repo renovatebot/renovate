@@ -1,4 +1,3 @@
-import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
@@ -886,20 +885,8 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
-      expect(
-        gerrit.massageMarkdown(
-          codeBlock`
-        you tick the rebase/retry checkbox
-        checking the rebase/retry box above
-        `,
-          'rebase',
-        ),
-      ).toBe(codeBlock`
-        you add the _rebase_ hashtag to this change
-        adding the _rebase_ hashtag to this change
-        `);
+      expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
     });
-
     //TODO: add some tests for Gerrit-specific replacements..
   });
 
