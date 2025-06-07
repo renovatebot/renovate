@@ -253,7 +253,7 @@ export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
       depName: name.value,
     };
 
-    if (commit.value) {
+    if (commit?.value) {
       gitRepo.currentDigest = commit.value;
     }
 
