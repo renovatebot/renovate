@@ -138,5 +138,32 @@ some-private-key
       expect(fs.existsSync(privateKeyFile)).toBeFalse();
       expect(fs.existsSync(publicKeyFile)).toBeFalse();
     });
+
+    it('imports the private x.509 key', async () => {
+      const x509Key = `\
+-----BEGIN CERTIFICATE-----\
+some-x509-cert\
+-----END CERTIFICATE-----\
+`;
+      const keyFile = upath.join(os.tmpdir() + '/git-private-x509.key');
+      const repoDir = '/tmp/some-repo';
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`gpgsm --import ${keyFile}`)
+        .mockResolvedValueOnce({ stdout: 'Import OK', stderr: '' });
+      setPrivateKey(x509Key);
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+      expect(exec.exec).toHaveBeenCalledWith(
+        `git config user.signingkey ${keyFile}`,
+        { cwd: repoDir },
+      );
+      expect(exec.exec).toHaveBeenCalledWith('git config commit.gpgsign true', {
+        cwd: repoDir,
+      });
+      expect(exec.exec).toHaveBeenCalledWith('git config gpg.format x509', {
+        cwd: repoDir,
+      });
+    });
   });
 });
