@@ -78,10 +78,9 @@ RUN echo "Cache bust: $CACHEBUST"; \
   rm -rf node_modules .pnpm; \
   ln -sf /usr/local/renovate/node /usr/local/bin/node; \
   ln -sf /usr/local/renovate/node /bin/node; \
-  pnpm install --prod --offline --ignore-scripts; \
-  # Remove any prebuilt node-expat binary to force a native rebuild
+  pnpm install --prod --offline; \
   find node_modules/.pnpm/node-expat@*/node_modules/node-expat/build -type f -name 'node_expat.node' -delete; \
-  pnpm rebuild re2 better-sqlite3 node-expat --force; \
+  pnpm rebuild re2 better-sqlite3 node-expat; \
   true
 
 # --------------------------------------
