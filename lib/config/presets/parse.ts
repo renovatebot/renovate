@@ -53,6 +53,7 @@ export function parsePreset(input: string): ParsedPreset {
     return { presetSource, repo: str, presetName: '', params };
   }
   const presetsPackages = [
+    'abandonments',
     'compatibility',
     'config',
     'customManagers',
