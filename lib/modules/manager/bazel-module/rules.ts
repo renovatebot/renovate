@@ -243,8 +243,8 @@ export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
   children: z.object({
     name: StringFragmentSchema,
     remote: StringFragmentSchema,
-    commit: StringFragmentSchema,
-    tag: StringFragmentSchema,
+    commit: StringFragmentSchema.optional(),
+    tag: StringFragmentSchema.optional(),
   }),
 }).transform(
   ({ rule, children: { name, remote, commit, tag } }): BasePackageDep => {
@@ -257,7 +257,7 @@ export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
       gitRepo.currentDigest = commit.value;
     }
 
-    if (tag.value) {
+    if (tag?.value) {
       gitRepo.currentValue = tag.value;
     }
 
