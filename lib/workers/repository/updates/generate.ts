@@ -472,7 +472,7 @@ export function generateBranchConfig(
   );
   if (
     !config.skipArtifactsUpdate &&
-    config.upgrades.some((upgrade) => upgrade.updateLockFiles)
+    config.upgrades.some((upgrade) => upgrade.skipArtifactsUpdate)
   ) {
     logger.debug(
       {

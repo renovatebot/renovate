@@ -1659,12 +1659,6 @@ describe('workers/repository/updates/generate', () => {
         ...requiredDefaultOptions,
         manager: 'some-manager',
         branchName: 'deps',
-        groupName: 'deps',
-        group: {
-          commitMessageTopic: '{{{groupName}}}',
-          commitMessagePrefix:
-            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
-        },
       };
 
       const branch = [
@@ -1704,7 +1698,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
-        skipArtifactsUpdate: true,
+        skipArtifactsUpdate: false,
       });
       expect(logger.logger.debug).not.toHaveBeenCalled();
     });
@@ -1714,12 +1708,6 @@ describe('workers/repository/updates/generate', () => {
         ...requiredDefaultOptions,
         manager: 'some-manager',
         branchName: 'deps',
-        groupName: 'deps',
-        group: {
-          commitMessageTopic: '{{{groupName}}}',
-          commitMessagePrefix:
-            '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
-        },
       };
 
       const branch = [
@@ -1774,12 +1762,6 @@ describe('workers/repository/updates/generate', () => {
           ...requiredDefaultOptions,
           manager: 'some-manager',
           branchName: 'deps',
-          groupName: 'deps',
-          group: {
-            commitMessageTopic: '{{{groupName}}}',
-            commitMessagePrefix:
-              '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
-          },
         };
 
         const branch = [
@@ -1812,7 +1794,7 @@ describe('workers/repository/updates/generate', () => {
             newVersion: '1.2.3',
             newValue: '1.2.3',
             updateType: 'patch' as UpdateType,
-            skipArtifactsUpdate: false,
+            skipArtifactsUpdate: true,
             fileReplacePosition: 0,
             prBodyDefinitions: {
               Issue: 'I3',
@@ -1826,12 +1808,12 @@ describe('workers/repository/updates/generate', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
             upgrades: [
-              { depName: 'dep3', skipArtifactsUpdate: false },
+              { depName: 'dep3', skipArtifactsUpdate: true },
               { depName: 'dep2', skipArtifactsUpdate: undefined },
               { depName: 'dep1', skipArtifactsUpdate: first },
             ],
           },
-          'Mixed `skipArtifactsUpdate` values in upgrades. Lock files will be updated.',
+          'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
         );
       },
     );
