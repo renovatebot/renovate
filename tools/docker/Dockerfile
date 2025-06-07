@@ -73,9 +73,14 @@ RUN set -ex; \
 COPY --link . ./
 
 # install npm packages
-RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+ARG CACHEBUST=1
+RUN echo "Cache bust: $CACHEBUST"; \
+  rm -rf node_modules .pnpm; \
+  ln -sf /usr/local/renovate/node /usr/local/bin/node; \
+  ln -sf /usr/local/renovate/node /bin/node; \
+  pnpm install --prod --offline; \
+  find node_modules/.pnpm/node-expat@*/node_modules/node-expat/build -type f -name 'node_expat.node' -delete; \
+  pnpm rebuild re2 better-sqlite3 node-expat; \
   true
 
 # --------------------------------------
@@ -98,8 +103,30 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# make our node binary available as last in path
-RUN ln -sf /usr/local/renovate/node /bin/node
+# Copy pnpm binary from build stage to final image
+COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
+COPY --from=build /opt/containerbase/tools/pnpm /opt/containerbase/tools/pnpm
+COPY --from=build /usr/local/bin/npm /usr/local/bin/npm
+
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
+# Ensure both /bin/node and /usr/local/bin/node point to the custom Node.js binary
+RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node /usr/local/bin/node
+
+# Fix permissions BEFORE switching to non-root user
+RUN chown -R 12021:12021 /usr/local/renovate
+
+# Switch to non-root user for native module rebuild
+USER 12021
+RUN cd /usr/local/renovate && pnpm rebuild re2 better-sqlite3 node-expat
+
+# Switch back to root for any further setup
+USER root
+RUN chown -R 12021:12021 /usr/local/renovate
+
+# Debug: list all node_expat.node files
+RUN find /usr/local/renovate -name node_expat.node -ls
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
