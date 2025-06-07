@@ -315,7 +315,11 @@ export function validateLogLevel(
       },
     ],
   });
-  logger.fatal({ logLevel: logLevelToCheck }, 'Invalid log level');
+  // Emulate logFatal convention
+  logger.fatal(
+    { errCode: 'LOG_LEVEL_INVALID', logLevel: logLevelToCheck },
+    'Invalid log level',
+  );
   process.exit(1);
 }
 

@@ -92,7 +92,7 @@ export async function updateArtifacts({
         });
       }
     } else {
-      logger.error('Failed to get git status');
+      logger.warn('Failed to get git status');
     }
 
     return fileChanges.length ? fileChanges : null;

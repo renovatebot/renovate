@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
-import { logger } from '../../../../logger';
+import { logFatal, logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
@@ -51,10 +51,9 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   const configFileExists = await fs.pathExists(configFile);
   if (env.RENOVATE_CONFIG_FILE && !configFileExists) {
-    logger.fatal(
-      { configFile },
-      `Custom config file specified in RENOVATE_CONFIG_FILE must exist`,
-    );
+    logFatal('CONFIG_FILE_NOT_FOUND', {
+      fileName: configFile,
+    });
     process.exit(1);
   }
 
@@ -69,20 +68,30 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
+    logger.debug({ err }, 'Error reading or parsing config file');
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal({ error: err.stack }, 'Could not parse config file');
+      logFatal('CONFIG_FILE_PARSE_ERROR', {
+        fileName: configFile,
+        errorMessage: err.message,
+      });
       process.exit(1);
     } else if (err instanceof ReferenceError) {
-      logger.fatal(
-        `Error parsing config file due to unresolved variable(s): ${err.message}`,
-      );
+      logFatal('CONFIG_FILE_PARSE_ERROR', {
+        fileName: configFile,
+        errorMessage: `Error parsing config file due to unresolved variable(s): ${err.message}`,
+      });
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {
-      logger.fatal(err.message);
+      logFatal('CONFIG_FILE_PARSE_ERROR', {
+        fileName: configFile,
+        errorMessage: err.message,
+      });
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
-      logger.debug({ err }, 'Parse error');
-      logger.fatal('Error parsing config file');
+      logFatal('CONFIG_FILE_PARSE_ERROR', {
+        fileName: configFile,
+        errorMessage: err.message,
+      });
       process.exit(1);
     }
     logger.debug('Error reading or parsing file - skipping');
