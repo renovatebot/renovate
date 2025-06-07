@@ -108,6 +108,9 @@ COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
 COPY --from=build /opt/containerbase/tools/pnpm /opt/containerbase/tools/pnpm
 COPY --from=build /usr/local/bin/npm /usr/local/bin/npm
 
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
 # Ensure both /bin/node and /usr/local/bin/node point to the custom Node.js binary
 RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node /usr/local/bin/node
 
