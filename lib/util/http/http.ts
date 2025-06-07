@@ -686,11 +686,11 @@ export abstract class HttpBase<
       },
     };
 
-    const res: any = await this.getText(url, opts);
+    const res = await this.getText(url, opts);
     if (schema) {
       res.body = await Toml.pipe(schema).parseAsync(res.body);
     } else {
-      res.body = await Toml.parseAsync(res.body);
+      res.body = (await Toml.parseAsync(res.body)) as Infer<Schema>;
     }
 
     return res;
