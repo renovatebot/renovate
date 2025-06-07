@@ -99,6 +99,10 @@ export abstract class RepoCacheBase implements RepoCache {
     });
   }
 
+  cleanup(): Promise<void> {
+    return Promise.resolve();
+  }
+
   getData(): RepoCacheData {
     return this.data;
   }
