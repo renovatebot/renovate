@@ -73,7 +73,9 @@ RUN set -ex; \
 COPY --link . ./
 
 # install npm packages
-RUN set -ex; \
+ARG CACHEBUST=1
+RUN echo "Cache bust: $CACHEBUST"; \
+  rm -rf node_modules .pnpm; \
   ln -sf /usr/local/renovate/node /usr/local/bin/node; \
   ln -sf /usr/local/renovate/node /bin/node; \
   pnpm install --prod --offline --ignore-scripts; \
