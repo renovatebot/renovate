@@ -18,5 +18,5 @@ The command doesn't do any "compare" - or before and after analysis - if you wan
 ## Limitations
 
 - `local>` presets can't be resolved. Normally these would point to the local platform such as GitHub, but in the case of running locally, it does not exist
-- `baseBranches` are ignored
+- `baseBranchPatterns` are ignored
 - Branch creation is not supported

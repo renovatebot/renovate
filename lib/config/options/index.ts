@@ -1059,7 +1059,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'baseBranches',
+    name: 'baseBranchPatterns',
     description:
       'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
