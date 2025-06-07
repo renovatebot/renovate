@@ -1,14 +1,14 @@
 import { getOptions } from '../../config/options';
-import * as _execUtils from '../exec/utils';
+import * as _execUtils from '../env';
 import * as template from '.';
 
-vi.mock('../exec/utils');
+vi.mock('../env');
 
 const execUtils = vi.mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
-    execUtils.getChildEnv.mockReturnValue({
+    execUtils.getEnv.mockReturnValue({
       CUSTOM_FOO: 'foo',
       HOME: '/root',
     });

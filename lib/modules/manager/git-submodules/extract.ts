@@ -4,7 +4,7 @@ import Git from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import { getChildEnv } from '../../../util/exec/utils';
+import { getEnv } from '../../../util/env';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl } from '../../../util/git/url';
@@ -44,7 +44,7 @@ async function getDefaultBranch(subModuleUrl: string): Promise<string> {
     'git-tags',
     'git-refs',
   ]);
-  const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
+  const gitEnv = getEnv(false, { env: gitSubmoduleAuthEnvironmentVariables });
   const val = await Git(simpleGitConfig())
     .env(gitEnv)
     .listRemote(['--symref', subModuleUrl, 'HEAD']);

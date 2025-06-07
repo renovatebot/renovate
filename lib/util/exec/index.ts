@@ -3,7 +3,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { getCustomEnv, getUserEnv } from '../env';
+import { getCustomEnv, getEnv, getUserEnv } from '../env';
 import { rawExec } from './common';
 import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import {
@@ -20,7 +20,6 @@ import type {
   Opt,
   RawExecOptions,
 } from './types';
-import { getChildEnv } from './utils';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -37,7 +36,7 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
 
 function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
-  const childEnv = getChildEnv(opts);
+  const childEnv = getEnv(true, opts);
   const cwd = getCwd(opts);
   const rawExecOptions: RawExecOptions = {
     cwd,
@@ -101,7 +100,7 @@ async function prepareRawExec(
       ...customEnvVariables,
       ...userConfiguredEnv,
     };
-    const childEnv = getChildEnv(opts);
+    const childEnv = getEnv(true, opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
       'CONTAINERBASE_CACHE_DIR',

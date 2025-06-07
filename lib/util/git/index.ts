@@ -246,7 +246,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  // TODO: safe to pass all env variables? use `getChildEnv` instead?
+  // TODO: safe to pass all env variables? filter some instead?
   git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
     ...getEnv(),
     LANG: 'C.UTF-8',

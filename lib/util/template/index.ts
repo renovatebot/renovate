@@ -3,7 +3,7 @@ import handlebars, { type HelperOptions } from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { toArray } from '../array';
-import { getChildEnv } from '../exec/utils';
+import { getEnv } from '../env';
 import { regEx } from '../regex';
 
 // Missing in handlebars
@@ -302,7 +302,7 @@ export function compile(
   input: CompileInput,
   filterFields = true,
 ): string {
-  const env = getChildEnv({});
+  const env = getEnv();
   const data = { ...GlobalConfig.get(), ...input, env };
   const warnVariables = new Set<string>();
   const filteredInput = filterFields
