@@ -718,9 +718,15 @@ async function tryPrAutomerge(
 
 async function approveMr(mrNumber: number): Promise<void> {
   logger.debug(`approveMr(${mrNumber})`);
+  const env = getEnv();
+  const opts: GitlabHttpOptions = {};
+  if (env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN) {
+    opts.token = env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
+  }
   try {
     await gitlabApi.postJson(
       `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
+      opts,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
