@@ -103,8 +103,7 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# Copy pnpm binary and its directory from build stage to final image
-COPY --from=build /usr/local/share/pnpm /usr/local/share/pnpm
+# Copy pnpm binary from build stage to final image
 COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
 
 # Rebuild native modules in the final image context
