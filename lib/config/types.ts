@@ -317,7 +317,13 @@ export interface RenovateConfig
   sharedVariableName?: string;
 }
 
-const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+const CustomDatasourceFormats = [
+  'json',
+  'plain',
+  'yaml',
+  'html',
+  'toml',
+] as const;
 export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 
 export interface CustomDatasourceConfig {
