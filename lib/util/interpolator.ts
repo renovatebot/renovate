@@ -88,7 +88,7 @@ export function replaceInterpolatedValuesInObject(
   config_: RenovateConfig,
   input: Record<string, string>,
   options: InterpolatorOptions,
-  deleteValues: boolean,
+  deleteValues = true,
 ): RenovateConfig {
   const config = { ...config_ };
   const { name } = options;

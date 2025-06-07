@@ -45,51 +45,11 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
   }
 }
 
-function validateConfigSecrets(config: AllConfig): void {
-  validateNestedInterpolatedValues(config, 'secrets');
-}
-
-function validateConfigVariables(config: AllConfig): void {
-  validateNestedInterpolatedValues(config, 'variables');
-}
-
-export function applySecretsToConfig(
-  config: RenovateConfig,
-  secrets = config.secrets,
-  deleteSecrets = true,
-): RenovateConfig {
-  // Add all secrets to be sanitized
-  if (is.plainObject(secrets)) {
-    for (const secret of Object.values(secrets)) {
-      addSecretForSanitizing(secret);
-    }
-  }
-  return replaceInterpolatedValuesInObject(
-    config,
-    secrets ?? {},
-    options.secrets,
-    deleteSecrets,
-  );
-}
-
-function applyVariablesToConfig(
-  config: RenovateConfig,
-  variables = config.variables,
-  deleteVariables = true,
-): RenovateConfig {
-  return replaceInterpolatedValuesInObject(
-    config,
-    variables ?? {},
-    options.variables,
-    deleteVariables,
-  );
-}
-
 export function validateConfigSecretsAndVariables(
   config: RenovateConfig,
 ): void {
-  validateConfigSecrets(config);
-  validateConfigVariables(config);
+  validateNestedInterpolatedValues(config, 'secrets');
+  validateNestedInterpolatedValues(config, 'variables');
 }
 
 interface ApplySecretsAndVariablesConfig {
@@ -106,13 +66,28 @@ interface ApplySecretsAndVariablesConfig {
 export function applySecretsAndVariablesToConfig(
   applyConfig: ApplySecretsAndVariablesConfig,
 ): RenovateConfig {
-  return applySecretsToConfig(
-    applyVariablesToConfig(
-      applyConfig.config,
-      applyConfig.variables,
-      applyConfig.deleteVariables,
-    ),
-    applyConfig.secrets,
-    applyConfig.deleteSecrets,
+  const { config, deleteSecrets, deleteVariables } = applyConfig;
+  const secrets = applyConfig.secrets ?? config.secrets;
+  const variables = applyConfig.variables ?? config.variables;
+
+  // Add all secrets to be sanitized
+  if (is.plainObject(secrets)) {
+    for (const secret of Object.values(secrets)) {
+      addSecretForSanitizing(secret);
+    }
+  }
+
+  const configWithVars = replaceInterpolatedValuesInObject(
+    config,
+    variables ?? {},
+    options.variables,
+    deleteVariables,
+  );
+
+  return replaceInterpolatedValuesInObject(
+    configWithVars,
+    secrets ?? {},
+    options.secrets,
+    deleteSecrets,
   );
 }
