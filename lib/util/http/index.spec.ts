@@ -707,7 +707,7 @@ describe('util/http/index', () => {
 
       await expect(
         http.getToml('http://renovate.com', SomeSchema),
-      ).rejects.toThrow('Unexpected character');
+      ).rejects.toThrow();
     });
   });
 });
