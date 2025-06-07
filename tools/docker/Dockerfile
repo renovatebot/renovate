@@ -107,11 +107,11 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
 COPY --from=build /opt/containerbase/tools/pnpm /opt/containerbase/tools/pnpm
 
-# Rebuild native modules in the final image context
-RUN cd /usr/local/renovate && pnpm rebuild re2 better-sqlite3 node-expat
-
 # Ensure both /bin/node and /usr/local/bin/node point to the custom Node.js binary
 RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node /usr/local/bin/node
+
+# Rebuild native modules in the final image context
+RUN cd /usr/local/renovate && pnpm rebuild re2 better-sqlite3 node-expat
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
