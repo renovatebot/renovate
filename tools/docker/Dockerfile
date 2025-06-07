@@ -114,6 +114,9 @@ RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node
 # Rebuild native modules in the final image context
 RUN cd /usr/local/renovate && pnpm rebuild re2 better-sqlite3 node-expat
 
+# Ensure the non-root user can access all built native modules
+RUN chown -R 12021:12021 /usr/local/renovate/node_modules
+
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
 RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
