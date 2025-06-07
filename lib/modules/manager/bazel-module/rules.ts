@@ -244,19 +244,30 @@ export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
     name: StringFragmentSchema,
     remote: StringFragmentSchema,
     commit: StringFragmentSchema,
+    tag: StringFragmentSchema,
   }),
-}).transform(({ rule, children: { name, remote, commit } }): BasePackageDep => {
-  const gitRepo: BasePackageDep = {
-    depType: rule,
-    depName: name.value,
-    currentDigest: commit.value,
-  };
-  const ghPackageName = githubPackageName(remote.value);
-  if (is.nonEmptyString(ghPackageName)) {
-    gitRepo.datasource = GithubTagsDatasource.id;
-    gitRepo.packageName = ghPackageName;
-  } else {
-    gitRepo.skipReason = 'unsupported-datasource';
-  }
-  return gitRepo;
-});
+}).transform(
+  ({ rule, children: { name, remote, commit, tag } }): BasePackageDep => {
+    const gitRepo: BasePackageDep = {
+      depType: rule,
+      depName: name.value,
+    };
+
+    if (commit.value) {
+      gitRepo.currentDigest = commit.value;
+    }
+
+    if (tag.value) {
+      gitRepo.currentValue = tag.value;
+    }
+
+    const ghPackageName = githubPackageName(remote.value);
+    if (is.nonEmptyString(ghPackageName)) {
+      gitRepo.datasource = GithubTagsDatasource.id;
+      gitRepo.packageName = ghPackageName;
+    } else {
+      gitRepo.skipReason = 'unsupported-datasource';
+    }
+    return gitRepo;
+  },
+);

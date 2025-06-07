@@ -581,6 +581,7 @@ describe('modules/manager/bazel-module/extract', () => {
             name = "rules_foo",
             commit = "850cb49c8649e463b80ef7984e7c744279746170",
             remote = "https://github.com/example/rules_foo.git",
+            tag = "1.2.3"
         )
         `;
       const result = await extractPackageFile(input, 'MODULE.bazel');
@@ -593,6 +594,7 @@ describe('modules/manager/bazel-module/extract', () => {
           {
             depType: 'git_repository',
             depName: 'rules_foo',
+            currentValue: '1.2.3',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             datasource: GithubTagsDatasource.id,
             packageName: 'example/rules_foo',
@@ -607,6 +609,7 @@ describe('modules/manager/bazel-module/extract', () => {
             name = "rules_foo",
             commit = "850cb49c8649e463b80ef7984e7c744279746170",
             remote = "https://github.com/example/rules_foo.git",
+            tag = "1.2.3"
         )
         `;
       const result = await extractPackageFile(input, 'MODULE.bazel');
@@ -619,6 +622,7 @@ describe('modules/manager/bazel-module/extract', () => {
           {
             depType: 'new_git_repository',
             depName: 'rules_foo',
+            currentValue: '1.2.3',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             datasource: GithubTagsDatasource.id,
             packageName: 'example/rules_foo',
