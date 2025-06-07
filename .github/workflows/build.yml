@@ -389,7 +389,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
@@ -400,7 +400,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
@@ -412,7 +412,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -441,7 +441,7 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event.pull_request.draft != true
+    if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
