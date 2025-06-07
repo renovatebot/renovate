@@ -103,6 +103,9 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
+# Rebuild native modules in the final image context
+RUN cd /usr/local/renovate && pnpm rebuild re2 better-sqlite3 node-expat
+
 # Ensure both /bin/node and /usr/local/bin/node point to the custom Node.js binary
 RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node /usr/local/bin/node
 
