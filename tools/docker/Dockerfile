@@ -100,8 +100,8 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# make our node binary available as last in path
-RUN ln -sf /usr/local/renovate/node /bin/node
+# Ensure both /bin/node and /usr/local/bin/node point to the custom Node.js binary
+RUN ln -sf /usr/local/renovate/node /bin/node && ln -sf /usr/local/renovate/node /usr/local/bin/node
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
