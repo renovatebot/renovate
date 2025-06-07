@@ -74,6 +74,8 @@ COPY --link . ./
 
 # install npm packages
 RUN set -ex; \
+  ln -sf /usr/local/renovate/node /usr/local/bin/node; \
+  ln -sf /usr/local/renovate/node /bin/node; \
   pnpm install --prod --offline --ignore-scripts; \
   pnpm rebuild re2 better-sqlite3 node-expat; \
   true
