@@ -211,6 +211,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "separateMajorMinor": true,
   "separateMajorReleases": true,
   "separateMinorPatch": true,
+  "skipArtifactsUpdate": true,
   "suppressNotifications": [
     "lockFileErrors",
   ],
