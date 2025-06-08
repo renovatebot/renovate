@@ -25,6 +25,14 @@ export const removedPresets: Record<string, string | null> = {
   'default:library': 'config:js-lib',
   'default:onlyNpm': null,
   'default:unpublishSafe': 'npm:unpublishSafe',
+  'helpers:disableTypesNodeMajor': 'helper:disableTypesNodeMajor',
+  'helpers:followTypescriptNext': 'helper:followTypescriptNext',
+  'helpers:followTypescriptRc': 'helper:followTypescriptRc',
+  'helpers:pinGitHubActionDigests': 'helper:pinGitHubActionDigests',
+  'helpers:pinGitHubActionDigestsToSemver':
+    'helper:pinGitHubActionDigestsToSemver',
+  'helpers:pinGitHubActionDigestsToSemverMajor':
+    'helper:pinGitHubActionDigestsToSemver',
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
   'group:jsTestMonMajor': 'group:jsTestNonMajor',

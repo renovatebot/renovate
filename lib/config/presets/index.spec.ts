@@ -716,5 +716,64 @@ describe('config/presets/index', () => {
       expect(e!.validationError).toBeUndefined();
       expect(e!.validationMessage).toBeUndefined();
     });
+
+    it('handles helpers:disableTypesNodeMajor rename', async () => {
+      const res = await presets.getPreset('helpers:disableTypesNodeMajor', {});
+      expect(res).toEqual({
+        description: ['Disable `major` updates to `@types/node`.'],
+        packageRules: [
+          {
+            enabled: false,
+            matchPackageNames: ['@types/node'],
+            matchUpdateTypes: ['major'],
+          },
+        ],
+      });
+    });
+
+    it('handles helpers:followTypescriptNext rename', async () => {
+      const res = await presets.getPreset('helpers:followTypescriptNext', {});
+      expect(res).toEqual({
+        extends: [':followTag(typescript, next)'],
+      });
+    });
+
+    it('handles helpers:followTypescriptRc rename', async () => {
+      const res = await presets.getPreset('helpers:followTypescriptRc', {});
+      expect(res).toEqual({
+        extends: [':followTag(typescript, rc)'],
+      });
+    });
+
+    it('handles helpers:pinGitHubActionDigests rename', async () => {
+      const res = await presets.getPreset('helpers:pinGitHubActionDigests', {});
+      expect(res).toEqual({
+        description: ['Pin `github-action` digests.'],
+        packageRules: [
+          {
+            matchDepTypes: ['action'],
+            pinDigests: true,
+          },
+        ],
+      });
+    });
+
+    it('handles helpers:pinGitHubActionDigestsToSemver rename', async () => {
+      const res = await presets.getPreset(
+        'helpers:pinGitHubActionDigestsToSemver',
+        {},
+      );
+      expect(res).toEqual({
+        description: ['Convert pinned GitHub Action digests to SemVer.'],
+        packageRules: [
+          {
+            extends: ['helper:pinGitHubActionDigests'],
+            extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+            versioning:
+              'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+          },
+        ],
+      });
+    });
   });
 });

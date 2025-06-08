@@ -31,11 +31,11 @@ Here are the examples of valid GitHub tags:
 `prefix/1.0.1`, `prefix/1.0`, `prefix/1`,
 `prefix/v1.0.1`, `prefix/v1.0`, `prefix/v1`.
 
-If you want to automatically pin action digests add the `helpers:pinGitHubActionDigests` preset to the `extends` array:
+If you want to automatically pin action digests add the `helper:pinGitHubActionDigests` preset to the `extends` array:
 
 ```json
 {
-  "extends": ["helpers:pinGitHubActionDigests"]
+  "extends": ["helper:pinGitHubActionDigests"]
 }
 ```
 

@@ -9,7 +9,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'config:recommended',
       'docker:pinDigests',
-      'helpers:pinGitHubActionDigests',
+      'helper:pinGitHubActionDigests',
       ':configMigration',
       ':pinDevDependencies',
     ],
