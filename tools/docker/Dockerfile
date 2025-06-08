@@ -72,6 +72,8 @@ RUN set -ex; \
 
 COPY --link . ./
 
+RUN which pnpm && ls -l $(which pnpm)
+
 # install npm packages
 RUN set -ex; \
   pnpm install --ignore-scripts; \
@@ -101,9 +103,9 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 # make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
 
-# Copy pnpm binary from build stage to final image
-COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
+RUN mkdir -p /usr/local/renovate/pnpm-bin && cp /usr/local/bin/pnpm /usr/local/renovate/pnpm-bin/pnpm
 
+COPY --link --from=build /usr/local/renovate/pnpm-bin/pnpm /usr/local/bin/pnpm
 # Ensure pnpm is available in PATH
 ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 
