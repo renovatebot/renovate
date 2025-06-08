@@ -139,7 +139,7 @@ RUN set -ex; \
 
 # install npm packages
 RUN set -ex; \
-  pnpm install --ignore-scripts; \
+  pnpm install node-expat; \
   pnpm rebuild node-expat; \
   true
 
