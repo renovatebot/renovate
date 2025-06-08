@@ -592,8 +592,8 @@ export interface ValidationResult {
 }
 
 export interface BumpVersionConfig {
-  bumpType: string;
+  bumpType?: string;
   filePatterns: string[];
   matchStrings: string[];
-  name: string | null;
+  name?: string;
 }

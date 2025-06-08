@@ -30,7 +30,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['\\.release-version'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
@@ -54,7 +53,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['\\^'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
@@ -131,7 +129,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
@@ -164,7 +161,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['\\.release-version'],
             bumpType: 'minor',
             matchStrings: ['^(?<version>.+)$'],
@@ -193,11 +189,41 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
+    it('should bump version with patch by default', async () => {
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['\\.release-version'],
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', '.release-version']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: '.release-version',
+            contents: '1.0.1',
+          },
+        ],
+      });
+    });
+
     it('should bump version in an already changed packageFiles', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
@@ -243,7 +269,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
@@ -289,7 +314,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
@@ -343,7 +367,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: ['\\s*version:\\s+(?<version>[^\\s]+)'],
@@ -417,7 +440,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
           {
-            name: null,
             filePatterns: ['foo'],
             bumpType: 'minor',
             matchStrings: [
