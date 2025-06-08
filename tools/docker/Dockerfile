@@ -109,14 +109,15 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 # make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
 
-COPY --link --from=build /usr/local/renovate/pnpm-bin/pnpm /usr/local/bin/pnpm
+# Install standalone pnpm in the final image
+RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=bash sh - && mv ~/.local/share/pnpm/pnpm /usr/local/bin/pnpm
 # Ensure pnpm is available in PATH
 ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 
 RUN which pnpm && ls -l $(which pnpm)
 
 # Rebuild node-expat for the final image environment
-RUN /usr/local/bin/pnpm rebuild node-expat
+RUN pnpm rebuild node-expat
 
 # test (moved after rebuild)
 RUN set -ex; \
