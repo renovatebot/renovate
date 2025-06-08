@@ -27,6 +27,9 @@ RUN install-tool node 22.16.0
 # renovate: datasource=npm
 RUN install-tool pnpm 10.11.0
 
+# Debug: show where pnpm is installed in the build stage
+RUN which pnpm && ls -l $(which pnpm)
+
 WORKDIR /usr/local/renovate
 
 ARG TARGETPLATFORM
@@ -108,6 +111,8 @@ RUN mkdir -p /usr/local/renovate/pnpm-bin && cp /usr/local/bin/pnpm /usr/local/r
 COPY --link --from=build /usr/local/renovate/pnpm-bin/pnpm /usr/local/bin/pnpm
 # Ensure pnpm is available in PATH
 ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
+
+RUN which pnpm && ls -l $(which pnpm)
 
 # Rebuild node-expat for the final image environment
 RUN pnpm rebuild node-expat
