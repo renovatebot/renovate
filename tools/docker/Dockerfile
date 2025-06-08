@@ -75,7 +75,7 @@ COPY --link . ./
 # install npm packages
 RUN set -ex; \
   pnpm install --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3 node-expat; \
+  pnpm rebuild re2 better-sqlite3; \
   true
 
 # --------------------------------------
@@ -98,9 +98,6 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# Rebuild native modules for the current environment
-RUN pnpm rebuild re2 better-sqlite3 node-expat
-
 # make our node binary available as last in path
 RUN ln -sf /usr/local/renovate/node /bin/node
 
@@ -115,6 +112,22 @@ RUN set -ex; \
   pushd /usr/local/renovate/; \
   node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
+
+# Move pnpm setup, .npmrc, pnpm-lock.yaml, and patches to the final image before rebuilding node-expat. Ensure pnpm is available in the final image. Rebuild node-expat in the final image for compatibility.
+COPY --link --from=build /usr/local/renovate/node /usr/local/renovate/node
+COPY --link --from=build /usr/local/renovate/node_modules /usr/local/renovate/node_modules
+COPY --link --from=build /usr/local/renovate/package.json /usr/local/renovate/package.json
+COPY --link --from=build /usr/local/renovate/pnpm-lock.yaml /usr/local/renovate/pnpm-lock.yaml
+COPY --link --from=build /usr/local/renovate/.npmrc /usr/local/renovate/.npmrc
+COPY --link --from=build /usr/local/renovate/patches /usr/local/renovate/patches
+COPY --link --from=build /usr/local/renovate/pnpm.cjs /usr/local/renovate/pnpm.cjs
+COPY --link --from=build /usr/local/renovate/pnpm /usr/local/renovate/pnpm
+
+# Ensure pnpm is available in PATH
+ENV PATH="/usr/local/renovate:$PATH"
+
+# Rebuild node-expat for the final image environment
+RUN pnpm rebuild node-expat
 
 LABEL \
   org.opencontainers.image.version="${RENOVATE_VERSION}" \
