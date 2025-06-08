@@ -25,6 +25,20 @@ describe('workers/repository/changelog/index', () => {
       { logJSON: null },
       { logJSON: { hasReleaseNotes: true } },
       { logJSON: null },
+      {
+        changelogContent: 'testContent',
+        logJSON: {
+          hasReleaseNotes: true,
+          project: {},
+          versions: [
+            {
+              releaseNotes: {
+                body: 'testContent',
+              },
+            },
+          ],
+        },
+      },
     ]);
   });
 });
