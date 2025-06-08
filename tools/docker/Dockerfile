@@ -125,8 +125,16 @@ WORKDIR /usr/local/renovate
 # Remove prebuilt node_expat.node before rebuild
 RUN rm -rf node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/Release/node_expat.node
 
-# Rebuild all native modules for the final image environment
-RUN pnpm rebuild --prod --ignore-scripts;
+# only fetch deps from lockfile https://pnpm.io/cli/fetch
+RUN set -ex; \
+  pnpm fetch --prod --ignore-scripts; \
+  true
+
+# install npm packages
+RUN set -ex; \
+  pnpm install --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3; \
+  true
 
 # test (moved after rebuild)
 RUN set -ex; \
