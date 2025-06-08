@@ -1,8 +1,8 @@
 import JSON5 from 'json5';
 import { z } from 'zod/v4';
 import { parseJsonc } from '../common';
-import { parseSingleYaml, parseYaml } from '../yaml';
 import { parse as parseToml } from '../toml';
+import { parseSingleYaml, parseYaml } from '../yaml';
 
 export const Json = z.string().transform((str, ctx): unknown => {
   try {
