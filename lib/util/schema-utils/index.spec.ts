@@ -17,7 +17,7 @@ import {
 } from '.';
 import { logger } from '~test/util';
 
-describe('util/schema-utils', () => {
+describe('util/schema-utils/index', () => {
   describe('LooseArray', () => {
     it('parses array', () => {
       const s = LooseArray(z.string());
