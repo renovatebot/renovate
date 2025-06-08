@@ -132,15 +132,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Remove prebuilt node_expat.node before rebuild
 RUN rm -rf node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/Release/node_expat.node
 
-# only fetch deps from lockfile https://pnpm.io/cli/fetch
+# Install all npm packages and build native modules
 RUN set -ex; \
-  pnpm fetch --prod --ignore-scripts; \
-  true
-
-# install npm packages
-RUN set -ex; \
-  pnpm install node-expat; \
-  pnpm rebuild node-expat; \
+  pnpm install; \
+  pnpm rebuild; \
   true
 
 # test (moved after rebuild)
