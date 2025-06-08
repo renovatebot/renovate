@@ -126,7 +126,7 @@ WORKDIR /usr/local/renovate
 RUN rm -rf node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/Release/node_expat.node
 
 # Rebuild all native modules for the final image environment
-RUN pnpm rebuild
+RUN pnpm rebuild --prod --ignore-scripts;
 
 # test (moved after rebuild)
 RUN set -ex; \
