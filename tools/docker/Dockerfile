@@ -120,8 +120,9 @@ COPY --link --from=build /usr/local/renovate/package.json /usr/local/renovate/pa
 COPY --link --from=build /usr/local/renovate/pnpm-lock.yaml /usr/local/renovate/pnpm-lock.yaml
 COPY --link --from=build /usr/local/renovate/.npmrc /usr/local/renovate/.npmrc
 COPY --link --from=build /usr/local/renovate/patches /usr/local/renovate/patches
-COPY --link --from=build /usr/local/renovate/pnpm.cjs /usr/local/renovate/pnpm.cjs
-COPY --link --from=build /usr/local/renovate/pnpm /usr/local/renovate/pnpm
+
+# Install pnpm in the final image to ensure it is available for rebuild
+RUN install-tool pnpm 10.11.0
 
 # Ensure pnpm is available in PATH
 ENV PATH="/usr/local/renovate:$PATH"
