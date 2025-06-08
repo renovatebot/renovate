@@ -75,6 +75,7 @@ import type {
   RepoResponse,
 } from './types';
 import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
