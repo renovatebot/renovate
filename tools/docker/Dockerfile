@@ -109,23 +109,28 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 # make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
 
+RUN node --version
+
 # Install standalone pnpm in the final image
 RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=bash sh - && mv ~/.local/share/pnpm/pnpm /usr/local/bin/pnpm
 # Ensure pnpm is available in PATH
 ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 
 RUN which pnpm && ls -l $(which pnpm)
+RUN node --version
 
-# Set working directory to where package.json is before rebuilding native modules
+# Set working directory to where package.json is before rebuilding native modules and running tests
 WORKDIR /usr/local/renovate
 
-# Rebuild node-expat for the final image environment
-RUN pnpm rebuild node-expat
+# Remove prebuilt node_expat.node before rebuild
+RUN rm -rf node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/Release/node_expat.node
+
+# Rebuild all native modules for the final image environment
+RUN pnpm rebuild
 
 # test (moved after rebuild)
 RUN set -ex; \
   renovate --version; \
-  pushd /usr/local/renovate/; \
   node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
