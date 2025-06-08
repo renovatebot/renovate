@@ -50,6 +50,7 @@ exports[`config/migration > migrateConfig(config, parentConfig) > migrates confi
   "exposeAllEnv": true,
   "extends": [
     ":automergeBranch",
+    ":skipArtifactsUpdate",
     "config:js-app",
     "config:js-lib",
     ":dependencyDashboard",

@@ -29,6 +29,7 @@ describe('config/migration', () => {
         },
         extends: [
           ':automergeBranchMergeCommit',
+          ':disableLockFiles',
           'default:js-app',
           'config:library',
           ':masterIssue',
