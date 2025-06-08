@@ -1047,6 +1047,26 @@ export async function getBranchFiles(
   }
 }
 
+export async function getBranchFilesFromCommit(
+  referenceCommit: LongCommitSha,
+): Promise<string[] | null> {
+  await syncGit();
+  try {
+    const diff = await gitRetry(() =>
+      git.diffSummary([referenceCommit, referenceCommit + `^`]),
+    );
+    return diff.files.map((file) => file.file);
+    /* v8 ignore next 8 -- TODO: add test */
+  } catch (err) {
+    logger.warn({ err }, 'getBranchFiles error');
+    const errChecked = checkForPlatformFailure(err);
+    if (errChecked) {
+      throw errChecked;
+    }
+    return null;
+  }
+}
+
 export async function getFile(
   filePath: string,
   branchName?: string,

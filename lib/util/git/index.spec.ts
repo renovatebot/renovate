@@ -12,7 +12,7 @@ import { newlineRegex, regEx } from '../regex';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
-import type { FileChange } from './types';
+import type { FileChange, LongCommitSha } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 import { logger } from '~test/util';
@@ -432,6 +432,28 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes',
+      );
+      expect(branchFiles).toEqual(['some-new-file']);
+    });
+  });
+
+  describe('getBranchFilesFromCommit(sha)', () => {
+    it('detects changed files compared to the parent commit', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const sha = await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFilesFromCommit(
+        sha as LongCommitSha,
       );
       expect(branchFiles).toEqual(['some-new-file']);
     });

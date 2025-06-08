@@ -4,8 +4,9 @@ import { logger } from '../../../../logger';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
-import { getBranchFiles } from '../../../../util/git';
+import { getBranchFiles, getBranchFilesFromCommit } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { GlobalConfig } from '../../../../config/global';
 
 interface FileOwnersScore {
   file: string;
@@ -98,9 +99,14 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
 
     logger.debug(`Found CODEOWNERS file: ${codeOwnersFile}`);
+    const pl = GlobalConfig.get('platform');
 
     // Get list of modified files in PR
-    const prFiles = await getBranchFiles(pr.sourceBranch);
+    //on the gerrit platform, the source branch does not exists. Instead of the branch, we can take the commit sha and diff against the parent
+    const prFiles =
+      'gerrit' === pl && pr.sha
+        ? await getBranchFilesFromCommit(pr.sha)
+        : await getBranchFiles(pr.sourceBranch);
 
     if (!prFiles?.length) {
       logger.debug('PR includes no files');
