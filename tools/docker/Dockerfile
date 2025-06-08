@@ -106,13 +106,6 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
   chmod -R 777 /tmp/renovate /runner
 
-# test
-RUN set -ex; \
-  renovate --version; \
-  pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
-  true
-
 # Move pnpm setup, .npmrc, pnpm-lock.yaml, and patches to the final image before rebuilding node-expat. Ensure pnpm is available in the final image. Rebuild node-expat in the final image for compatibility.
 COPY --link --from=build /usr/local/renovate/node /usr/local/renovate/node
 COPY --link --from=build /usr/local/renovate/node_modules /usr/local/renovate/node_modules
@@ -129,6 +122,13 @@ ENV PATH="/usr/local/renovate:$PATH"
 
 # Rebuild node-expat for the final image environment
 RUN pnpm rebuild node-expat
+
+# test (moved after rebuild)
+RUN set -ex; \
+  renovate --version; \
+  pushd /usr/local/renovate/; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  true
 
 LABEL \
   org.opencontainers.image.version="${RENOVATE_VERSION}" \
