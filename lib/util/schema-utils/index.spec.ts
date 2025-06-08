@@ -14,7 +14,7 @@ import {
   multidocYaml,
   withDebugMessage,
   withTraceMessage,
-} from './schema-utils';
+} from '.';
 import { logger } from '~test/util';
 
 describe('util/schema-utils', () => {
