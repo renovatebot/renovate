@@ -116,7 +116,7 @@ ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 RUN which pnpm && ls -l $(which pnpm)
 
 # Rebuild node-expat for the final image environment
-RUN pnpm rebuild node-expat
+RUN /usr/local/bin/pnpm rebuild node-expat
 
 # test (moved after rebuild)
 RUN set -ex; \
