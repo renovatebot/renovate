@@ -317,11 +317,11 @@ export interface RenovateConfig
 }
 
 const CustomDatasourceFormats = [
+  'html',
   'json',
   'plain',
-  'yaml',
-  'html',
   'toml',
+  'yaml',
 ] as const;
 export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 

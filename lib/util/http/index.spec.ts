@@ -706,7 +706,7 @@ describe('util/http/index', () => {
         .reply(200, '!@#$%^');
 
       await expect(
-        http.getToml('http://renovate.com', SomeSchema),
+        http.getToml('http://renovate.com'),
       ).rejects.toThrow();
     });
   });
