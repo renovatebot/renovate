@@ -582,6 +582,7 @@ jobs:
         run: pnpm build:docker build --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
+          DOCKER_BUILDKIT: 0
 
       - name: Test docker
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
