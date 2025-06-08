@@ -98,6 +98,9 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
+# Rebuild native modules for the current environment
+RUN pnpm rebuild re2 better-sqlite3 node-expat
+
 # make our node binary available as last in path
 RUN ln -sf /usr/local/renovate/node /bin/node
 
