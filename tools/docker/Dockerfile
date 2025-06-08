@@ -33,24 +33,23 @@ ARG TARGETPLATFORM
 ARG TARGETARCH
 ARG BUILDPLATFORM
 
-RUN set -ex
-echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"
-uname -a
-true
+RUN set -ex; \
+  echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM"; \
+  uname -a; \
+  true
 
 # replace `amd64` with `x86_64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x86_64}
 ENV ARCH=${ARCH/arm64/aarch64}
 
 # fetch static node binary
-RUN set -ex
-ver=$(node --version)
-ver=${ver:1} \
-  temp_dir="$(mktemp -d)"
-curl -fsSL "https://github.com/containerbase/node-prebuild/releases/download/${ver}/node-${ver}-${ARCH}.tar.xz" -o ${temp_dir}/node.tar.xz
-bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz
-cp ${temp_dir}/bin/node ./node
-true
+RUN set -ex; \
+  ver=$(node --version); ver=${ver:1} \
+  temp_dir="$(mktemp -d)"; \
+  curl -fsSL "https://github.com/containerbase/node-prebuild/releases/download/${ver}/node-${ver}-${ARCH}.tar.xz" -o ${temp_dir}/node.tar.xz; \
+  bsdtar --strip 1 -C ${temp_dir} -xf ${temp_dir}/node.tar.xz; \
+  cp ${temp_dir}/bin/node ./node; \
+  true
 
 # prepare pnpm env
 ENV CI=1 npm_config_modules_cache_max_age=0 \
@@ -67,16 +66,17 @@ COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN set -ex
-pnpm fetch --prod --ignore-scripts
-true
+RUN set -ex; \
+  pnpm fetch --prod --ignore-scripts; \
+  true
 
 COPY --link . ./
 
 # install npm packages
-RUN set -ex
-pnpm install --ignore-scripts
-pnpm rebuild re2 better-sqlite3 node-expat
+RUN set -ex; \
+  pnpm install --ignore-scripts; \
+  pnpm rebuild re2 better-sqlite3 node-expat; \
+  true
 
 # --------------------------------------
 # final image
@@ -103,15 +103,15 @@ RUN ln -sf /usr/local/renovate/node /bin/node
 
 # ensure default base and cache directories exist.
 # /runner/cache is an alternative cache directory used in both Docker and microVMs.
-RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository &&
+RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
   chmod -R 777 /tmp/renovate /runner
 
 # test
-RUN set -ex
-renovate --version
-pushd /usr/local/renovate/
-node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"
-true
+RUN set -ex; \
+  renovate --version; \
+  pushd /usr/local/renovate/; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  true
 
 LABEL \
   org.opencontainers.image.version="${RENOVATE_VERSION}" \
