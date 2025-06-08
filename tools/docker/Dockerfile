@@ -98,21 +98,8 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# make our node binary available as last in path
+# make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
-
-# ensure default base and cache directories exist.
-# /runner/cache is an alternative cache directory used in both Docker and microVMs.
-RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
-  chmod -R 777 /tmp/renovate /runner
-
-# Move pnpm setup, .npmrc, pnpm-lock.yaml, and patches to the final image before rebuilding node-expat. Ensure pnpm is available in the final image. Rebuild node-expat in the final image for compatibility.
-COPY --link --from=build /usr/local/renovate/node /usr/local/renovate/node
-COPY --link --from=build /usr/local/renovate/node_modules /usr/local/renovate/node_modules
-COPY --link --from=build /usr/local/renovate/package.json /usr/local/renovate/package.json
-COPY --link --from=build /usr/local/renovate/pnpm-lock.yaml /usr/local/renovate/pnpm-lock.yaml
-COPY --link --from=build /usr/local/renovate/.npmrc /usr/local/renovate/.npmrc
-COPY --link --from=build /usr/local/renovate/patches /usr/local/renovate/patches
 
 # Install pnpm in the final image to ensure it is available for rebuild
 RUN install-tool pnpm 10.11.0
