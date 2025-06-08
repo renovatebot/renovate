@@ -133,7 +133,7 @@ RUN set -ex; \
 # install npm packages
 RUN set -ex; \
   pnpm install --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+  pnpm rebuild node-expat; \
   true
 
 # test (moved after rebuild)
