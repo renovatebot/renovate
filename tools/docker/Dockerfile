@@ -30,6 +30,9 @@ RUN install-tool pnpm 10.11.0
 # Debug: show where pnpm is installed in the build stage
 RUN which pnpm && ls -l $(which pnpm)
 
+# Copy pnpm binary to a known location before changing WORKDIR
+RUN mkdir -p /usr/local/renovate/pnpm-bin && cp /usr/local/bin/pnpm /usr/local/renovate/pnpm-bin/pnpm
+
 WORKDIR /usr/local/renovate
 
 ARG TARGETPLATFORM
