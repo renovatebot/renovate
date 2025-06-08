@@ -14,16 +14,16 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Json.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
+      expect(result).toMatchObject({
+        success: true,
+        data: {
           name: 'test',
           version: '1.0.0',
           dependencies: {
             lodash: '^4.17.21',
           },
-        });
-      }
+        },
+      });
     });
 
     it('fails for invalid JSON', () => {
@@ -37,10 +37,12 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Json.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid JSON');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid JSON' }],
+        },
+      });
     });
   });
 
@@ -57,16 +59,16 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Json5.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
+      expect(result).toMatchObject({
+        success: true,
+        data: {
           name: 'test',
           version: '1.0.0',
           dependencies: {
             lodash: '^4.17.21',
           },
-        });
-      }
+        },
+      });
     });
 
     it('fails for invalid JSON5', () => {
@@ -80,10 +82,12 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Json5.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid JSON5');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid JSON5' }],
+        },
+      });
     });
   });
 
@@ -100,16 +104,16 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Jsonc.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
+      expect(result).toMatchObject({
+        success: true,
+        data: {
           name: 'test',
           version: '1.0.0',
           dependencies: {
             lodash: '^4.17.21',
           },
-        });
-      }
+        },
+      });
     });
 
     it('fails for invalid JSONC', () => {
@@ -123,10 +127,12 @@ describe('util/schema-utils/v4', () => {
         }
       `;
       const result = Jsonc.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid JSONC');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid JSONC' }],
+        },
+      });
     });
   });
 
@@ -140,17 +146,17 @@ describe('util/schema-utils/v4', () => {
           express: ^4.18.0
       `;
       const result = Yaml.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
+      expect(result).toMatchObject({
+        success: true,
+        data: {
           name: 'test',
           version: '1.0.0',
           dependencies: {
             lodash: '^4.17.21',
             express: '^4.18.0',
           },
-        });
-      }
+        },
+      });
     });
 
     it('fails for invalid YAML', () => {
@@ -162,10 +168,12 @@ describe('util/schema-utils/v4', () => {
             invalid: indentation
       `;
       const result = Yaml.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid YAML');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid YAML' }],
+        },
+      });
     });
   });
 
@@ -180,9 +188,9 @@ describe('util/schema-utils/v4', () => {
         version: 2.0.0
       `;
       const result = MultidocYaml.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([
+      expect(result).toMatchObject({
+        success: true,
+        data: [
           {
             name: 'test1',
             version: '1.0.0',
@@ -191,8 +199,8 @@ describe('util/schema-utils/v4', () => {
             name: 'test2',
             version: '2.0.0',
           },
-        ]);
-      }
+        ],
+      });
     });
 
     it('fails for invalid multidoc YAML', () => {
@@ -205,10 +213,12 @@ describe('util/schema-utils/v4', () => {
           invalid: indentation
       `;
       const result = MultidocYaml.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid YAML');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid YAML' }],
+        },
+      });
     });
   });
 
@@ -223,17 +233,17 @@ describe('util/schema-utils/v4', () => {
         express = "^4.18.0"
       `;
       const result = Toml.safeParse(input);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
+      expect(result).toMatchObject({
+        success: true,
+        data: {
           name: 'test',
           version: '1.0.0',
           dependencies: {
             lodash: '^4.17.21',
             express: '^4.18.0',
           },
-        });
-      }
+        },
+      });
     });
 
     it('fails for invalid TOML', () => {
@@ -245,10 +255,12 @@ describe('util/schema-utils/v4', () => {
         lodash = "^4.17.21"
       `;
       const result = Toml.safeParse(input);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Invalid TOML');
-      }
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ message: 'Invalid TOML' }],
+        },
+      });
     });
   });
 });
