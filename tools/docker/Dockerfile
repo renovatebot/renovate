@@ -101,11 +101,11 @@ COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renov
 # make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
 
-# Install pnpm in the final image to ensure it is available for rebuild
-RUN install-tool pnpm 10.11.0
+# Copy pnpm binary from build stage to final image
+COPY --from=build /usr/local/bin/pnpm /usr/local/bin/pnpm
 
 # Ensure pnpm is available in PATH
-ENV PATH="/usr/local/renovate:$PATH"
+ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 
 # Rebuild node-expat for the final image environment
 RUN pnpm rebuild node-expat
