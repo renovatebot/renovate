@@ -139,7 +139,7 @@ RUN set -ex; \
 # test (moved after rebuild)
 RUN set -ex; \
   renovate --version; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:');new require('node-expat');"; \
   true
 
 LABEL \
