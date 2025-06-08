@@ -716,5 +716,54 @@ describe('config/presets/index', () => {
       expect(e!.validationError).toBeUndefined();
       expect(e!.validationMessage).toBeUndefined();
     });
+
+    it('handles helpers:disableTypesNodeMajor rename', async () => {
+      const res = await presets.getPreset('helpers:disableTypesNodeMajor', {});
+      expect(res).toEqual({
+        description: 'Disable `major` updates to `@types/node`.',
+        packageRules: [
+          {
+            enabled: false,
+            matchPackageNames: ['@types/node'],
+            matchUpdateTypes: ['major'],
+          },
+        ],
+      });
+    });
+
+    it('handles helpers:followTypescriptNext rename', async () => {
+      const res = await presets.getPreset('helpers:followTypescriptNext', {});
+      expect(res).toEqual({
+        description: 'Keep `typescript` version in sync with the `next` tag.',
+        extends: [':followTag(typescript, next)'],
+      });
+    });
+
+    it('handles helpers:followTypescriptRc rename', async () => {
+      const res = await presets.getPreset('helpers:followTypescriptRc', {});
+      expect(res).toEqual({
+        description: 'Keep `typescript` version in sync with the `rc` tag.',
+        extends: [':followTag(typescript, rc)'],
+      });
+    });
+
+    it('handles helpers:pinGitHubActionDigests rename', async () => {
+      const res = await presets.getPreset('helpers:pinGitHubActionDigests', {});
+      expect(res).toEqual({
+        description: 'Pin GitHub Action digests to specific versions.',
+        extends: [':pinGitHubActionDigests'],
+      });
+    });
+
+    it('handles helpers:pinGitHubActionDigestsToSemver rename', async () => {
+      const res = await presets.getPreset(
+        'helpers:pinGitHubActionDigestsToSemver',
+        {},
+      );
+      expect(res).toEqual({
+        description: 'Pin GitHub Action digests to SemVer ranges.',
+        extends: [':pinGitHubActionDigestsToSemver'],
+      });
+    });
   });
 });

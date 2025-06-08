@@ -60,7 +60,7 @@ export function parsePreset(input: string): ParsedPreset {
     'docker',
     'global',
     'group',
-    'helpers',
+    'helper',
     'mergeConfidence',
     'monorepo',
     'npm',

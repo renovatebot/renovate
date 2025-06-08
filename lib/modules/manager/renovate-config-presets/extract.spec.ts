@@ -35,7 +35,7 @@ describe('modules/manager/renovate-config-presets/extract', () => {
         extractPackageFile(
           codeBlock`
             {
-              "extends": ["config:recommended", ":label(test)", "helpers:pinGitHubActionDigests"]
+              "extends": ["config:recommended", ":label(test)", "helper:pinGitHubActionDigests"]
             }
           `,
           'renovate.json',

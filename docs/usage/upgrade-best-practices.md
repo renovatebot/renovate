@@ -45,7 +45,7 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
   "extends": [
     "config:recommended",
     "docker:pinDigests",
-    "helpers:pinGitHubActionDigests",
+    "helper:pinGitHubActionDigests",
     ":configMigration",
     ":pinDevDependencies"
   ]
@@ -70,12 +70,12 @@ That's why we extend from it.
 
 The [Renovate docs, Docker Digest pinning](./docker.md#digest-pinning) section explains _why_ you should pin your Docker containers to an exact digest.
 
-#### Extends `helpers:pinGitHubActionDigests`
+#### Extends `helper:pinGitHubActionDigests`
 
 The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions) recommend that you pin third-party GitHub Actions to a full-length commit SHA.
 
 We recommend pinning _all_ Actions.
-That's why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
+That's why the `helper:pinGitHubActionDigests` preset pins all GitHub Actions.
 
 For an in-depth explanation why you should pin your Github Actions, read the [Palo Alto Networks blog post about the GitHub Actions worm](https://www.paloaltonetworks.com/blog/prisma-cloud/github-actions-worm-dependencies/).
 
