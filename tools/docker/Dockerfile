@@ -116,6 +116,9 @@ ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
 
 RUN which pnpm && ls -l $(which pnpm)
 
+# Set working directory to where package.json is before rebuilding native modules
+WORKDIR /usr/local/renovate
+
 # Rebuild node-expat for the final image environment
 RUN pnpm rebuild node-expat
 
