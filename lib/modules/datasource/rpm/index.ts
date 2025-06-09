@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { gunzip } from 'node:zlib';
 import { promisify } from 'util';
-import * as expat from 'node-expat';
+import sax from 'sax';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
@@ -139,66 +139,69 @@ export class RpmDatasource extends Datasource {
       throw err;
     }
 
-    // Use XML streaming parser to handle large XML files efficiently
-    // If the file is too large (e.g., > 512MB), node.js doesn't support it natively.
-    // Therefore, we use a streaming parser to handle the XML file.
+    // Use sax streaming parser to handle large XML files efficiently
     // This allows us to parse the XML file without loading the entire file into memory.
     const releases: Record<string, Release> = {};
     let foundAny = false;
     let insideTargetPackage = false;
     let versionAttrs: { ver?: string; rel?: string } = {};
 
-    // Wrap parsing in a Promise for proper async handling
-    await new Promise<void>((resolve, reject) => {
-      const xmlStream = Readable.from(decompressedBuffer);
-      const parser = new expat.Parser('UTF-8');
+    // Create a SAX parser in strict mode
+    const saxParser = sax.createStream(true, {
+      lowercase: true, // normalize tag names to lowercase
+      trim: true,
+    });
 
-      parser.on('startElement', (name: string, attrs: any) => {
-        if (name === 'package') {
-          insideTargetPackage = attrs.name === packageName;
-          versionAttrs = {};
-        } else if (insideTargetPackage && name === 'version') {
-          versionAttrs = attrs;
-        }
-      });
+    saxParser.on('opentag', (node: sax.Tag) => {
+      if (node.name === 'package') {
+        // The 'name' attribute is on the <package> tag
+        insideTargetPackage = node.attributes.name === packageName;
+        versionAttrs = {};
+      } else if (insideTargetPackage && node.name === 'version') {
+        // The <version> tag has 'ver' and 'rel' attributes
+        versionAttrs = {
+          ver:
+            typeof node.attributes.ver === 'string'
+              ? node.attributes.ver
+              : undefined,
+          rel:
+            typeof node.attributes.rel === 'string'
+              ? node.attributes.rel
+              : undefined,
+        };
+      }
+    });
 
-      parser.on('endElement', (tagName: string) => {
-        if (tagName === 'package') {
-          if (insideTargetPackage && versionAttrs.ver) {
-            let versionWithRel = versionAttrs.ver ?? '';
-            if (versionAttrs.rel ?? false) {
-              versionWithRel += `-${versionAttrs.rel}`;
-            }
-            if (!releases[versionWithRel]) {
-              releases[versionWithRel] = { version: versionWithRel };
-              foundAny = true;
-            }
+    saxParser.on('closetag', (tagName: string) => {
+      if (tagName === 'package') {
+        if (insideTargetPackage && versionAttrs.ver) {
+          let versionWithRel = versionAttrs.ver ?? '';
+          if (versionAttrs.rel ?? false) {
+            versionWithRel += `-${versionAttrs.rel}`;
           }
-          insideTargetPackage = false;
-          versionAttrs = {};
+          if (!releases[versionWithRel]) {
+            releases[versionWithRel] = { version: versionWithRel };
+            foundAny = true;
+          }
         }
-      });
+        insideTargetPackage = false;
+        versionAttrs = {};
+      }
+    });
 
-      parser.on('error', (err: Error) => {
-        parser.removeAllListeners();
-        xmlStream.destroy();
+    await new Promise<void>((resolve, reject) => {
+      saxParser.on('error', (err: Error) => {
         logger.debug(
-          `XmlStream parsing error in ${filelistsGzipUrl}: ${err.message}`,
+          `SAX parsing error in ${filelistsGzipUrl}: ${err.message}`,
         );
+        saxParser.removeAllListeners();
         reject(err);
       });
-
-      xmlStream.on('data', (chunk) => {
-        parser.write(chunk);
-      });
-      xmlStream.on('end', () => {
-        parser.removeAllListeners();
+      saxParser.on('end', () => {
         resolve();
       });
-      xmlStream.on('error', (err) => {
-        parser.removeAllListeners();
-        reject(err);
-      });
+      // Pipe the decompressed buffer into the SAX parser as a stream
+      Readable.from(decompressedBuffer).pipe(saxParser);
     });
 
     if (!foundAny) {

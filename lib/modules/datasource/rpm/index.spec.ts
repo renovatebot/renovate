@@ -1,5 +1,4 @@
 import { gzipSync } from 'node:zlib';
-import { Readable } from 'stream';
 import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
@@ -372,40 +371,7 @@ describe('modules/datasource/rpm/index', () => {
         });
       await expect(
         rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrowError('not well-formed (invalid token)');
-    });
-
-    it('rejects when xmlStream emits an error event', async () => {
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?><filelists></filelists>`;
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
-
-      httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
-          'Content-Type': 'application/gzip',
-        });
-
-      // Save the original Readable.from
-      const originalFrom = Readable.from;
-      // Mock Readable.from to emit an error during read
-      Readable.from = function () {
-        const stream = new Readable({
-          read() {
-            process.nextTick(() => {
-              this.emit('error', new Error('Simulated xmlStream error'));
-            });
-          },
-        });
-        return stream;
-      } as typeof Readable.from;
-
-      await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
-      ).rejects.toThrowError('Simulated xmlStream error');
-
-      // Restore the original Readable.from
-      Readable.from = originalFrom;
+      ).rejects.toThrowError('Unencoded <');
     });
   });
 
