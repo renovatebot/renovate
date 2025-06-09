@@ -190,17 +190,31 @@ export class RpmDatasource extends Datasource {
     });
 
     await new Promise<void>((resolve, reject) => {
+      let settled = false;
       saxParser.on('error', (err: Error) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
         logger.debug(
           `SAX parsing error in ${filelistsGzipUrl}: ${err.message}`,
         );
-        saxParser.removeAllListeners();
+        setImmediate(() => saxParser.removeAllListeners());
+        if (typeof saxParser.destroy === 'function') {
+          saxParser.destroy();
+        }
         reject(err);
       });
       saxParser.on('end', () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
         resolve();
       });
-      // Pipe the decompressed buffer into the SAX parser as a stream
+      saxParser.on('close', () => {
+        saxParser.removeAllListeners();
+      });
       Readable.from(decompressedBuffer).pipe(saxParser);
     });
 
