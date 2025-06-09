@@ -268,6 +268,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardReportAbandonment?: boolean;
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -590,8 +591,8 @@ export interface ValidationResult {
 }
 
 export interface BumpVersionConfig {
-  bumpType: string;
+  bumpType?: string;
   filePatterns: string[];
   matchStrings: string[];
-  name: string | null;
+  name?: string;
 }
