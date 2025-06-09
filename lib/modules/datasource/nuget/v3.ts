@@ -343,7 +343,6 @@ export class NugetV3Api {
           return 'is no longer maintained';
         case 'criticalbugs':
           return 'has bugs which make it unsuitable for usage';
-        case 'other':
         default:
           return 'is deprecated due to other reasons';
       }
