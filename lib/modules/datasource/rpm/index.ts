@@ -200,20 +200,11 @@ export class RpmDatasource extends Datasource {
           `SAX parsing error in ${filelistsGzipUrl}: ${err.message}`,
         );
         setImmediate(() => saxParser.removeAllListeners());
-        if (typeof saxParser.destroy === 'function') {
-          saxParser.destroy();
-        }
         reject(err);
       });
       saxParser.on('end', () => {
-        if (settled) {
-          return;
-        }
         settled = true;
         resolve();
-      });
-      saxParser.on('close', () => {
-        saxParser.removeAllListeners();
       });
       Readable.from(decompressedBuffer).pipe(saxParser);
     });
