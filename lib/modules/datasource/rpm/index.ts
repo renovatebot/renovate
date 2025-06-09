@@ -155,7 +155,6 @@ export class RpmDatasource extends Datasource {
         isTargetPackage = false;
       }
       if (insidePackage && node.name === 'name') {
-        // Check if the package name matches the target package name from <name>targetpackage</name>
         saxParser.on('text', (text: string) => {
           if (text.trim() === packageName) {
             isTargetPackage = true;
@@ -163,8 +162,8 @@ export class RpmDatasource extends Datasource {
         });
       }
       if (insidePackage && isTargetPackage && node.name === 'version') {
+        // rel is optional
         if (node.attributes.rel === undefined) {
-          // rel is optional
           const version = `${node.attributes.ver}`;
           releases[version] = { version };
         } else {
