@@ -58,13 +58,17 @@ describe('modules/manager/mise/extract', () => {
       buf = "1.27.0"
       ccache = "4.11.3"
       consul = "1.14.3"
+      committed = "1.1.7"
       hivemind = "1.1.0"
+      hk = "1.1.2"
       jq = "1.7.1"
       kafka = "apache-3.9.0"
+      lefthook = "1.11.13"
       localstack = "4.3.0"
       opentofu = "1.6.1"
       protoc = "30.2"
       redis = "8.0.1"
+      ruff = "0.11.12"
       shellcheck = "0.10.0"
       skeema = "1.12.3"
       sops = "3.10.2"
@@ -125,11 +129,25 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'hashicorp/consul',
           },
           {
+            currentValue: '1.1.7',
+            datasource: 'github-releases',
+            depName: 'committed',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'crate-ci/committed',
+          },
+          {
             currentValue: '1.1.0',
             datasource: 'github-releases',
             depName: 'hivemind',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'DarthSim/hivemind',
+          },
+          {
+            currentValue: '1.1.2',
+            datasource: 'github-releases',
+            depName: 'hk',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'jdx/hk',
           },
           {
             currentValue: '1.7.1',
@@ -143,6 +161,13 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-tags',
             depName: 'kafka',
             packageName: 'apache/kafka',
+          },
+          {
+            currentValue: '1.11.13',
+            datasource: 'github-releases',
+            depName: 'lefthook',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'evilmartians/lefthook',
           },
           {
             currentValue: '4.3.0',
@@ -170,6 +195,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'github-releases',
             depName: 'redis',
             packageName: 'redis/redis',
+          },
+          {
+            currentValue: '0.11.12',
+            datasource: 'github-releases',
+            depName: 'ruff',
+            packageName: 'astral-sh/ruff',
           },
           {
             currentValue: '0.10.0',

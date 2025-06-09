@@ -2,6 +2,8 @@ import type { FindPRConfig } from '../types';
 
 export interface GerritFindPRConfig extends FindPRConfig {
   label?: string;
+  limit?: number;
+  requestDetails?: GerritRequestDetail[];
 }
 
 /**
@@ -30,7 +32,15 @@ export interface GerritBranchInfo {
 
 export type GerritChangeStatus = 'NEW' | 'MERGED' | 'ABANDONED';
 
-export type GerritReviewersType = 'REVIEWER' | 'CC' | 'REMOVED';
+export type GerritRequestDetail =
+  | 'SUBMITTABLE'
+  | 'CHECK'
+  | 'MESSAGES'
+  | 'DETAILED_ACCOUNTS'
+  | 'LABELS'
+  | 'CURRENT_ACTIONS'
+  | 'CURRENT_REVISION'
+  | 'COMMIT_FOOTERS';
 
 export interface GerritChange {
   branch: string;
@@ -38,31 +48,38 @@ export interface GerritChange {
   subject: string;
   status: GerritChangeStatus;
   created: string;
+  /** Requires o=SUBMITTABLE. */
   submittable?: boolean;
   _number: number;
+  /** Requires o=LABELS. */
   labels?: Record<string, GerritLabelInfo>;
-  reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>;
+  /** Requires o=LABELS. */
+  reviewers?: {
+    REVIEWER?: GerritAccountInfo[];
+  };
+  /** Requires o=MESSAGES. */
   messages?: GerritChangeMessageInfo[];
-  current_revision: string;
+  /** Requires o=CURRENT_REVISION. */
+  current_revision?: string;
   /**
    * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
+   * Requires o=CURRENT_REVISION.
    */
-  revisions: Record<string, GerritRevisionInfo>;
-  problems: unknown[];
-}
-
-export interface GerritCommitInfo {
-  message: string;
+  revisions?: Record<string, GerritRevisionInfo>;
+  /**
+   * Potential consistency issues with the change (not related to labels).
+   * Requires o=CHECKS. */
+  problems?: unknown[];
 }
 
 export interface GerritRevisionInfo {
   uploader: GerritAccountInfo;
-  /**
-   * The Git reference for the patch set.
-   */
+  /** The Git reference for the patch set. */
   ref: string;
+  /** Requires o=CURRENT_ACTIONS. */
   actions?: Record<string, GerritActionInfo>;
-  commit: GerritCommitInfo;
+  /** Requires o=COMMIT_FOOTERS. */
+  commit_with_footers?: string;
 }
 
 export interface GerritChangeMessageInfo {
@@ -85,6 +102,7 @@ export interface GerritActionInfo {
 
 export interface GerritAccountInfo {
   _account_id: number;
+  /** Requires o=DETAILED_ACCOUNTS. */
   username?: string;
 }
 
