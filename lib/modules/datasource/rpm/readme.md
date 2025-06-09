@@ -7,14 +7,14 @@ According to this Pulp project doc, <https://docs.pulpproject.org/en/2.10/plugin
 
 ## Set URL when using an RPM repository
 
-To use an RPM repository with the datasource, you must set a `registryUrl` with the directory that contains the `repomd.xml` and corresponding `filelists.xml`.
+To use an RPM repository with the datasource, you must set a `registryUrl` with the directory that contains the `repomd.xml` and corresponding `primary.xml`.
 
 **Example**:
 
 If we have
 
 - `http://example.com/repo/repodata/repomd.xml`
-- `http://example.com/repo/repodata/<SHA256>-filelists.xml` where `<SHA256>` is a dynamically generated SHA256 pattern.
+- `http://example.com/repo/repodata/<SHA256>-primary.xml` where `<SHA256>` is a dynamically generated SHA256 pattern.
 
 Then the `registryUrl` should set as `http://example.com/repo/repodata/` or `http://example.com/repo/repodata`.
 
@@ -49,26 +49,34 @@ where the versioning format could be `<semantic version>-<revision or release>`,
 }
 ```
 
-In an RPM repository, the `<SHA256>-filelists.xml` looks like this:
+In an RPM repository, the `<SHA256>-primary.xml` looks like this:
 
 ```
-<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="841">
-<package pkgid="<some id>" name="package1" arch="x86_64">
-  <version epoch="0" ver="1.0.0" rel="1"/>
-  <file>/usr/bin/package1</file>
-</package>
-<package pkgid="<some id>" name="package1" arch="x86_64">
-  <version epoch="0" ver="1.0.0" rel="2"/>
-  <file>/usr/bin/package1</file>
-</package>
-<package pkgid="<some id>" name="package1" arch="x86_64">
-  <version epoch="0" ver="1.1.0" rel="1"/>
-  <file>/usr/bin/package1</file>
-</package>
+`<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.0" rel="2.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.1" rel="1.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.1" rel="2.azl3"/>
+  </package>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.2"/>
+  </package>
 ...
 ...
-</filelists>
+</metadata>
 ```
 
 You can see that `ver` and `rel` (release/revision) is stored separately.
@@ -78,6 +86,6 @@ Or just `1.1.0` if `rel` is not available.
 
 ## Limitation and Consideration
 
-In real-world scenarios, the decompressed filelist XML file from an RPM repository can exceed 512MB. Node.js has a limitation where a single string cannot be larger than 512MB by default. To address this, instead of loading and parsing the entire XML file as a string, this implementation uses XML streaming, which processes the file incrementally and avoids memory issues with large files.
+In real-world scenarios, the decompressed `primary.xml` file from an RPM repository can be extremely large. To handle this efficiently, this implementation uses streaming XML parsing, which processes the file incrementally and avoids loading the entire XML into memory.
 
-While XML streaming is a practical solution for handling very large XML files in Node.js, there may be even more efficient or robust approaches for extreme cases (e.g., using native modules, SAX parsers, or external tools). If you have suggestions or improvements for handling huge XML files, contributions and ideas are welcome.
+Streaming XML parsing is a practical solution for large files in Node.js, but for extremely large or complex cases (e.g., files exceeding ~512MB), you may still encounter memory or performance issues. For such scenarios, consider using more robust approaches such as native modules, optimized SAX parsers, or external tools. Contributions and suggestions for further improving large file handling are welcome.

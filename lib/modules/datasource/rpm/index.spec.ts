@@ -3,15 +3,15 @@ import { RpmDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/rpm/index', () => {
-  describe('getFilelistsGzipUrl', () => {
+  describe('getPrimaryGzipUrl', () => {
     const registryUrl = 'https://example.com/repo/repodata/';
     const rpmDatasource = new RpmDatasource();
 
-    it('returns the correct filelists.xml URL', async () => {
+    it('returns the correct primary.xml URL', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="filelists">
-    <location href="repodata/somesha256-filelists.xml.gz"/>
+  <data type="primary">
+    <location href="repodata/somesha256-primary.xml.gz"/>
   </data>
 </repomd>`;
 
@@ -20,11 +20,10 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/gzip' });
 
-      const filelistsXmlUrl =
-        await rpmDatasource.getFilelistsGzipUrl(registryUrl);
+      const primaryXmlUrl = await rpmDatasource.getPrimaryGzipUrl(registryUrl);
 
-      expect(filelistsXmlUrl).toBe(
-        'https://example.com/repo/repodata/somesha256-filelists.xml.gz',
+      expect(primaryXmlUrl).toBe(
+        'https://example.com/repo/repodata/somesha256-primary.xml.gz',
       );
     });
 
@@ -32,7 +31,7 @@ describe('modules/datasource/rpm/index', () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(`Response code 404 (Not Found)`);
     });
 
@@ -43,15 +42,15 @@ describe('modules/datasource/rpm/index', () => {
         .replyWithError('Network error');
 
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow('Network error');
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
       const repomdXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="filelists">
-    <location href="repodata/somesha256-filelists.xml.gz"/>
+  <data type="primary">
+    <location href="repodata/somesha256-primary.xml.gz"/>
   </data>
 </repomd>`;
       httpMock
@@ -59,15 +58,15 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(`is not in XML format.`);
     });
 
-    it('throws an error if no filelists data is found', async () => {
+    it('throws an error if no primary data is found', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="non-filelists">
-    <location href="repodata/somesha256-filelists.xml.gz"/>
+  <data type="non-primary">
+    <location href="repodata/somesha256-primary.xml.gz"/>
   </data>
 </repomd>`;
 
@@ -77,17 +76,17 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(
-        'No filelists data found in https://example.com/repo/repodata/repomd.xml',
+        'No primary data found in https://example.com/repo/repodata/repomd.xml',
       );
     });
 
     it('throws an error if no location element is found', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="filelists">
-    <non-location href="repodata/somesha256-filelists.xml.gz"/>
+  <data type="primary">
+    <non-location href="repodata/somesha256-primary.xml.gz"/>
   </data>
 </repomd>`;
 
@@ -97,7 +96,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(
         'No location element found in https://example.com/repo/repodata/repomd.xml',
       );
@@ -106,8 +105,8 @@ describe('modules/datasource/rpm/index', () => {
     it('throws an error if location href is missing', async () => {
       const repomdXml = `<?xml version="1.0" encoding="UTF-8"?>
 <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
-  <data type="filelists">
-    <location non-href="repodata/somesha256-filelists.xml.gz"/>
+  <data type="primary">
+    <location non-href="repodata/somesha256-primary.xml.gz"/>
   </data>
 </repomd>`;
 
@@ -117,7 +116,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       await expect(
-        rpmDatasource.getFilelistsGzipUrl(registryUrl),
+        rpmDatasource.getPrimaryGzipUrl(registryUrl),
       ).rejects.toThrow(
         `No href found in https://example.com/repo/repodata/repomd.xml`,
       );
@@ -127,40 +126,44 @@ describe('modules/datasource/rpm/index', () => {
   describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
     const rpmDatasource = new RpmDatasource();
-    const filelistsXmlUrl =
-      'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
+    const primaryXmlUrl =
+      'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 
     it('returns the correct releases', async () => {
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.0" rel="2.azl3"/>
-    <file>example-file</file>
   </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.1" rel="1.azl3"/>
-    <file>example-file</file>
   </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.1" rel="2.azl3"/>
-    <file>example-file</file>
   </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.2"/>
-    <file>example-file</file>
   </package>
-</filelists>
+</metadata>
 `;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
+      // gzip the primaryXml content
+      const gzippedPrimaryXml = gzipSync(primaryXml);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedPrimaryXml, {
           'Content-Type': 'application/gzip',
         });
       const releases = await rpmDatasource.getReleasesByPackageName(
-        filelistsXmlUrl,
+        primaryXmlUrl,
         packageName,
       );
       expect(releases).toEqual({
@@ -181,122 +184,101 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if somesha256-filelists.xml.gz is not found', async () => {
+    it('throws an error if somesha256-primary.xml.gz is not found', async () => {
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
         .reply(404, 'Not Found');
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrow(`Response code 404 (Not Found)`);
     });
 
     it('throws an error if response.body is empty', async () => {
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
         .reply(200, '', { 'Content-Type': 'application/gzip' });
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError(
-        'Empty response body from getting ' + filelistsXmlUrl + '.',
+        'Empty response body from getting ' + primaryXmlUrl + '.',
       );
     });
 
-    it('returns null if filelistsXmlUrl is not in XML format', async () => {
-      const filelistsXml = `<?invalidxml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <package pkgid="someid" name="other-package" arch="x86_64">
+    it('returns null if no element package is found in primary.xml', async () => {
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <nonpackage type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.0" rel="2.azl3"/>
-    <file>example-file</file>
-  </package>
-</filelists>
-`;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
-      httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
-          'Content-Type': 'application/gzip',
-        });
-      const result = await rpmDatasource.getReleasesByPackageName(
-        filelistsXmlUrl,
-        packageName,
-      );
-      expect(result).toBeNull();
-    });
-
-    it('returns null if no element package is found in filelists.xml', async () => {
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <nonpackage pkgid="someid" name="nonpackage" arch="x86_64">
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-    <file>example-file</file>
   </nonpackage>
-</filelists>
+</metadata>
 `;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedprimaryXml, {
           'Content-Type': 'application/gzip',
         });
       const result = await rpmDatasource.getReleasesByPackageName(
-        filelistsXmlUrl,
+        primaryXmlUrl,
         packageName,
       );
       expect(result).toBeNull();
     });
 
-    it('returns null if the specific packageName is not found in filelists.xml', async () => {
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <package pkgid="someid" name="other-package" arch="x86_64">
+    it('returns null if the specific packageName is not found in primary.xml', async () => {
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <nonpackage type="rpm">
+    <name>wrong-package</name>
+    <arch>x86_64</arch>
     <version epoch="0" ver="1.0" rel="2.azl3"/>
-    <file>example-file</file>
-  </package>
-</filelists>
+  </nonpackage>
+</metadata>
 `;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedprimaryXml, {
           'Content-Type': 'application/gzip',
         });
       expect(
         await rpmDatasource.getReleasesByPackageName(
-          filelistsXmlUrl,
+          primaryXmlUrl,
           packageName,
         ),
       ).toBeNull();
     });
 
     it('returns an empty array if version is not found in a version element', async () => {
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0"/>
-    <file>example-file</file>
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <non-version epoch="0" ver="1.0" rel="2.azl3"/>
   </package>
-</filelists>
+</metadata>
 `;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedprimaryXml, {
           'Content-Type': 'application/gzip',
         });
       const releases = await rpmDatasource.getReleasesByPackageName(
-        filelistsXmlUrl,
+        primaryXmlUrl,
         packageName,
       );
       expect(releases).toBeNull();
@@ -304,73 +286,62 @@ describe('modules/datasource/rpm/index', () => {
 
     // this is most likely a bug in the RPM XML file, but we can still handle it gracefully
     it('returns an array of releases without duplicate versionWithRel', async () => {
-      const filelistsXmlUrl =
-        'https://example.com/repo/repodata/somesha256-filelists.xml.gz';
-      const filelistsXml = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0" ver="1.0" rel="2.dupl"/>
-    <file>example-file</file>
+      const primaryXmlUrl =
+        'https://example.com/repo/repodata/somesha256-primary.xml.gz';
+      const primaryXml = `<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
   </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0" ver="1.0" rel="2.dupl"/>
-    <file>example-file</file>
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
   </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0" ver="1.1" rel="1.azl3"/>
-    <file>example-file</file>
-  </package>
-  <package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0" ver="1.1" rel="2.azl3"/>
-    <file>example-file</file>
-  </package>
-</filelists>
+</metadata>
 `;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXml);
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXml);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedprimaryXml, {
           'Content-Type': 'application/gzip',
         });
       const releases = await rpmDatasource.getReleasesByPackageName(
-        filelistsXmlUrl,
+        primaryXmlUrl,
         packageName,
       );
       expect(releases).toEqual({
         releases: [
           {
-            version: '1.0-2.dupl',
-          },
-          {
-            version: '1.1-1.azl3',
-          },
-          {
-            version: '1.1-2.azl3',
+            version: '1.0-dulp.azl3',
           },
         ],
       });
     });
 
     it('handles parser error event in getReleasesByPackageName', async () => {
-      const filelistsXmlMalformed = `<?xml version="1.0" encoding="UTF-8"?>
-<filelists xmlns="http://linux.duke.edu/metadata/filelists">
-  <********/?package pkgid="someid" name="${packageName}" arch="x86_64">
-    <version epoch="0" ver="1.0" rel="2.azl3"/>
-    <file>example-file</file>
+      const primaryXmlMalformed = `<?xml version="1.0" encoding="UTF-8"?>
+<%$#metadata xmlns="http://linux.duke.edu/metadata/common">
+  <package type="rpm">
+    <name>example-package</name>
+    <arch>x86_64</arch>
+    <version epoch="0" ver="1.0" rel="dulp.azl3"/>
   </package>
-<filelists>`;
-      // gzip the filelistsXml content
-      const gzippedFilelistsXml = gzipSync(filelistsXmlMalformed);
+</metadata>`;
+      // gzip the primaryXml content
+      const gzippedprimaryXml = gzipSync(primaryXmlMalformed);
       httpMock
-        .scope(filelistsXmlUrl.replace(/\/[^/]+$/, ''))
-        .get('/somesha256-filelists.xml.gz')
-        .reply(200, gzippedFilelistsXml, {
+        .scope(primaryXmlUrl.replace(/\/[^/]+$/, ''))
+        .get('/somesha256-primary.xml.gz')
+        .reply(200, gzippedprimaryXml, {
           'Content-Type': 'application/gzip',
         });
       await expect(
-        rpmDatasource.getReleasesByPackageName(filelistsXmlUrl, packageName),
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrowError('Unencoded <');
     });
   });
@@ -387,8 +358,8 @@ describe('modules/datasource/rpm/index', () => {
       expect(releases).toBeNull();
     });
 
-    it('returns null if filelistsXmlUrl is empty', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(null);
+    it('returns null if primaryXmlUrl is empty', async () => {
+      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(null);
       const releases = await rpmDatasource.getReleases({
         registryUrl: 'someurl',
         packageName: 'example-package',
@@ -405,8 +376,8 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns the correct releases', async () => {
-      //mock the getFilelistsGzipUrl method to return the filelistsXmlUrl
-      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(
+      //mock the getPrimaryGzipUrl method to return the primaryXmlUrl
+      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
         'https://example.com/repo/repodata/',
       );
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue({
@@ -448,8 +419,8 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if getFilelistsGzipUrl fails', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockRejectedValue(
+    it('throws an error if getPrimaryGzipUrl fails', async () => {
+      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockRejectedValue(
         new Error('Something wrong'),
       );
 
@@ -462,7 +433,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if getReleasesByPackageName fails', async () => {
-      vi.spyOn(rpmDatasource, 'getFilelistsGzipUrl').mockResolvedValue(
+      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
         'https://example.com/repo/repodata/',
       );
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockRejectedValue(

@@ -24,7 +24,7 @@ export class RpmDatasource extends Datasource {
 
   /**
    * Users are able to specify custom RPM repositories as long as they follow the format.
-   * There is a URI http://linux.duke.edu/metadata/filelists in the <sha>-filelists.xml.
+   * There is a URI http://linux.duke.edu/metadata/common in the <sha>-primary.xml.
    * But according to this post, it's not something we can really look into or reference.
    * @see{https://lists.rpm.org/pipermail/rpm-ecosystem/2015-October/000283.html}
    */
@@ -33,7 +33,7 @@ export class RpmDatasource extends Datasource {
   /**
    * Fetches the release information for a given package from the registry URL.
    *
-   * @param registryUrl - the registryUrl should be the folder which contains repodata.xml and its corresponding file list <sha256>-filelists.xml.gz, e.g.: https://packages.microsoft.com/azurelinux/3.0/prod/cloud-native/x86_64/repodata/
+   * @param registryUrl - the registryUrl should be the folder which contains repodata.xml and its corresponding file list <sha256>-primary.xml.gz, e.g.: https://packages.microsoft.com/azurelinux/3.0/prod/cloud-native/x86_64/repodata/
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
@@ -51,23 +51,23 @@ export class RpmDatasource extends Datasource {
       return null;
     }
     try {
-      const filelistsGzipUrl = await this.getFilelistsGzipUrl(registryUrl);
-      if (!filelistsGzipUrl) {
+      const primaryGzipUrl = await this.getPrimaryGzipUrl(registryUrl);
+      if (!primaryGzipUrl) {
         return null;
       }
-      return await this.getReleasesByPackageName(filelistsGzipUrl, packageName);
+      return await this.getReleasesByPackageName(primaryGzipUrl, packageName);
     } catch (err) {
       this.handleGenericErrors(err);
     }
   }
 
-  // Fetches the filelists.xml.gz URL from the repomd.xml file.
+  // Fetches the primary.xml.gz URL from the repomd.xml file.
   @cache({
     namespace: `datasource-${RpmDatasource.id}`,
     key: (registryUrl: string) => registryUrl,
     ttlMinutes: 1440,
   })
-  async getFilelistsGzipUrl(registryUrl: string): Promise<string | null> {
+  async getPrimaryGzipUrl(registryUrl: string): Promise<string | null> {
     const repomdUrl = joinUrlParts(
       registryUrl,
       RpmDatasource.repomdXmlFileName,
@@ -88,16 +88,16 @@ export class RpmDatasource extends Datasource {
     // parse repomd.xml using XmlDocument
     const xml = new XmlDocument(response.body);
 
-    const filelistsData = xml.childWithAttribute('type', 'filelists');
+    const primaryData = xml.childWithAttribute('type', 'primary');
 
-    if (!filelistsData) {
+    if (!primaryData) {
       logger.debug(
-        `No filelists data found in ${repomdUrl}, xml contents: ${response.body}`,
+        `No primary data found in ${repomdUrl}, xml contents: ${response.body}`,
       );
-      throw new Error(`No filelists data found in ${repomdUrl}`);
+      throw new Error(`No primary data found in ${repomdUrl}`);
     }
 
-    const locationElement = filelistsData.childNamed('location');
+    const locationElement = primaryData.childNamed('location');
     if (!locationElement) {
       throw new Error(`No location element found in ${repomdUrl}`);
     }
@@ -114,25 +114,23 @@ export class RpmDatasource extends Datasource {
   }
 
   async getReleasesByPackageName(
-    filelistsGzipUrl: string,
+    primaryGzipUrl: string,
     packageName: string,
   ): Promise<ReleaseResult | null> {
     let response: HttpResponse<Buffer>;
     let decompressedBuffer: Buffer;
     try {
-      // filelistsXmlUrl is a .gz file, need to extract it before parsing
-      response = await this.http.getBuffer(filelistsGzipUrl);
+      // primaryGzipUrl is a .gz file, need to extract it before parsing
+      response = await this.http.getBuffer(primaryGzipUrl);
       if (response.body.length === 0) {
-        logger.debug(`Empty response body from getting ${filelistsGzipUrl}.`);
-        throw new Error(
-          `Empty response body from getting ${filelistsGzipUrl}.`,
-        );
+        logger.debug(`Empty response body from getting ${primaryGzipUrl}.`);
+        throw new Error(`Empty response body from getting ${primaryGzipUrl}.`);
       }
       // decompress the gzipped file
       decompressedBuffer = await gunzipAsync(response.body);
     } catch (err) {
       logger.debug(
-        `Failed to fetch or decompress ${filelistsGzipUrl}: ${
+        `Failed to fetch or decompress ${primaryGzipUrl}: ${
           err instanceof Error ? err.message : err
         }`,
       );
@@ -142,9 +140,8 @@ export class RpmDatasource extends Datasource {
     // Use sax streaming parser to handle large XML files efficiently
     // This allows us to parse the XML file without loading the entire file into memory.
     const releases: Record<string, Release> = {};
-    let foundAny = false;
-    let insideTargetPackage = false;
-    let versionAttrs: { ver?: string; rel?: string } = {};
+    let insidePackage = false;
+    let isTargetPackage = false;
 
     // Create a SAX parser in strict mode
     const saxParser = sax.createStream(true, {
@@ -153,39 +150,33 @@ export class RpmDatasource extends Datasource {
     });
 
     saxParser.on('opentag', (node: sax.Tag) => {
-      if (node.name === 'package') {
-        // The 'name' attribute is on the <package> tag
-        insideTargetPackage = node.attributes.name === packageName;
-        versionAttrs = {};
-      } else if (insideTargetPackage && node.name === 'version') {
-        // The <version> tag has 'ver' and 'rel' attributes
-        versionAttrs = {
-          ver:
-            typeof node.attributes.ver === 'string'
-              ? node.attributes.ver
-              : undefined,
-          rel:
-            typeof node.attributes.rel === 'string'
-              ? node.attributes.rel
-              : undefined,
-        };
+      if (node.name === 'package' && node.attributes.type === 'rpm') {
+        insidePackage = true;
+        isTargetPackage = false;
+      }
+      if (insidePackage && node.name === 'name') {
+        // Check if the package name matches the target package name from <name>targetpackage</name>
+        saxParser.on('text', (text: string) => {
+          if (text.trim() === packageName) {
+            isTargetPackage = true;
+          }
+        });
+      }
+      if (insidePackage && isTargetPackage && node.name === 'version') {
+        if (node.attributes.rel === undefined) {
+          // rel is optional
+          const version = `${node.attributes.ver}`;
+          releases[version] = { version };
+        } else {
+          const version = `${node.attributes.ver}-${node.attributes.rel}`;
+          releases[version] = { version };
+        }
       }
     });
-
-    saxParser.on('closetag', (tagName: string) => {
-      if (tagName === 'package') {
-        if (insideTargetPackage && versionAttrs.ver) {
-          let versionWithRel = versionAttrs.ver ?? '';
-          if (versionAttrs.rel ?? false) {
-            versionWithRel += `-${versionAttrs.rel}`;
-          }
-          if (!releases[versionWithRel]) {
-            releases[versionWithRel] = { version: versionWithRel };
-            foundAny = true;
-          }
-        }
-        insideTargetPackage = false;
-        versionAttrs = {};
+    saxParser.on('closetag', (tag: string) => {
+      if (tag === 'package') {
+        insidePackage = false;
+        isTargetPackage = false;
       }
     });
 
@@ -196,9 +187,7 @@ export class RpmDatasource extends Datasource {
           return;
         }
         settled = true;
-        logger.debug(
-          `SAX parsing error in ${filelistsGzipUrl}: ${err.message}`,
-        );
+        logger.debug(`SAX parsing error in ${primaryGzipUrl}: ${err.message}`);
         setImmediate(() => saxParser.removeAllListeners());
         reject(err);
       });
@@ -209,9 +198,9 @@ export class RpmDatasource extends Datasource {
       Readable.from(decompressedBuffer).pipe(saxParser);
     });
 
-    if (!foundAny) {
+    if (Object.keys(releases).length === 0) {
       logger.trace(
-        `No releases found for package ${packageName} in ${filelistsGzipUrl}`,
+        `No releases found for package ${packageName} in ${primaryGzipUrl}`,
       );
       return null;
     }
