@@ -131,6 +131,9 @@ importers:
       azure-devops-node-api:
         specifier: 14.1.0
         version: 14.1.0
+      bindings:
+        specifier: 1.5.0
+        version: 1.5.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -477,6 +480,9 @@ importers:
       '@types/punycode':
         specifier: 2.1.4
         version: 2.1.4
+      '@types/sax':
+        specifier: 1.2.7
+        version: 1.2.7
       '@types/semver':
         specifier: 7.7.0
         version: 7.7.0
@@ -2161,6 +2167,9 @@ packages:
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
+
+  '@types/sax@1.2.7':
+    resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
 
   '@types/semver-stable@3.0.2':
     resolution: {integrity: sha512-uNLK57+EY0r8VprVwHytHhlTb1tUVZiWgXkMBKoeu1/3LaFq+ZiaG29xAC3APAWG7xdedwGqeUY8N1y9YG1vjw==}
@@ -8736,6 +8745,10 @@ snapshots:
   '@types/punycode@2.1.4': {}
 
   '@types/responselike@1.0.3':
+    dependencies:
+      '@types/node': 22.15.29
+
+  '@types/sax@1.2.7':
     dependencies:
       '@types/node': 22.15.29
 
