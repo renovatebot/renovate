@@ -1,11 +1,8 @@
 import URL from 'node:url';
-import { homedir } from 'os';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import pMap from 'p-map';
 import semver from 'semver';
-import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
