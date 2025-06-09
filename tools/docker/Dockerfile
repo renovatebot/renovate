@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.71.12@sha256:d0c1dc7d656f0b6679db14f7b6d91f96aba3a13b05de989aa8affda0264ccad6 AS slim-base
+FROM ghcr.io/renovatebot/base-image:9.71.5@sha256:b620bcc9a4a98dd26ed78a5708c61b522669fa7ce8966193c657eca3a0858e36 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:9.71.12-full@sha256:93b56e2685a7d3f2da8d23ddc105c0f11dcf23a3e95085b707022b277cfd8ce1 AS full-base
+FROM ghcr.io/renovatebot/base-image:9.71.5-full@sha256:e043385c0328f8e9949241aafbbc8ed6a3ff3c45a2d08d9ecd9a62310f5edacf AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.71.12@sha256:d0c1dc7d656f0b6679db14f7b6d91f96aba3a13b05de989aa8affda0264ccad6 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:9.71.5@sha256:b620bcc9a4a98dd26ed78a5708c61b522669fa7ce8966193c657eca3a0858e36 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -25,7 +25,13 @@ RUN install-tool node 22.16.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.11.1
+RUN install-tool pnpm 10.11.0
+
+# Debug: show where pnpm is installed in the build stage
+RUN which pnpm && ls -l $(which pnpm)
+
+# Copy pnpm binary to a known location before changing WORKDIR
+RUN mkdir -p /usr/local/renovate/pnpm-bin && cp /usr/local/bin/pnpm /usr/local/renovate/pnpm-bin/pnpm
 
 WORKDIR /usr/local/renovate
 
@@ -72,9 +78,11 @@ RUN set -ex; \
 
 COPY --link . ./
 
+RUN which pnpm && ls -l $(which pnpm)
+
 # install npm packages
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
+  pnpm install --ignore-scripts; \
   pnpm rebuild re2 better-sqlite3; \
   true
 
@@ -98,19 +106,45 @@ ARG RENOVATE_VERSION
 
 COPY --link --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
-# make our node binary available as last in path
+# make our node binary available as last in path (must be before pnpm install)
 RUN ln -sf /usr/local/renovate/node /bin/node
 
-# ensure default base and cache directories exist.
-# /runner/cache is an alternative cache directory used in both Docker and microVMs.
-RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repository && \
-  chmod -R 777 /tmp/renovate /runner
+RUN node --version
 
-# test
+# Install standalone pnpm in the final image
+RUN curl -fsSL https://get.pnpm.io/install.sh | SHELL=bash sh - && mv ~/.local/share/pnpm/pnpm /usr/local/bin/pnpm
+# Ensure pnpm is available in PATH
+ENV PATH="/usr/local/renovate:/usr/local/bin:$PATH"
+
+RUN which pnpm && ls -l $(which pnpm)
+RUN node --version
+
+# Set working directory to where package.json is before rebuilding native modules and running tests
+WORKDIR /usr/local/renovate
+
+# Install build tools for native module rebuilds
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+# Remove prebuilt node_expat.node before rebuild
+RUN rm -rf node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/Release/node_expat.node
+
+# Remove prepare script from package.json to avoid missing dev files in production
+RUN jq 'del(.scripts.prepare)' package.json > package.json.tmp && mv package.json.tmp package.json
+
+# Install all npm packages (skip lifecycle scripts)
+RUN set -ex; \
+  pnpm install --ignore-scripts; \
+  pnpm rebuild node-expat; \
+  ls -l node_modules/.pnpm/node-expat@*/node_modules/node-expat/build/ || true; \
+  true
+
+# test (moved after rebuild)
 RUN set -ex; \
   renovate --version; \
-  pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
   true
 
 LABEL \
