@@ -285,8 +285,8 @@ importers:
         specifier: 6.6.2
         version: 6.6.2
       p-throttle:
-        specifier: 4.1.1
-        version: 4.1.1
+        specifier: 7.0.0
+        version: 7.0.0
       parse-link-header:
         specifier: 2.0.0
         version: 2.0.0
@@ -5061,9 +5061,9 @@ packages:
     resolution: {integrity: sha512-xsrIUgI0Kn6iyDYm9StOpOeK29XM1aboGji26+QEortiFST1hGZaUQOLhtEbqHErPpGW/aSz6allwK2qcptp0Q==}
     engines: {node: '>=12'}
 
-  p-throttle@4.1.1:
-    resolution: {integrity: sha512-TuU8Ato+pRTPJoDzYD4s7ocJYcNSEZRvlxoq3hcPI2kZDZ49IQ1Wkj7/gDJc3X7XiEAAvRGtDzdXJI0tC3IL1g==}
-    engines: {node: '>=10'}
+  p-throttle@7.0.0:
+    resolution: {integrity: sha512-aio0v+S0QVkH1O+9x4dHtD4dgCExACcL+3EtNaGqC01GBudS9ijMuUsmN8OVScyV4OOp0jqdLShZFuSlbL/AsA==}
+    engines: {node: '>=18'}
 
   p-timeout@3.2.0:
     resolution: {integrity: sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg==}
@@ -11930,7 +11930,7 @@ snapshots:
 
   p-reduce@3.0.0: {}
 
-  p-throttle@4.1.1: {}
+  p-throttle@7.0.0: {}
 
   p-timeout@3.2.0:
     dependencies:
