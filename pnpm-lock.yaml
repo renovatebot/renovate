@@ -168,8 +168,8 @@ importers:
         specifier: 7.0.1
         version: 7.0.1
       diff:
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 8.0.2
+        version: 8.0.2
       editorconfig:
         specifier: 2.0.1
         version: 2.0.1
@@ -414,9 +414,6 @@ importers:
       '@types/conventional-commits-detector':
         specifier: 1.0.2
         version: 1.0.2
-      '@types/diff':
-        specifier: 7.0.2
-        version: 7.0.2
       '@types/eslint-config-prettier':
         specifier: 6.11.3
         version: 6.11.3
@@ -2053,9 +2050,6 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
-  '@types/diff@7.0.2':
-    resolution: {integrity: sha512-JSWRMozjFKsGlEjiiKajUjIJVKuKdE3oVy2DNtK+fUo8q82nhFZ2CPQwicAIkXrofahDXrWJ7mjelvZphMS98Q==}
-
   '@types/emscripten@1.40.1':
     resolution: {integrity: sha512-sr53lnYkQNhjHNN0oJDdUm5564biioI5DuOpycufDVK7D3y+GR3oUswe2rlwY1nPNyusHbrJ9WoTyIHl4/Bpwg==}
 
@@ -3048,8 +3042,8 @@ packages:
     resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
     engines: {node: '>=0.3.1'}
 
-  diff@7.0.0:
-    resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
+  diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -8616,8 +8610,6 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
-  '@types/diff@7.0.2': {}
-
   '@types/emscripten@1.40.1': {}
 
   '@types/eslint-config-prettier@6.11.3': {}
@@ -9641,7 +9633,7 @@ snapshots:
 
   diff@5.2.0: {}
 
-  diff@7.0.0: {}
+  diff@8.0.2: {}
 
   dir-glob@3.0.1:
     dependencies:
