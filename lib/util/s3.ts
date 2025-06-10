@@ -7,6 +7,7 @@ import { parseUrl } from './url';
 
 let s3Instance: S3Client | undefined;
 export function getS3Client(
+  // Only needed if GlobalConfig is not initialized due to some error
   s3Endpoint?: string,
   s3PathStyle?: boolean,
 ): S3Client {
