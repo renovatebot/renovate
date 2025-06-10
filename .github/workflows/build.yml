@@ -292,7 +292,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
+        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -559,7 +559,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.draft != true
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
