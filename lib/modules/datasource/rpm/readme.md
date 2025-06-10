@@ -86,6 +86,9 @@ Or just `1.1.0` if `rel` is not available.
 
 ## Limitation and Consideration
 
-In real-world scenarios, the decompressed `primary.xml` file from an RPM repository can be extremely large. To handle this efficiently, this implementation uses streaming XML parsing, which processes the file incrementally and avoids loading the entire XML into memory.
+In real-world scenarios, the decompressed `primary.xml` file from an RPM repository can be extremely large.
+To handle this efficiently, this implementation uses streaming XML parsing, which processes the file incrementally and avoids loading the entire XML into memory.
 
-Streaming XML parsing is a practical solution for large files in Node.js, but for extremely large or complex cases (e.g., files exceeding ~512MB), you may still encounter memory or performance issues. For such scenarios, consider using more robust approaches such as native modules, optimized SAX parsers, or external tools. Contributions and suggestions for further improving large file handling are welcome.
+Streaming XML parsing is a practical solution for large files in Node.js, but for extremely large or complex cases (e.g., files exceeding ~512MB), you may still encounter memory or performance issues.
+For such scenarios, consider using more robust approaches such as native modules, optimized SAX parsers, or external tools.
+Contributions and suggestions for further improving large file handling are welcome.

@@ -142,6 +142,7 @@ export class RpmDatasource extends Datasource {
     const releases: Record<string, Release> = {};
     let insidePackage = false;
     let isTargetPackage = false;
+    let insideName = false;
 
     // Create a SAX parser in strict mode
     const saxParser = sax.createStream(true, {
@@ -155,11 +156,7 @@ export class RpmDatasource extends Datasource {
         isTargetPackage = false;
       }
       if (insidePackage && node.name === 'name') {
-        saxParser.on('text', (text: string) => {
-          if (text.trim() === packageName) {
-            isTargetPackage = true;
-          }
-        });
+        insideName = true;
       }
       if (insidePackage && isTargetPackage && node.name === 'version') {
         // rel is optional
@@ -172,7 +169,17 @@ export class RpmDatasource extends Datasource {
         }
       }
     });
+    saxParser.on('text', (text: string) => {
+      if (insidePackage && insideName) {
+        if (text.trim() === packageName) {
+          isTargetPackage = true;
+        }
+      }
+    });
     saxParser.on('closetag', (tag: string) => {
+      if (tag === 'name' && insidePackage) {
+        insideName = false;
+      }
       if (tag === 'package') {
         insidePackage = false;
         isTargetPackage = false;
@@ -192,6 +199,7 @@ export class RpmDatasource extends Datasource {
       });
       saxParser.on('end', () => {
         settled = true;
+        setImmediate(() => saxParser.removeAllListeners());
         resolve();
       });
       Readable.from(decompressedBuffer).pipe(saxParser);
