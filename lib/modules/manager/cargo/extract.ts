@@ -286,7 +286,7 @@ export async function extractPackageFile(
       const versions = coerceArray(versionsByPackage.get(packageName));
       const lockedVersion = versioning.getSatisfyingVersion(
         versions,
-        dep.currentValue!,
+        dep.currentValue ?? '*',
       );
       if (lockedVersion) {
         dep.lockedVersion = lockedVersion;
