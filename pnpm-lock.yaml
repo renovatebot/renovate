@@ -279,8 +279,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       p-map:
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 7.0.3
+        version: 7.0.3
       p-queue:
         specifier: 8.1.0
         version: 8.1.0
