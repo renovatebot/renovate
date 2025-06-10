@@ -17,9 +17,6 @@ describe('modules/datasource/aws-eks-addon/schema', () => {
       ${{ addonName: 'vpc-cni' }}                                   | ${true}
     `('safeParse("$input") === $expected', ({ input, expected }) => {
       const actual = EksAddonsFilter.safeParse(JSON.stringify(input));
-      if (expected) {
-        EksAddonsFilter.parse(JSON.stringify(input));
-      }
       expect(actual.success).toBe(expected);
     });
   });
