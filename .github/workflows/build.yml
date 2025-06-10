@@ -587,7 +587,7 @@ jobs:
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: dry-run
-        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true') || (github.repository == 'renovatebot/renovate' && github.event_name == 'pull_request')
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -705,7 +705,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@e9586b5ff433686becf57ffa6eead0c7a2854f64 # v3.10.42
+        uses: containerbase/internal-tools@feca6cf1cfca09641ab497b50c52614e0eecf399 # v3.10.44
         with:
           command: docker-config
 
