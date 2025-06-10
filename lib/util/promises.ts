@@ -1,5 +1,6 @@
-import AggregateError from 'aggregate-error';
+import AggregateErrorLegacy from 'aggregate-error';
 import pAll from 'p-all';
+import type { Mapper, Options } from 'p-map';
 import pMap from 'p-map';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -27,12 +28,14 @@ function handleMultipleErrors(errors: Error[]): never {
 }
 
 function handleError(err: any): never {
-  if (!(err instanceof AggregateError)) {
+  // AggregateErrorLegacy can be dropped after `p_all` was upgraded too
+  // https://github.com/renovatebot/renovate/issues/36429
+  if (!(err instanceof AggregateError || err instanceof AggregateErrorLegacy)) {
     throw err;
   }
 
   logger.debug({ err }, 'Aggregate error is thrown');
-  handleMultipleErrors([...err]);
+  handleMultipleErrors(err instanceof AggregateError ? err.errors : [...err]);
 }
 
 export async function all<T>(
@@ -53,8 +56,8 @@ export async function all<T>(
 
 export async function map<Element, NewElement>(
   input: Iterable<Element>,
-  mapper: pMap.Mapper<Element, NewElement>,
-  options?: pMap.Options,
+  mapper: Mapper<Element, NewElement>,
+  options?: Options,
 ): Promise<NewElement[]> {
   try {
     const res = await pMap(input, mapper, {
