@@ -98,7 +98,7 @@ function getCNBDependencies(
         config.registryAliases,
       );
 
-      dep.fileReplacePosition = node.position;
+      dep.fileReplacePosition = node.position!; // TODO: should not be null
       if (dep.currentValue || dep.currentDigest) {
         deps.push(dep);
       }
@@ -108,7 +108,7 @@ function getCNBDependencies(
       );
 
       if (dep?.currentValue) {
-        dep.fileReplacePosition = node.position;
+        dep.fileReplacePosition = node.position!; // TODO: should not be null
         deps.push(dep);
       }
     }
@@ -177,7 +177,7 @@ function depFromNode(
   if (groupId && artifactId && currentValue) {
     const depName = `${groupId}:${artifactId}`;
     const versionNode = node.descendantWithPath('version')!;
-    const fileReplacePosition = versionNode.position;
+    const fileReplacePosition = versionNode.position!; // TODO: should not be null
     const datasource = MavenDatasource.id;
     const result: PackageDependency = {
       datasource,
@@ -410,7 +410,7 @@ export function extractPackage(
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
       const val = propNode?.val?.trim();
-      if (key && val) {
+      if (key && val && propNode.position) {
         const fileReplacePosition = propNode.position;
         props[key] = { val, fileReplacePosition, packageFile };
       }
