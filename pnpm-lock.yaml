@@ -351,8 +351,8 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       xmldoc:
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.2
+        version: 2.0.2
       yaml:
         specifier: 2.8.0
         version: 2.8.0
@@ -489,9 +489,6 @@ importers:
       '@types/validate-npm-package-name':
         specifier: 4.0.2
         version: 4.0.2
-      '@types/xmldoc':
-        specifier: 2.0.0
-        version: 2.0.0
       '@vitest/coverage-v8':
         specifier: 3.2.2
         version: 3.2.2(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.32)(tsx@4.20.3)(yaml@2.8.0))
@@ -2198,10 +2195,6 @@ packages:
 
   '@types/validate-npm-package-name@4.0.2':
     resolution: {integrity: sha512-lrpDziQipxCEeK5kWxvljWYhUvOiB2A9izZd9B2AFarYAkqZshb4lPbRs7zKEic6eGtH8V/2qJW+dPp9OtF6bw==}
-
-  '@types/xmldoc@2.0.0':
-    resolution: {integrity: sha512-ascOBEW+WtwqLGJBGam+EeijuAxiC7Pbj/r/pO9+MLbL/JI3axe2qqesLqIec3MD3Hoii6XkuV0RJOA0pDlUVQ==}
-    deprecated: This is a stub types definition. xmldoc provides its own type definitions, so you do not need this installed.
 
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
@@ -6369,8 +6362,8 @@ packages:
     resolution: {integrity: sha512-LwyucHy0uhWqbrOkh9cBluZBeNVxzHjDaE9mwepZG3n3ZlbM4v3ndrFw51zW/NXYFFqP+QWZ72ihtLWTh05e4Q==}
     engines: {node: '>=10.13'}
 
-  xmldoc@2.0.1:
-    resolution: {integrity: sha512-sOOqgsjl3PU6iBw+fBUGAkTCE+JFK+sBaOL3pnZgzqk2/yvOD7RlFmZtDRJAEBzdpOYxSXyOQH4mjubdfs3MSg==}
+  xmldoc@2.0.2:
+    resolution: {integrity: sha512-UiRwoSStEXS3R+YE8OqYv3jebza8cBBAI2y8g3B15XFkn3SbEOyyLnmPHjLBPZANrPJKEzxxB7A3XwcLikQVlQ==}
     engines: {node: '>=12.0.0'}
 
   xtend@4.0.2:
@@ -8766,10 +8759,6 @@ snapshots:
   '@types/uuid@9.0.8': {}
 
   '@types/validate-npm-package-name@4.0.2': {}
-
-  '@types/xmldoc@2.0.0':
-    dependencies:
-      xmldoc: 2.0.1
 
   '@types/yauzl@2.10.3':
     dependencies:
@@ -13500,7 +13489,7 @@ snapshots:
       js-yaml: 4.1.0
       write-file-atomic: 3.0.3
 
-  xmldoc@2.0.1:
+  xmldoc@2.0.2:
     dependencies:
       sax: 1.4.1
 
