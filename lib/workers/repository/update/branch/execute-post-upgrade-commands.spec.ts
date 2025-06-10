@@ -1,5 +1,6 @@
-import path from 'path';
-import { dir, DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -136,7 +137,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           postUpgradeTasks: {
             commands: ['some-command'],
             dataFileTemplate:
-              '[{{#each upgrades}}{\"depName\": \"{{{depName}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]',
+              '[{{#each upgrades}}{"depName": "{{{depName}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
             executionMode: 'update',
           },
         },
@@ -161,10 +162,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           deleted: [],
         }),
       );
-      const cacheDir = path.join(tmpDir.path, 'cache');
+      const cacheDir = upath.join(tmpDir.path, 'cache');
       GlobalConfig.set({
-        localDir: path.join(tmpDir.path, 'local'),
-        cacheDir: cacheDir,
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile
@@ -184,7 +185,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeSystemFile).toHaveBeenCalledTimes(1);
       expect(fs.writeSystemFile).toHaveBeenCalledWith(
         expect.stringMatching(
-          `^.*${path.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
         ),
         '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
       );
@@ -218,10 +219,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           deleted: [],
         }),
       );
-      const cacheDir = path.join(tmpDir.path, 'cache');
+      const cacheDir = upath.join(tmpDir.path, 'cache');
       GlobalConfig.set({
-        localDir: path.join(tmpDir.path, 'local'),
-        cacheDir: cacheDir,
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
         allowedCommands: ['some-command'],
       });
       fs.localPathIsFile

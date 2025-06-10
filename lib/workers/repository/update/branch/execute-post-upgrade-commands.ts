@@ -1,7 +1,7 @@
-import path from 'path';
 import crypto from 'crypto';
 // TODO #22198
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
@@ -10,10 +10,10 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
+  privateCacheDir,
   readLocalFile,
   writeLocalFile,
   writeSystemFile,
-  privateCacheDir,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -78,7 +78,7 @@ export async function postUpgradeCommandsExecutor(
         );
 
         const dataFileName = `post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
-        dataFilePath = path.join(privateCacheDir(), dataFileName);
+        dataFilePath = upath.join(privateCacheDir(), dataFileName);
 
         try {
           await writeSystemFile(dataFilePath, dataFileContent);
@@ -88,6 +88,8 @@ export async function postUpgradeCommandsExecutor(
             'Created post-upgrade commands data file.',
           );
         } catch (error) {
+          dataFilePath = '';
+
           artifactErrors.push({
             stderr: sanitize(
               `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
