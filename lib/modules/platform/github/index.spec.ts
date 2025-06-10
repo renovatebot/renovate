@@ -3560,7 +3560,9 @@ describe('modules/platform/github/index', () => {
       await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { err: new ExternalHostError(expect.any(RequestError), 'github') },
+        {
+          err: new ExternalHostError(expect.any(RequestError) as any, 'github'),
+        },
         'Error re-attempting PR platform automerge',
       );
     });
