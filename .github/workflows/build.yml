@@ -559,7 +559,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.draft != true
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
