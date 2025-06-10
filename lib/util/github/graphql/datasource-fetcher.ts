@@ -1,4 +1,4 @@
-import AggregateError from 'aggregate-error';
+import AggregateErrorLegacy from 'aggregate-error';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -37,7 +37,14 @@ function isUnknownGraphqlError(err: Error): boolean {
 }
 
 function canBeSolvedByShrinking(err: Error): boolean {
-  const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
+  // AggregateErrorLegacy can be dropped after `p_all` was upgraded too
+  // https://github.com/renovatebot/renovate/issues/36429
+  const errors: Error[] =
+    err instanceof AggregateError
+      ? err.errors
+      : err instanceof AggregateErrorLegacy
+        ? [...err]
+        : [err];
   return errors.some(
     (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e),
   );
