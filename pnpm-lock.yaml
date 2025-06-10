@@ -547,8 +547,8 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       jest-extended:
-        specifier: 4.0.2
-        version: 4.0.2
+        specifier: 5.0.3
+        version: 5.0.3
       lint-staged:
         specifier: 15.5.2
         version: 15.5.2
@@ -4164,9 +4164,9 @@ packages:
     resolution: {integrity: sha512-LMIgiIrhigmPrs03JHpxUh2yISK3vLFPkAodPeo0+BuF7wA2FoQbkEg1u8gBYBThncu7e1oEDUfIXVuTqLRUjw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  jest-extended@4.0.2:
-    resolution: {integrity: sha512-FH7aaPgtGYHc9mRjriS0ZEHYM5/W69tLrFTIdzm+yJgeoCmmrSB/luSfMSqWP9O29QWHPEmJ4qmU6EwsZideog==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+  jest-extended@5.0.3:
+    resolution: {integrity: sha512-sxrNxTvHd5S0qFSchkYdr7WhLQb55qhr5sHcllPaPXXGhv0kXy/0VTtFbrFUPOLHyZRDpNoEmhzcPRT7b90MZA==}
+    engines: {node: ^18.12.0 || ^20.9.0 || ^22.11.0 || >=23.0.0}
     peerDependencies:
       jest: '>=27.2.5'
     peerDependenciesMeta:
@@ -10906,10 +10906,9 @@ snapshots:
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
 
-  jest-extended@4.0.2:
+  jest-extended@5.0.3:
     dependencies:
       jest-diff: 29.7.0
-      jest-get-type: 29.6.3
 
   jest-get-type@29.6.3: {}
 
