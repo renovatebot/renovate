@@ -70,7 +70,7 @@ export async function applyPrettierFormatting(
       }
     }
 
-    if (!prettierExists) {
+    if (!prettierExists || !parser) {
       return content;
     }
 

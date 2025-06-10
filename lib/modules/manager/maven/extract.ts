@@ -7,6 +7,14 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
+import {
+  BUILDPACK_REGISTRY_PREFIX,
+  DOCKER_PREFIX,
+  getDep as getBuildpackDep,
+  isBuildpackRegistryRef,
+  isDockerRef,
+} from '../buildpacks/extract';
+import { getDep as getDockerDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
@@ -74,6 +82,80 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
 
 function containsPlaceholder(str: string | null | undefined): boolean {
   return !!str && regEx(/\${[^}]*?}/).test(str);
+}
+
+function getCNBDependencies(
+  nodes: XmlElement[],
+  config: ExtractConfig,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  for (const node of nodes) {
+    const depString = node.val.trim();
+    if (isDockerRef(depString)) {
+      const dep = getDockerDep(
+        depString.replace(DOCKER_PREFIX, ''),
+        true,
+        config.registryAliases,
+      );
+
+      dep.fileReplacePosition = node.position;
+      if (dep.currentValue || dep.currentDigest) {
+        deps.push(dep);
+      }
+    } else if (isBuildpackRegistryRef(depString)) {
+      const dep = getBuildpackDep(
+        depString.replace(BUILDPACK_REGISTRY_PREFIX, ''),
+      );
+
+      if (dep?.currentValue) {
+        dep.fileReplacePosition = node.position;
+        deps.push(dep);
+      }
+    }
+  }
+  return deps;
+}
+
+function getAllCNBDependencies(
+  node: XmlDocument,
+  config: ExtractConfig,
+): PackageDependency[] | null {
+  const pluginNodes =
+    node.childNamed('build')?.childNamed('plugins')?.childrenNamed('plugin') ??
+    [];
+
+  const pluginNode = pluginNodes.find((pluginNode) => {
+    return (
+      pluginNode.valueWithPath('groupId')?.trim() ===
+        'org.springframework.boot' &&
+      pluginNode.valueWithPath('artifactId')?.trim() ===
+        'spring-boot-maven-plugin'
+    );
+  });
+  if (!pluginNode) {
+    return null;
+  }
+
+  const deps: PackageDependency[] = [];
+  const imageNode = pluginNode.childNamed('configuration')?.childNamed('image');
+  if (!imageNode) {
+    return null;
+  }
+  const builder = getCNBDependencies(
+    imageNode.childrenNamed('builder'),
+    config,
+  );
+  const runImage = getCNBDependencies(
+    imageNode.childrenNamed('runImage'),
+    config,
+  );
+  const buildpacks = getCNBDependencies(
+    imageNode.childNamed('buildpacks')?.childrenNamed('buildpack') ?? [],
+    config,
+  );
+  deps.push(...builder, ...runImage, ...buildpacks);
+
+  return deps.length ? deps : null;
 }
 
 function depFromNode(
@@ -229,9 +311,10 @@ function applyPropsInternal(
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
   let sharedVariableName: string | null = null;
-  const currentValue = dep.currentValue!.replace(
-    regEx(/^\${[^}]*?}$/),
-    (substr) => {
+  let currentValue: string | null = null;
+
+  if (dep.currentValue) {
+    currentValue = dep.currentValue.replace(regEx(/^\${[^}]*?}$/), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
@@ -251,8 +334,8 @@ function applyPropsInternal(
         return propValue.val;
       }
       return substr;
-    },
-  );
+    });
+  }
 
   const result: PackageDependency = {
     ...dep,
@@ -297,7 +380,7 @@ interface MavenInterimPackageFile extends PackageFile {
 export function extractPackage(
   rawContent: string,
   packageFile: string,
-  _config: ExtractConfig,
+  config: ExtractConfig,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -315,6 +398,11 @@ export function extractPackage(
   };
 
   result.deps = deepExtract(project);
+
+  const CNBDependencies = getAllCNBDependencies(project, config);
+  if (CNBDependencies) {
+    result.deps.push(...CNBDependencies);
+  }
 
   const propsNode = project.childNamed('properties');
   const props: Record<string, MavenProp> = {};
@@ -463,7 +551,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const urlsSet = new Set([...rawDep.registryUrls!, ...registryUrls[name]]);
+      const urlsSet = new Set([
+        ...(rawDep.registryUrls ?? []),
+        ...registryUrls[name],
+      ]);
       rawDep.registryUrls = [...urlsSet];
     });
   });
@@ -582,7 +673,9 @@ export async function extractAllPackageFiles(
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
-        dep.registryUrls!.unshift(...additionalRegistryUrls);
+        if (dep.registryUrls) {
+          dep.registryUrls.unshift(...additionalRegistryUrls);
+        }
       }
     }
   }
