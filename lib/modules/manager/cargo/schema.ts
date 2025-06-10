@@ -1,7 +1,10 @@
+import semver from 'semver';
 import { z } from 'zod';
 import type { SkipReason } from '../../../types';
 import { Toml, withDepType } from '../../../util/schema-utils';
 import { CrateDatasource } from '../../datasource/crate';
+import * as looseVersioning from '../../versioning/loose';
+import * as semanticVersioning from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { applyGitSource } from '../util';
 import type { CargoManagerData } from './types';
@@ -63,6 +66,11 @@ const CargoDep = z.union([
           skipReason = 'inherited-dependency';
         } else if (git) {
           applyGitSource(dep, git, rev, tag, branch);
+          if (semver.parse(dep.currentValue)) {
+            dep.versioning = semanticVersioning.id;
+          } else {
+            dep.versioning = looseVersioning.id;
+          }
         } else if (!version) {
           skipReason = 'invalid-dependency-specification';
         }

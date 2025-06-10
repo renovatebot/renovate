@@ -291,6 +291,7 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     },
     "packageName": "https://github.com/foo/bar",
     "skipReason": "unspecified-version",
+    "versioning": "loose",
   },
   {
     "currentValue": undefined,
@@ -302,6 +303,7 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     },
     "packageName": "https://github.com/foo/bar",
     "skipReason": "unspecified-version",
+    "versioning": "loose",
   },
   {
     "currentValue": "1.10.3",
@@ -316,6 +318,7 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
       "https://github.com",
     ],
     "skipReason": undefined,
+    "versioning": "semver",
   },
   {
     "currentDigest": "abc1234",
@@ -329,6 +332,7 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     "packageName": "https://github.com/foo/bar",
     "replaceString": "abc1234",
     "skipReason": undefined,
+    "versioning": "loose",
   },
   {
     "currentValue": "next",
@@ -340,6 +344,7 @@ exports[`modules/manager/cargo/extract > extractPackageFile() > extracts multipl
     },
     "packageName": "https://github.com/foo/bar",
     "skipReason": "git-dependency",
+    "versioning": "loose",
   },
   {
     "currentValue": "0.0.0",
