@@ -356,6 +356,10 @@
     "renovate-schema.json"
   ],
   "pnpm": {
+    "ignoredBuiltDependencies": [
+      "core-js-pure",
+      "unrs-resolver"
+    ],
     "ignoredOptionalDependencies": [
       "dtrace-provider",
       "moment",
