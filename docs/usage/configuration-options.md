@@ -151,6 +151,8 @@ This option _adds_ to the existing reviewer list, rather than _replacing_ it lik
 Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
 For example, when adding focused reviewers for a specific package group.
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
@@ -2381,6 +2383,8 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## ignoreScripts
 
 By default, Renovate will disable package manager scripts.
@@ -2884,9 +2888,13 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+<!-- prettier-ignore -->
+!!! warning
+    `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
+
 #### Using regular expressions
 
-You can use Regular Expressions in the `allowedVersion` config.
+You can use Regular Expressions in the `allowedVersions` config.
 You must _begin_ and _end_ your Regular Expression with the `/` character!
 
 For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
@@ -3406,6 +3414,10 @@ For more details on supported syntax see Renovate's [string pattern matching doc
     Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
     When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
     Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
+
+<!-- prettier-ignore -->
+!!! warning
+    `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
 
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
@@ -4168,6 +4180,8 @@ For example: if the username or team name is `bar` then you would set the config
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
@@ -4177,6 +4191,8 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 <!-- prettier-ignore -->
 !!! note

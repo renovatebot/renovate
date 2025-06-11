@@ -529,6 +529,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "scalar": "https://github.com/scalar/scalar",
     "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
@@ -560,7 +561,11 @@
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
     "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
-    "surveyjs": "https://github.com/surveyjs/surveyjs",
+    "surveyjs": [
+      "https://github.com/surveyjs/surveyjs",
+      "https://github.com/surveyjs/survey-library",
+      "https://github.com/surveyjs/survey-creator"
+    ],
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
@@ -569,6 +574,7 @@
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
+    "tanstack-virtual": "https://github.com/TanStack/virtual",
     "tauri": "https://github.com/tauri-apps/tauri",
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
