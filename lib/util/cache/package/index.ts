@@ -1,4 +1,5 @@
 import type { AllConfig } from '../../../config/types';
+import { getEnv } from '../../env';
 import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
@@ -59,7 +60,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
-  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+  if (getEnv().RENOVATE_X_SQLITE_PACKAGE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
     return;
   }

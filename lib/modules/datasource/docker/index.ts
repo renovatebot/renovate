@@ -4,6 +4,7 @@ import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import { HttpError } from '../../../util/http';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
@@ -460,7 +461,7 @@ export class DockerDatasource extends Datasource {
     logger.debug(`getLabels(${registryHost}, ${dockerRepository}, ${tag})`);
     // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
     if (
-      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
+      getEnv().RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
       registryHost === 'https://index.docker.io'
     ) {
       logger.debug(
@@ -669,7 +670,13 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = GlobalConfig.get('dockerMaxPages', 20);
+    const hostsNeedingAllPages = [
+      'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
+    ];
+    const pages = hostsNeedingAllPages.includes(registryHost)
+      ? 1000
+      : GlobalConfig.get('dockerMaxPages', 20);
+    logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -695,13 +702,21 @@ export class DockerDatasource extends Datasource {
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
       if (isArtifactoryServer(res)) {
-        // Artifactory incorrectly returns a next link without the virtual repository name
-        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
-        url = linkHeader?.next?.last
-          ? `${url}&last=${linkHeader.next.last}`
-          : null;
+        // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
+        if (linkHeader?.next?.last) {
+          // parse the current URL, strip any old "last" param, then set the new one
+          const parsed: URL = new URL(url);
+          parsed.searchParams.delete('last');
+          parsed.searchParams.set('last', linkHeader.next.last);
+          url = parsed.href;
+        } else {
+          url = null;
+        }
+      } else if (linkHeader?.next?.url) {
+        // for the normal case we can still use URL to resolve relative-next
+        url = new URL(linkHeader.next.url, url).href;
       } else {
-        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
+        url = null;
       }
       page += 1;
     } while (url && page < pages);
@@ -1076,7 +1091,7 @@ export class DockerDatasource extends Datasource {
 
     const tagsResult =
       registryHost === 'https://index.docker.io' &&
-      !process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
+      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
 

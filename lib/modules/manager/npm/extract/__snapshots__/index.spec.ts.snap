@@ -14,6 +14,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > catches inv
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -132,6 +133,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts en
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -345,6 +347,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts no
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -428,6 +431,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts np
   "managerData": {
     "hasPackageManager": false,
     "npmLock": "package-lock.json",
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -460,6 +464,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts pa
   "managerData": {
     "hasPackageManager": true,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -529,6 +534,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts vo
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -577,6 +583,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > extracts vo
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": undefined,
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -711,6 +718,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds a loc
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -731,6 +739,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > finds compl
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": "@a/b",
     "pnpmShrinkwrap": undefined,
     "workspaces": {
@@ -887,6 +896,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an 
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,
@@ -1003,6 +1013,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > returns an 
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": undefined,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspaces": [],
@@ -1137,6 +1148,7 @@ exports[`modules/manager/npm/extract/index > .extractPackageFile() > sets skipIn
   "managerData": {
     "hasPackageManager": false,
     "npmLock": undefined,
+    "npmrcFileName": null,
     "packageJsonName": "renovate",
     "pnpmShrinkwrap": undefined,
     "workspaces": undefined,

@@ -1,5 +1,6 @@
-import AggregateError from 'aggregate-error';
+import type { Options as PAllOptions } from 'p-all';
 import pAll from 'p-all';
+import type { Mapper, Options as PMapOptions } from 'p-map';
 import pMap from 'p-map';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
@@ -32,12 +33,12 @@ function handleError(err: any): never {
   }
 
   logger.debug({ err }, 'Aggregate error is thrown');
-  handleMultipleErrors([...err]);
+  handleMultipleErrors(err.errors);
 }
 
 export async function all<T>(
   tasks: PromiseFactory<T>[],
-  options?: pAll.Options,
+  options?: PAllOptions,
 ): Promise<T[]> {
   try {
     const res = await pAll(tasks, {
@@ -53,8 +54,8 @@ export async function all<T>(
 
 export async function map<Element, NewElement>(
   input: Iterable<Element>,
-  mapper: pMap.Mapper<Element, NewElement>,
-  options?: pMap.Options,
+  mapper: Mapper<Element, NewElement>,
+  options?: PMapOptions,
 ): Promise<NewElement[]> {
   try {
     const res = await pMap(input, mapper, {
