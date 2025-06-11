@@ -135,8 +135,8 @@ importers:
         specifier: 19.0.1
         version: 19.0.1
       chalk:
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 5.4.1
+        version: 5.4.1
       changelog-filename-regex:
         specifier: 2.0.1
         version: 2.0.1
