@@ -53,7 +53,7 @@ interface Config {
 
 export const id = 'codecommit';
 
-export const config: Config = {};
+let config: Config = {} as any;
 
 export async function initPlatform({
   endpoint,
@@ -106,7 +106,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
-  config.repository = repository;
+  config = { repository } as Config;
 
   let repo;
   try {

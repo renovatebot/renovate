@@ -12,6 +12,7 @@ import {
   ListPullRequestsCommand,
   ListRepositoriesCommand,
   PostCommentForPullRequestCommand,
+  PullRequestStatusEnum,
   UpdatePullRequestDescriptionCommand,
   UpdatePullRequestStatusCommand,
   UpdatePullRequestTitleCommand,
@@ -25,8 +26,6 @@ import {
 } from '../../../constants/error-messages';
 import type { Platform } from '../types';
 import { getCodeCommitUrl } from './codecommit-client';
-import type { CodeCommitPr } from './index';
-import { config } from './index';
 import { git, logger } from '~test/util';
 
 const codeCommitClient = mockClient(CodeCommitClient);
@@ -49,8 +48,6 @@ describe('modules/platform/codecommit/index', () => {
     delete process.env.AWS_ACCESS_KEY_ID;
     delete process.env.AWS_SECRET_ACCESS_KEY;
     codeCommitClient.reset();
-    config.prList = undefined;
-    config.repository = undefined;
     vi.useRealTimers();
   });
 
@@ -743,19 +740,32 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR body if cache is not the same', async () => {
-      config.prList = [];
-      const pr: CodeCommitPr = {
-        number: 1,
-        state: 'open',
-        title: 'someTitle',
-        sourceBranch: 'sourceBranch',
-        targetBranch: 'targetBranch',
-        sourceCommit: '123',
-        destinationCommit: '321',
-        sourceRepo: undefined,
-        body: 'some old description',
-      };
-      config.prList.push(pr);
+      await codeCommit.initRepo({
+        repository: 'some/repo',
+      });
+
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce({
+        pullRequest: {
+          pullRequestTargets: [
+            {
+              destinationReference: 'targetBranch',
+              sourceReference: 'sourceBranch',
+              destinationCommit: '321',
+              sourceCommit: '123',
+            },
+          ],
+          pullRequestStatus: PullRequestStatusEnum.OPEN,
+          title: 'someTitle',
+          description: 'some old description',
+        },
+      });
+
+      const prList = await codeCommit.getPrList();
+      expect(prList).toHaveLength(1);
+
       codeCommitClient.on(UpdatePullRequestDescriptionCommand).resolvesOnce({});
       codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
       codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
@@ -770,19 +780,32 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('updates PR body does not update if cache is the same', async () => {
-      config.prList = [];
-      const pr: CodeCommitPr = {
-        number: 1,
-        state: 'open',
-        title: 'someTitle',
-        sourceBranch: 'sourceBranch',
-        targetBranch: 'targetBranch',
-        sourceCommit: '123',
-        destinationCommit: '321',
-        sourceRepo: undefined,
-        body: 'new description',
-      };
-      config.prList.push(pr);
+      await codeCommit.initRepo({
+        repository: 'some/repo',
+      });
+
+      codeCommitClient
+        .on(ListPullRequestsCommand)
+        .resolvesOnce({ pullRequestIds: ['1'] });
+      codeCommitClient.on(GetPullRequestCommand).resolvesOnce({
+        pullRequest: {
+          pullRequestTargets: [
+            {
+              destinationReference: 'targetBranch',
+              sourceReference: 'sourceBranch',
+              destinationCommit: '321',
+              sourceCommit: '123',
+            },
+          ],
+          pullRequestStatus: PullRequestStatusEnum.OPEN,
+          title: 'someTitle',
+          description: 'news description',
+        },
+      });
+
+      const prList = await codeCommit.getPrList();
+      expect(prList).toHaveLength(1);
+
       codeCommitClient.on(UpdatePullRequestTitleCommand).resolvesOnce({});
       codeCommitClient.on(UpdatePullRequestStatusCommand).resolvesOnce({});
       await expect(
