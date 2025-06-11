@@ -128,12 +128,11 @@ async function updateArtifactsImpl(
         (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
       );
       // Non-crate dependencies (like git ones) do not have locked versions.
-      // For crate dependencies, not having a locked version is not expected.
+      // For crate dependencies, a locked version is expected.
       // In both situations, perform a regular workspace lockfile update.
       if (nonCrateDep || crateDepWithoutLockedVersion) {
         if (crateDepWithoutLockedVersion) {
-          // Only warn when a crate dependency has no locked version, as this is
-          // not an expected situation.
+          // Only warn when a crate dependency has no locked version
           logger.warn(
             { dependency: crateDepWithoutLockedVersion.depName },
             'Missing locked version for dependency',
