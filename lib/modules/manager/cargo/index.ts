@@ -4,7 +4,6 @@ import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 export { bumpPackageVersion } from './update';
@@ -21,7 +20,6 @@ export const categories: Category[] = ['rust'];
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
   managerFilePatterns: ['/(^|/)Cargo\\.toml$/'],
-  versioning: cargoVersioning.id,
 };
 
 export const supportedDatasources = [
