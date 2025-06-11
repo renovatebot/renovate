@@ -72,7 +72,7 @@ export async function fetchJSONFile(
  * @param fileName - The filename or path to extract from
  * @returns The extracted filename without path or query parameters
  */
-function extractFilenameFromGitLabPath(fileName: string): string {
+export function extractFilenameFromGitLabPath(fileName: string): string {
   try {
     const url = parseUrl(fileName);
     if (url) {
@@ -90,7 +90,7 @@ function extractFilenameFromGitLabPath(fileName: string): string {
       // Extract filename from the path
       return pathWithoutQuery.split('/').slice(-1)[0];
     }
-  } catch (error) {
+  } catch {
     // If parseUrl fails, it's not a URL, so return as is
   }
 
