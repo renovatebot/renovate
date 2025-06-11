@@ -250,6 +250,60 @@ describe('config/presets/gitlab/index', () => {
     });
   });
 
+  describe('extractFilenameFromGitLabPath()', () => {
+    it('should extract filename from simple filename', () => {
+      const result = gitlab.extractFilenameFromGitLabPath('config.json5');
+      expect(result).toBe('config.json5');
+    });
+
+    it('should extract filename from path', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'src/renovate/config.json5',
+      );
+      expect(result).toBe('src/renovate/config.json5');
+    });
+
+    it('should extract filename from URL-encoded path', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'src%2Frenovate%2Fconfig.json5',
+      );
+      expect(result).toBe('src%2Frenovate%2Fconfig.json5');
+    });
+
+    it('should extract filename from GitLab API URL', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/api/v4/projects/13083/repository/files/config.json5?ref=main',
+      );
+      expect(result).toBe('config.json5');
+    });
+
+    it('should handle GitLab API URL with /raw suffix', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/api/v4/projects/13083/repository/files/config.json5/raw?ref=main',
+      );
+      expect(result).toBe('config.json5');
+    });
+
+    it('should handle GitLab API URL with nested path and /raw suffix', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/api/v4/projects/13083/repository/files/src/renovate/config.json5/raw?ref=main',
+      );
+      expect(result).toBe('config.json5');
+    });
+
+    it('should handle invalid URL and return as is', () => {
+      const result = gitlab.extractFilenameFromGitLabPath('not-a-url-at-all');
+      expect(result).toBe('not-a-url-at-all');
+    });
+
+    it('should handle non-URL string and return as is', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'just-a-filename.json',
+      );
+      expect(result).toBe('just-a-filename.json');
+    });
+  });
+
   describe('getPreset()', () => {
     it('throws EXTERNAL_HOST_ERROR', async () => {
       httpMock.scope(gitlabApiHost).get(projectPath).reply(500);
