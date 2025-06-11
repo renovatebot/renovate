@@ -206,6 +206,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res?.releases).toHaveLength(3);
     });
   });
+
   describe('constructBaseUrl', () => {
     const galaxy_collection_datasource = new GalaxyCollectionDatasource();
     it('returns ansible url with artifactory URL', () => {
@@ -218,6 +219,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         'https://my.artifactory.local/artifactory/api/ansible/ansible-repo/api/v3/collections/foo/bar/',
       );
     });
+
     it('returns galaxy url with automation hub URL', () => {
       expect(
         galaxy_collection_datasource.constructBaseUrl(
@@ -228,6 +230,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         'https://my.automationhub.local/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/foo/bar/',
       );
     });
+
     it('returns galaxy url with other url', () => {
       expect(
         galaxy_collection_datasource.constructBaseUrl(
