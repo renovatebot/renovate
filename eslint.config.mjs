@@ -59,7 +59,6 @@ export default tseslint.config(
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
         projectService: true,
-        extraFileExtensions: ['.mjs'],
       },
     },
 
