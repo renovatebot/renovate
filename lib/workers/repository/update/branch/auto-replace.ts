@@ -196,6 +196,105 @@ async function checkExistingBranch(
   return existingContent;
 }
 
+interface Upgrade {
+  current: string;
+  new: string;
+}
+
+interface Upgrades {
+  name?: Upgrade;
+  value?: Upgrade;
+  digest?: Upgrade;
+  shortDigest?: Upgrade;
+}
+
+function numUpgrades(upgrades: Upgrades): number {
+  const { name, value, digest, shortDigest } = upgrades;
+  const toInt = (val: Upgrade | undefined): number => (val ? 1 : 0);
+  return toInt(name) + toInt(value) + toInt(digest) + toInt(shortDigest);
+}
+
+function firstMatch(content: string, upgrades: Upgrades): number {
+  const { name, value, digest, shortDigest } = upgrades;
+
+  let index = content.length;
+
+  if (name) {
+    const found = content.indexOf(name.current);
+    index = index < found ? index : found;
+  }
+
+  if (value) {
+    const found = content.indexOf(value.current);
+    index = index < found ? index : found;
+  }
+
+  if (digest) {
+    const found = content.indexOf(digest.current);
+    index = index < found ? index : found;
+  }
+
+  if (shortDigest) {
+    const found = content.indexOf(shortDigest.current);
+    index = index < found ? index : found;
+  }
+
+  return index === content.length ? -1 : index;
+}
+
+function upgradeList(upgrades: Upgrades): Upgrade[] {
+  const { name, value, digest, shortDigest } = upgrades;
+
+  const list: Upgrade[] = [];
+
+  if (name) {
+    list.push(name);
+  }
+  if (value) {
+    list.push(value);
+  }
+  if (digest) {
+    list.push(digest);
+  }
+  if (shortDigest) {
+    list.push(shortDigest);
+  }
+
+  return list;
+}
+
+function requestedUpgrades(upgrade: BranchUpgradeConfig): Upgrades {
+  const {
+    depName,
+    newName,
+    currentValue,
+    newValue,
+    currentDigest,
+    currentDigestShort,
+    newDigest,
+  } = upgrade;
+
+  const request: Upgrades = {};
+
+  if (depName && newName && depName !== newName) {
+    request.name = { current: depName, new: newName };
+  }
+
+  if (currentValue && newValue && currentValue !== newValue) {
+    request.value = { current: currentValue, new: newValue };
+  }
+
+  if (currentDigest && newDigest && currentDigest !== newDigest) {
+    request.digest = { current: currentDigest, new: newDigest };
+  }
+
+  if (currentDigestShort && newDigest && currentDigestShort !== newDigest) {
+    request.shortDigest = { current: currentDigestShort, new: newDigest };
+  }
+
+  return request;
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -245,6 +344,60 @@ export async function doAutoReplace(
     return existingContent;
   }
   try {
+    const requested = requestedUpgrades(upgrade);
+    logger.debug(requested, 'Requested upgrades');
+
+    // Special case, multiple upgrades requested (e.g. digest & version)
+    if (!upgrade.replaceString && numUpgrades(requested) > 1) {
+      logger.debug(
+        { packageFile, depName, requested },
+        `requested changes to ${numUpgrades(requested)} values`,
+      );
+
+      let searchIndex = firstMatch(existingContent, requested);
+      let newContent = existingContent;
+
+      const toReplace = upgradeList(requested); // things we need to replace
+
+      for (; searchIndex < newContent.length; searchIndex += 1) {
+        if (toReplace.length === 0) {
+          break;
+        } // replaced everything we were looking for
+
+        for (const [index, value] of toReplace.entries()) {
+          if (matchAt(newContent, searchIndex, value.current)) {
+            // Found the current value
+            logger.debug(
+              { packageFile, depName },
+              `Found '${value.current}' at ${searchIndex}, replacing with '${value.new}'`,
+            );
+
+            // Replace contents
+            newContent = replaceAt(
+              newContent,
+              searchIndex,
+              value.current,
+              value.new,
+            );
+            searchIndex += value.new.length - 1;
+
+            // Remove current value from toReplace
+            toReplace.splice(index, 1);
+            break;
+          }
+        }
+      }
+
+      // Confirm upgrade
+      await writeLocalFile(upgrade.packageFile!, newContent);
+      if (await confirmIfDepUpdated(upgrade, newContent)) {
+        return newContent;
+      }
+
+      // Upgrade failed, revert package file
+      await writeLocalFile(upgrade.packageFile!, existingContent);
+    }
+
     let newString: string;
     if (autoReplaceStringTemplate && !newName) {
       newString = compile(autoReplaceStringTemplate, upgrade, false);
