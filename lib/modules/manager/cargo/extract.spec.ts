@@ -557,6 +557,24 @@ replace-with = "mcorbin"
       expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
     });
 
+    it('does not extract locked versions for git dependencies', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        git_dep = { git = "https://github.com/foo/bar" }
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps[0].lockedVersion).toBeUndefined();
+    });
+
     it('extracts locked versions for renamed packages', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.1.lock');
       mockReadLocalFile({ 'Cargo.lock': cargolock });
