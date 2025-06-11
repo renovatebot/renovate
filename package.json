@@ -177,7 +177,7 @@
     "@renovatebot/osv-offline": "1.6.5",
     "@renovatebot/pep440": "4.1.0",
     "@renovatebot/ruby-semver": "4.0.0",
-    "@sindresorhus/is": "7.0.1",
+    "@sindresorhus/is": "7.0.2",
     "@yarnpkg/core": "4.4.2",
     "@yarnpkg/parsers": "3.0.3",
     "agentkeepalive": "4.6.0",
