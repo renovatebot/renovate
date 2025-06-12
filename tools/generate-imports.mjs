@@ -153,7 +153,7 @@ async function generateManagerList() {
     .map((fname) => `"${fname}"`);
 
   const content = `
-export const AllManagersListLiteral = [${managers}] as const;
+export const AllManagersListLiteral = [${managers.join(',')}] as const;
 export type ManagerName = typeof AllManagersListLiteral[number];
 `;
 
