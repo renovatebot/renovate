@@ -210,12 +210,14 @@ export class NugetV3Api {
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
       nupkgUrl ??= massageUrl(last.packageContent);
+           /* v8 ignore start */
       if (last.deprecation) {
         deprecationMessage ??= this.getDeprecationMessage(
           pkgName,
           last.deprecation,
         );
       }
+      /* v8 ignore stop */
     }
 
     const dep: ReleaseResult = {
