@@ -311,7 +311,7 @@
     "@types/tmp": "0.2.6",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@vitest/coverage-v8": "3.2.1",
+    "@vitest/coverage-v8": "3.2.2",
     "@vitest/eslint-plugin": "1.2.1",
     "aws-sdk-client-mock": "4.1.0",
     "callsite": "1.0.0",
@@ -347,7 +347,7 @@
     "unified": "9.2.2",
     "vite": "6.3.5",
     "vite-tsconfig-paths": "5.1.4",
-    "vitest": "3.2.1",
+    "vitest": "3.2.2",
     "vitest-mock-extended": "3.1.0"
   },
   "packageManager": "pnpm@10.11.1",
