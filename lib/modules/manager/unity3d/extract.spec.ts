@@ -28,7 +28,7 @@ describe('modules/manager/unity3d/extract', () => {
         {
           currentValue: value,
           datasource: 'unity3d',
-          depName: depName,
+          depName,
         },
       ]);
     });
