@@ -73,25 +73,21 @@ export async function fetchJSONFile(
  * @returns The extracted filename without path or query parameters
  */
 export function extractFilenameFromGitLabPath(fileName: string): string {
-  try {
-    const url = parseUrl(fileName);
-    if (url) {
-      // If it's a valid URL, extract the pathname and process it
-      let pathWithoutQuery = url.pathname;
+  const url = parseUrl(fileName);
+  if (url) {
+    // If it's a valid URL, extract the pathname and process it
+    let pathWithoutQuery = url.pathname;
 
-      // Handle GitLab "/raw" suffix that's appended to the filename
-      if (pathWithoutQuery.endsWith('/raw')) {
-        pathWithoutQuery = pathWithoutQuery.substring(
-          0,
-          pathWithoutQuery.length - 4,
-        );
-      }
-
-      // Extract filename from the path
-      return pathWithoutQuery.split('/').slice(-1)[0];
+    // Handle GitLab "/raw" suffix that's appended to the filename
+    if (pathWithoutQuery.endsWith('/raw')) {
+      pathWithoutQuery = pathWithoutQuery.substring(
+        0,
+        pathWithoutQuery.length - 4,
+      );
     }
-  } catch {
-    // If parseUrl fails, it's not a URL, so return as is
+
+    // Extract filename from the path
+    return pathWithoutQuery.split('/').slice(-1)[0];
   }
 
   // Return as is - should be a normal filename with extension

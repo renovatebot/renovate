@@ -291,11 +291,6 @@ describe('config/presets/gitlab/index', () => {
       expect(result).toBe('config.json5');
     });
 
-    it('should handle invalid URL and return as is', () => {
-      const result = gitlab.extractFilenameFromGitLabPath('not-a-url-at-all');
-      expect(result).toBe('not-a-url-at-all');
-    });
-
     it('should handle non-URL string and return as is', () => {
       const result = gitlab.extractFilenameFromGitLabPath(
         'just-a-filename.json',
