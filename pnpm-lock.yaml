@@ -358,8 +358,8 @@ importers:
         version: 3.25.51
     devDependencies:
       '@containerbase/eslint-plugin':
-        specifier: 1.1.4
-        version: 1.1.4(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.1(eslint@9.28.0))(eslint@9.28.0)
+        specifier: 1.1.6
+        version: 1.1.6(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.1(eslint@9.28.0))(eslint@9.28.0)
       '@eslint/js':
         specifier: 9.28.0
         version: 9.28.0
@@ -900,9 +900,9 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
 
-  '@containerbase/eslint-plugin@1.1.4':
-    resolution: {integrity: sha512-HQhrqnkXN2u8+3Tj+ZwtLqOi4NamJzu2rYongSwlQSMxwWEzwY+YUi95bl7lDB8c5JSEneaXyZSSHDILONaLrQ==}
-    engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^9.0.0}
+  '@containerbase/eslint-plugin@1.1.6':
+    resolution: {integrity: sha512-D/AXn+6rqEX3vlQl8vULi2cz0I5Iyuryajz19H3aHkCLXOZ9QXdAQpIFgEOJctMLZVg6S1k01FgxVkzGrR8kww==}
+    engines: {node: ^20.9.0 || ^22.11.0, pnpm: ^10.0.0}
     peerDependencies:
       eslint: ^9.0.0
       eslint-plugin-import: ^2.31.0
@@ -7369,7 +7369,7 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@containerbase/eslint-plugin@1.1.4(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.1(eslint@9.28.0))(eslint@9.28.0)':
+  '@containerbase/eslint-plugin@1.1.6(eslint-plugin-import@2.31.0)(eslint-plugin-promise@7.2.1(eslint@9.28.0))(eslint@9.28.0)':
     dependencies:
       eslint: 9.28.0
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.33.1(eslint@9.28.0)(typescript@5.8.3))(eslint-import-resolver-typescript@4.4.2)(eslint@9.28.0)
