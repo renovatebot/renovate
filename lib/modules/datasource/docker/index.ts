@@ -679,6 +679,7 @@ export class DockerDatasource extends Datasource {
     let page = 0;
     const hostsNeedingAllPages = [
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
+      'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
