@@ -4,7 +4,7 @@ import type { SkipReason } from '../../../types';
 import { Toml, withDepType } from '../../../util/schema-utils';
 import { CrateDatasource } from '../../datasource/crate';
 import * as looseVersioning from '../../versioning/loose';
-import * as semanticVersioning from '../../versioning/semver';
+import * as semverVersioning from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 import { applyGitSource } from '../util';
 import type { CargoManagerData } from './types';
@@ -67,7 +67,7 @@ const CargoDep = z.union([
         } else if (git) {
           applyGitSource(dep, git, rev, tag, branch);
           if (semver.parse(dep.currentValue)) {
-            dep.versioning = semanticVersioning.id;
+            dep.versioning = semverVersioning.id;
           } else {
             dep.versioning = looseVersioning.id;
           }
