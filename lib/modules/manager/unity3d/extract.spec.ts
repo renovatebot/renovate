@@ -1,159 +1,77 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
-
-const beta = Fixtures.get('beta.ProjectVersion.txt');
-const lts = Fixtures.get('lts.ProjectVersion.txt');
-const stable = Fixtures.get('stable.ProjectVersion.txt');
 
 describe('modules/manager/unity3d/extract', () => {
   describe('extractPackageFile()', () => {
-    it('handles no version', () => {
-      const res = extractPackageFile(
-        'm_EditorVersion: ',
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toBeEmpty();
+    it.each([
+      'm_EditorVersion: ',
+      'm_EditorVersionWithRevision: ',
+      'invalidKey: a',
+    ])('handles no version', (content) => {
+      const res = extractPackageFile(content)?.deps;
+      expect(res).toBeUndefined();
     });
 
-    it('skips ProjectVersion.txt outside of ProjectSettings directory', () => {
-      const res = extractPackageFile(
-        'm_EditorVersion: 2022.3.19f1\n',
-        'ProjectVersion.txt',
-      )?.deps;
-      expect(res).toBeEmpty();
-    });
-
-    it('skips ProjectVersion.txt inside directories ending in `ProjectSettings`', () => {
-      const res = extractPackageFile(
-        'm_EditorVersion: 2022.3.19f1\n',
-        'OtherProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toBeEmpty();
-    });
-
-    it('handles m_EditorVersion', () => {
-      const res = extractPackageFile(
-        'm_EditorVersion: 2022.3.19f1\n',
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
+    it.each([
+      {
+        content: 'm_EditorVersion: 2022.3.19f1',
+        value: '2022.3.19f1',
+        depName: 'm_EditorVersion',
+      },
+      {
+        content: 'm_EditorVersionWithRevision: 2022.3.19f1 (30acc77e9b6b)',
+        value: '2022.3.19f1 (30acc77e9b6b)',
+        depName: 'm_EditorVersionWithRevision',
+      },
+    ])('handles $depName', ({ content, value, depName }) => {
+      const res = extractPackageFile(content)?.deps;
       expect(res).toEqual([
         {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2022.3.19f1',
+          currentValue: value,
           datasource: 'unity3d',
-          depName: 'm_EditorVersion',
-          depType: 'final',
-          replaceString: 'm_EditorVersion: 2022.3.19f1',
+          depName: depName,
         },
       ]);
     });
 
-    it('handles beta versions', () => {
-      const res = extractPackageFile(
-        beta,
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2023.3.0b5',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersion',
-          depType: 'final',
-          replaceString: 'm_EditorVersion: 2023.3.0b5',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2023.3.0b5 (30acc77e9b6b)',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersionWithRevision',
-          depType: 'final',
-          replaceString:
-            'm_EditorVersionWithRevision: 2023.3.0b5 (30acc77e9b6b)',
-        },
-      ]);
-    });
-
-    it('handles stable versions', () => {
-      const res = extractPackageFile(
-        stable,
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2022.3.19f1',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersion',
-          depType: 'final',
-          replaceString: 'm_EditorVersion: 2022.3.19f1',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2022.3.19f1 (244b723c30a6)',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersionWithRevision',
-          depType: 'final',
-          replaceString:
-            'm_EditorVersionWithRevision: 2022.3.19f1 (244b723c30a6)',
-        },
-      ]);
-    });
-
-    it('handles lts versions', () => {
-      const res = extractPackageFile(
-        lts,
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2021.3.35f1',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersion',
-          depType: 'final',
-          replaceString: 'm_EditorVersion: 2021.3.35f1',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2021.3.35f1 (157b46ce122a)',
-          datasource: 'unity3d',
-          depName: 'm_EditorVersionWithRevision',
-          depType: 'final',
-          replaceString:
-            'm_EditorVersionWithRevision: 2021.3.35f1 (157b46ce122a)',
-        },
-      ]);
-    });
-
-    it('skips if casing is incorrect', () => {
-      const res = extractPackageFile(
-        'm_EditorVersionWITHRevision: 2022.3.19f1 (244b723c30a6)\n',
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toBeEmpty();
-    });
-
-    it('skips abnormal spacing', () => {
-      const res = extractPackageFile(
-        'm_EditorVersionWithRevision:  2022.3.19f1 (244b723c30a6)\n',
-        'ProjectSettings/ProjectVersion.txt',
-      )?.deps;
-      expect(res).toBeEmpty();
-    });
+    it.each([
+      {
+        type: 'alpha',
+        content:
+          'm_EditorVersion: 2022.3.0a1\nm_EditorVersionWithRevision: 2022.3.0a1 (244b723c30a6)',
+        version: '2022.3.0a1',
+        versionWithRevision: '2022.3.0a1 (244b723c30a6)',
+      },
+      {
+        type: 'beta',
+        content:
+          'm_EditorVersion: 2023.3.0b5\nm_EditorVersionWithRevision: 2023.3.0b5 (30acc77e9b6b)',
+        version: '2023.3.0b5',
+        versionWithRevision: '2023.3.0b5 (30acc77e9b6b)',
+      },
+      {
+        type: 'stable',
+        content:
+          'm_EditorVersion: 2021.3.35f1\nm_EditorVersionWithRevision: 2021.3.35f1 (122a674b12f3)',
+        version: '2021.3.35f1',
+        versionWithRevision: '2021.3.35f1 (122a674b12f3)',
+      },
+    ])(
+      'handles $type versions',
+      ({ content, version, versionWithRevision }) => {
+        const res = extractPackageFile(content)?.deps;
+        expect(res).toEqual([
+          {
+            currentValue: version,
+            datasource: 'unity3d',
+            depName: 'm_EditorVersion',
+          },
+          {
+            currentValue: versionWithRevision,
+            datasource: 'unity3d',
+            depName: 'm_EditorVersionWithRevision',
+          },
+        ]);
+      },
+    );
   });
 });
