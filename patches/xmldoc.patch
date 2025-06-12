@@ -1,0 +1,13 @@
+diff --git a/dist/xmldoc.js b/dist/xmldoc.js
+index b91d8079e84b7369f860caf7b7046a0eb9306900..74a559359e3863addf46a0375099ebca7670d751 100644
+--- a/dist/xmldoc.js
++++ b/dist/xmldoc.js
+@@ -146,7 +146,7 @@ class XmlElement {
+         this._addChild(child);
+         delegates.unshift(child);
+         // Remove the parser as it is no longer needed and should not be exposed to clients
+-        delete this.parser;
++        // delete this.parser;
+     }
+     _closetag() {
+         delegates.shift();
