@@ -610,6 +610,7 @@
     "utoipa": "https://github.com/juhaku/utoipa",
     "vaadin-hilla": "https://github.com/vaadin/hilla",
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
+    "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
