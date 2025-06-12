@@ -12,13 +12,13 @@ import { coerceString } from '../../../../../util/string';
 import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
+import * as bitbucketServer from './bitbucket-server';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
-  ChangeLogPlatform,
   ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
@@ -45,6 +45,11 @@ export async function getReleaseList(
         return await github.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
+      case 'bitbucket-server':
+        logger.trace(
+          'Unsupported Bitbucket Server feature. Skipping release fetching.',
+        );
+        return [];
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -281,6 +286,12 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory,
         );
+      case 'bitbucket-server':
+        return await bitbucketServer.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -355,35 +366,24 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const notesSourceUrl = getNotesSourceUrl(
+            baseUrl,
+            repository,
+            project,
+            changelogFile,
+          );
+          const mdHeadingLink = title
+            .filter((word) => !isHttpUrl(word))
+            .join('-')
+            .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              // TODO: fix url
-              const notesSourceUrl = joinUrlParts(
-                baseUrl,
-                repository,
-                getSourceRootPath(project.type),
-                'HEAD',
-                changelogFile,
-              );
-              const mdHeadingLink = title
-                .filter((word) => !isHttpUrl(word))
-                .join('-')
-                .replace(regEx(/[^A-Za-z0-9-]/g), '');
-              const url = `${notesSourceUrl}#${mdHeadingLink}`;
-              body = massageBody(body, baseUrl);
-              if (body?.length) {
-                try {
-                  body = await linkify(body, {
-                    repository: `${baseUrl}${repository}`,
-                  });
-                } catch (err) /* istanbul ignore next */ {
-                  logger.warn({ body, err }, 'linkify error');
-                }
-              }
               return {
-                body,
+                body: await linkifyBody(project, body),
                 url,
                 notesSourceUrl,
               };
@@ -487,11 +487,48 @@ export function shouldSkipChangelogMd(repository: string): boolean {
   return repositoriesToSkipMdFetching.includes(repository);
 }
 
-function getSourceRootPath(type: ChangeLogPlatform): string {
-  switch (type) {
-    case 'bitbucket':
-      return 'src';
-    default:
-      return 'blob';
+function getNotesSourceUrl(
+  baseUrl: string,
+  repository: string,
+  project: ChangeLogProject,
+  changelogFile: string,
+): string {
+  if (project.type === 'bitbucket-server') {
+    const [projectKey, repositorySlug] = repository.split('/');
+    return joinUrlParts(
+      baseUrl,
+      'projects',
+      projectKey,
+      'repos',
+      repositorySlug,
+      'browse',
+      changelogFile,
+      '?at=HEAD',
+    );
   }
+
+  return joinUrlParts(
+    baseUrl,
+    repository,
+    project.type === 'bitbucket' ? 'src' : 'blob',
+    'HEAD',
+    changelogFile,
+  );
+}
+
+async function linkifyBody(
+  { baseUrl, repository }: ChangeLogProject,
+  bodyStr: string,
+): Promise<string> {
+  const body = massageBody(bodyStr, baseUrl);
+  if (body?.length) {
+    try {
+      return await linkify(body, {
+        repository: `${baseUrl}${repository}`,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ body, err }, 'linkify error');
+    }
+  }
+  return body;
 }

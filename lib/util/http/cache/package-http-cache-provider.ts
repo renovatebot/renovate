@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { get, set } from '../../cache/package'; // Import the package cache functions
@@ -11,8 +12,9 @@ import type { HttpCache } from './schema';
 
 export interface PackageHttpCacheProviderOptions {
   namespace: PackageCacheNamespace;
-  ttlMinutes?: number;
-  checkCacheControl?: boolean;
+  softTtlMinutes?: number;
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
@@ -21,22 +23,22 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private softTtlMinutes: number;
   private hardTtlMinutes: number;
 
-  checkCacheControl: boolean;
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
 
   constructor({
     namespace,
-    ttlMinutes = 15,
-    checkCacheControl = true,
+    softTtlMinutes = 15,
+    checkCacheControlHeader = false,
+    checkAuthorizationHeader = false,
   }: PackageHttpCacheProviderOptions) {
     super();
     this.namespace = namespace;
-    const { softTtlMinutes, hardTtlMinutes } = resolveTtlValues(
-      this.namespace,
-      ttlMinutes,
-    );
-    this.softTtlMinutes = softTtlMinutes;
-    this.hardTtlMinutes = hardTtlMinutes;
-    this.checkCacheControl = checkCacheControl;
+    const ttl = resolveTtlValues(this.namespace, softTtlMinutes);
+    this.softTtlMinutes = ttl.softTtlMinutes;
+    this.hardTtlMinutes = ttl.hardTtlMinutes;
+    this.checkCacheControlHeader = checkCacheControlHeader;
+    this.checkAuthorizationHeader = checkAuthorizationHeader;
   }
 
   async load(url: string): Promise<unknown> {
@@ -72,32 +74,41 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     return cached.httpResponse as HttpResponse<T>;
   }
 
-  private preventCaching<T>(resp: HttpResponse<T>): boolean {
-    const cachePrivatePackages = GlobalConfig.get(
+  cacheAllowed<T>(resp: HttpResponse<T>): boolean {
+    const allowedViaGlobalConfig = GlobalConfig.get(
       'cachePrivatePackages',
       false,
     );
-    if (cachePrivatePackages) {
+    if (allowedViaGlobalConfig) {
+      return true;
+    }
+
+    if (
+      this.checkCacheControlHeader &&
+      is.string(resp.headers['cache-control'])
+    ) {
+      const isPublic = resp.headers['cache-control']
+        .toLocaleLowerCase()
+        .split(regEx(/\s*,\s*/))
+        .includes('public');
+
+      if (!isPublic) {
+        return false;
+      }
+    }
+
+    if (this.checkAuthorizationHeader && resp.authorization) {
       return false;
     }
 
-    if (!this.checkCacheControl) {
-      return false;
-    }
-
-    const isPublic = resp.headers?.['cache-control']
-      ?.toLocaleLowerCase()
-      .split(regEx(/\s*,\s*/))
-      .includes('public');
-
-    return !isPublic;
+    return true;
   }
 
   override async wrapServerResponse<T>(
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200 && this.preventCaching(resp)) {
+    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
       return resp;
     }
 

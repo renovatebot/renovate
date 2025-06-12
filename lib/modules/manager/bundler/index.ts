@@ -23,7 +23,7 @@ export const url = 'https://bundler.io/docs.html';
 export const categories: Category[] = ['ruby'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)Gemfile$'],
+  managerFilePatterns: ['/(^|/)Gemfile$/'],
   versioning: rubyVersioning.id,
 };
 

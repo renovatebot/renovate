@@ -2,7 +2,6 @@ import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
   UpdateType,
-  UserEnv,
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
@@ -15,6 +14,7 @@ import type {
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
+import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -46,7 +46,6 @@ export interface UpdateArtifactsConfig {
   newMajor?: number;
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
-  env?: UserEnv;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -101,6 +100,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
@@ -165,6 +165,14 @@ export interface PackageDependency<T = Record<string, any>>
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
+
+  /**
+   * override data source's default strategy.
+   */
+  registryStrategy?: RegistryStrategy;
+
+  mostRecentTimestamp?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {

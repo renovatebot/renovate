@@ -1,4 +1,3 @@
-import AggregateError from 'aggregate-error';
 import * as _packageCache from '../../../util/cache/package';
 import type { Timestamp } from '../../../util/timestamp';
 import type { GithubGraphqlResponse } from '../../http/github';
@@ -194,7 +193,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       )) as AggregateError;
 
       expect(res).toBeInstanceOf(AggregateError);
-      expect([...res]).toEqual([
+      expect(res.errors).toEqual([
         new Error('first error'),
         new Error('second error'),
       ]);

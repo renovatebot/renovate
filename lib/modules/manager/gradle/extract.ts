@@ -40,7 +40,10 @@ function updatePackageRegistries(
   for (const url of urls) {
     const registryAlreadyKnown = packageRegistries.some(
       (item) =>
-        item.registryUrl === url.registryUrl && item.scope === url.scope,
+        item.registryUrl === url.registryUrl &&
+        item.scope === url.scope &&
+        item.registryType === url.registryType &&
+        item.content === url.content,
     );
     if (!registryAlreadyKnown) {
       packageRegistries.push(url);
@@ -137,10 +140,18 @@ function getRegistryUrlsForDep(
 ): string[] {
   const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
 
-  const registryUrls = packageRegistries
-    .filter((item) => item.scope === scope)
-    .filter((item) => matchesContentDescriptor(dep, item.content))
-    .map((item) => item.registryUrl);
+  const matchingRegistries = packageRegistries.filter(
+    (item) =>
+      item.scope === scope && matchesContentDescriptor(dep, item.content),
+  );
+
+  const exclusiveRegistries = matchingRegistries.filter(
+    (item) => item.registryType === 'exclusive',
+  );
+
+  const registryUrls = (
+    exclusiveRegistries.length ? exclusiveRegistries : matchingRegistries
+  ).map((item) => item.registryUrl);
 
   if (!registryUrls.length && scope === 'plugin') {
     registryUrls.push(REGISTRY_URLS.gradlePluginPortal);
@@ -255,19 +266,15 @@ export async function extractAllPackageFiles(
         };
       }
 
-      if (!dep.datasource) {
-        dep.datasource = mavenDatasource;
-      }
+      dep.datasource ??= mavenDatasource;
 
       if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
-        if (!dep.depType) {
-          dep.depType =
-            key.startsWith('buildSrc') && !kotlinSourceFiles.length
-              ? 'devDependencies'
-              : 'dependencies';
-        }
+        dep.depType ??=
+          key.startsWith('buildSrc') && !kotlinSourceFiles.length
+            ? 'devDependencies'
+            : 'dependencies';
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(

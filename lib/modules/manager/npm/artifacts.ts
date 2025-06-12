@@ -71,7 +71,6 @@ export async function updateArtifacts({
       },
     ],
     docker: {},
-    userConfiguredEnv: config.env,
   };
 
   await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);

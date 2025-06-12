@@ -10,10 +10,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { Result } from '../../../util/result';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { pickConfig } from './lockfile';
-import { LockfileYaml } from './schema';
+import { getUserPixiConfig } from './extract';
 
 export const commandLock = 'pixi lock --no-progress --color=never --quiet';
 
@@ -41,8 +39,10 @@ export async function updateArtifacts({
 
   const cmd = [commandLock];
 
+  const pixiConfig = getUserPixiConfig(newPackageFileContent, packageFileName);
+
   const constraint =
-    config.constraints?.pixi ?? getPixiConstraint(existingLockFileContent);
+    config.constraints?.pixi ?? pixiConfig?.project['requires-pixi'];
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -61,7 +61,6 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      userConfiguredEnv: config.env,
       toolConstraints: [{ toolName: 'pixi', constraint }],
     };
     await exec(cmd, execOptions);
@@ -89,18 +88,9 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: `${err}\n${String(err.stdout)}\n${String(err.stderr)}`,
+          stderr: `${err}`,
         },
       },
     ];
   }
-}
-
-function getPixiConstraint(
-  existingLockFileContent: string,
-): string | undefined {
-  const { val } = Result.parse(existingLockFileContent, LockfileYaml).unwrap();
-  const cfg = pickConfig(val?.version);
-
-  return cfg?.range ?? undefined;
 }

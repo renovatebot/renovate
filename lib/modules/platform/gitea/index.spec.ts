@@ -555,6 +555,26 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
+    it('should fall back to merge method "fast-forward"', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          allow_rebase: false,
+          allow_fast_forward_only_merge: true,
+        });
+      await initFakePlatform(scope);
+
+      await gitea.initRepo(initRepoCfg);
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          mergeMethod: 'fast-forward',
+        }),
+      );
+    });
+
     it('should fall back to merge method "rebase-merge"', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -1465,6 +1485,61 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo(scope);
 
       const res = await gitea.findPr({ branchName: 'missing' });
+
+      expect(res).toBeNull();
+    });
+
+    it('finds pr from other authors using base and head', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls/some-base-branch/some-head-branch')
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          head: {
+            label: 'some-head-branch',
+            sha: mockCommitHash,
+            repo: partial<Repo>({ full_name: mockRepo.full_name }),
+          },
+          base: {
+            ref: 'some-base-branch',
+          },
+          title: 'from other author',
+          body: 'pr-body',
+          mergeable: true,
+          created_at: '2014-04-01T05:14:20Z',
+          updated_at: '2017-12-28T12:17:48Z',
+        });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res = await gitea.findPr({
+        branchName: 'some-head-branch',
+        targetBranch: 'some-base-branch',
+        includeOtherAuthors: true,
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        sourceBranch: 'some-head-branch',
+        targetBranch: 'some-base-branch',
+        title: 'from other author',
+      });
+    });
+
+    it('returns null if cannot find pr from other author', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls/some-base-branch/some-head-branch')
+        .reply(404);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res = await gitea.findPr({
+        branchName: 'some-head-branch',
+        targetBranch: 'some-base-branch',
+        includeOtherAuthors: true,
+      });
 
       expect(res).toBeNull();
     });

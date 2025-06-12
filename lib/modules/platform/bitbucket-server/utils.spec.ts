@@ -121,7 +121,6 @@ describe('modules/platform/bitbucket-server/utils', () => {
 
   describe('getRepoGitUrl', () => {
     Object.entries(scenarios).forEach(([scenarioName, url]) => {
-      // eslint-disable-next-line vitest/valid-title
       describe(scenarioName, () => {
         const username = 'abc';
         const password = '123';

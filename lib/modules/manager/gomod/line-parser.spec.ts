@@ -299,4 +299,76 @@ describe('modules/manager/gomod/line-parser', () => {
       skipReason: 'local-dependency',
     });
   });
+
+  it('should parse tool definition', () => {
+    const line = 'tool foo/foo';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'tool',
+      skipReason: 'unversioned-reference',
+    });
+  });
+
+  it('should parse tool multi-line', () => {
+    const line = '        foo/foo';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'tool',
+      managerData: {
+        multiLine: true,
+      },
+      skipReason: 'unversioned-reference',
+    });
+  });
+
+  it('should parse tool definition with quotes', () => {
+    const line = 'tool "foo/foo"';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'tool',
+      skipReason: 'unversioned-reference',
+    });
+  });
+
+  it('should parse go tool without paths - 1', () => {
+    const line = 'tool tailscale.com';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'tailscale.com',
+      depType: 'tool',
+      skipReason: 'unversioned-reference',
+    });
+  });
+
+  it('should parse go tool without paths - 2', () => {
+    const line = 'tool foo.tailscale.com';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'foo.tailscale.com',
+      depType: 'tool',
+      skipReason: 'unversioned-reference',
+    });
+  });
+
+  it('should parse tool multi-line definition with quotes', () => {
+    const line = '        "foo/foo"';
+    const res = parseLine(line);
+    expect(res).toStrictEqual({
+      datasource: 'go',
+      depName: 'foo/foo',
+      depType: 'tool',
+      managerData: {
+        multiLine: true,
+      },
+      skipReason: 'unversioned-reference',
+    });
+  });
 });
