@@ -1027,13 +1027,11 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(
-  branchName: string,
-): Promise<string[] | null> {
+export function getBranchFiles(branchName: string): Promise<string[] | null> {
   return getBranchFilesFromRef(`origin/${branchName}`);
 }
 
-export async function getBranchFilesFromCommit(
+export function getBranchFilesFromCommit(
   referenceCommit: LongCommitSha,
 ): Promise<string[] | null> {
   return getBranchFilesFromRef(referenceCommit);

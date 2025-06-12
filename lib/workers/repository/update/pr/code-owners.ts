@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import ignore from 'ignore';
+import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles, getBranchFilesFromCommit } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
-import { GlobalConfig } from '../../../../config/global';
 
 interface FileOwnersScore {
   file: string;

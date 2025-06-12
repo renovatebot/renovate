@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
+import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
 import * as gitlab from '../../../../modules/platform/gitlab';
+import type { LongCommitSha } from '../../../../util/git/types';
 import { codeOwnersForPr } from './code-owners';
 import { fs, git, platform } from '~test/util';
-import { GlobalConfig } from '../../../../config/global';
-import { LongCommitSha } from '../../../../util/git/types';
 
 vi.mock('../../../../util/fs');
 

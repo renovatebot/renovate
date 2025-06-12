@@ -12,7 +12,7 @@ import { newlineRegex, regEx } from '../regex';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
-import type { FileChange, LongCommitSha } from './types';
+import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
 import { logger } from '~test/util';
@@ -452,9 +452,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         ],
         message: 'Create something',
       });
-      const branchFiles = await git.getBranchFilesFromCommit(
-        sha as LongCommitSha,
-      );
+      const branchFiles = await git.getBranchFilesFromCommit(sha!);
       expect(branchFiles).toEqual(['some-new-file']);
     });
   });
