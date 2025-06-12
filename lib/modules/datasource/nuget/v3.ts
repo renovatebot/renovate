@@ -23,7 +23,6 @@ import { massageUrl, removeBuildMeta, sortNugetVersions } from './common';
 import type {
   CatalogEntry,
   CatalogPage,
-  Deprecation,
   PackageRegistration,
   ServicesIndexRaw,
 } from './types';
@@ -186,10 +185,7 @@ export class NugetV3Api {
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);
           if (deprecation) {
-            deprecationMessage = this.getDeprecationMessage(
-              pkgName,
-              deprecation,
-            );
+            deprecationMessage = this.getDeprecationMessage(pkgName);
           }
         }
 
@@ -210,12 +206,9 @@ export class NugetV3Api {
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
       nupkgUrl ??= massageUrl(last.packageContent);
-           /* v8 ignore start */
+      /* v8 ignore start */
       if (last.deprecation) {
-        deprecationMessage ??= this.getDeprecationMessage(
-          pkgName,
-          last.deprecation,
-        );
+        deprecationMessage ??= this.getDeprecationMessage(pkgName);
       }
       /* v8 ignore stop */
     }
@@ -338,18 +331,7 @@ export class NugetV3Api {
     }
   }
 
-  getDeprecationMessage(packageName: string, deprecation: Deprecation): string {
-    const reasons = deprecation.reasons.map((reason) => {
-      switch (reason.toLowerCase()) {
-        case 'legacy':
-          return 'is no longer maintained';
-        case 'criticalbugs':
-          return 'has bugs which make it unsuitable for usage';
-        default:
-          return 'is deprecated due to other reasons';
-      }
-    });
-    const reason = reasons.join(', ');
-    return `The package \`${packageName}\` ${reason}.`;
+  getDeprecationMessage(packageName: string): string {
+    return `The package \`${packageName}\` is deprecated.`;
   }
 }
