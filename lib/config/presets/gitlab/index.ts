@@ -87,7 +87,7 @@ export function extractFilenameFromGitLabPath(fileName: string): string {
     }
 
     // Extract filename from the path
-    return pathWithoutQuery.split('/').slice(-1)[0];
+    return pathWithoutQuery.split('/').pop();
   }
 
   // Return as is - should be a normal filename with extension
