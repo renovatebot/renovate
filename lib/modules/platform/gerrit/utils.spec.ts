@@ -49,15 +49,15 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapPrStateToGerritFilter()', () => {
     it.each([
-      ['closed', 'status:closed'],
+      ['closed', 'status:abandoned'],
       ['merged', 'status:merged'],
       ['!open', '-status:open'],
       ['open', 'status:open'],
-      ['all', '-is:wip'],
-      [undefined, '-is:wip'],
+      ['all', null],
+      [undefined, null],
     ])(
       'maps pr state %p to gerrit filter %p',
-      (prState: any, filter: string) => {
+      (prState: any, filter: string | null) => {
         expect(utils.mapPrStateToGerritFilter(prState)).toEqual(filter);
       },
     );
@@ -68,7 +68,7 @@ describe('modules/platform/gerrit/utils', () => {
       ['NEW' as GerritChangeStatus, 'open'],
       ['MERGED' as GerritChangeStatus, 'merged'],
       ['ABANDONED' as GerritChangeStatus, 'closed'],
-      ['unknown' as GerritChangeStatus, 'all'],
+      ['unknown' as GerritChangeStatus, undefined],
     ])(
       'maps gerrit change state %p to PrState %p',
       (state: GerritChangeStatus, prState: any) => {
@@ -87,16 +87,12 @@ describe('modules/platform/gerrit/utils', () => {
         created: '2025-04-14 16:33:37.000000000',
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
-          REMOVED: [],
-          CC: [],
         },
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            },
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
         messages: [
@@ -128,25 +124,116 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody('Last PR-Body'),
         },
+        sha: 'abc',
       });
     });
 
-    it('map a gerrit change without source branch info and reviewers to Pr', () => {
+    it('map a gerrit change without reviewers to Pr', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
+        reviewers: {},
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
         state: 'open',
         title: 'Fix for',
-        sourceBranch: 'main',
+        sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: [],
+        sha: 'abc',
         bodyStruct: {
           hash: hashBody(''),
+        },
+      });
+    });
+
+    it('does not map a gerrit change without source branch to Pr', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(utils.mapGerritChangeToPr(change)).toBeNull();
+    });
+
+    it('does not reject a broken commit message if knownProperties.sourceBranch is passed', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(
+        utils.mapGerritChangeToPr(change, {
+          sourceBranch: 'renovate/dependency-1.x',
+        }),
+      ).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'renovate/dependency-1.x',
+        targetBranch: 'main',
+        reviewers: [],
+        sha: 'abc',
+        bodyStruct: {
+          hash: hashBody(''),
+        },
+      });
+    });
+
+    it('avoids iterating through change messages knownProperties.prBody is passed', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(
+        utils.mapGerritChangeToPr(change, {
+          prBody: 'PR Body',
+        }),
+      ).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'renovate/dependency-1.x',
+        targetBranch: 'main',
+        reviewers: [],
+        sha: 'abc',
+        bodyStruct: {
+          hash: hashBody('PR Body'),
         },
       });
     });
@@ -163,9 +250,7 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
+            commit_with_footers: 'some message...',
           }),
         },
       });
@@ -177,10 +262,8 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            },
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
       });
