@@ -249,7 +249,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.2",
-    "simple-git": "3.27.0",
+    "simple-git": "3.28.0",
     "slugify": "1.6.6",
     "source-map-support": "0.5.21",
     "toml-eslint-parser": "0.10.0",
