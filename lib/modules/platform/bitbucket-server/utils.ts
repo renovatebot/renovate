@@ -140,7 +140,7 @@ export function getRepoGitUrl(
   return cloneUrl.href;
 }
 
-export function getExtraCloneOpts(opts: HostRule): GitOptions {
+export function getExtraGitOpts(opts: HostRule): GitOptions {
   if (opts.token) {
     return {
       '-c': `http.extraheader=Authorization: Bearer ${opts.token}`,

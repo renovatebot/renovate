@@ -931,6 +931,36 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
+
+    it('should use extra git configuration', async () => {
+      await fs.emptyDir(tmpDir.path);
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({
+        url: origin.path,
+        extraGitOptions: {
+          '-c': 'extra.git.config=test-extra-config-value',
+        },
+        fullClone: true,
+      });
+      git.getBranchCommit(defaultBranch);
+      await git.syncGit();
+      expect(rawSpy).nthCalledWith(1, [
+        '-c',
+        'extra.git.config=test-extra-config-value',
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
+      expect(rawSpy).nthCalledWith(2, [
+        '-c',
+        'extra.git.config=test-extra-config-value',
+        'clone',
+        origin.path,
+        '.',
+      ]);
+    });
   });
 
   describe('setGitAuthor()', () => {
