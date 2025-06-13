@@ -96,6 +96,7 @@ YAML files are parsed as multi document files, even those that have only one doc
 To show how the JSONata manager parses YAML, below is an example YAML file and the corresponding parsing to JSON.
 
 YAML:
+
 ```yaml title="Example multi document YAML file"
 production:
   packages:
@@ -111,6 +112,7 @@ development:
 ```
 
 JSON:
+
 ```json title="Example JSON parsing"
 [
   {
