@@ -129,6 +129,7 @@ Forking Renovate needs only `read` level access to the code of any repository it
 If you use Forking Renovate, you'll miss out on these features of the regular Renovate app:
 
 - Automerge
+- The `baseBranchPatterns` config option
 
 ### Hosting Renovate
 
