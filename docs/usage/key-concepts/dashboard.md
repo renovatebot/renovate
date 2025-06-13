@@ -74,11 +74,6 @@ Renovate includes the `abandonments:recommended` preset (automatically included 
 - Includes community-sourced overrides for packages that appear abandoned but are still maintained
 - Prevents updates to truly abandoned packages while allowing updates to packages with irregular release schedules
 
-**Key overrides:**
-
-- `@types/*` packages (npm): Set to `eternal` - TypeScript definitions don't need frequent releases
-- `lodash` (npm): Set to `6 years` - Maintainers still respond to security issues despite infrequent releases
-
 **Usage:**
 
 ```json
