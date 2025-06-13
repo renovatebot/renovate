@@ -234,5 +234,22 @@ describe('logger/utils', () => {
         name: 'TimeoutError',
       });
     });
+
+    it('handles AggregateError', () => {
+      const err = new Error('err');
+      err.stack = 'err stack';
+      const aggregateErr = new AggregateError([err], 'aggregate');
+      aggregateErr.stack = 'aggregate stack';
+      expect(prepareError(aggregateErr)).toMatchObject({
+        message: 'aggregate',
+        stack: 'aggregate stack',
+        errors: [
+          {
+            message: 'err',
+            stack: 'err stack',
+          },
+        ],
+      });
+    });
   });
 });
