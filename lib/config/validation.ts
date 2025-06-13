@@ -76,13 +76,6 @@ const ignoredNodes = [
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
-function isManagerPath(parentPath: string): boolean {
-  return (
-    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
-    managerList.includes(parentPath)
-  );
-}
-
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -218,19 +211,6 @@ export async function validateConfig(
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
             ', ',
           )}"`,
-        });
-      }
-    }
-    if (key === 'managerFilePatterns') {
-      if (parentPath === undefined) {
-        errors.push({
-          topic: 'Config error',
-          message: `"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block`,
-        });
-      } else if (!isManagerPath(parentPath)) {
-        warnings.push({
-          topic: 'Config warning',
-          message: `"managerFilePatterns" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
