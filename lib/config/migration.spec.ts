@@ -53,6 +53,7 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         trustLevel: 'high',
+        updateLockFiles: false,
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
