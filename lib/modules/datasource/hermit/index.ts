@@ -1,4 +1,4 @@
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { GithubRestRelease } from '../../../util/github/types';
 import { getApiBaseUrl } from '../../../util/github/url';
@@ -54,7 +54,10 @@ export class HermitDatasource extends Datasource {
     logger.trace(`HermitDataSource.getReleases()`);
 
     if (!registryUrl) {
-      logger.error('registryUrl must be supplied');
+      logError('DATASOURCE_REGISTRY_URL_MISSING', {
+        datasource: this.id,
+        method: 'getReleases',
+      });
       return null;
     }
 
