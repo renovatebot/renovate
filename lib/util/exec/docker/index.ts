@@ -171,6 +171,13 @@ export async function removeDanglingContainers(): Promise<void> {
     return;
   }
 
+  if (process.env.RENOVATE_X_SKIP_DANGLING_CONTAINERS) {
+    logger.debug(
+      'Skipping removal of dangling containers due to RENOVATE_X_SKIP_DANGLING_CONTAINERS env var',
+    );
+    return;
+  }
+
   try {
     const containerLabel = getContainerLabel(
       GlobalConfig.get('dockerChildPrefix'),
