@@ -300,6 +300,7 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: lib
     },
     {
       "version": "0.2.51",
+      "versionOrig": "0.2.51+metadata",
     },
   ],
   "sourceUrl": "https://github.com/rust-lang/libc",
