@@ -2183,6 +2183,46 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
     });
 
+    it('auto-accepts the MR over Notes API when requested', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .post('/api/v4/projects/undefined/merge_requests/12345/notes')
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            gitLabNotesMerge: true,
+          },
+        }),
+      ).toMatchObject({
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
+    });
+
     it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
       await initPlatform('13.3.6-ee');
       const reply_body = {
