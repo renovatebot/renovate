@@ -1,5 +1,7 @@
+import crypto from 'crypto';
 // TODO #22198
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
@@ -8,8 +10,10 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
+  privateCacheDir,
   readLocalFile,
   writeLocalFile,
+  writeSystemFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -42,6 +46,7 @@ export async function postUpgradeCommandsExecutor(
       `Checking for post-upgrade tasks`,
     );
     const commands = upgrade.postUpgradeTasks?.commands;
+    const dataFileTemplate = upgrade.postUpgradeTasks?.dataFileTemplate;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
@@ -61,6 +66,38 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
+      let dataFilePath = '';
+      if (dataFileTemplate) {
+        const dataFileContent = compile(
+          dataFileTemplate,
+          mergeChildConfig(config, upgrade),
+        );
+        logger.debug(
+          { dataFileTemplate },
+          'Processed post-upgrade commands data file template.',
+        );
+
+        const dataFileName = `post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
+        dataFilePath = upath.join(privateCacheDir(), dataFileName);
+
+        try {
+          await writeSystemFile(dataFilePath, dataFileContent);
+
+          logger.debug(
+            { dataFilePath, dataFileContent },
+            'Created post-upgrade commands data file.',
+          );
+        } catch (error) {
+          dataFilePath = '';
+
+          artifactErrors.push({
+            stderr: sanitize(
+              `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
+            ),
+          });
+        }
+      }
+
       for (const cmd of commands) {
         const compiledCmd = compile(cmd, mergeChildConfig(config, upgrade));
         if (compiledCmd !== cmd) {
@@ -76,6 +113,7 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
+              env: { RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath },
             });
 
             logger.debug(
