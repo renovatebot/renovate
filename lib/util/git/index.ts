@@ -26,7 +26,6 @@ import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { getEnv } from '../env';
 import { newlineRegex, regEx } from '../regex';
-import { matchRegexOrGlobList } from '../string-match';
 import { parseGitAuthor } from './author';
 import {
   getCachedBehindBaseResult,
@@ -368,6 +367,13 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
+  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
+  const gitEnv = {
+    // pass all existing env variables
+    ...process.env,
+    // add all known git variables
+    ...gitSubmoduleAuthEnvironmentVariables,
+  };
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -381,7 +387,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.submoduleUpdate(['--init', '--recursive', submodule]),
+        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
