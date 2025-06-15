@@ -1,0 +1,11 @@
+import type { Category } from '../../../constants';
+import { Unity3dDatasource } from '../../datasource/unity3d';
+export { extractPackageFile } from './extract';
+
+export const defaultConfig = {
+  managerFilePatterns: ['/(^|/)ProjectSettings/ProjectVersion\\.txt$/'],
+};
+
+export const categories: Category[] = ['unity3d'];
+
+export const supportedDatasources = [Unity3dDatasource.id];
