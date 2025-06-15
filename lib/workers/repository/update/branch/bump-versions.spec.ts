@@ -119,6 +119,45 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
+    it('should noop if no files are matching', async () => {
+      const compile = vi.spyOn(templates, 'compile');
+      compile.mockReturnValueOnce('foo');
+      compile.mockReturnValueOnce('^(?<version>.+)$');
+      const config = partial<BranchConfig>({
+        bumpVersions: [
+          {
+            filePatterns: ['foo'],
+            bumpType: 'minor',
+            matchStrings: ['^(?<version>.+)$'],
+          },
+        ],
+        artifactErrors: [],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: '1.0.0',
+          },
+        ],
+        updatedArtifacts: [],
+      });
+      scm.getFileList.mockResolvedValueOnce(['bar']);
+
+      await bumpVersions(config);
+
+      expect(config).toMatchObject({
+        artifactErrors: [],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: '1.0.0',
+          },
+        ],
+        updatedArtifacts: [],
+      });
+    });
+
     it('should catch template error in bumpType', async () => {
       const compile = vi.spyOn(templates, 'compile');
       compile.mockReturnValueOnce('foo');
