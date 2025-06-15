@@ -6,9 +6,11 @@ import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { GitOptions, GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
+import type { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
+import type { RestDetailedUser } from './schema';
 import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
@@ -147,4 +149,20 @@ export function getExtraCloneOpts(opts: HostRule): GitOptions {
     };
   }
   return {};
+}
+
+// https://docs.atlassian.com/bitbucket-server/rest/5.1.0/bitbucket-rest.html#idm45588158982432
+export async function resolveEmailToUsername(
+  http: BitbucketServerHttp,
+  email: string,
+): Promise<string | null> {
+  // GET /rest/api/1.0/admin/users?filter={filter}
+  const users = (
+    await http.getJsonUnchecked<RestDetailedUser[]>(
+      `./rest/api/1.0/admin/users?filter=${email}`,
+      { paginate: true },
+    )
+  ).body;
+
+  return users[0].name ?? null;
 }
