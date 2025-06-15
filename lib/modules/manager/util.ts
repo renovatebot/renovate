@@ -21,7 +21,9 @@ export function applyGitSource(
           ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
       const { protocol, source, full_name } = parseGitUrl(git);
-      dep.registryUrls = [`${protocol}://${source}`];
+      dep.registryUrls = [
+        `${protocol === 'ssh' ? 'https' : protocol}://${source}`,
+      ];
       dep.packageName = full_name;
     } else {
       dep.datasource = GitTagsDatasource.id;
