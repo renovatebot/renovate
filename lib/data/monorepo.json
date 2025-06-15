@@ -453,6 +453,7 @@
       "https://github.com/nuxt/nuxt"
     ],
     "okhttp": "https://github.com/square/okhttp",
+    "openapi-dotnet": "https://github.com/microsoft/OpenAPI.NET",
     "opencost": [
       "https://github.com/opencost/opencost",
       "https://github.com/opencost/opencost-ui"
