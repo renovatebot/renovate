@@ -93,7 +93,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 
 function createSchemaForParentConfigs(): void {
   for (const option of options) {
-    if (!option.parents) {
+    if (!option.parents || option.parents.includes('.')) {
       properties[option.name] = createSingleConfig(option);
     }
   }
@@ -101,35 +101,47 @@ function createSchemaForParentConfigs(): void {
 
 function addChildrenArrayInParents(): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents) {
-        properties[parent].items = {
-          allOf: [
-            {
-              type: 'object',
-              properties: {
-                description: {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                        description:
-                          'A custom description for this configuration object',
-                      },
+    try {
+      if (option.parents) {
+        for (const parent of option.parents.filter(
+          (parent) => parent !== '.',
+        )) {
+          try {
+            properties[parent].items = {
+              allOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    description: {
+                      oneOf: [
+                        {
+                          type: 'array',
+                          items: {
+                            type: 'string',
+                            description:
+                              'A custom description for this configuration object',
+                          },
+                        },
+                        {
+                          type: 'string',
+                          description:
+                            'A custom description for this configuration object',
+                        },
+                      ],
                     },
-                    {
-                      type: 'string',
-                      description:
-                        'A custom description for this configuration object',
-                    },
-                  ],
+                  },
                 },
-              },
-            },
-          ],
-        };
+              ],
+            };
+          } catch (err) {
+            console.log({ parent });
+            throw err;
+          }
+        }
       }
+    } catch (err) {
+      console.log({ option });
+      throw err;
     }
   }
 }
@@ -137,7 +149,7 @@ function addChildrenArrayInParents(): void {
 function createSchemaForChildConfigs(): void {
   for (const option of options) {
     if (option.parents) {
-      for (const parent of option.parents) {
+      for (const parent of option.parents.filter((parent) => parent !== '.')) {
         properties[parent].items.allOf[0].properties[option.name] =
           createSingleConfig(option);
       }
