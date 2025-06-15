@@ -101,47 +101,35 @@ function createSchemaForParentConfigs(): void {
 
 function addChildrenArrayInParents(): void {
   for (const option of options) {
-    try {
-      if (option.parents) {
-        for (const parent of option.parents.filter(
-          (parent) => parent !== '.',
-        )) {
-          try {
-            properties[parent].items = {
-              allOf: [
-                {
-                  type: 'object',
-                  properties: {
-                    description: {
-                      oneOf: [
-                        {
-                          type: 'array',
-                          items: {
-                            type: 'string',
-                            description:
-                              'A custom description for this configuration object',
-                          },
-                        },
-                        {
-                          type: 'string',
-                          description:
-                            'A custom description for this configuration object',
-                        },
-                      ],
+    if (option.parents) {
+      for (const parent of option.parents.filter((parent) => parent !== '.')) {
+        properties[parent].items = {
+          allOf: [
+            {
+              type: 'object',
+              properties: {
+                description: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'A custom description for this configuration object',
+                      },
                     },
-                  },
+                    {
+                      type: 'string',
+                      description:
+                        'A custom description for this configuration object',
+                    },
+                  ],
                 },
-              ],
-            };
-          } catch (err) {
-            console.log({ parent });
-            throw err;
-          }
-        }
+              },
+            },
+          ],
+        };
       }
-    } catch (err) {
-      console.log({ option });
-      throw err;
     }
   }
 }
