@@ -195,6 +195,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
 }
