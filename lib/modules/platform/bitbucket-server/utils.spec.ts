@@ -7,7 +7,7 @@ import type {
 } from './types';
 import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
-  getExtraCloneOpts,
+  getExtraGitOpts,
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils';
@@ -289,14 +289,14 @@ describe('modules/platform/bitbucket-server/utils', () => {
     });
   });
 
-  describe('getExtraCloneOpts', () => {
+  describe('getExtraGitOpts', () => {
     it('should not configure bearer token', () => {
-      const res = getExtraCloneOpts({});
+      const res = getExtraGitOpts({});
       expect(res).toEqual({});
     });
 
     it('should configure bearer token', () => {
-      const res = getExtraCloneOpts({ token: 'abc' });
+      const res = getExtraGitOpts({ token: 'abc' });
       expect(res).toEqual({
         '-c': 'http.extraheader=Authorization: Bearer abc',
       });

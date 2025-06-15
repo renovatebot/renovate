@@ -437,25 +437,36 @@ export async function syncGit(): Promise<void> {
   if (clone) {
     const cloneStart = Date.now();
     try {
-      const opts: string[] = [];
+      const cloneOpts: string[] = [];
       if (config.defaultBranch) {
-        opts.push('-b', config.defaultBranch);
+        cloneOpts.push('-b', config.defaultBranch);
       }
       if (config.fullClone) {
         logger.debug('Performing full clone');
       } else {
         logger.debug('Performing blobless clone');
-        opts.push('--filter=blob:none');
+        cloneOpts.push('--filter=blob:none');
       }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           // TODO: types (#22198)
-          opts.push(e[0], `${e[1]!}`),
+          cloneOpts.push(e[0], `${e[1]!}`),
+        );
+      }
+      const gitOpts: string[] = [];
+      if (config.extraGitOptions) {
+        Object.entries(config.extraGitOptions).forEach((e) =>
+          // TODO: types (#22198)
+          gitOpts.push(e[0], `${e[1]!}`),
         );
       }
       const emptyDirAndClone = async (): Promise<void> => {
         await fs.emptyDir(localDir);
-        await git.clone(config.url, '.', opts);
+        const commandArgs: string[] = ['clone'];
+        commandArgs.unshift(...gitOpts);
+        commandArgs.push(...cloneOpts);
+        commandArgs.push(config.url, '.');
+        await git.raw(commandArgs);
       };
       await gitRetry(() => emptyDirAndClone());
       /* v8 ignore next 10 -- TODO: add test */
