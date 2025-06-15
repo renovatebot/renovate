@@ -32,6 +32,7 @@
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
+    "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
     "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
@@ -299,6 +300,7 @@
     "embla-carousel": "https://github.com/davidjerleke/embla-carousel",
     "emojibase": "https://github.com/milesj/emojibase",
     "emotion": "https://github.com/emotion-js/emotion",
+    "enumeratum": "https://github.com/lloydmeta/enumeratum",
     "envelop": "https://github.com/n1ru4l/envelop",
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
@@ -452,6 +454,7 @@
       "https://github.com/nuxt/nuxt"
     ],
     "okhttp": "https://github.com/square/okhttp",
+    "openapi-dotnet": "https://github.com/microsoft/OpenAPI.NET",
     "opencost": [
       "https://github.com/opencost/opencost",
       "https://github.com/opencost/opencost-ui"
@@ -486,6 +489,7 @@
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
     "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
+    "polly": "https://github.com/App-vNext/Polly",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
