@@ -199,6 +199,7 @@ export async function lookupUpdates(
         'registryUrl',
         'sourceDirectory',
         'homepage',
+        'changelogContent',
         'changelogUrl',
         'dependencyUrl',
         'lookupName',
@@ -759,6 +760,15 @@ export async function lookupUpdates(
           res.updates.length === 1 ||
           /* istanbul ignore next */ update.updateType !== 'rollback',
       );
+    }
+
+    const release = dependency?.releases.find(
+      (r) => r.version === res.updates[0].newValue,
+    );
+
+    if (release?.changelogContent) {
+      res.changelogContent = release.changelogContent;
+      res.changelogUrl = release.changelogUrl;
     }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
