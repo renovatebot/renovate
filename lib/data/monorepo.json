@@ -487,6 +487,7 @@
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
     "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
+    "polly": "https://github.com/App-vNext/Polly",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
