@@ -21,6 +21,9 @@ const packageCache = vi.mocked(_packageCache);
 const pkgInfoV3FromNuget = Fixtures.get('nunit/v3_nuget_org.xml');
 const pkgListV3Registration = Fixtures.get('nunit/v3_registration.json');
 
+const pkgInfoV3Deprecated = Fixtures.get('proxykit/v3.xml');
+const pkgListV3Deprecated = Fixtures.get('proxykit/v3_registration.json');
+
 const pkgListV2 = Fixtures.get('nunit/v2.xml');
 const pkgListV2NoGitHubProjectUrl = Fixtures.get(
   'nunit/v2_noGitHubProjectUrl.xml',
@@ -106,6 +109,13 @@ const configV3AzureDevOps = {
   registryUrls: [
     'https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/index.json',
   ],
+};
+
+const configV3Deprecated = {
+  datasource,
+  versioning,
+  packageName: 'ProxyKit',
+  registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 describe('modules/datasource/nuget/index', () => {
@@ -816,6 +826,23 @@ describe('modules/datasource/nuget/index', () => {
         .reply(200, pkgListV2Page2of2);
       const res = await getPkgReleases({
         ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should return deprecated', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndexV3)
+        .get('/v3/registration5-gz-semver2/proxykit/index.json')
+        .reply(200, pkgListV3Deprecated)
+        .get('/v3-flatcontainer/proxykit/2.3.4/proxykit.nuspec')
+        .reply(200, pkgInfoV3Deprecated);
+      const res = await getPkgReleases({
+        ...configV3Deprecated,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
