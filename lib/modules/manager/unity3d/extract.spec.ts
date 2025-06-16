@@ -7,8 +7,8 @@ describe('modules/manager/unity3d/extract', () => {
       'm_EditorVersionWithRevision: ',
       'invalidKey: a',
     ])('handles no version', (content) => {
-      const res = extractPackageFile(content)?.deps;
-      expect(res).toBeUndefined();
+      const res = extractPackageFile(content);
+      expect(res).toBeNull();
     });
 
     it.each([
