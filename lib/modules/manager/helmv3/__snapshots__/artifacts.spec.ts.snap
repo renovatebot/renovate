@@ -123,7 +123,7 @@ exports[`modules/manager/helmv3/artifacts > do not add registryAliases to reposi
 exports[`modules/manager/helmv3/artifacts > log into private registries and repositories NOT defined in registryAliases 1`] = `
 [
   {
-    "cmd": "helm registry login --username registryUser --password password registry.gitlab.com/user/oci-helm-test",
+    "cmd": "helm registry login --username registryUser --password password registry.gitlab.com",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -194,7 +194,7 @@ exports[`modules/manager/helmv3/artifacts > log into private registries and repo
 exports[`modules/manager/helmv3/artifacts > log into private registries and repositories already defined in registryAliases 1`] = `
 [
   {
-    "cmd": "helm registry login --username test --password aPassword registry.example.com/organization",
+    "cmd": "helm registry login --username test --password aPassword registry.example.com",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

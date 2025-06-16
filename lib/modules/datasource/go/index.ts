@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { getEnv } from '../../../util/env';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
@@ -119,9 +120,10 @@ export class GoDatasource extends Datasource {
   }
 }
 
+const env = getEnv();
 /* v8 ignore next 3 -- hard to test */
-if (is.string(process.env.GOPROXY)) {
-  const uri = parseUrl(process.env.GOPROXY);
+if (is.string(env.GOPROXY)) {
+  const uri = parseUrl(env.GOPROXY);
   if (uri?.password) {
     addSecretForSanitizing(uri.password, 'global');
   } else if (uri?.username) {

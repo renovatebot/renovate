@@ -16,7 +16,7 @@ export interface ToolingDefinition {
 
 export const asdfTooling = upgradeableTooling;
 
-export const miseTooling: Record<string, ToolingDefinition> = {
+const miseCoreTooling: Record<string, ToolingDefinition> = {
   bun: {
     misePluginUrl: 'https://mise.jdx.dev/lang/bun.html',
     config: {
@@ -173,4 +173,216 @@ export const miseTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
     },
   },
+};
+
+const miseRegistryTooling: Record<string, ToolingDefinition> = {
+  actionlint: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'rhysd/actionlint',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  astro: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'astronomer/astro-cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  'aws-cli': {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'aws/aws-cli',
+    },
+  },
+  'aws-vault': {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: '99designs/aws-vault',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  buf: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'bufbuild/buf',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ccache: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'ccache/ccache',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  committed: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'crate-ci/committed',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  consul: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'hashicorp/consul',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  hivemind: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'DarthSim/hivemind',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  jq: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'jqlang/jq',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^jq-v(?<version>\\S+)',
+    },
+  },
+  hk: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'jdx/hk',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  kafka: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: (version) => {
+      const apacheMatches = /^apache-(?<version>\d\S+)/.exec(version)?.groups;
+      if (apacheMatches) {
+        return {
+          datasource: GithubTagsDatasource.id,
+          packageName: 'apache/kafka',
+          currentValue: apacheMatches.version,
+        };
+      }
+
+      return undefined;
+    },
+  },
+  lefthook: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'evilmartians/lefthook',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  localstack: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'localstack/localstack',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  opentofu: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'opentofu/opentofu',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  protoc: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'protocolbuffers/protobuf',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  redis: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'redis/redis',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  ruff: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'astral-sh/ruff',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  shellcheck: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'koalaman/shellcheck',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  skeema: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'skeema/skeema',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  sops: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'getsops/sops',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  stripe: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'stripe/stripe-cli',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  terragrunt: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'gruntwork-io/terragrunt',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  tilt: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'tilt-dev/tilt',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  tusd: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'tus/tusd',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+};
+
+export const miseTooling: Record<string, ToolingDefinition> = {
+  ...miseCoreTooling,
+  ...miseRegistryTooling,
 };

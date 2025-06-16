@@ -9,11 +9,12 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getCache } from '../cache/repository';
+import { getEnv } from '../env';
 import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
-import { joinUrlParts, parseLinkHeader } from '../url';
+import { joinUrlParts, parseLinkHeader, parseUrl } from '../url';
 import { findMatchingRule } from './host-rules';
 import {
   HttpBase,
@@ -122,19 +123,26 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (err.statusCode === 401 && message.includes('Bad credentials')) {
-    const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
-    logger.debug(
-      {
-        token: maskToken(opts.token),
-        err,
-      },
-      'GitHub failure: Bad credentials',
-    );
-    if (rateLimit === '60') {
-      return new ExternalHostError(err, 'github');
+  if (err.statusCode === 401) {
+    // Warn once for github.com token if unauthorized
+    const hostname = parseUrl(url)?.hostname;
+    if (hostname === 'github.com' || hostname === 'api.github.com') {
+      logger.once.warn('github.com token 401 unauthorized');
     }
-    return new Error(PLATFORM_BAD_CREDENTIALS);
+    if (message.includes('Bad credentials')) {
+      const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
+      logger.debug(
+        {
+          token: maskToken(opts.token),
+          err,
+        },
+        'GitHub failure: Bad credentials',
+      );
+      if (rateLimit === '60') {
+        return new ExternalHostError(err, 'github');
+      }
+      return new Error(PLATFORM_BAD_CREDENTIALS);
+    }
   }
   if (err.statusCode === 422) {
     if (
@@ -350,19 +358,17 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const pageLimit = httpOptions.pageLimit ?? 10;
       const linkHeader = parseLinkHeader(result?.headers?.link);
       const next = linkHeader?.next;
+      const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
         let lastPage = parseInt(linkHeader.last.page, 10);
-        if (
-          !process.env.RENOVATE_PAGINATE_ALL &&
-          httpOptions.paginate !== 'all'
-        ) {
+        if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
         }
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
         const parsedUrl = new URL(next.url, baseUrl);
         const rebasePagination =
           !!baseUrl &&
-          !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+          !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
           // Preserve github.com URLs for use cases like release notes
           parsedUrl.origin !== 'https://api.github.com';
         const firstPageUrl = rebasePagination

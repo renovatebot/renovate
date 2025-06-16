@@ -1,3 +1,4 @@
+import * as decrypt from '../../../config/decrypt';
 import * as presets_ from '../../../config/presets';
 import type { RenovateConfig } from '../../../config/types';
 import * as validation from '../../../config/validation';
@@ -108,6 +109,41 @@ describe('workers/repository/init/inherited', () => {
       {
         matchHost: 'some-host-url',
         token: 'some-token',
+      },
+    ]);
+    expect(res.hostRules).toBeUndefined();
+  });
+
+  it('should decrypt encrypted values from inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      `{
+        "hostRules": [
+          {
+            "matchHost": "some-host-url",
+            "encrypted": {
+              "token": "some-secret-token"
+            }
+          }
+        ]
+      }`,
+    );
+
+    vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+      hostRules: [
+        {
+          matchHost: 'some-host-url',
+          token: 'some-secret-token',
+        },
+      ],
+    });
+
+    const res = await mergeInheritedConfig({
+      ...config,
+    });
+    expect(hostRules.getAll()).toMatchObject([
+      {
+        matchHost: 'some-host-url',
+        token: 'some-secret-token',
       },
     ]);
     expect(res.hostRules).toBeUndefined();

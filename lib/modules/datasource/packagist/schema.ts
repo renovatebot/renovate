@@ -42,7 +42,7 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z.object({
-  version: z.string(),
+  version: z.union([z.string(), z.number().transform((v) => v.toString())]),
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
   time: MaybeTimestamp,

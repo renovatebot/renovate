@@ -20,7 +20,7 @@ FROM image-python${PYTHON_VERSION}-builder:1.0.0
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ARG PYTHON_VERSION=\"?(?<currentValue>3(?<minor>\\d+))\"?\\s"

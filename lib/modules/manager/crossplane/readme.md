@@ -1,6 +1,6 @@
-To use the `crossplane` manager you must set your own `fileMatch` pattern.
-The `crossplane` manager has no default `fileMatch` pattern, because there is no common filename or directory name convention for Crossplane YAML files.
-By setting your own `fileMatch` Renovate avoids having to check each `*.yaml` file in a repository for a Crossplane Package definition.
+To use the `crossplane` manager you must set your own `managerFilePatterns` pattern.
+The `crossplane` manager has no default `managerFilePatterns` pattern, because there is no common filename or directory name convention for Crossplane YAML files.
+By setting your own `managerFilePatterns` Renovate avoids having to check each `*.yaml` file in a repository for a Crossplane Package definition.
 
 The `crossplane` manager supports these `depType`s:
 
@@ -17,7 +17,7 @@ Some configuration examples:
 ```json title="If most .yaml files are for Crossplane"
 {
   "crossplane": {
-    "fileMatch": ["\\.yaml$"]
+    "managerFilePatterns": ["/\\.yaml$/"]
   }
 }
 ```
@@ -25,7 +25,7 @@ Some configuration examples:
 ```json title="For Crossplane files in a packages/ directory"
 {
   "crossplane": {
-    "fileMatch": ["packages/.+\\.yaml$"]
+    "managerFilePatterns": ["/packages/.+\\.yaml$/"]
   }
 }
 ```
@@ -33,7 +33,7 @@ Some configuration examples:
 ```json title="For a single Crossplane file"
 {
   "crossplane": {
-    "fileMatch": ["^config/provider\\.yaml$"]
+    "managerFilePatterns": ["/^config/provider\\.yaml$/"]
   }
 }
 ```

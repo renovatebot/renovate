@@ -1,4 +1,5 @@
 import * as memCache from '../../cache/memory';
+import { clone } from '../../clone';
 import type { HttpResponse } from '../types';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider';
 import type { HttpCache } from './schema';
@@ -10,7 +11,8 @@ export class MemoryHttpCacheProvider extends AbstractHttpCacheProvider {
 
   protected override load(url: string): Promise<unknown> {
     const data = memCache.get<HttpCache>(this.cacheKey(url));
-    return Promise.resolve(data);
+    const cloned = clone(data); // Ensures cached responses cannot be mutated
+    return Promise.resolve(cloned);
   }
 
   protected override persist(url: string, data: HttpCache): Promise<void> {
