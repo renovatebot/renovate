@@ -359,7 +359,7 @@ export type UpdateType =
   | 'replacement';
 
 // These are the update types which can have configuration
-export const updateTypesOptions = [
+export const UpdateTypesOptions = [
   'major',
   'minor',
   'patch',
@@ -371,7 +371,7 @@ export const updateTypesOptions = [
   'replacement',
 ] as const;
 
-export type UpdateTypeOptions = (typeof updateTypesOptions)[number];
+export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
 
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
