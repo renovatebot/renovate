@@ -37,16 +37,6 @@ const validJsoncString = `
 }
 `;
 
-const jsoncString = codeBlock`
-{
-  // This is a comment (valid in JSONC, invalid in JSON5 when outside object properties)
-  "name": "Alice", // inline comment is valid in JSONC but not in JSON5
-  "age": 25,       // JSON5 supports trailing commas, so this line is okay in both
-  "city": "Atlanta",
-  // JSONC allows comments here too
-}
-`;
-
 describe('util/common', () => {
   beforeEach(() => hostRules.clear());
 
@@ -122,6 +112,16 @@ describe('util/common', () => {
     });
 
     it('supports jsonc', () => {
+      const jsoncString = codeBlock`
+      {
+        // This is a comment (valid in JSONC, invalid in JSON5 when outside object properties)
+        "name": "Alice", // inline comment is valid in JSONC but not in JSON5
+        "age": 25,       // JSON5 supports trailing commas, so this line is okay in both
+        "city": "Atlanta",
+        // JSONC allows comments here too
+      }
+      `;
+
       expect(parseJson(jsoncString, 'renovate.json')).toEqual({
         name: 'Alice',
         age: 25,
