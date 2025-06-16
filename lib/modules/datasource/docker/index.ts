@@ -9,7 +9,6 @@ import { HttpError } from '../../../util/http';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
-import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
 import { isDockerDigest } from '../../../util/string-match';
 import { asTimestamp } from '../../../util/timestamp';
@@ -658,9 +657,7 @@ export class DockerDatasource extends Datasource {
         ? 1000
         : 10000;
     // Add the last parameter if currentValue is provided to optimize tag fetching for Quay
-    const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
-      registryHost,
-    );
+    const isQuay = registryHost.startsWith('https://quay.io');
     let url: string | null =
       isQuay && currentValue
         ? `${registryHost}/${dockerRepository}/tags/list?n=${limit}&last=${currentValue}`
@@ -746,13 +743,11 @@ export class DockerDatasource extends Datasource {
     currentValue?: string,
   ): Promise<string[] | null> {
     try {
-      const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
-        registryHost,
-      );
+      const isQuay = registryHost.startsWith('https://quay.io');
       let tags: string[] | null;
       if (isQuay) {
         try {
-          // Due to pagination and sorting limits on Quay standard v2 API we try the v1 API first
+          // Due to pagination and sorting limits on Quay Docker v2 API implementation we try the Quay v1 API first
           tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
         } catch (err) {
           // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
@@ -1086,12 +1081,12 @@ export class DockerDatasource extends Datasource {
    */
   @cache({
     namespace: 'datasource-docker-releases-v2',
-    key: ({ registryUrl, packageName }: GetReleasesConfig) => {
+    key: ({ registryUrl, packageName, currentValue }: GetReleasesConfig) => {
       const { registryHost, dockerRepository } = getRegistryRepository(
         packageName,
         registryUrl!,
       );
-      return `${registryHost}:${dockerRepository}`;
+      return `${registryHost}:${dockerRepository}${currentValue ? `:${currentValue}` : ''}`;
     },
     cacheable: ({ registryUrl, packageName }: GetReleasesConfig) => {
       const { registryHost } = getRegistryRepository(packageName, registryUrl!);
