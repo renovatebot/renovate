@@ -46,69 +46,6 @@ export async function validateReconfigureBranch(
     );
   }
 
-  try {
-    await scm.checkoutBranch(branchName);
-    configFileName = await detectConfigFile();
-  } catch (err) {
-    logger.error(
-      { err },
-      'Error while searching for config file in reconfigure branch',
-    );
-  }
-
-  if (!is.nonEmptyString(configFileName)) {
-    logger.warn('No config file found in reconfigure branch');
-    await setBranchStatus(
-      branchName,
-      'Validation Failed - No config file found',
-      'red',
-      context,
-    );
-    setReconfigureBranchCache(branchSha, false);
-    await scm.checkoutBranch(config.defaultBranch!);
-    return;
-  }
-
-  let configFileRaw: string | null = null;
-  try {
-    configFileRaw = await readLocalFile(configFileName, 'utf8');
-  } catch (err) {
-    logger.error({ err }, 'Error while reading config file');
-  }
-
-  if (!is.nonEmptyString(configFileRaw)) {
-    logger.warn('Empty or invalid config file');
-    await setBranchStatus(
-      branchName,
-      'Validation Failed - Empty/Invalid config file',
-      'red',
-      context,
-    );
-    setReconfigureBranchCache(branchSha, false);
-    await scm.checkoutBranch(config.baseBranch!);
-    return;
-  }
-
-  let configFileParsed: any;
-  try {
-    configFileParsed = parseJson(configFileRaw, configFileName);
-    // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
-    if (configFileName === 'package.json') {
-      configFileParsed = configFileParsed.renovate;
-    }
-  } catch (err) {
-    logger.error({ err }, 'Error while parsing config file');
-    await setBranchStatus(
-      branchName,
-      'Validation Failed - Unparsable config file',
-      'red',
-      context,
-    );
-    setReconfigureBranchCache(branchSha, false);
-    await scm.checkoutBranch(config.baseBranch!);
-    return;
-  }
-
   // perform validation and provide a passing or failing check based on result
   const massagedConfig = massageConfig(reconfigureConfig);
   const validationResult = await validateConfig('repo', massagedConfig);
