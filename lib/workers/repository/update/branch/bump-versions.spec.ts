@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { expect } from 'vitest';
 import * as templates from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import { bumpVersions } from './bump-versions';
