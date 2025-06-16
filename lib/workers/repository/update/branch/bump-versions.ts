@@ -57,7 +57,7 @@ async function bumpVersion(
 ): Promise<void> {
   const rawBumpType = config.bumpType ?? 'patch';
 
-  // all log messages should be prefixed with this string to allow logLevelRemapping
+  // all log messages should be prefixed with this string to facilitate easier logLevelRemapping
   const bumpVersionsDescr = config.name
     ? `bumpVersions(${config.name})`
     : 'bumpVersions';
