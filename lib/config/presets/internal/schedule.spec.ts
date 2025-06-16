@@ -82,6 +82,36 @@ describe('config/presets/internal/schedule', () => {
     });
   });
 
+  describe('officeHours', () => {
+    it.each`
+      datetime                     | expected
+      ${'2017-06-01T04:50:00.000'} | ${false}
+      ${'2017-06-01T05:10:00.000'} | ${true}
+      ${'2017-06-01T12:00:00.000'} | ${true}
+      ${'2017-06-01T21:50:00.000'} | ${true}
+      ${'2017-06-01T22:10:00.000'} | ${false}
+      ${'2017-06-02T04:50:00.000'} | ${false}
+      ${'2017-06-02T05:10:00.000'} | ${true}
+      ${'2017-06-02T12:00:00.000'} | ${true}
+      ${'2017-06-02T21:50:00.000'} | ${true}
+      ${'2017-06-02T22:10:00.000'} | ${false}
+      ${'2017-06-03T04:50:00.000'} | ${false}
+      ${'2017-06-03T05:10:00.000'} | ${false}
+      ${'2017-06-03T12:00:00.000'} | ${false}
+      ${'2017-06-03T21:50:00.000'} | ${false}
+      ${'2017-06-03T22:10:00.000'} | ${false}
+      ${'2017-06-04T04:50:00.000'} | ${false}
+      ${'2017-06-04T05:10:00.000'} | ${false}
+      ${'2017-06-04T12:00:00.000'} | ${false}
+      ${'2017-06-04T21:50:00.000'} | ${false}
+      ${'2017-06-04T22:10:00.000'} | ${false}
+    `('$datetime', ({ datetime, expected }) => {
+      config.schedule = presets.officeHours.schedule;
+      vi.setSystemTime(new Date(datetime));
+      expect(isScheduledNow(config)).toBe(expected);
+    });
+  });
+
   // const weekdays = ['every weekday'];
   // const weekends = ['every weekend'];
   // const yearly = ['every 12 months on the first day of the month'];
