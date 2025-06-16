@@ -12,7 +12,7 @@ import type { ApiPageCache, GhPr, GhRestPr } from './types';
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   if (!repoCache?.platform?.github?.pullRequestsCache) {
-    logger.debug('getPrApiCache: cached data not found, creating new cache');
+    logger.debug('PR cache: cached data not found, creating new cache');
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
     repoCache.platform.github.pullRequestsCache ??= { items: {} };
@@ -78,10 +78,10 @@ export async function getPrCache(
 
       let perPage: number;
       if (isInitial) {
-        logger.debug('getPrCache: initial fetch');
+        logger.debug('PR cache: initial fetch');
         perPage = 100;
       } else {
-        logger.debug('getPrCache: sync fetch');
+        logger.debug('PR cache: sync fetch');
         perPage = 20;
       }
 
@@ -103,7 +103,7 @@ export async function getPrCache(
         );
 
         logger.debug(
-          `Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
+          `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
         );
 
         page = filteredPage;
@@ -127,10 +127,10 @@ export async function getPrCache(
         requestsTotal,
         apiQuotaAffected,
       },
-      `getPrList success`,
+      `PR cache: getPrList success`,
     );
   } catch (err) /* v8 ignore start */ {
-    logger.debug({ err }, 'getPrList err');
+    logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
   } /* v8 ignore stop */
 

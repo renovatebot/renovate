@@ -76,14 +76,14 @@ export class GithubIssueCache {
       cacheData[issue.number] = issue;
     }
 
-    logger.debug(`Setting ${issues.length} issues in cache`);
+    logger.debug(`Issues cache: Setting ${issues.length} issues in cache`);
     this.reset(cacheData);
   }
 
   static updateIssue(issue: GithubIssue): void {
     const cacheData = this.data;
     if (cacheData) {
-      logger.debug(`Updating issue ${issue.number} in cache`);
+      logger.debug(`Issues cache: Updating issue ${issue.number} in cache`);
       cacheData[issue.number] = issue;
     }
   }
@@ -91,7 +91,7 @@ export class GithubIssueCache {
   static deleteIssue(number: number): void {
     const cacheData = this.data;
     if (cacheData) {
-      logger.debug(`Deleting issue ${number} from cache`);
+      logger.debug(`Issues cache: Deleting issue ${number} from cache`);
       delete cacheData[number];
     }
   }
@@ -101,7 +101,9 @@ export class GithubIssueCache {
    * What we can do is to store issues for later reconciliation.
    */
   static addIssuesToReconcile(issues: GithubIssue[] | undefined): void {
-    logger.debug(`Adding ${issues?.length} issues to reconcile queue`);
+    logger.debug(
+      `Issues cache: Adding ${issues?.length} issues to reconcile queue`,
+    );
     memCache.set('github-issues-reconcile-queue', issues);
   }
 
@@ -126,7 +128,7 @@ export class GithubIssueCache {
         cachedIssue.lastModified === issue.lastModified
       ) {
         isReconciled = true;
-        logger.debug(`Done reconciling at issue ${issue.number}`);
+        logger.debug(`Issues cache: Done reconciling at issue ${issue.number}`);
         break;
       }
 
@@ -136,7 +138,9 @@ export class GithubIssueCache {
     // If we've just iterated over all the items in the cache,
     // it means sync is also done.
     if (issuesToReconcile.length >= Object.keys(cacheData).length) {
-      logger.debug(`Done reconciling by iterating over all items`);
+      logger.debug(
+        `Issues cache: Done reconciling by iterating over all items`,
+      );
       isReconciled = true;
     }
 
