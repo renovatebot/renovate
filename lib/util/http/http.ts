@@ -10,6 +10,7 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { getEnv } from '../env';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { ObsoleteCacheHitLogger } from '../stats';
@@ -82,7 +83,7 @@ export abstract class HttpBase<
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,
       {
@@ -160,6 +161,7 @@ export abstract class HttpBase<
     const { cacheProvider } = options;
 
     const memCacheKey =
+      !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
@@ -205,7 +207,9 @@ export abstract class HttpBase<
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
+      const queuedTask = queue
+        ? () => queue.add(throttledTask, { throwOnTimeout: true })
+        : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);

@@ -1,3 +1,4 @@
+import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
@@ -115,6 +116,39 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
     globalOnly: true,
+  },
+  {
+    name: 'bumpVersions',
+    description:
+      'A list of bumpVersion config options to bump generic version numbers.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
+    name: 'bumpType',
+    description:
+      'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
+    type: 'string',
+    parents: ['bumpVersions'],
+  },
+  {
+    name: 'filePatterns',
+    description:
+      'A list of patterns to match files that contain the version string.',
+    type: 'array',
+    subType: 'string',
+    parents: ['bumpVersions'],
+  },
+  {
+    name: 'name',
+    description:
+      'A name for the bumpVersion config. This is used for logging and debugging.',
+    type: 'string',
+    parents: ['bumpVersions'],
   },
   {
     name: 'postUpgradeTasks',
@@ -508,7 +542,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:13.8.18',
+    default: 'ghcr.io/containerbase/sidecar:13.8.23',
     globalOnly: true,
   },
   {
@@ -1140,6 +1174,7 @@ const options: RenovateOptions[] = [
       'helmv3',
       'kubernetes',
       'kustomize',
+      'maven',
       'terraform',
       'vendir',
       'woodpecker',
@@ -1410,7 +1445,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchSourceUrls',
-    description: 'A list of source URLs to exact match against.',
+    description:
+      'A list of exact match URLs (or URL patterns) to match sourceUrl against.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1854,6 +1890,20 @@ const options: RenovateOptions[] = [
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
+  },
+  {
+    name: 'abandonmentThreshold',
+    description:
+      'Flags packages that have not been updated within this period as abandoned.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'dependencyDashboardReportAbandonment',
+    description:
+      'Controls whether abandoned packages are reported in the dependency dashboard.',
+    type: 'boolean',
+    default: true,
   },
   {
     name: 'internalChecksAsSuccess',
@@ -2397,6 +2447,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    parents: [...AllManagersListLiteral, 'customManagers'],
   },
   {
     name: 'postUpdateOptions',
@@ -2780,10 +2831,11 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'matchStrings',
-    description: 'Queries to use. Valid only within a `customManagers` object.',
+    description:
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
     type: 'array',
     subType: 'string',
-    parents: ['customManagers'],
+    parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
   },

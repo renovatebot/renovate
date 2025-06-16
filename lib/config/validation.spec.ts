@@ -1,7 +1,11 @@
+import { getManagerList } from '../modules/manager';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
+import { partial } from '~test/util';
+
+const managerList = getManagerList().sort();
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -1095,9 +1099,9 @@ describe('config/validation', () => {
         'repo',
         config,
       );
-      expect(errors).toHaveLength(1);
-      expect(warnings).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(2);
       expect(warnings).toMatchSnapshot();
     });
 
@@ -1755,15 +1759,15 @@ describe('config/validation', () => {
           'global',
           config,
         );
+        expect.assertions(1);
         expect(warnings).toEqual([
-          {
-            message:
-              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
-            topic: 'Config error',
-          },
           {
             topic: 'Configuration Error',
             message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+          },
+          {
+            topic: 'managerFilePatterns',
+            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
           },
         ]);
       });
@@ -1785,9 +1789,8 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message:
-              '"managerFilePatterns" may not be defined at the top level of a config and must instead be within a manager block',
-            topic: 'Config error',
+            topic: 'managerFilePatterns',
+            message: `managerFilePatterns should only be configured within one of "${managerList.join(' or ')} or customManagers" objects. Was found in .`,
           },
         ]);
       });
@@ -2069,6 +2072,77 @@ describe('config/validation', () => {
       ]);
       expect(warnings).toHaveLength(2);
       expect(errors).toHaveLength(1);
+    });
+
+    it('errors if no bumpVersion filePattern is provided', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          bumpType: 'patch',
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              bumpType: 'patch',
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('errors if no matchStrings are provided for bumpVersion', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    it('allow bumpVersion ', async () => {
+      const config = partial<RenovateConfig>({
+        bumpVersion: {
+          filePatterns: ['foo'],
+        },
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            bumpVersion: {
+              filePatterns: ['bar'],
+            },
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
     });
   });
 });

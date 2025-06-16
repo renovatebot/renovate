@@ -10,6 +10,8 @@ The JSONata manager is unique in Renovate, because:
 - It can be configured via [JSONata](https://jsonata.org/) queries
 - You can create multiple "JSONata managers" in the same repository
 
+If you have limited managers to run within [`enabledManagers` config option](../../../configuration-options.md#enabledmanagers), you need to add `"custom.jsonata"` to the list.
+
 ### Required Fields
 
 The first two required fields are `managerFilePatterns` and `matchStrings`:
@@ -87,7 +89,55 @@ We recommend you follow these steps:
 
 Alternatively you can "try and error" to a working config, by adjusting our examples.
 
-YAML files are parsed as multi document files.
+YAML files are parsed as multi document files, even those that have only one document.
+
+#### YAML parsing
+
+To show how the JSONata manager parses YAML, below is an example YAML file and the corresponding parsing to JSON.
+
+YAML:
+
+```yaml title="Example multi document YAML file"
+production:
+  packages:
+    version: 1.2.3
+    package: foo
+test:
+  metadata:
+    - version: 4.5.6
+      package: bar
+---
+development:
+  author: Renovate
+```
+
+JSON:
+
+```json title="Example JSON parsing"
+[
+  {
+    "production": {
+      "packages": {
+        "version": "1.2.3",
+        "package": "foo"
+      }
+    },
+    "test": {
+      "metadata": [
+        {
+          "version": "4.5.6",
+          "package": "bar"
+        }
+      ]
+    }
+  },
+  {
+    "development": {
+      "author": "Renovate"
+    }
+  }
+]
+```
 
 #### Example queries
 
