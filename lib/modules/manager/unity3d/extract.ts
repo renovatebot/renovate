@@ -26,7 +26,8 @@ function extractVersions(content: string): PackageDependency[] {
     deps.push({
       currentValue: value,
       datasource: Unity3dDatasource.id,
-      depName: key,
+      depName: 'Unity Editor',
+      packageName: key,
     });
   }
 
