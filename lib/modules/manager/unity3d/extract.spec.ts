@@ -15,20 +15,23 @@ describe('modules/manager/unity3d/extract', () => {
       {
         content: 'm_EditorVersion: 2022.3.19f1',
         value: '2022.3.19f1',
-        depName: 'm_EditorVersion',
+        depName: 'Unity Editor',
+        packageName: 'm_EditorVersion',
       },
       {
         content: 'm_EditorVersionWithRevision: 2022.3.19f1 (30acc77e9b6b)',
         value: '2022.3.19f1 (30acc77e9b6b)',
-        depName: 'm_EditorVersionWithRevision',
+        depName: 'Unity Editor',
+        packageName: 'm_EditorVersionWithRevision',
       },
-    ])('handles $depName', ({ content, value, depName }) => {
+    ])('handles $packageName', ({ content, value, depName, packageName }) => {
       const res = extractPackageFile(content)?.deps;
       expect(res).toEqual([
         {
           currentValue: value,
           datasource: 'unity3d',
           depName,
+          packageName,
         },
       ]);
     });
@@ -63,12 +66,14 @@ describe('modules/manager/unity3d/extract', () => {
           {
             currentValue: version,
             datasource: 'unity3d',
-            depName: 'm_EditorVersion',
+            depName: 'Unity Editor',
+            packageName: 'm_EditorVersion',
           },
           {
             currentValue: versionWithRevision,
             datasource: 'unity3d',
-            depName: 'm_EditorVersionWithRevision',
+            depName: 'Unity Editor',
+            packageName: 'm_EditorVersionWithRevision',
           },
         ]);
       },
