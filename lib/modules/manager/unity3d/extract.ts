@@ -2,7 +2,7 @@ import { regEx } from '../../../util/regex';
 import { Unity3dDatasource } from '../../datasource/unity3d';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-const supportedKeys = ['m_EditorVersionWithRevision', 'm_EditorVersion'];
+const supportedKeys = ['m_EditorVersion', 'm_EditorVersionWithRevision'];
 
 const UnityVersionRegex = regEx(/^(?<depName>.+): (?<currentValue>.+)/);
 
