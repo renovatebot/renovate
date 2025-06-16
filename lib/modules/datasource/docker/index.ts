@@ -647,7 +647,7 @@ export class DockerDatasource extends Datasource {
   private async getDockerApiTags(
     registryHost: string,
     dockerRepository: string,
-    currentVersion?: string,
+    currentValue?: string,
   ): Promise<string[] | null> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
@@ -657,13 +657,13 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
-    // Add the last parameter if currentVersion is provided to optimize tag fetching for Quay
+    // Add the last parameter if currentValue is provided to optimize tag fetching for Quay
     const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
       registryHost,
     );
     let url: string | null =
-      isQuay && currentVersion
-        ? `${registryHost}/${dockerRepository}/tags/list?n=${limit}&last=${currentVersion}`
+      isQuay && currentValue
+        ? `${registryHost}/${dockerRepository}/tags/list?n=${limit}&last=${currentValue}`
         : `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
@@ -736,14 +736,14 @@ export class DockerDatasource extends Datasource {
     key: (
       registryHost: string,
       dockerRepository: string,
-      currentVersion?: string,
+      currentValue?: string,
     ) =>
-      `${registryHost}:${dockerRepository}${currentVersion ? `:${currentVersion}` : ''}`,
+      `${registryHost}:${dockerRepository}${currentValue ? `:${currentValue}` : ''}`,
   })
   async getTags(
     registryHost: string,
     dockerRepository: string,
-    currentVersion?: string,
+    currentValue?: string,
   ): Promise<string[] | null> {
     try {
       const isQuay = regEx(/^https:\/\/quay\.io(?::[1-9][0-9]{0,4})?$/i).test(
@@ -764,7 +764,7 @@ export class DockerDatasource extends Datasource {
             tags = await this.getDockerApiTags(
               registryHost,
               dockerRepository,
-              currentVersion,
+              currentValue,
             );
           } else {
             throw err;
@@ -774,7 +774,7 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(
           registryHost,
           dockerRepository,
-          currentVersion,
+          currentValue,
         );
       }
       return tags;
