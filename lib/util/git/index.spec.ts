@@ -1299,7 +1299,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await git.syncGit();
         await expect(git.syncForkWithUpstream('develop')).toResolve();
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Checking out branch develop from remote upstream',
+          'Checking out branch develop from remote renovate-fork-upstream',
         );
       });
     });
@@ -1326,19 +1326,23 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
         // make sure upstream exists
         const upstreamRemote = (
-          await tmpGit.raw(['remote', 'get-url', 'upstream'])
+          await tmpGit.raw(['remote', 'get-url', git.RENOVATE_FORK_UPSTREAM])
         ).trim();
         expect(upstreamRemote).toBe(upstreamOrigin.path);
 
         // verify fetch from upstream happened
-        // by checking the `upstream/main` branch in the forked repo's remote branches
+        // by checking the `${RENOVATE_FORK_UPSTREAM}/main` branch in the forked repo's remote branches
         const branches = await tmpGit.branch(['-r']);
-        expect(branches.all).toContain(`upstream/${defaultBranch}`);
+        expect(branches.all).toContain(
+          `${git.RENOVATE_FORK_UPSTREAM}/${defaultBranch}`,
+        );
 
         // verify that the HEAD's match
         const headSha = (await tmpGit.revparse(['HEAD'])).trim();
         const upstreamSha = (
-          await tmpGit.revparse([`upstream/${defaultBranch}`])
+          await tmpGit.revparse([
+            `${git.RENOVATE_FORK_UPSTREAM}/${defaultBranch}`,
+          ])
         ).trim();
         expect(headSha).toBe(upstreamSha);
       });
@@ -1367,7 +1371,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
       checkoutSpy.mockRejectedValueOnce(new Error('checkout error'));
       await expect(
-        git.checkoutBranchFromRemote('branch', 'upstream'),
+        git.checkoutBranchFromRemote('branch', git.RENOVATE_FORK_UPSTREAM),
       ).rejects.toThrow('checkout error');
     });
 
@@ -1375,21 +1379,17 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const checkoutSpy = vi.spyOn(SimpleGit.prototype, 'checkoutBranch');
       checkoutSpy.mockRejectedValueOnce(new Error('fatal: ambiguous argument'));
       await expect(
-        git.checkoutBranchFromRemote('branch', 'upstream'),
+        git.checkoutBranchFromRemote('branch', git.RENOVATE_FORK_UPSTREAM),
       ).rejects.toThrow(TEMPORARY_ERROR);
     });
 
-    it('syncForkWithRemote() - throws error if no upstream exists', async () => {
+    it('syncForkWithRemote() - returns if no upstream exists', async () => {
       await git.initRepo({
         url: origin.path,
         defaultBranch,
       });
 
-      await git.syncGit();
-
-      await expect(git.syncForkWithUpstream(defaultBranch)).rejects.toThrow(
-        'No remote named "upstream" exists, cannot sync fork',
-      );
+      await expect(git.syncForkWithUpstream(defaultBranch)).toResolve();
     });
   });
 });

@@ -3,6 +3,7 @@ import { massageConfig } from '../../../config/massage';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
 import { logger } from '../../../logger';
+import type { Pr } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
@@ -11,30 +12,20 @@ import { parseJson } from '../../../util/common';
 import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
 import { regEx } from '../../../util/regex';
-import { detectConfigFile } from '../init/merge';
 import { setReconfigureBranchCache } from './reconfigure-cache';
 import { getReconfigureBranchName, setBranchStatus } from './utils';
 
 export async function validateReconfigureBranch(
   config: RenovateConfig,
-): Promise<void> {
+  reconfigureConfig: RenovateConfig,
+  configFileName: string,
+  reconfigurePr: Pr | null,
+): Promise<boolean> {
   logger.debug('validateReconfigureBranch()');
 
   const context = config.statusCheckNames?.configValidation;
   const branchName = getReconfigureBranchName(config.branchPrefix!);
-
-  // look for config file
-  // 1. check reconfigure branch cache and use the configFileName if it exists
-  // 2. checkout reconfigure branch and look for the config file, don't assume default configFileName
   const branchSha = getBranchCommit(branchName)!;
-  const cache = getCache();
-  let configFileName: string | null = null;
-  const reconfigureCache = cache.reconfigureBranchCache;
-  // only use valid cached information
-  if (reconfigureCache?.reconfigureBranchSha === branchSha) {
-    logger.debug('Skipping validation check as branch sha is unchanged');
-    return;
-  }
 
   if (context) {
     const validationStatus = await platform.getBranchStatusCheck(
@@ -47,7 +38,7 @@ export async function validateReconfigureBranch(
       logger.debug(
         'Skipping validation check because status check already exists.',
       );
-      return;
+      return validationStatus === 'green';
     }
   } else {
     logger.debug(
@@ -119,7 +110,7 @@ export async function validateReconfigureBranch(
   }
 
   // perform validation and provide a passing or failing check based on result
-  const massagedConfig = massageConfig(configFileParsed);
+  const massagedConfig = massageConfig(reconfigureConfig);
   const validationResult = await validateConfig('repo', massagedConfig);
 
   // failing check
@@ -128,13 +119,6 @@ export async function validateReconfigureBranch(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
       'Validation Errors',
     );
-
-    const reconfigurePr = await platform.findPr({
-      branchName,
-      state: 'open',
-      includeOtherAuthors: true,
-      targetBranch: config.defaultBranch,
-    });
 
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {
@@ -154,14 +138,10 @@ export async function validateReconfigureBranch(
 
     await setBranchStatus(branchName, 'Validation Failed', 'red', context);
     setReconfigureBranchCache(branchSha, false);
-    await scm.checkoutBranch(config.baseBranch!);
-    return;
+    return false;
   }
 
   // passing check
   await setBranchStatus(branchName, 'Validation Successful', 'green', context);
-
-  setReconfigureBranchCache(branchSha, true);
-  await scm.checkoutBranch(config.baseBranch!);
-  return;
+  return true;
 }
