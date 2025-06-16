@@ -273,9 +273,11 @@
     "dot-swashbuckle": "https://github.com/Havunen/DotSwashbuckle",
     "dotnet": [
       "https://github.com/dotnet/aspnetcore",
+      "https://github.com/dotnet/dotnet",
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/fsharp",
+      "https://github.com/dotnet/msbuild",
       "https://github.com/dotnet/maui",
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
