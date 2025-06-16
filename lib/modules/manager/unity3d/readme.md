@@ -2,7 +2,8 @@ Manages version numbers in the `ProjectVersion.txt` file located within the `Pro
 
 Example path: `/home/user/testUnityProject/ProjectSettings/ProjectVersion.txt`.
 
-`ProjectVersion.txt` always have two version references in yml syntax; one with and one without a hash, both are updated:
+`ProjectVersion.txt` always have two version references in `YAML` syntax; one with revision and another one without it. 
+Both are updated together.
 
 ```yml
 m_EditorVersion: 2020.3.15f2
