@@ -10,7 +10,7 @@ import {
 
 const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
-const includeBlockCheck = 'include "';
+const includeBlockCheck = regEx(/include\s*(?:".*")?\s*\{/);
 
 export function extractPackageFile(
   content: string,
@@ -18,7 +18,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace({ content }, `terragrunt.extractPackageFile(${packageFile!})`);
   if (!checkFileContainsDependency(content, contentCheckList)) {
-    if (content.includes(includeBlockCheck)) {
+    if (content.match(includeBlockCheck)) {
       return { deps: [] };
     }
     return null;
