@@ -6,6 +6,5 @@ export const defaultConfig = {
   managerFilePatterns: ['**/ProjectSettings/ProjectVersion.txt'],
 };
 
-export const categories: Category[] = ['unity3d'];
 
 export const supportedDatasources = [Unity3dDatasource.id];
