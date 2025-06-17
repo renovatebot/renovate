@@ -766,11 +766,7 @@ export class DockerDatasource extends Datasource {
           }
         }
       } else {
-        tags = await this.getDockerApiTags(
-          registryHost,
-          dockerRepository,
-          currentValue,
-        );
+        tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
     } catch (_err) /* istanbul ignore next */ {
