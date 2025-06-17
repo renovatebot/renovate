@@ -578,7 +578,7 @@ All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help 
   "logLevelRemap": [
     {
       "matchMessage": "/bumpVersions/",
-      "newLogLevel": "info"
+      "newLogLevel": "debug"
     }
   ]
 }
