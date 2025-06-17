@@ -715,7 +715,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+      - uses: sigstore/cosign-installer@fb28c2b6339dcd94da6e4cbcbc5e888961f6f8c3 # v3.9.0
 
       - name: Docker registry login
         run: |
