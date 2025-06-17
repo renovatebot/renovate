@@ -753,7 +753,7 @@ export class DockerDatasource extends Datasource {
           // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
           if (err.statusCode === 401) {
             logger.debug(
-              { registryHost, dockerRepository, err },
+              { registryHost, dockerRepository },
               'Quay v1 API unauthorized, falling back to Docker v2 API',
             );
             tags = await this.getDockerApiTags(
