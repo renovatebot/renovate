@@ -62,7 +62,6 @@ export const CategoryNames: Record<Category, string> = {
   rust: 'Rust',
   swift: 'Swift',
   terraform: 'Terraform',
-  unity3d: 'Unity3D',
 };
 
 export async function generateManagers(
