@@ -182,8 +182,8 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
 
       expect(res.updatedArtifacts).toHaveLength(0);
-      expect(fs.writeSystemFile).toHaveBeenCalledTimes(1);
-      expect(fs.writeSystemFile).toHaveBeenCalledWith(
+      expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
+      expect(fs.outputCacheFile).toHaveBeenCalledWith(
         expect.stringMatching(
           `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
         ),
@@ -239,7 +239,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       );
 
       expect(res.updatedArtifacts).toHaveLength(0);
-      expect(fs.writeSystemFile).not.toHaveBeenCalled();
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
     });
 
     it('logs files which do not match fileFilters', async () => {

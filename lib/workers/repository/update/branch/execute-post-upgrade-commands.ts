@@ -10,10 +10,10 @@ import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
+  outputCacheFile,
   privateCacheDir,
   readLocalFile,
   writeLocalFile,
-  writeSystemFile,
 } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
@@ -81,20 +81,20 @@ export async function postUpgradeCommandsExecutor(
         dataFilePath = upath.join(privateCacheDir(), dataFileName);
 
         try {
-          await writeSystemFile(dataFilePath, dataFileContent);
+          await outputCacheFile(dataFilePath, dataFileContent);
 
           logger.debug(
             { dataFilePath, dataFileContent },
             'Created post-upgrade commands data file.',
           );
         } catch (error) {
-          dataFilePath = '';
-
           artifactErrors.push({
             stderr: sanitize(
               `Failed to create post-upgrade commands data file at ${dataFilePath}, reason: ${error.message}`,
             ),
           });
+
+          dataFilePath = '';
         }
       }
 

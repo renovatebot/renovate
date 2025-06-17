@@ -2309,7 +2309,7 @@ describe('workers/repository/update/branch/index', () => {
         .mockResolvedValueOnce(true);
       fs.privateCacheDir.mockReturnValue(cacheDir);
       // Fail post-upgrade file creation
-      fs.writeSystemFile.mockRejectedValue(new Error('failed to create file'));
+      fs.outputCacheFile.mockRejectedValue(new Error('failed to create file'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
