@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -87,16 +86,10 @@ export async function generateLockFile(
 
     let args = '--lockfile-only';
 
-    // pnpm v9+ is doing recursive automatically when it detects workspaces.
-    //
     // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
     // `--recursive` will install un-wanted project.
     // we should avoid this.
-    if (
-      pnpmToolConstraint.constraint &&
-      !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
-      (await localPathExists(pnpmWorkspaceFilePath))
-    ) {
+    if (await localPathExists(pnpmWorkspaceFilePath)) {
       args += ' --recursive';
     }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {

@@ -121,6 +121,66 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('performs lock file updates for workspace with --recursive using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for non workspace without --recursive using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.localPathExists.mockResolvedValueOnce(false); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
   it('performs lock file updates and install when lock file updates mixed with regular updates', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
