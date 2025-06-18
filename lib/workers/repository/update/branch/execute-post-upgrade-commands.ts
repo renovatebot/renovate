@@ -68,9 +68,8 @@ export async function postUpgradeCommandsExecutor(
 
       let dataFilePath = '';
       if (dataFileTemplate) {
-        const dataFileContent = compile(
-          dataFileTemplate,
-          mergeChildConfig(config, upgrade),
+        const dataFileContent = sanitize(
+          compile(dataFileTemplate, mergeChildConfig(config, upgrade)),
         );
         logger.debug(
           { dataFileTemplate },
