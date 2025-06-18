@@ -50,13 +50,13 @@ files = [
 
 [[package]]
 name = "certifi"
-version = "2025.4.26"
-requires_python = ">=3.6"
+version = "2025.6.15"
+requires_python = ">=3.7"
 summary = "Python package for providing Mozilla's CA Bundle."
 groups = ["default"]
 files = [
-    {file = "certifi-2025.4.26-py3-none-any.whl", hash = "sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3"},
-    {file = "certifi-2025.4.26.tar.gz", hash = "sha256:0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6"},
+    {file = "certifi-2025.6.15-py3-none-any.whl", hash = "sha256:2e0c7ce7cb5d8f8634ca55d2ba7e6ec2689a2fd6537d8dec1296a477a4910057"},
+    {file = "certifi-2025.6.15.tar.gz", hash = "sha256:d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b"},
 ]
 
 [[package]]
@@ -489,7 +489,7 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.32.3"
+version = "2.32.4"
 requires_python = ">=3.8"
 summary = "Python HTTP for Humans."
 groups = ["default"]
@@ -500,8 +500,8 @@ dependencies = [
     "urllib3<3,>=1.21.1",
 ]
 files = [
-    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
-    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
+    {file = "requests-2.32.4-py3-none-any.whl", hash = "sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c"},
+    {file = "requests-2.32.4.tar.gz", hash = "sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422"},
 ]
 
 [[package]]
