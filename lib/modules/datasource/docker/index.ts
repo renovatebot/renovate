@@ -657,7 +657,7 @@ export class DockerDatasource extends Datasource {
         ? 1000
         : 10000;
     // Add the last parameter if currentValue is provided to optimize tag fetching for Quay
-    const isQuay = registryHost.startsWith('https://quay.io');
+    const isQuay = registryHost === 'https://quay.io';
     let url: string | null =
       isQuay && currentValue
         ? `${registryHost}/${dockerRepository}/tags/list?n=${limit}&last=${currentValue}`
@@ -743,7 +743,7 @@ export class DockerDatasource extends Datasource {
     currentValue?: string,
   ): Promise<string[] | null> {
     try {
-      const isQuay = registryHost.startsWith('https://quay.io');
+      const isQuay = registryHost === 'https://quay.io';
       let tags: string[] | null;
       if (isQuay) {
         try {
