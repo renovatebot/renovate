@@ -342,7 +342,7 @@
     "semantic-release": "24.2.5",
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
-    "tsx": "4.19.4",
+    "tsx": "4.20.1",
     "type-fest": "4.41.0",
     "typescript": "5.8.3",
     "typescript-eslint": "8.34.0",
