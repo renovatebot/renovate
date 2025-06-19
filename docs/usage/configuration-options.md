@@ -568,6 +568,22 @@ In this configuration:
 - The version string is extracted from lines matching `version: <value>`.
 - The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
 
+**debugging `bumpVersions`**
+
+Use [`logLevelRemap`](#loglevelremap) to remap, `trace` log level messages to a higher level e.g. `debug`.
+All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help you filter them in the logs.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/bumpVersions/",
+      "newLogLevel": "debug"
+    }
+  ]
+}
+```
+
 ### bumpType
 
 The `bumpType` field specifies the type of version bump to apply.

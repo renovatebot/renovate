@@ -1,3 +1,4 @@
+import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
@@ -2446,6 +2447,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    parents: [...AllManagersListLiteral, 'customManagers'],
   },
   {
     name: 'postUpdateOptions',

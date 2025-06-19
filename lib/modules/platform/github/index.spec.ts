@@ -2943,8 +2943,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
-        expect(logger.logger.debug).toHaveBeenNthCalledWith(
-          10,
+        expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 123 },
           'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
         );
@@ -2991,8 +2990,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
-        expect(logger.logger.debug).toHaveBeenNthCalledWith(
-          11,
+        expect(logger.logger.debug).toHaveBeenCalledWith(
           'GitHub-native automerge: success...PrNo: 123',
         );
       });
