@@ -555,7 +555,7 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('should fall back to merge method "fast-forward"', async () => {
+    it('should fall back to merge method "fast-forward-only"', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -570,7 +570,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          mergeMethod: 'fast-forward',
+          mergeMethod: 'fast-forward-only',
         }),
       );
     });

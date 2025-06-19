@@ -329,7 +329,7 @@ const platform: Platform = {
     } else if (repo.allow_merge_commits) {
       config.mergeMethod = 'merge';
     } else if (repo.allow_fast_forward_only_merge) {
-      config.mergeMethod = 'fast-forward';
+      config.mergeMethod = 'fast-forward-only';
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',
