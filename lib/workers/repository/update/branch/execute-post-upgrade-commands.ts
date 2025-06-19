@@ -8,6 +8,7 @@ import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
+import type { ExecOptions } from '../../../../util/exec/types';
 import {
   localPathIsFile,
   outputCacheFile,
@@ -66,7 +67,7 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      let dataFilePath = '';
+      let dataFilePath: string | null = null;
       if (dataFileTemplate) {
         const dataFileContent = sanitize(
           compile(dataFileTemplate, mergeChildConfig(config, upgrade)),
@@ -93,7 +94,7 @@ export async function postUpgradeCommandsExecutor(
             ),
           });
 
-          dataFilePath = '';
+          dataFilePath = null;
         }
       }
 
@@ -110,10 +111,16 @@ export async function postUpgradeCommandsExecutor(
         ) {
           try {
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
-            const execResult = await exec(compiledCmd, {
+
+            const execOpts: ExecOptions = {
               cwd: GlobalConfig.get('localDir'),
-              env: { RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath },
-            });
+            };
+            if (dataFilePath) {
+              execOpts.env = {
+                RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE: dataFilePath,
+              };
+            }
+            const execResult = await exec(compiledCmd, execOpts);
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },
