@@ -12,6 +12,7 @@ export const presets: Record<string, Preset> = {
       'helpers:pinGitHubActionDigests',
       ':configMigration',
       ':pinDevDependencies',
+      'abandonments:recommended',
     ],
   },
   'js-app': {
