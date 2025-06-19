@@ -3788,7 +3788,7 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
@@ -3800,6 +3800,30 @@ They will be compiled _prior_ to the comparison against [`allowedCommands`](./se
 <!-- prettier-ignore -->
 !!! note
     Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### dataFileTemplate
+
+A template to create data file from.
+The template uses the same format as `commands`.
+The data file is created as a temporary file and the path to the data file is stored in the `RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE` environment variable avaliable to each post-upgrade command.
+The primary purpose of the data file is to store some update information in a file which would be consumed from a post-upgrade command.
+This is particularly useful if a post-upgrade command needs to have a long line of arguments.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": [
+      "my-script.py --data-file \"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+    ],
+    "dataFileTemplate": "[{{#each upgrades}}{\"depName\": \"{{{depName}}}\", \"currentValue\": \"{{{currentValue}}}\", \"newValue\": \"{{{newValue}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+   `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### executionMode
 
