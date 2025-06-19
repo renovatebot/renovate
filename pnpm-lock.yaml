@@ -357,8 +357,8 @@ importers:
         specifier: 2.8.0
         version: 2.8.0
       zod:
-        specifier: 3.25.62
-        version: 3.25.62
+        specifier: 3.25.63
+        version: 3.25.63
     devDependencies:
       '@containerbase/eslint-plugin':
         specifier: 1.1.6
@@ -6403,8 +6403,8 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
-  zod@3.25.62:
-    resolution: {integrity: sha512-YCxsr4DmhPcrKPC9R1oBHQNlQzlJEyPAId//qTau/vBee9uO8K6prmRq4eMkOyxvBfH4wDPIPdLx9HVMWIY3xA==}
+  zod@3.25.63:
+    resolution: {integrity: sha512-3ttCkqhtpncYXfP0f6dsyabbYV/nEUW+Xlu89jiXbTBifUfjaSqXOG6JnQPLtqt87n7KAmnMqcjay6c0Wq0Vbw==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7966,7 +7966,7 @@ snapshots:
       fs-extra: 11.3.0
       toml-eslint-parser: 0.10.0
       upath: 2.0.1
-      zod: 3.25.62
+      zod: 3.25.63
 
   '@renovatebot/kbpgp@4.0.1':
     dependencies:
@@ -13486,6 +13486,6 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zod@3.25.62: {}
+  zod@3.25.63: {}
 
   zwitch@2.0.4: {}
