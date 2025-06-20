@@ -61,7 +61,7 @@ describe('modules/platform/bitbucket/index', () => {
   }
 
   describe('initPlatform()', () => {
-    it('should throw if no token or username/password', async () => {
+    it('should throw if no token, username/password or email/password', async () => {
       expect.assertions(1);
       await expect(bitbucket.initPlatform({})).rejects.toThrow();
     });
@@ -86,6 +86,20 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.initPlatform({
           endpoint: baseUrl,
           username: 'abc',
+          password: '123',
+        }),
+      ).toEqual(expectedResult);
+    });
+
+    it('should init with email/password', async () => {
+      const expectedResult: PlatformResult = {
+        endpoint: baseUrl,
+      };
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200);
+      expect(
+        await bitbucket.initPlatform({
+          endpoint: baseUrl,
+          email: 'abc@gmail.com',
           password: '123',
         }),
       ).toEqual(expectedResult);
@@ -209,7 +223,31 @@ describe('modules/platform/bitbucket/index', () => {
       });
     });
 
-    it('works with only token', async () => {
+    it('works with only API token', async () => {
+      hostRules.clear();
+      hostRules.find.mockReturnValue({
+        password: 'ATCTIAMACONTAINERTOKEN3407361359',
+      });
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
+      expect(
+        await bitbucket.initRepo({
+          repository: 'some/repo',
+        }),
+      ).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
+    });
+
+    it('works with only access token', async () => {
       hostRules.clear();
       hostRules.find.mockReturnValue({
         token: 'abc',

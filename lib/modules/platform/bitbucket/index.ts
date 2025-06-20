@@ -73,12 +73,13 @@ let renovateUserUuid: string | null = null;
 export async function initPlatform({
   endpoint,
   username,
+  email,
   password,
   token,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!(username && password) && !token) {
+  if (!(username && password) && !(email && password) && !token) {
     throw new Error(
-      'Init: You must configure either a Bitbucket token or username and password',
+      'Init: You must configure either a Bitbucket access token or email and password',
     );
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
@@ -92,6 +93,9 @@ export async function initPlatform({
   const options: HttpOptions = { memCache: false };
   if (token) {
     options.token = token;
+  } else if (email) {
+    options.username = email;
+    options.password = password;
   } else {
     options.username = username;
     options.password = password;
@@ -253,9 +257,15 @@ export async function initRepo({
   // TODO #22198
   const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname!)?.[1];
 
-  const auth = opts.token
-    ? `x-token-auth:${opts.token}`
-    : `${opts.username!}:${opts.password!}`;
+  let auth = '';
+  if (opts.token) {
+    auth = `x-token-auth:${opts.token}`;
+  } else if (opts.password?.startsWith('ATAT')) {
+    auth = `x-bitbucket-api-token-auth:${opts.password}`;
+  } else {
+    auth = `${opts.username!}:${opts.password!}`;
+  }
+
   const url = git.getUrl({
     protocol: 'https',
     auth,
