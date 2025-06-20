@@ -16,7 +16,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { parseJson } from '../../../util/common';
@@ -201,7 +201,8 @@ export async function initRepo({
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
   if (!repo) {
-    logger.error({ repos, repo }, 'Could not find repo in repo list');
+    logger.debug({ repos }, 'Available repos');
+    logError('REPO_NOT_FOUND', { repository });
     throw new Error(REPOSITORY_NOT_FOUND);
   }
   logger.debug({ repositoryDetails: repo }, 'Repository details');

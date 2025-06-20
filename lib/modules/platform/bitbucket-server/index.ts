@@ -6,7 +6,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import { parseJson } from '../../../util/common';
@@ -199,7 +199,8 @@ export async function getRepos(): Promise<string[]> {
     logger.debug({ result }, 'result of getRepos()');
     return result;
   } catch (err) /* v8 ignore start */ {
-    logger.error({ err }, `bitbucket getRepos error`);
+    logger.debug({ err }, 'Bitbucket getRepos error');
+    logError('GET_REPOS_ERROR', {});
     throw err;
   } /* v8 ignore stop */
 }

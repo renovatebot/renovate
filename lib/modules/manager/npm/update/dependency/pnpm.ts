@@ -16,7 +16,7 @@ export function updatePnpmCatalogDependency({
 
   // istanbul ignore if
   if (!is.string(catalogName)) {
-    logger.error(
+    logger.warn(
       'No catalogName was found; this is likely an extraction error.',
     );
     return null;
