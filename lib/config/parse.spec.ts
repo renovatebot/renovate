@@ -56,4 +56,37 @@ describe('config/parse', () => {
       });
     });
   });
+
+  describe('jsonc', () => {
+    it('parses', () => {
+      expect(parseFileConfig('config.jsonc', '{}')).toEqual({
+        success: true,
+        parsedContents: {},
+      });
+    });
+
+    it('parses with comments', () => {
+      const jsoncContent = `{
+        // This is a comment
+        "extends": ["config:base"],
+        "enabled": true // Another comment
+      }`;
+      expect(parseFileConfig('config.jsonc', jsoncContent)).toEqual({
+        success: true,
+        parsedContents: {
+          extends: ['config:base'],
+          enabled: true,
+        },
+      });
+    });
+
+    it('returns error', () => {
+      expect(parseFileConfig('config.jsonc', '{')).toEqual({
+        success: false,
+        validationError: 'Invalid JSONC (parsing failed)',
+        validationMessage:
+          'JSONC.parse error: `Invalid JSONC`',
+      });
+    });
+  });
 });

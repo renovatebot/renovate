@@ -1,12 +1,16 @@
 export const configFileNames = [
   'renovate.json',
   'renovate.json5',
+  'renovate.jsonc',
   '.github/renovate.json',
   '.github/renovate.json5',
+  '.github/renovate.jsonc',
   '.gitlab/renovate.json',
   '.gitlab/renovate.json5',
+  '.gitlab/renovate.jsonc',
   '.renovaterc',
   '.renovaterc.json',
   '.renovaterc.json5',
+  '.renovaterc.jsonc',
   'package.json',
 ];

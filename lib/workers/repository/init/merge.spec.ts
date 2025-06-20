@@ -199,6 +199,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('finds and parse renovate.jsonc', async () => {
+      const configFileRaw = `{
+        // this is jsonc format with comments
+        "extends": ["config:base"]
+      }`;
+      scm.getFileList.mockResolvedValue(['package.json', 'renovate.jsonc']);
+      fs.readLocalFile.mockResolvedValue(configFileRaw);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.jsonc',
+        configFileParsed: { extends: ['config:base'] },
+      });
+    });
+
     it('finds .github/renovate.json', async () => {
       scm.getFileList.mockResolvedValue([
         'package.json',
@@ -220,6 +233,36 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
+      });
+    });
+
+    it('finds .github/renovate.jsonc', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.jsonc',
+      ]);
+      fs.readLocalFile.mockResolvedValue(`{
+        // JSONC config with comments
+        "extends": ["config:base"]
+      }`);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.jsonc',
+        configFileParsed: { extends: ['config:base'] },
+      });
+    });
+
+    it('finds .gitlab/renovate.jsonc', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.gitlab/renovate.jsonc',
+      ]);
+      fs.readLocalFile.mockResolvedValue(`{
+        // JSONC config with comments  
+        "enabled": true
+      }`);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitlab/renovate.jsonc',
+        configFileParsed: { enabled: true },
       });
     });
 
