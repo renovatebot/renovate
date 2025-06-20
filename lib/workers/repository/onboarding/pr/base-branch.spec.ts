@@ -16,18 +16,18 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
     });
 
     it('describes baseBranch', () => {
-      config.baseBranches = ['some-branch'];
+      config.baseBranchPatterns = ['some-branch'];
       const res = getBaseBranchDesc(config);
       expect(res.trim()).toBe(
         'You have configured Renovate to use branch `some-branch` as base branch.',
       );
     });
 
-    it('describes baseBranches', () => {
-      config.baseBranches = ['some-branch', 'some-other-branch'];
+    it('describes baseBranchPatterns', () => {
+      config.baseBranchPatterns = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
       expect(res.trim()).toBe(
-        'You have configured Renovate to use the following baseBranches: `some-branch`, `some-other-branch`.',
+        'You have configured Renovate to use the following baseBranchPatterns: `some-branch`, `some-other-branch`.',
       );
     });
   });
