@@ -14,7 +14,6 @@ export interface PlatformParams {
   endpoint?: string;
   token?: string;
   username?: string;
-  email?: string;
   password?: string;
   gitAuthor?: string;
 }

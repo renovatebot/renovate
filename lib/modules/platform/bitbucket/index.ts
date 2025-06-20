@@ -73,11 +73,10 @@ let renovateUserUuid: string | null = null;
 export async function initPlatform({
   endpoint,
   username,
-  email,
   password,
   token,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!(username && password) && !(email && password) && !token) {
+  if (!(username && password) && !token) {
     throw new Error(
       'Init: You must configure either a Bitbucket access token or email and password',
     );
@@ -93,9 +92,6 @@ export async function initPlatform({
   const options: HttpOptions = { memCache: false };
   if (token) {
     options.token = token;
-  } else if (email) {
-    options.username = email;
-    options.password = password;
   } else {
     options.username = username;
     options.password = password;
