@@ -32,7 +32,11 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import type { Timestamp } from '../../../../util/timestamp';
 import * as _limits from '../../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+import type {
+  BranchConfig,
+  BranchUpgradeConfig,
+  CacheFingerprintMatchResult,
+} from '../../../types';
 import type { ResultWithPr } from '../pr';
 import * as _prWorker from '../pr';
 import * as _prAutomerge from '../pr/automerge';
@@ -1480,7 +1484,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
         commitFingerprint: '111',
         reuseExistingBranch: true,
-        cacheFingerprintMatch: 'matched',
+        cacheFingerprintMatch: 'matched' as CacheFingerprintMatchResult,
       };
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
