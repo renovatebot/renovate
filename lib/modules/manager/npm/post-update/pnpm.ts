@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { PnpmWorkspaceFile } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
@@ -90,7 +91,16 @@ export async function generateLockFile(
     // `--recursive` will install un-wanted project.
     // we should avoid this.
     if (await localPathExists(pnpmWorkspaceFilePath)) {
-      args += ' --recursive';
+      const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(
+        (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!,
+      );
+      if (pnpmWorkspace?.packages?.length) {
+        logger.debug(
+          `Found pnpm workspace with ${pnpmWorkspace.packages.length} package definitions`,
+        );
+        // we are in a monorepo, 'pnpm update' needs the '--recursive' flag contrary to 'pnpm install'
+        args += ' --recursive';
+      }
     }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
