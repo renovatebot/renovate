@@ -102,7 +102,21 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs lock file updates for workspace with --recursive', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+      if (fileName === 'some-folder/pnpm-lock.yaml') {
+        return Promise.resolve('package-lock-contents');
+      }
+      if (fileName === 'some-folder/pnpm-workspace.yaml') {
+        return Promise.resolve(
+          codeBlock`
+            packages:
+              - pkg-a
+          `,
+        );
+      }
+      return Promise.resolve('unexpected file name');
+    });
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
@@ -112,7 +126,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -123,7 +137,21 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs lock file updates for workspace with --recursive using pnpm 10.x', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+      if (fileName === 'some-folder/pnpm-lock.yaml') {
+        return Promise.resolve('package-lock-contents');
+      }
+      if (fileName === 'some-folder/pnpm-workspace.yaml') {
+        return Promise.resolve(
+          codeBlock`
+            packages:
+              - pkg-a
+          `,
+        );
+      }
+      return Promise.resolve('unexpected file name');
+    });
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
     const res = await pnpmHelper.generateLockFile(
       'some-folder',
@@ -142,7 +170,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
