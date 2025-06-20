@@ -3199,7 +3199,7 @@ Invalid if used outside of a `packageRule`.
 
 Renovate will compare `matchFileNames` glob or RE2 regex matching against the dependency's package file and also lock file if one exists.
 
-For more details on supported syntax see Renovate's [string pattern matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
