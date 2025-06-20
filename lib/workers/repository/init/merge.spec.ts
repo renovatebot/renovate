@@ -257,7 +257,7 @@ describe('workers/repository/init/merge', () => {
         '.gitlab/renovate.jsonc',
       ]);
       fs.readLocalFile.mockResolvedValue(`{
-        // JSONC config with comments  
+        // JSONC config with comments
         "enabled": true
       }`);
       expect(await detectRepoFileConfig()).toEqual({

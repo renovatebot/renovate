@@ -84,8 +84,7 @@ describe('config/parse', () => {
       expect(parseFileConfig('config.jsonc', '{')).toEqual({
         success: false,
         validationError: 'Invalid JSONC (parsing failed)',
-        validationMessage:
-          'JSONC.parse error: `Invalid JSONC`',
+        validationMessage: 'JSONC.parse error: `Invalid JSONC`',
       });
     });
   });

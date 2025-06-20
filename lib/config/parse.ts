@@ -30,7 +30,10 @@ export function parseFileConfig(
     }
   } else if (fileType === '.jsonc') {
     try {
-      return { success: true, parsedContents: parseJson(fileContents, fileName) };
+      return {
+        success: true,
+        parsedContents: parseJson(fileContents, fileName),
+      };
     } catch (err) {
       logger.debug({ fileName, fileContents }, 'Error parsing JSONC file');
       const validationError = 'Invalid JSONC (parsing failed)';
