@@ -475,7 +475,7 @@ export async function processBranch(
         'Base branch changed by user, rebasing the branch onto new base',
       );
       config.reuseExistingBranch = false;
-    } else if (config.cacheFingerPrintMatch === 'no-match') {
+    } else if (config.cacheFingerprintMatch === 'no-match') {
       logger.debug(
         'Cache fingerprint does not match, cannot reuse existing branch',
       );
@@ -487,7 +487,7 @@ export async function processBranch(
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (
       !(
-        config.reuseExistingBranch && config.cacheFingerPrintMatch === 'matched'
+        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
       )
     ) {
       await scm.checkoutBranch(config.baseBranch);

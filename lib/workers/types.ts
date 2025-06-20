@@ -134,7 +134,7 @@ export interface BranchConfig
   stopUpdating?: boolean;
   isConflicted?: boolean;
   commitFingerprint?: string;
-  cacheFingerPrintMatch?: 'no-fingerprint' | 'no-match' | 'matched';
+  cacheFingerprintMatch?: 'no-fingerprint' | 'no-match' | 'matched';
 }
 
 export interface BranchMetadata {

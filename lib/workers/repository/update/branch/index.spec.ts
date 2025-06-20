@@ -1226,7 +1226,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch({
         ...config,
         baseBranch: 'new_base',
-        skipBranchUpdate: true,
+        cacheFingerprintMatch: 'matched',
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Base branch changed by user, rebasing the branch onto new base',
@@ -1480,7 +1480,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
         commitFingerprint: '111',
         reuseExistingBranch: true,
-        skipBranchUpdate: true,
+        cacheFingerprintMatch: 'matched',
       };
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
@@ -2500,7 +2500,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       config.reuseExistingBranch = true;
-      config.skipBranchUpdate = true;
+      config.cacheFingerprintMatch = 'matched';
       const inconfig = {
         ...config,
         branchName: 'new/some-branch',

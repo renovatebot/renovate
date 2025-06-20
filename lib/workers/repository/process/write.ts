@@ -156,7 +156,7 @@ export async function writeUpdates(
       commitFingerprintConfig: generateCommitFingerprintConfig(branch),
       managers,
     });
-    branch.cacheFingerPrintMatch = compareCacheFingerprint(
+    branch.cacheFingerprintMatch = compareCacheFingerprint(
       branchState,
       commitFingerprint,
     );
