@@ -2848,7 +2848,7 @@ For example, if you have an `examples` directory and you want all updates to tho
 
 If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` glob (which can include an exact file name match) or RE2 regex.
 
-For more details on supported syntax see Renovate's [string pattern matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
