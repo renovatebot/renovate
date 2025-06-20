@@ -33,22 +33,22 @@ export function generateCommitFingerprintConfig(
   return res;
 }
 
-export function canSkipBranchUpdateCheck(
+export function compareCacheFingerprint(
   branchState: BranchCache,
   commitFingerprint: string,
-): boolean {
+): 'no-fingerprint' | 'no-match' | 'matched' {
   if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
-    return false;
+    return 'no-fingerprint';
   }
 
   if (commitFingerprint !== branchState.commitFingerprint) {
     logger.debug('branch.isUpToDate(): needs recalculation');
-    return false;
+    return 'no-match';
   }
 
   logger.debug('branch.isUpToDate(): using cached result "true"');
-  return true;
+  return 'matched';
 }
 
 export async function syncBranchState(
@@ -156,7 +156,7 @@ export async function writeUpdates(
       commitFingerprintConfig: generateCommitFingerprintConfig(branch),
       managers,
     });
-    branch.skipBranchUpdate = canSkipBranchUpdateCheck(
+    branch.cacheFingerPrintMatch = compareCacheFingerprint(
       branchState,
       commitFingerprint,
     );
