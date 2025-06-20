@@ -128,6 +128,10 @@ const uvOptionsWithArguments = [
   '--constraints',
   '--python-version',
   '--no-emit-package',
+  '--resolution',
+  '--prerelease',
+  '--fork-strategy',
+  '--exclude-newer',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
