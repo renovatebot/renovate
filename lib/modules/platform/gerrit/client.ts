@@ -1,8 +1,6 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { GerritHttp } from '../../../util/http/gerrit';
-import type { HttpOptions } from '../../../util/http/types';
 import { getQueryString } from '../../../util/url';
 import type {
   GerritAccountInfo,
@@ -17,7 +15,7 @@ import type {
 import { mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
-  private gerritHttp = new GerritHttp();
+  private gerritHttp = new GerritHttp({ memCache: false });
 
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJsonUnchecked<string[]>(
@@ -48,15 +46,6 @@ class GerritClient {
     repository: string,
     findPRConfig: GerritFindPRConfig,
   ): Promise<GerritChange[]> {
-    /* v8 ignore start: temporary code */
-    // Disables memCache (enabled by default) to be replaced by memCacheProvider
-    const opts: HttpOptions = { memCache: false };
-    // TODO: should refresh the cache rather than just ignore it
-    if (!findPRConfig.refreshCache) {
-      opts.cacheProvider = memCacheProvider;
-    }
-    /* v8 ignore stop */
-
     const query: Record<string, any> = {};
     if (findPRConfig.requestDetails) {
       query.o = findPRConfig.requestDetails;
@@ -71,7 +60,6 @@ class GerritClient {
     const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
       `a/changes/?${queryString}`,
-      opts,
     );
     logger.trace(`findChanges(${queryString}) => ${changes.body.length}`);
     return changes.body;
@@ -79,22 +67,11 @@ class GerritClient {
 
   async getChange(
     changeNumber: number,
-    refreshCache?: boolean,
     requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
-    /* v8 ignore start: temporary code */
-    // Disables memCache (enabled by default) to be replaced by memCacheProvider
-    const opts: HttpOptions = { memCache: false };
-    // TODO: should refresh the cache rather than just ignore it
-    if (!refreshCache) {
-      opts.cacheProvider = memCacheProvider;
-    }
-    /* v8 ignore stop */
-
     const queryString = getQueryString({ o: requestDetails });
     const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
       `a/changes/${changeNumber}?${queryString}`,
-      opts,
     );
     return changes.body;
   }
@@ -126,7 +103,7 @@ class GerritClient {
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJsonUnchecked<
       GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`, { memCache: false });
+    >(`a/changes/${changeNumber}/messages`);
     return messages.body;
   }
 
