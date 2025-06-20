@@ -41,7 +41,7 @@ const RuleSetSchema = z.object({
     ),
 });
 
-const AllSchema = z.object({
+const ExtendsSchema = z.object({
   description: z.string(),
   extends: z.array(z.string()),
   ignoreDeps: z.array(z.string()).optional(),
@@ -50,7 +50,9 @@ const AllSchema = z.object({
 export const ReplacementsSchema = z
   .object({
     $schema: z.string(),
-    all: AllSchema,
+    all: ExtendsSchema,
+    'drop-in': ExtendsSchema,
+    breaking: ExtendsSchema,
   })
   .catchall(RuleSetSchema);
 
