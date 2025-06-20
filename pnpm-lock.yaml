@@ -496,8 +496,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.31)(tsx@4.20.3)(yaml@2.8.0))
       '@vitest/eslint-plugin':
-        specifier: 1.2.4
-        version: 1.2.4(eslint@9.28.0)(typescript@5.8.3)(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.31)(tsx@4.20.3)(yaml@2.8.0))
+        specifier: 1.2.5
+        version: 1.2.5(eslint@9.28.0)(typescript@5.8.3)(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.31)(tsx@4.20.3)(yaml@2.8.0))
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
@@ -2380,8 +2380,8 @@ packages:
       '@vitest/browser':
         optional: true
 
-  '@vitest/eslint-plugin@1.2.4':
-    resolution: {integrity: sha512-4gcw3Kvh1cvwEA1dhPbcwoNmJJXQAaeSiP4UZ8Y9SFdxKuMKrt3moxQ1DLklugjw8S1zhziDp/vPrB3x0UEHKQ==}
+  '@vitest/eslint-plugin@1.2.5':
+    resolution: {integrity: sha512-cfmXz++mkqYpssrKymd7KJumxaZBsfFji2y22QV04kDYKRbiaZ+s4WZL/bzAkcefVKj4KkFctVALHdDZhFhHGg==}
     peerDependencies:
       eslint: '>= 8.57.0'
       typescript: '>= 5.0.0'
@@ -8920,7 +8920,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.2.4(eslint@9.28.0)(typescript@5.8.3)(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.31)(tsx@4.20.3)(yaml@2.8.0))':
+  '@vitest/eslint-plugin@1.2.5(eslint@9.28.0)(typescript@5.8.3)(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.31)(tsx@4.20.3)(yaml@2.8.0))':
     dependencies:
       '@typescript-eslint/utils': 8.34.0(eslint@9.28.0)(typescript@5.8.3)
       eslint: 9.28.0
