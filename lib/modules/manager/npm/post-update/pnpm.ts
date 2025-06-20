@@ -21,6 +21,7 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { tryParsePnpmWorkspaceYaml } from '../extract/pnpm';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
@@ -32,6 +33,23 @@ function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
     }
   }
   return null;
+}
+
+async function isPnpmWorkspace(
+  pnpmWorkspaceFilePath: string,
+): Promise<boolean> {
+  if (!(await localPathExists(pnpmWorkspaceFilePath))) {
+    return false;
+  }
+  const content = await readLocalFile(pnpmWorkspaceFilePath, 'utf8');
+  if (!content) {
+    return false;
+  }
+  const workspaceContents = tryParsePnpmWorkspaceYaml(content);
+  if (!workspaceContents.success) {
+    return false;
+  }
+  return workspaceContents.data.packages?.length > 0;
 }
 
 export async function generateLockFile(
@@ -87,18 +105,7 @@ export async function generateLockFile(
 
     let args = '--lockfile-only';
 
-    // pnpm v9+ is doing recursive automatically when it detects workspaces.
-    //
-    // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
-    // `--recursive` will install un-wanted project.
-    // we should avoid this.
-    if (
-      pnpmToolConstraint.constraint &&
-      !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
-      (await localPathExists(pnpmWorkspaceFilePath))
-    ) {
-      args += ' --recursive';
-    }
+    const isWorkspace = await isPnpmWorkspace(pnpmWorkspaceFilePath);
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
@@ -108,15 +115,26 @@ export async function generateLockFile(
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
     if (lockUpdates.length !== upgrades.length) {
+      // pnpm v9+ is doing recursive automatically when it detects workspaces.
+      //
+      // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
+      // `--recursive` will install the unwanted project which we should avoid.
+      const isPnpmPreV9 =
+        pnpmToolConstraint.constraint &&
+        !semver.intersects(pnpmToolConstraint.constraint, '>=9');
+
       // This command updates the lock file based on package.json
-      commands.push(`pnpm install ${args}`);
+      commands.push(
+        `pnpm install ${isWorkspace && isPnpmPreV9 ? '--recursive ' : ''}${args}`,
+      );
     }
 
     // rangeStrategy = update-lockfile
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (pnpm)');
+      // Unlike pnpm install, pnpm update requires --recursive to update within a workspace
       commands.push(
-        `pnpm update --no-save ${lockUpdates
+        `pnpm update --no-save ${isWorkspace ? '--recursive ' : ''}${lockUpdates
           // TODO: types (#22198)
           .map((update) => `${update.packageName!}@${update.newVersion!}`)
           .filter(uniqueStrings)
