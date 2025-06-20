@@ -901,6 +901,38 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it('updates branch when no fingerprint match', async () => {
+      expect.assertions(3);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitBody: '[skip-ci]',
+        fetchChangeLogs: 'branch',
+        cacheFingerprintMatch: 'no-match',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'pending',
+        commitSha: '123test',
+      });
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
     it('ensures PR and comments notice', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
