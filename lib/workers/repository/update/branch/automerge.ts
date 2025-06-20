@@ -46,7 +46,11 @@ export async function tryBranchAutomerge(
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
         await scm.checkoutBranch(config.baseBranch!);
-        await scm.mergeAndPush(config.branchName!);
+        await scm.mergeAndPush(
+          config.branchName!,
+          config.automergeStrategy ?? 'auto',
+          config.automergeMergeCommitMessage,
+        );
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
