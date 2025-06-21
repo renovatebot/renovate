@@ -60,6 +60,9 @@ export class Unity3dDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const translatedRegistryUrl = this.translateStream(registryUrl!);
 
+    const isStable: boolean =
+      translatedRegistryUrl === Unity3dDatasource.streams.lts;
+
     let total: number | undefined = undefined;
     let offset = 0;
 
@@ -82,7 +85,7 @@ export class Unity3dDatasource extends Datasource {
             : release.version,
           releaseTimestamp: asTimestamp(release.releaseDate),
           changelogUrl: release.releaseNotes.url,
-          isStable: translatedRegistryUrl === Unity3dDatasource.streams.lts,
+          isStable,
         });
       }
 
