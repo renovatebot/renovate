@@ -102,7 +102,21 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('performs lock file updates for workspace with --recursive', async () => {
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+      if (fileName === 'some-folder/pnpm-lock.yaml') {
+        return Promise.resolve('package-lock-contents');
+      }
+      if (fileName === 'some-folder/pnpm-workspace.yaml') {
+        return Promise.resolve(
+          codeBlock`
+            packages:
+              - pkg-a
+          `,
+        );
+      }
+      return Promise.resolve('unexpected file name');
+    });
     fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
     const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
       { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
@@ -112,11 +126,85 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for workspace with --recursive using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+    fs.readLocalFile.mockImplementation((fileName: string): Promise<string> => {
+      if (fileName === 'some-folder/pnpm-lock.yaml') {
+        return Promise.resolve('package-lock-contents');
+      }
+      if (fileName === 'some-folder/pnpm-workspace.yaml') {
+        return Promise.resolve(
+          codeBlock`
+            packages:
+              - pkg-a
+          `,
+        );
+      }
+      return Promise.resolve('unexpected file name');
+    });
+    fs.localPathExists.mockResolvedValueOnce(true); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates for non workspace without --recursive using pnpm 10.x', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    fs.localPathExists.mockResolvedValueOnce(false); // pnpm-workspace.yaml
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, constraints: { pnpm: '10.x' } },
+      [
+        {
+          packageName: 'some-dep',
+          newVersion: '1.0.1',
+          isLockfileUpdate: true,
+        },
+        {
+          packageName: 'some-other-dep',
+          newVersion: '1.1.0',
+          isLockfileUpdate: true,
+        },
+      ],
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
