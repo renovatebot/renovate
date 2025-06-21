@@ -1,4 +1,5 @@
 import { getPkgReleases } from '..';
+import { UnityReleasesJSON } from './schema';
 import { Unity3dDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -21,6 +22,30 @@ describe('modules/datasource/unity3d/index', () => {
         .get(`${uri.pathname}${uri.search}`)
         .reply(200, content);
     }
+  };
+
+  const createUnityReleases = (
+    total: number,
+    offset: number,
+    resultCount: number,
+  ) => {
+    const results = [];
+
+    for (let i = 0; i < resultCount; i++) {
+      results.push({
+        version: `6000.0.${offset + i + 1}f1`,
+        releaseDate: '2024-12-18T08:40:10.134Z',
+        releaseNotes: {
+          url: 'testUrl',
+        },
+        shortRevision: '0115cb901a32',
+      });
+    }
+
+    return UnityReleasesJSON.parse({
+      total,
+      results,
+    });
   };
 
   it.each([
@@ -275,5 +300,32 @@ describe('modules/datasource/unity3d/index', () => {
         registryUrl: expect.stringMatching(/(releases|lts)/),
       }),
     );
+  });
+
+  it('uses pagination', async () => {
+    const uriPageOne = new URL(
+      `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    );
+    const uriPageTwo = new URL(
+      `${Unity3dDatasource.streams.lts}&limit=25&offset=25`,
+    );
+
+    const total = 30;
+
+    httpMock
+      .scope(uriPageOne.origin)
+      .get(`${uriPageOne.pathname}${uriPageOne.search}`)
+      .reply(200, JSON.stringify(createUnityReleases(total, 0, 25)));
+    httpMock
+      .scope(uriPageTwo.origin)
+      .get(`${uriPageTwo.pathname}${uriPageTwo.search}`)
+      .reply(200, JSON.stringify(createUnityReleases(total, 25, 5)));
+
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+    });
+
+    expect(responses?.releases).toBeArrayOfSize(total);
   });
 });
