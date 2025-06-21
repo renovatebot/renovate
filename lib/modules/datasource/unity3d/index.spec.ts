@@ -28,7 +28,9 @@ describe('modules/datasource/unity3d/index', () => {
     Unity3dDatasource.legacyStreams.lts,
     Unity3dDatasource.legacyStreams.stable,
   ])('returns lts if requested %s', async (registryUrl) => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -58,7 +60,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns tech if requested', async () => {
-    mockUnityReleasesApi({ tech: Unity3dDatasource.streams.tech });
+    mockUnityReleasesApi({
+      tech: `${Unity3dDatasource.streams.tech}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -88,7 +92,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns alpha if requested', async () => {
-    mockUnityReleasesApi({ alpha: Unity3dDatasource.streams.alpha });
+    mockUnityReleasesApi({
+      alpha: `${Unity3dDatasource.streams.alpha}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -121,7 +127,9 @@ describe('modules/datasource/unity3d/index', () => {
     Unity3dDatasource.streams.beta,
     Unity3dDatasource.legacyStreams.beta,
   ])('returns beta if requested %s', async (registryUrl) => {
-    mockUnityReleasesApi({ beta: Unity3dDatasource.streams.beta });
+    mockUnityReleasesApi({
+      beta: `${Unity3dDatasource.streams.beta}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -151,7 +159,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns lts releases by default', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -197,7 +207,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns hash if requested', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responsesWithHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
@@ -218,7 +230,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns no hash if not requested', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responsesWithoutHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -239,7 +253,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns only lts by default', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
