@@ -23,6 +23,11 @@ export function addConfigFileNames(fileNames: string[]): void {
 export function getConfigFileNames(): string[] {
   let allFileNames = [...userAddedConfigFileNames, ...configFileNames];
   const platform = GlobalConfig.get('platform');
+  // should not happen
+  if (!platform) {
+    return allFileNames;
+  }
+
   allFileNames = allFileNames.filter((filename) => {
     const parts = filename.split('/');
     if (parts.length === 1) {

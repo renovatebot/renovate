@@ -3,12 +3,19 @@ import { GlobalConfig } from './global';
 
 describe('config/app-strings', () => {
   beforeEach(() => {
-    GlobalConfig.set({ platform: 'github' });
+    GlobalConfig.reset();
   });
 
-  it('returns platform specific config filenames', () => {
+  it('returns platform specific config filenames if platform detected', () => {
+    GlobalConfig.set({ platform: 'github' });
     const filenames = getConfigFileNames();
     expect(filenames.includes('.gitlab/renovate.json')).toBeFalse();
+    expect(filenames.includes('.github/renovate.json')).toBeTrue();
+  });
+
+  it('returns all config filenames if platform not detected', () => {
+    const filenames = getConfigFileNames();
+    expect(filenames.includes('.gitlab/renovate.json')).toBeTrue();
     expect(filenames.includes('.github/renovate.json')).toBeTrue();
   });
 
