@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 
-const defaultConfigFile = configFileNames[0];
+const defaultConfigFile = getConfigFileNames()[0];
 
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
@@ -36,7 +36,9 @@ export function getConfigDesc(
   packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
-  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
+  const configFile = getConfigFileNames().includes(
+    config.onboardingConfigFileName!,
+  )
     ? config.onboardingConfigFileName!
     : defaultConfigFile;
   logger.debug('getConfigDesc()');

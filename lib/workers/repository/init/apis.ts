@@ -1,4 +1,4 @@
-import { configFileNames } from '../../../config/app-strings';
+import { getConfigFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -12,6 +12,8 @@ import { platform } from '../../../modules/platform';
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
+
+const configFileNames = getConfigFileNames();
 
 // TODO #22198
 const getDefaultConfigFile = (config: RenovateConfig): string =>

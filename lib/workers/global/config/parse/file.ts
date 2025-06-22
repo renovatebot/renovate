@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
+import { addConfigFileNames } from '../../../../config/app-strings';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
@@ -104,6 +105,10 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       'processEnv keys were exported to env',
     );
     delete config.processEnv;
+  }
+
+  if (is.nonEmptyArray(config.configFileNames)) {
+    addConfigFileNames(config.configFileNames);
   }
 
   return migrateAndValidateConfig(config, configFile);

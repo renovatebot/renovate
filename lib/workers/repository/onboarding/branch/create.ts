@@ -1,4 +1,4 @@
-import { configFileNames } from '../../../../config/app-strings';
+import { getConfigFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -7,13 +7,13 @@ import { compile } from '../../../../util/template';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
-const defaultConfigFile = configFileNames[0];
+const defaultConfigFile = getConfigFileNames()[0];
 
 export function getDefaultConfigFileName(
   config: Partial<RenovateConfig>,
 ): string {
   // TODO #22198
-  return configFileNames.includes(config.onboardingConfigFileName!)
+  return getConfigFileNames().includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : defaultConfigFile;
 }

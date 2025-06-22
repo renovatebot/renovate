@@ -1,4 +1,4 @@
-import { configFileNames } from '../../../config/app-strings';
+import { getConfigFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
@@ -6,7 +6,7 @@ import * as memCache from '../../../util/cache/memory';
 export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
 }
-
+const configFileNames = getConfigFileNames();
 export function defaultConfigFile(config: RenovateConfig): string {
   return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!

@@ -16,7 +16,7 @@ import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
-import { configFileNames } from './app-strings';
+import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
@@ -44,6 +44,7 @@ import {
 } from './validation-helpers/utils';
 
 const options = getOptions();
+const configFileNames = getConfigFileNames();
 
 let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;

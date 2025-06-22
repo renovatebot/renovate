@@ -1,4 +1,7 @@
-export const configFileNames = [
+import { logger } from '../logger';
+import { GlobalConfig } from './global';
+
+const configFileNames = [
   'renovate.json',
   'renovate.json5',
   '.github/renovate.json',
@@ -10,3 +13,27 @@ export const configFileNames = [
   '.renovaterc.json5',
   'package.json',
 ];
+
+let userAddedConfigFileNames: string[] = [];
+
+export function addConfigFileNames(fileNames: string[]): void {
+  userAddedConfigFileNames = fileNames;
+}
+
+export function getConfigFileNames(): string[] {
+  let allFileNames = [...userAddedConfigFileNames, ...configFileNames];
+  const platform = GlobalConfig.get('platform');
+  allFileNames = allFileNames.filter((filename) => {
+    const parts = filename.split('/');
+    if (parts.length === 1) {
+      // No platform specified, include this file
+      return true;
+    }
+
+    const platformName = parts[0].replace('.', '');
+    return platformName === platform;
+  });
+
+  logger.debug({ allFileNames });
+  return allFileNames;
+}
