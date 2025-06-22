@@ -108,7 +108,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   }
 
   if (is.nonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
     addConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return migrateAndValidateConfig(config, configFile);
