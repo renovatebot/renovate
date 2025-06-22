@@ -63,7 +63,7 @@ export class Unity3dDatasource extends Datasource {
     const isStable: boolean =
       translatedRegistryUrl === Unity3dDatasource.streams.lts;
 
-    let total: number | undefined = undefined;
+    let total: number | null = null;
     let offset = 0;
 
     const result: ReleaseResult = {
