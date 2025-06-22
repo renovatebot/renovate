@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { mock } from 'vitest-mock-extended';
-import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
 import * as gitlab from '../../../../modules/platform/gitlab';
 import type { LongCommitSha } from '../../../../util/git/types';
@@ -16,15 +15,13 @@ describe('workers/repository/update/pr/code-owners', () => {
       writable: true,
     });
   });
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
 
   describe('codeOwnersForPr', () => {
     let pr: Pr;
 
     beforeEach(() => {
       pr = mock<Pr>();
+      pr.sha = undefined;
     });
 
     it('returns global code owner', async () => {
@@ -34,10 +31,7 @@ describe('workers/repository/update/pr/code-owners', () => {
       expect(codeOwners).toEqual(['@jimmy']);
     });
 
-    it('returns global code owner for gerrit', async () => {
-      GlobalConfig.set({
-        platform: 'gerrit',
-      });
+    it('returns global code owner for commit with sha set', async () => {
       pr.sha = 'f7374c2de8a4c95a7fd7182ab24044e3896aac02' as LongCommitSha;
       fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
       git.getBranchFilesFromCommit.mockResolvedValueOnce(['README.md']);

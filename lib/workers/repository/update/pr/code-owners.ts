@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import ignore from 'ignore';
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
@@ -99,12 +98,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
 
     logger.debug(`Found CODEOWNERS file: ${codeOwnersFile}`);
-    const pl = GlobalConfig.get('platform');
 
     // Get list of modified files in PR
-    //on the gerrit platform, the source branch does not exists. Instead of the branch, we can take the commit sha and diff against the parent
+    // if the commit sha is known, we can directly compare against the parent, otherwise use the branch
     const prFiles =
-      'gerrit' === pl && pr.sha
+      pr.sha
         ? await getBranchFilesFromCommit(pr.sha)
         : await getBranchFiles(pr.sourceBranch);
 
