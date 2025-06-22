@@ -64,7 +64,6 @@ export class Unity3dDatasource extends Datasource {
       translatedRegistryUrl === Unity3dDatasource.streams.lts;
 
     let total: number | null = null;
-    let offset = 0;
 
     const result: ReleaseResult = {
       releases: [],
@@ -72,7 +71,11 @@ export class Unity3dDatasource extends Datasource {
       registryUrl: translatedRegistryUrl,
     };
 
-    do {
+    for (
+      let offset = 0;
+      total === null || offset < total;
+      offset += Unity3dDatasource.limit
+    ) {
       const response = await this.http.getJson(
         `${translatedRegistryUrl}&limit=${Unity3dDatasource.limit}&offset=${offset}`,
         UnityReleasesJSON,
@@ -90,9 +93,7 @@ export class Unity3dDatasource extends Datasource {
       }
 
       total ??= response.body.total;
-
-      offset += Unity3dDatasource.limit;
-    } while (offset < total);
+    }
 
     return result;
   }
