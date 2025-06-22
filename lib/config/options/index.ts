@@ -222,6 +222,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'configFileNames',
+    description: 'List of filenames where repository config will be stored.',
+    type: 'array',
+    default: null,
+    globalOnly: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'onboardingConfigFileName',
     description:
       'Change this value to override the default onboarding config file name.',
