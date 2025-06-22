@@ -7,6 +7,7 @@ import {
 import { logger } from '../../../logger';
 import type { RepoParams, RepoResult } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
+import { getDefaultConfigFileName } from '../onboarding/common';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
@@ -33,7 +34,7 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(getDefaultConfigFile(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -65,7 +66,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const defaultConfigFile = getDefaultConfigFile(config);
+    const defaultConfigFile = getDefaultConfigFileName(config);
     const repoConfig = await getJsonFile(defaultConfigFile);
     if (!repoConfig) {
       logger.debug(

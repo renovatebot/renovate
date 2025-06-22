@@ -510,7 +510,7 @@ export async function initRepo({
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        user: renovateUsername,
+        ...(!ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
     });

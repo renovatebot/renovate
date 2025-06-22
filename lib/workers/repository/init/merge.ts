@@ -28,13 +28,15 @@ import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
 import { parseAndValidateOrExit } from '../../global/config/parse/env';
 import { getOnboardingConfig } from '../onboarding/branch/config';
-import { getDefaultConfigFileName } from '../onboarding/branch/create';
 import {
   getOnboardingConfigFromCache,
   getOnboardingFileNameFromCache,
   setOnboardingConfigDetails,
 } from '../onboarding/branch/onboarding-branch-cache';
-import { OnboardingState } from '../onboarding/common';
+import {
+  OnboardingState,
+  getDefaultConfigFileName,
+} from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
 export async function detectConfigFile(): Promise<string | null> {

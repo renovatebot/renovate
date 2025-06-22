@@ -11,6 +11,10 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->

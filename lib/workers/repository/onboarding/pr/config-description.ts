@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
+import { getDefaultConfigFileName } from '../common';
 
 const defaultConfigFile = getConfigFileNames()[0];
 
