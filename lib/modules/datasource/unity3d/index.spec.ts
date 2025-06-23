@@ -28,7 +28,7 @@ describe('modules/datasource/unity3d/index', () => {
     total: number,
     offset: number,
     resultCount: number,
-  ) => {
+  ) {
     const results = [];
 
     for (let i = 0; i < resultCount; i++) {
