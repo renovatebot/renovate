@@ -22,12 +22,16 @@ function hashReleases(releases: ReleaseResult): string {
   return hashVersions(releases.releases.map((release) => release.version));
 }
 
-type CacheNotFoundError = { type: 'cache-not-found' };
-type CacheStaleError = {
+interface CacheNotFoundError {
+  type: 'cache-not-found';
+}
+interface CacheStaleError {
   type: 'cache-stale';
   cache: CacheRecord;
-};
-type CacheInvalidError = { type: 'cache-invalid' };
+}
+interface CacheInvalidError {
+  type: 'cache-invalid';
+}
 type CacheLoadError = CacheNotFoundError | CacheStaleError;
 type CacheError = CacheNotFoundError | CacheStaleError | CacheInvalidError;
 

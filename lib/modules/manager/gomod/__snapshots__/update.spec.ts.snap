@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/gomod/update updateDependency replaces major gopkg.in updates 1`] = `
+exports[`modules/manager/gomod/update > updateDependency > replaces major gopkg.in updates 1`] = `
 "module github.com/renovate-tests/gomod1
 
 require github.com/pkg/errors v0.7.0
@@ -15,10 +15,13 @@ replace github.com/pkg/errors => ../errors
 replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
 
 require github.com/caarlos0/env v3.5.0+incompatible
+
+require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
+require github.com/cucumber/common/messages/go/v18 v18.0.0
 "
 `;
 
-exports[`modules/manager/gomod/update updateDependency replaces quoted multiline 1`] = `
+exports[`modules/manager/gomod/update > updateDependency > replaces quoted multiline 1`] = `
 "module github.com/jesseduffield/lazygit
 
 require (
@@ -85,7 +88,7 @@ require (
 "
 `;
 
-exports[`modules/manager/gomod/update updateDependency replaces two values in one file 1`] = `
+exports[`modules/manager/gomod/update > updateDependency > replaces two values in one file 1`] = `
 "module github.com/renovate-tests/gomod1
 
 require github.com/pkg/errors v0.8.0
@@ -100,5 +103,8 @@ replace github.com/pkg/errors => ../errors
 replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
 
 require github.com/caarlos0/env v3.5.0+incompatible
+
+require sigs.k8s.io/structured-merge-diff/v4 v4.7.0
+require github.com/cucumber/common/messages/go/v18 v18.0.0
 "
 `;

@@ -1,11 +1,10 @@
-import { mockedFunction } from '../../../../test/util';
 import { readLocalDirectory } from '../../../util/fs';
 import { HermitDatasource } from '../../datasource/hermit';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
-const readdirMock = mockedFunction(readLocalDirectory);
+const readdirMock = vi.mocked(readLocalDirectory);
 
 describe('modules/manager/hermit/extract', () => {
   describe('extractPackageFile', () => {

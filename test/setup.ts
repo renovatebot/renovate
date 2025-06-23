@@ -1,20 +1,33 @@
 // Check for missing or pending http mocks
 import './http-mock';
-import { mockDeep } from 'jest-mock-extended';
+import { mockDeep } from 'vitest-mock-extended';
 import type { Platform, PlatformScm } from '../lib/modules/platform';
+import * as _fixtures from './fixtures';
 
-jest.mock('../lib/modules/platform', () => ({
+// Set timezone so snapshots are consistent
+process.env.TZ = 'UTC';
+
+vi.mock('../lib/modules/platform', () => ({
   platform: mockDeep<Platform>(),
-  initPlatform: jest.fn(),
-  getPlatformList: jest.fn(),
+  initPlatform: vi.fn(),
+  getPlatformList: vi.fn(),
 }));
 
-jest.mock('../lib/modules/platform/scm', () => ({
+vi.mock('../lib/modules/platform/scm', () => ({
   scm: mockDeep<PlatformScm>(),
 }));
 
-jest.mock('../lib/logger', () => {
+vi.mock('../lib/logger', () => {
   return mockDeep({
     withMeta: <T>(_: Record<string, unknown>, cb: () => T): T => cb(),
   });
 });
+
+vi.mock('../lib/util/git', () => mockDeep());
+
+vi.mock('../lib/util/exec/common', () => ({ rawExec: vi.fn() }));
+
+Object.defineProperty(global, 'fixtures', { value: _fixtures });
+declare global {
+  const fixtures: typeof _fixtures;
+}

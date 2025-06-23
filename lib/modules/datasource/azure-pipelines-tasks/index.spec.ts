@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { AzurePipelinesTask } from './schema';
 import { AzurePipelinesTasksDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const builtinTasksPath =
@@ -96,7 +96,83 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'AzurePowerShell',
       }),
-    ).toEqual({ releases: [{ version: '5.248.3' }] });
+    ).toEqual({
+      releases: [
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
+  });
+
+  it('identifies task based on task id', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://my.custom.domain',
+    });
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName: '5d437bf5-f193-4449-b531-c4c69eebaa48',
+      }),
+    ).toEqual({ releases: [{ version: '3.1.11' }] });
+  });
+
+  it('identifies task based on contributionIdentifier and id', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://my.custom.domain',
+    });
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName:
+          'gittools.gittools.open-gitreleasemanager-task.5d437bf5-f193-4449-b531-c4c69eebaa48',
+      }),
+    ).toEqual({ releases: [{ version: '3.1.11' }] });
+  });
+
+  it('identifies task based on contributionIdentifier and name', async () => {
+    GlobalConfig.set({
+      platform: 'azure',
+      endpoint: 'https://my.custom.domain',
+    });
+    hostRules.add({
+      hostType: AzurePipelinesTasksDatasource.id,
+      matchHost: 'my.custom.domain',
+      token: '123test',
+    });
+    httpMock
+      .scope('https://my.custom.domain')
+      .get('/_apis/distributedtask/tasks/')
+      .reply(200, Fixtures.get('tasks.json'));
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        packageName:
+          'gittools.gittools.open-gitreleasemanager-task.gitreleasemanager/open',
+      }),
+    ).toEqual({ releases: [{ version: '3.1.11' }] });
   });
 
   it('returns organization task with multiple versions', async () => {
@@ -123,8 +199,17 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       }),
     ).toEqual({
       releases: [
-        { isDeprecated: true, version: '1.2.3' },
-        { isDeprecated: undefined, version: '2.247.1' },
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          isDeprecated: true,
+          version: '1.2.3',
+        },
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '2.247.1',
+        },
       ],
     });
   });
@@ -151,6 +236,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
             : null;
 
         return AzurePipelinesTask.parse({
+          id: '',
           name: '',
           deprecated: false,
           version,

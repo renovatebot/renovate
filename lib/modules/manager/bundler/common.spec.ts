@@ -1,6 +1,4 @@
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { UpdateArtifact } from '../types';
@@ -9,8 +7,10 @@ import {
   getLockFilePath,
   getRubyConstraint,
 } from './common';
+import { Fixtures } from '~test/fixtures';
+import { fs, partial } from '~test/util';
 
-jest.mock('../../../util/fs');
+vi.mock('../../../util/fs');
 
 const gemfile = Fixtures.get('Gemfile.sourceGroup');
 const lockedContent = Fixtures.get('Gemfile.gitlab-foss.lock');

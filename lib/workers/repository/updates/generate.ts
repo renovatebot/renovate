@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import mdTable from 'markdown-table';
+import { markdownTable } from 'markdown-table';
 import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
@@ -193,7 +193,7 @@ export function generateBranchConfig(
     }
     if (upg.newDigest) {
       upg.newDigestShort =
-        upg.newDigestShort ||
+        upg.newDigestShort ??
         upg.newDigest.replace('sha256:', '').substring(0, 7);
     }
     if (upg.isDigest || upg.isPinDigest) {
@@ -285,7 +285,6 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
-    // istanbul ignore else
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&
@@ -436,15 +435,36 @@ export function generateBranchConfig(
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
+
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
     config.updateType = 'major';
   }
+
+  config.isBreaking = config.upgrades.some((upgrade) => upgrade.isBreaking);
+
+  // explicit set `isLockFileMaintenance` for the branch for groups
+  if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
+    config.isLockFileMaintenance = true;
+    // istanbul ignore if: not worth testing
+    if (config.upgrades.some((upgrade) => !upgrade.isLockFileMaintenance)) {
+      // TODO: warn?
+      logger.debug(
+        'Grouping lockfile maintenance with other update types is not supported',
+      );
+    }
+  }
+
   config.constraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
   }
+
+  // Set skipInstalls to false if any upgrade in the branch has it false
+  config.skipInstalls = config.upgrades.every(
+    (upgrade) => upgrade.skipInstalls !== false,
+  );
 
   const tableRows = config.upgrades
     .map(getTableValues)
@@ -464,7 +484,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += '\n\n' + mdTable(table) + '\n';
+    config.commitMessage += '\n\n' + markdownTable(table) + '\n';
   }
   const additionalReviewers = uniq(
     config.upgrades

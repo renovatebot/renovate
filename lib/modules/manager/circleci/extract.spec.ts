@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const file1 = Fixtures.get('config.yml');
 const file2 = Fixtures.get('config2.yml');
@@ -14,16 +14,20 @@ describe('modules/manager/circleci/extract', () => {
     });
 
     it('handles registry alias', () => {
-      const res = extractPackageFile(
-        'executors:\n  my-executor:\n    docker:\n      - image: quay.io/myName/myPackage:0.6.2',
-        '',
-        {
-          registryAliases: {
-            'quay.io': 'my-quay-mirror.registry.com',
-            'index.docker.io': 'my-docker-mirror.registry.com',
-          },
+      const src = codeBlock`
+        executors:
+          my-executor:
+            docker:
+              - image: quay.io/myName/myPackage:0.6.2
+      `;
+
+      const res = extractPackageFile(src, '.circleci/config.yml', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+          'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      );
+      });
+
       expect(res).toEqual({
         deps: [
           {
@@ -222,10 +226,10 @@ describe('modules/manager/circleci/extract', () => {
     it('extracts and exclude android images', () => {
       expect(
         extractPackageFile(codeBlock`
-        jobs:
-          build:
-            machine:
-              image: android:202102-01
+          jobs:
+            build:
+              machine:
+                image: android:202102-01
         `),
       ).toBeNull();
     });
@@ -246,10 +250,12 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts executors', () => {
       const res = extractPackageFile(codeBlock`
-      executors:
-        my-executor:
-          docker:
-            - image: cimg/ruby:3.0.3-browsers`);
+        executors:
+          my-executor:
+            docker:
+              - image: cimg/ruby:3.0.3-browsers
+      `);
+
       expect(res?.deps).toEqual([
         {
           autoReplaceStringTemplate:
@@ -266,29 +272,30 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts orb definitions', () => {
       const res = extractPackageFile(codeBlock`
-      version: 2.1
+        version: 2.1
 
-      orbs:
-        myorb:
-          orbs:
-            python: circleci/python@2.1.1
+        orbs:
+          myorb:
+            orbs:
+              python: circleci/python@2.1.1
 
-          executors:
-            python:
-              docker:
-                - image: cimg/python:3.9
+            executors:
+              python:
+                docker:
+                  - image: cimg/python:3.9
 
-          jobs:
-            test_image:
-              docker:
-                - image: cimg/python:3.7
-              steps:
-                - checkout
+            jobs:
+              test_image:
+                docker:
+                  - image: cimg/python:3.7
+                steps:
+                  - checkout
 
-      workflows:
-        Test:
-          jobs:
-            - myorb/test_image`);
+        workflows:
+          Test:
+            jobs:
+              - myorb/test_image
+      `);
 
       expect(res).toEqual({
         deps: [

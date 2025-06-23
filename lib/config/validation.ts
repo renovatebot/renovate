@@ -76,13 +76,6 @@ const ignoredNodes = [
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
-function isManagerPath(parentPath: string): boolean {
-  return (
-    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
-    managerList.includes(parentPath)
-  );
-}
-
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
 }
@@ -166,7 +159,7 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    // istanbul ignore if
+    /* v8 ignore next 7 -- TODO: add test */
     if (key === '__proto__') {
       errors.push({
         topic: 'Config security error',
@@ -218,19 +211,6 @@ export async function validateConfig(
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
             ', ',
           )}"`,
-        });
-      }
-    }
-    if (key === 'fileMatch') {
-      if (parentPath === undefined) {
-        errors.push({
-          topic: 'Config error',
-          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
-        });
-      } else if (!isManagerPath(parentPath)) {
-        warnings.push({
-          topic: 'Config warning',
-          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
@@ -488,7 +468,7 @@ export async function validateConfig(
                 'customType',
                 'description',
                 'fileFormat',
-                'fileMatch',
+                'managerFilePatterns',
                 'matchStrings',
                 'matchStringsStrategy',
                 'depNameTemplate',
@@ -520,7 +500,7 @@ export async function validateConfig(
                   is.nonEmptyString(customManager.customType) &&
                   isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                  if (is.nonEmptyArray(customManager.managerFilePatterns)) {
                     switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
@@ -540,7 +520,7 @@ export async function validateConfig(
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty managerFilePatterns array`,
                     });
                   }
                 } else {
@@ -575,18 +555,6 @@ export async function validateConfig(
                       message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                     });
                   }
-                }
-              }
-            }
-            if (key === 'fileMatch') {
-              for (const fileMatch of val as string[]) {
-                try {
-                  regEx(fileMatch);
-                } catch {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
-                  });
                 }
               }
             }
@@ -677,7 +645,7 @@ export async function validateConfig(
                   });
                 }
                 if (
-                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                  !(is.string(statusCheckValue) || null === statusCheckValue)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -818,11 +786,9 @@ export async function validateConfig(
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
-    // istanbul ignore else: currently never happen
     if (a.topic === b.topic) {
       return a.message > b.message ? 1 : -1;
     }
-    // istanbul ignore next: currently never happen
     return a.topic > b.topic ? 1 : -1;
   }
 
@@ -843,7 +809,7 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
-  // istanbul ignore if
+  /* v8 ignore next 5 -- not testable yet */
   if (getDeprecationMessage(key)) {
     warnings.push({
       topic: 'Deprecation Warning',

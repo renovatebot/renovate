@@ -1,5 +1,3 @@
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
@@ -18,6 +16,7 @@ import {
   getIssue,
   getOrgLabels,
   getPR,
+  getPRByBranch,
   getRepo,
   getRepoContents,
   getRepoLabels,
@@ -46,6 +45,8 @@ import type {
   RepoContents,
   User,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { logger, partial } from '~test/util';
 
 describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
@@ -70,6 +71,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   const mockRepo: Repo = partial<Repo>({
     id: 123,
+    allow_fast_forward_only_merge: true,
     allow_rebase: true,
     allow_rebase_explicit: true,
     allow_merge_commits: true,
@@ -417,6 +419,62 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
       const res = await getPR(mockRepo.full_name, mockPR.number);
       expect(res).toEqual(mockPR);
+    });
+  });
+
+  describe('getPRByBranch', () => {
+    it('should call /api/v1/repos/[repo]/pulls/[base]/[head] endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(200, mockPR);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toEqual(mockPR);
+    });
+
+    it('should return null if pr not found', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(404);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should log error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.base!.ref}/${mockPR.head!.label}`,
+        )
+        .reply(410);
+
+      const res = await getPRByBranch(
+        mockRepo.full_name,
+        mockPR.base!.ref,
+        mockPR.head!.label,
+      );
+      expect(res).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          err: expect.any(Object),
+        },
+        'Error while fetching PR',
+      );
     });
   });
 

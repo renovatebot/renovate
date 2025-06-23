@@ -163,8 +163,7 @@ const defRegex = regEx(
 export function extractVariables(content: string): ExtractedVariables {
   const result: ExtractedVariables = {};
   const lines = content.split(newlineRegex);
-  for (let idx = 0; idx < lines.length; idx += 1) {
-    const line = lines[idx];
+  for (const line of lines) {
     const match = defRegex.exec(line);
     if (match?.groups) {
       const { varName: key, stringValue: val } = match.groups;

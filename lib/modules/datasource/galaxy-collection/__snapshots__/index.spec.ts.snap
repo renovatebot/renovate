@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/galaxy-collection/index getReleases processes real data 1`] = `
+exports[`modules/datasource/galaxy-collection/index > getReleases > processes real data 1`] = `
 {
   "registryUrl": "https://galaxy.ansible.com/api",
   "releases": [
@@ -33,7 +33,7 @@ exports[`modules/datasource/galaxy-collection/index getReleases processes real d
 }
 `;
 
-exports[`modules/datasource/galaxy-collection/index getReleases processes real data with automation hub URL 1`] = `
+exports[`modules/datasource/galaxy-collection/index > getReleases > processes real data with automation hub URL 1`] = `
 {
   "registryUrl": "https://my.automationhub.local/api/galaxy/content/published",
   "releases": [

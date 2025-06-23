@@ -1,5 +1,4 @@
 import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
-import type { UserEnv } from '../../config/types';
 
 export interface ToolConstraint {
   toolName: string;
@@ -26,10 +25,10 @@ export interface DockerOptions {
 }
 
 export type DataListener = (chunk: any) => void;
-export type OutputListeners = {
+export interface OutputListeners {
   stdout?: DataListener[];
   stderr?: DataListener[];
-};
+}
 
 export interface RawExecOptions extends ChildProcessSpawnOptions {
   // TODO: to be removed in #16655
@@ -53,7 +52,6 @@ export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;
   env?: Opt<ExtraEnv>;
-  userConfiguredEnv?: UserEnv;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;

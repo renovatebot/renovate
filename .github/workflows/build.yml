@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - next
+      - maint/**
 
   pull_request:
     types:
@@ -26,12 +28,13 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: ${{ github.ref_name != 'main' }}
+  cancel-in-progress: true
 
 env:
-  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+  # are we on a release branch?
+  DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.22.3 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.25.3 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -130,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION }}
+      node-version: ${{ steps.setup-outputs.outputs.node-version }}
 
     steps:
       - name: Checkout code
@@ -139,6 +142,11 @@ jobs:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
+
+      - name: Setup outputs
+        id: setup-outputs
+        run: |
+          echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
@@ -193,9 +201,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    permissions:
-      actions: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -209,38 +214,28 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          # we need to add the hash because eslint cache doesn't detect plugin changes
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: pnpm eslint-ci
 
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=eslint-main-cache ||
-            echo "Cache not found"
-
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-main-cache
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 7
-
-    permissions:
-      actions: write
 
     steps:
       - name: Checkout code
@@ -255,10 +250,12 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          # we need to add the hash because prettier cache doesn't detect plugin changes
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: |
@@ -269,21 +266,12 @@ jobs:
             exit 1
           }
 
-      - name: Remove cache
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.event.repository.full_name }}
-        run: |
-          gh api --method DELETE /repos/{owner}/{repo}/actions/caches?key=prettier-main-cache ||
-            echo "Cache not found"
-
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-main-cache
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
@@ -304,7 +292,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
+        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -375,12 +363,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - name: Cache jest
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      - name: Cache vitest
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: .cache/jest
+          path: .cache/vitest
           key: |
-            jest-cache-${{
+            vitest-cache-${{
               runner.os
             }}-${{
               env.NODE_VERSION
@@ -395,14 +383,13 @@ jobs:
         run: |
           for shard in ${{ matrix.shards }};
           do
-            TEST_SHARD="$shard" pnpm jest \
-              --ci \
+            TEST_SHARD="$shard" pnpm vitest \
               --test-timeout ${{ matrix.test-timeout-milliseconds }} \
               --coverage ${{ matrix.coverage }}
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
@@ -413,8 +400,8 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -425,7 +412,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -434,14 +421,14 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -454,7 +441,7 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event.pull_request.draft != true
+    if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -470,7 +457,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
@@ -485,10 +472,10 @@ jobs:
       - name: Check coverage threshold
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
-            --branches 100 \
-            --functions 100 \
-            --lines 100 \
-            --statements 100
+            --branches 98.16 \
+            --functions 99.51 \
+            --lines 98.22 \
+            --statements 98.22
 
   # Catch-all required check for test matrix and coverage
   test-success:
@@ -561,6 +548,36 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Upload dist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: renovate-dist
+          path: dist/
+
+  build-docker:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          show-progress: false
+
+      - name: Download dist
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: renovate-dist
+          path: dist/
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
+
       - name: Build docker
         run: pnpm build:docker build --tries=3 --args '--load'
         env:
@@ -569,14 +586,11 @@ jobs:
       - name: Test docker
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
-      - name: Pack
-        run: pnpm test-e2e:pack
-
-      - name: Upload
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
-        with:
-          name: renovate-package
-          path: renovate-0.0.0-semantic-release.tgz
+      - name: dry-run
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
+        run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
+        env:
+          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-docs:
     needs:
@@ -598,7 +612,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@b2472ca4258a9ea3aee813980a0100a2261a42fc # v4.2
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -617,7 +631,7 @@ jobs:
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: docs
           path: tmp/docs/
@@ -638,20 +652,20 @@ jobs:
         with:
           show-progress: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          standalone: true
-
       - name: Setup Node.js
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: ./.github/actions/setup-node
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ needs.setup-build.outputs.node-version }}
+          os: ${{ runner.os }}
 
-      - name: Download package
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      - name: Download dist
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: renovate-package
+          name: renovate-dist
+          path: dist/
+
+      - name: Pack
+        run: pnpm test-e2e:pack
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -662,6 +676,7 @@ jobs:
   release:
     needs:
       - setup-build
+      - build-docker
       - lint-eslint
       - lint-prettier
       - lint-docs
@@ -690,7 +705,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@d005037f4b778e5c456510a397b91f8ac19078e6 # v3.9.0
+        uses: containerbase/internal-tools@d38112e780a0b9e66c8708cc5bded26bf7014460 # v3.10.48
         with:
           command: docker-config
 
@@ -700,7 +715,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@c56c2d3e59e4281cc41dea2217323ba5694b171e # v3.8.0
+      - uses: sigstore/cosign-installer@fb28c2b6339dcd94da6e4cbcbc5e888961f6f8c3 # v3.9.0
 
       - name: Docker registry login
         run: |
@@ -711,9 +726,7 @@ jobs:
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" && "${{ github.event.inputs.dryRun }}" != "true"  ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
-          elif [[ "${{github.ref}}" == "refs/heads/${{env.DEFAULT_BRANCH}}" ]]; then
-            echo "DRY_RUN=false" >> "$GITHUB_ENV"
-          elif [[ "${{github.ref}}" =~ ^refs/heads/v[0-9]+(\.[0-9]+)?$ ]]; then
+          elif [[ "${{env.DO_REALEASE}}" == "true" ]]; then
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 

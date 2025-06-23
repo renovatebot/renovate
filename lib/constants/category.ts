@@ -1,4 +1,3 @@
-// istanbul ignore next
 export const Categories = [
   'ansible',
   'batect',

@@ -1,9 +1,9 @@
-import * as httpMock from '../../test/http-mock';
-import { partial } from '../../test/util';
 import * as hostRules from '../util/host-rules';
 import { Http } from '../util/http';
 import errSerializer from './err-serializer';
 import { sanitizeValue } from './utils';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 describe('logger/err-serializer', () => {
   it('expands errors', () => {
@@ -107,6 +107,27 @@ describe('logger/err-serializer', () => {
           url: 'https://**redacted**@github.com/api',
           username: '',
         },
+      });
+    });
+
+    it('handles AggregateErrors', () => {
+      const err = partial<Error & Record<string, unknown>>({
+        message: 'foo',
+        stack: 'error stack',
+        body: 'error body',
+      });
+      const aggregateError = new AggregateError([err], 'bar');
+      aggregateError.stack = 'aggregate stack';
+      expect(errSerializer(aggregateError)).toEqual({
+        message: 'bar',
+        stack: 'aggregate stack',
+        errors: [
+          {
+            message: 'foo',
+            body: 'error body',
+            stack: 'error stack',
+          },
+        ],
       });
     });
   });

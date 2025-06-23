@@ -1,14 +1,11 @@
-import { logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { printRepositoryProblems } from '../../../workers/repository';
-import * as _fs from '../../fs';
 import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
 import { getCache, isCacheModified, resetCache, saveCache } from '.';
+import { fs, logger } from '~test/util';
 
-jest.mock('../../fs');
-
-const fs = mocked(_fs);
+vi.mock('../../fs');
 
 describe('util/cache/repository/index', () => {
   beforeEach(() => {

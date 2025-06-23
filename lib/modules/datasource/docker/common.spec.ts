@@ -1,6 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked, partial } from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
@@ -12,12 +10,14 @@ import {
   getRegistryRepository,
 } from './common';
 import type { OciHelmConfig } from './schema';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
-const hostRules = mocked(_hostRules);
+const hostRules = vi.mocked(_hostRules);
 
 const http = new Http(dockerDatasourceId);
 
-jest.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {

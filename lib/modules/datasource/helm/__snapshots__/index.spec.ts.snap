@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/helm/index getReleases returns list of versions for normal response 1`] = `
+exports[`modules/datasource/helm/index > getReleases > returns list of versions for normal response 1`] = `
 {
   "homepage": "https://www.getambassador.io/",
   "registryUrl": "https://example-repository.com",

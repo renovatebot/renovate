@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
+exports[`modules/manager/ansible/extract > extractPackageFile() > extracts multiple image lines from docker_container 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -89,7 +89,7 @@ exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple 
 ]
 `;
 
-exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
+exports[`modules/manager/ansible/extract > extractPackageFile() > extracts multiple image lines from docker_service 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",

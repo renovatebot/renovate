@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import upath from 'upath';
 import { Json } from '../../lib/util/schema-utils';
-import { capitalize } from '../../tools/docs/utils';
+import { capitalize } from '../../lib/util/string';
 import * as Schemas from '../../tools/schemas/schema';
 
 describe('other/validate-schemas', () => {
@@ -38,7 +38,7 @@ describe('other/validate-schemas', () => {
 
         // validate json data against schema: using parse here instead of safeParse so we throw
         // this leads to a better error message when the assertion fails
-        // eslint-disable-next-line import/namespace
+        // eslint-disable-next-line import-x/namespace
         Schemas[schemaName].parse(data);
       }),
     );

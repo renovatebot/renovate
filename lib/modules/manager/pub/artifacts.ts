@@ -22,7 +22,7 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pub.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pub deps - returning null');
@@ -58,7 +58,6 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
-      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName,
@@ -101,7 +100,7 @@ export async function updateArtifacts({
 function getExecCommand(
   toolName: string,
   updatedDeps: Upgrade<Record<string, unknown>>[],
-  isLockFileMaintenance: boolean,
+  isLockFileMaintenance: boolean | undefined,
 ): string {
   if (isLockFileMaintenance) {
     return `${toolName} pub upgrade`;

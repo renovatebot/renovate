@@ -1,11 +1,11 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Timestamp } from '../../../util/timestamp';
 import { GithubTagsDatasource } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -13,8 +13,8 @@ describe('modules/datasource/github-tags/index', () => {
   const github = new GithubTagsDatasource();
 
   beforeEach(() => {
-    jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
-    jest.spyOn(hostRules, 'find').mockReturnValue({
+    vi.spyOn(hostRules, 'hosts').mockReturnValue([]);
+    vi.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',
     });
   });
@@ -52,7 +52,7 @@ describe('modules/datasource/github-tags/index', () => {
     });
 
     it('returns tagged commit digest', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
@@ -71,7 +71,7 @@ describe('modules/datasource/github-tags/index', () => {
     });
 
     it('returns null for missing hash', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
@@ -89,7 +89,7 @@ describe('modules/datasource/github-tags/index', () => {
     });
 
     it('returns null for missing tagged commit digest', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
@@ -108,7 +108,7 @@ describe('modules/datasource/github-tags/index', () => {
     });
 
     it('returns null for error', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce('error');
+      vi.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce('error');
       const res = await github.getDigest({ packageName }, 'v3.0.0');
       expect(res).toBeNull();
     });
@@ -118,7 +118,7 @@ describe('modules/datasource/github-tags/index', () => {
     const packageName = 'some/dep2';
 
     it('returns tags', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
@@ -132,7 +132,7 @@ describe('modules/datasource/github-tags/index', () => {
           hash: 'abc',
         },
       ]);
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
         {
           id: 1,
           version: 'v1.0.0',

@@ -1,13 +1,20 @@
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
-import { fs, git } from '../../../../../test/util';
+import { mock } from 'vitest-mock-extended';
 import type { Pr } from '../../../../modules/platform';
+import * as gitlab from '../../../../modules/platform/gitlab';
 import { codeOwnersForPr } from './code-owners';
+import { fs, git, platform } from '~test/util';
 
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
+vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/pr/code-owners', () => {
+  beforeAll(() => {
+    Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+      value: undefined,
+      writable: true,
+    });
+  });
+
   describe('codeOwnersForPr', () => {
     let pr: Pr;
 
@@ -170,6 +177,125 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
+    describe('supports Gitlab sections', () => {
+      beforeAll(() => {
+        Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+          value: gitlab.extractRulesFromCodeOwnersLines,
+          writable: true,
+        });
+      });
+
+      it('returns section code owner', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          ['[team] @jimmy', '*'].join('\n'),
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['README.md']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@jimmy']);
+      });
+
+      const codeOwnerFileWithDefaultApproval = codeBlock`
+            # Required for all files
+            * @general-approvers
+
+            [Documentation] @docs-team
+            docs/
+            README.md
+            *.txt
+
+            # Invalid section
+            Something before [Tests] @tests-team
+            tests/
+
+            # Optional section
+            ^[Optional] @optional-team
+            optional/
+
+            [Database] @database-team
+            model/db/
+            config/db/database-setup.md @docs-team
+          `;
+
+      it('returns code owners of multiple sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'config/db/database-setup.md',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual(['@docs-team', '@general-approvers']);
+      });
+
+      it('returns default owners when none is explicitly set', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['model/db/CHANGELOG.txt']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@database-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+
+      it('parses only sections that start at the beginning of a line', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce(['tests/setup.ts']);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).not.toInclude('@tests-team');
+      });
+
+      it('returns code owners for optional sections', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          codeOwnerFileWithDefaultApproval,
+        );
+        git.getBranchFiles.mockResolvedValueOnce([
+          'optional/optional-file.txt',
+        ]);
+
+        const codeOwners = await codeOwnersForPr(pr);
+
+        expect(codeOwners).toEqual([
+          '@optional-team',
+          '@docs-team',
+          '@general-approvers',
+        ]);
+      });
+    });
+
+    it.fails('does not parse Gitea regex as Gitlab sections', async () => {
+      Object.defineProperty(platform, 'extractRulesFromCodeOwnersLines', {
+        value: undefined,
+        writable: true,
+      });
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          # This is a regex, not a Gitlab section, so 002-file.md should be assigned to @reviewer-03
+          [0-3].*/*.md$ @reviewer-03
+          002-file.md
+
+          [4-9].*/*.md$ @reviewer-49
+        `,
+      );
+      git.getBranchFiles.mockResolvedValueOnce(['001-file.md', '002-file.md']);
+
+      const codeOwners = await codeOwnersForPr(pr);
+
+      expect(codeOwners).toEqual(['@reviewer-03']);
+    });
+
     it('does not require all files to match a single rule, regression test for #12611', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
@@ -258,7 +384,6 @@ describe('workers/repository/update/pr/code-owners', () => {
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
       it(`detects code owner file at '${codeOwnerFilePath}'`, async () => {
-        // TODO: fix types, jest is using wrong overload (#22198)
         fs.readLocalFile.mockImplementation((path): Promise<any> => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/datasource/npm/index should fetch package info from custom registry 1`] = `
+exports[`modules/datasource/npm/index > should fetch package info from custom registry 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com",
@@ -28,9 +28,8 @@ exports[`modules/datasource/npm/index should fetch package info from custom regi
 }
 `;
 
-exports[`modules/datasource/npm/index should fetch package info from npm 1`] = `
+exports[`modules/datasource/npm/index > should fetch package info from npm 1`] = `
 {
-  "isPrivate": false,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -56,62 +55,7 @@ exports[`modules/datasource/npm/index should fetch package info from npm 1`] = `
 }
 `;
 
-exports[`modules/datasource/npm/index should handle foobar 1`] = `
-{
-  "isPrivate": true,
-  "registryUrl": "https://registry.npmjs.org",
-  "releases": [
-    {
-      "dependencies": undefined,
-      "devDependencies": undefined,
-      "gitRef": undefined,
-      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
-      "version": "0.0.1",
-    },
-    {
-      "dependencies": undefined,
-      "devDependencies": undefined,
-      "gitRef": undefined,
-      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
-      "version": "0.0.2",
-    },
-  ],
-  "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
-  "tags": {
-    "latest": "0.0.1",
-  },
-}
-`;
-
-exports[`modules/datasource/npm/index should handle no time 1`] = `
-{
-  "isPrivate": true,
-  "registryUrl": "https://registry.npmjs.org",
-  "releases": [
-    {
-      "dependencies": undefined,
-      "devDependencies": undefined,
-      "gitRef": undefined,
-      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
-      "version": "0.0.1",
-    },
-    {
-      "dependencies": undefined,
-      "devDependencies": undefined,
-      "gitRef": undefined,
-      "version": "0.0.2",
-    },
-  ],
-  "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
-  "tags": {
-    "latest": "0.0.1",
-  },
-}
-`;
-
-exports[`modules/datasource/npm/index should not send an authorization header if public package 1`] = `
+exports[`modules/datasource/npm/index > should handle foobar 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -139,7 +83,62 @@ exports[`modules/datasource/npm/index should not send an authorization header if
 }
 `;
 
-exports[`modules/datasource/npm/index should parse repo url (string) 1`] = `
+exports[`modules/datasource/npm/index > should handle no time 1`] = `
+{
+  "isPrivate": true,
+  "registryUrl": "https://registry.npmjs.org",
+  "releases": [
+    {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
+      "version": "0.0.1",
+    },
+    {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "tags": {
+    "latest": "0.0.1",
+  },
+}
+`;
+
+exports[`modules/datasource/npm/index > should not send an authorization header if public package 1`] = `
+{
+  "isPrivate": true,
+  "registryUrl": "https://registry.npmjs.org",
+  "releases": [
+    {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T05:21:53.000Z",
+      "version": "0.0.1",
+    },
+    {
+      "dependencies": undefined,
+      "devDependencies": undefined,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-07T05:21:53.000Z",
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "tags": {
+    "latest": "0.0.1",
+  },
+}
+`;
+
+exports[`modules/datasource/npm/index > should parse repo url (string) 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -159,7 +158,7 @@ exports[`modules/datasource/npm/index should parse repo url (string) 1`] = `
 }
 `;
 
-exports[`modules/datasource/npm/index should parse repo url 1`] = `
+exports[`modules/datasource/npm/index > should parse repo url 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -179,7 +178,7 @@ exports[`modules/datasource/npm/index should parse repo url 1`] = `
 }
 `;
 
-exports[`modules/datasource/npm/index should replace any environment variable in npmrc 1`] = `
+exports[`modules/datasource/npm/index > should replace any environment variable in npmrc 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.from-env.com",
@@ -207,7 +206,7 @@ exports[`modules/datasource/npm/index should replace any environment variable in
 }
 `;
 
-exports[`modules/datasource/npm/index should return deprecated 1`] = `
+exports[`modules/datasource/npm/index > should return deprecated 1`] = `
 {
   "deprecationMessage": "On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`foobar\` has the following deprecation notice:
 
@@ -241,7 +240,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 }
 `;
 
-exports[`modules/datasource/npm/index should return deprecated 2`] = `
+exports[`modules/datasource/npm/index > should return deprecated 2`] = `
 "On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`foobar\` has the following deprecation notice:
 
 \`This is deprecated\`
@@ -249,7 +248,7 @@ exports[`modules/datasource/npm/index should return deprecated 2`] = `
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
-exports[`modules/datasource/npm/index should send an authorization header if provided 1`] = `
+exports[`modules/datasource/npm/index > should send an authorization header if provided 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -277,7 +276,7 @@ exports[`modules/datasource/npm/index should send an authorization header if pro
 }
 `;
 
-exports[`modules/datasource/npm/index should use default registry if missing from npmrc 1`] = `
+exports[`modules/datasource/npm/index > should use default registry if missing from npmrc 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -305,7 +304,7 @@ exports[`modules/datasource/npm/index should use default registry if missing fro
 }
 `;
 
-exports[`modules/datasource/npm/index should use host rules by baseUrl if provided 1`] = `
+exports[`modules/datasource/npm/index > should use host rules by baseUrl if provided 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry",
@@ -333,7 +332,7 @@ exports[`modules/datasource/npm/index should use host rules by baseUrl if provid
 }
 `;
 
-exports[`modules/datasource/npm/index should use host rules by hostName if provided 1`] = `
+exports[`modules/datasource/npm/index > should use host rules by hostName if provided 1`] = `
 {
   "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com",

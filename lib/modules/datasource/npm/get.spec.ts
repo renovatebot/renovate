@@ -1,15 +1,15 @@
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as _packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { CACHE_REVISION, getDependency } from './get';
+import type { HttpResponse } from '../../../util/http/types';
+import { getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
+import * as httpMock from '~test/http-mock';
 
-jest.mock('../../../util/cache/package');
+vi.mock('../../../util/cache/package');
 
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 function getPath(s = ''): string {
   const [x] = s.split('\n');
@@ -362,6 +362,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
@@ -509,6 +510,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
@@ -550,6 +552,7 @@ describe('modules/datasource/npm/get', () => {
             "accept": "application/json",
             "accept-encoding": "gzip, deflate, br",
             "authorization": "Bearer XXX",
+            "connection": "close",
             "host": "test.org",
             "user-agent": "RenovateBot/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
           },
@@ -561,69 +564,96 @@ describe('modules/datasource/npm/get', () => {
     `);
   });
 
-  it('discards cache with no revision', async () => {
-    setNpmrc('registry=https://test.org\n_authToken=XXX');
-
-    packageCache.get.mockResolvedValueOnce({
-      some: 'result',
-      cacheData: { softExpireAt: '2099' },
-    });
-
-    httpMock
-      .scope('https://test.org')
-      .get('/@neutrinojs%2Freact')
-      .reply(200, {
-        name: '@neutrinojs/react',
+  describe('cache', () => {
+    const httpResponse: HttpResponse<unknown> = {
+      statusCode: 200,
+      body: {
+        name: 'test',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+          directory: 'packages/foo',
+        },
         versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      },
+      headers: { 'cache-control': 'max-age=180, public' },
+    };
+
+    it('returns unexpired cache', async () => {
+      vi.setSystemTime('2024-06-15T00:14:59.999Z');
+      packageCache.get.mockResolvedValue({
+        etag: 'some-etag',
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
       });
-    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
-    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep?.releases).toHaveLength(1);
-  });
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
 
-  it('returns unexpired cache', async () => {
-    packageCache.get.mockResolvedValueOnce({
-      some: 'result',
-      cacheData: { revision: CACHE_REVISION, softExpireAt: '2099' },
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [{ version: '1.0.0' }],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
     });
-    const dep = await getDependency(http, 'https://some.url', 'some-package');
-    expect(dep).toMatchObject({ some: 'result' });
-  });
 
-  it('returns soft expired cache if revalidated', async () => {
-    packageCache.get.mockResolvedValueOnce({
-      some: 'result',
-      cacheData: {
-        revision: CACHE_REVISION,
-        softExpireAt: '2020',
+    it('returns soft expired cache if revalidated', async () => {
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
+      packageCache.get.mockResolvedValue({
         etag: 'some-etag',
-      },
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+      setNpmrc('registry=https://example.com\n_authToken=XXX');
+      httpMock.scope('https://example.com').get('/some-package').reply(304);
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [{ version: '1.0.0' }],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
     });
-    setNpmrc('registry=https://test.org\n_authToken=XXX');
 
-    httpMock.scope('https://test.org').get('/@neutrinojs%2Freact').reply(304);
-    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
-    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
-    expect(dep).toMatchObject({ some: 'result' });
-  });
-
-  it('returns soft expired cache on npmjs error', async () => {
-    packageCache.get.mockResolvedValueOnce({
-      some: 'result',
-      cacheData: {
-        revision: CACHE_REVISION,
-        softExpireAt: '2020',
+    it('returns soft expired cache on npmjs error', async () => {
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
+      packageCache.get.mockResolvedValue({
         etag: 'some-etag',
-      },
-    });
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+      setNpmrc('registry=https://example.com\n_authToken=XXX');
+      httpMock.scope('https://example.com').get('/some-package').reply(500);
 
-    httpMock
-      .scope('https://registry.npmjs.org')
-      .get('/@neutrinojs%2Freact')
-      .reply(500);
-    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
-    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
-    expect(dep).toMatchObject({ some: 'result' });
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [{ version: '1.0.0' }],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+    });
   });
 });

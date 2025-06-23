@@ -234,6 +234,15 @@ function subset(subRange: string, superRange: string): boolean | undefined {
   }
 }
 
+function intersects(subRange: string, superRange: string): boolean {
+  try {
+    return npm.intersects!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.intersects error');
+    return false;
+  }
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -375,11 +384,16 @@ function isCompatible(version: string): boolean {
   return isVersion(version);
 }
 
+function isBreaking(current: string, version: string): boolean {
+  return npm.isBreaking!(composer2npm(current), composer2npm(version));
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
+  isBreaking,
   isCompatible,
   isGreaterThan,
   isLessThanRange,
@@ -393,5 +407,6 @@ export const api: VersioningApi = {
   getNewValue,
   sortVersions,
   subset,
+  intersects,
 };
 export default api;

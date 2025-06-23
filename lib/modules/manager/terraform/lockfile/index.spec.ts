@@ -1,18 +1,18 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { fs, mocked } from '../../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
 import { getNewConstraint } from './index';
+import { fs } from '~test/util';
 
 // auto-mock fs
-jest.mock('../../../../util/fs');
-jest.mock('./hash');
-jest.mock('../../../datasource', () => mockDeep());
+vi.mock('../../../../util/fs');
+vi.mock('./hash');
+vi.mock('../../../datasource', () => mockDeep());
 
 const config = {
   constraints: {},
@@ -25,10 +25,8 @@ const adminConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const mockHash = mocked(TerraformProviderHash).createHashes;
-const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
-  typeof getPkgReleases
->;
+const mockHash = vi.mocked(TerraformProviderHash).createHashes;
+const mockGetPkgReleases = vi.mocked(getPkgReleases);
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
@@ -659,7 +657,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -769,7 +767,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -874,7 +872,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
     const result = await updateArtifacts({
@@ -944,7 +942,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     mockHash.mockResolvedValue(null);
 
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
 
@@ -980,7 +978,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('return null if experimental flag is not set', async () => {
     const localConfig: UpdateArtifactsConfig = {
-      updateType: 'lockFileMaintenance',
+      isLockFileMaintenance: true,
       ...config,
     };
     const result = await updateArtifacts({

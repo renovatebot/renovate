@@ -1,9 +1,8 @@
 import { ERROR, WARN } from 'bunyan';
 import { codeBlock } from 'common-tags';
-import { mock } from 'jest-mock-extended';
-import { Fixtures } from '../../../test/fixtures';
-import type { RenovateConfig } from '../../../test/util';
-import { logger, mockedFunction, platform } from '../../../test/util';
+import type { MockedObject } from 'vitest';
+import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
@@ -14,13 +13,17 @@ import type { Platform } from '../../modules/platform';
 import { massageMarkdown } from '../../modules/platform/github';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { asTimestamp } from '../../util/timestamp';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+import { Fixtures } from '~test/fixtures';
+import { logger, platform } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-const createVulnerabilitiesMock = jest.fn();
-jest.mock('./process/vulnerabilities', () => {
+const createVulnerabilitiesMock = vi.fn();
+vi.mock('./process/vulnerabilities', () => {
   return {
     __esModule: true,
     Vulnerabilities: class {
@@ -73,7 +76,7 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.MockedObject<Platform>,
+  platform: MockedObject<Platform>,
   ensureIssueClosingCalls: number,
   ensureIssueCalls: number,
 ) {
@@ -1102,11 +1105,11 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -1140,7 +1143,7 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = {};
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
@@ -1152,7 +1155,7 @@ None detected
 
 `,
       });
-      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+      vi.mocked(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: '',
       });
@@ -1297,6 +1300,77 @@ None detected
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             'npm | `express-handlebars` | ![Available]',
           );
+          // same with dry run
+          await dryRun(branches, platform, 0, 1);
+        });
+
+        it('handles missing version/digest values correctly', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithMissingVersions = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'dep-with-version-only',
+                    currentValue: '1.0.0',
+                  },
+                  {
+                    depName: 'dep-with-digest-only',
+                    currentDigest: 'sha256:1234567890',
+                  },
+                  {
+                    depName: 'dep-with-version-and-digest',
+                    currentValue: '2.0.0',
+                    currentDigest: 'sha256:0987654321',
+                  },
+                  {
+                    depName: 'dep-with-locked-version-only',
+                    lockedVersion: '3.0.0',
+                  },
+                  {
+                    depName: 'dep-with-no-version-info',
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithMissingVersions);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithMissingVersions,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const dashboardBody = platform.ensureIssue.mock.calls[0][0].body;
+
+          // Version only case
+          expect(dashboardBody).toInclude('`dep-with-version-only 1.0.0`');
+
+          // Digest only case
+          expect(dashboardBody).toInclude(
+            '`dep-with-digest-only sha256:1234567890`',
+          );
+
+          // Version and digest case
+          expect(dashboardBody).toInclude(
+            '`dep-with-version-and-digest 2.0.0@sha256:0987654321`',
+          );
+
+          // Locked version fallback case
+          expect(dashboardBody).toInclude(
+            '`dep-with-locked-version-only lock file @ 3.0.0`',
+          );
+
+          // No version info case
+          expect(dashboardBody).toInclude(
+            '`dep-with-no-version-info unknown version`',
+          );
+
+          // Verify no 'undefined' appears in the output
+          expect(dashboardBody).not.toInclude('undefined');
+
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
@@ -1509,7 +1583,7 @@ None detected
     });
 
     it('return no data section if summary is set to all and no vulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1528,7 +1602,7 @@ None detected
     });
 
     it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1595,7 +1669,7 @@ None detected
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
-      const fetchVulnerabilitiesMock = jest.fn();
+      const fetchVulnerabilitiesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1652,6 +1726,128 @@ See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-opti
 
 </blockquote>
 </details>`);
+    });
+  });
+
+  describe('getAbandonedPackagesMd()', () => {
+    it('returns empty string when no abandoned packages exist', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              { depName: 'lodash', isAbandoned: false },
+              { depName: 'express', isAbandoned: false },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      expect(result).toEqual('');
+    });
+
+    it('returns formatted markdown when abandoned packages exist', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'abandoned-pkg',
+                isAbandoned: true,
+                mostRecentTimestamp: asTimestamp('2020-05-15T12:00:00.000Z')!,
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+
+      expect(result).toContain('> ℹ **Note**');
+      expect(result).toContain('| Datasource | Name | Last Updated |');
+      expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
+      expect(result).toContain('abandonmentThreshold');
+    });
+
+    it('handles multiple abandoned packages across different managers', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'pkg1',
+                isAbandoned: true,
+                mostRecentTimestamp: asTimestamp('2021-01-10T10:00:00.000Z')!,
+              },
+              { depName: 'pkg2', isAbandoned: false },
+              {
+                depName: 'pkg3',
+                isAbandoned: true,
+                mostRecentTimestamp: asTimestamp('2020-11-05T15:30:00.000Z')!,
+              },
+            ],
+          },
+        ],
+        gradle: [
+          {
+            packageFile: 'build.gradle',
+            deps: [
+              {
+                depName: 'org.example:lib',
+                isAbandoned: true,
+                mostRecentTimestamp: asTimestamp('2019-07-22T08:15:00.000Z')!,
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+
+      expect(result).toContain('| gradle | `org.example:lib` | `2019-07-22` |');
+      expect(result).toContain('| npm | `pkg1` | `2021-01-10` |');
+      expect(result).toContain('| npm | `pkg3` | `2020-11-05` |');
+      expect(result).not.toContain('pkg2');
+    });
+
+    it('displays "unknown" when mostRecentTimestamp is missing', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'pkg-with-date',
+                isAbandoned: true,
+                mostRecentTimestamp: asTimestamp('2021-03-17T14:30:00.000Z')!,
+              },
+              { depName: 'pkg-no-date', isAbandoned: true },
+            ],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+
+      expect(result).toContain('| npm | `pkg-with-date` | `2021-03-17` |');
+      expect(result).toContain('| npm | `pkg-no-date` | `unknown` |');
+    });
+
+    it('handles empty deps array', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [],
+          },
+        ],
+      };
+
+      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      expect(result).toEqual('');
     });
   });
 });

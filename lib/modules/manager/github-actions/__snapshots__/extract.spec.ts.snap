@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
+exports[`modules/manager/github-actions/extract > extractPackageFile() > extracts multiple action tag lines from yaml configuration file 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",
@@ -116,7 +116,7 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
 ]
 `;
 
-exports[`modules/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
+exports[`modules/manager/github-actions/extract > extractPackageFile() > extracts multiple docker image lines from yaml configuration file 1`] = `
 [
   {
     "autoReplaceStringTemplate": "{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}",

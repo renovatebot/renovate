@@ -1,25 +1,20 @@
 import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
-import { Fixtures } from '../../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../../test/util';
-import { git, partial, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
-
-jest.mock('../../../../util/git');
+import { Fixtures } from '~test/fixtures';
+import { git, partial, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
 );
 
 describe('workers/repository/config-migration/branch/rebase', () => {
-  const prettierSpy = jest.spyOn(
-    MigratedDataFactory,
-    'applyPrettierFormatting',
-  );
+  const prettierSpy = vi.spyOn(MigratedDataFactory, 'applyPrettierFormatting');
 
   beforeEach(() => {
     GlobalConfig.set({

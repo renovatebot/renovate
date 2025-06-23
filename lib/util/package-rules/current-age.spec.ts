@@ -8,11 +8,11 @@ describe('util/package-rules/current-age', () => {
     const t0 = DateTime.fromISO('2023-07-07', { zone: 'utc' });
 
     beforeAll(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     beforeEach(() => {
-      jest.setSystemTime(t0.toMillis());
+      vi.setSystemTime(t0.toMillis());
     });
 
     it('returns false if release is older', () => {

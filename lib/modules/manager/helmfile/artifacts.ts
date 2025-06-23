@@ -27,7 +27,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.trace(`helmfile.updateArtifacts(${packageFileName})`);
 
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
   if (
     !isLockFileMaintenance &&
     (updatedDeps === undefined || updatedDeps.length < 1)
@@ -94,7 +94,6 @@ export async function updateArtifacts({
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
       docker: {},
-      userConfiguredEnv: config.env,
       extraEnv: generateHelmEnvs(),
       toolConstraints,
     });

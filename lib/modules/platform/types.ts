@@ -97,7 +97,7 @@ export interface Issue {
   state?: string;
   title?: string;
 }
-export type PlatformPrOptions = {
+export interface PlatformPrOptions {
   autoApprove?: boolean;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
@@ -106,7 +106,7 @@ export type PlatformPrOptions = {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-};
+}
 
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -221,6 +221,13 @@ export interface AutodiscoverConfig {
   projects?: string[];
 }
 
+export interface FileOwnerRule {
+  usernames: string[];
+  pattern: string;
+  score: number;
+  match: (path: string) => boolean;
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -280,6 +287,7 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+  extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
@@ -297,4 +305,5 @@ export interface PlatformScm {
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
+  syncForkWithUpstream?(baseBranch: string): Promise<void>;
 }

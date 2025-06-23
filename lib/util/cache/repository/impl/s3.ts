@@ -6,6 +6,7 @@ import type {
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
+import { getEnv } from '../../../env';
 import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
@@ -66,7 +67,7 @@ export class RepoCacheS3 extends RepoCacheBase {
     };
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
-      if (is.nonEmptyString(process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL)) {
+      if (is.nonEmptyString(getEnv().RENOVATE_X_REPO_CACHE_FORCE_LOCAL)) {
         const cacheLocalFileName = getLocalCacheFileName(
           this.platform,
           this.repository,

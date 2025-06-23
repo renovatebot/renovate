@@ -9,7 +9,6 @@ export const upgradeFingerprintFields: CommitFingerprintFields[] = [
   'currentVersion',
   'datasource',
   'depName',
-  'env',
   'lockFile',
   'lockedVersion',
   'manager',

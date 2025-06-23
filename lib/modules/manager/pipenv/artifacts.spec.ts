@@ -1,15 +1,6 @@
 import * as _fsExtra from 'fs-extra';
-import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import {
-  env,
-  git,
-  mocked,
-  mockedFunction,
-  partial,
-} from '../../../../test/util';
+import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -26,18 +17,27 @@ import {
 } from './artifacts';
 import type { PipfileLock } from './types';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, git, partial } from '~test/util';
 
-const datasource = mocked(_datasource);
-const find = mockedFunction(_find);
+// mock for cjs require for `@renovatebot/detect-tools`
+// https://github.com/vitest-dev/vitest/discussions/3134
+vi.hoisted(() => {
+  require.cache[require.resolve('fs-extra')] = {
+    exports: fixtures.fsExtra(),
+  } as never;
+});
+vi.mock('fs-extra', () => fixtures.fsExtra());
+vi.mock('../../../util/exec/env', () => mockDeep());
+vi.mock('../../../util/git', () => mockDeep());
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/http', () => mockDeep());
+vi.mock('../../datasource', () => mockDeep());
 
-jest.mock('fs-extra');
-const fsExtra = mocked(_fsExtra);
-
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
-jest.mock('../../datasource', () => mockDeep());
+const datasource = vi.mocked(_datasource);
+const find = vi.mocked(_find);
+const fsExtra = vi.mocked(_fsExtra);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -59,9 +59,7 @@ const pipenvCacheDir = join('/tmp/renovate/cache/others/pipenv');
 const pipCacheDir = join('/tmp/renovate/cache/others/pip');
 const virtualenvsCacheDir = join('/tmp/renovate/cache/others/virtualenvs');
 
-interface MockFiles {
-  [key: string]: string | string[];
-}
+type MockFiles = Record<string, string | string[]>;
 
 function mockFiles(mockFiles: MockFiles): void {
   fsExtra.readFile.mockImplementation(((name: string) => {
@@ -84,6 +82,7 @@ function mockFiles(mockFiles: MockFiles): void {
 
 describe('modules/manager/pipenv/artifacts', () => {
   beforeEach(() => {
+    Fixtures.reset();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -714,6 +713,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined as never);
     fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.remove.mockResolvedValue();
 
     mockFiles({
       '/Pipfile.lock': ['Current Pipfile.lock', 'New Pipfile.lock'],
@@ -733,7 +733,15 @@ describe('modules/manager/pipenv/artifacts', () => {
         newPackageFileContent: '{}',
         config: lockMaintenanceConfig,
       }),
-    ).not.toBeNull();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
 
     expect(execSnapshots).toMatchObject([
       {

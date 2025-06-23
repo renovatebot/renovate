@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/helm-values/extract extractPackageFile() extracts from complex values file correctly" 1`] = `
+exports[`modules/manager/helm-values/extract > extractPackageFile() > extracts from complex values file correctly" 1`] = `
 {
   "deps": [
     {
@@ -56,7 +56,7 @@ exports[`modules/manager/helm-values/extract extractPackageFile() extracts from 
 }
 `;
 
-exports[`modules/manager/helm-values/extract extractPackageFile() extracts from values.yaml correctly with same structure as "helm create" 1`] = `
+exports[`modules/manager/helm-values/extract > extractPackageFile() > extracts from values.yaml correctly with same structure as "helm create" 1`] = `
 {
   "deps": [
     {

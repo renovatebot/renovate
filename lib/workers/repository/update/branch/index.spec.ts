@@ -1,12 +1,6 @@
 import { codeBlock } from 'common-tags';
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -50,39 +44,39 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { fs, git, partial, platform, scm } from '~test/util';
 
-jest.mock('./get-updated');
-jest.mock('./schedule');
-jest.mock('./check-existing');
-jest.mock('./reuse');
-jest.mock('../../../../modules/manager/npm/post-update');
-jest.mock('./automerge');
-jest.mock('./commit');
-jest.mock('../pr');
-jest.mock('../pr/automerge');
-jest.mock('../../changelog');
-jest.mock('../../../../util/exec');
-jest.mock('../../../../util/merge-confidence');
-jest.mock('../../../../util/sanitize');
-jest.mock('../../../../util/fs');
-jest.mock('../../../../util/git');
-jest.mock('../../../global/limits');
-jest.mock('../../../../util/cache/repository');
+vi.mock('./get-updated');
+vi.mock('./schedule');
+vi.mock('./check-existing');
+vi.mock('./reuse');
+vi.mock('../../../../modules/manager/npm/post-update');
+vi.mock('./automerge');
+vi.mock('./commit');
+vi.mock('../pr');
+vi.mock('../pr/automerge');
+vi.mock('../../changelog');
+vi.mock('../../../../util/exec');
+vi.mock('../../../../util/merge-confidence');
+vi.mock('../../../../util/sanitize');
+vi.mock('../../../../util/fs');
+vi.mock('../../../global/limits');
+vi.mock('../../../../util/cache/repository');
 
-const getUpdated = mocked(_getUpdated);
-const schedule = mocked(_schedule);
-const checkExisting = mocked(_checkExisting);
-const reuse = mocked(_reuse);
-const npmPostExtract = mocked(_npmPostExtract);
-const automerge = mocked(_automerge);
-const commit = mocked(_commit);
-const mergeConfidence = mocked(_mergeConfidence);
-const prAutomerge = mocked(_prAutomerge);
-const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
-const sanitize = mocked(_sanitize);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const getUpdated = vi.mocked(_getUpdated);
+const schedule = vi.mocked(_schedule);
+const checkExisting = vi.mocked(_checkExisting);
+const reuse = vi.mocked(_reuse);
+const npmPostExtract = vi.mocked(_npmPostExtract);
+const automerge = vi.mocked(_automerge);
+const commit = vi.mocked(_commit);
+const mergeConfidence = vi.mocked(_mergeConfidence);
+const prAutomerge = vi.mocked(_prAutomerge);
+const prWorker = vi.mocked(_prWorker);
+const exec = vi.mocked(_exec);
+const sanitize = vi.mocked(_sanitize);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -114,9 +108,9 @@ describe('workers/repository/update/branch/index', () => {
         // eslint-disable-next-line require-await, @typescript-eslint/require-await
         async (config) => config,
       );
-      prWorker.ensurePr = jest.fn();
-      prWorker.getPlatformPrOptions = jest.fn();
-      prAutomerge.checkAutoMerge = jest.fn();
+      prWorker.ensurePr = vi.fn();
+      prWorker.getPlatformPrOptions = vi.fn();
+      prAutomerge.checkAutoMerge = vi.fn();
       // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),
@@ -145,7 +139,6 @@ describe('workers/repository/update/branch/index', () => {
         usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
-      // TODO: fix types, jest is using wrong overload (#22198)
       sanitize.sanitize.mockImplementation((input) => input!);
       repoCache.getCache.mockReturnValue({});
     });
@@ -1635,12 +1628,12 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
       const inconfig = {
         ...config,
+        versioning: 'semver',
         postUpgradeTasks: {
           executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1733,7 +1726,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^exit 1$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1817,8 +1809,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: false,
+        allowedCommands: ['^echo'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1832,6 +1823,7 @@ describe('workers/repository/update/branch/index', () => {
         upgrades: [
           partial<BranchUpgradeConfig>({
             depName: 'some-dep-name',
+            versioning: 'semver',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1848,7 +1840,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
     });
@@ -1919,8 +1911,7 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{depName}}}$'],
-        allowCommandTemplating: true,
+        allowedCommands: ['^echo some'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -2070,7 +2061,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });
@@ -2135,6 +2125,215 @@ describe('workers/repository/update/branch/index', () => {
           'modified_file',
         ),
       ).toBe('modified file content');
+    });
+
+    it('executes post-upgrade tasks with propagated post-upgrade file path via env variable', async () => {
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      });
+      scm.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        }),
+      );
+
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+        cacheDir,
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const inconfig: BranchConfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo hardcoded-string'],
+          dataFileTemplate:
+            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+          executionMode: 'branch',
+        },
+      };
+
+      try {
+        const result = await branchWorker.processBranch(inconfig);
+        expect(result).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'done',
+          commitSha: null,
+        });
+
+        expect(exec.exec).toHaveBeenCalledTimes(1);
+
+        const execPathParam = exec.exec.mock.calls[0][0];
+        expect(execPathParam).toEqual('echo hardcoded-string');
+
+        const execOptionsParam = exec.exec.mock.calls[0][1];
+        expect(execOptionsParam).toBeDefined();
+        expect(execOptionsParam?.cwd).toEqual('/localDir');
+        const dataFileRegex = new RegExp(
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+        );
+        expect(
+          execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
+        ).toMatch(dataFileRegex);
+      } finally {
+        await tmpDir.cleanup();
+      }
+    });
+
+    it('should not propagate post-upgrade file path via env variable if the post-upgrade file creation failed', async () => {
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      });
+      scm.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        }),
+      );
+
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+        cacheDir,
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+      // Fail post-upgrade file creation
+      fs.outputCacheFile.mockRejectedValue(new Error('failed to create file'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const inconfig: BranchConfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo hardcoded-string'],
+          dataFileTemplate:
+            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+          executionMode: 'branch',
+        },
+      };
+
+      try {
+        const result = await branchWorker.processBranch(inconfig);
+        expect(result).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'done',
+          commitSha: null,
+        });
+        expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
+          cwd: '/localDir',
+        });
+        expect(exec.exec).toHaveBeenCalledTimes(1);
+        expect(
+          findFileContent(
+            commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
+            'modified_file',
+          ),
+        ).toBe('modified file content');
+      } finally {
+        await tmpDir.cleanup();
+      }
     });
 
     it('returns when rebaseWhen=never', async () => {
@@ -2322,7 +2521,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard All Pending approval', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2359,7 +2558,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('Dependency Dashboard open all rate-limited', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2396,7 +2595,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
@@ -2435,7 +2634,7 @@ describe('workers/repository/update/branch/index', () => {
           state: 'open',
         }),
       );
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
+      vi.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
         }),

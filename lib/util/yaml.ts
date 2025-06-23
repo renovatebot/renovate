@@ -9,7 +9,7 @@ import type {
 import { parseAllDocuments, parseDocument, stringify } from 'yaml';
 import type { ZodType } from 'zod';
 import { logger } from '../logger';
-import { regEx } from './regex';
+import { stripTemplates } from './string';
 
 export interface YamlOptions<
   ResT = unknown,
@@ -76,7 +76,7 @@ export function parseYaml<ResT = unknown>(
     if (errors?.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
-        logger.debug(`Failed to parse YAML file: ${error.message}`);
+        logger.debug(`Failed to parse YAML file`);
         continue;
       }
       throw error;
@@ -167,12 +167,7 @@ export function dump(obj: any, opts?: DumpOptions): string {
 
 function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
-    return content
-      .replace(regEx(/\s+{{.+?}}:.+/gs), '')
-      .replace(regEx(/{{`.+?`}}/gs), '')
-      .replace(regEx(/{{.+?}}/gs), '')
-      .replace(regEx(/{%`.+?`%}/gs), '')
-      .replace(regEx(/{%.+?%}/g), '');
+    return stripTemplates(content);
   }
 
   return content;

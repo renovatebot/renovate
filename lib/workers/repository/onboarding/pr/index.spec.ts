@@ -1,6 +1,4 @@
 import type { RequestError, Response } from 'got';
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial, platform, scm } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,8 +8,8 @@ import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
-
-jest.mock('../../../../util/git');
+import { partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
@@ -225,6 +223,25 @@ describe('workers/repository/onboarding/pr/index', () => {
       scm.isBranchConflicted.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('does nothing in dry run when PR is conflicted', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+        }),
+      );
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      await ensureOnboardingPr(config, {}, branches);
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });

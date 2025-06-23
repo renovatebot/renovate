@@ -1,7 +1,5 @@
-import { mocked, partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
-import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
 import type {
@@ -14,11 +12,11 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
+import { hostRules, partial } from '~test/util';
 
-jest.mock('../../../util/host-rules');
+vi.mock('../../../util/host-rules');
 
 const baseUrl = 'https://gerrit.example.com';
-const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/utils', () => {
   beforeEach(() => {
@@ -51,15 +49,15 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapPrStateToGerritFilter()', () => {
     it.each([
-      ['closed', 'status:closed'],
+      ['closed', 'status:abandoned'],
       ['merged', 'status:merged'],
       ['!open', '-status:open'],
       ['open', 'status:open'],
-      ['all', '-is:wip'],
-      [undefined, '-is:wip'],
+      ['all', null],
+      [undefined, null],
     ])(
       'maps pr state %p to gerrit filter %p',
-      (prState: any, filter: string) => {
+      (prState: any, filter: string | null) => {
         expect(utils.mapPrStateToGerritFilter(prState)).toEqual(filter);
       },
     );
@@ -70,7 +68,7 @@ describe('modules/platform/gerrit/utils', () => {
       ['NEW' as GerritChangeStatus, 'open'],
       ['MERGED' as GerritChangeStatus, 'merged'],
       ['ABANDONED' as GerritChangeStatus, 'closed'],
-      ['unknown' as GerritChangeStatus, 'all'],
+      ['unknown' as GerritChangeStatus, undefined],
     ])(
       'maps gerrit change state %p to PrState %p',
       (state: GerritChangeStatus, prState: any) => {
@@ -86,18 +84,15 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
+        created: '2025-04-14 16:33:37.000000000',
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
-          REMOVED: [],
-          CC: [],
         },
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            },
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
         messages: [
@@ -122,31 +117,123 @@ describe('modules/platform/gerrit/utils', () => {
         number: 123456,
         state: 'open',
         title: 'Fix for',
+        createdAt: '2025-04-14T16:33:37.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: ['username'],
         bodyStruct: {
           hash: hashBody('Last PR-Body'),
         },
+        sha: 'abc',
       });
     });
 
-    it('map a gerrit change without source branch info and reviewers to Pr', () => {
+    it('map a gerrit change without reviewers to Pr', () => {
       const change = partial<GerritChange>({
         _number: 123456,
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
+        reviewers: {},
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
       });
       expect(utils.mapGerritChangeToPr(change)).toEqual({
         number: 123456,
         state: 'open',
         title: 'Fix for',
-        sourceBranch: 'main',
+        sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: [],
+        sha: 'abc',
         bodyStruct: {
           hash: hashBody(''),
+        },
+      });
+    });
+
+    it('does not map a gerrit change without source branch to Pr', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(utils.mapGerritChangeToPr(change)).toBeNull();
+    });
+
+    it('does not reject a broken commit message if knownProperties.sourceBranch is passed', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(
+        utils.mapGerritChangeToPr(change, {
+          sourceBranch: 'renovate/dependency-1.x',
+        }),
+      ).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'renovate/dependency-1.x',
+        targetBranch: 'main',
+        reviewers: [],
+        sha: 'abc',
+        bodyStruct: {
+          hash: hashBody(''),
+        },
+      });
+    });
+
+    it('avoids iterating through change messages knownProperties.prBody is passed', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        branch: 'main',
+        subject: 'Fix for',
+        current_revision: 'abc',
+        revisions: {
+          abc: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
+        },
+      });
+      expect(
+        utils.mapGerritChangeToPr(change, {
+          prBody: 'PR Body',
+        }),
+      ).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'renovate/dependency-1.x',
+        targetBranch: 'main',
+        reviewers: [],
+        sha: 'abc',
+        bodyStruct: {
+          hash: hashBody('PR Body'),
         },
       });
     });
@@ -163,9 +250,7 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
+            commit_with_footers: 'some message...',
           }),
         },
       });
@@ -177,55 +262,12 @@ describe('modules/platform/gerrit/utils', () => {
         current_revision: 'abc',
         revisions: {
           abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            },
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
           }),
         },
       });
       expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('no commit message but with hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('commit message with no footer but with hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-        current_revision: 'abc',
-        revisions: {
-          abc: partial<GerritRevisionInfo>({
-            commit: {
-              message: 'some message...',
-            },
-          }),
-        },
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
-    });
-
-    // for backwards compatibility
-    it('prefers the footer over the hashtags', () => {
-      const change = partial<GerritChange>({
-        hashtags: ['sourceBranch-renovate/dependency-1.x'],
-        current_revision: 'abc',
-        revisions: {
-          abc: partial<GerritRevisionInfo>({
-            commit: {
-              message:
-                'Some change\n\nRenovate-Branch: renovate/dependency-2.x\nChange-Id: ...',
-            },
-          }),
-        },
-      });
-      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-2.x');
     });
   });
 

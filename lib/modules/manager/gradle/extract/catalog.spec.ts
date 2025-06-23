@@ -191,4 +191,44 @@ describe('modules/manager/gradle/extract/catalog', () => {
       },
     ]);
   });
+
+  it('supports templated toml', () => {
+    const input = codeBlock`
+      [versions]
+      # Releases: http://someWebsite.com/junit/1.4.9
+      mocha-junit-reporter = "2.0.2"
+      {%- if cookiecutter.service_uses_junit %}
+      # JUnit 1.4.9 is awesome!
+      junit = "1.4.9"
+      {%- endif %}
+
+      [libraries]
+      {%- if cookiecutter.service_uses_junit %}
+      junit-legacy = { module = "junit:junit", version.ref = "junit" }
+      {%- endif %}
+      mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.reporter" }
+    `;
+    const res = parseCatalog('gradle/libs.versions.toml', input);
+
+    expect(res).toStrictEqual([
+      {
+        depName: 'junit:junit',
+        sharedVariableName: 'junit',
+        currentValue: '1.4.9',
+        managerData: {
+          fileReplacePosition: 166,
+          packageFile: 'gradle/libs.versions.toml',
+        },
+      },
+      {
+        depName: 'mocha-junit:mocha-junit',
+        sharedVariableName: 'mocha.junit.reporter',
+        currentValue: '2.0.2',
+        managerData: {
+          fileReplacePosition: 82,
+          packageFile: 'gradle/libs.versions.toml',
+        },
+      },
+    ]);
+  });
 });

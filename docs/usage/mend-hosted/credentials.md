@@ -10,18 +10,19 @@ If you self-host, you can skip reading this page.
 
 ## :warning: Migrate secrets in your Renovate config file :warning:
 
-Use of encrypted secrets in the Mend Renovate cloud apps has been deprecated and soon the apps will stop reading secrets from the Renovate config file in your repository.
-You must migrate any secrets you currently keep in the Renovate config file, and put them in the app settings page on [developer.mend.io](https://developer.mend.io).
+The Mend Renovate cloud apps no longer read `encrypted` secrets from Renovate config files in your repositories.
+You must migrate any secrets you currently keep in a Renovate config file, and upload them as secrets to org or repo settings pages on [developer.mend.io](https://developer.mend.io).
 To add secrets you must have admin-level rights.
 
 Read [Migrating encrypted secrets from Repo Config to App Settings](migrating-secrets.md) to learn more.
 
-## Managing secrets for the Mend-hosted cloud apps
+## Managing secrets via the Web UI
 
-This section explains how you manage secrets for the Mend-hosted cloud apps.
-If you self-host you do not need this section.
+This section explains how to manage secrets for the Mend-hosted cloud apps via the Web UI.
 
-### Adding a secret
+Only administrators of an Org or Repo can manage the secrets for that Org or Repo.
+
+### Adding a secret through the UI
 
 To add a secret for the Mend cloud app:
 
@@ -97,3 +98,27 @@ The **Recent jobs** table means you are on your repository's page.
 Select the _Settings_ button to manage your repository secrets:
 
 ![repository settings button](../assets/images/app-settings/repo-settings-button.png)
+
+## Automating secrets via APIs (GitHub only)
+
+Administrators of GitHub organizations and repositories can use the Developer Platform APIs to manage secrets.
+
+See the [Developer Platform API documentation](https://api-docs.mend.io/developer-platform/1.0/repo-secret) for details.
+
+### Authenticating the APIs
+
+Calls to the APIs require authentication with a personal access token from the GitHub user making the request.
+The token must be included in the request header as the `authorization` property.
+
+You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
+No additional scopes or permissions are required for the token.
+
+## Known Issues
+
+### Error deleting host rule from Developer Portal
+
+Problem: When deleting a host rule from the Developer Portal, an error is shown "Error deleting host rule".
+
+Workaround:
+Update the host rule to point to a valid host that you are not using in your repo.
+This way, the host rule will have no effect.

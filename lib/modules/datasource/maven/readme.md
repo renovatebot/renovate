@@ -27,3 +27,8 @@ For example:
 ```xml
 <url>https://project.example.com</url>
 ```
+
+#### latest and release tags
+
+When `latest` or `release` values are present in a package's `maven-metadata.xml`, Renovate will map these to its `tags` concept.
+This enables the use of Renovate's `followTag` feature.

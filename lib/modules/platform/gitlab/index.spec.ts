@@ -1,9 +1,7 @@
 // TODO fix mocks
-import type * as _timers from 'timers/promises';
-import { mockDeep } from 'jest-mock-extended';
-import type { Platform, RepoParams } from '..';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import _timers from 'timers/promises';
+import { mockDeep } from 'vitest-mock-extended';
+import type { RepoParams } from '..';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -12,36 +10,27 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
-import type { logger as _logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
-import type * as _git from '../../../util/git';
+import * as memCache from '../../../util/cache/memory';
+import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
-import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
-import { getPrBodyStruct } from '../pr-body';
+import * as prBodyModule from '../utils/pr-body';
+import * as gitlab from '.';
+import * as httpMock from '~test/http-mock';
+import { git, hostRules, logger } from '~test/util';
 
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/git');
-jest.mock('timers/promises');
+vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/git', () => mockDeep());
+vi.mock('timers/promises');
+vi.mock('../utils/pr-body', { spy: true });
+
+const timers = vi.mocked(_timers);
 
 const gitlabApiHost = 'https://gitlab.com';
 
 describe('modules/platform/gitlab/index', () => {
-  let gitlab: Platform;
-  let hostRules: jest.Mocked<typeof _hostRules>;
-  let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
-  let timers: jest.Mocked<typeof _timers>;
-
-  beforeEach(async () => {
-    // reset module
-    jest.resetModules();
-
-    gitlab = await import('.');
-    logger = mocked(await import('../../../logger')).logger;
-    timers = jest.requireMock('timers/promises');
-    hostRules = jest.requireMock('../../../util/host-rules');
-    git = jest.requireMock('../../../util/git');
+  beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
@@ -55,6 +44,11 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
+    delete process.env.RENOVATE_X_PLATFORM_VERSION;
+
+    gitlab.resetPlatform();
+    memCache.init();
+    repoCache.resetCache();
   });
 
   async function initFakePlatform(version: string) {
@@ -77,11 +71,11 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('initPlatform()', () => {
-    it(`should throw if no token`, async () => {
+    it('should throw if no token', async () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
     });
 
-    it(`should throw if auth fails`, async () => {
+    it('should throw if auth fails', async () => {
       // user
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(403);
       const res = gitlab.initPlatform({
@@ -91,7 +85,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(res).rejects.toThrow('Init: Authentication failure');
     });
 
-    it(`should default to gitlab.com`, async () => {
+    it('should default to gitlab.com', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
         email: 'a@b.com',
         name: 'Renovate Bot',
@@ -107,7 +101,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toMatchSnapshot();
     });
 
-    it(`should accept custom endpoint`, async () => {
+    it('should accept custom endpoint', async () => {
       const endpoint = 'https://gitlab.renovatebot.com';
       httpMock
         .scope(endpoint)
@@ -128,7 +122,7 @@ describe('modules/platform/gitlab/index', () => {
       ).toMatchSnapshot();
     });
 
-    it(`should reuse existing gitAuthor`, async () => {
+    it('should reuse existing gitAuthor', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
         version: '13.3.6-ee',
       });
@@ -502,7 +496,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getBranchForceRebase!('master')).toBeFalse();
+      expect(await gitlab.getBranchForceRebase()).toBeFalse();
     });
 
     it('should return true', async () => {
@@ -516,7 +510,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getBranchForceRebase!('master')).toBeTrue();
+      expect(await gitlab.getBranchForceRebase()).toBeTrue();
     });
   });
 
@@ -528,6 +522,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
+
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
     });
@@ -554,6 +549,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 91,
           title: 'some change',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
           additions: 1,
           deletions: 1,
           commits: 1,
@@ -589,6 +585,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 91,
           title: 'Draft: some change',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
           additions: 1,
           deletions: 1,
           commits: 1,
@@ -624,6 +621,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 91,
           title: 'WIP: some change',
           state: 'opened',
+          created_at: '2025-05-19T12:00:00.000Z',
           additions: 1,
           deletions: 1,
           commits: 1,
@@ -1068,7 +1066,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to get the branch commit SHA',
       );
     });
@@ -1099,7 +1097,7 @@ describe('modules/platform/gitlab/index', () => {
         state: 'green',
         url: 'some-url',
       });
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to retrieve commit pipeline',
       );
     });
@@ -1227,13 +1225,13 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 1`,
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created. Retrying 2`,
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         `Pipeline not yet created after 3 attempts`,
       );
     });
@@ -1563,7 +1561,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
-        .reply(304, [])
+        .reply(200, [])
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
@@ -1571,13 +1569,13 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
         },
         'Failed to add assignee - could not get ID',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         {
           assignee: 'someuser',
           err: new Error(
@@ -1594,7 +1592,7 @@ describe('modules/platform/gitlab/index', () => {
       it('should not be supported in too low version', async () => {
         await initFakePlatform('13.8.0');
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
-        expect(logger.warn).toHaveBeenCalledWith(
+        expect(logger.logger.warn).toHaveBeenCalledWith(
           { version: '13.8.0' },
           'Adding reviewers is only available in GitLab 13.9 and onwards',
         );
@@ -2018,6 +2016,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2046,6 +2048,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2074,6 +2080,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.1.0-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2102,6 +2112,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.2.0-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2130,6 +2144,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2172,6 +2190,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2206,13 +2228,13 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([
@@ -2230,6 +2252,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2262,13 +2288,13 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
@@ -2281,6 +2307,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2317,20 +2347,20 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 1',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 2',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 1',
       );
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Automerge on PR creation failed. Retrying 2',
       );
@@ -2353,6 +2383,10 @@ describe('modules/platform/gitlab/index', () => {
       };
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2388,6 +2422,10 @@ describe('modules/platform/gitlab/index', () => {
 
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
           squash_option: 'default_on',
@@ -2427,6 +2465,10 @@ describe('modules/platform/gitlab/index', () => {
 
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
           squash_option: 'always',
@@ -2465,6 +2507,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2515,6 +2561,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2559,6 +2609,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2617,6 +2671,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2686,6 +2744,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2765,6 +2827,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2815,6 +2881,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2865,6 +2935,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2898,6 +2972,10 @@ describe('modules/platform/gitlab/index', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
@@ -2937,6 +3015,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'do something',
           description: 'a merge request',
           state: 'merged',
+          created_at: '2025-05-19T12:00:00.000Z',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -2960,6 +3039,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'Draft: do something',
           description: 'a merge request',
           state: 'merged',
+          created_at: '2025-05-19T12:00:00.000Z',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -2983,6 +3063,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'WIP: do something',
           description: 'a merge request',
           state: 'merged',
+          created_at: '2025-05-19T12:00:00.000Z',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -3006,6 +3087,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'do something',
           description: 'a merge request',
           state: 'open',
+          created_at: '2025-05-19T12:00:00.000Z',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3030,6 +3112,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'do something',
           description: 'a merge request',
           state: 'open',
+          created_at: '2025-05-19T12:00:00.000Z',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 2,
           source_branch: 'some-branch',
@@ -3318,41 +3401,6 @@ describe('modules/platform/gitlab/index', () => {
         }),
       ).toResolve();
     });
-
-    it('updates runtime pr list when pr is updated', async () => {
-      await initPlatform('13.3.6-ee');
-      httpMock
-        .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
-        )
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            description: 'a merge request',
-            state: 'opened',
-          },
-        ])
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200, {
-          iid: 1,
-          source_branch: 'branch-a',
-          title: 'new_title',
-          description: 'body',
-          state: 'opened',
-        });
-      await gitlab.updatePr({
-        number: 1,
-        prTitle: 'new_title',
-        prBody: 'body',
-      });
-      const prList = await gitlab.getPrList();
-      const updatedPr = prList.find((pr) => pr.number === 1);
-      expect(updatedPr?.title).toBe('new_title');
-      expect(updatedPr?.bodyStruct).toMatchObject(getPrBodyStruct('body'));
-    });
   });
 
   describe('reattemptPlatformAutomerge(number, platformPrOptions)', () => {
@@ -3381,7 +3429,7 @@ describe('modules/platform/gitlab/index', () => {
 
       await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
 
-      expect(logger.debug).toHaveBeenLastCalledWith(
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
         'PR platform automerge re-attempted...prNo: 12345',
       );
     });
@@ -3435,32 +3483,29 @@ These updates have all been created already. Click a checkbox below to force a r
     });
 
     it('returns updated pr body', async () => {
-      jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
-
       await initFakePlatform('13.4.0');
       expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
-      expect(smartTruncate).not.toHaveBeenCalled();
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledOnce();
     });
 
     it('truncates description if too low API version', async () => {
-      jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
-
       await initFakePlatform('13.3.0');
       gitlab.massageMarkdown(prBody);
-      expect(smartTruncate).toHaveBeenCalledTimes(1);
-      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 25000);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+        expect.any(String),
+        25000,
+      );
     });
 
     it('truncates description for API version gt 13.4', async () => {
-      jest.doMock('../utils/pr-body');
-      const { smartTruncate } = await import('../utils/pr-body');
-
       await initFakePlatform('13.4.1');
       gitlab.massageMarkdown(prBody);
-      expect(smartTruncate).toHaveBeenCalledTimes(1);
-      expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledTimes(1);
+      expect(prBodyModule.smartTruncate).toHaveBeenCalledWith(
+        expect.any(String),
+        1000000,
+      );
     });
   });
 
@@ -3667,7 +3712,7 @@ These updates have all been created already. Click a checkbox below to force a r
         '@group',
       ]);
       expect(expandedGroupMembers).toEqual(['group']);
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
         'Unable to fetch group',
       );

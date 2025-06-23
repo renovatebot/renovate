@@ -1,11 +1,9 @@
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
-
-const defaultConfigFile = configFileNames[0];
+import { getDefaultConfigFileName } from '../common';
 
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
@@ -25,7 +23,9 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  const desc = is.nonEmptyArray(config.description) ? config.description : [];
+  const desc = is.array(config.description, is.string)
+    ? config.description
+    : [];
   return desc.concat(getScheduleDesc(config));
 }
 
@@ -34,9 +34,7 @@ export function getConfigDesc(
   packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
-  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : defaultConfigFile;
+  const configFile = getDefaultConfigFileName(config);
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);

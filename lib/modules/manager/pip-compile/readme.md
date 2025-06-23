@@ -1,25 +1,24 @@
-Due to limited functionality, the `pip-compile` manager should be considered in an "alpha" stage, which means it's not ready for production use for the majority of end users.
-We welcome feedback and bug reports!
+The `pip-compile` manager does not support all use cases for `pip-compile`, so if you find any areas lacking and without an existing Issue then please "Suggest an Idea" in the Discussions forum with your use case.
 
 The `uv pip compile` command is also supported through this manager in the same fashion as `pip-compile`.
 
 The current implementation has some limitations.
 Read the full document before you start using the `pip-compile` manager.
 
-### Non-configured fileMatch
+### Non-configured managerFilePatterns
 
-The `pip-compile` manager has an empty array for default `fileMatch`, meaning it won't match any files ever by default.
-You can "activate" the manager by specifying a `fileMatch` pattern such as:
+The `pip-compile` manager has an empty array for default `managerFilePatterns`, meaning it won't match any files ever by default.
+You can "activate" the manager by specifying a `managerFilePatterns` pattern such as:
 
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["(^|/)requirements\\.txt$"]
+    "managerFilePatterns": ["/(^|/)requirements\\.txt$/"]
   }
 }
 ```
 
-`pip-compile` reads the output files to extract the arguments passed to the original command, as such the `fileMatch` must be configured for `*.txt` files and not `*.in`.
+`pip-compile` reads the output files to extract the arguments passed to the original command, as such the `managerFilePatterns` must be configured for `*.txt` files and not `*.in`.
 
 ### Assumption of header with a command
 
@@ -33,12 +32,10 @@ In turn `pip-compile` manager will find all source files and parse them as packa
 
 The following files are currently supported:
 
-|  Source filename | Manager            |
-| ---------------: | ------------------ |
-|       `setup.py` | `pip_setup`        |
-|      `setup.cfg` | `setup-cfg`        |
-| `pyproject.toml` | `pep621`           |
-| `*.in` / `*.txt` | `pip_requirements` |
+| Source filename | Manager            |
+| --------------: | ------------------ |
+|      `setup.py` | `pip_setup`        |
+|          `*.in` | `pip_requirements` |
 
 Example header:
 
@@ -62,19 +59,13 @@ Because `pip-compile` will update source files with their associated manager you
   },
   "pip_setup": {
     "enabled": false
-  },
-  "setup-cfg": {
-    "enabled": false
-  },
-  "pep621": {
-    "enabled": false
   }
 }
 ```
 
 ### Configuration of Python version
 
-By default Renovate extracts Python version from the header.
+By default Renovate extracts Python version from the header for `pip-compile`, and from the `--python-version` option for `uv`.
 To get Renovate to use another version of Python, add a constraints` rule to the Renovate config:
 
 ```json
