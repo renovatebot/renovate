@@ -1966,7 +1966,7 @@ const options: RenovateOptions[] = [
     name: 'commitHourlyLimit',
     description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
     type: 'integer',
-    default: 10,
+    default: 0,
   },
   {
     name: 'prHourlyLimit',
