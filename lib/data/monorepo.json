@@ -477,6 +477,10 @@
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
+    "oxlint": [
+      "https://github.com/oxc-project/oxc",
+      "https://github.com/oxc-project/eslint-plugin-oxlint"
+    ],
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
@@ -669,7 +673,6 @@
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
-    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
