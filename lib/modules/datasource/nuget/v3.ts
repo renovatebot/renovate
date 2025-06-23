@@ -166,7 +166,14 @@ export class NugetV3Api {
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
-      ({ version, published, projectUrl, listed, packageContent }) => {
+      ({
+        version,
+        published,
+        projectUrl,
+        listed,
+        packageContent,
+        deprecation,
+      }) => {
         const release: Release = { version: removeBuildMeta(version) };
         const releaseTimestamp = asTimestamp(published);
         if (releaseTimestamp) {
@@ -177,7 +184,8 @@ export class NugetV3Api {
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);
         }
-        if (listed === false) {
+
+        if (listed === false || deprecation) {
           release.isDeprecated = true;
         }
         return release;
@@ -199,6 +207,10 @@ export class NugetV3Api {
     const dep: ReleaseResult = {
       releases,
     };
+
+    if (releases.every((release) => release.isDeprecated === true)) {
+      dep.deprecationMessage = this.getDeprecationMessage(pkgName);
+    }
 
     try {
       const packageBaseAddress = await this.getResourceUrl(
@@ -308,5 +320,9 @@ export class NugetV3Api {
       await fs.rmCache(nupkgFile);
       await fs.rmCache(nupkgContentsDir);
     }
+  }
+
+  getDeprecationMessage(packageName: string): string {
+    return `The package \`${packageName}\` is deprecated.`;
   }
 }

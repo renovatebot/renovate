@@ -762,9 +762,12 @@ export async function lookupUpdates(
       );
     }
 
-    const release = dependency?.releases.find(
-      (r) => r.version === res.updates[0].newValue,
-    );
+    const release =
+      res.updates.length > 0
+        ? dependency?.releases.find(
+            (r) => r.version === res.updates[0].newValue,
+          )
+        : null;
 
     if (release?.changelogContent) {
       res.changelogContent = release.changelogContent;

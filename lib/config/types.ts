@@ -1,5 +1,6 @@
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
+import type { ManagerName } from '../manager-list.generated';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule, SkipReason } from '../types';
@@ -195,6 +196,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
 }
@@ -411,7 +413,8 @@ export type AllowedParents =
   | 'logLevelRemap'
   | 'packageRules'
   | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts';
+  | 'vulnerabilityAlerts'
+  | ManagerName;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
