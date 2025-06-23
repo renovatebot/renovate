@@ -212,7 +212,7 @@ describe('modules/platform/bitbucket/index', () => {
     it('works with only API token', async () => {
       hostRules.clear();
       hostRules.find.mockReturnValue({
-        password: 'ATCTIAMACONTAINERTOKEN3407361359',
+        password: 'ATATIAMACONTAINERTOKEN3407361359',
       });
       httpMock
         .scope(baseUrl)
