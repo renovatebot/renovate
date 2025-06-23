@@ -669,6 +669,7 @@
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
+    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
