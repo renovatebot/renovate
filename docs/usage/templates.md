@@ -69,6 +69,14 @@ If you want to convert a string to Base64, use the built-in function `encodeBase
 
 In the example above `body` is the string you want to transform into a Base64-encoded value.
 
+### decodeBase64
+
+If you want to convert a Base64 value to a string, use the built-in function `decodeBase64` like this:
+
+`{{{decodeBase64 body}}}`
+
+In the example above `body` is the base64 encoded value you want to decode.
+
 ### encodeURIComponent
 
 If you want to convert a string to a valid URI, use the built-in function `encodeURIComponent` like this:
