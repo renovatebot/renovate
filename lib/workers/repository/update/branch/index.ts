@@ -232,7 +232,9 @@ export async function processBranch(
       };
     }
     if (
-      (isLimitReached('Commits') || isLimitReached('Branches', branchConfig)) &&
+      (isLimitReached('Commits') ||
+        (!branchConfig.rebaseRequested &&
+          isLimitReached('Branches', branchConfig))) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
