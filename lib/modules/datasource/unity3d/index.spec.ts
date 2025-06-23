@@ -315,7 +315,7 @@ describe('modules/datasource/unity3d/index', () => {
     httpMock
       .scope(uriPageOne.origin)
       .get(`${uriPageOne.pathname}${uriPageOne.search}`)
-      .reply(200, JSON.stringify(createUnityReleases(total, 0, 25)));
+      .reply(200, createUnityReleases(total, 0, 25));
     httpMock
       .scope(uriPageTwo.origin)
       .get(`${uriPageTwo.pathname}${uriPageTwo.search}`)
