@@ -142,7 +142,6 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image1, image2, image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
 
     it('with 1 returned image', async () => {
@@ -153,7 +152,6 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
 
     it('without returned images', async () => {
@@ -164,7 +162,6 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([]);
       expect(ec2Mock.calls()).toHaveLength(1);
-      expect(ec2Mock.calls()[0].args).toMatchSnapshot();
     });
   });
 

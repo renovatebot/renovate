@@ -19,7 +19,12 @@ function githubPackageName(input: string): string | undefined {
   return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
 }
 
-export const gitRules = ['git_repository', '_git_repository'] as const;
+export const gitRules = [
+  'git_repository',
+  '_git_repository',
+  'new_git_repository',
+  '_new_git_repository',
+] as const;
 
 export const GitTarget = z
   .object({

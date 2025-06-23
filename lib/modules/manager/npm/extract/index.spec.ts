@@ -906,6 +906,43 @@ describe('modules/manager/npm/extract/index', () => {
             prettyDepType: 'packageManager',
           },
         ],
+        managerData: {
+          hasPackageManager: true,
+        },
+      });
+    });
+
+    it('sets hasPackageManager to true when devEngines detected in package file', async () => {
+      const pJson = {
+        devEngines: {
+          packageManager: {
+            name: 'yarn',
+            version: '3.0.0',
+          },
+        },
+        dependencies: {
+          express: '2.0.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'express',
+            depType: 'dependencies',
+            prettyDepType: 'dependency',
+          },
+        ],
+        managerData: {
+          hasPackageManager: true,
+        },
       });
     });
 

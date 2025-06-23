@@ -22,6 +22,8 @@ There are some exceptions:
 - if the `depType` is a known "production dependency" type (e.g. `dependencies` or `require`), then Renovate uses the `fix` prefix
 - if an update uses the `maven` datasource _and_ `matchDepTypes` is a known production type (e.g. `compile`, `provided`, `runtime`, `system`, `import` or `parent`) then Renovate uses the `fix` prefix
 
+Be aware that the semantic commits feature does not work if you have a `commitMessagePrefix` configured - `commitMessagePrefix` will take priority.
+
 ## Manually enabling or disabling semantic commits
 
 You can override the default settings, and disable or enable Semantic Commits.

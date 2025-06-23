@@ -11,9 +11,13 @@ import type { ApiPageCache, GhPr, GhRestPr } from './types';
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
-  repoCache.platform ??= {};
-  repoCache.platform.github ??= {};
-  repoCache.platform.github.pullRequestsCache ??= { items: {} };
+  if (!repoCache?.platform?.github?.pullRequestsCache) {
+    logger.debug('PR cache: cached data not found, creating new cache');
+    repoCache.platform ??= {};
+    repoCache.platform.github ??= {};
+    repoCache.platform.github.pullRequestsCache ??= { items: {} };
+  }
+
   const prApiCache = new ApiCache<GhPr>(
     repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,
   );
@@ -72,7 +76,15 @@ export async function getPrCache(
         }
       }
 
-      const perPage = isInitial ? 100 : 20;
+      let perPage: number;
+      if (isInitial) {
+        logger.debug('PR cache: initial fetch');
+        perPage = 100;
+      } else {
+        logger.debug('PR cache: sync fetch');
+        perPage = 20;
+      }
+
       const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const res = await http.getJsonUnchecked<GhRestPr[]>(urlPath, opts);
@@ -86,9 +98,15 @@ export async function getPrCache(
       let { body: page } = res;
 
       if (username) {
-        page = page.filter(
+        const filteredPage = page.filter(
           (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
         );
+
+        logger.debug(
+          `PR cache: Filtered ${page.length} PRs to ${filteredPage.length} (user=${username})`,
+        );
+
+        page = filteredPage;
       }
 
       const items = page.map(coerceRestPr);
@@ -109,10 +127,10 @@ export async function getPrCache(
         requestsTotal,
         apiQuotaAffected,
       },
-      `getPrList success`,
+      `PR cache: getPrList success`,
     );
   } catch (err) /* v8 ignore start */ {
-    logger.debug({ err }, 'getPrList err');
+    logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
   } /* v8 ignore stop */
 

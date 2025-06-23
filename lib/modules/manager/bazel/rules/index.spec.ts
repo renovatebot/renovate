@@ -100,6 +100,23 @@ describe('modules/manager/bazel/rules/index', () => {
 
       expect(
         extractDepsFromFragmentData({
+          rule: 'new_git_repository',
+          name: 'foo_bar',
+          commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+          remote: 'https://github.com/foo/bar',
+        }),
+      ).toEqual([
+        {
+          datasource: 'github-tags',
+          depType: 'new_git_repository',
+          depName: 'foo_bar',
+          packageName: 'foo/bar',
+          currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+        },
+      ]);
+
+      expect(
+        extractDepsFromFragmentData({
           rule: 'git_repository',
           name: 'foo_bar',
           tag: '1.2.3',

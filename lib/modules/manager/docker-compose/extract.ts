@@ -56,12 +56,14 @@ export function extractPackageFile(
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
     const services = config.services ?? config;
+    const extensions = config.extensions ?? {};
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(
       services || /* istanbul ignore next: can never happen */ {},
     )
+      .concat(Object.values(extensions))
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
