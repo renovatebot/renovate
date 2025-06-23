@@ -51,13 +51,17 @@ export class GerritScm extends DefaultGitScm {
   override async getBranchUpdateDate(
     branchName: string,
   ): Promise<DateTime | null> {
-    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
-    const change = await client
-      .findChanges(repository, searchConfig, true)
-      .then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      limit: 1,
+      refreshCache: true,
+      requestDetails: ['CURRENT_REVISION'],
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
       const date = convertGerritDateToISO(
-        change.revisions[change.current_revision].created,
+        change.revisions![change.current_revision!].created,
       )!;
       return DateTime.fromISO(date, { zone: 'utc' });
     }
