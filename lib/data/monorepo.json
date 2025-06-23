@@ -32,6 +32,7 @@
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
+    "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
     "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
@@ -272,10 +273,12 @@
     "dot-swashbuckle": "https://github.com/Havunen/DotSwashbuckle",
     "dotnet": [
       "https://github.com/dotnet/aspnetcore",
+      "https://github.com/dotnet/dotnet",
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/fsharp",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/msbuild",
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
@@ -453,6 +456,7 @@
       "https://github.com/nuxt/nuxt"
     ],
     "okhttp": "https://github.com/square/okhttp",
+    "openapi-dotnet": "https://github.com/microsoft/OpenAPI.NET",
     "opencost": [
       "https://github.com/opencost/opencost",
       "https://github.com/opencost/opencost-ui"
@@ -487,6 +491,7 @@
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
     "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
+    "polly": "https://github.com/App-vNext/Polly",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",

@@ -1,5 +1,5 @@
-import type { Content } from 'mdast';
-import remark from 'remark';
+import type { RootContent } from 'mdast';
+import { remark } from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../../logger';
 import { coerceNumber } from '../../../util/number';
@@ -23,7 +23,7 @@ function massageLink(input: string): string {
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
-  const transformer = (tree: Content): void => {
+  const transformer = (tree: RootContent): void => {
     const startOffset = coerceNumber(tree.position?.start.offset);
     const endOffset = coerceNumber(tree.position?.end.offset);
 
@@ -49,7 +49,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
       }
     } else if ('children' in tree) {
-      tree.children.forEach((child: Content) => {
+      tree.children.forEach((child: RootContent) => {
         transformer(child);
       });
     }
