@@ -319,7 +319,7 @@ describe('modules/datasource/unity3d/index', () => {
     httpMock
       .scope(uriPageTwo.origin)
       .get(`${uriPageTwo.pathname}${uriPageTwo.search}`)
-      .reply(200, JSON.stringify(createUnityReleases(total, 25, 5)));
+      .reply(200, createUnityReleases(total, 25, 5));
 
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
