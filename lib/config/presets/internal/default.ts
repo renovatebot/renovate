@@ -482,7 +482,6 @@ export const presets: Record<string, Preset> = {
   prHourlyLimitNone: {
     description: 'Removes rate limit for PR creation per hour.',
     prHourlyLimit: 0,
-    // TODO consider commitHourlyLimit
   },
   prImmediately: {
     description: 'Raise PRs immediately (after branch is created).',
