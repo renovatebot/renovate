@@ -359,11 +359,10 @@ export class CrateDatasource extends Datasource {
       maxConcurrentProcesses: 1,
     }).env(getChildEnv());
 
-    const innerClonePromise = git.clone(registryFetchUrl, clonePath, {
-      '--depth': 1,
-    });
     try {
-      return await innerClonePromise;
+      return await git.clone(registryFetchUrl, clonePath, {
+        '--depth': 1,
+      });
     } catch (err) {
       if (
         err.message.includes(
@@ -374,9 +373,8 @@ export class CrateDatasource extends Datasource {
           { packageName, registryFetchUrl },
           'failed to shallow clone git registry, doing full clone',
         );
-        const innerClonePromise = git.clone(registryFetchUrl, clonePath);
         try {
-          return await innerClonePromise;
+          return await git.clone(registryFetchUrl, clonePath);
         } catch (err) {
           logger.warn(
             { err, packageName, registryFetchUrl },
