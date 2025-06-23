@@ -150,8 +150,8 @@ importers:
         specifier: 1.0.3
         version: 1.0.3
       croner:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 9.1.0
+        version: 9.1.0
       cronstrue:
         specifier: 2.61.0
         version: 2.61.0
@@ -2929,8 +2929,8 @@ packages:
       typescript:
         optional: true
 
-  croner@9.0.0:
-    resolution: {integrity: sha512-onMB0OkDjkXunhdW9htFjEhqrD54+M94i6ackoUkjHKbRnXdyEyKRelp4nJ1kAz32+s27jP1FsebpJCVl0BsvA==}
+  croner@9.1.0:
+    resolution: {integrity: sha512-p9nwwR4qyT5W996vBZhdvBCnMhicY5ytZkR4D1Xj0wuTDEiMnjwR57Q3RXYY/s0EpX6Ay3vgIcfaR+ewGHsi+g==}
     engines: {node: '>=18.0'}
 
   cronstrue@2.61.0:
@@ -9525,7 +9525,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
 
-  croner@9.0.0: {}
+  croner@9.1.0: {}
 
   cronstrue@2.61.0: {}
 
