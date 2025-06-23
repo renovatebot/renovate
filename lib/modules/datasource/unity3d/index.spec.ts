@@ -31,9 +31,9 @@ describe('modules/datasource/unity3d/index', () => {
   ) {
     const results = [];
 
-    for (let i = 0; i < resultCount; i++) {
+    for (let i = 1; i <= resultCount; i++) {
       results.push({
-        version: `6000.0.${offset + i + 1}f1`,
+        version: `6000.0.${offset + i}f1`,
         releaseDate: '2024-12-18T08:40:10.134Z',
         releaseNotes: {
           url: 'testUrl',
