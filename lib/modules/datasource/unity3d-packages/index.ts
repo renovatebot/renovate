@@ -48,6 +48,7 @@ export class Unity3dPackagesDatasource extends Datasource {
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(response.body.time[release.version]),
+        changelogContent: release?._upm?.changelog,
         changelogUrl:
           registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl
             ? release.documentationUrl?.replace(

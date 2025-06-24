@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
+const Upm = z.object({
+  changelog: z.string().optional(),
+});
+
 const UnityPackageRelease = z.object({
+  _upm: Upm.optional(),
   documentationUrl: z.string().optional(),
   version: z.string(),
 });

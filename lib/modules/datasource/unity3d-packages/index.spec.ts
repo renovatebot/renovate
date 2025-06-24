@@ -134,11 +134,52 @@ describe('modules/datasource/unity3d-packages/index', () => {
     });
   });
 
-  it(`package with real data`, async () => {
+  it(`package with changelog content and url`, async () => {
+    const data = `
+      {
+        "_id": "com.unity.xr.openxr",
+        "name": "com.unity.xr.openxr",
+        "description": "OpenXR is an open, royalty-free standard developed by Khronos that aims to simplify AR/VR development by allowing developers to target a wide range of AR/VR devices. Use this plug-in to enable OpenXR in XR Plug-in Management.",
+        "provider": "upm",
+        "versions": {
+          "1.14.3": {
+            "_upm": {
+              "changelog": "### Fixed\n\n* Fixed Multiview Render Regions feature regression."
+            },
+            "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html",
+            "version": "1.14.3"
+          },
+          "1.12.0-exp.1": {
+            "_upm": {
+              "changelog": "### Fixed\n* Fixed Custom Composition Layer Feature not showing up in the OpenXR feature setting UI after importing into project.\n* Fixed a crash with composition layers in scene due to race condition.\n\n### Changed\n* Implements the construction and maintenance of native composition layers in C# via our LayerProvider classes inheriting from OpenXRCustomLayerHandler."
+            },
+            "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/manual/index.html",
+            "version": "1.12.0-exp.1"
+          },
+          "1.0.0-pre.1": {
+            "version": "1.0.0-pre.1"
+          },
+          "0.1.2-preview.2": {
+            "version": "0.1.2-preview.2"
+          }
+        },
+        "time": {
+          "1.14.3": "2025-04-18T18:06:12.036Z",
+          "1.12.0-exp.1": "2024-07-03T15:24:28.000Z",
+          "1.0.0-pre.1": "2021-02-11T19:26:19.000Z",
+          "0.1.2-preview.2": "2021-01-05T17:57:41.000Z"
+        },
+        "dist-tags": {
+          "latest": "1.14.3"
+        },
+        etag: "1ac33-Wq9aM7Y4fPfdcXOvZGnRrxOh0GY"
+      }
+    `;
+
     httpMock
       .scope('https://packages.unity.com')
       .get('/com.unity.xr.openxr')
-      .reply(200, Fixtures.get('package.json'));
+      .reply(200, data);
 
     const res = await getPkgReleases({
       datasource: Unity3dPackagesDatasource.id,
@@ -158,8 +199,8 @@ describe('modules/datasource/unity3d-packages/index', () => {
         'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/changelog/CHANGELOG.html',
       isStable: true,
       registryUrl: 'https://packages.unity.com',
-      releaseTimestamp: '2025-03-27T10:54:45.412Z',
-      version: '1.14.2',
+      releaseTimestamp: '2025-04-18T18:06:12.036Z',
+      version: '1.14.3',
     });
 
     expect(res?.releases[2]).toEqual({
