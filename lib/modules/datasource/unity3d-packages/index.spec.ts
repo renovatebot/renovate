@@ -1,6 +1,5 @@
 import { getPkgReleases } from '..';
 import { Unity3dPackagesDatasource } from '.';
-import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/unity3d-packages/index', () => {
@@ -144,14 +143,13 @@ describe('modules/datasource/unity3d-packages/index', () => {
         "versions": {
           "1.14.3": {
             "_upm": {
-              "changelog": "### Fixed\n\n* Fixed Multiview Render Regions feature regression."
+              "changelog": "### Fixed\\n\\n* Fixed Multiview Render Regions feature regression."
             },
             "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html",
             "version": "1.14.3"
           },
           "1.12.0-exp.1": {
             "_upm": {
-              "changelog": "### Fixed\n* Fixed Custom Composition Layer Feature not showing up in the OpenXR feature setting UI after importing into project.\n* Fixed a crash with composition layers in scene due to race condition.\n\n### Changed\n* Implements the construction and maintenance of native composition layers in C# via our LayerProvider classes inheriting from OpenXRCustomLayerHandler."
             },
             "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/manual/index.html",
             "version": "1.12.0-exp.1"
@@ -172,7 +170,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
         "dist-tags": {
           "latest": "1.14.3"
         },
-        etag: "1ac33-Wq9aM7Y4fPfdcXOvZGnRrxOh0GY"
+        "etag": "1ac33-Wq9aM7Y4fPfdcXOvZGnRrxOh0GY"
       }
     `;
 
@@ -195,6 +193,8 @@ describe('modules/datasource/unity3d-packages/index', () => {
     expect(res?.releases).toHaveLength(4);
 
     expect(res?.releases[3]).toEqual({
+      changelogContent:
+        '### Fixed\n\n* Fixed Multiview Render Regions feature regression.',
       changelogUrl:
         'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/changelog/CHANGELOG.html',
       isStable: true,
