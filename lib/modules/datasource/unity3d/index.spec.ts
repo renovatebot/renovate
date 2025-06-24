@@ -24,7 +24,7 @@ describe('modules/datasource/unity3d/index', () => {
     }
   };
 
-  const createUnityReleases = (
+  function createUnityReleases(
     total: number,
     offset: number,
     resultCount: number,
@@ -46,7 +46,7 @@ describe('modules/datasource/unity3d/index', () => {
       total,
       results,
     });
-  };
+  }
 
   it.each([
     Unity3dDatasource.streams.lts,
