@@ -33,7 +33,7 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     it('returns global code owner for commit with sha set', async () => {
       pr.sha = 'f7374c2de8a4c95a7fd7182ab24044e3896aac02' as LongCommitSha;
-      fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
+      fs.readLocalFile.mockResolvedValueOnce('* @jimmy');
       git.getBranchFilesFromCommit.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);

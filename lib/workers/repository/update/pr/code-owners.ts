@@ -101,10 +101,9 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     // Get list of modified files in PR
     // if the commit sha is known, we can directly compare against the parent, otherwise use the branch
-    const prFiles =
-      pr.sha
-        ? await getBranchFilesFromCommit(pr.sha)
-        : await getBranchFiles(pr.sourceBranch);
+    const prFiles = pr.sha
+      ? await getBranchFilesFromCommit(pr.sha)
+      : await getBranchFiles(pr.sourceBranch);
 
     if (!prFiles?.length) {
       logger.debug('PR includes no files');

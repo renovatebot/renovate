@@ -1037,7 +1037,7 @@ export function getBranchFilesFromCommit(
   return getBranchFilesFromRef(referenceCommit);
 }
 
-export async function getBranchFilesFromRef(
+async function getBranchFilesFromRef(
   refName: string,
 ): Promise<string[] | null> {
   await syncGit();
