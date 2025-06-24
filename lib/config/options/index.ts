@@ -172,6 +172,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'dataFileTemplate',
+    description: 'A template to create post-upgrade command data file from.',
+    type: 'string',
+    parents: ['postUpgradeTasks'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'fileFilters',
     description:
       'Files that match the glob pattern will be committed after running a post-upgrade task.',
@@ -2151,7 +2159,7 @@ const options: RenovateOptions[] = [
     description: 'Branch topic.',
     type: 'string',
     default:
-      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+      '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
     cli: false,
   },
   {
