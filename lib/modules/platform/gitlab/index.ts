@@ -296,8 +296,9 @@ function getRepoUrl(
   });
   const env = getEnv();
 
+  const credentialPassing = GlobalConfig.get('gitCredentialPassing');
   const authData =
-    GlobalConfig.get('gitCredentialPassing') === 'url'
+    !credentialPassing || credentialPassing === 'url'
       ? `oauth2:${opts.token!}`
       : null;
 
