@@ -946,6 +946,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     default: 'url',
     allowedValues: ['url', 'store'],
+    supportedPlatforms: ['gitlab'],
   },
   {
     name: 'username',
