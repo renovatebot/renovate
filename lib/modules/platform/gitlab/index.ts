@@ -5,7 +5,6 @@ import pMap from 'p-map';
 import semver from 'semver';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
-  PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -19,6 +18,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { coerceArray } from '../../../util/array';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
@@ -64,6 +64,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
+import { GitlabPrCache } from './pr-cache';
 import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
@@ -74,11 +75,11 @@ import type {
   RepoResponse,
 } from './types';
 import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
   email: string;
-  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
   defaultBranch: string;
@@ -106,9 +107,11 @@ const defaults = {
 export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
+let botUserName: string;
 
 export async function initPlatform({
   endpoint,
+  username,
   token,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
@@ -138,10 +141,12 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
+      botUserName = user.name;
     }
+    const env = getEnv();
     /* v8 ignore start: experimental feature */
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (env.RENOVATE_X_PLATFORM_VERSION) {
+      gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } /* v8 ignore stop */ else {
       const version = (
         await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
@@ -164,6 +169,8 @@ export async function initPlatform({
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
+
+  botUserName ??= username!;
 
   return platformConfig;
 }
@@ -273,16 +280,17 @@ function getRepoUrl(
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
+  const env = getEnv();
 
   if (
     gitUrl === 'endpoint' ||
-    is.nonEmptyString(process.env.GITLAB_IGNORE_REPO_URL) ||
+    is.nonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
-    if (process.env.GITLAB_IGNORE_REPO_URL) {
+    if (env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
         'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
       );
@@ -373,7 +381,6 @@ export async function initRepo({
         res.body.squash_option === 'default_on';
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-    delete config.prList;
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
@@ -554,37 +561,13 @@ export async function getBranchStatus(
 }
 
 // Pull Request
-
-async function fetchPrList(): Promise<Pr[]> {
-  const searchParams = {
-    per_page: '100',
-  } as any;
-  /* v8 ignore start */
-  if (!config.ignorePrAuthor) {
-    searchParams.scope = 'created_by_me';
-  } /* v8 ignore stop */
-  const query = getQueryString(searchParams);
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
-      urlString,
-      {
-        paginate: true,
-      },
-    );
-    return res.body.map((pr) => prInfo(pr));
-  } catch (err) /* v8 ignore start */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  } /* v8 ignore stop */
-}
-
 export async function getPrList(): Promise<Pr[]> {
-  config.prList ??= await fetchPrList();
-  return config.prList;
+  return await GitlabPrCache.getPrs(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    !!config.ignorePrAuthor,
+  );
 }
 
 async function ignoreApprovals(pr: number): Promise<void> {
@@ -661,14 +644,15 @@ async function tryPrAutomerge(
         'running', // pipeline is running, no need to wait for it
       ];
       const desiredStatus = 'can_be_merged';
+      const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
-        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
       const mergeDelay = parseInteger(
-        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
+        env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
         250,
       );
 
@@ -732,10 +716,11 @@ async function tryPrAutomerge(
   } /* v8 ignore stop */
 }
 
-async function approvePr(pr: number): Promise<void> {
+async function approveMr(mrNumber: number): Promise<void> {
+  logger.debug(`approveMr(${mrNumber})`);
   try {
     await gitlabApi.postJson(
-      `projects/${config.repository}/merge_requests/${pr}/approve`,
+      `projects/${config.repository}/merge_requests/${mrNumber}/approve`,
     );
   } catch (err) {
     logger.warn({ err }, 'GitLab: Error approving merge request');
@@ -773,14 +758,16 @@ export async function createPr({
   );
 
   const pr = prInfo(res.body);
-
-  /* v8 ignore start */
-  if (config.prList) {
-    config.prList.push(pr);
-  } /* v8 ignore stop */
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    pr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(pr.number);
+    await approveMr(pr.number);
   }
 
   await tryPrAutomerge(pr.number, platformPrOptions);
@@ -841,25 +828,16 @@ export async function updatePr({
   ).body;
 
   const updatedPr = prInfo(updatedPrInfo);
-
-  if (config.prList) {
-    const existingIndex = config.prList.findIndex(
-      (pr) => pr.number === updatedPr.number,
-    );
-    /* v8 ignore start: should not happen */
-    if (existingIndex === -1) {
-      logger.warn(
-        { pr: updatedPr },
-        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-      );
-      config.prList.push(updatedPr);
-    } /* v8 ignore stop */ else {
-      config.prList[existingIndex] = updatedPr;
-    }
-  }
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    updatedPr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
-    await approvePr(iid);
+    await approveMr(iid);
   }
 }
 
@@ -1031,8 +1009,9 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
 
+  const env = getEnv();
   const retryTimes = parseInteger(
-    process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
+    env.RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS,
     2,
   );
 
@@ -1054,7 +1033,7 @@ export async function setBranchStatus({
       }
       // give gitlab some time to create pipelines for the sha
       await setTimeout(
-        parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
+        parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
       );
     }
   } catch (err) {

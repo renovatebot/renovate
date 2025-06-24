@@ -9,6 +9,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
 
+const ansibleProtocolRegex = regEx(/^\S+\/api\/ansible\/.+/);
 const repositoryRegex = regEx(
   /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
@@ -45,21 +46,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const [namespace, projectName] = packageName.split('.');
-
-    const repository =
-      repositoryRegex.exec(registryUrl!)?.groups?.repository ?? 'published';
-
-    const baseUrl = ensureTrailingSlash(
-      joinUrlParts(
-        registryUrl!,
-        'v3/plugin/ansible/content',
-        repository,
-        'collections/index',
-        namespace,
-        projectName,
-      ),
-    );
+    const baseUrl = this.constructBaseUrl(registryUrl!, packageName);
 
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
@@ -116,6 +103,28 @@ export class GalaxyCollectionDatasource extends Datasource {
       releases: filteredReleases,
       sourceUrl: sourceUrlOfHighestRelease,
     };
+  }
+
+  constructBaseUrl(registryUrl: string, packageName: string): string {
+    const [namespace, projectName] = packageName.split('.');
+    if (ansibleProtocolRegex.test(registryUrl)) {
+      return ensureTrailingSlash(
+        joinUrlParts(registryUrl, 'api/v3/collections', namespace, projectName),
+      );
+    } else {
+      const repository =
+        repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
+      return ensureTrailingSlash(
+        joinUrlParts(
+          registryUrl,
+          'v3/plugin/ansible/content',
+          repository,
+          'collections/index',
+          namespace,
+          projectName,
+        ),
+      );
+    }
   }
 
   @cache({

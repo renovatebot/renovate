@@ -78,7 +78,8 @@ export async function getDependency(
   try {
     const cacheProvider = new PackageHttpCacheProvider({
       namespace: 'datasource-npm:cache-provider',
-      checkAuthorizationHeader: false,
+      checkAuthorizationHeader: false, // We don't rely on whether user token is provided or not
+      checkCacheControlHeader: true,
     });
     const options: HttpOptions = { cacheProvider };
 

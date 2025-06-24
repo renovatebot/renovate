@@ -239,24 +239,35 @@ export function toPackageDependencies(
 }
 
 export const GitRepositoryToPackageDep = RuleFragmentSchema.extend({
-  rule: z.literal('git_repository'),
+  rule: z.union([z.literal('git_repository'), z.literal('new_git_repository')]),
   children: z.object({
     name: StringFragmentSchema,
     remote: StringFragmentSchema,
-    commit: StringFragmentSchema,
+    commit: StringFragmentSchema.optional(),
+    tag: StringFragmentSchema.optional(),
   }),
-}).transform(({ rule, children: { name, remote, commit } }): BasePackageDep => {
-  const gitRepo: BasePackageDep = {
-    depType: rule,
-    depName: name.value,
-    currentDigest: commit.value,
-  };
-  const ghPackageName = githubPackageName(remote.value);
-  if (is.nonEmptyString(ghPackageName)) {
-    gitRepo.datasource = GithubTagsDatasource.id;
-    gitRepo.packageName = ghPackageName;
-  } else {
-    gitRepo.skipReason = 'unsupported-datasource';
-  }
-  return gitRepo;
-});
+}).transform(
+  ({ rule, children: { name, remote, commit, tag } }): BasePackageDep => {
+    const gitRepo: BasePackageDep = {
+      depType: rule,
+      depName: name.value,
+    };
+
+    if (commit?.value) {
+      gitRepo.currentDigest = commit.value;
+    }
+
+    if (tag?.value) {
+      gitRepo.currentValue = tag.value;
+    }
+
+    const ghPackageName = githubPackageName(remote.value);
+    if (is.nonEmptyString(ghPackageName)) {
+      gitRepo.datasource = GithubTagsDatasource.id;
+      gitRepo.packageName = ghPackageName;
+    } else {
+      gitRepo.skipReason = 'unsupported-datasource';
+    }
+    return gitRepo;
+  },
+);

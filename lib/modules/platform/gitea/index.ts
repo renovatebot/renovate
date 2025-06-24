@@ -12,6 +12,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { map } from '../../../util/promises';
@@ -224,9 +225,10 @@ const platform: Platform = {
       gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
+      const env = getEnv();
       /* v8 ignore start: experimental feature */
-      if (semver.valid(process.env.RENOVATE_X_PLATFORM_VERSION)) {
-        defaults.version = process.env.RENOVATE_X_PLATFORM_VERSION!;
+      if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
+        defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
       } /* v8 ignore stop */ else {
         defaults.version = await helper.getVersion({ token });
       }
@@ -326,6 +328,8 @@ const platform: Platform = {
       config.mergeMethod = 'squash';
     } else if (repo.allow_merge_commits) {
       config.mergeMethod = 'merge';
+    } else if (repo.allow_fast_forward_only_merge) {
+      config.mergeMethod = 'fast-forward-only';
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',

@@ -13,6 +13,8 @@ The `regex` manager is unique in Renovate because:
 We have [additional Handlebars helpers](../../../templates.md#additional-handlebars-helpers) to help you perform common transformations on the regex manager's template fields.
 Also read the documentation for the [`customManagers` config option](../../../configuration-options.md#custommanagers).
 
+If you have limited managers to run within [`enabledManagers` config option](../../../configuration-options.md#enabledmanagers), you need to add `"custom.regex"` to the list.
+
 ### Required Fields
 
 The first two required fields are `managerFilePatterns` and `matchStrings`:
@@ -196,7 +198,7 @@ Using the `customManagers` below, Renovate looks for available Docker tags of th
       "datasourceTemplate": "docker",
       "managerFilePatterns": ["/(^|/)Chart\\.yaml$/"],
       "matchStrings": [
-        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\'?(?<currentValue>[\\w+\\.\\-]*)'"
       ]
     }
   ]

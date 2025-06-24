@@ -1,5 +1,6 @@
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
+import type { ManagerName } from '../manager-list.generated';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule, SkipReason } from '../types';
@@ -37,6 +38,7 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
+  bumpVersions?: BumpVersionConfig[];
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -193,6 +195,7 @@ export type ExecutionMode = 'branch' | 'update';
 
 export interface PostUpgradeTasks {
   commands?: string[];
+  dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
 }
@@ -267,6 +270,7 @@ export interface RenovateConfig
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardReportAbandonment?: boolean;
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
@@ -401,13 +405,15 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
   | 'logLevelRemap'
   | 'packageRules'
   | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts';
+  | 'vulnerabilityAlerts'
+  | ManagerName;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -585,4 +591,11 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface BumpVersionConfig {
+  bumpType?: string;
+  filePatterns: string[];
+  matchStrings: string[];
+  name?: string;
 }

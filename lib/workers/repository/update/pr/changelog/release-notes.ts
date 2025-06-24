@@ -366,33 +366,24 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const notesSourceUrl = getNotesSourceUrl(
+            baseUrl,
+            repository,
+            project,
+            changelogFile,
+          );
+          const mdHeadingLink = title
+            .filter((word) => !isHttpUrl(word))
+            .join('-')
+            .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              const notesSourceUrl = getNotesSourceUrl(
-                baseUrl,
-                repository,
-                project,
-                changelogFile,
-              );
-              const mdHeadingLink = title
-                .filter((word) => !isHttpUrl(word))
-                .join('-')
-                .replace(regEx(/[^A-Za-z0-9-]/g), '');
-              const url = `${notesSourceUrl}#${mdHeadingLink}`;
-              body = massageBody(body, baseUrl);
-              if (body?.length) {
-                try {
-                  body = await linkify(body, {
-                    repository: `${baseUrl}${repository}`,
-                  });
-                } catch (err) /* istanbul ignore next */ {
-                  logger.warn({ body, err }, 'linkify error');
-                }
-              }
               return {
-                body,
+                body: await linkifyBody(project, body),
                 url,
                 notesSourceUrl,
               };
@@ -523,4 +514,21 @@ function getNotesSourceUrl(
     'HEAD',
     changelogFile,
   );
+}
+
+async function linkifyBody(
+  { baseUrl, repository }: ChangeLogProject,
+  bodyStr: string,
+): Promise<string> {
+  const body = massageBody(bodyStr, baseUrl);
+  if (body?.length) {
+    try {
+      return await linkify(body, {
+        repository: `${baseUrl}${repository}`,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ body, err }, 'linkify error');
+    }
+  }
+  return body;
 }

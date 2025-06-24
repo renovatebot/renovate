@@ -6,6 +6,13 @@ export type DependenciesMeta = Record<
   { optional: boolean; built: boolean; unplugged: boolean }
 >;
 
+// https://docs.npmjs.com/cli/v11/configuring-npm/package-json#devengines
+interface DevEngineItem {
+  name: string;
+  version?: string;
+  onFail?: 'warn' | 'error' | 'ignore';
+}
+
 export type NpmPackage = PackageJson & {
   renovate?: unknown;
   _from?: any;
@@ -16,6 +23,9 @@ export type NpmPackage = PackageJson & {
   volta?: PackageJson.Dependency;
   pnpm?: {
     overrides?: PackageJson.Dependency;
+  };
+  devEngines?: {
+    packageManager?: DevEngineItem | DevEngineItem[];
   };
 };
 
