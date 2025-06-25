@@ -130,15 +130,14 @@ function extractDependency(
     { repository },
     'Could not separate hostname from full dependency url.',
   );
-  const dep: PackageDependency = {
+  return {
     depName: undefined,
     depType: 'repository',
     datasource: undefined,
     packageName: undefined,
     skipReason: 'invalid-url',
     currentValue,
-  };
-  return dep;
+  } as PackageDependency;
 }
 
 /**
