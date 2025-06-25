@@ -107,22 +107,23 @@ export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
-  let { newPackageFileContent: contents } = updateArtifact;
+  const oldContents = updateArtifact.newPackageFileContent;
+  let newContents = oldContents;
   for (const upgrade of upgrades) {
     const { managerData } = upgrade;
     const idx = managerData?.idx as number;
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
-      const rule = findCodeFragment(contents, [idx]);
-      // istanbul ignore if
+      const rule = findCodeFragment(newContents, [idx]);
+      /* v8 ignore start -- used only for type narrowing */
       if (rule?.type !== 'record') {
-        return null;
-      }
+        continue;
+      } /* v8 ignore stop */
 
       const urlFragments = getUrlFragments(rule);
       if (!urlFragments?.length) {
         logger.debug(`def: ${rule.value}, urls is empty`);
-        return null;
+        continue;
       }
 
       const updateValues = (oldUrl: string): string => {
@@ -135,13 +136,25 @@ export async function updateArtifacts(
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
-        return null;
+        continue;
       }
 
-      contents = patchCodeAtFragments(contents, urlFragments, updateValues);
-      contents = updateCode(contents, [idx, 'strip_prefix'], updateValues);
-      contents = updateCode(contents, [idx, 'sha256'], hash);
+      newContents = patchCodeAtFragments(
+        newContents,
+        urlFragments,
+        updateValues,
+      );
+      newContents = updateCode(
+        newContents,
+        [idx, 'strip_prefix'],
+        updateValues,
+      );
+      newContents = updateCode(newContents, [idx, 'sha256'], hash);
     }
+  }
+
+  if (oldContents === newContents) {
+    return null;
   }
 
   return [
@@ -149,7 +162,7 @@ export async function updateArtifacts(
       file: {
         type: 'addition',
         path,
-        contents,
+        contents: newContents,
       },
     },
   ];
