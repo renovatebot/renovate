@@ -5,7 +5,7 @@ import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
 import type { RecordFragment, StringFragment } from './types';
 
@@ -45,6 +45,21 @@ function massageUrl(url: string): string {
     result = result.replace(from, to);
   }
   return result;
+}
+
+function migrateUrl(url: string, upgrade: Upgrade): string {
+  const newValue = upgrade.newValue?.replace(regEx(/^v/), '');
+
+  // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.3.5
+  // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
+  if (
+    url.endsWith('/rules_webtesting.tar.gz') &&
+    !newValue?.match(/^0\.[0123]\./)
+  ) {
+    return url.replace(/\.tar\.gz$/, `-${newValue}.tar.gz`);
+  }
+
+  return url;
 }
 
 function replaceAll(input: string, from: string, to: string): string {
@@ -130,6 +145,7 @@ export async function updateArtifacts(
         let url = oldUrl;
         url = replaceValues(url, upgrade.currentValue, upgrade.newValue);
         url = replaceValues(url, upgrade.currentDigest, upgrade.newDigest);
+        url = migrateUrl(url, upgrade);
         return url;
       };
 
