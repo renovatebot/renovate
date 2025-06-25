@@ -2974,6 +2974,10 @@ describe('modules/platform/gitlab/index', () => {
       process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN = 'some-token';
       httpMock
         .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests')
         .reply(200, {
           id: 1,
