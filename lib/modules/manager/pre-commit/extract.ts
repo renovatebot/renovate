@@ -138,10 +138,6 @@ function extractDependency(
     skipReason: 'invalid-url',
     currentValue,
   };
-  if (currentDigest) {
-    dep.currentDigest = currentDigest;
-    dep.replaceString = `${currentDigest} # frozen: ${currentValue}`;
-  }
   return dep;
 }
 
