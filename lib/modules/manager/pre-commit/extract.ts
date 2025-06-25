@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
-import { Document, isMap, isSeq, isScalar } from 'yaml';
+import type { Document } from 'yaml';
+import { isMap, isScalar, isSeq } from 'yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
@@ -89,7 +90,7 @@ function extractDependency(
 
   if (tag.length === 40 && comment) {
     const match = /.*frozen: (.+)$/.exec(comment);
-    if (match && match[1]) {
+    if (match?.[1]) {
       currentValue = match[1];
       currentDigest = tag;
     }
@@ -159,20 +160,19 @@ function findDependencies(
   const packageDependencies: PackageDependency[] = [];
 
   // Map for quick lookup of comments by repo index
-  let repoComments: Record<number, string | undefined> = {};
-  if (doc && doc.contents && isMap(doc.contents)) {
+  const repoComments: Record<number, string | undefined> = {};
+  if (doc?.contents && isMap(doc.contents)) {
     const reposPair = doc.contents.items.find(
       (pair: any) => pair.key && pair.key.value === 'repos',
     );
-    if (reposPair && reposPair.value && isSeq(reposPair.value)) {
+    if (reposPair?.value && isSeq(reposPair.value)) {
       reposPair.value.items.forEach((repoItem: any, idx: number) => {
         if (repoItem && isMap(repoItem)) {
           const revPair = repoItem.items.find(
             (pair: any) => pair.key && pair.key.value === 'rev',
           );
           if (
-            revPair &&
-            revPair.value &&
+            revPair?.value &&
             isScalar(revPair.value) &&
             typeof revPair.value.comment === 'string'
           ) {
