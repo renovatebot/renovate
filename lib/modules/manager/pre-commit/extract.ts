@@ -83,8 +83,6 @@ function extractDependency(
   repository: string,
   comment?: string,
 ): PackageDependency {
-  logger.debug(`Found version ${tag}`);
-
   let currentValue = tag;
   let currentDigest: string | undefined;
 
@@ -95,6 +93,8 @@ function extractDependency(
       currentDigest = tag;
     }
   }
+
+  logger.debug(`Found version ${currentValue}`);
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
@@ -121,6 +121,7 @@ function extractDependency(
       };
       if (currentDigest) {
         dep.currentDigest = currentDigest;
+        dep.replaceString = `${currentDigest} # frozen: ${currentValue}`;
       }
       return dep;
     }
@@ -139,6 +140,7 @@ function extractDependency(
   };
   if (currentDigest) {
     dep.currentDigest = currentDigest;
+    dep.replaceString = `${currentDigest} # frozen: ${currentValue}`;
   }
   return dep;
 }

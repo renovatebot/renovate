@@ -188,14 +188,18 @@ describe('modules/manager/pre-commit/extract', () => {
             depName: 'pre-commit/mirrors-prettier',
             depType: 'repository',
             packageName: 'pre-commit/mirrors-prettier',
+            replaceString:
+              '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode',
           },
           {
             currentValue: 'v1.14.12',
-            currentDigest: '81d6b864ea032adff1d7dfb23cb601e64a8e6daa',
+            currentDigest: '20b36ca07fa1bfe124912287ac8502cf12f140e6',
             datasource: 'github-tags',
             depName: 'crate-ci/typos',
             depType: 'repository',
             packageName: 'crate-ci/typos',
+            replaceString:
+              '20b36ca07fa1bfe124912287ac8502cf12f140e6 # frozen: v1.14.12',
           },
           {
             currentValue: '0.23.1',
@@ -204,6 +208,8 @@ describe('modules/manager/pre-commit/extract', () => {
             depName: 'python-jsonschema/check-jsonschema',
             depType: 'repository',
             packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              'a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1',
           },
         ],
       });
