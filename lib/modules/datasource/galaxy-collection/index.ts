@@ -51,10 +51,12 @@ export class GalaxyCollectionDatasource extends Datasource {
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
       .onError((err) => {
-        logger.warn(
-          { url: baseUrl, datasource: this.id, packageName, err },
-          'Error fetching from url',
-        );
+        if (err.response?.statusCode !== 404) {
+          logger.warn(
+            { url: baseUrl, datasource: this.id, packageName, err },
+            'Error fetching from url',
+          );
+        }
       })
       .unwrap();
     if (baseErr) {
