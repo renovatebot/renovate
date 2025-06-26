@@ -298,8 +298,7 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
-      }
-      if (allVersions.find((v) => v.version === compareValue)) {
+      } else if (allVersions.find((v) => v.version === compareValue)) {
         currentVersion = compareValue!;
       }
       // TODO #22198
@@ -760,6 +759,18 @@ export async function lookupUpdates(
           res.updates.length === 1 ||
           /* istanbul ignore next */ update.updateType !== 'rollback',
       );
+    }
+
+    const release =
+      res.updates.length > 0
+        ? dependency?.releases.find(
+            (r) => r.version === res.updates[0].newValue,
+          )
+        : null;
+
+    if (release?.changelogContent) {
+      res.changelogContent = release.changelogContent;
+      res.changelogUrl = release.changelogUrl;
     }
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {

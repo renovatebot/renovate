@@ -14,7 +14,7 @@ name: renovate-otel-demo
 services:
   # Jaeger for storing traces
   jaeger:
-    image: jaegertracing/jaeger:2.6.0
+    image: jaegertracing/jaeger:2.7.0
     ports:
       - '16686:16686' # Web UI
       - '4317' # OTLP gRPC
@@ -36,7 +36,7 @@ services:
   otel-collector:
     # Using the Contrib version to access the spanmetrics connector.
     # If you don't need the spanmetrics connector, you can use the standard version
-    image: otel/opentelemetry-collector-contrib:0.127.0
+    image: otel/opentelemetry-collector-contrib:0.128.0
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:

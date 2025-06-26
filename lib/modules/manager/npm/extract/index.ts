@@ -213,9 +213,9 @@ export async function extractPackageFile(
       ...res.managerData,
       ...lockFiles,
       yarnZeroInstall,
-      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager,
-      ),
+      hasPackageManager:
+        is.nonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
+        is.nonEmptyObject(packageJson.devEngines?.packageManager),
       workspacesPackages,
       npmrcFileName, // store npmrc file name so we can later tell if it came from the workspace or not
     },

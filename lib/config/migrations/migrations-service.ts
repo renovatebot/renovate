@@ -91,6 +91,7 @@ export class MigrationsService {
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
+    ['group:junit5Monorepo', 'group:junit-frameworkMonorepo'],
     ['keepalive', 'keepAlive'],
     ['managerBranchPrefix', 'additionalBranchPrefix'],
     ['multipleMajorPrs', 'separateMultipleMajor'],
@@ -105,6 +106,7 @@ export class MigrationsService {
     ['masterIssueFooter', 'dependencyDashboardFooter'],
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
+    ['monorepo:junit5', 'monorepo:junit-framework'],
     ['regexManagers', 'customManagers'],
   ]);
 
