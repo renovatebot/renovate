@@ -27,7 +27,6 @@ export const removedPresets: Record<string, string | null> = {
   'default:unpublishSafe': 'npm:unpublishSafe',
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
-  'group:junit5Monorepo': 'group:junit-frameworkMonorepo',
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
