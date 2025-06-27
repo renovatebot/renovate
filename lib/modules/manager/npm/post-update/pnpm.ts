@@ -62,8 +62,8 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       // these are used by pnpm v5 and above. Maybe earlier versions too
-      npm_config_cache_dir: await ensureCacheDir('pnpm-cache'),
-      npm_config_store_dir: await ensureCacheDir('pnpm-store'),
+      npm_config_cache_dir: await ensureCacheDir('pnpm/cache'),
+      npm_config_store_dir: await ensureCacheDir('pnpm/store'),
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
@@ -130,7 +130,7 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      commands.push('pnpm dedupe --config.ignore-scripts=true');
+      commands.push('pnpm dedupe --ignore-scripts');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
