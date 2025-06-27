@@ -45,6 +45,14 @@ Returns `true` if a given string is a substring.
 
 `{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
+### decodeBase64
+
+If you want to convert a Base64 value to a string, use the built-in function `decodeBase64` like this:
+
+`{{{decodeBase64 body}}}`
+
+In the example above `body` is the base64 encoded value you want to decode.
+
 ### decodeURIComponent
 
 If you want to decode a percent-encoded string, use the built-in function `decodeURIComponent` like this:
