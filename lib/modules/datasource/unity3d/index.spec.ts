@@ -28,7 +28,7 @@ describe('modules/datasource/unity3d/index', () => {
     total: number,
     offset: number,
     resultCount: number,
-  ) {
+  ): UnityReleasesJSON {
     const results = [];
 
     for (let i = 1; i <= resultCount; i++) {
