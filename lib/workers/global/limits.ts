@@ -39,19 +39,6 @@ function handleCommitsLimit(): boolean {
   return max - current <= 0;
 }
 
-function handleHourlyCommitsLimit(config: BranchConfig): boolean {
-  // calculate the remaining hourly commit limit
-  const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
-  const hourlyCommitCount = getCount('HourlyCommits');
-
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
-    return true;
-  }
-
-  return false;
-}
-
 export type CountName =
   | 'ConcurrentPRs'
   | 'HourlyPRs'
@@ -90,16 +77,18 @@ function handleConcurrentLimits(
   key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
-  if (handleHourlyCommitsLimit(config)) {
+  // calculate the remaining hourly commit limit
+  const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
+  const hourlyCommitCount = getCount('HourlyCommits');
+
+  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+  if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
     return true;
   }
 
   if (key === 'HourlyCommits') {
     return false;
   }
-
-  const limitKey =
-    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
 
   // calculate the remaining hourly PR limit
   const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
@@ -111,6 +100,8 @@ function handleConcurrentLimits(
   }
 
   // calculate the branch or PR concurrent limit
+  const limitKey =
+    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
   const limitValue = calcLimit(config.upgrades, limitKey);
   const currentCount = getCount(key);
 
