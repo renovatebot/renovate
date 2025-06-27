@@ -447,6 +447,7 @@
       "https://github.com/vercel/next.js"
     ],
     "nextra": "https://github.com/shuding/nextra",
+    "ngx-cookie-service": "https://github.com/stevermeister/ngx-cookie-service",
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly",
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
