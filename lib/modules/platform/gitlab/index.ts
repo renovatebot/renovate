@@ -766,11 +766,11 @@ export async function createPr({
     !!config.ignorePrAuthor,
   );
 
+  await tryPrAutomerge(pr.number, platformPrOptions);
+
   if (platformPrOptions?.autoApprove) {
     await approveMr(pr.number);
   }
-
-  await tryPrAutomerge(pr.number, platformPrOptions);
 
   return pr;
 }
