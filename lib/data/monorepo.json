@@ -647,7 +647,7 @@
     ],
     "yarn": "https://github.com/yarnpkg/berry",
     "zag-js": "https://github.com/chakra-ui/zag",
-    "zxing-net": "https://github.com/micjahn/ZXing.Net",
+    "zxing-net": "https://github.com/micjahn/ZXing.Net"
   },
   "orgGroups": {
     "hapijs": "https://github.com/hapijs/",
