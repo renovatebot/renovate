@@ -324,6 +324,7 @@
     "formatjs": "https://github.com/formatjs/formatjs",
     "framework7": "https://github.com/framework7io/framework7",
     "funogram": "https://github.com/Dolfik1/Funogram",
+    "fusioncache": "https://github.com/ZiggyCreatures/FusionCache",
     "gatsby": "https://github.com/gatsbyjs/gatsby",
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
@@ -447,6 +448,7 @@
       "https://github.com/vercel/next.js"
     ],
     "nextra": "https://github.com/shuding/nextra",
+    "ngx-cookie-service": "https://github.com/stevermeister/ngx-cookie-service",
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly",
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
@@ -582,6 +584,7 @@
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
+    "taiga-ui": "https://github.com/taiga-family/taiga-ui",
     "tamagui": "https://github.com/tamagui/tamagui",
     "tanstack-form": "https://github.com/TanStack/form",
     "tanstack-query": "https://github.com/TanStack/query",
