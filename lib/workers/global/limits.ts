@@ -39,6 +39,19 @@ function handleCommitsLimit(): boolean {
   return max - current <= 0;
 }
 
+function handleHourlyCommitsLimit(config: BranchConfig): boolean {
+  // calculate the remaining hourly commit limit
+  const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
+  const hourlyCommitCount = getCount('HourlyCommits');
+
+  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
+  if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+    return true;
+  }
+
+  return false;
+}
+
 export type CountName =
   | 'ConcurrentPRs'
   | 'HourlyPRs'
@@ -74,20 +87,19 @@ export function incCountValue(key: CountName, incBy = 1): void {
 }
 
 function handleConcurrentLimits(
-  key: Exclude<CountName, 'HourlyPRs' | 'HourlyCommits'>,
+  key: Exclude<CountName, 'HourlyPRs'>,
   config: BranchConfig,
 ): boolean {
-  const limitKey =
-    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
-
-  // calculate the remaining hourly commit limit
-  const hourlyCommitLimit = calcLimit(config.upgrades, 'commitHourlyLimit');
-  const hourlyCommitCount = getCount('HourlyCommits');
-
-  // if a limit is defined ( >0 ) and limit reached return true ie. limit has been reached
-  if (hourlyCommitLimit && hourlyCommitCount >= hourlyCommitLimit) {
+  if (handleHourlyCommitsLimit(config)) {
     return true;
   }
+
+  if (key === 'HourlyCommits') {
+    return false;
+  }
+
+  const limitKey =
+    key === 'Branches' ? 'branchConcurrentLimit' : 'prConcurrentLimit';
 
   // calculate the remaining hourly PR limit
   const hourlyPrLimit = calcLimit(config.upgrades, 'prHourlyLimit');
@@ -192,11 +204,11 @@ export function hasMultipleLimits(
 
 export function isLimitReached(limit: 'Commits'): boolean;
 export function isLimitReached(
-  limit: 'Branches' | 'ConcurrentPRs',
+  limit: 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
   config: BranchConfig,
 ): boolean;
 export function isLimitReached(
-  limit: 'Commits' | 'Branches' | 'ConcurrentPRs',
+  limit: 'Commits' | 'Branches' | 'ConcurrentPRs' | 'HourlyCommits',
   config?: BranchConfig,
 ): boolean {
   if (limit === 'Commits') {

@@ -234,7 +234,7 @@ export async function processBranch(
     if (
       (isLimitReached('Commits') ||
         (!branchConfig.rebaseRequested &&
-          isLimitReached('Branches', branchConfig))) &&
+          isLimitReached('HourlyCommits', branchConfig))) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
