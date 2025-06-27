@@ -49,6 +49,7 @@ nav:
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
       - ... | user-stories
+      - 'Errors': 'errors.md'
       - 'Security and Permissions': 'security-and-permissions.md'
       - 'Merge Confidence': 'merge-confidence.md'
       - 'Language constraints and upgrading': 'language-constraints-and-upgrading.md'

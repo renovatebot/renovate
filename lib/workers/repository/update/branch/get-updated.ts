@@ -257,7 +257,7 @@ export async function getUpdatedPackageFiles(
             reuseExistingBranch: false,
           });
         }
-        logger.error({ packageFile, depName }, 'Could not autoReplace');
+        logger.warn({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       let newContent = await updateDependency({
