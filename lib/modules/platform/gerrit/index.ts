@@ -475,8 +475,11 @@ export function maxBodyLength(): number {
   return 16384; //TODO: check the real gerrit limit (max. chars)
 }
 
-export function deleteLabel(number: number, label: string): Promise<void> {
-  return Promise.resolve();
+export async function deleteLabel(
+  number: number,
+  label: string,
+): Promise<void> {
+  await client.deleteHashtag(number, label);
 }
 
 export function ensureCommentRemoval(

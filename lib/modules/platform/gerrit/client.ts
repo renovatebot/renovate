@@ -182,6 +182,12 @@ class GerritClient {
     );
   }
 
+  async deleteHashtag(changeNumber: number, hashtag: string): Promise<void> {
+    await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
+      body: { remove: [hashtag] },
+    });
+  }
+
   async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
