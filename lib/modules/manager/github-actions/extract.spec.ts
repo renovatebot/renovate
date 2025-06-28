@@ -913,7 +913,6 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
-        name: 'Pinning a minor version of uv',
         uses: 'https://github.com/astral-sh/setup-uv@v5',
         with: {},
       },
