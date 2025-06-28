@@ -253,7 +253,7 @@ If you're on `github.com` or GitHub Enterprise Server (`>=3.4`) you can let Reno
 Alternatively, if you use the Mend Renovate App, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
 These approval helper apps are only available for GitHub.
 
-On Azure/Gerrit/Gitlab, you can activate the [`autoApprove` option](https://docs.renovatebot.com/configuration-options/#autoapprove).
+On Azure/Gerrit/Gitlab, you can activate the [`autoApprove` option](../configuration-options.md#autoapprove).
 
 ### Codeowners
 
