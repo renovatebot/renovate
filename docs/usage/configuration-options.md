@@ -25,6 +25,11 @@ You can store your Renovate configuration file in one of these locations:
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+     We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
 
@@ -48,6 +53,43 @@ When an array or object configuration option is `mergeable`, it means that value
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
 ---
+
+## abandonmentThreshold
+
+The `abandonmentThreshold` option allows Renovate to flag packages as abandoned when they haven't received updates for a specified period of time.
+
+Renovate adds an `isAbandoned` boolean property to the package lookup result when:
+
+- `abandonmentThreshold` is defined (not `null`)
+- The package has a `mostRecentTimestamp` timestamp available from the datasource
+
+The `mostRecentTimestamp` timestamp represents the release date of the highest version, but only if that version also has the most recent timestamp among all releases.
+This ensures abandonment detection is based on normal package release patterns.
+
+If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).
+
+This option accepts time duration strings like `1 year`, `6 months`, `90 days`, etc.
+
+Example usage:
+
+```json
+{
+  "abandonmentThreshold": "2 years"
+}
+```
+
+You can also apply this setting selectively using `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "abandonmentThreshold": "1 year"
+    }
+  ]
+}
+```
 
 ## addLabels
 
@@ -113,6 +155,8 @@ This option _adds_ to the existing reviewer list, rather than _replacing_ it lik
 
 Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
 For example, when adding focused reviewers for a specific package group.
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 ## assignAutomerge
 
@@ -511,11 +555,13 @@ For example, to bump versions only for updates in the `charts/` directory:
   "packageRules": [
     {
       "matchFileNames": ["charts/**"],
-      "bumpVersions": {
-        "filePatterns": "{{packageFileDir}}/Chart.{yaml,yml}",
-        "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
-        "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
-      }
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
     }
   ]
 }
@@ -526,6 +572,22 @@ In this configuration:
 - If Renovate updates dependencies in the `charts/` directory check the `Chart.yaml` file next to the updated file.
 - The version string is extracted from lines matching `version: <value>`.
 - The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
+
+**debugging `bumpVersions`**
+
+Use [`logLevelRemap`](#loglevelremap) to remap, `trace` log level messages to a higher level e.g. `debug`.
+All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help you filter them in the logs.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/bumpVersions/",
+      "newLogLevel": "debug"
+    }
+  ]
+}
+```
 
 ### bumpType
 
@@ -1371,6 +1433,15 @@ You will only get OSV-based vulnerability alerts for direct dependencies.
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
+
+## dependencyDashboardReportAbandonment
+
+Controls whether abandoned packages are reported in the dependency dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
 ## dependencyDashboardTitle
 
@@ -2333,6 +2404,8 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## ignoreScripts
 
 By default, Renovate will disable package manager scripts.
@@ -2463,28 +2536,29 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-- `.terraform.lock.hcl`
-- `Cargo.lock`
-- `Chart.lock`
-- `composer.lock`
-- `conan.lock`
-- `flake.lock`
-- `Gemfile.lock`
-- `gradle.lockfile`
-- `jsonnetfile.lock.json`
-- `manifest.toml`
-- `package-lock.json`
-- `packages.lock.json`
-- `pdm.lock`
-- `Pipfile.lock`
-- `pnpm-lock.yaml`
-- `poetry.lock`
-- `pubspec.lock`
-- `pyproject.toml`
-- `requirements.txt`
-- `uv.lock`
-- `yarn.lock`
-- `pixi.lock`
+| Manager           | Lockfile                                           |
+| ----------------- | -------------------------------------------------- |
+| `bun`             | `bun.lockb`, `bun.lock`                            |
+| `bundler`         | `Gemfile.lock`                                     |
+| `cargo`           | `Cargo.lock`                                       |
+| `composer`        | `composer.lock`                                    |
+| `conan`           | `conan.lock`                                       |
+| `devbox`          | `devbox.lock`                                      |
+| `gleam`           | `manifest.toml`                                    |
+| `gradle`          | `gradle.lockfile`                                  |
+| `helmv3`          | `Chart.lock`                                       |
+| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
+| `mix`             | `mix.lock`                                         |
+| `nix`             | `flake.lock`                                       |
+| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
+| `nuget`           | `packages.lock.json`                               |
+| `pep621`          | `pdm.lock`, `uv.lock`                              |
+| `pip-compile`     | `requirements.txt`                                 |
+| `pipenv`          | `Pipfile.lock`                                     |
+| `pixi`            | `pixi.lock`                                        |
+| `poetry`          | `poetry.lock`                                      |
+| `pub`             | `pubspec.lock`                                     |
+| `terraform`       | `.terraform.lock.hcl`                              |
 
 Support for new lock files may be added via feature request.
 
@@ -2835,9 +2909,13 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+<!-- prettier-ignore -->
+!!! warning
+    `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
+
 #### Using regular expressions
 
-You can use Regular Expressions in the `allowedVersion` config.
+You can use Regular Expressions in the `allowedVersions` config.
 You must _begin_ and _end_ your Regular Expression with the `/` character!
 
 For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
@@ -3358,6 +3436,10 @@ For more details on supported syntax see Renovate's [string pattern matching doc
     When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
     Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
+<!-- prettier-ignore -->
+!!! warning
+    `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
+
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
 ```json
@@ -3706,18 +3788,42 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use handlebars templating in these commands.
+You can use Handlebars templating in these commands.
 They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
 !!! note
     Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### dataFileTemplate
+
+A template to create data file from.
+The template uses the same format as `commands`.
+The data file is created as a temporary file and the path to the data file is stored in the `RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE` environment variable avaliable to each post-upgrade command.
+The primary purpose of the data file is to store some update information in a file which would be consumed from a post-upgrade command.
+This is particularly useful if a post-upgrade command needs to have a long line of arguments.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": [
+      "my-script.py --data-file \"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+    ],
+    "dataFileTemplate": "[{{#each upgrades}}{\"depName\": \"{{{depName}}}\", \"currentValue\": \"{{{currentValue}}}\", \"newValue\": \"{{{newValue}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+   `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### executionMode
 
@@ -4119,6 +4225,8 @@ For example: if the username or team name is `bar` then you would set the config
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
@@ -4128,6 +4236,8 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
 <!-- prettier-ignore -->
 !!! note

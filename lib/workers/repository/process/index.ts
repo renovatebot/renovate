@@ -114,6 +114,7 @@ function unfoldBaseBranches(
 
 export async function extractDependencies(
   config: RenovateConfig,
+  overwriteCache = true,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);
   let res: ExtractResult = {
@@ -130,9 +131,13 @@ export async function extractDependencies(
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
+
+      if (scm.syncForkWithUpstream) {
+        await scm.syncForkWithUpstream(baseBranch);
+      }
       if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
-        extracted[baseBranch] = await extract(baseBranchConfig);
+        extracted[baseBranch] = await extract(baseBranchConfig, overwriteCache);
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
       }
@@ -155,7 +160,7 @@ export async function extractDependencies(
     removeMeta(['baseBranch']);
   } else {
     logger.debug('No baseBranches');
-    const packageFiles = await extract(config);
+    const packageFiles = await extract(config, overwriteCache);
     addSplit('extract');
     if (GlobalConfig.get('dryRun') === 'extract') {
       res.packageFiles = packageFiles;

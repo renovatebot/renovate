@@ -27,7 +27,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBe('2022-01-01T00:00:00.000Z');
+      expect(result.mostRecentTimestamp).toBe('2022-01-01T00:00:00.000Z');
     });
 
     it('handles releases with missing timestamps', () => {
@@ -47,7 +47,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBe('2023-01-01T00:00:00.000Z');
+      expect(result.mostRecentTimestamp).toBe('2023-01-01T00:00:00.000Z');
     });
 
     it('handles latest release with missing timestamp', () => {
@@ -69,7 +69,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBeUndefined();
+      expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
     it('handles latest release with deprecation flag', () => {
@@ -93,7 +93,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBeUndefined();
+      expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
     it('handles latest release with invalid version', () => {
@@ -116,23 +116,23 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBeUndefined();
+      expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
-    it('returns undefined bumpedAt when no valid timestamps exist', () => {
+    it('returns undefined mostRecentTimestamp when no valid timestamps exist', () => {
       const releaseResult: ReleaseResult = {
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       };
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBeUndefined();
+      expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
     it('handles empty releases array', () => {
       const releaseResult: ReleaseResult = { releases: [] };
       const result = calculateLatestReleaseBump(versioning, releaseResult);
-      expect(result.bumpedAt).toBeUndefined();
+      expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
     it('preserves other properties in the release result', () => {
@@ -150,7 +150,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
       const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-      expect(result.bumpedAt).toBe('2021-01-01T00:00:00.000Z');
+      expect(result.mostRecentTimestamp).toBe('2021-01-01T00:00:00.000Z');
       expect(result.sourceUrl).toBe('https://github.com/some/repo');
       expect(result.homepage).toBe('https://example.com');
       expect(result.tags).toEqual({ latest: '1.0.0' });
@@ -174,7 +174,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
     const result = calculateLatestReleaseBump(versioning, releaseResult);
 
     expect(result).toBe(releaseResult);
-    expect(result.bumpedAt).toBeUndefined();
+    expect(result.mostRecentTimestamp).toBeUndefined();
   });
 
   it('handles errors thrown for invalid versions', () => {
@@ -201,6 +201,6 @@ describe('workers/repository/process/lookup/timestamps', () => {
 
     const result = calculateLatestReleaseBump(versioning, releaseResult);
 
-    expect(result.bumpedAt).toBe('2023-01-01T00:00:00.000Z');
+    expect(result.mostRecentTimestamp).toBe('2023-01-01T00:00:00.000Z');
   });
 });

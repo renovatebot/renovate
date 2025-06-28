@@ -141,6 +141,18 @@ export async function getConfiguredRegistries(
     }
   }
 
+  // Deduplicate registries with #procolVersion=3
+  // Keep any which include sourceMappedPackagePatterns
+  const plainRegistryUrls = registries
+    .filter((r) => !r.sourceMappedPackagePatterns)
+    .map((r) => r.url);
+  registries = registries.filter((r) => {
+    return (
+      r.sourceMappedPackagePatterns ??
+      !plainRegistryUrls.includes(`${r.url}#protocolVersion=3`)
+    );
+  });
+
   return registries;
 }
 
