@@ -143,7 +143,7 @@ module "addons_aws" {
 
 
 
-module "relative_parent" {
+module "relative" {
   source = "../../modules/fe"
 }
 

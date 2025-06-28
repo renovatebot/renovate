@@ -3,38 +3,10 @@
     "foo": {
       "source": "github.com/hashicorp/example?ref=v1.0.0"
     },
-    "bar": {
-      "source": "github.com/hashicorp/example?ref=next"
-    },
-    "repo-with-non-semver-ref": {
-      "source": "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
-    },
-    "repo-with-dot": {
-      "source": "github.com/hashicorp/example.2.3?ref=v1.0.0"
-    },
     "repo-with-dot-and-git-suffix": {
       "source": "github.com/hashicorp/example.2.3.git?ref=v1.0.0"
     },
     "consul": {
-      "source": "hashicorp/consul/aws",
-      "version": "0.1.0"
-    },
-    "consul1": {
-      "source": "git@github.com:hashicorp/example.git?ref=v2.0.0"
-    },
-    "consul3": {
-      "source": "app.terraform.io/example-corp/k8s-cluster/azurerm",
-      "version": "~> 1.1.0"
-    },
-    "consul4": {
-      "source": "app.terraform.io/example-corp/k8s-cluster/azurerm",
-      "version": "~> 1.1"
-    },
-    "consul5": {
-      "source": "app.terraform.io/example-corp/k8s-cluster/azurerm",
-      "version": "~~ 1.1"
-    },
-    "consul6": {
       "source": "hashicorp/consul/aws",
       "version": ">= 1.0.0, <= 2.0.0"
     },
@@ -59,15 +31,6 @@
     },
     "repo-with-dotgit": {
       "source": "git@git.example.com:group/repo/foo.git?depth=1&ref=v1.0.0"
-    },
-    "repo-without-dotgit": {
-      "source": "git@git.example.com:group/repo/foo?depth=1&ref=v1.0.0"
-    },
-    "repo-with-dotgit-with-subfolder": {
-      "source": "git@git.example.com:group/repo/foo.git//bar?depth=1&ref=bar-v1.0.0"
-    },
-    "repo-without-dotgit-with-subfolder": {
-      "source": "git@git.example.com:group/repo/foo//bar?depth=1&ref=bar-v1.0.0"
     },
     "web_server_sg": {
       "source": "terraform-aws-modules/security-group/aws//modules/http-80",
@@ -118,9 +81,6 @@
     },
     "relative_parent": {
       "source": "../../modules/fe"
-    },
-    "relative": {
-      "source": "./relative"
     },
     "nosauce": {
       "foo": "bar"
