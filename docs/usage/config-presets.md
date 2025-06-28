@@ -12,8 +12,7 @@ Shareable config presets must use the JSON or JSON5 formats, other formats are n
 
 <!-- prettier-ignore -->
 !!! tip
-    Describe what your preset does in the `"description"` field.
-    This way your configuration is self-documenting.
+    Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
 
 ## Extending from a preset
 

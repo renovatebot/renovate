@@ -108,7 +108,7 @@ describe('modules/platform/gerrit/client', () => {
         { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
       ],
       [
-        'status:closed',
+        'status:abandoned',
         {
           branchName: 'dependency-xyz',
           state: 'closed' as FindPRConfig['state'],
@@ -122,7 +122,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): update dependency react-router-dom to ~> \\"v6.21.2\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -130,7 +130,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:"fix(deps): update dependency react-router-dom to ~> v6.21.2"',
+        'message:"fix(deps): \\"update dependency react-router-dom to ~> \\"v6.21.2\\"\\""',
         {
           branchName: 'dependency-xyz',
           prTitle:
@@ -155,6 +155,46 @@ describe('modules/platform/gerrit/client', () => {
         ]);
       },
     );
+
+    it('sets query.n when limit is provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '5' && !('no-limit' in query))
+        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', { branchName: 'dependency-xyz', limit: 5 }),
+      ).resolves.toEqual([{ _number: 1 }]);
+    });
+
+    it('sets query["no-limit"] when limit is not provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query['no-limit'] === 'true')
+        .reply(200, gerritRestResponse([{ _number: 2 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', { branchName: 'dependency-xyz' }),
+      ).resolves.toEqual([{ _number: 2 }]);
+    });
+
+    it('sets query.o when requestDetails is provided', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query(
+          (query) =>
+            Array.isArray(query.o) &&
+            query.o.toString() === ['LABELS', 'MESSAGES'].toString(),
+        )
+        .reply(200, gerritRestResponse([{ _number: 3 }]), jsonResultHeader);
+      await expect(
+        client.findChanges('repo', {
+          branchName: 'dependency-xyz',
+          requestDetails: ['LABELS', 'MESSAGES'],
+        }),
+      ).resolves.toEqual([{ _number: 3 }]);
+    });
   });
 
   describe('getChange()', () => {
@@ -162,11 +202,14 @@ describe('modules/platform/gerrit/client', () => {
       const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
-        .get(
-          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION&o=CURRENT_COMMIT',
-        )
+        .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
-      await expect(client.getChange(123456)).resolves.toEqual(change);
+      await expect(
+        client.getChange(123456, undefined, [
+          'CURRENT_REVISION',
+          'COMMIT_FOOTERS',
+        ]),
+      ).resolves.toEqual(change);
     });
   });
 
@@ -190,9 +233,23 @@ describe('modules/platform/gerrit/client', () => {
     it('abandon', async () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/abandon')
+        .post('/a/changes/123456/abandon', {
+          notify: 'OWNER_REVIEWERS',
+        })
         .reply(200, gerritRestResponse({}), jsonResultHeader);
       await expect(client.abandonChange(123456)).toResolve();
+    });
+    it('abandon with message', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/abandon', {
+          message: 'The abandon reason is important.',
+          notify: 'OWNER_REVIEWERS',
+        })
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
+      await expect(
+        client.abandonChange(123456, 'The abandon reason is important.'),
+      ).toResolve();
     });
   });
 

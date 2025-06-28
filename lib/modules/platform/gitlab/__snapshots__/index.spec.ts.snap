@@ -5,6 +5,7 @@ exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should return
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "number": 91,
   "sourceBranch": "some-branch",
@@ -19,6 +20,7 @@ exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should strip 
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "isDraft": true,
   "number": 91,
@@ -34,6 +36,7 @@ exports[`modules/platform/gitlab/index > getBranchPr(branchName) > should strip 
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "isDraft": true,
   "number": 91,
@@ -49,6 +52,7 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > removes deprecated draft 
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "isDraft": true,
   "number": 12345,
@@ -64,6 +68,7 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > removes draft prefix from
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "isDraft": true,
   "number": 12345,
@@ -79,6 +84,7 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > returns the PR 1`] = `
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": false,
   "number": 12345,
   "sourceBranch": "some-branch",
@@ -93,6 +99,7 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > returns the PR with nonex
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": true,
   "number": 12345,
   "sourceBranch": "some-branch",
@@ -107,6 +114,7 @@ exports[`modules/platform/gitlab/index > getPr(prNo) > returns the mergeable PR 
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
+  "createdAt": "2025-05-19T12:00:00.000Z",
   "hasAssignees": true,
   "number": 12345,
   "sourceBranch": "some-branch",

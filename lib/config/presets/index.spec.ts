@@ -561,6 +561,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           'group:monorepos',
           'group:recommended',
+          'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
         ],

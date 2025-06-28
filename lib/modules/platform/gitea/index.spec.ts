@@ -555,6 +555,26 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
+    it('should fall back to merge method "fast-forward-only"', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          allow_rebase: false,
+          allow_fast_forward_only_merge: true,
+        });
+      await initFakePlatform(scope);
+
+      await gitea.initRepo(initRepoCfg);
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          mergeMethod: 'fast-forward-only',
+        }),
+      );
+    });
+
     it('should fall back to merge method "rebase-merge"', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
