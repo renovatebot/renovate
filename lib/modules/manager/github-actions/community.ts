@@ -36,8 +36,8 @@ const setupUVSchema = z
       depName: 'astral-sh/uv',
       versioning: npmVersioning.id,
       packageName: 'astral-sh/uv',
-    ...(skipStage && { skipStage }),
-    ...(skipReason && { skipReason }),
+      ...(skipStage && { skipStage }),
+      ...(skipReason && { skipReason }),
       currentValue: val.version,
       depType: 'uses-with',
     };
