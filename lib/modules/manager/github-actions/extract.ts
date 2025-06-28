@@ -2,7 +2,6 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { Result } from '../../../util/result';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
