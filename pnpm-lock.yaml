@@ -251,6 +251,9 @@ importers:
       lzma-native:
         specifier: 8.0.6
         version: 8.0.6
+      lzma-native:
+        specifier: 8.0.6
+        version: 8.0.6
       markdown-it:
         specifier: 14.1.0
         version: 14.1.0
@@ -2136,6 +2139,9 @@ packages:
 
   '@types/luxon@3.6.2':
     resolution: {integrity: sha512-R/BdP7OxEMc44l2Ex5lSXHoIXTB2JLNa3y2QISIbr58U/YcsffyQrYW//hZSdrfxrjRZj3GcUoxMPGdO8gSYuw==}
+
+  '@types/lzma-native@4.0.4':
+    resolution: {integrity: sha512-9nwec86WAT3wUhjx9iV0AQ06xyDyiN/D9CAk3ZzNLb8zFjjo4EDBliN2uo7CFcBDJ64oXfX4sa+p6fpGpzy/4A==}
 
   '@types/lzma-native@4.0.4':
     resolution: {integrity: sha512-9nwec86WAT3wUhjx9iV0AQ06xyDyiN/D9CAk3ZzNLb8zFjjo4EDBliN2uo7CFcBDJ64oXfX4sa+p6fpGpzy/4A==}
@@ -8775,6 +8781,10 @@ snapshots:
   '@types/tmp@0.2.6': {}
 
   '@types/treeify@1.0.3': {}
+
+  '@types/unbzip2-stream@1.4.3':
+    dependencies:
+      '@types/through': 0.0.33
 
   '@types/unbzip2-stream@1.4.3':
     dependencies:
