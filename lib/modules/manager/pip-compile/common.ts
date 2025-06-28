@@ -127,6 +127,10 @@ const pipOptionsWithArguments = [
 const uvOptionsWithArguments = [
   '--constraints',
   '--python-version',
+  '--resolution',
+  '--prerelease',
+  '--fork-strategy',
+  '--exclude-newer',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
