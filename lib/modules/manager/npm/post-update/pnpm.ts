@@ -20,6 +20,7 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
 import type { PnpmWorkspaceFile } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
@@ -62,8 +63,8 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       // these are used by pnpm v5 and above. Maybe earlier versions too
-      npm_config_cache_dir: await ensureCacheDir('pnpm-cache'),
-      npm_config_store_dir: await ensureCacheDir('pnpm-store'),
+      npm_config_cache_dir: await ensureCacheDir(PNPM_CACHE_DIR),
+      npm_config_store_dir: await ensureCacheDir(PNPM_STORE_DIR),
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
