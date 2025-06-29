@@ -1059,10 +1059,11 @@ describe('modules/manager/terraform/extract', () => {
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.7.8',
           datasource: 'docker',
+          depName: 'nginx',
           depType: 'docker_image',
-          replaceString: '${data.docker_registry_image.ubuntu.name}',
-          skipReason: 'contains-variable',
+          replaceString: 'nginx:1.7.8',
         },
         {
           depType: 'docker_image',
@@ -1071,11 +1072,10 @@ describe('modules/manager/terraform/extract', () => {
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentValue: '1.7.8',
           datasource: 'docker',
-          depName: 'nginx',
           depType: 'docker_image',
-          replaceString: 'nginx:1.7.8',
+          replaceString: '${data.docker_registry_image.ubuntu.name}',
+          skipReason: 'contains-variable',
         },
         {
           autoReplaceStringTemplate:
@@ -1255,8 +1255,8 @@ describe('modules/manager/terraform/extract', () => {
               }
             }
           }
-        }
-      `;
+          }
+          `;
       expect(await extractPackageFile(src, '2.tf.json', {})).toBeNull();
     });
 
@@ -1267,6 +1267,25 @@ describe('modules/manager/terraform/extract', () => {
       expect(res?.deps).toHaveLength(9);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0.1',
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+        {
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+        {
+          datasource: 'helm',
+          depName: './charts/example',
+          depType: 'helm_release',
+          skipReason: 'local-chart',
+        },
         {
           currentValue: '4.0.1',
           datasource: 'helm',
@@ -1301,30 +1320,11 @@ describe('modules/manager/terraform/extract', () => {
           packageName: 'public.ecr.aws/karpenter/karpenter',
         },
         {
-          datasource: 'helm',
-          depName: './charts/example',
-          depType: 'helm_release',
-          skipReason: 'local-chart',
-        },
-        {
           currentValue: '8.9.1',
           datasource: 'docker',
           depName: 'kube-prometheus',
           depType: 'helm_release',
           packageName: 'index.docker.io/bitnamicharts/kube-prometheus',
-        },
-        {
-          currentValue: '1.0.1',
-          datasource: 'helm',
-          depName: 'redis',
-          depType: 'helm_release',
-          registryUrls: ['https://charts.helm.sh/stable'],
-        },
-        {
-          datasource: 'helm',
-          depName: 'redis',
-          depType: 'helm_release',
-          registryUrls: ['https://charts.helm.sh/stable'],
         },
       ]);
     });
