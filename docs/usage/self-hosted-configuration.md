@@ -926,8 +926,7 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 <!-- prettier-ignore -->
 !!! note
-    If you want renovate to use a custom filename for the onboarding branch.
-    You need add allow that filename using the [`configFileNames`](#configfilenames) option.
+    If you want renovate to use a custom filename for the onboarding branch you need add allow that filename using the [`configFileNames`](#configfilenames) option.
 
 ## onboardingNoDeps
 
