@@ -45,7 +45,8 @@ export function parsePreset(input: string): ParsedPreset {
   if (str.includes('(')) {
     params = str
       .slice(str.indexOf('(') + 1, -1)
-      .split(',')
+      .split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+      .map((elem) => elem.replace(/^\"+|\"+$/g, ''))
       .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
