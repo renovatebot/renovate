@@ -233,6 +233,7 @@ const options: RenovateOptions[] = [
     name: 'configFileNames',
     description: 'List of filenames where repository config will be stored.',
     type: 'array',
+    subType: 'string',
     default: null,
     globalOnly: true,
     cli: false,
