@@ -19,7 +19,6 @@ export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'widen',
-  'pin',
   'replace',
   'update-lockfile',
 ];
@@ -249,9 +248,6 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  if (rangeStrategy === 'pin') {
-    return newVersion;
-  }
   if (rangeStrategy === 'update-lockfile') {
     if (matches(newVersion, currentValue)) {
       return currentValue;
