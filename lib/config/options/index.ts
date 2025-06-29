@@ -2066,7 +2066,7 @@ const options: RenovateOptions[] = [
   {
     name: 'automergeStrategy',
     description:
-      'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
+      'The merge strategy to use when `automergeType` is `branch` or `pr`.',
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
