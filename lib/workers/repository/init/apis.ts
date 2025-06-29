@@ -1,4 +1,3 @@
-import { getConfigFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -13,14 +12,6 @@ import { getDefaultConfigFileName } from '../onboarding/common';
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
-
-const configFileNames = getConfigFileNames();
-
-// TODO #22198
-const getDefaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : configFileNames[0];
 
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {

@@ -1,4 +1,3 @@
-import { getConfigFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -7,17 +6,6 @@ import { compile } from '../../../../util/template';
 import { getDefaultConfigFileName } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
-
-const defaultConfigFile = getConfigFileNames()[0];
-
-export function getDefaultConfigFileName(
-  config: Partial<RenovateConfig>,
-): string {
-  // TODO #22198
-  return getConfigFileNames().includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : defaultConfigFile;
-}
 
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,

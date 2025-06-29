@@ -7,8 +7,8 @@ export function getSemanticCommitPrTitle(config: RenovateConfig): string {
   return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
 }
 
-const configFileNames = getConfigFileNames();
 export function getDefaultConfigFileName(config: RenovateConfig): string {
+  const configFileNames = getConfigFileNames();
   return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : configFileNames[0];

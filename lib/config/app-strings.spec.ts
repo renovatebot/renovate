@@ -1,4 +1,4 @@
-import { addConfigFileNames, getConfigFileNames } from './app-strings';
+import { getConfigFileNames, setUserConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 
 describe('config/app-strings', () => {
@@ -20,7 +20,7 @@ describe('config/app-strings', () => {
   });
 
   it('adds user configured filenames to list', () => {
-    addConfigFileNames(['abc', 'def']);
+    setUserConfigFileNames(['abc', 'def']);
     const filenames = getConfigFileNames();
     expect(filenames.includes('abc')).toBeTrue();
     expect(filenames.includes('def')).toBeTrue();

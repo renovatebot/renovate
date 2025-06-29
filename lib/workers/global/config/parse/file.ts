@@ -2,7 +2,7 @@ import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { addConfigFileNames } from '../../../../config/app-strings';
+import { setUserConfigFileNames } from '../../../../config/app-strings';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
@@ -114,7 +114,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       { configFileNames: config.configFileNames },
       'Updated the config filenames list',
     );
-    addConfigFileNames(config.configFileNames);
+    setUserConfigFileNames(config.configFileNames);
     delete config.configFileNames;
   }
 

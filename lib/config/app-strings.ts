@@ -16,7 +16,7 @@ const configFileNames = [
 
 let userAddedConfigFileNames: string[] = [];
 
-export function addConfigFileNames(fileNames: string[]): void {
+export function setUserConfigFileNames(fileNames: string[]): void {
   userAddedConfigFileNames = fileNames;
 }
 

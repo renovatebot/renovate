@@ -44,7 +44,6 @@ import {
 } from './validation-helpers/utils';
 
 const options = getOptions();
-const configFileNames = getConfigFileNames();
 
 let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
@@ -822,11 +821,11 @@ async function validateGlobalConfig(
       if (is.string(val)) {
         if (
           key === 'onboardingConfigFileName' &&
-          !configFileNames.includes(val)
+          !getConfigFileNames().includes(val)
         ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
           });
         } else if (
           key === 'repositoryCache' &&

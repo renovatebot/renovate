@@ -414,8 +414,7 @@ Example:
 
 <!-- prettier-ignore -->
 !!! note
-    If you want renovate to use a custom filename for the onboarding branch.
-    You also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
+    If you want renovate to use a custom filename for the onboarding branch you also need to change the [`onboardingConfigFileName`](#onboardingconfigfilename).
 
 ## containerbaseDir
 

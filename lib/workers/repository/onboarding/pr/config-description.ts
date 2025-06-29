@@ -6,8 +6,6 @@ import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 import { getDefaultConfigFileName } from '../common';
 
-const defaultConfigFile = getConfigFileNames()[0];
-
 export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
   logger.trace({ config });
@@ -37,11 +35,7 @@ export function getConfigDesc(
   packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
-  const configFile = getConfigFileNames().includes(
-    config.onboardingConfigFileName!,
-  )
-    ? config.onboardingConfigFileName!
-    : defaultConfigFile;
+  const configFile = getDefaultConfigFileName(config);
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);
