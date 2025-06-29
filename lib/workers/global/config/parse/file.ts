@@ -2,6 +2,7 @@ import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { setUserConfigFileNames } from '../../../../config/app-strings';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
@@ -106,6 +107,15 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       'processEnv keys were exported to env',
     );
     delete config.processEnv;
+  }
+
+  if (is.nonEmptyArray(config.configFileNames)) {
+    logger.debug(
+      { configFileNames: config.configFileNames },
+      'Updated the config filenames list',
+    );
+    setUserConfigFileNames(config.configFileNames);
+    delete config.configFileNames;
   }
 
   return migrateAndValidateConfig(config, configFile);
