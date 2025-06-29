@@ -67,6 +67,9 @@ Follow these steps to find out why Renovate does not find a changelog:
    - Check if the token Renovate uses has access rights to the repository you need it to access
 1. Renovate cannot detect the file names or release name convention within the repository
    - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming the package/repository has a reasonable convention to follow
+1. Renovate cannot detect the release version in the changelog file
+   - Ensure the changelog header for the section contains the version being released, or in the case of a monorepo where this may not be the case, ensure the body has a line that contains both the package name and the version.
+   - Otherwise an enhancement to Renovate might be needed to better detect the versions, assuming the package/repository has a reasonable convention to follow
 
 If none of this helps, search the Renovate issues and discussions to see if this is a known problem.
 

@@ -334,7 +334,7 @@ export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease,
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository } = project;
+  const { baseUrl, repository, packageName } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
 
@@ -381,6 +381,27 @@ export async function getReleaseNotesMd(
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
+              logger.trace({ body }, 'Found release notes for v' + version);
+              return {
+                body: await linkifyBody(project, body),
+                url,
+                notesSourceUrl,
+              };
+            }
+          }
+          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          if (packageName && heading.search(releasesRegex) !== -1) {
+            // Now check if any line contains both the package name and the version
+            const bodyLines = body.split('\n');
+            if (
+              bodyLines.some(
+                (line) =>
+                  line.includes(packageName) &&
+                  line.includes(version) &&
+                  !isHttpUrl(line),
+              )
+            ) {
               logger.trace({ body }, 'Found release notes for v' + version);
               return {
                 body: await linkifyBody(project, body),
