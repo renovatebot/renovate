@@ -1,6 +1,5 @@
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
-import { GlobalConfig } from '../../../config/global';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
 import type { AllConfig } from '../../../config/types';
@@ -201,7 +200,6 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('finds .github/renovate.json', async () => {
-      GlobalConfig.set({ platform: 'github' });
       scm.getFileList.mockResolvedValue([
         'package.json',
         '.github/renovate.json',
@@ -211,11 +209,9 @@ describe('workers/repository/init/merge', () => {
         configFileName: '.github/renovate.json',
         configFileParsed: {},
       });
-      GlobalConfig.reset();
     });
 
     it('finds .gitlab/renovate.json', async () => {
-      GlobalConfig.set({ platform: 'gitlab' });
       scm.getFileList.mockResolvedValue([
         'package.json',
         '.gitlab/renovate.json',
@@ -225,7 +221,6 @@ describe('workers/repository/init/merge', () => {
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
       });
-      GlobalConfig.reset();
     });
 
     it('finds .renovaterc.json', async () => {

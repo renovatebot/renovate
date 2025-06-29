@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { getConfigFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
