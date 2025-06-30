@@ -8,11 +8,15 @@ import * as internal from '.';
 vi.mock('../npm');
 vi.mock('../../../modules/datasource/npm');
 
-vi.spyOn(npm, 'getPreset').mockResolvedValue(undefined);
+const getPresetSpy = vi.spyOn(npm, 'getPreset');
 
 const ignoredPresets = ['default:group', 'default:timezone'];
 
 describe('config/presets/internal/index', () => {
+  beforeEach(() => {
+    getPresetSpy.mockResolvedValue(undefined);
+  });
+
   it('fails for undefined internal preset', async () => {
     const preset = 'foo:bar';
     const presetConfig = { extends: [preset] };

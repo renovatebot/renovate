@@ -18,6 +18,10 @@ handlebars.registerHelper('encodeBase64', (str: string) =>
   Buffer.from(str ?? '').toString('base64'),
 );
 
+handlebars.registerHelper('decodeBase64', (str: string) =>
+  Buffer.from(str ?? '', 'base64').toString(),
+);
+
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
@@ -147,6 +151,7 @@ export const exposedConfigOptions = [
   'semanticCommitType',
   'separateMajorMinor',
   'separateMinorPatch',
+  'separateMultipleMinor',
   'sourceDirectory',
 ];
 
