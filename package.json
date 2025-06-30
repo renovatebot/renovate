@@ -281,7 +281,7 @@
     "@types/better-sqlite3": "7.6.13",
     "@types/breejs__later": "4.1.5",
     "@types/bunyan": "1.8.11",
-    "@types/cacache": "17.0.2",
+    "@types/cacache": "19.0.0",
     "@types/callsite": "1.0.34",
     "@types/changelog-filename-regex": "2.0.2",
     "@types/clean-git-ref": "2.0.2",
