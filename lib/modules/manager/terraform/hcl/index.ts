@@ -1,7 +1,7 @@
 import { parse } from '@cdktf/hcl2json';
 import { parseJson } from '../../../../util/common';
+import { TerraformDefinitionFileJSON } from './schema';
 import type { TerraformDefinitionFile } from './types';
-import { TerraformDefinitionFile as TerraformDefinitionFileJSON } from '../schema';
 
 export async function parseHCL(
   content: string,
@@ -14,7 +14,9 @@ export async function parseHCL(
       fileName.endsWith('.tf.json') ||
       fileName.endsWith('.hcl.json')
     ) {
-      return TerraformDefinitionFileJSON.parse(parseJson(content, fileName));
+      return TerraformDefinitionFileJSON.parse(
+        parseJson(content, fileName),
+      ) as TerraformDefinitionFile;
     } else {
       return null;
     }

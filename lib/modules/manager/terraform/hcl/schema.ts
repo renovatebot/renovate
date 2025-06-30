@@ -31,8 +31,11 @@ const NORMALISE_KEYS = new Set([
 
 function normalise(node: any): any {
   if (Array.isArray(node)) {
-    while (node.length === 1 && Array.isArray(node[0])) node = node[0];
-    return node.map(normalise);
+    let arr: any[] = node;
+    while (arr.length === 1 && Array.isArray(arr[0])) {
+      arr = arr[0];
+    }
+    return arr.map(normalise);
   }
 
   if (node && typeof node === 'object') {
@@ -50,7 +53,7 @@ function normalise(node: any): any {
   return node;
 }
 
-const oneOrMany = <T extends z.ZodTypeAny>(schema: T) =>
+const oneOrMany: any = <T extends z.ZodTypeAny>(schema: T) =>
   z
     .union([schema, z.array(schema)])
     .transform((v) => (Array.isArray(v) ? v : [v]));
@@ -175,7 +178,7 @@ export const TerraformResources = z
   .catchall(GenericResourceSchema)
   .optional();
 
-export const TerraformDefinitionFile = z
+export const TerraformDefinitionFileJSON = z
   .object({
     terraform: oneOrMany(TerraformBlock).optional(),
 
@@ -207,7 +210,7 @@ export type KubernetesReplicationControllerV1 = z.infer<
 >;
 export type KubernetesStatefulSet = z.infer<typeof KubernetesStatefulSet>;
 export type KubernetesStatefulSetV1 = z.infer<typeof KubernetesStatefulSetV1>;
-export type TerraformDefinitionFile = z.infer<typeof TerraformDefinitionFile>;
+
 export type TerraformBlock = z.infer<typeof TerraformBlock>;
 export type TerraformModule = z.infer<typeof TerraformModule>;
 export type TerraformProvider = z.infer<typeof TerraformProvider>;
@@ -219,4 +222,7 @@ export type TerraformRequiredProvider = z.infer<
 >;
 export type TerraformRequiredProviderBlock = z.infer<
   typeof TerraformRequiredProviderBlock
+>;
+export type TerraformDefinitionFileJSON = z.infer<
+  typeof TerraformDefinitionFileJSON
 >;
