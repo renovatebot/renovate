@@ -605,8 +605,8 @@ importers:
         version: 3.1.0(typescript@5.8.3)(vitest@3.2.2(@types/debug@4.1.12)(@types/node@22.15.32)(tsx@4.20.3)(yaml@2.8.0))
     optionalDependencies:
       better-sqlite3:
-        specifier: 12.0.0
-        version: 12.0.0
+        specifier: 12.1.0
+        version: 12.1.0
       openpgp:
         specifier: 6.1.1
         version: 6.1.1
@@ -2595,8 +2595,8 @@ packages:
   before-after-hook@4.0.0:
     resolution: {integrity: sha512-q6tR3RPqIB1pMiTRMFcZwuG5T8vwp+vUvEG0vuI6B+Rikh5BfPp2fQ82c925FOs+b0lcFQ8CFrL+KbilfZFhOQ==}
 
-  better-sqlite3@12.0.0:
-    resolution: {integrity: sha512-ElLgwbEth4MHBrDXEqzkE7Hm2+ACw5+KKBhkLArcjJrVFJyOXvzcE/if2dx7/m5pXTc8vqJjsCQUt1AFQY+TTQ==}
+  better-sqlite3@12.1.0:
+    resolution: {integrity: sha512-8f5xvlc6bcGZ57kYzQmeWYHqbKj57RRK/WiTrBGUowiX8ZbrgStWznBPIMGJi5MP7SNhJCKSc4TBaX9hhQL6Iw==}
     engines: {node: 20.x || 22.x || 23.x || 24.x}
 
   bignumber.js@9.3.0:
@@ -9218,7 +9218,7 @@ snapshots:
 
   before-after-hook@4.0.0: {}
 
-  better-sqlite3@12.0.0:
+  better-sqlite3@12.1.0:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.3
