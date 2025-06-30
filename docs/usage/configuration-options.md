@@ -4564,7 +4564,7 @@ Other managers can use the `"loose"` versioning fallback: the first 3 parts are 
 
 A key characteristic of the `"docker"` versioning is that it attempts to preserve the precision of the current version string. For example, if your current version has two parts (e.g., 5.6), Renovate will propose updates that also have two parts (e.g., 5.7), rather than a three-part SemVer equivalent (e.g., 5.7.0).
 
-### Example Use Case: "Floating Patch Versions" using 2 digits versioning
+Example Use Case: "Floating Patch Versions" using 2 digits versioning
 
 You may want to use a 2-part version like 5.6 to indicate the minor version while automatically receiving the latest patch updates (a "floating patch"). At the same time, you still want Renovate to create merge requests for minor or major updates like 5.7 or 6.2. The default semver versioning would update 5.6 to a 3-part version like 5.6.1, which would break the floating patch behavior.
 
