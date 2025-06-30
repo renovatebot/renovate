@@ -250,7 +250,9 @@ describe('config/presets/parse', () => {
     });
 
     it('parses local repo with presetPath with URL-encoded characters', () => {
-      expect(parsePreset('local>some%20group/some%20repo//some-dir/some-file')).toEqual({
+      expect(
+        parsePreset('local>some%20group/some%20repo//some-dir/some-file'),
+      ).toEqual({
         repo: 'some%20group/some%20repo',
         params: undefined,
         presetName: 'some-file',
