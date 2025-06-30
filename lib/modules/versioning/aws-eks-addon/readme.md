@@ -7,7 +7,6 @@ At the moment every ESK Addon that matches the regex `^v?\d+\.\d+\.\d+-eksbuild\
 **Key Points about EKS Addon Versioning**
 
 1. Versioning Scheme: Add-ons typically follow a semantic versioning scheme (e.g., Major.Minor.Patch). This helps in understanding the significance of changes between versions:
-
    - `Major`: Indicates significant changes or breaking API changes for plugin version.
    - `Minor`: Introduces new features or enhancements for plugin version.
    - `Patch`: Includes bug fixes and minor improvements for plugin version.

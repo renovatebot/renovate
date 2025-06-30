@@ -12,6 +12,11 @@ export interface CatalogEntry {
   projectUrl?: string;
   listed?: boolean;
   packageContent?: string;
+  deprecation?: Deprecation;
+}
+
+export interface Deprecation {
+  reasons: string[];
 }
 
 export interface CatalogPage {
