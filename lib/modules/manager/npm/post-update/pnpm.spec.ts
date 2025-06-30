@@ -316,7 +316,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe --config.ignore-scripts=true',
+        cmd: 'pnpm dedupe --ignore-scripts',
       },
     ]);
   });
