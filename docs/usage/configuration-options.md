@@ -25,6 +25,11 @@ You can store your Renovate configuration file in one of these locations:
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+     We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
 
@@ -567,6 +572,22 @@ In this configuration:
 - If Renovate updates dependencies in the `charts/` directory check the `Chart.yaml` file next to the updated file.
 - The version string is extracted from lines matching `version: <value>`.
 - The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
+
+**debugging `bumpVersions`**
+
+Use [`logLevelRemap`](#loglevelremap) to remap, `trace` log level messages to a higher level e.g. `debug`.
+All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help you filter them in the logs.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/bumpVersions/",
+      "newLogLevel": "debug"
+    }
+  ]
+}
+```
 
 ### bumpType
 
@@ -2846,7 +2867,10 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` glob (which can include an exact file name match) or RE2 regex.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -3194,7 +3218,9 @@ Invalid if used outside of a `packageRule`.
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob matching against the dependency's package file and also lock file if one exists.
+Renovate will compare `matchFileNames` glob or RE2 regex matching against the dependency's package file and also lock file if one exists.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
@@ -3232,6 +3258,20 @@ The following example matches any file in directories starting with `app/`:
       "description": "Group all dependencies from the app directory",
       "matchFileNames": ["app/**"],
       "groupName": "App dependencies"
+    }
+  ]
+}
+```
+
+The following example matches any `.toml` file in a `v2` or `v3` directory:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from legacy projects",
+      "matchFileNames": ["/v[123]/.*\\.toml/"],
+      "groupName": "Legacy project dependencies"
     }
   ]
 }
@@ -3739,7 +3779,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
-| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -3767,7 +3807,7 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
@@ -3779,6 +3819,30 @@ They will be compiled _prior_ to the comparison against [`allowedCommands`](./se
 <!-- prettier-ignore -->
 !!! note
     Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### dataFileTemplate
+
+A template to create data file from.
+The template uses the same format as `commands`.
+The data file is created as a temporary file and the path to the data file is stored in the `RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE` environment variable avaliable to each post-upgrade command.
+The primary purpose of the data file is to store some update information in a file which would be consumed from a post-upgrade command.
+This is particularly useful if a post-upgrade command needs to have a long line of arguments.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": [
+      "my-script.py --data-file \"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+    ],
+    "dataFileTemplate": "[{{#each upgrades}}{\"depName\": \"{{{depName}}}\", \"currentValue\": \"{{{currentValue}}}\", \"newValue\": \"{{{newValue}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+   `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### executionMode
 
@@ -4516,6 +4580,27 @@ We do not recommend overriding the default versioning, but there are some cases 
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
 Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
+
+A key characteristic of the `"docker"` versioning is that it attempts to preserve the precision of the current version string. For example, if your current version has two parts (e.g., 5.6), Renovate will propose updates that also have two parts (e.g., 5.7), rather than a three-part SemVer equivalent (e.g., 5.7.0).
+
+Example Use Case: "Floating Patch Versions" using 2 digits versioning
+
+You may want to use a 2-part version like 5.6 to indicate the minor version while automatically receiving the latest patch updates (a "floating patch"). At the same time, you still want Renovate to create merge requests for minor or major updates like 5.7 or 6.2. The default semver versioning would update 5.6 to a 3-part version like 5.6.1, which would break the floating patch behavior.
+
+In the below `renovate.json` extract example, Renovate will use the `docker` versioning for the `.gitlab-ci.yml` file, so you can pin the minor version while still receiving the latest patch updates.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "versioning": "docker"
+    }
+  ]
+}
+```
+
+When using this strategy, make sure that the package you're referencing does support 2-part versions, e.g. that it has a version like `5.6` available in the registry in addition to `5.6.1` or `5.6.2`.
 
 ## vulnerabilityAlerts
 
