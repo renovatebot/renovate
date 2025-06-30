@@ -87,7 +87,7 @@ function extractDependency(
   let currentDigest: string | undefined;
 
   if (tag.length === 40 && comment) {
-    const match = /.*frozen: (.+)$/.exec(comment);
+    const match = regEx(/.*frozen: (.+)$/).exec(comment);
     if (match?.[1]) {
       currentValue = match[1];
       currentDigest = tag;
