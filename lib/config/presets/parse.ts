@@ -5,10 +5,10 @@ import type { ParsedPreset } from './types';
 import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util';
 
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
+  /^(?<repo>~?[\w\-. /%]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
 );
 const gitPresetRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/,
+  /^(?<repo>~?[\w\-. /%]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/,
 );
 
 export function parsePreset(input: string): ParsedPreset {
