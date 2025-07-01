@@ -14,7 +14,7 @@ export async function extract(
   compression: string,
   outputFile: string,
 ): Promise<void> {
-  if (compression === 'gz') {
+  if (compression === '.gz') {
     const source = fs.createCacheReadStream(compressedFile);
     const destination = fs.createCacheWriteStream(outputFile);
     await fs.pipeline(source, createUnzip(), destination);

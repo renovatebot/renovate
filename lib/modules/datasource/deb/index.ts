@@ -71,27 +71,34 @@ export class DebDatasource extends Datasource {
     const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
     let lastTimestamp = await getFileCreationTime(extractedFile);
 
-    const compression = 'gz';
-    const compressedFile = upath.join(
+    let compression = '.gz';
+    let downloadedFile = upath.join(
       fullCacheDir,
       `${nanoid()}_${packageUrlHash}.${compression}`,
     );
 
+    if (componentUrl.includes('-apt.pkg.dev/')) {
+      downloadedFile = extractedFile;
+      compression = '';
+    }
+
     const wasUpdated = await this.downloadPackageFile(
       componentUrl,
       compression,
-      compressedFile,
+      downloadedFile,
       lastTimestamp,
     );
 
     if (wasUpdated || !lastTimestamp) {
       try {
-        await extract(compressedFile, compression, extractedFile);
+        if (compression !== '') {
+          await extract(downloadedFile, compression, extractedFile);
+        }
         lastTimestamp = await getFileCreationTime(extractedFile);
       } catch (error) {
         logger.warn(
           {
-            compressedFile,
+            compressedFile: downloadedFile,
             componentUrl,
             compression,
             error: error.message,
@@ -99,7 +106,9 @@ export class DebDatasource extends Datasource {
           'Failed to extract package file from compressed file',
         );
       } finally {
-        await fs.rmCache(compressedFile);
+        if (compression !== '') {
+          await fs.rmCache(downloadedFile);
+        }
       }
     }
 
@@ -115,19 +124,19 @@ export class DebDatasource extends Datasource {
    * Downloads a package file if it has been modified since the last download timestamp.
    *
    * @param basePackageUrl - The base URL of the package.
-   * @param compression - The compression method used (e.g., 'gz').
-   * @param compressedFile - The path where the compressed file will be saved.
+   * @param compression - The compression file suffix used including the dot (e.g., '.gz').
+   * @param downloadedFile - The path where the compressed file will be saved.
    * @param lastDownloadTimestamp - The timestamp of the last download.
    * @returns True if the file was downloaded, otherwise false.
    */
   private async downloadPackageFile(
     basePackageUrl: string,
     compression: string,
-    compressedFile: string,
+    downloadedFile: string,
     lastDownloadTimestamp?: Date,
   ): Promise<boolean> {
     const baseSuiteUrl = getBaseSuiteUrl(basePackageUrl);
-    const packageUrl = joinUrlParts(basePackageUrl, `Packages.${compression}`);
+    const packageUrl = joinUrlParts(basePackageUrl, `Packages${compression}`);
     let needsToDownload = true;
 
     if (lastDownloadTimestamp) {
@@ -142,10 +151,10 @@ export class DebDatasource extends Datasource {
       return false;
     }
     const readStream = this.http.stream(packageUrl);
-    const writeStream = fs.createCacheWriteStream(compressedFile);
+    const writeStream = fs.createCacheWriteStream(downloadedFile);
     await fs.pipeline(readStream, writeStream);
     logger.debug(
-      { url: packageUrl, targetFile: compressedFile },
+      { url: packageUrl, targetFile: downloadedFile },
       'Downloading Debian package file',
     );
 
@@ -162,14 +171,14 @@ export class DebDatasource extends Datasource {
     }
 
     if (inReleaseContent) {
-      const actualChecksum = await computeFileChecksum(compressedFile);
+      const actualChecksum = await computeFileChecksum(downloadedFile);
       const expectedChecksum = parseChecksumsFromInRelease(
         inReleaseContent,
         // path to the Package.gz file
         packageUrl.replace(`${baseSuiteUrl}/`, ''),
       );
       if (actualChecksum !== expectedChecksum) {
-        await fs.rmCache(compressedFile);
+        await fs.rmCache(downloadedFile);
         throw new Error('SHA256 checksum validation failed');
       }
     }
