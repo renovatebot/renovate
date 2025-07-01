@@ -7,6 +7,7 @@ import * as fs from '../../../util/fs';
 import { toSha256 } from '../../../util/hash';
 import type { HttpOptions } from '../../../util/http/types';
 import { joinUrlParts } from '../../../util/url';
+import { getGoogleAuthToken } from '../util';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { computeFileChecksum, parseChecksumsFromInRelease } from './checksum';
@@ -71,16 +72,28 @@ export class DebDatasource extends Datasource {
     const extractedFile = upath.join(fullCacheDir, `${packageUrlHash}.txt`);
     let lastTimestamp = await getFileCreationTime(extractedFile);
 
-    const compression = 'gz';
-    const compressedFile = upath.join(
+    let compression = '.gz';
+    let downloadedFile = upath.join(
       fullCacheDir,
       `${nanoid()}_${packageUrlHash}.${compression}`,
     );
 
+    let authHeaders: OutgoingHttpHeaders | null = null;
+    if (componentUrl.includes('-apt.pkg.dev/')) {
+      downloadedFile = extractedFile;
+      compression = '';
+
+      const hostRule = await getGoogleAuthHostRule();
+      if (hostRule && Object.keys(hostRule).length !== 0) {
+        authHeaders = { authorization: `Bearer ${hostRule.password}` };
+      }
+      logger.once.debug(`Could not get Google access token (url=${url})`);
+    }
+
     const wasUpdated = await this.downloadPackageFile(
       componentUrl,
       compression,
-      compressedFile,
+      downloadedFile,
       lastTimestamp,
     );
 
@@ -115,9 +128,10 @@ export class DebDatasource extends Datasource {
    * Downloads a package file if it has been modified since the last download timestamp.
    *
    * @param basePackageUrl - The base URL of the package.
-   * @param compression - The compression method used (e.g., 'gz').
+   * @param compression - The compression file suffix used including the dot (e.g., '.gz').
    * @param compressedFile - The path where the compressed file will be saved.
    * @param lastDownloadTimestamp - The timestamp of the last download.
+   * @param authHeaders - Any addition OutgoingHttpHeaders to pass in the stream.
    * @returns True if the file was downloaded, otherwise false.
    */
   private async downloadPackageFile(
@@ -125,9 +139,10 @@ export class DebDatasource extends Datasource {
     compression: string,
     compressedFile: string,
     lastDownloadTimestamp?: Date,
+    authHeaders?: OutgoingHttpHeaders,
   ): Promise<boolean> {
     const baseSuiteUrl = getBaseSuiteUrl(basePackageUrl);
-    const packageUrl = joinUrlParts(basePackageUrl, `Packages.${compression}`);
+    const packageUrl = joinUrlParts(basePackageUrl, `Packages${compression}`);
     let needsToDownload = true;
 
     if (lastDownloadTimestamp) {
@@ -141,7 +156,11 @@ export class DebDatasource extends Datasource {
       logger.debug(`No need to download ${packageUrl}, file is up to date.`);
       return false;
     }
-    const readStream = this.http.stream(packageUrl);
+    let options = {};
+    if (authHeaders) {
+      options = { headers: authHeaders };
+    }
+    const readStream = this.http.stream(packageUrl, options);
     const writeStream = fs.createCacheWriteStream(compressedFile);
     await fs.pipeline(readStream, writeStream);
     logger.debug(
