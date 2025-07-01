@@ -2867,7 +2867,10 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` glob (which can include an exact file name match) or RE2 regex.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -3215,7 +3218,9 @@ Invalid if used outside of a `packageRule`.
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob matching against the dependency's package file and also lock file if one exists.
+Renovate will compare `matchFileNames` glob or RE2 regex matching against the dependency's package file and also lock file if one exists.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
@@ -3253,6 +3258,20 @@ The following example matches any file in directories starting with `app/`:
       "description": "Group all dependencies from the app directory",
       "matchFileNames": ["app/**"],
       "groupName": "App dependencies"
+    }
+  ]
+}
+```
+
+The following example matches any `.toml` file in a `v2` or `v3` directory:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from legacy projects",
+      "matchFileNames": ["/v[123]/.*\\.toml/"],
+      "groupName": "Legacy project dependencies"
     }
   ]
 }
@@ -3760,7 +3779,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
-| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -4561,6 +4580,27 @@ We do not recommend overriding the default versioning, but there are some cases 
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
 Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
+
+A key characteristic of the `"docker"` versioning is that it attempts to preserve the precision of the current version string. For example, if your current version has two parts (e.g., 5.6), Renovate will propose updates that also have two parts (e.g., 5.7), rather than a three-part SemVer equivalent (e.g., 5.7.0).
+
+Example Use Case: "Floating Patch Versions" using 2 digits versioning
+
+You may want to use a 2-part version like 5.6 to indicate the minor version while automatically receiving the latest patch updates (a "floating patch"). At the same time, you still want Renovate to create merge requests for minor or major updates like 5.7 or 6.2. The default semver versioning would update 5.6 to a 3-part version like 5.6.1, which would break the floating patch behavior.
+
+In the below `renovate.json` extract example, Renovate will use the `docker` versioning for the `.gitlab-ci.yml` file, so you can pin the minor version while still receiving the latest patch updates.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "versioning": "docker"
+    }
+  ]
+}
+```
+
+When using this strategy, make sure that the package you're referencing does support 2-part versions, e.g. that it has a version like `5.6` available in the registry in addition to `5.6.1` or `5.6.2`.
 
 ## vulnerabilityAlerts
 
