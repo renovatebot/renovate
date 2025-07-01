@@ -249,6 +249,28 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('parses local repo with presetPath with URL-encoded characters', () => {
+      expect(
+        parsePreset('local>some%20group/some%20repo//some-dir/some-file'),
+      ).toEqual({
+        repo: 'some%20group/some%20repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: 'some-dir',
+        presetSource: 'local',
+      });
+    });
+
+    it('parses local repo with URL-encoded characters', () => {
+      expect(parsePreset('local>some%20group/some%20repo//some-file')).toEqual({
+        repo: 'some%20group/some%20repo',
+        params: undefined,
+        presetName: 'some-file',
+        presetPath: undefined,
+        presetSource: 'local',
+      });
+    });
+
     it('parses no prefix as local', () => {
       expect(parsePreset('some/repo')).toEqual({
         repo: 'some/repo',
