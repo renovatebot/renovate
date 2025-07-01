@@ -16,7 +16,7 @@ export type CommitStatusType =
   | 'warning'
   | 'unknown';
 export type PRMergeMethod =
-  | 'fast-forward'
+  | 'fast-forward-only'
   | 'merge'
   | 'rebase'
   | 'rebase-merge'

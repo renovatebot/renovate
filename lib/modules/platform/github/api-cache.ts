@@ -1,5 +1,6 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
+import { logger } from '../../../logger';
 import type { ApiPageCache, ApiPageItem } from './types';
 
 export class ApiCache<T extends ApiPageItem> {
@@ -50,6 +51,7 @@ export class ApiCache<T extends ApiPageItem> {
         : null;
 
       if (!dequal(oldItem, newItem)) {
+        logger.debug(`PR cache: updating item ${number}`);
         items[number] = newItem;
       }
 

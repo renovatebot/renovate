@@ -58,6 +58,7 @@ export interface LookupUpdateConfig
 
 export interface UpdateResult {
   sourceDirectory?: string;
+  changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;

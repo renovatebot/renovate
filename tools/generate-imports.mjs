@@ -141,6 +141,25 @@ async function generateData() {
   );
 }
 
+async function generateManagerList() {
+  // get managers list
+  const managers = (
+    await fs.readdir('lib/modules/manager', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .filter((mgr) => mgr !== 'custom')
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllManagersListLiteral = [${managers.join(',')}] as const;
+export type ManagerName = typeof AllManagersListLiteral[number];
+`;
+
+  await updateFile(`lib/manager-list.generated.ts`, content);
+}
+
 async function generateHash() {
   console.log('generating hashes');
   try {
@@ -191,6 +210,7 @@ await (async () => {
   try {
     // data-files
     await generateData();
+    await generateManagerList();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))
