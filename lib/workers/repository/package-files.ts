@@ -109,8 +109,15 @@ export class PackageFiles {
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
-            const version =
-              ver && digest ? `${ver}@${digest}` : `${digest ?? ver!}`;
+            const lock = dep.lockedVersion;
+            let version;
+            if (ver || digest) {
+              version = ver && digest ? `${ver}@${digest}` : `${digest ?? ver}`;
+            } else if (lock) {
+              version = `lock file @ ${lock}`;
+            } else {
+              version = 'unknown version';
+            }
             // TODO: types (#22198)
             deps += ` - \`${dep.depName!} ${version}\`\n`;
           }

@@ -176,6 +176,7 @@ export async function extract(
         packageFiles,
       };
     }
+
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
       ? config.baseBranches

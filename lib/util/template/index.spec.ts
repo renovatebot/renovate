@@ -294,6 +294,30 @@ describe('util/template/index', () => {
     });
   });
 
+  describe('base64 decoding', () => {
+    it('decode values', () => {
+      const output = template.compile(
+        '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
+        undefined as never,
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
+    });
+  });
+
   describe('equals', () => {
     it('equals', () => {
       const output = template.compile(

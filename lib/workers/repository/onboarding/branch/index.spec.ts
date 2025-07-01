@@ -91,6 +91,14 @@ describe('workers/repository/onboarding/branch/index', () => {
             '}\n',
         );
         scm.getFileList.mockResolvedValue(['package.json']);
+        fs.findLocalSiblingOrParent.mockImplementation(
+          (packageFile, configFile): Promise<string | null> => {
+            if (packageFile === 'package.json' && configFile === '.npmrc') {
+              return Promise.resolve('.npmrc');
+            }
+            return Promise.resolve(null);
+          },
+        );
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
         const file = scm.commitAndPush.mock.calls[0][0]
@@ -116,6 +124,14 @@ describe('workers/repository/onboarding/branch/index', () => {
           '}\n',
       );
       scm.getFileList.mockResolvedValue(['package.json']);
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, configFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && configFile === '.npmrc') {
+            return Promise.resolve('.npmrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       const expectConfig = {

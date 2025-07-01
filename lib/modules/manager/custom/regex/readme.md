@@ -198,7 +198,7 @@ Using the `customManagers` below, Renovate looks for available Docker tags of th
       "datasourceTemplate": "docker",
       "managerFilePatterns": ["/(^|/)Chart\\.yaml$/"],
       "matchStrings": [
-        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\'?(?<currentValue>[\\w+\\.\\-]*)'"
       ]
     }
   ]

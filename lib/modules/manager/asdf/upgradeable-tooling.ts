@@ -132,6 +132,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
     },
   },
+  clusterctl: {
+    asdfPluginUrl: 'https://github.com/pfnet-research/asdf-clusterctl',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes-sigs/cluster-api',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   conftest: {
     asdfPluginUrl: 'https://github.com/looztra/asdf-conftest',
     config: {
@@ -498,6 +506,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes-sigs/kustomize',
       extractVersion: '^kustomize/v(?<version>\\S+)',
+    },
+  },
+  localstack: {
+    asdfPluginUrl: 'https://github.com/Azulinho/asdf-localstack',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'localstack/localstack',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   lua: {

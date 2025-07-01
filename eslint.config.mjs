@@ -1,11 +1,14 @@
 import eslintContainerbase from '@containerbase/eslint-plugin';
 import js from '@eslint/js';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import eslintPluginImport from 'eslint-plugin-import';
 import vitest from '@vitest/eslint-plugin';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import * as importX from 'eslint-plugin-import-x';
 import eslintPluginPromise from 'eslint-plugin-promise';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+
+const jsFiles = { files: ['**/*.{js,cjs,mjs,mts,ts}'] };
 
 export default tseslint.config(
   {
@@ -27,25 +30,23 @@ export default tseslint.config(
       '**/.venv/',
       'tools/mkdocs/docs',
       'tools/mkdocs/site',
-
-      // TODO: fix me
-      'eslint.config.mjs',
     ],
+  },
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
   },
 
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  eslintPluginImport.flatConfigs.errors,
-  eslintPluginImport.flatConfigs.warnings,
-  eslintPluginImport.flatConfigs.recommended,
-  eslintPluginImport.flatConfigs.typescript,
   eslintPluginPromise.configs['flat/recommended'],
   eslintContainerbase.configs.all,
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: 'error',
-    },
+    ...jsFiles,
+
+    extends: [importX.flatConfigs.recommended, importX.flatConfigs.typescript],
 
     languageOptions: {
       globals: {
@@ -58,33 +59,26 @@ export default tseslint.config(
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
         projectService: true,
-        extraFileExtensions: ['.mjs'],
       },
     },
 
     settings: {
-      'import/parsers': {
-        '@typescript-eslint/parser': ['.ts'],
-      },
-
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-        },
-      },
+      'import-x/resolver-next': [
+        createTypeScriptImportResolver({ project: 'tsconfig.json' }),
+      ],
     },
   },
 
   eslintConfigPrettier,
   {
-    files: ['**/*.{ts,js,cjs,mjs}'],
+    ...jsFiles,
     rules: {
-      'import/default': 2,
-      'import/named': 2,
-      'import/namespace': 2,
-      'import/no-named-as-default-member': 0,
+      'import-x/default': 2,
+      'import-x/named': 2,
+      'import-x/namespace': 2,
+      'import-x/no-named-as-default-member': 0,
 
-      'import/no-extraneous-dependencies': [
+      'import-x/no-extraneous-dependencies': [
         'error',
         {
           devDependencies: [
@@ -96,8 +90,8 @@ export default tseslint.config(
         },
       ],
 
-      'import/prefer-default-export': 0,
-      'import/no-cycle': 2,
+      'import-x/prefer-default-export': 0,
+      'import-x/no-cycle': 2,
       'consistent-return': 0,
       eqeqeq: 'error',
       'no-console': 'error',
@@ -115,14 +109,14 @@ export default tseslint.config(
         },
       ],
 
-      'import/no-unresolved': [
+      'import-x/no-unresolved': [
         'error',
         {
           ignore: ['^mdast$'],
         },
       ],
 
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           alphabetize: {
@@ -131,7 +125,7 @@ export default tseslint.config(
         },
       ],
 
-      'import/no-restricted-paths': [
+      'import-x/no-restricted-paths': [
         2,
         {
           zones: [
@@ -263,7 +257,7 @@ export default tseslint.config(
       'no-template-curly-in-string': 0,
       'prefer-destructuring': 0,
       'prefer-promise-reject-errors': 0,
-      'import/no-dynamic-require': 0,
+      'import-x/no-dynamic-require': 0,
       'global-require': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/no-object-literal-type-assertion': 0,
@@ -283,7 +277,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tools/**/*.{ts,js,mjs,cjs}'],
+    files: [
+      '*.config.{cjs,cts,js,mjs,mts,ts}',
+      'tools/**/*.{cjs,cts,js,mjs,mts,ts}',
+    ],
 
     languageOptions: {
       globals: {
@@ -292,7 +289,7 @@ export default tseslint.config(
     },
 
     rules: {
-      'import/no-extraneous-dependencies': [
+      'import-x/no-extraneous-dependencies': [
         'error',
         {
           devDependencies: true,
@@ -313,7 +310,7 @@ export default tseslint.config(
     files: ['**/*.mjs'],
 
     rules: {
-      'import/extensions': 0,
+      'import-x/extensions': 0,
     },
   },
   {

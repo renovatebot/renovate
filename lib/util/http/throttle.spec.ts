@@ -6,7 +6,7 @@ describe('util/http/throttle', () => {
     clear();
     hostRules.clear();
     hostRules.add({
-      matchHost: 'https://example.com',
+      matchHost: 'example.com',
       maxRequestsPerSecond: 143,
     });
   });

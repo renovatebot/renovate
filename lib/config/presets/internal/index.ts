@@ -1,4 +1,5 @@
 import type { Preset, PresetConfig } from '../types';
+import * as configAbandonments from './abandonments';
 import * as configPreset from './config';
 import * as customManagersPreset from './custom-managers';
 import * as defaultPreset from './default';
@@ -19,6 +20,7 @@ import * as workaroundsPreset from './workarounds';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const groups: Record<string, Record<string, Preset>> = {
+  abandonments: configAbandonments.presets,
   config: configPreset.presets,
   customManagers: customManagersPreset.presets,
   default: defaultPreset.presets,

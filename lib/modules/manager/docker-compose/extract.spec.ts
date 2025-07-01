@@ -194,5 +194,40 @@ describe('modules/manager/docker-compose/extract', () => {
         ],
       });
     });
+
+    it('extract images from fragments', () => {
+      const compose = codeBlock`
+        ---
+        x-shared_setting: &shared_settings
+          image: debian:11
+          # Other shared properties here
+
+        services:
+          service-a:
+            <<: *shared_settings
+            environment:
+              - SERVICE=a
+          service-b:
+            <<: *shared_settings
+            environment:
+              - SERVICE=b
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '11',
+            datasource: 'docker',
+            depName: 'debian',
+            packageName: 'debian',
+            replaceString: 'debian:11',
+            versioning: 'debian',
+          },
+        ],
+      });
+    });
   });
 });

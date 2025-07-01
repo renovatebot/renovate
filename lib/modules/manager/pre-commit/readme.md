@@ -29,12 +29,12 @@ Alternatively, add `:enablePreCommit` to your `extends` array.
 
 ### Additional Dependencies
 
-renovate has partial support for `additional_dependencies`, currently python only.
+Renovate has partial support for `additional_dependencies`, currently Python only.
 
-for python hooks, you will need to **explicitly add language** to your hooks with `additional_dependencies`
-to let renovatebot know what kind of dependencies they are.
+For Python hooks, you will need to **explicitly add language** to your hooks with `additional_dependencies`
+to let Renovate know what kind of dependencies they are.
 
-For example, this work for `request`:
+For example, this works for `requests`:
 
 ```yaml
 - repo: https://github.com/psf/black
@@ -43,10 +43,10 @@ For example, this work for `request`:
     - id: black
       language: python
       additional_dependencies:
-        - 'request==1.1.1'
+        - 'requests==1.1.1'
 ```
 
-this won't work:
+This won't work:
 
 ```yaml
 - repo: https://github.com/psf/black
@@ -54,5 +54,5 @@ this won't work:
   hooks:
     - id: black
       additional_dependencies:
-        - 'request==1.1.1'
+        - 'requests==1.1.1'
 ```

@@ -1,13 +1,12 @@
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
-import { exec } from '../../../util/exec';
 import { ExecError } from '../../../util/exec/exec-error';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import { exec, mockExecAll } from '~test/exec-util';
 import { fs } from '~test/util';
 
-vi.mock('../../../util/exec');
 vi.mock('../../../util/fs');
 
 const globalConfig: RepoGlobalConfig = {
@@ -49,14 +48,20 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce(null);
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual('gleam deps update');
     });
 
     it('returns null if lock content unchanged', async () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('old');
+      const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual('gleam deps update');
     });
 
     it('returns updated lock content', async () => {
@@ -64,6 +69,7 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -73,6 +79,8 @@ describe('modules/manager/gleam/artifacts', () => {
           },
         },
       ]);
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual('gleam deps update');
     });
 
     it('supports lockFileMaintenance', async () => {
@@ -81,6 +89,7 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('new');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -90,6 +99,8 @@ describe('modules/manager/gleam/artifacts', () => {
           },
         },
       ]);
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual('gleam deps update');
     });
 
     it('returns null if lockfile content unchanged', async () => {
@@ -98,7 +109,10 @@ describe('modules/manager/gleam/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
+      expect(execSnapshots).toBeArrayOfSize(1);
+      expect(execSnapshots[0].cmd).toEqual('gleam deps update');
     });
 
     it('handles temporary error', async () => {
@@ -111,7 +125,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       fs.readLocalFile.mockResolvedValueOnce('old');
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
-      vi.mocked(exec).mockRejectedValueOnce(execError);
+      exec.mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
       );
@@ -138,7 +152,7 @@ describe('modules/manager/gleam/artifacts', () => {
       updateArtifact.updatedDeps = [{ manager: 'gleam' }];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock.toString());
-      vi.mocked(exec).mockRejectedValueOnce(execError);
+      exec.mockRejectedValueOnce(execError);
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
@@ -146,6 +160,20 @@ describe('modules/manager/gleam/artifacts', () => {
             lockFile: 'manifest.toml',
             stderr: 'fake_gleam_failure',
           },
+        },
+      ]);
+    });
+
+    it('prevents injections', async () => {
+      updateArtifact.updatedDeps = [{ depName: '|| date' }];
+      fs.readLocalFile.mockResolvedValueOnce('old');
+      fs.readLocalFile.mockResolvedValueOnce('new');
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      const execSnapshots = mockExecAll();
+      await updateArtifacts(updateArtifact);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `gleam deps update '|| date'`,
         },
       ]);
     });

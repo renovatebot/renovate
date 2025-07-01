@@ -79,6 +79,7 @@ export interface BranchUpgradeConfig
 
   hasReleaseNotes?: boolean;
   homepage?: string;
+  changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;

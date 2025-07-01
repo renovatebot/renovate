@@ -610,7 +610,7 @@ describe('workers/repository/init/merge', () => {
           },
         },
         {
-          name: 'it should merge a static repo config into the repo config by appending it',
+          name: 'it should merge both configs and and repo config is higher priority',
           currentConfig: {},
           repoFileConfig: {
             extends: ['group:socketio'],
@@ -639,12 +639,52 @@ describe('workers/repository/init/merge', () => {
                 matchPackageNames: ['socket.io**'],
               },
               {
+                groupName: 'my-custom-socketio-override',
+                matchPackageNames: ['socket.io**'],
+              },
+              {
                 groupName: 'high merge confidence',
                 matchConfidence: ['high', 'very high'],
               },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should merge extends from both a repo config and static repo config by appending it',
+          currentConfig: {},
+          repoFileConfig: {
+            extends: ['group:springAndroid'],
+          },
+          staticConfig: {
+            dependencyDashboard: true,
+            extends: ['group:springAmqp'],
+            packageRules: [
               {
-                groupName: 'my-custom-socketio-override',
-                matchPackageNames: ['socket.io**'],
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
+              },
+            ],
+          },
+          wantConfig: {
+            dependencyDashboard: true,
+            description: [
+              'Group Java Spring AMQP packages.',
+              'Group Java Spring Android packages.',
+            ],
+            packageRules: [
+              {
+                groupName: 'spring amqp',
+                matchPackageNames: ['org.springframework.amqp:**'],
+              },
+              {
+                groupName: 'spring android',
+                matchPackageNames: ['org.springframework.android:**'],
+              },
+              {
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
               },
             ],
             renovateJsonPresent: true,

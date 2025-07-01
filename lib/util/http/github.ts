@@ -14,7 +14,7 @@ import { maskToken } from '../mask';
 import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
-import { joinUrlParts, parseLinkHeader } from '../url';
+import { joinUrlParts, parseLinkHeader, parseUrl } from '../url';
 import { findMatchingRule } from './host-rules';
 import {
   HttpBase,
@@ -123,19 +123,26 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (err.statusCode === 401 && message.includes('Bad credentials')) {
-    const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
-    logger.debug(
-      {
-        token: maskToken(opts.token),
-        err,
-      },
-      'GitHub failure: Bad credentials',
-    );
-    if (rateLimit === '60') {
-      return new ExternalHostError(err, 'github');
+  if (err.statusCode === 401) {
+    // Warn once for github.com token if unauthorized
+    const hostname = parseUrl(url)?.hostname;
+    if (hostname === 'github.com' || hostname === 'api.github.com') {
+      logger.once.warn('github.com token 401 unauthorized');
     }
-    return new Error(PLATFORM_BAD_CREDENTIALS);
+    if (message.includes('Bad credentials')) {
+      const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
+      logger.debug(
+        {
+          token: maskToken(opts.token),
+          err,
+        },
+        'GitHub failure: Bad credentials',
+      );
+      if (rateLimit === '60') {
+        return new ExternalHostError(err, 'github');
+      }
+      return new Error(PLATFORM_BAD_CREDENTIALS);
+    }
   }
   if (err.statusCode === 422) {
     if (
