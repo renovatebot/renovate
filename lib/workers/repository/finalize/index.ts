@@ -19,6 +19,7 @@ export async function finalizeRepo(
 ): Promise<void> {
   await checkReconfigureBranch(config, repoConfig);
   await repositoryCache.saveCache();
+  await repositoryCache.cleanup();
   await pruneStaleBranches(config, branchList);
   await ensureIssuesClosing();
   await clearRenovateRefs();
