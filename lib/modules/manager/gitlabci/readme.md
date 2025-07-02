@@ -18,3 +18,17 @@ If you use predefined GitLab CI variables like `CI_REGISTRY` or `CI_SERVER_FQDN`
   }
 }
 ```
+
+Variables with default values (using the `:-` syntax) are also supported, which is useful for Docker Compose files or scripts:
+
+```json
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "registry.example.com"
+  }
+}
+```
+
+This supports both formats with and without slashes:
+- `${DEPENDENCY_PROXY:-}/image:1.0`
+- `${DEPENDENCY_PROXY:-}image:1.0`
