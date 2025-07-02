@@ -231,5 +231,125 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
     });
+
+    it('picks up minimumMinorAge settings from config for minor updates', async () => {
+      config.internalChecksFilter = 'strict';
+      config.minimumMinorAge = '3 days';
+      config.currentVersion = '1.0.0';
+      // Create releases that would be minor updates
+      const minorReleases: Release[] = [
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.3.0',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.4.0',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
+        },
+      ];
+      const res = await filterInternalChecks(
+        config,
+        versioning,
+        'minor',
+        minorReleases,
+      );
+      expect(res.pendingChecks).toBeFalse();
+      expect(res.pendingReleases).toHaveLength(0);
+      expect(res.release?.version).toBe('1.4.0');
+    });
+
+    it('picks up minimumMinorAge settings from packageRules for minor updates', async () => {
+      config.internalChecksFilter = 'strict';
+      config.minimumMinorAge = '6 days';
+      config.currentVersion = '1.0.0';
+      config.packageRules = [
+        { matchUpdateTypes: ['minor'], minimumMinorAge: '1 day' },
+      ];
+      // Create releases that would be minor updates
+      const minorReleases: Release[] = [
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.3.0',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.4.0',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
+        },
+      ];
+      const res = await filterInternalChecks(
+        config,
+        versioning,
+        'minor',
+        minorReleases,
+      );
+      expect(res.pendingChecks).toBeFalse();
+      expect(res.pendingReleases).toHaveLength(0);
+      expect(res.release?.version).toBe('1.4.0');
+    });
+
+    it('ignores minimumMinorAge for non-minor updates', async () => {
+      config.internalChecksFilter = 'strict';
+      config.minimumMinorAge = '1 day';
+      config.currentVersion = '1.0.0';
+      const res = await filterInternalChecks(
+        config,
+        versioning,
+        'patch',
+        sortedReleases,
+      );
+      expect(res.pendingChecks).toBeFalse();
+      expect(res.pendingReleases).toHaveLength(0);
+      expect(res.release?.version).toBe('1.0.4');
+    });
+
+    it('picks up minimumMinorAge settings from updateType', async () => {
+      config.internalChecksFilter = 'strict';
+      config.currentVersion = '1.0.0';
+      config.minor = { minimumMinorAge: '4 days' };
+      // Create releases that would be minor updates
+      const minorReleases: Release[] = [
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2021-01-01T00:00:01.000Z' as Timestamp,
+        },
+        {
+          version: '1.2.0',
+          releaseTimestamp: '2021-01-03T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.3.0',
+          releaseTimestamp: '2021-01-05T00:00:00.000Z' as Timestamp,
+        },
+        {
+          version: '1.4.0',
+          releaseTimestamp: '2021-01-07T00:00:00.000Z' as Timestamp,
+        },
+      ];
+      const res = await filterInternalChecks(
+        config,
+        versioning,
+        'minor',
+        minorReleases,
+      );
+      expect(res.pendingChecks).toBeFalse();
+      expect(res.pendingReleases).toHaveLength(1);
+      expect(res.release?.version).toBe('1.3.0');
+    });
   });
 });

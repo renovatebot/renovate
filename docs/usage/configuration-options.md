@@ -2653,6 +2653,42 @@ Renovate will only add a milestone when it _creates_ the PR.
 }
 ```
 
+## minimumMinorAge
+
+Similar to `minimumReleaseAge`, but only applies to minor updates.
+This allows you to set different stability requirements for minor version updates specifically.
+
+If `minimumMinorAge` is set to a time duration _and_ the update has a release timestamp header _and_ the update is a minor update, then Renovate will check if the set duration has passed.
+
+When used together with `minimumReleaseAge`, both conditions are checked independently.
+For minor updates, both `minimumMinorAge` and `minimumReleaseAge` (if configured) must pass their respective age requirements.
+
+<!-- prettier-ignore -->
+!!! note
+    Configuring this option will add a `renovate/minor-stability-days` option to the status checks.
+
+Example configuration to wait 1 week for minor updates but only 3 days for other updates:
+
+```json
+{
+  "minimumReleaseAge": "3 days",
+  "minimumMinorAge": "7 days"
+}
+```
+
+You can also configure `minimumMinorAge` per package or per update type:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["react"],
+      "minimumMinorAge": "14 days"
+    }
+  ]
+}
+```
+
 ## minimumReleaseAge
 
 This feature used to be called `stabilityDays`.

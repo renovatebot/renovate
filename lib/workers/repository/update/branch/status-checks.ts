@@ -92,6 +92,45 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   );
 }
 
+export interface MinorStabilityConfig extends RenovateConfig {
+  minorStabilityStatus?: BranchStatus;
+  branchName: string;
+}
+
+export async function setMinorStability(
+  config: MinorStabilityConfig,
+): Promise<void> {
+  if (!config.minorStabilityStatus) {
+    return;
+  }
+
+  const context = config.statusCheckNames?.minimumMinorAge;
+  if (!context) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    return;
+  }
+
+  const description =
+    config.minorStabilityStatus === 'green'
+      ? 'Updates have met minimum minor release age requirement'
+      : 'Updates have not met minimum minor release age requirement';
+
+  const docsLink = joinUrlParts(
+    coerceString(config.productLinks?.documentation),
+    'configuration-options/#minimumminorage',
+  );
+
+  await setStatusCheck(
+    config.branchName,
+    context,
+    description,
+    config.minorStabilityStatus,
+    docsLink,
+  );
+}
+
 export interface ConfidenceConfig extends RenovateConfig {
   confidenceStatus?: BranchStatus;
   minimumConfidence?: MergeConfidence | undefined;

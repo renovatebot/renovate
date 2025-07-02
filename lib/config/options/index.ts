@@ -307,6 +307,7 @@ const options: RenovateOptions[] = [
       configValidation: 'renovate/config-validation',
       mergeConfidence: 'renovate/merge-confidence',
       minimumReleaseAge: 'renovate/stability-days',
+      minimumMinorAge: 'renovate/minor-stability-days',
     },
   },
   {
@@ -1896,6 +1897,13 @@ const options: RenovateOptions[] = [
   {
     name: 'minimumReleaseAge',
     description: 'Time required before a new release is considered stable.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'minimumMinorAge',
+    description:
+      'Time required before a new minor release is considered stable.',
     type: 'string',
     default: null,
   },

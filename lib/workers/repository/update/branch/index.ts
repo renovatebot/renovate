@@ -49,7 +49,11 @@ import { getUpdatedPackageFiles } from './get-updated';
 import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setConfidence, setStability } from './status-checks';
+import {
+  setConfidence,
+  setMinorStability,
+  setStability,
+} from './status-checks';
 
 async function rebaseCheck(
   config: RenovateConfig,
@@ -360,12 +364,16 @@ export async function processBranch(
         (upgrade) =>
           (is.nonEmptyString(upgrade.minimumReleaseAge) &&
             is.nonEmptyString(upgrade.releaseTimestamp)) ||
+          (upgrade.updateType === 'minor' &&
+            is.nonEmptyString(upgrade.minimumMinorAge) &&
+            is.nonEmptyString(upgrade.releaseTimestamp)) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
+      config.minorStabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
         if (
@@ -383,6 +391,25 @@ export async function processBranch(
               'Update has not passed minimum release age',
             );
             config.stabilityStatus = 'yellow';
+            continue;
+          }
+        }
+        if (
+          upgrade.updateType === 'minor' &&
+          is.nonEmptyString(upgrade.minimumMinorAge) &&
+          upgrade.releaseTimestamp
+        ) {
+          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+          if (timeElapsed < coerceNumber(toMs(upgrade.minimumMinorAge))) {
+            logger.debug(
+              {
+                depName: upgrade.depName,
+                timeElapsed,
+                minimumMinorAge: upgrade.minimumMinorAge,
+              },
+              'Update has not passed minimum minor release age',
+            );
+            config.minorStabilityStatus = 'yellow';
             continue;
           }
         }
@@ -417,7 +444,8 @@ export async function processBranch(
       if (
         !dependencyDashboardCheck &&
         !branchExists &&
-        config.stabilityStatus === 'yellow' &&
+        (config.stabilityStatus === 'yellow' ||
+          config.minorStabilityStatus === 'yellow') &&
         ['not-pending', 'status-success'].includes(config.prCreation!)
       ) {
         logger.debug(
@@ -639,6 +667,7 @@ export async function processBranch(
     // Set branch statuses
     await setArtifactErrorStatus(config);
     await setStability(config);
+    await setMinorStability(config);
     await setConfidence(config);
 
     // new commit means status check are pretty sure pending but maybe not reported yet

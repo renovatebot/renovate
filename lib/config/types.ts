@@ -216,6 +216,7 @@ export type ConstraintsFilter = 'strict' | 'none';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
+  'minimumMinorAge',
   'mergeConfidence',
   'configValidation',
   'artifactError',
