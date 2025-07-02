@@ -18,6 +18,7 @@ export function parsePreset(input: string): ParsedPreset {
   let repo: string;
   let presetName: string;
   let tag: string | undefined;
+  let rawParams: string | undefined;
   let params: string[] | undefined;
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -43,14 +44,12 @@ export function parsePreset(input: string): ParsedPreset {
   str = str.replace(regEx(/^npm>/), '');
   presetSource = presetSource ?? 'npm';
   if (str.includes('(')) {
-    params = str
-      .slice(str.indexOf('(') + 1, -1)
-      .split(',')
-      .map((elem) => elem.trim());
+    rawParams = str.slice(str.indexOf('(') + 1, -1);
+    params = rawParams.split(',').map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
   if (presetSource === 'http') {
-    return { presetSource, repo: str, presetName: '', params };
+    return { presetSource, repo: str, presetName: '', params, rawParams };
   }
   const presetsPackages = [
     'abandonments',
@@ -124,5 +123,6 @@ export function parsePreset(input: string): ParsedPreset {
     presetName,
     tag,
     params,
+    rawParams,
   };
 }
