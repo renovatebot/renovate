@@ -23,6 +23,8 @@ $ npx --yes --package renovate -- renovate-config-validator
  INFO: Config validated successfully
 ```
 
+If you want to run `renovate-config-validator` while using a custom filename for your renovate config file, you will need to pass the filename as cli argument.
+
 ### Strict mode
 
 By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
