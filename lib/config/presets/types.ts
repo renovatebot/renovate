@@ -23,7 +23,7 @@ export interface ParsedPreset {
   presetName: string;
   tag?: string | undefined;
   params?: string[] | undefined;
-  paramString?: string | undefined;
+  rawParams?: string | undefined;
 }
 
 export type PresetFetcher = (
