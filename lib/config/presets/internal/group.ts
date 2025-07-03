@@ -111,6 +111,15 @@ const staticGroups = {
       },
     ],
   },
+  drupalCore: {
+    description: 'Group Drupal core updates.',
+    packageRules: [
+      {
+        groupName: 'Drupal core',
+        matchPackageNames: ['drupal/core', '/^drupal/core-.*/'],
+      },
+    ],
+  },
   flyway: {
     description: 'Group Java Flyway packages.',
     packageRules: [
