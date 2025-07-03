@@ -64,7 +64,7 @@ export async function generateLockFile(
       // those arwe no longer working and it's unclear if they ever worked
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      // these are used by pnpm v5 and above. Maybe earlier versions too
+      // these are used by pnpm v5 to v10. Maybe earlier versions too
       npm_config_cache_dir: pnpmConfigCacheDir,
       npm_config_store_dir: pnpmConfigStoreDir,
       // pnpm stops reading npm_config_* env vars since v11

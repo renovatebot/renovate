@@ -72,7 +72,8 @@ export async function updateArtifacts({
     cwdFile: packageFileName,
     extraEnv: {
       // To make sure pnpm store location is consistent between "corepack use"
-      // here and the pnpm commands in ./post-update/pnpm.ts
+      // here and the pnpm commands in ./post-update/pnpm.ts. Check
+      // ./post-update/pnpm.ts for more details.
       npm_config_cache_dir: pnpmConfigCacheDir,
       npm_config_store_dir: pnpmConfigStoreDir,
       pnpm_config_cache_dir: pnpmConfigCacheDir,
