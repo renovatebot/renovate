@@ -81,7 +81,7 @@ export interface Repo {
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
-  default_merge_style: string;
+  default_merge_style: PRMergeMethod;
   external_tracker?: unknown;
   has_issues: boolean;
   has_pull_requests: boolean;

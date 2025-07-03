@@ -112,7 +112,7 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
-  const { presetSource, repo, presetPath, presetName, tag, params } =
+  const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
   const presetCachePersistence = GlobalConfig.get(
@@ -154,6 +154,9 @@ export async function getPreset(
     const argMapping: Record<string, string> = {};
     for (const [index, value] of params.entries()) {
       argMapping[`arg${index}`] = value;
+    }
+    if (rawParams) {
+      argMapping.args = rawParams;
     }
     presetConfig = replaceArgs(presetConfig, argMapping);
   }
