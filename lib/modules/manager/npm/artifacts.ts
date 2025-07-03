@@ -2,9 +2,14 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, writeLocalFile } from '../../../util/fs';
+import {
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
 import { getNodeToolConstraint } from './post-update/node-version';
 import { processHostRules } from './post-update/rules';
 import { lazyLoadPackageJson } from './post-update/utils';
@@ -63,6 +68,12 @@ export async function updateArtifacts({
 
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      // To make sure pnpm store location is consistent between "corepack use"
+      // here and the pnpm commands in ./post-update/pnpm.ts
+      npm_config_cache_dir: await ensureCacheDir(PNPM_CACHE_DIR),
+      npm_config_store_dir: await ensureCacheDir(PNPM_STORE_DIR),
+    },
     toolConstraints: [
       nodeConstraints,
       {
