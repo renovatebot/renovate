@@ -49,5 +49,10 @@
     "org.slf4j:slf4j-nop": "https://www.slf4j.org/news.html",
     "org.slf4j:slf4j-reload4j": "https://www.slf4j.org/news.html",
     "org.slf4j:slf4j-simple": "https://www.slf4j.org/news.html"
+  },
+  "nuget": {
+    "Scalar.AspNetCore": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md",
+    "Scalar.AspNetCore.Microsoft": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md",
+    "Scalar.AspNetCore.Swashbuckle": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md"
   }
 }

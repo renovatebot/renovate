@@ -22,7 +22,7 @@ For Renovate to work with .NET Framework projects, you need to update these file
 
 ### Disabling updates for pinned versions
 
-In Nuget, when you use versions like `Version="1.2.3"` then it means "1.2.3 or greater, up to v2"
+In NuGet, when you use versions like `Version="1.2.3"` then it means "1.2.3 or greater, up to v2"
 When you use versions like `Version="[1.2.3]"` then it means "exactly 1.2.3".
 
 If you would like Renovate to disable updating of exact versions (warning: you might end up years out of date and not realize it) then here is an example configuration to achieve that:

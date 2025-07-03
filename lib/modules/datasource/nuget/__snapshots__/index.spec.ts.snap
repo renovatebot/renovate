@@ -1986,3 +1986,21 @@ exports[`modules/datasource/nuget/index > getReleases > returns deduplicated res
   "sourceUrl": "https://github.com/nunit/nunit",
 }
 `;
+
+exports[`modules/datasource/nuget/index > getReleases > should return deprecated 1`] = `
+{
+  "deprecationMessage": "The package \`ProxyKit\` is deprecated.",
+  "registryUrl": "https://api.nuget.org/v3/index.json",
+  "releases": [
+    {
+      "isDeprecated": true,
+      "version": "1.0.0",
+    },
+    {
+      "isDeprecated": true,
+      "version": "2.3.4",
+    },
+  ],
+  "sourceUrl": "https://github.com/ProxyKit/ProxyKit",
+}
+`;

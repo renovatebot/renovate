@@ -223,6 +223,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  committed: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'crate-ci/committed',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   consul: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
@@ -247,6 +255,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^jq-v(?<version>\\S+)',
     },
   },
+  hk: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'jdx/hk',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   kafka: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: (version) => {
@@ -260,6 +276,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       }
 
       return undefined;
+    },
+  },
+  lefthook: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'evilmartians/lefthook',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   localstack: {
@@ -290,6 +314,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'redis/redis',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  ruff: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'astral-sh/ruff',
       datasource: GithubReleasesDatasource.id,
     },
   },

@@ -19,9 +19,7 @@
     "isolatedModules": true /* required for esbuild */,
     "lib": ["es2023"],
     "types": ["node", "vitest/globals"],
-    "allowJs": true,
     "checkJs": true,
-    "ignoreDeprecations": "5.0",
     "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
     "paths": {
       "~test/*": ["./test/*"]

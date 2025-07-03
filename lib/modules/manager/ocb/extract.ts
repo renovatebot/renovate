@@ -51,6 +51,7 @@ export function extractPackageFile(
   deps.push(...processModule(definition.exporters, 'exports'));
   deps.push(...processModule(definition.extensions, 'extensions'));
   deps.push(...processModule(definition.processors, 'processors'));
+  deps.push(...processModule(definition.providers, 'providers'));
   deps.push(...processModule(definition.receivers, 'receivers'));
 
   return {

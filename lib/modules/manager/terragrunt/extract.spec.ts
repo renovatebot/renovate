@@ -696,5 +696,14 @@ describe('modules/manager/terragrunt/extract', () => {
       `),
       ).toBeNull();
     });
+
+    it('returns empty deps if only local terragrunt includes', () => {
+      expect(
+        extractPackageFile(`include "root" {
+        path = find_in_parent_folders("root.hcl")
+      }
+      `),
+      ).toStrictEqual({ deps: [] });
+    });
   });
 });

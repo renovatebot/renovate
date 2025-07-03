@@ -20,7 +20,7 @@ nav:
       - 'Java': 'java.md'
       - 'JavaScript': 'javascript.md'
       - 'Node.js Versions': 'node.md'
-      - 'Nuget': 'nuget.md'
+      - 'NuGet': 'nuget.md'
       - 'PHP': 'php.md'
       - 'Python': 'python.md'
       - 'Ruby': 'ruby.md'

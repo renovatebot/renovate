@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { toSha256 } from '../../../../util/hash';
-import { defaultConfigFile } from '../common';
+import { getDefaultConfigFileName } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -22,7 +22,7 @@ export async function rebaseOnboardingBranch(
     return null;
   }
 
-  const configFile = defaultConfigFile(config);
+  const configFile = getDefaultConfigFileName(config);
   const contents = await getOnboardingConfigContents(config, configFile);
   const currentConfigHash = toSha256(contents);
 
