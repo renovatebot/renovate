@@ -11,6 +11,10 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -360,10 +364,8 @@ Valid codes for namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
-- `datasource-maven`
-- `datasource-maven:head-requests-timeout`
-- `datasource-maven:head-requests`
-- `datasource-maven:metadata-xml`
+- `datasource-maven:cache-provider`
+- `datasource-maven:postprocess-reject`
 - `datasource-node-version`
 - `datasource-npm:data`
 - `datasource-nuget-v3`
@@ -1197,7 +1199,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
-Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip

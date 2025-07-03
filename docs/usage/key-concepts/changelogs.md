@@ -104,6 +104,6 @@ Read [`maven` datasource, making your changelogs fetchable](../modules/datasourc
 
 Read the [Docker datasource](../modules/datasource/docker/index.md) docs.
 
-### Nuget package maintainers
+### NuGet package maintainers
 
 See [Renovate issue #14128 about using NuGet's changelogs](https://github.com/renovatebot/renovate/issues/14128).

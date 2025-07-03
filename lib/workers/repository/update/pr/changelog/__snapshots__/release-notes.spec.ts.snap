@@ -2,7 +2,7 @@
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > handles gitlab sourceDirectory 1`] = `
 {
-  "body": "-   add new auth, fix accept header and base path in mock
+  "body": "- add new auth, fix accept header and base path in mock
 
 Closes ADAPT-207
 
@@ -17,7 +17,7 @@ See merge request itentialopensource/adapter-utils!177
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > ReleaseNotes Correctness > parses adapter-utils 4.33.0 1`] = `
 {
-  "body": "-   add new auth, fix accept header and base path in mock
+  "body": "- add new auth, fix accept header and base path in mock
 
 Closes ADAPT-207
 
@@ -34,27 +34,27 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 {
   "body": "##### ⚠ BREAKING CHANGES
 
--   **deps:** yargs-parser@17.0.0 no longer implicitly creates arrays out of boolean
-    arguments when duplicates are provided
+- **deps:** yargs-parser@17.0.0 no longer implicitly creates arrays out of boolean
+  arguments when duplicates are provided
 
 ##### Features
 
--   **completion:** takes negated flags into account when boolean-negation is set ([#1509](https://www.github.com/yargs/yargs/issues/1509)) ([7293ad5](https://www.github.com/yargs/yargs/commit/7293ad50d20ea0fb7dd1ac9b925e90e1bd95dea8))
--   **deps:** pull in yargs-parser@17.0.0 ([#1553](https://www.github.com/yargs/yargs/issues/1553)) ([b9409da](https://www.github.com/yargs/yargs/commit/b9409da199ebca515a848489c206b807fab2e65d))
--   deprecateOption ([#1559](https://www.github.com/yargs/yargs/issues/1559)) ([8aae333](https://www.github.com/yargs/yargs/commit/8aae3332251d09fa136db17ef4a40d83fa052bc4))
--   display appropriate $0 for electron apps ([#1536](https://www.github.com/yargs/yargs/issues/1536)) ([d0e4379](https://www.github.com/yargs/yargs/commit/d0e437912917d6a66bb5128992fa2f566a5f830b))
--   introduces strictCommands() subset of strict mode ([#1540](https://www.github.com/yargs/yargs/issues/1540)) ([1d4cca3](https://www.github.com/yargs/yargs/commit/1d4cca395a98b395e6318f0505fc73bef8b01350))
--   **deps:** yargs-parser with 'greedy-array' configuration ([#1569](https://www.github.com/yargs/yargs/issues/1569)) ([a03a320](https://www.github.com/yargs/yargs/commit/a03a320dbf5c0ce33d829a857fc04a651c0bb53e))
+- **completion:** takes negated flags into account when boolean-negation is set ([#1509](https://www.github.com/yargs/yargs/issues/1509)) ([7293ad5](https://www.github.com/yargs/yargs/commit/7293ad50d20ea0fb7dd1ac9b925e90e1bd95dea8))
+- **deps:** pull in yargs-parser@17.0.0 ([#1553](https://www.github.com/yargs/yargs/issues/1553)) ([b9409da](https://www.github.com/yargs/yargs/commit/b9409da199ebca515a848489c206b807fab2e65d))
+- deprecateOption ([#1559](https://www.github.com/yargs/yargs/issues/1559)) ([8aae333](https://www.github.com/yargs/yargs/commit/8aae3332251d09fa136db17ef4a40d83fa052bc4))
+- display appropriate $0 for electron apps ([#1536](https://www.github.com/yargs/yargs/issues/1536)) ([d0e4379](https://www.github.com/yargs/yargs/commit/d0e437912917d6a66bb5128992fa2f566a5f830b))
+- introduces strictCommands() subset of strict mode ([#1540](https://www.github.com/yargs/yargs/issues/1540)) ([1d4cca3](https://www.github.com/yargs/yargs/commit/1d4cca395a98b395e6318f0505fc73bef8b01350))
+- **deps:** yargs-parser with 'greedy-array' configuration ([#1569](https://www.github.com/yargs/yargs/issues/1569)) ([a03a320](https://www.github.com/yargs/yargs/commit/a03a320dbf5c0ce33d829a857fc04a651c0bb53e))
 
 ##### Bug Fixes
 
--   help always displayed for the first command parsed having an async handler ([#1535](https://www.github.com/yargs/yargs/issues/1535)) ([d585b30](https://www.github.com/yargs/yargs/commit/d585b303a43746201b05c9c9fda94a444634df33))
--   **deps:** fix enumeration for normalized path arguments ([#1567](https://www.github.com/yargs/yargs/issues/1567)) ([0b5b1b0](https://www.github.com/yargs/yargs/commit/0b5b1b0e5f4f9baf393c48e9cc2bc85c1b67a47a))
--   **locales:** only translate default option group name ([acc16de](https://www.github.com/yargs/yargs/commit/acc16de6b846ea7332db753646a9cec76b589162))
--   **locales:** remove extra space in French for 'default' ([#1564](https://www.github.com/yargs/yargs/issues/1564)) ([ecfc2c4](https://www.github.com/yargs/yargs/commit/ecfc2c474575c6cdbc6d273c94c13181bd1dbaa6))
--   **translations:** add French translation for unknown command ([#1563](https://www.github.com/yargs/yargs/issues/1563)) ([18b0b75](https://www.github.com/yargs/yargs/commit/18b0b752424bf560271e670ff95a0f90c8386787))
--   **translations:** fix pluralization in error messages. ([#1557](https://www.github.com/yargs/yargs/issues/1557)) ([94fa38c](https://www.github.com/yargs/yargs/commit/94fa38cbab8d86943e87bf41d368ed56dffa6835))
--   **yargs:** correct support of bundled electron apps ([#1554](https://www.github.com/yargs/yargs/issues/1554)) ([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))
+- help always displayed for the first command parsed having an async handler ([#1535](https://www.github.com/yargs/yargs/issues/1535)) ([d585b30](https://www.github.com/yargs/yargs/commit/d585b303a43746201b05c9c9fda94a444634df33))
+- **deps:** fix enumeration for normalized path arguments ([#1567](https://www.github.com/yargs/yargs/issues/1567)) ([0b5b1b0](https://www.github.com/yargs/yargs/commit/0b5b1b0e5f4f9baf393c48e9cc2bc85c1b67a47a))
+- **locales:** only translate default option group name ([acc16de](https://www.github.com/yargs/yargs/commit/acc16de6b846ea7332db753646a9cec76b589162))
+- **locales:** remove extra space in French for 'default' ([#1564](https://www.github.com/yargs/yargs/issues/1564)) ([ecfc2c4](https://www.github.com/yargs/yargs/commit/ecfc2c474575c6cdbc6d273c94c13181bd1dbaa6))
+- **translations:** add French translation for unknown command ([#1563](https://www.github.com/yargs/yargs/issues/1563)) ([18b0b75](https://www.github.com/yargs/yargs/commit/18b0b752424bf560271e670ff95a0f90c8386787))
+- **translations:** fix pluralization in error messages. ([#1557](https://www.github.com/yargs/yargs/issues/1557)) ([94fa38c](https://www.github.com/yargs/yargs/commit/94fa38cbab8d86943e87bf41d368ed56dffa6835))
+- **yargs:** correct support of bundled electron apps ([#1554](https://www.github.com/yargs/yargs/issues/1554)) ([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))
 ",
   "notesSourceUrl": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md",
   "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-2020-03-01",
@@ -65,12 +65,12 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 {
   "body": "##### Features
 
--   **yargs-parser:** introduce single-digit boolean aliases ([#1576](https://www.github.com/yargs/yargs/issues/1576)) ([3af7f04](https://www.github.com/yargs/yargs/commit/3af7f04cdbfcbd4b3f432aca5144d43f21958c39))
--   add usage for single-digit boolean aliases ([#1580](https://www.github.com/yargs/yargs/issues/1580)) ([6014e39](https://www.github.com/yargs/yargs/commit/6014e39bca3a1e8445aa0fb2a435f6181e344c45))
+- **yargs-parser:** introduce single-digit boolean aliases ([#1576](https://www.github.com/yargs/yargs/issues/1576)) ([3af7f04](https://www.github.com/yargs/yargs/commit/3af7f04cdbfcbd4b3f432aca5144d43f21958c39))
+- add usage for single-digit boolean aliases ([#1580](https://www.github.com/yargs/yargs/issues/1580)) ([6014e39](https://www.github.com/yargs/yargs/commit/6014e39bca3a1e8445aa0fb2a435f6181e344c45))
 
 ##### Bug Fixes
 
--   address ambiguity between nargs of 1 and requiresArg ([#1572](https://www.github.com/yargs/yargs/issues/1572)) ([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))
+- address ambiguity between nargs of 1 and requiresArg ([#1572](https://www.github.com/yargs/yargs/issues/1572)) ([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))
 ",
   "notesSourceUrl": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md",
   "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-2020-03-08",
@@ -79,8 +79,8 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > handles github sourceDirectory 1`] = `
 {
-  "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
--   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
+  "body": "- Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
+- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "notesSourceUrl": "https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md",
   "url": "https://github.com/nodeca/js-yaml/blob/HEAD/packages/foo/CHANGELOG.md#3100--2017-09-10",
@@ -91,27 +91,27 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 {
   "body": "#### Bug Fixes
 
--   **input:** add \`drop\` event support for IE
-    ([5dc076](https://github.com/angular/angular.js/commit/5dc07667de00c5e85fd69c5b7b7fe4fb5fd65a77))
--   **ngMessages:** prevent memory leak from messages that are never attached
-    ([9d058d](https://github.com/angular/angular.js/commit/9d058de04bb78694b83179e9b97bc40214eca01a),
-    [#16389](https://github.com/angular/angular.js/issues/16389),
-    [#16404](https://github.com/angular/angular.js/issues/16404),
-    [#16406](https://github.com/angular/angular.js/issues/16406))
--   **ngTransclude:** remove terminal: true
-    ([1d826e](https://github.com/angular/angular.js/commit/1d826e2f1e941d14c3c56d7a0249f5796ba11f85),
-    [#16411](https://github.com/angular/angular.js/issues/16411),
-    [#16412](https://github.com/angular/angular.js/issues/16412))
--   **$sanitize:** sanitize \`xml:base\` attributes
-    ([b9ef65](https://github.com/angular/angular.js/commit/b9ef6585e10477fbbf912a971fe0b390bca692a6))
+- **input:** add \`drop\` event support for IE
+  ([5dc076](https://github.com/angular/angular.js/commit/5dc07667de00c5e85fd69c5b7b7fe4fb5fd65a77))
+- **ngMessages:** prevent memory leak from messages that are never attached
+  ([9d058d](https://github.com/angular/angular.js/commit/9d058de04bb78694b83179e9b97bc40214eca01a),
+  [#16389](https://github.com/angular/angular.js/issues/16389),
+  [#16404](https://github.com/angular/angular.js/issues/16404),
+  [#16406](https://github.com/angular/angular.js/issues/16406))
+- **ngTransclude:** remove terminal: true
+  ([1d826e](https://github.com/angular/angular.js/commit/1d826e2f1e941d14c3c56d7a0249f5796ba11f85),
+  [#16411](https://github.com/angular/angular.js/issues/16411),
+  [#16412](https://github.com/angular/angular.js/issues/16412))
+- **$sanitize:** sanitize \`xml:base\` attributes
+  ([b9ef65](https://github.com/angular/angular.js/commit/b9ef6585e10477fbbf912a971fe0b390bca692a6))
 
 #### New Features
 
--   **currencyFilter:** trim whitespace around an empty currency symbol
-    ([367390](https://github.com/angular/angular.js/commit/3673909896efb6ff47546caf7fc61549f193e043),
-    [#15018](https://github.com/angular/angular.js/issues/15018),
-    [#15085](https://github.com/angular/angular.js/issues/15085),
-    [#15105](https://github.com/angular/angular.js/issues/15105))
+- **currencyFilter:** trim whitespace around an empty currency symbol
+  ([367390](https://github.com/angular/angular.js/commit/3673909896efb6ff47546caf7fc61549f193e043),
+  [#15018](https://github.com/angular/angular.js/issues/15018),
+  [#15085](https://github.com/angular/angular.js/issues/15085),
+  [#15105](https://github.com/angular/angular.js/issues/15105))
 ",
   "notesSourceUrl": "https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md",
   "url": "https://github.com/angular/angular.js/blob/HEAD/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
@@ -120,15 +120,15 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
 {
-  "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
--   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
-    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
--   Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
-    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
--   Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
--   Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
--   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
-    -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
+  "body": "- Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
+- Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
+  - Thanks to [@auua](https://gitlab.com/auua) for the contribution
+- Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
+  - Thanks to [@auua](https://gitlab.com/auua) for the contribution
+- Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
+- Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
+- Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
+  - Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
 ",
   "notesSourceUrl": "https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md",
   "url": "https://gitlab.com/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18",
@@ -139,189 +139,189 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 {
   "body": "##### Fixes
 
--   \`[jest-resolve]\` Use \`module.builtinModules\` as \`BUILTIN_MODULES\` when it
-    exists
--   \`[jest-worker]\` Remove \`debug\` and \`inspect\` flags from the arguments sent to
-    the child ([#5068](https://github.com/facebook/jest/pull/5068))
--   \`[jest-config]\` Use all \`--testPathPattern\` and \`<regexForTestFiles>\` args in
-    \`testPathPattern\` ([#5066](https://github.com/facebook/jest/pull/5066))
--   \`[jest-cli]\` Do not support \`--watch\` inside non-version-controlled
-    environments ([#5060](https://github.com/facebook/jest/pull/5060))
--   \`[jest-config]\` Escape Windows path separator in testPathPattern CLI arguments
-    ([#5054](https://github.com/facebook/jest/pull/5054)
--   \`[jest-jasmine]\` Register sourcemaps as node environment to improve
-    performance with jsdom ([#5045](https://github.com/facebook/jest/pull/5045))
--   \`[pretty-format]\` Do not call toJSON recursively
-    ([#5044](https://github.com/facebook/jest/pull/5044))
--   \`[pretty-format]\` Fix errors when identity-obj-proxy mocks CSS Modules
-    ([#4935](https://github.com/facebook/jest/pull/4935))
--   \`[babel-jest]\` Fix support for namespaced babel version 7
-    ([#4918](https://github.com/facebook/jest/pull/4918))
--   \`[expect]\` fix .toThrow for promises
-    ([#4884](https://github.com/facebook/jest/pull/4884))
--   \`[jest-docblock]\` pragmas should preserve urls
-    ([#4837](https://github.com/facebook/jest/pull/4629))
--   \`[jest-cli]\` Check if \`npm_lifecycle_script\` calls Jest directly
-    ([#4629](https://github.com/facebook/jest/pull/4629))
--   \`[jest-cli]\` Fix --showConfig to show all configs
-    ([#4494](https://github.com/facebook/jest/pull/4494))
--   \`[jest-cli]\` Throw if \`maxWorkers\` doesn't have a value
-    ([#4591](https://github.com/facebook/jest/pull/4591))
--   \`[jest-cli]\` Use \`fs.realpathSync.native\` if available
-    ([#5031](https://github.com/facebook/jest/pull/5031))
--   \`[jest-config]\` Fix \`--passWithNoTests\`
-    ([#4639](https://github.com/facebook/jest/pull/4639))
--   \`[jest-config]\` Support \`rootDir\` tag in testEnvironment
-    ([#4579](https://github.com/facebook/jest/pull/4579))
--   \`[jest-editor-support]\` Fix \`--showConfig\` to support jest 20 and jest 21
-    ([#4575](https://github.com/facebook/jest/pull/4575))
--   \`[jest-editor-support]\` Fix editor support test for node 4
-    ([#4640](https://github.com/facebook/jest/pull/4640))
--   \`[jest-mock]\` Support mocking constructor in \`mockImplementationOnce\`
-    ([#4599](https://github.com/facebook/jest/pull/4599))
--   \`[jest-runtime]\` Fix manual user mocks not working with custom resolver
-    ([#4489](https://github.com/facebook/jest/pull/4489))
--   \`[jest-util]\` Fix \`runOnlyPendingTimers\` for \`setTimeout\` inside
-    \`setImmediate\` ([#4608](https://github.com/facebook/jest/pull/4608))
--   \`[jest-message-util]\` Always remove node internals from stacktraces
-    ([#4695](https://github.com/facebook/jest/pull/4695))
--   \`[jest-resolve]\` changes method of determining builtin modules to include
-    missing builtins ([#4740](https://github.com/facebook/jest/pull/4740))
--   \`[pretty-format]\` Prevent error in pretty-format for window in jsdom test env
-    ([#4750](https://github.com/facebook/jest/pull/4750))
--   \`[jest-resolve]\` Preserve module identity for symlinks
-    ([#4761](https://github.com/facebook/jest/pull/4761))
--   \`[jest-config]\` Include error message for \`preset\` json
-    ([#4766](https://github.com/facebook/jest/pull/4766))
--   \`[pretty-format]\` Throw \`PrettyFormatPluginError\` if a plugin halts with an
-    exception ([#4787](https://github.com/facebook/jest/pull/4787))
--   \`[expect]\` Keep the stack trace unchanged when \`PrettyFormatPluginError\` is
-    thrown by pretty-format ([#4787](https://github.com/facebook/jest/pull/4787))
--   \`[jest-environment-jsdom]\` Fix asynchronous test will fail due to timeout
-    issue. ([#4669](https://github.com/facebook/jest/pull/4669))
--   \`[jest-cli]\` Fix \`--onlyChanged\` path case sensitivity on Windows platform
-    ([#4730](https://github.com/facebook/jest/pull/4730))
--   \`[jest-runtime]\` Use realpath to match transformers
-    ([#5000](https://github.com/facebook/jest/pull/5000))
--   \`[expect]\` \\[**BREAKING**] Replace identity equality with Object.is in toBe
-    matcher ([#4917](https://github.com/facebook/jest/pull/4917))
+- \`[jest-resolve]\` Use \`module.builtinModules\` as \`BUILTIN_MODULES\` when it
+  exists
+- \`[jest-worker]\` Remove \`debug\` and \`inspect\` flags from the arguments sent to
+  the child ([#5068](https://github.com/facebook/jest/pull/5068))
+- \`[jest-config]\` Use all \`--testPathPattern\` and \`<regexForTestFiles>\` args in
+  \`testPathPattern\` ([#5066](https://github.com/facebook/jest/pull/5066))
+- \`[jest-cli]\` Do not support \`--watch\` inside non-version-controlled
+  environments ([#5060](https://github.com/facebook/jest/pull/5060))
+- \`[jest-config]\` Escape Windows path separator in testPathPattern CLI arguments
+  ([#5054](https://github.com/facebook/jest/pull/5054)
+- \`[jest-jasmine]\` Register sourcemaps as node environment to improve
+  performance with jsdom ([#5045](https://github.com/facebook/jest/pull/5045))
+- \`[pretty-format]\` Do not call toJSON recursively
+  ([#5044](https://github.com/facebook/jest/pull/5044))
+- \`[pretty-format]\` Fix errors when identity-obj-proxy mocks CSS Modules
+  ([#4935](https://github.com/facebook/jest/pull/4935))
+- \`[babel-jest]\` Fix support for namespaced babel version 7
+  ([#4918](https://github.com/facebook/jest/pull/4918))
+- \`[expect]\` fix .toThrow for promises
+  ([#4884](https://github.com/facebook/jest/pull/4884))
+- \`[jest-docblock]\` pragmas should preserve urls
+  ([#4837](https://github.com/facebook/jest/pull/4629))
+- \`[jest-cli]\` Check if \`npm_lifecycle_script\` calls Jest directly
+  ([#4629](https://github.com/facebook/jest/pull/4629))
+- \`[jest-cli]\` Fix --showConfig to show all configs
+  ([#4494](https://github.com/facebook/jest/pull/4494))
+- \`[jest-cli]\` Throw if \`maxWorkers\` doesn't have a value
+  ([#4591](https://github.com/facebook/jest/pull/4591))
+- \`[jest-cli]\` Use \`fs.realpathSync.native\` if available
+  ([#5031](https://github.com/facebook/jest/pull/5031))
+- \`[jest-config]\` Fix \`--passWithNoTests\`
+  ([#4639](https://github.com/facebook/jest/pull/4639))
+- \`[jest-config]\` Support \`rootDir\` tag in testEnvironment
+  ([#4579](https://github.com/facebook/jest/pull/4579))
+- \`[jest-editor-support]\` Fix \`--showConfig\` to support jest 20 and jest 21
+  ([#4575](https://github.com/facebook/jest/pull/4575))
+- \`[jest-editor-support]\` Fix editor support test for node 4
+  ([#4640](https://github.com/facebook/jest/pull/4640))
+- \`[jest-mock]\` Support mocking constructor in \`mockImplementationOnce\`
+  ([#4599](https://github.com/facebook/jest/pull/4599))
+- \`[jest-runtime]\` Fix manual user mocks not working with custom resolver
+  ([#4489](https://github.com/facebook/jest/pull/4489))
+- \`[jest-util]\` Fix \`runOnlyPendingTimers\` for \`setTimeout\` inside
+  \`setImmediate\` ([#4608](https://github.com/facebook/jest/pull/4608))
+- \`[jest-message-util]\` Always remove node internals from stacktraces
+  ([#4695](https://github.com/facebook/jest/pull/4695))
+- \`[jest-resolve]\` changes method of determining builtin modules to include
+  missing builtins ([#4740](https://github.com/facebook/jest/pull/4740))
+- \`[pretty-format]\` Prevent error in pretty-format for window in jsdom test env
+  ([#4750](https://github.com/facebook/jest/pull/4750))
+- \`[jest-resolve]\` Preserve module identity for symlinks
+  ([#4761](https://github.com/facebook/jest/pull/4761))
+- \`[jest-config]\` Include error message for \`preset\` json
+  ([#4766](https://github.com/facebook/jest/pull/4766))
+- \`[pretty-format]\` Throw \`PrettyFormatPluginError\` if a plugin halts with an
+  exception ([#4787](https://github.com/facebook/jest/pull/4787))
+- \`[expect]\` Keep the stack trace unchanged when \`PrettyFormatPluginError\` is
+  thrown by pretty-format ([#4787](https://github.com/facebook/jest/pull/4787))
+- \`[jest-environment-jsdom]\` Fix asynchronous test will fail due to timeout
+  issue. ([#4669](https://github.com/facebook/jest/pull/4669))
+- \`[jest-cli]\` Fix \`--onlyChanged\` path case sensitivity on Windows platform
+  ([#4730](https://github.com/facebook/jest/pull/4730))
+- \`[jest-runtime]\` Use realpath to match transformers
+  ([#5000](https://github.com/facebook/jest/pull/5000))
+- \`[expect]\` \\[**BREAKING**] Replace identity equality with Object.is in toBe
+  matcher ([#4917](https://github.com/facebook/jest/pull/4917))
 
 ##### Features
 
--   \`[jest-message-util]\` Add codeframe to test assertion failures
-    ([#5087](https://github.com/facebook/jest/pull/5087))
--   \`[jest-config]\` Add Global Setup/Teardown options
-    ([#4716](https://github.com/facebook/jest/pull/4716))
--   \`[jest-config]\` Add \`testEnvironmentOptions\` to apply to jsdom options or node
-    context. ([#5003](https://github.com/facebook/jest/pull/5003))
--   \`[jest-jasmine2]\` Update Timeout error message to \`jest.timeout\` and display
-    current timeout value ([#4990](https://github.com/facebook/jest/pull/4990))
--   \`[jest-runner]\` Enable experimental detection of leaked contexts
-    ([#4895](https://github.com/facebook/jest/pull/4895))
--   \`[jest-cli]\` Add combined coverage threshold for directories.
-    ([#4885](https://github.com/facebook/jest/pull/4885))
--   \`[jest-mock]\` Add \`timestamps\` to mock state.
-    ([#4866](https://github.com/facebook/jest/pull/4866))
--   \`[eslint-plugin-jest]\` Add \`prefer-to-have-length\` lint rule.
-    ([#4771](https://github.com/facebook/jest/pull/4771))
--   \`[jest-environment-jsdom]\` \\[**BREAKING**] Upgrade to JSDOM@11
-    ([#4770](https://github.com/facebook/jest/pull/4770))
--   \`[jest-environment-*]\` \\[**BREAKING**] Add Async Test Environment APIs, dispose
-    is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
--   \`[jest-cli]\` Add an option to clear the cache
-    ([#4430](https://github.com/facebook/jest/pull/4430))
--   \`[babel-plugin-jest-hoist]\` Improve error message, that the second argument of
-    \`jest.mock\` must be an inline function
-    ([#4593](https://github.com/facebook/jest/pull/4593))
--   \`[jest-snapshot]\` \\[**BREAKING**] Concatenate name of test and snapshot
-    ([#4460](https://github.com/facebook/jest/pull/4460))
--   \`[jest-cli]\` \\[**BREAKING**] Fail if no tests are found
-    ([#3672](https://github.com/facebook/jest/pull/3672))
--   \`[jest-diff]\` Highlight only last of odd length leading spaces
-    ([#4558](https://github.com/facebook/jest/pull/4558))
--   \`[jest-docblock]\` Add \`docblock.print()\`
-    ([#4517](https://github.com/facebook/jest/pull/4517))
--   \`[jest-docblock]\` Add \`strip\`
-    ([#4571](https://github.com/facebook/jest/pull/4571))
--   \`[jest-docblock]\` Preserve leading whitespace in docblock comments
-    ([#4576](https://github.com/facebook/jest/pull/4576))
--   \`[jest-docblock]\` remove leading newlines from \`parswWithComments().comments\`
-    ([#4610](https://github.com/facebook/jest/pull/4610))
--   \`[jest-editor-support]\` Add Snapshots metadata
-    ([#4570](https://github.com/facebook/jest/pull/4570))
--   \`[jest-editor-support]\` Adds an 'any' to the typedef for
-    \`updateFileWithJestStatus\`
-    ([#4636](https://github.com/facebook/jest/pull/4636))
--   \`[jest-editor-support]\` Better monorepo support
-    ([#4572](https://github.com/facebook/jest/pull/4572))
--   \`[jest-environment-jsdom]\` Add simple rAF polyfill in jsdom environment to
-    work with React 16 ([#4568](https://github.com/facebook/jest/pull/4568))
--   \`[jest-environment-node]\` Implement node Timer api
-    ([#4622](https://github.com/facebook/jest/pull/4622))
--   \`[jest-jasmine2]\` Add testPath to reporter callbacks
-    ([#4594](https://github.com/facebook/jest/pull/4594))
--   \`[jest-mock]\` Added support for naming mocked functions with
-    \`.mockName(value)\` and \`.mockGetName()\`
-    ([#4586](https://github.com/facebook/jest/pull/4586))
--   \`[jest-runtime]\` Add \`module.loaded\`, and make \`module.require\` not enumerable
-    ([#4623](https://github.com/facebook/jest/pull/4623))
--   \`[jest-runtime]\` Add \`module.parent\`
-    ([#4614](https://github.com/facebook/jest/pull/4614))
--   \`[jest-runtime]\` Support sourcemaps in transformers
-    ([#3458](https://github.com/facebook/jest/pull/3458))
--   \`[jest-snapshot]\` \\[**BREAKING**] Add a serializer for \`jest.fn\` to allow a
-    snapshot of a jest mock ([#4668](https://github.com/facebook/jest/pull/4668))
--   \`[jest-worker]\` Initial version of parallel worker abstraction, say hello!
-    ([#4497](https://github.com/facebook/jest/pull/4497))
--   \`[jest-jasmine2]\` Add \`testLocationInResults\` flag to add location information
-    per spec to test results ([#4782](https://github.com/facebook/jest/pull/4782))
--   \`[jest-environment-jsdom]\` Update JSOM to 11.4, which includes built-in
-    support for \`requestAnimationFrame\`
-    ([#4919](https://github.com/facebook/jest/pull/4919))
--   \`[jest-cli]\` Hide watch usage output when running on non-interactive
-    environments ([#4958](https://github.com/facebook/jest/pull/4958))
--   \`[jest-snapshot]\` Promises support for \`toThrowErrorMatchingSnapshot\`
-    ([#4946](https://github.com/facebook/jest/pull/4946))
--   \`[jest-cli]\` Explain which snapshots are obsolete
-    ([#5005](https://github.com/facebook/jest/pull/5005))
+- \`[jest-message-util]\` Add codeframe to test assertion failures
+  ([#5087](https://github.com/facebook/jest/pull/5087))
+- \`[jest-config]\` Add Global Setup/Teardown options
+  ([#4716](https://github.com/facebook/jest/pull/4716))
+- \`[jest-config]\` Add \`testEnvironmentOptions\` to apply to jsdom options or node
+  context. ([#5003](https://github.com/facebook/jest/pull/5003))
+- \`[jest-jasmine2]\` Update Timeout error message to \`jest.timeout\` and display
+  current timeout value ([#4990](https://github.com/facebook/jest/pull/4990))
+- \`[jest-runner]\` Enable experimental detection of leaked contexts
+  ([#4895](https://github.com/facebook/jest/pull/4895))
+- \`[jest-cli]\` Add combined coverage threshold for directories.
+  ([#4885](https://github.com/facebook/jest/pull/4885))
+- \`[jest-mock]\` Add \`timestamps\` to mock state.
+  ([#4866](https://github.com/facebook/jest/pull/4866))
+- \`[eslint-plugin-jest]\` Add \`prefer-to-have-length\` lint rule.
+  ([#4771](https://github.com/facebook/jest/pull/4771))
+- \`[jest-environment-jsdom]\` \\[**BREAKING**] Upgrade to JSDOM@11
+  ([#4770](https://github.com/facebook/jest/pull/4770))
+- \`[jest-environment-*]\` \\[**BREAKING**] Add Async Test Environment APIs, dispose
+  is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
+- \`[jest-cli]\` Add an option to clear the cache
+  ([#4430](https://github.com/facebook/jest/pull/4430))
+- \`[babel-plugin-jest-hoist]\` Improve error message, that the second argument of
+  \`jest.mock\` must be an inline function
+  ([#4593](https://github.com/facebook/jest/pull/4593))
+- \`[jest-snapshot]\` \\[**BREAKING**] Concatenate name of test and snapshot
+  ([#4460](https://github.com/facebook/jest/pull/4460))
+- \`[jest-cli]\` \\[**BREAKING**] Fail if no tests are found
+  ([#3672](https://github.com/facebook/jest/pull/3672))
+- \`[jest-diff]\` Highlight only last of odd length leading spaces
+  ([#4558](https://github.com/facebook/jest/pull/4558))
+- \`[jest-docblock]\` Add \`docblock.print()\`
+  ([#4517](https://github.com/facebook/jest/pull/4517))
+- \`[jest-docblock]\` Add \`strip\`
+  ([#4571](https://github.com/facebook/jest/pull/4571))
+- \`[jest-docblock]\` Preserve leading whitespace in docblock comments
+  ([#4576](https://github.com/facebook/jest/pull/4576))
+- \`[jest-docblock]\` remove leading newlines from \`parswWithComments().comments\`
+  ([#4610](https://github.com/facebook/jest/pull/4610))
+- \`[jest-editor-support]\` Add Snapshots metadata
+  ([#4570](https://github.com/facebook/jest/pull/4570))
+- \`[jest-editor-support]\` Adds an 'any' to the typedef for
+  \`updateFileWithJestStatus\`
+  ([#4636](https://github.com/facebook/jest/pull/4636))
+- \`[jest-editor-support]\` Better monorepo support
+  ([#4572](https://github.com/facebook/jest/pull/4572))
+- \`[jest-environment-jsdom]\` Add simple rAF polyfill in jsdom environment to
+  work with React 16 ([#4568](https://github.com/facebook/jest/pull/4568))
+- \`[jest-environment-node]\` Implement node Timer api
+  ([#4622](https://github.com/facebook/jest/pull/4622))
+- \`[jest-jasmine2]\` Add testPath to reporter callbacks
+  ([#4594](https://github.com/facebook/jest/pull/4594))
+- \`[jest-mock]\` Added support for naming mocked functions with
+  \`.mockName(value)\` and \`.mockGetName()\`
+  ([#4586](https://github.com/facebook/jest/pull/4586))
+- \`[jest-runtime]\` Add \`module.loaded\`, and make \`module.require\` not enumerable
+  ([#4623](https://github.com/facebook/jest/pull/4623))
+- \`[jest-runtime]\` Add \`module.parent\`
+  ([#4614](https://github.com/facebook/jest/pull/4614))
+- \`[jest-runtime]\` Support sourcemaps in transformers
+  ([#3458](https://github.com/facebook/jest/pull/3458))
+- \`[jest-snapshot]\` \\[**BREAKING**] Add a serializer for \`jest.fn\` to allow a
+  snapshot of a jest mock ([#4668](https://github.com/facebook/jest/pull/4668))
+- \`[jest-worker]\` Initial version of parallel worker abstraction, say hello!
+  ([#4497](https://github.com/facebook/jest/pull/4497))
+- \`[jest-jasmine2]\` Add \`testLocationInResults\` flag to add location information
+  per spec to test results ([#4782](https://github.com/facebook/jest/pull/4782))
+- \`[jest-environment-jsdom]\` Update JSOM to 11.4, which includes built-in
+  support for \`requestAnimationFrame\`
+  ([#4919](https://github.com/facebook/jest/pull/4919))
+- \`[jest-cli]\` Hide watch usage output when running on non-interactive
+  environments ([#4958](https://github.com/facebook/jest/pull/4958))
+- \`[jest-snapshot]\` Promises support for \`toThrowErrorMatchingSnapshot\`
+  ([#4946](https://github.com/facebook/jest/pull/4946))
+- \`[jest-cli]\` Explain which snapshots are obsolete
+  ([#5005](https://github.com/facebook/jest/pull/5005))
 
 ##### Chore & Maintenance
 
--   \`[docs]\` Add guide of using with puppeteer
-    ([#5093](https://github.com/facebook/jest/pull/5093))
--   \`[jest-util]\` \`jest-util\` should not depend on \`jest-mock\`
-    ([#4992](https://github.com/facebook/jest/pull/4992))
--   \`[*]\` \\[**BREAKING**] Drop support for Node.js version 4
-    ([#4769](https://github.com/facebook/jest/pull/4769))
--   \`[docs]\` Wrap code comments at 80 characters
-    ([#4781](https://github.com/facebook/jest/pull/4781))
--   \`[eslint-plugin-jest]\` Removed from the Jest core repo, and moved to
-    <https://github.com/jest-community/eslint-plugin-jest>
-    ([#4867](https://github.com/facebook/jest/pull/4867))
--   \`[babel-jest]\` Explicitly bump istanbul to newer versions
-    ([#4616](https://github.com/facebook/jest/pull/4616))
--   \`[expect]\` Upgrade mocha and rollup for browser testing
-    ([#4642](https://github.com/facebook/jest/pull/4642))
--   \`[docs]\` Add info about \`coveragePathIgnorePatterns\`
-    ([#4602](https://github.com/facebook/jest/pull/4602))
--   \`[docs]\` Add Vuejs series of testing with Jest
-    ([#4648](https://github.com/facebook/jest/pull/4648))
--   \`[docs]\` Mention about optional \`done\` argument in test function
-    ([#4556](https://github.com/facebook/jest/pull/4556))
--   \`[jest-cli]\` Bump node-notifier version
-    ([#4609](https://github.com/facebook/jest/pull/4609))
--   \`[jest-diff]\` Simplify highlight for leading and trailing spaces
-    ([#4553](https://github.com/facebook/jest/pull/4553))
--   \`[jest-get-type]\` Add support for date
-    ([#4621](https://github.com/facebook/jest/pull/4621))
--   \`[jest-matcher-utils]\` Call \`chalk.inverse\` for trailing spaces
-    ([#4578](https://github.com/facebook/jest/pull/4578))
--   \`[jest-runtime]\` Add \`.advanceTimersByTime\`; keep \`.runTimersToTime()\` as an
-    alias.
--   \`[docs]\` Include missing dependency in TestEnvironment sample code
--   \`[docs]\` Add clarification for hook execution order
--   \`[docs]\` Update \`expect.anything()\` sample code
-    ([#5007](https://github.com/facebook/jest/pull/5007))
+- \`[docs]\` Add guide of using with puppeteer
+  ([#5093](https://github.com/facebook/jest/pull/5093))
+- \`[jest-util]\` \`jest-util\` should not depend on \`jest-mock\`
+  ([#4992](https://github.com/facebook/jest/pull/4992))
+- \`[*]\` \\[**BREAKING**] Drop support for Node.js version 4
+  ([#4769](https://github.com/facebook/jest/pull/4769))
+- \`[docs]\` Wrap code comments at 80 characters
+  ([#4781](https://github.com/facebook/jest/pull/4781))
+- \`[eslint-plugin-jest]\` Removed from the Jest core repo, and moved to
+  <https://github.com/jest-community/eslint-plugin-jest>
+  ([#4867](https://github.com/facebook/jest/pull/4867))
+- \`[babel-jest]\` Explicitly bump istanbul to newer versions
+  ([#4616](https://github.com/facebook/jest/pull/4616))
+- \`[expect]\` Upgrade mocha and rollup for browser testing
+  ([#4642](https://github.com/facebook/jest/pull/4642))
+- \`[docs]\` Add info about \`coveragePathIgnorePatterns\`
+  ([#4602](https://github.com/facebook/jest/pull/4602))
+- \`[docs]\` Add Vuejs series of testing with Jest
+  ([#4648](https://github.com/facebook/jest/pull/4648))
+- \`[docs]\` Mention about optional \`done\` argument in test function
+  ([#4556](https://github.com/facebook/jest/pull/4556))
+- \`[jest-cli]\` Bump node-notifier version
+  ([#4609](https://github.com/facebook/jest/pull/4609))
+- \`[jest-diff]\` Simplify highlight for leading and trailing spaces
+  ([#4553](https://github.com/facebook/jest/pull/4553))
+- \`[jest-get-type]\` Add support for date
+  ([#4621](https://github.com/facebook/jest/pull/4621))
+- \`[jest-matcher-utils]\` Call \`chalk.inverse\` for trailing spaces
+  ([#4578](https://github.com/facebook/jest/pull/4578))
+- \`[jest-runtime]\` Add \`.advanceTimersByTime\`; keep \`.runTimersToTime()\` as an
+  alias.
+- \`[docs]\` Include missing dependency in TestEnvironment sample code
+- \`[docs]\` Add clarification for hook execution order
+- \`[docs]\` Update \`expect.anything()\` sample code
+  ([#5007](https://github.com/facebook/jest/pull/5007))
 ",
   "notesSourceUrl": "https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md",
   "url": "https://github.com/facebook/jest/blob/HEAD/CHANGELOG.md#jest-2200",
@@ -330,8 +330,8 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses js-yaml 1`] = `
 {
-  "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
--   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
+  "body": "- Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
+- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "notesSourceUrl": "https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md",
   "url": "https://github.com/nodeca/js-yaml/blob/HEAD/CHANGELOG.md#3100--2017-09-10",
@@ -340,15 +340,15 @@ exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesM
 
 exports[`workers/repository/update/pr/changelog/release-notes > getReleaseNotesMd() > parses self hosted gitlab 1`] = `
 {
-  "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
--   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
-    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
--   Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
-    -   Thanks to [@auua](https://gitlab.com/auua) for the contribution
--   Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
--   Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
--   Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
-    -   Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
+  "body": "- Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
+- Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
+  - Thanks to [@auua](https://gitlab.com/auua) for the contribution
+- Fix \`/channel\` slash command name regex to accept hyphenated names, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1881>
+  - Thanks to [@auua](https://gitlab.com/auua) for the contribution
+- Add GitLab branding to the left-menu, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1865>
+- Fix left-menu search state showing all rooms, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1883>
+- Update Polish translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1882>
+  - Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution
 ",
   "notesSourceUrl": "https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md",
   "url": "https://my.custom.domain/gitlab-org/gitter/webapp/blob/HEAD/CHANGELOG.md#20260---2020-05-18",

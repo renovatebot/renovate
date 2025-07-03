@@ -1,16 +1,15 @@
 import is from '@sindresorhus/is';
 import ignore from 'ignore';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import type { FileOwnerRule, Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
-interface FileOwnerRule {
-  usernames: string[];
-  pattern: string;
-  score: number;
-  match: (path: string) => boolean;
+interface FileOwnersScore {
+  file: string;
+  userScoreMap: Map<string, number>;
 }
 
 function extractOwnersFromLine(line: string): FileOwnerRule {
@@ -22,11 +21,6 @@ function extractOwnersFromLine(line: string): FileOwnerRule {
     score: pattern.length,
     match: (path: string) => matchPattern.ignores(path),
   };
-}
-
-interface FileOwnersScore {
-  file: string;
-  userScoreMap: Map<string, number>;
 }
 
 function matchFileToOwners(
@@ -56,8 +50,8 @@ interface OwnerFileScore {
 function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
   const userFileMap = new Map<string, Map<string, number>>();
 
-  for (const fileMatch of filesWithOwners) {
-    for (const [username, score] of fileMatch.userScoreMap.entries()) {
+  for (const fileName of filesWithOwners) {
+    for (const [username, score] of fileName.userScoreMap.entries()) {
       // Get / create user file score
       const fileMap = userFileMap.get(username) ?? new Map<string, number>();
       if (!userFileMap.has(username)) {
@@ -65,7 +59,7 @@ function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
       }
 
       // Add file to user
-      fileMap.set(fileMatch.file, (fileMap.get(fileMatch.file) ?? 0) + score);
+      fileMap.set(fileName.file, (fileMap.get(fileName.file) ?? 0) + score);
     }
   }
 
@@ -73,6 +67,18 @@ function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
     username: key,
     fileScoreMap: value,
   }));
+}
+
+function parseCodeOwnersContent(codeOwnersFile: string): string[] {
+  return (
+    codeOwnersFile
+      .split(newlineRegex)
+      // Remove comments
+      .map((line) => line.split('#')[0])
+      // Remove empty lines
+      .map((line) => line.trim())
+      .filter(is.nonEmptyString)
+  );
 }
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
@@ -102,15 +108,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
 
     // Convert CODEOWNERS file into list of matching rules
-    const fileOwnerRules = codeOwnersFile
-      .split(newlineRegex)
-      // Remove comments
-      .map((line) => line.split('#')[0])
-      // Remove empty lines
-      .map((line) => line.trim())
-      .filter(is.nonEmptyString)
-      // Extract pattern & usernames
-      .map(extractOwnersFromLine);
+    const cleanedLines = parseCodeOwnersContent(codeOwnersFile);
+
+    const fileOwnerRules =
+      platform.extractRulesFromCodeOwnersLines?.(cleanedLines) ??
+      cleanedLines.map(extractOwnersFromLine);
 
     logger.debug(
       { prFiles, fileOwnerRules },
@@ -127,14 +129,14 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         .map((file) => matchFileToOwners(file, fileOwnerRules))
 
         // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
-        .map((fileMatch) => {
+        .map((matchedFile) => {
           const matchEmpty = emptyRules.find((rule) =>
-            rule.match(fileMatch.file),
+            rule.match(matchedFile.file),
           );
           if (matchEmpty) {
-            return { ...fileMatch, userScoreMap: new Map<string, number>() };
+            return { ...matchedFile, userScoreMap: new Map<string, number>() };
           }
-          return fileMatch;
+          return matchedFile;
         });
 
     logger.debug(
