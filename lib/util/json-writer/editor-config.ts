@@ -1,4 +1,4 @@
-import type { KnownProps } from 'editorconfig';
+import type { Props } from 'editorconfig';
 import { parse } from 'editorconfig';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
@@ -23,7 +23,7 @@ export class EditorConfig {
   }
 
   private static getIndentationType(
-    knownProps: KnownProps,
+    knownProps: Props,
   ): IndentationType | undefined {
     const { indent_style: indentStyle } = knownProps;
 
@@ -38,9 +38,7 @@ export class EditorConfig {
     return undefined;
   }
 
-  private static getIndentationSize(
-    knownProps: KnownProps,
-  ): number | undefined {
+  private static getIndentationSize(knownProps: Props): number | undefined {
     const indentSize = Number(knownProps.indent_size);
 
     if (!Number.isNaN(indentSize) && Number.isInteger(indentSize)) {
