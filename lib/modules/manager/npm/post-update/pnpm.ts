@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -21,6 +20,8 @@ import {
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
+import type { PnpmWorkspaceFile } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
@@ -62,8 +63,8 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
       // these are used by pnpm v5 and above. Maybe earlier versions too
-      npm_config_cache_dir: await ensureCacheDir('pnpm-cache'),
-      npm_config_store_dir: await ensureCacheDir('pnpm-store'),
+      npm_config_cache_dir: await ensureCacheDir(PNPM_CACHE_DIR),
+      npm_config_store_dir: await ensureCacheDir(PNPM_STORE_DIR),
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
@@ -87,17 +88,20 @@ export async function generateLockFile(
 
     let args = '--lockfile-only';
 
-    // pnpm v9+ is doing recursive automatically when it detects workspaces.
-    //
     // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
     // `--recursive` will install un-wanted project.
     // we should avoid this.
-    if (
-      pnpmToolConstraint.constraint &&
-      !semver.intersects(pnpmToolConstraint.constraint, '>=9') &&
-      (await localPathExists(pnpmWorkspaceFilePath))
-    ) {
-      args += ' --recursive';
+    if (await localPathExists(pnpmWorkspaceFilePath)) {
+      const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(
+        (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!,
+      );
+      if (pnpmWorkspace?.packages?.length) {
+        logger.debug(
+          `Found pnpm workspace with ${pnpmWorkspace.packages.length} package definitions`,
+        );
+        // we are in a monorepo, 'pnpm update' needs the '--recursive' flag contrary to 'pnpm install'
+        args += ' --recursive';
+      }
     }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
@@ -127,7 +131,7 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      commands.push('pnpm dedupe --config.ignore-scripts=true');
+      commands.push('pnpm dedupe --ignore-scripts');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

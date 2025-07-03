@@ -1,22 +1,11 @@
-import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { compile } from '../../../../util/template';
+import { getDefaultConfigFileName } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
-
-const defaultConfigFile = configFileNames[0];
-
-export function getDefaultConfigFileName(
-  config: Partial<RenovateConfig>,
-): string {
-  // TODO #22198
-  return configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : defaultConfigFile;
-}
 
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,

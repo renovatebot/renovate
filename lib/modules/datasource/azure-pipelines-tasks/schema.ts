@@ -10,6 +10,7 @@ export const AzurePipelinesTask = z.object({
   id: z.string(),
   name: z.string(),
   deprecated: z.boolean().optional(),
+  releaseNotes: z.string().optional(),
   serverOwned: z.boolean().optional(),
   version: AzurePipelinesTaskVersion.nullable(),
   contributionIdentifier: z.string().optional(),

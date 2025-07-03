@@ -1,7 +1,6 @@
 import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import JSON5 from 'json5';
 import upath from 'upath';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -12,7 +11,10 @@ import { migrateAndValidateConfig } from './util';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
-    return JSON5.parse(await readSystemFile(file, 'utf8'));
+    return parseJson(
+      await readSystemFile(file, 'utf8'),
+      file,
+    ) as RenovateConfig;
   }
   switch (upath.extname(file)) {
     case '.yaml':
