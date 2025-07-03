@@ -1,7 +1,7 @@
 import type { ReleaseResult } from '../../../../modules/datasource/types';
 import { get as getVersioning } from '../../../../modules/versioning/index';
 import { asTimestamp } from '../../../../util/timestamp';
-import { calculateLatestReleaseBump } from '../../../../workers/repository/process/lookup/timestamps';
+import { calculateMostRecentTimestamp } from '../../../../workers/repository/process/lookup/timestamps';
 
 const versioning = getVersioning('semver');
 
@@ -25,7 +25,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         ],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBe('2022-01-01T00:00:00.000Z');
     });
@@ -45,7 +45,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         ],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBe('2023-01-01T00:00:00.000Z');
     });
@@ -67,7 +67,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         ],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBeUndefined();
     });
@@ -91,7 +91,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         ],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBeUndefined();
     });
@@ -114,7 +114,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         ],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBeUndefined();
     });
@@ -124,14 +124,14 @@ describe('workers/repository/process/lookup/timestamps', () => {
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
     it('handles empty releases array', () => {
       const releaseResult: ReleaseResult = { releases: [] };
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
       expect(result.mostRecentTimestamp).toBeUndefined();
     });
 
@@ -148,7 +148,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
         tags: { latest: '1.0.0' },
       };
 
-      const result = calculateLatestReleaseBump(versioning, releaseResult);
+      const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
       expect(result.mostRecentTimestamp).toBe('2021-01-01T00:00:00.000Z');
       expect(result.sourceUrl).toBe('https://github.com/some/repo');
@@ -171,7 +171,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
       ],
     };
 
-    const result = calculateLatestReleaseBump(versioning, releaseResult);
+    const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
     expect(result).toBe(releaseResult);
     expect(result.mostRecentTimestamp).toBeUndefined();
@@ -199,7 +199,7 @@ describe('workers/repository/process/lookup/timestamps', () => {
       ],
     };
 
-    const result = calculateLatestReleaseBump(versioning, releaseResult);
+    const result = calculateMostRecentTimestamp(versioning, releaseResult);
 
     expect(result.mostRecentTimestamp).toBe('2023-01-01T00:00:00.000Z');
   });
