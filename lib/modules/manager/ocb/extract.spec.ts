@@ -24,6 +24,9 @@ describe('modules/manager/ocb/extract', () => {
 
         processors:
           - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.86.0
+
+        providers:
+          - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.0.0-rcv0015
       `;
       const result = extractPackageFile(content, 'builder-config.yaml');
       expect(result?.deps).toEqual([
@@ -59,6 +62,12 @@ describe('modules/manager/ocb/extract', () => {
           datasource: 'go',
           depName: 'go.opentelemetry.io/collector/processor/batchprocessor',
           depType: 'processors',
+        },
+        {
+          currentValue: 'v1.0.0-rcv0015',
+          datasource: 'go',
+          depName: 'go.opentelemetry.io/collector/confmap/provider/envprovider',
+          depType: 'providers',
         },
         {
           currentValue: 'v0.86.0',

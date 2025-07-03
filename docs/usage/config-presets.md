@@ -169,6 +169,10 @@ Parameters must be strings, non-quoted, and separated by commas if there are mor
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterized presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
+Also, the entire parameter string is available as `{{args}}`.
+It includes everything between parentheses, verbatim, without the parentheses themselves.
+If you want to include a comma in the parameter value, you need to use `{{args}}` instead of `{{arg0}}`.
+
 ## GitHub-hosted Presets
 
 To host your preset config on GitHub:

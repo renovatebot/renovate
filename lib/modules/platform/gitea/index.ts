@@ -320,15 +320,27 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    if (repo.allow_rebase) {
+    if (repo.allow_rebase && repo.default_merge_style === 'rebase') {
       config.mergeMethod = 'rebase';
-    } else if (repo.allow_rebase_explicit) {
+    } else if (
+      repo.allow_rebase_explicit &&
+      repo.default_merge_style === 'rebase-merge'
+    ) {
       config.mergeMethod = 'rebase-merge';
-    } else if (repo.allow_squash_merge) {
+    } else if (
+      repo.allow_squash_merge &&
+      repo.default_merge_style === 'squash'
+    ) {
       config.mergeMethod = 'squash';
-    } else if (repo.allow_merge_commits) {
+    } else if (
+      repo.allow_merge_commits &&
+      repo.default_merge_style === 'merge'
+    ) {
       config.mergeMethod = 'merge';
-    } else if (repo.allow_fast_forward_only_merge) {
+    } else if (
+      repo.allow_fast_forward_only_merge &&
+      repo.default_merge_style === 'fast-forward-only'
+    ) {
       config.mergeMethod = 'fast-forward-only';
     } else {
       logger.debug(
