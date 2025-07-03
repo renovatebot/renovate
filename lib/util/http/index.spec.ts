@@ -648,4 +648,64 @@ describe('util/http/index', () => {
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
     });
   });
+
+  describe('getToml', () => {
+    const SomeSchema = z
+      .object({ x: z.number(), y: z.number() })
+      .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
+
+    it('parses toml with schema validation', async () => {
+      httpMock.scope(baseUrl).get('/').reply(200, 'x = 2\ny = 2');
+
+      const res = await http.getToml('http://renovate.com', SomeSchema);
+      expect(res.body).toBe('2 + 2 = 4');
+    });
+
+    it('parses toml with options and schema', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .matchHeader('custom', 'header')
+        .reply(200, 'x = 2\ny = 2');
+
+      const res = await http.getToml(
+        'http://renovate.com',
+        { headers: { custom: 'header' } },
+        SomeSchema,
+      );
+      expect(res.body).toBe('2 + 2 = 4');
+    });
+
+    it('throws on schema validation failure', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .reply(200, 'foo = "bar"');
+
+      await expect(
+        http.getToml('http://renovate.com', SomeSchema),
+      ).rejects.toThrow(z.ZodError);
+    });
+
+    it('throws on invalid toml', async () => {
+      httpMock
+        .scope(baseUrl, {
+          reqheaders: {
+            'Content-Type': 'application/toml',
+          },
+        })
+        .get('/')
+        .reply(200, '!@#$%^');
+
+      await expect(http.getToml('http://renovate.com')).rejects.toThrow();
+    });
+  });
 });

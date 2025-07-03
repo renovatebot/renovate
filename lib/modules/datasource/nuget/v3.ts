@@ -165,7 +165,6 @@ export class NugetV3Api {
     let homepage: string | null = null;
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
-    let deprecationMessage: string | null = null;
     const releases = catalogEntries.map(
       ({
         version,
@@ -184,12 +183,9 @@ export class NugetV3Api {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
           nupkgUrl = massageUrl(packageContent);
-          if (deprecation) {
-            deprecationMessage = this.getDeprecationMessage(pkgName);
-          }
         }
 
-        if (listed === false) {
+        if (listed === false || deprecation) {
           release.isDeprecated = true;
         }
         return release;
@@ -206,19 +202,14 @@ export class NugetV3Api {
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
       nupkgUrl ??= massageUrl(last.packageContent);
-      /* v8 ignore start */
-      if (last.deprecation) {
-        deprecationMessage ??= this.getDeprecationMessage(pkgName);
-      }
-      /* v8 ignore stop */
     }
 
     const dep: ReleaseResult = {
       releases,
     };
 
-    if (deprecationMessage) {
-      dep.deprecationMessage = deprecationMessage;
+    if (releases.every((release) => release.isDeprecated === true)) {
+      dep.deprecationMessage = this.getDeprecationMessage(pkgName);
     }
 
     try {
