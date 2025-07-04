@@ -4,7 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import { supportedDatasources } from '../presets/internal/merge-confidence';
-import type { RenovateOptions } from '../types';
+import { type RenovateOptions, UpdateTypesOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
@@ -367,10 +367,17 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'enabled',
-    description: `Enable or disable Renovate bot.`,
+    description: `Enable or disable corresponding functionality.`,
     stage: 'package',
     type: 'boolean',
     default: true,
+    parents: [
+      '.',
+      'packageRules',
+      ...AllManagersListLiteral,
+      'hostRules',
+      ...UpdateTypesOptions,
+    ],
   },
   {
     name: 'constraintsFiltering',
