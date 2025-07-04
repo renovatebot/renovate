@@ -160,14 +160,12 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
               match.groups.name,
               match.groups.range,
             );
-            if (dep) {
-              packageDependencies.push({
-                depType,
-                depName: match.groups.name,
-                packageName: match.groups.name,
-                ...dep,
-              });
-            }
+            packageDependencies.push({
+              depType,
+              depName: match.groups.name,
+              packageName: match.groups.name,
+              ...dep,
+            });
           });
         } else if (hook.language === 'python') {
           hook.additional_dependencies?.map((req) => {
