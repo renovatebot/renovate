@@ -111,7 +111,7 @@ const staticGroups = {
       },
     ],
   },
-  drupalCore: {
+  'drupal-core': {
     description: 'Group Drupal core updates.',
     packageRules: [
       {
