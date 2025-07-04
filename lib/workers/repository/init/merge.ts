@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
+import { GlobalConfig } from '../../../config/global';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
 import { parseFileConfig } from '../../../config/parse';
@@ -37,9 +38,40 @@ import {
 import { OnboardingState } from '../onboarding/common';
 import type { RepoFileConfig } from './types';
 
+/**
+ * Filter config file names based on the current platform
+ * Only include platform-specific folders for the current platform
+ */
+function getPlatformSpecificConfigFileNames(): string[] {
+  const platform = GlobalConfig.get('platform');
+  return configFileNames.filter((fileName) => {
+    // Always include root-level files and package.json
+    if (!fileName.includes('/')) {
+      return true;
+    }
+    
+    // Include platform-specific files only for the current platform
+    if (fileName.startsWith('.github/') && platform === 'github') {
+      return true;
+    }
+    if (fileName.startsWith('.gitlab/') && platform === 'gitlab') {
+      return true;
+    }
+    
+    // Exclude platform-specific files for other platforms
+    if (fileName.startsWith('.github/') || fileName.startsWith('.gitlab/')) {
+      return false;
+    }
+    
+    return true;
+  });
+}
+
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
-  for (const fileName of configFileNames) {
+  const platformSpecificConfigFileNames = getPlatformSpecificConfigFileNames();
+  
+  for (const fileName of platformSpecificConfigFileNames) {
     if (fileName === 'package.json') {
       try {
         const pJson = JSON.parse(
