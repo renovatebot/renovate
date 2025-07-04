@@ -88,6 +88,27 @@ exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts fr
       "packageName": undefined,
       "skipReason": "invalid-url",
     },
+    {
+      "currentValue": "^5.2.2",
+      "datasource": "npm",
+      "depName": "@trivago/prettier-plugin-sort-imports",
+      "depType": "pre-commit-node",
+      "packageName": "@trivago/prettier-plugin-sort-imports",
+    },
+    {
+      "currentValue": "^3.6.2",
+      "datasource": "npm",
+      "depName": "prettier",
+      "depType": "pre-commit-node",
+      "packageName": "prettier",
+    },
+    {
+      "currentValue": "v3.1.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/mirrors-prettier",
+      "depType": "repository",
+      "packageName": "pre-commit/mirrors-prettier",
+    },
   ],
 }
 `;
