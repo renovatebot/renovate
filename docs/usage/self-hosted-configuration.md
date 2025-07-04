@@ -294,8 +294,7 @@ In the self-hosted setup, use option to enable caching of private packages to im
 
 ## cacheTtlOverride
 
-Utilize this key-value map to override the default package cache TTL values for a specific namespace.
-This object contains pairs of namespace matchers and their corresponding TTL values in minutes.
+Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
 
 You can use:
 
@@ -306,7 +305,7 @@ You can use:
 Priority order:
 
 1. Exact namespace matches take highest priority
-2. If no exact match, patterns are evaluated in reverse order (last defined pattern wins)
+2. If no exact match, the last matching pattern wins
 
 Examples:
 
