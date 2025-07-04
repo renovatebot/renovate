@@ -66,13 +66,18 @@ export async function updateArtifacts({
     lazyPkgJson,
   );
 
+  const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
+  const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
       // To make sure pnpm store location is consistent between "corepack use"
-      // here and the pnpm commands in ./post-update/pnpm.ts
-      npm_config_cache_dir: await ensureCacheDir(PNPM_CACHE_DIR),
-      npm_config_store_dir: await ensureCacheDir(PNPM_STORE_DIR),
+      // here and the pnpm commands in ./post-update/pnpm.ts. Check
+      // ./post-update/pnpm.ts for more details.
+      npm_config_cache_dir: pnpmConfigCacheDir,
+      npm_config_store_dir: pnpmConfigStoreDir,
+      pnpm_config_cache_dir: pnpmConfigCacheDir,
+      pnpm_config_store_dir: pnpmConfigStoreDir,
     },
     toolConstraints: [
       nodeConstraints,
