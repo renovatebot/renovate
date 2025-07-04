@@ -32,7 +32,9 @@ Alternatively, add `:enablePreCommit` to your `extends` array.
 Renovate has partial support for `additional_dependencies`, currently Node.js and Python only.
 
 You will need to **explicitly add the language** to your hooks with `additional_dependencies` to let Renovate know
-what kind of dependencies they are. Examples for the supported languages are listed below.
+what kind of dependencies they are.
+
+Examples for the supported languages are listed below.
 
 #### Node.js
 
