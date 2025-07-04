@@ -1249,21 +1249,25 @@ export async function pushCommit({
   sourceRef,
   targetRef,
   files,
+  pushOptions,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
   logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
-    const pushOptions: TaskOptions = {
+    const gitOptions: TaskOptions = {
       '--force-with-lease': null,
       '-u': null,
     };
     if (getNoVerify().includes('push')) {
-      pushOptions['--no-verify'] = null;
+      gitOptions['--no-verify'] = null;
+    }
+    if (pushOptions) {
+      gitOptions['--push-option'] = pushOptions;
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions),
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, gitOptions),
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');

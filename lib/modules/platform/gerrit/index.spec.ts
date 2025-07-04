@@ -754,6 +754,15 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
+  describe('deleteLabel()', () => {
+    it('deleteLabel() - deletes a label', async () => {
+      const pro = gerrit.deleteLabel(123456, 'hashtag1');
+      await expect(pro).resolves.toBeUndefined();
+      expect(clientMock.deleteHashtag).toHaveBeenCalledTimes(1);
+      expect(clientMock.deleteHashtag).toHaveBeenCalledWith(123456, 'hashtag1');
+    });
+  });
+
   describe('addReviewers()', () => {
     it('addReviewers() - add reviewers', async () => {
       await expect(
