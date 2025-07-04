@@ -3,13 +3,15 @@
 import 'source-map-support/register';
 import './punycode.cjs';
 import { instrument, shutdown as telemetryShutdown } from './instrumentation'; // has to be imported before logger and other libraries which are instrumentalised
-import { logger } from './logger';
+import { logError } from './logger';
 import { bootstrap } from './proxy';
 import { start } from './workers/global';
 
 /* v8 ignore next 3 -- not easily testable */
 process.on('unhandledRejection', (err) => {
-  logger.error({ err }, 'unhandledRejection');
+  logError('UNHANDLED_REJECTION', {
+    err,
+  });
 });
 
 bootstrap();
