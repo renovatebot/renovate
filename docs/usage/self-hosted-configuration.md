@@ -373,7 +373,7 @@ Valid codes for namespaces are as follows:
 - `datasource-packagist`
 - `datasource-pod`
 - `datasource-python-version`
-- `datasource-releases`
+- `datasource-releases-{{datasource}}`: special short-living cache for final results of the particular datasource fetches
 - `datasource-repology`
 - `datasource-ruby-version`
 - `datasource-rubygems`
