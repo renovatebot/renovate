@@ -365,6 +365,21 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+// These are the update types which can have configuration
+export const UpdateTypesOptions = [
+  'major',
+  'minor',
+  'patch',
+  'pin',
+  'digest',
+  'pinDigest',
+  'lockFileMaintenance',
+  'rollback',
+  'replacement',
+] as const;
+
+export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
+
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
@@ -411,6 +426,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | '.'
   | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
@@ -419,7 +435,8 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
-  | ManagerName;
+  | ManagerName
+  | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
