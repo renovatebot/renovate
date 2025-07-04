@@ -1,14 +1,27 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
+import { matchRegexOrGlob } from '../../string-match';
 import type { PackageCacheNamespace } from './types';
 
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
-  const ttl = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  const overrides = GlobalConfig.get('cacheTtlOverride', {});
+  const ttl = overrides[namespace];
   if (is.number(ttl)) {
     return ttl;
   }
+
+  for (const [key, value] of Object.entries(overrides).reverse()) {
+    if (!is.number(value)) {
+      continue;
+    }
+
+    if (matchRegexOrGlob(namespace, key)) {
+      return value;
+    }
+  }
+
   return undefined;
 }
 
