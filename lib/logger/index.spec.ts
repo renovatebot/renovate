@@ -211,21 +211,16 @@ describe('logger/index', () => {
     it.each([
       {
         logFileLevel: null,
-        logFileFormat: 'json',
         expectedLogLevel: 'debug',
-        expectedType: null,
       },
       {
         logFileLevel: 'warn',
-        logFileFormat: 'pretty',
         expectedLogLevel: 'warn',
-        expectedType: 'raw',
       },
     ])(
-      'handles log file stream level and format',
-      ({ logFileLevel, logFileFormat, expectedLogLevel, expectedType }) => {
+      'handles log file stream $logFileLevel level',
+      ({ logFileLevel, expectedLogLevel }) => {
         process.env['LOG_FILE_LEVEL'] = logFileLevel?.toString();
-        process.env['LOG_FILE_FORMAT'] = logFileFormat;
 
         const streams = createDefaultStreams(
           'info',
@@ -236,6 +231,31 @@ describe('logger/index', () => {
         const logFileStream = streams[2];
 
         expect(expectedLogLevel, logFileStream.level?.toString());
+      },
+    );
+
+    it.each([
+      {
+        logFileFormat: 'json',
+        expectedType: null,
+      },
+      {
+        logFileFormat: 'pretty',
+        expectedType: 'raw',
+      },
+    ])(
+      'handles log file stream $logFileFormat format',
+      ({ logFileFormat, expectedType }) => {
+        process.env['LOG_FILE_FORMAT'] = logFileFormat;
+
+        const streams = createDefaultStreams(
+          'info',
+          new ProblemStream(),
+          'file.log',
+        );
+
+        const logFileStream = streams[2];
+
         expect(expectedType, logFileStream.type);
       },
     );
