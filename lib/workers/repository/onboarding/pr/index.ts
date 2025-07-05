@@ -153,7 +153,7 @@ If you need any further assistance then you can also [request help here](${
 
   logger.trace('prBody:\n' + prBody);
 
-  prBody = platform.massageMarkdown(prBody);
+  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
