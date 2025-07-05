@@ -525,29 +525,29 @@ describe('util/stats', () => {
     });
 
     it('ignores wrong url', () => {
-      HttpCacheStats.incLocalHits('<invalid>');
+      HttpCacheStats.localHit('<invalid>');
       expect(HttpCacheStats.getData()).toEqual({});
     });
 
     it('writes data points', () => {
-      HttpCacheStats.incLocalHits('https://example.com/foo');
-      HttpCacheStats.incLocalHits('https://example.com/foo');
-      HttpCacheStats.incLocalMisses('https://example.com/foo');
-      HttpCacheStats.incLocalMisses('https://example.com/bar');
-      HttpCacheStats.incRemoteHits('https://example.com/bar');
-      HttpCacheStats.incRemoteMisses('https://example.com/bar');
+      HttpCacheStats.localHit('https://example.com/foo');
+      HttpCacheStats.localHit('https://example.com/foo');
+      HttpCacheStats.localMiss('https://example.com/foo');
+      HttpCacheStats.localMiss('https://example.com/bar');
+      HttpCacheStats.httpHit('https://example.com/bar');
+      HttpCacheStats.httpMiss('https://example.com/bar');
 
       const res = HttpCacheStats.getData();
 
       expect(res).toEqual({
         'https://example.com/bar': {
-          hit: 1,
-          miss: 1,
+          httpHit: 1,
+          httpMiss: 1,
           localMiss: 1,
         },
         'https://example.com/foo': {
-          hit: 0,
-          miss: 0,
+          httpHit: 0,
+          httpMiss: 0,
           localHit: 2,
           localMiss: 1,
         },
@@ -555,12 +555,12 @@ describe('util/stats', () => {
     });
 
     it('prints report', () => {
-      HttpCacheStats.incLocalHits('https://example.com/foo');
-      HttpCacheStats.incLocalHits('https://example.com/foo');
-      HttpCacheStats.incLocalMisses('https://example.com/foo');
-      HttpCacheStats.incLocalMisses('https://example.com/bar');
-      HttpCacheStats.incRemoteHits('https://example.com/bar');
-      HttpCacheStats.incRemoteMisses('https://example.com/bar');
+      HttpCacheStats.localHit('https://example.com/foo');
+      HttpCacheStats.localHit('https://example.com/foo');
+      HttpCacheStats.localMiss('https://example.com/foo');
+      HttpCacheStats.localMiss('https://example.com/bar');
+      HttpCacheStats.httpHit('https://example.com/bar');
+      HttpCacheStats.httpMiss('https://example.com/bar');
 
       HttpCacheStats.report();
 
@@ -569,8 +569,8 @@ describe('util/stats', () => {
       expect(msg).toBe('HTTP cache statistics');
       expect(data).toEqual({
         'https://example.com': {
-          '/foo': { hit: 0, localHit: 2, localMiss: 1, miss: 0 },
-          '/bar': { hit: 1, localMiss: 1, miss: 1 },
+          '/foo': { httpHit: 0, localHit: 2, localMiss: 1, httpMiss: 0 },
+          '/bar': { httpHit: 1, localMiss: 1, httpMiss: 1 },
         },
       });
     });

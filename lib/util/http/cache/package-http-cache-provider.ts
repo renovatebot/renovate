@@ -55,6 +55,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   ): Promise<HttpResponse<T> | null> {
     const cached = await this.get(url);
     if (!cached) {
+      HttpCacheStats.localMiss(url);
       return null;
     }
 
@@ -66,11 +67,11 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     const deadline = cachedAt.plus({ minutes: this.softTtlMinutes });
     const now = DateTime.now();
     if (now >= deadline) {
-      HttpCacheStats.incLocalMisses(url);
+      HttpCacheStats.localMiss(url);
       return null;
     }
 
-    HttpCacheStats.incLocalHits(url);
+    HttpCacheStats.localHit(url);
     return cached.httpResponse as HttpResponse<T>;
   }
 

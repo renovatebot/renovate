@@ -379,8 +379,8 @@ export class HttpStats {
 }
 
 interface HttpCacheHostStatsData {
-  hit: number;
-  miss: number;
+  httpHit: number;
+  httpMiss: number;
   localHit?: number;
   localMiss?: number;
 }
@@ -401,12 +401,7 @@ export class HttpCacheStats {
   }
 
   static read(key: string): HttpCacheHostStatsData {
-    return (
-      this.getData()?.[key] ?? {
-        hit: 0,
-        miss: 0,
-      }
-    );
+    return this.getData()?.[key] ?? {};
   }
 
   static write(key: string, data: HttpCacheHostStatsData): void {
@@ -426,7 +421,7 @@ export class HttpCacheStats {
     return baseUrl;
   }
 
-  static incLocalHits(url: string): void {
+  static localHit(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
@@ -437,7 +432,7 @@ export class HttpCacheStats {
     }
   }
 
-  static incLocalMisses(url: string): void {
+  static localMiss(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
@@ -448,22 +443,24 @@ export class HttpCacheStats {
     }
   }
 
-  static incRemoteHits(url: string): void {
+  static httpHit(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.hit += 1;
+      stats.httpHit ??= 0;
+      stats.httpHit += 1;
       HttpCacheStats.write(host, stats);
     }
   }
 
-  static incRemoteMisses(url: string): void {
+  static httpMiss(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.miss += 1;
+      stats.httpMiss ??= 0;
+      stats.httpMiss += 1;
       HttpCacheStats.write(host, stats);
     }
   }
