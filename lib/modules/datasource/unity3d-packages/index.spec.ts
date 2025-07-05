@@ -153,7 +153,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
       registryUrls: [],
     });
 
-    expect(res).toBe({
+    expect(res).toStrictEqual({
       homepage:
         'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html',
       registryUrl: 'https://packages.unity.com',
