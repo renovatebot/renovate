@@ -79,10 +79,10 @@ export function extractFilenameFromGitLabPath(fileName: string): string {
     let pathWithoutQuery = url.pathname;
 
     // Handle GitLab "/raw" suffix that's appended to the filename
-    pathWithoutQuery = pathWithoutQuery.replace(regEx(/\/raw$/), '');
+    pathWithoutQuery = pathWithoutQuery.replace(/\/raw$/, '');
 
     // Extract filename from the path
-    return pathWithoutQuery.split('/').pop();
+    return pathWithoutQuery.split('/').pop() || '';
   }
 
   // Return as is - should be a normal filename with extension
