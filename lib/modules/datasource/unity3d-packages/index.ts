@@ -34,10 +34,10 @@ export class Unity3dPackagesDatasource extends Datasource {
       UnityPackageReleasesJSON,
     );
 
-    const usingDefaultRegsitry = 
-          registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl;
+    const usingDefaultRegistry =
+      registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl;
     const versions = Object.values(response.body.versions);
-    
+
     const result: ReleaseResult = {
       releases: [],
       homepage: versions?.[0]?.documentationUrl,
@@ -49,13 +49,12 @@ export class Unity3dPackagesDatasource extends Datasource {
         version: release.version,
         releaseTimestamp: asTimestamp(response.body.time[release.version]),
         changelogContent: release._upm?.changelog,
-        changelogUrl:
-          usingDefaultRegistry
-            ? documentationUrl?.replace(
-                'manual/index.html',
-                'changelog/CHANGELOG.html',
-              )
-            : undefined,
+        changelogUrl: usingDefaultRegistry
+          ? release.documentationUrl?.replace(
+              'manual/index.html',
+              'changelog/CHANGELOG.html',
+            )
+          : undefined,
         isStable: Unity3dPackagesVersioning.default.isStable(release.version),
         registryUrl,
       });
