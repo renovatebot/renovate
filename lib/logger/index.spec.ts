@@ -1,5 +1,5 @@
 import type { WriteStream } from 'node:fs';
-import bunyan, { LogLevel } from 'bunyan';
+import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
@@ -21,7 +21,6 @@ import {
   withMeta,
 } from '.';
 import { partial } from '~test/util';
-import { env } from 'node:process';
 
 const logContext = 'initial_context';
 
