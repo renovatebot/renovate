@@ -379,10 +379,10 @@ export class HttpStats {
 }
 
 interface HttpCacheHostStatsData {
-  httpHit: number;
-  httpMiss: number;
   localHit?: number;
   localMiss?: number;
+  etagHit?: number;
+  etagMiss?: number;
 }
 
 type HttpCacheStatsData = Record<string, HttpCacheHostStatsData>;
@@ -443,24 +443,24 @@ export class HttpCacheStats {
     }
   }
 
-  static httpHit(url: string): void {
+  static etagHit(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.httpHit ??= 0;
-      stats.httpHit += 1;
+      stats.etagHit ??= 0;
+      stats.etagHit += 1;
       HttpCacheStats.write(host, stats);
     }
   }
 
-  static httpMiss(url: string): void {
+  static etagMiss(url: string): void {
     const baseUrl = HttpCacheStats.getBaseUrl(url);
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.httpMiss ??= 0;
-      stats.httpMiss += 1;
+      stats.etagMiss ??= 0;
+      stats.etagMiss += 1;
       HttpCacheStats.write(host, stats);
     }
   }
