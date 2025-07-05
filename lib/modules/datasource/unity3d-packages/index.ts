@@ -34,23 +34,24 @@ export class Unity3dPackagesDatasource extends Datasource {
       UnityPackageReleasesJSON,
     );
 
+    const usingDefaultRegsitry = 
+          registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl;
+    const versions = Object.values(response.body.versions);
+    
     const result: ReleaseResult = {
       releases: [],
-      homepage:
-        Object.keys(response.body.versions).length > 0
-          ? Object.values(response.body.versions)[0].documentationUrl
-          : undefined,
+      homepage: versions?.[0]?.documentationUrl,
       registryUrl,
     };
 
-    for (const release of Object.values(response.body.versions)) {
+    for (const release of versions) {
       result.releases.push({
         version: release.version,
         releaseTimestamp: asTimestamp(response.body.time[release.version]),
-        changelogContent: release?._upm?.changelog,
+        changelogContent: release._upm?.changelog,
         changelogUrl:
-          registryUrl === Unity3dPackagesDatasource.defaultRegistryUrl
-            ? release.documentationUrl?.replace(
+          usingDefaultRegistry
+            ? documentationUrl?.replace(
                 'manual/index.html',
                 'changelog/CHANGELOG.html',
               )
