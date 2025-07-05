@@ -236,7 +236,7 @@ describe('logger/index', () => {
     it.each([
       {
         logFileFormat: 'json',
-        expectedType: null,
+        expectedType: undefined,
       },
       {
         logFileFormat: 'pretty',
