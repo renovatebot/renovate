@@ -11,53 +11,15 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
 !!! note
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
-
-## allowCommandTemplating
-
-Let's look at an example of configuring packages with existing Angular migrations.
-
-```javascript
-module.exports = {
-  allowedCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
-};
-```
-
-In the `renovate.json` file, define the commands and files to be included in the final commit.
-
-The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
-
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["@angular/core"],
-      "postUpgradeTasks": {
-        "commands": [
-          "npm ci --ignore-scripts",
-          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
-        ]
-      }
-    }
-  ]
-}
-```
-
-With this configuration, the executable command for `@angular/core` looks like this:
-
-```bash
-npm ci --ignore-scripts
-npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
-```
-
-If you wish to disable templating because of any security or performance concern, you may set `allowCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedCommands` config option to limit what commands are allowed to run.
-
-This configuration option was previously named `allowPostUpgradeCommandTemplating`.
 
 ## allowCustomCrateRegistries
 
@@ -69,7 +31,7 @@ This configuration option was previously named `allowPostUpgradeCommandTemplatin
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
 
-If you are using a template command, the regular expression should match the template itself, not the final resolved value.
+If you are using a template command, the regular expression should match the final resolved value.
 If this list is empty then no tasks will be executed.
 
 For example:
@@ -157,7 +119,9 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 The pattern matches against the organization/repo path.
-It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
+
+This option supports an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
 
@@ -179,29 +143,20 @@ The configuration:
 
 ```json
 {
-  "autodiscoverFilter": ["my-org/*"]
+  "autodiscoverFilter": ["my-org/*", "!my-org/old-*"]
 }
 ```
 
-The search for repositories is case-insensitive.
+Glob patterns are case-insensitive.
 
 **Regex**:
 
 All text inside the start and end `/` will be treated as a regular expression.
-
-```json
-{
-  "autodiscoverFilter": ["/project/.*/"]
-}
-```
-
-You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": ["!/project/.*/"]
+  "autodiscoverFilter": ["/project/.*/", "!/project/old-/"]
 }
 ```
 
@@ -409,10 +364,8 @@ Valid codes for namespaces are as follows:
 - `datasource-hexpm-bob`
 - `datasource-java-version`
 - `datasource-jenkins-plugins`
-- `datasource-maven`
-- `datasource-maven:head-requests-timeout`
-- `datasource-maven:head-requests`
-- `datasource-maven:metadata-xml`
+- `datasource-maven:cache-provider`
+- `datasource-maven:postprocess-reject`
 - `datasource-node-version`
 - `datasource-npm:data`
 - `datasource-nuget-v3`
@@ -1246,7 +1199,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
-Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip

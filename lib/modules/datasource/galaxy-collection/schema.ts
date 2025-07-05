@@ -37,7 +37,7 @@ export const GalaxyV3DetailedVersion = z
       sha256: z.string(),
     }),
     metadata: z.object({
-      homepage: z.string(),
+      homepage: z.string().optional(),
       repository: z.string(),
       dependencies: z.record(z.string(), z.string()).optional(),
     }),

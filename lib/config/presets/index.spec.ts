@@ -561,6 +561,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           'group:monorepos',
           'group:recommended',
+          'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
         ],
@@ -662,6 +663,33 @@ describe('config/presets/index', () => {
           'Use version pinning (maintain a single version only and not SemVer ranges).',
         ],
         rangeStrategy: 'pin',
+      });
+    });
+
+    it('substitutes {{args}}', async () => {
+      local.getPreset.mockResolvedValueOnce({
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['{{args}}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
+      });
+      const res = await presets.getPreset(
+        'local>customManager(**/{*.py, *.yaml})',
+        {},
+      );
+      expect(res).toEqual({
+        customManagers: [
+          {
+            customType: 'regex',
+            // The space after comma is obviously incorrect here.
+            // But the test must ensure that spaces aren't removed.
+            managerFilePatterns: ['**/{*.py, *.yaml}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
       });
     });
 

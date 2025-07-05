@@ -34,7 +34,7 @@ env:
   # are we on a release branch?
   DO_REALEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 22
-  PDM_VERSION: 2.23.0 # renovate: datasource=pypi depName=pdm
+  PDM_VERSION: 2.25.4 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      node-version: ${{ env.NODE_VERSION }}
+      node-version: ${{ steps.setup-outputs.outputs.node-version }}
 
     steps:
       - name: Checkout code
@@ -142,6 +142,11 @@ jobs:
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
+
+      - name: Setup outputs
+        id: setup-outputs
+        run: |
+          echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
         uses: ./.github/actions/setup-node
@@ -212,8 +217,9 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-cache
-          restore-keys: eslint-cache-
+          # we need to add the hash because eslint cache doesn't detect plugin changes
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: pnpm eslint-ci
@@ -223,7 +229,7 @@ jobs:
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/eslint
-          key: eslint-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          key: eslint-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-prettier:
     needs:
@@ -247,8 +253,9 @@ jobs:
         uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-cache
-          restore-keys: prettier-cache-
+          # we need to add the hash because prettier cache doesn't detect plugin changes
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-
 
       - name: Lint
         run: |
@@ -264,7 +271,7 @@ jobs:
         uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache/prettier
-          key: prettier-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lint-docs:
     needs:
@@ -285,7 +292,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@05f32210e84442804257b2a6f20b273450ec8265 # v19.1.0
+        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -382,7 +389,7 @@ jobs:
           done
 
       - name: Move coverage files
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         run: |
           mkdir -p ./coverage/lcov
           mkdir -p ./coverage/json
@@ -393,7 +400,7 @@ jobs:
           done
 
       - name: Save coverage artifacts
-        if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
+        if: success() && github.event.pull_request.draft != true && matrix.coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.upload-artifact-name }}
@@ -405,7 +412,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
+    if: success() && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -414,14 +421,14 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -434,7 +441,7 @@ jobs:
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event.pull_request.draft != true
+    if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -450,7 +457,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: coverage-*
           path: coverage
@@ -552,7 +559,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.draft != true
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -560,7 +567,7 @@ jobs:
           show-progress: false
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -580,7 +587,7 @@ jobs:
         run: docker run -e LOG_LEVEL=debug --rm renovate/renovate --version
 
       - name: dry-run
-        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true') || (github.repository == 'renovatebot/renovate' && github.event_name == 'pull_request')
+        if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_REALEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -605,7 +612,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@deb8d8a4e2a03aabcef6f2cc981923fc6b29ef99 # v4.3
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4.4
         with:
           python-version-file: .python-version
           version: ${{ env.PDM_VERSION }}
@@ -652,7 +659,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renovate-dist
           path: dist/
@@ -698,7 +705,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@5b65bcc6c57327ea0b13ce6008716f7887fcbc10 # v3.10.14
+        uses: containerbase/internal-tools@c8e43d74b05e014d78d01b4b9c9f52dd8b660140 # v3.10.51
         with:
           command: docker-config
 
@@ -708,7 +715,7 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
 
       - name: Docker registry login
         run: |

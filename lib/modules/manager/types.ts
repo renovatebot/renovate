@@ -2,7 +2,6 @@ import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
   UpdateType,
-  UserEnv,
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
@@ -47,7 +46,6 @@ export interface UpdateArtifactsConfig {
   newMajor?: number;
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
-  env?: UserEnv;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -102,6 +100,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
@@ -171,6 +170,9 @@ export interface PackageDependency<T = Record<string, any>>
    * override data source's default strategy.
    */
   registryStrategy?: RegistryStrategy;
+
+  mostRecentTimestamp?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {

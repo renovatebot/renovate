@@ -5,7 +5,7 @@ import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import { id as versioning } from '../../versioning/loose';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
   AzurePipelinesFallbackTasks,
   AzurePipelinesJSON,
@@ -16,6 +16,8 @@ const TASKS_URL_BASE =
   'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main';
 const BUILT_IN_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-builtin-tasks.json`;
 const MARKETPLACE_TASKS_URL = `${TASKS_URL_BASE}/azure-pipelines-marketplace-tasks.json`;
+const BUILT_IN_TASKS_CHANGELOG_URL =
+  'https://github.com/microsoft/azure-pipelines-tasks/releases';
 
 export class AzurePipelinesTasksDatasource extends Datasource {
   static readonly id = 'azure-pipelines-tasks';
@@ -65,10 +67,17 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         })
         .sort(AzurePipelinesTasksDatasource.compareSemanticVersions('version'))
         .forEach((task) => {
-          result.releases.push({
+          const release: Release = {
             version: `${task.version!.major}.${task.version!.minor}.${task.version!.patch}`,
+            changelogContent: task.releaseNotes,
             isDeprecated: task.deprecated,
-          });
+          };
+
+          if (task.serverOwned) {
+            release.changelogUrl = BUILT_IN_TASKS_CHANGELOG_URL;
+          }
+
+          result.releases.push(release);
         });
 
       return result;

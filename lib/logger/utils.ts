@@ -128,6 +128,10 @@ export default function prepareError(err: Error): Record<string, unknown> {
     response.stack = err.stack;
   }
 
+  if (err instanceof AggregateError) {
+    response.errors = err.errors.map((error) => prepareError(error));
+  }
+
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
@@ -178,7 +182,7 @@ export function sanitizeValue(
     return value;
   }
 
-  if (is.function_(value)) {
+  if (is.function(value)) {
     return '[function]';
   }
 

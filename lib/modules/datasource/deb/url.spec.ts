@@ -1,4 +1,4 @@
-import { constructComponentUrls, getBaseReleaseUrl } from './url';
+import { constructComponentUrls, getBaseSuiteUrl } from './url';
 
 describe('modules/datasource/deb/url', () => {
   it('constructs URLs correctly from registry URL with suite', () => {
@@ -12,7 +12,7 @@ describe('modules/datasource/deb/url', () => {
     expect(componentUrls).toEqual(expectedUrls);
   });
 
-  it('constructs URLs correctly from registry URL with release', () => {
+  it('constructs URLs correctly from registry URL with deprecated release', () => {
     const registryUrl =
       'https://deb.debian.org/debian?release=bullseye&components=main,contrib&binaryArch=amd64';
     const expectedUrls = [
@@ -30,11 +30,11 @@ describe('modules/datasource/deb/url', () => {
     );
   });
 
-  it('returns the correct release url', () => {
+  it('returns the correct suite url', () => {
     const basePackageUrl =
       'https://deb.debian.org/debian/dists/bullseye/main/binary-amd64';
     const expectedUrl = 'https://deb.debian.org/debian/dists/bullseye';
 
-    expect(getBaseReleaseUrl(basePackageUrl)).toBe(expectedUrl);
+    expect(getBaseSuiteUrl(basePackageUrl)).toBe(expectedUrl);
   });
 });

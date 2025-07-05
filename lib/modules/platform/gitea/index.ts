@@ -12,6 +12,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
+import { getEnv } from '../../../util/env';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { map } from '../../../util/promises';
@@ -224,9 +225,10 @@ const platform: Platform = {
       gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
       botUserID = user.id;
       botUserName = user.username;
+      const env = getEnv();
       /* v8 ignore start: experimental feature */
-      if (semver.valid(process.env.RENOVATE_X_PLATFORM_VERSION)) {
-        defaults.version = process.env.RENOVATE_X_PLATFORM_VERSION!;
+      if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
+        defaults.version = env.RENOVATE_X_PLATFORM_VERSION!;
       } /* v8 ignore stop */ else {
         defaults.version = await helper.getVersion({ token });
       }
@@ -318,14 +320,28 @@ const platform: Platform = {
       throw new Error(REPOSITORY_BLOCKED);
     }
 
-    if (repo.allow_rebase) {
+    if (repo.allow_rebase && repo.default_merge_style === 'rebase') {
       config.mergeMethod = 'rebase';
-    } else if (repo.allow_rebase_explicit) {
+    } else if (
+      repo.allow_rebase_explicit &&
+      repo.default_merge_style === 'rebase-merge'
+    ) {
       config.mergeMethod = 'rebase-merge';
-    } else if (repo.allow_squash_merge) {
+    } else if (
+      repo.allow_squash_merge &&
+      repo.default_merge_style === 'squash'
+    ) {
       config.mergeMethod = 'squash';
-    } else if (repo.allow_merge_commits) {
+    } else if (
+      repo.allow_merge_commits &&
+      repo.default_merge_style === 'merge'
+    ) {
       config.mergeMethod = 'merge';
+    } else if (
+      repo.allow_fast_forward_only_merge &&
+      repo.default_merge_style === 'fast-forward-only'
+    ) {
+      config.mergeMethod = 'fast-forward-only';
     } else {
       logger.debug(
         'Repository has no allowed merge methods - aborting renovation',
@@ -756,15 +772,13 @@ const platform: Platform = {
     if (config.hasIssuesEnabled === false) {
       return Promise.resolve([]);
     }
-    if (config.issueList === null) {
-      config.issueList = helper
-        .searchIssues(config.repository, { state: 'all' }, { memCache: false })
-        .then((issues) => {
-          const issueList = issues.map(toRenovateIssue);
-          logger.debug(`Retrieved ${issueList.length} Issues`);
-          return issueList;
-        });
-    }
+    config.issueList ??= helper
+      .searchIssues(config.repository, { state: 'all' }, { memCache: false })
+      .then((issues) => {
+        const issueList = issues.map(toRenovateIssue);
+        logger.debug(`Retrieved ${issueList.length} Issues`);
+        return issueList;
+      });
 
     return config.issueList;
   },

@@ -1,5 +1,4 @@
 import JSON5 from 'json5';
-import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import {
@@ -9,11 +8,12 @@ import {
   type ZodTypeDef,
   z,
 } from 'zod';
-import { logger } from '../logger';
-import type { PackageDependency } from '../modules/manager/types';
-import { parse as parseToml } from './toml';
-import type { YamlOptions } from './yaml';
-import { parseSingleYaml, parseYaml } from './yaml';
+import { logger } from '../../logger';
+import type { PackageDependency } from '../../modules/manager/types';
+import { parseJsonc } from '../common';
+import { parse as parseToml } from '../toml';
+import type { YamlOptions } from '../yaml';
+import { parseSingleYaml, parseYaml } from '../yaml';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -226,13 +226,12 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const Jsonc = z.string().transform((str, ctx): JsonValue => {
-  const errors: JSONC.ParseError[] = [];
-  const value = JSONC.parse(str, errors, { allowTrailingComma: true });
-  if (errors.length === 0) {
-    return value;
+  try {
+    return parseJsonc(str);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+    return z.NEVER;
   }
-  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
-  return z.NEVER;
 });
 
 export const UtcDate = z
@@ -319,3 +318,47 @@ export function withTraceMessage<Input, Output>(
     return value;
   };
 }
+
+function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+
+  if (visited.has(value)) {
+    return true;
+  }
+
+  const downstreamVisited = new Set(visited);
+  downstreamVisited.add(value);
+
+  if (Array.isArray(value)) {
+    for (const childValue of value) {
+      if (isCircular(childValue, downstreamVisited)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  const values = Object.values(value);
+  for (const ov of values) {
+    if (isCircular(ov, downstreamVisited)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const NotCircular = z.unknown().superRefine((val, ctx) => {
+  if (isCircular(val)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'values cannot be circular data structures',
+      fatal: true,
+    });
+
+    return z.NEVER;
+  }
+});

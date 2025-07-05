@@ -7,7 +7,7 @@ export const url = 'https://glasskube.dev/docs';
 export const categories: Category[] = ['kubernetes', 'cd'];
 
 export const defaultConfig = {
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [GlasskubePackagesDatasource.id];
