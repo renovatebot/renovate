@@ -8,25 +8,20 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import type { AllConfig, RenovateConfig } from './types';
 
-const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
-const secretNameRegex = regEx(`^${secretNamePattern}$`);
-const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
-const variableNamePattern = '[A-Za-z][A-Za-z0-9_]*';
-
-const variableNameRegex = regEx(`^${variableNamePattern}$`);
-const variableTemplateRegex = regEx(
-  `{{ variables\\.(${variableNamePattern}) }}`,
-);
+const namePattern = '[A-Za-z][A-Za-z0-9_]*';
+const nameRegex = regEx(`^${namePattern}$`);
+const secretTemplateRegex = regEx(`{{ secrets\\.(${namePattern}) }}`);
+const variableTemplateRegex = regEx(`{{ variables\\.(${namePattern}) }}`);
 
 export const options: Record<'secrets' | 'variables', InterpolatorOptions> = {
   secrets: {
     name: 'secrets',
-    nameRegex: secretNameRegex,
+    nameRegex,
     templateRegex: secretTemplateRegex,
   },
   variables: {
     name: 'variables',
-    nameRegex: variableNameRegex,
+    nameRegex,
     templateRegex: variableTemplateRegex,
   },
 };
