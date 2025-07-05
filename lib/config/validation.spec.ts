@@ -231,7 +231,7 @@ describe('config/validation', () => {
 
     it('validates matchBaseBranches', async () => {
       const config = {
-        baseBranches: ['foo'],
+        baseBranchPatterns: ['foo'],
         packageRules: [
           {
             matchBaseBranches: ['foo'],
@@ -247,7 +247,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
     });
 
-    it('catches invalid matchBaseBranches when baseBranches is not defined', async () => {
+    it('catches invalid matchBaseBranches when baseBranchPatterns is not defined', async () => {
       const config = {
         packageRules: [
           {
@@ -375,15 +375,15 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('catches invalid baseBranches regex', async () => {
+    it('catches invalid baseBranchPatterns regex', async () => {
       const config = {
-        baseBranches: ['/***$}{]][/', '/branch/i'],
+        baseBranchPatterns: ['/***$}{]][/', '/branch/i'],
       };
       const { errors } = await configValidation.validateConfig('repo', config);
       expect(errors).toEqual([
         {
           topic: 'Configuration Error',
-          message: 'Invalid regExp for baseBranches: `/***$}{]][/`',
+          message: 'Invalid regExp for baseBranchPatterns: `/***$}{]][/`',
         },
       ]);
     });

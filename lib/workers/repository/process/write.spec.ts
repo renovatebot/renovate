@@ -129,7 +129,7 @@ describe('workers/repository/process/write', () => {
 
       scm.branchExists.mockResolvedValueOnce(false).mockResolvedValue(true);
       GlobalConfig.set({ dryRun: 'full' });
-      config.baseBranches = ['main', 'dev'];
+      config.baseBranchPatterns = ['main', 'dev'];
       await writeUpdates(config, branches);
       expect(counts.get('Branches')).toBe(1);
       expect(addMeta).toHaveBeenCalledWith({
