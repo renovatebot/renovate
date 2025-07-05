@@ -13,6 +13,7 @@ import * as memCache from '../cache/memory';
 import { getEnv } from '../env';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
@@ -656,5 +657,44 @@ export abstract class HttpBase<
     combinedOptions = applyAuthorization(combinedOptions);
 
     return stream(resolvedUrl, combinedOptions);
+  }
+
+  async getToml<Schema extends ZodType<any, any, any>>(
+    url: string,
+    schema?: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getToml<Schema extends ZodType<any, any, any>>(
+    url: string,
+    options: JSONOpts,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getToml<Schema extends ZodType<any, any, any>>(
+    arg1: string,
+    arg2?: JSONOpts | Schema,
+    arg3?: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const { url, schema, httpOptions } = this.resolveArgs<Infer<Schema>>(
+      arg1,
+      arg2,
+      arg3,
+    );
+
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/toml',
+        ...httpOptions?.headers,
+      },
+    };
+
+    const res = await this.getText(url, opts);
+    if (schema) {
+      res.body = await Toml.pipe(schema).parseAsync(res.body);
+    } else {
+      res.body = (await Toml.parseAsync(res.body)) as Infer<Schema>;
+    }
+
+    return res;
   }
 }
