@@ -28,6 +28,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
+import { updateDependentModules } from './dependent-modules';
 
 const { major, valid } = semver;
 
@@ -426,6 +427,26 @@ export async function updateArtifacts({
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
     }
+
+    // Update dependent modules if this module was updated
+    if (res.length > 0) {
+      try {
+        // Get all go.mod files in the repository
+        const allGoModFiles = await getGoModFiles();
+        const dependentResults = await updateDependentModules(
+          goModFileName,
+          allGoModFiles,
+          config,
+        );
+        res.push(...dependentResults);
+      } catch (error) {
+        logger.warn(
+          { goModFileName, error },
+          'Failed to update dependent modules',
+        );
+      }
+    }
+
     return res;
   } catch (err) {
     // istanbul ignore if
@@ -441,6 +462,21 @@ export async function updateArtifacts({
         },
       },
     ];
+  }
+}
+
+/**
+ * Gets all go.mod files in the repository
+ */
+async function getGoModFiles(): Promise<string[]> {
+  try {
+    const fileList = await getRepoStatus();
+    return fileList.modified
+      .concat(fileList.not_added)
+      .filter((file) => file.endsWith('go.mod'));
+  } catch (error) {
+    logger.warn({ error }, 'Failed to get go.mod files');
+    return [];
   }
 }
 
