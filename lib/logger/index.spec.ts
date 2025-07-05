@@ -1,5 +1,5 @@
 import type { WriteStream } from 'node:fs';
-import bunyan from 'bunyan';
+import bunyan, { LogLevel } from 'bunyan';
 import fs from 'fs-extra';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
@@ -21,6 +21,7 @@ import {
   withMeta,
 } from '.';
 import { partial } from '~test/util';
+import { env } from 'node:process';
 
 const logContext = 'initial_context';
 
@@ -32,6 +33,10 @@ vi.mock('nanoid', () => ({
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
+  beforeEach(() => {
+    process.env = {};
+  });
+
   it('inits', () => {
     expect(logger).toBeDefined();
   });
@@ -202,6 +207,38 @@ describe('logger/index', () => {
         { name: 'logfile' },
       ]);
     });
+
+    it.each([
+      {
+        logFileLevel: null,
+        logFileFormat: 'json',
+        expectedLogLevel: 'debug',
+        expectedType: null,
+      },
+      {
+        logFileLevel: 'warn',
+        logFileFormat: 'pretty',
+        expectedLogLevel: 'warn',
+        expectedType: 'raw',
+      },
+    ])(
+      'handles log file stream level and format',
+      ({ logFileLevel, logFileFormat, expectedLogLevel, expectedType }) => {
+        process.env['LOG_FILE_LEVEL'] = logFileLevel?.toString();
+        process.env['LOG_FILE_FORMAT'] = logFileFormat;
+
+        const streams = createDefaultStreams(
+          'info',
+          new ProblemStream(),
+          'file.log',
+        );
+
+        const logFileStream = streams[2];
+
+        expect(expectedLogLevel, logFileStream.level?.toString());
+        expect(expectedType, logFileStream.type);
+      },
+    );
   });
 
   it('sets level', () => {
