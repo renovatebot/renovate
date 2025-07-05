@@ -73,7 +73,7 @@ function createLogFileStream(logFile: string): bunyan.Stream {
 
   if (
     is.nonEmptyStringAndNotWhitespace(logFileFormat) &&
-    logFileFormat !== 'json'
+    logFileFormat === 'pretty'
   ) {
     file.type = 'raw';
   }
