@@ -1,5 +1,5 @@
 import { getManagerList } from '../modules/manager';
-import { configFileNames } from './app-strings';
+import { getConfigFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
@@ -1741,7 +1741,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${configFileNames.join(', ')}.`,
+            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${getConfigFileNames().join(', ')}.`,
             topic: 'Configuration Error',
           },
         ]);

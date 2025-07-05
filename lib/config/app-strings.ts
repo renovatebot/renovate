@@ -1,4 +1,4 @@
-export const configFileNames = [
+const configFileNames = [
   'renovate.json',
   'renovate.json5',
   '.github/renovate.json',
@@ -10,3 +10,13 @@ export const configFileNames = [
   '.renovaterc.json5',
   'package.json',
 ];
+
+let userAddedConfigFileNames: string[] = [];
+
+export function setUserConfigFileNames(fileNames: string[]): void {
+  userAddedConfigFileNames = fileNames;
+}
+
+export function getConfigFileNames(): string[] {
+  return [...userAddedConfigFileNames, ...configFileNames];
+}
