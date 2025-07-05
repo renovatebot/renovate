@@ -295,20 +295,46 @@ In the self-hosted setup, use option to enable caching of private packages to im
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
-For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+You can use:
+
+- **Exact matches**: Direct namespace names
+- **Glob patterns**: Wildcards like `datasource-*` or `*`
+- **Regex patterns**: Regular expressions like `/^datasource-/`
+
+Priority order:
+
+1. Exact namespace matches take highest priority
+2. If no exact match, the last matching pattern wins
+
+Examples:
 
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker-tags": 120
+    "datasource-docker-tags": 120,
+    "datasource-npm": 90,
+    "datasource-*": 60,
+    "/^changelog-/": 30,
+    "*": 15
   }
 }
 ```
+
+In this example:
+
+- `datasource-docker-tags` gets 120 minutes (exact match)
+- `datasource-npm` gets 90 minutes (exact match)
+- Other datasources like `datasource-maven` get 15 minutes (matches `*` which is evaluated last)
+- Changelog namespaces like `changelog-github` get 30 minutes (regex match)
+- Everything else gets 15 minutes (wildcard match)
 
 Valid codes for namespaces are as follows:
 
 - `changelog-bitbucket-notes@v2`
 - `changelog-bitbucket-release`
+- `changelog-bitbucket-server-notes@v2`
+- `changelog-bitbucket-server-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -318,11 +344,14 @@ Valid codes for namespaces are as follows:
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
+- `datasource-aws-eks-addon`
 - `datasource-azure-bicep-resource`
 - `datasource-azure-pipelines-tasks`
 - `datasource-bazel`
 - `datasource-bitbucket-tags`
+- `datasource-bitbucket-server-tags`
 - `datasource-bitrise`
+- `datasource-buildpacks-registry`
 - `datasource-cdnjs`
 - `datasource-conan`
 - `datasource-conda`
@@ -367,7 +396,7 @@ Valid codes for namespaces are as follows:
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
 - `datasource-node-version`
-- `datasource-npm:data`
+- `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
 - `datasource-orb`
 - `datasource-packagist`
@@ -375,6 +404,7 @@ Valid codes for namespaces are as follows:
 - `datasource-python-version`
 - `datasource-releases`
 - `datasource-repology`
+- `datasource-rpm`
 - `datasource-ruby-version`
 - `datasource-rubygems`
 - `datasource-sbt-package`
