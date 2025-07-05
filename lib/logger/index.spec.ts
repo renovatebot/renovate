@@ -219,7 +219,7 @@ describe('logger/index', () => {
     ])(
       'handles log file stream $logFileLevel level',
       ({ logFileLevel, expectedLogLevel }) => {
-        process.env['LOG_FILE_LEVEL'] = logFileLevel?.toString();
+        process.env.LOG_FILE_LEVEL = logFileLevel?.toString();
 
         const streams = createDefaultStreams(
           'info',
@@ -245,7 +245,7 @@ describe('logger/index', () => {
     ])(
       'handles log file stream $logFileFormat format',
       ({ logFileFormat, expectedType }) => {
-        process.env['LOG_FILE_FORMAT'] = logFileFormat;
+        process.env.LOG_FILE_FORMAT = logFileFormat;
 
         const streams = createDefaultStreams(
           'info',
