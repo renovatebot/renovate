@@ -229,7 +229,7 @@ describe('logger/index', () => {
 
         const logFileStream = streams[2];
 
-        expect(expectedLogLevel).toBe(logFileStream.level?.toString());
+        expect(logFileStream.level).toBe(expectedLogLevel);
       },
     );
 
@@ -255,7 +255,7 @@ describe('logger/index', () => {
 
         const logFileStream = streams[2];
 
-        expect(expectedType).toBe(logFileStream.type);
+        expect(logFileStream.type).toBe(expectedType);
       },
     );
   });
