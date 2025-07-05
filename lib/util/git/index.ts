@@ -1,4 +1,5 @@
 import URL from 'node:url';
+import { homedir } from 'os';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
@@ -197,6 +198,59 @@ export async function validateGitVersion(): Promise<boolean> {
   }
   logger.debug(`Found valid git version: ${version}`);
   return true;
+}
+
+export async function enableCredentialStore(): Promise<void> {
+  const currentHelper = await simpleGit().getConfig(
+    'credential.helper',
+    'global',
+  );
+
+  if (!currentHelper.values.includes('store')) {
+    await simpleGit().addConfig('credential.helper', 'store', true, 'global');
+  }
+}
+
+export async function updateCredentialStore(url: string): Promise<void> {
+  const credentialsPath = upath.join(homedir(), '.git-credentials');
+  let lines: string[] = [];
+  try {
+    const content = await fs.readFile(credentialsPath, 'utf-8');
+    lines = content.split('\n').filter((line) => line.trim() !== '');
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw err;
+    }
+  }
+
+  const newUrl = new URL.URL(url);
+  let updated = false;
+
+  const result = lines.map((line) => {
+    try {
+      const existing = new URL.URL(line);
+      const sameTarget =
+        existing.protocol === newUrl.protocol &&
+        existing.hostname === newUrl.hostname &&
+        existing.port === newUrl.port;
+      if (sameTarget) {
+        updated = true;
+        return url;
+      }
+      return line;
+    } catch {
+      return line;
+    }
+  });
+
+  if (!updated) {
+    result.push(url);
+  }
+
+  await fs.writeFile(credentialsPath, result.join('\n') + '\n', {
+    encoding: 'utf-8',
+    mode: 0o600,
+  });
 }
 
 async function fetchBranchCommits(preferUpstream = true): Promise<void> {
