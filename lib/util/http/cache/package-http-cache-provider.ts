@@ -55,7 +55,6 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   ): Promise<HttpResponse<T> | null> {
     const cached = await this.get(url);
     if (!cached) {
-      HttpCacheStats.localMiss(url);
       return null;
     }
 
