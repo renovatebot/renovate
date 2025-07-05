@@ -27,6 +27,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -117,6 +118,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -197,6 +199,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyDepType": "dependency",
   "recreateClosed": true,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
@@ -244,6 +247,7 @@ exports[`workers/repository/updates/generate > generateBranchConfig() > handles 
   "prettyNewVersion": "v1.0.1",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
+  "skipArtifactsUpdate": false,
   "skipInstalls": true,
   "upgrades": [
     {
