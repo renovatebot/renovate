@@ -140,9 +140,9 @@ export function extractPackageJson(
     packageFileVersion,
     managerData: {
       packageJsonName,
-      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager,
-      ),
+      hasPackageManager:
+        is.nonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
+        is.nonEmptyObject(packageJson.devEngines?.packageManager),
       workspaces: packageJson.workspaces,
     },
   };
