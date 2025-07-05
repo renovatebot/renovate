@@ -42,7 +42,12 @@ describe('docs/documentation', () => {
       function getConfigHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n## (.*?)\n/g) ?? [];
-        return matches.map((match) => match.substring(4, match.length - 1));
+        return matches
+          .map((match) => match.substring(4, match.length - 1))
+          .filter(
+            (header) =>
+              header !== 'managerFilePatterns' && header !== 'enabled',
+          );
       }
 
       function getRequiredConfigOptions(): string[] {
@@ -80,6 +85,10 @@ describe('docs/documentation', () => {
           .filter((option) => !option.globalOnly)
           .filter((option) => option.parents)
           .map((option) => option.name)
+          .filter(
+            (header) =>
+              header !== 'managerFilePatterns' && header !== 'enabled',
+          )
           .sort();
       }
 

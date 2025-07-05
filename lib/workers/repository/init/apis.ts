@@ -1,4 +1,3 @@
-import { configFileNames } from '../../../config/app-strings';
 import type { RenovateConfig } from '../../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -7,17 +6,12 @@ import {
 import { logger } from '../../../logger';
 import type { RepoParams, RepoResult } from '../../../modules/platform';
 import { platform } from '../../../modules/platform';
+import { getDefaultConfigFileName } from '../onboarding/common';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
-
-// TODO #22198
-const getDefaultConfigFile = (config: RenovateConfig): string =>
-  configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName!
-    : configFileNames[0];
 
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {
@@ -31,7 +25,7 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(getDefaultConfigFile(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFileName(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -63,7 +57,7 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const defaultConfigFile = getDefaultConfigFile(config);
+    const defaultConfigFile = getDefaultConfigFileName(config);
     const repoConfig = await getJsonFile(defaultConfigFile);
     if (!repoConfig) {
       logger.debug(
