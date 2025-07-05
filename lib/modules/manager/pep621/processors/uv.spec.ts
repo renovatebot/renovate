@@ -491,7 +491,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: {
+            constraints: {},
+          },
           updatedDeps,
         },
         {},
