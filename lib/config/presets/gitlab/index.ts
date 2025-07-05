@@ -6,6 +6,7 @@ import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
 import { parseUrl } from '../../../util/url';
+import { regEx } from '../../../util/regex';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
@@ -79,7 +80,7 @@ export function extractFilenameFromGitLabPath(fileName: string): string {
     let pathWithoutQuery = url.pathname;
 
     // Handle GitLab "/raw" suffix that's appended to the filename
-    pathWithoutQuery = pathWithoutQuery.replace(/\/raw$/, '');
+    pathWithoutQuery = pathWithoutQuery.replace(regEx(/\/raw$/), '');
 
     // Extract filename from the path
     return pathWithoutQuery.split('/').pop() || '';
