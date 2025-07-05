@@ -1,3 +1,4 @@
+import type { DateTime } from 'luxon';
 import type { PlatformCommitOptions } from '../../config/types';
 import type { GitOptions } from '../../types/git';
 
@@ -32,6 +33,7 @@ export interface LocalConfig extends StorageConfig {
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
   branchIsModified: Record<string, boolean>;
+  branchUpdateDate: Record<string, DateTime>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
