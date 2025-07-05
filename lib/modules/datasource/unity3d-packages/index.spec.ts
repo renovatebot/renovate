@@ -6,16 +6,8 @@ describe('modules/datasource/unity3d-packages/index', () => {
   it(`package with no versions`, async () => {
     const data = `
       {
-        "_id": "com.unity.xr.openxr",
-        "name": "com.unity.xr.openxr",
-        "description": "OpenXR is an open, royalty-free standard developed by Khronos that aims to simplify AR/VR development by allowing developers to target a wide range of AR/VR devices. Use this plug-in to enable OpenXR in XR Plug-in Management.",
-        "provider": "upm",
         "versions": {},
-        "time": {},
-        "dist-tags": {
-          "latest": "1.14.2"
-        },
-        "etag": "18855-eQZPc3Nb+IhUvhXerfZyyDG0KZc"
+        "time": {}
       }
     `;
 
@@ -39,10 +31,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
   it(`package with no documentationUrl`, async () => {
     const data = `
       {
-        "_id": "com.unity.xr.openxr",
-        "name": "com.unity.xr.openxr",
-        "description": "OpenXR is an open, royalty-free standard developed by Khronos that aims to simplify AR/VR development by allowing developers to target a wide range of AR/VR devices. Use this plug-in to enable OpenXR in XR Plug-in Management.",
-        "provider": "upm",
         "versions": {
           "1.14.2": {
             "version": "1.14.2"
@@ -50,11 +38,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
         },
         "time": {
           "1.14.2": "2025-03-27T10:54:45.412Z"
-        },
-        "dist-tags": {
-          "latest": "1.14.2"
-        },
-        "etag": "18855-eQZPc3Nb+IhUvhXerfZyyDG0KZc"
+        }
       }
     `;
 
@@ -86,10 +70,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
   it(`package from a custom registry`, async () => {
     const data = `
       {
-        "_id": "com.unity.xr.openxr",
-        "name": "com.unity.xr.openxr",
-        "description": "OpenXR is an open, royalty-free standard developed by Khronos that aims to simplify AR/VR development by allowing developers to target a wide range of AR/VR devices. Use this plug-in to enable OpenXR in XR Plug-in Management.",
-        "provider": "upm",
         "versions": {
           "1.14.2": {
             "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html",
@@ -98,11 +78,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
         },
         "time": {
           "1.14.2": "2025-03-27T10:54:45.412Z"
-        },
-        "dist-tags": {
-          "latest": "1.14.2"
-        },
-        "etag": "18855-eQZPc3Nb+IhUvhXerfZyyDG0KZc"
+        }
       }
     `;
 
@@ -136,10 +112,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
   it(`package with changelog content and url`, async () => {
     const data = `
       {
-        "_id": "com.unity.xr.openxr",
-        "name": "com.unity.xr.openxr",
-        "description": "OpenXR is an open, royalty-free standard developed by Khronos that aims to simplify AR/VR development by allowing developers to target a wide range of AR/VR devices. Use this plug-in to enable OpenXR in XR Plug-in Management.",
-        "provider": "upm",
         "versions": {
           "1.14.3": {
             "_upm": {
@@ -166,11 +138,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
           "1.12.0-exp.1": "2024-07-03T15:24:28.000Z",
           "1.0.0-pre.1": "2021-02-11T19:26:19.000Z",
           "0.1.2-preview.2": "2021-01-05T17:57:41.000Z"
-        },
-        "dist-tags": {
-          "latest": "1.14.3"
-        },
-        "etag": "1ac33-Wq9aM7Y4fPfdcXOvZGnRrxOh0GY"
+        }
       }
     `;
 

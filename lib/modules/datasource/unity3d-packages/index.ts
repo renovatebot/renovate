@@ -9,7 +9,6 @@ export class Unity3dPackagesDatasource extends Datasource {
   static readonly id = 'unity3d-packages';
 
   static readonly defaultRegistryUrl = 'https://packages.unity.com';
-  static readonly homepage = 'https://unity.com/';
 
   override readonly defaultRegistryUrls = [
     Unity3dPackagesDatasource.defaultRegistryUrl,
