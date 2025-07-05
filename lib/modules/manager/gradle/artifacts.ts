@@ -96,38 +96,41 @@ async function buildUpdateVerificationMetadataCmd(
   if (!verificationMetadataFile) {
     return null;
   }
-  const hashTypes: string[] = [];
+
   const verificationMetadata = await readLocalFile(verificationMetadataFile);
-  if (
-    verificationMetadata?.includes('<verify-metadata>true</verify-metadata>')
-  ) {
-    logger.debug('Dependency verification enabled - generating checksums');
-    for (const hashType of ['sha256', 'sha512']) {
-      if (verificationMetadata?.includes(`<${hashType}`)) {
-        hashTypes.push(hashType);
-      }
-    }
-    if (!hashTypes.length) {
-      hashTypes.push('sha256');
-    }
+  const verifiesChecksums = verificationMetadata?.includes(
+    '<verify-metadata>true</verify-metadata>',
+  );
+  const verifiesSignatures = verificationMetadata?.includes(
+    '<verify-signatures>true</verify-signatures>',
+  );
+
+  const hashTypes = ['sha256', 'sha512'].filter((type) =>
+    verificationMetadata?.includes(`<${type} `),
+  );
+
+  if (verifiesChecksums || hashTypes.length) {
+    logger.debug(
+      'Dependency metadata verification enabled or checksums present - generating checksums',
+    );
   }
-  if (
-    verificationMetadata?.includes(
-      '<verify-signatures>true</verify-signatures>',
-    )
-  ) {
+
+  if ((verifiesChecksums || verifiesSignatures) && !hashTypes.length) {
+    // fallback algorithm for pgp and in case a weak algorithm (md5, sha1) is used for checksums
+    hashTypes.push('sha256');
+  }
+
+  if (verifiesSignatures) {
     logger.debug(
       'Dependency signature verification enabled - generating PGP signatures',
     );
-    // signature verification requires at least one checksum type as fallback.
-    if (!hashTypes.length) {
-      hashTypes.push('sha256');
-    }
     hashTypes.push('pgp');
   }
+
   if (!hashTypes.length) {
     return null;
   }
+
   return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} dependencies`;
 }
 

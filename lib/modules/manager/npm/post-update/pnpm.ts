@@ -58,13 +58,18 @@ export async function generateLockFile(
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
+    const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
+    const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
     const extraEnv: ExtraEnv = {
       // those arwe no longer working and it's unclear if they ever worked
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      // these are used by pnpm v5 and above. Maybe earlier versions too
-      npm_config_cache_dir: await ensureCacheDir(PNPM_CACHE_DIR),
-      npm_config_store_dir: await ensureCacheDir(PNPM_STORE_DIR),
+      // these are used by pnpm v5 to v10. Maybe earlier versions too
+      npm_config_cache_dir: pnpmConfigCacheDir,
+      npm_config_store_dir: pnpmConfigStoreDir,
+      // pnpm stops reading npm_config_* env vars since v11
+      pnpm_config_cache_dir: pnpmConfigCacheDir,
+      pnpm_config_store_dir: pnpmConfigStoreDir,
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
