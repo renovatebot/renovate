@@ -165,7 +165,8 @@ export class UvProcessor implements PyProjectProcessor {
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint: config.constraints?.uv,
+        constraint:
+          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
       };
 
       const extraEnv = {
