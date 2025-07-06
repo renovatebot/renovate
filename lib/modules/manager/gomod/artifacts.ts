@@ -502,42 +502,46 @@ async function tidyDependentModule(
 
   try {
     await exec([`${cmd} ${args}`], dependentExecOptions);
-
     const status = await getRepoStatus();
     const res: UpdateArtifactsResult[] = [];
 
     if (status.modified.includes(sumFileName)) {
-      logger.debug(`Returning updated ${sumFileName}`);
-      const sumContent = await readLocalFile(sumFileName);
-      if (sumContent) {
-        res.push({
-          file: {
-            type: 'addition',
-            path: sumFileName,
-            contents: sumContent,
-          },
-        });
-      }
+      logger.debug('Returning updated go.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: sumFileName,
+          contents: await readLocalFile(sumFileName),
+        },
+      });
     }
 
     if (status.modified.includes(goModFileName)) {
-      logger.debug(`Returning updated ${goModFileName}`);
-      const modContent = await readLocalFile(goModFileName, 'utf8');
-      if (modContent) {
-        res.push({
-          file: {
-            type: 'addition',
-            path: goModFileName,
-            contents: modContent,
-          },
-        });
-      }
+      logger.debug('Returning updated go.mod');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goModFileName,
+          contents: await readLocalFile(goModFileName, 'utf8'),
+        },
+      });
     }
 
     return res.length > 0 ? res : null;
   } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err, goModFileName }, 'Failed to update dependent go.mod');
-    return null;
+    return [
+      {
+        artifactError: {
+          lockFile: sumFileName,
+          stderr: err.message,
+        },
+      },
+    ];
   }
 }
 
