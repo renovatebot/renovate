@@ -297,6 +297,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'variables',
+    description: 'Object which holds variable name/value pairs.',
+    type: 'object',
+    globalOnly: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'statusCheckNames',
     description: 'Custom strings to use as status check names.',
     type: 'object',
