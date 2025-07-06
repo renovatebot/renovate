@@ -264,7 +264,7 @@
     "zod": "3.25.67"
   },
   "optionalDependencies": {
-    "better-sqlite3": "12.1.1",
+    "better-sqlite3": "12.2.0",
     "openpgp": "6.1.1",
     "re2": "1.22.1"
   },
@@ -302,7 +302,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.15.33",
+    "@types/node": "22.15.34",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -338,7 +338,7 @@
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
     "rimraf": "6.0.1",
-    "semantic-release": "24.2.5",
+    "semantic-release": "24.2.6",
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
     "tsx": "4.20.3",
