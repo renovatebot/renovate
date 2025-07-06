@@ -92,7 +92,9 @@ async function parseLocalReplaceDirectives(
 
   const directives: { targetGoModPath: string | null }[] = [];
   const lines = content.split(newlineRegex);
-
+  const blockRegex = regEx(
+    /^\s*(?<module>[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/.*)?$/,
+  );
   let inReplaceBlock = false;
   for (const line of lines) {
     const trimmedLine = line.trim();
@@ -115,9 +117,6 @@ async function parseLocalReplaceDirectives(
     // For multiline blocks, the keyword might be missing
     if (inReplaceBlock && !replaceMatches) {
       // Try parsing without the replace keyword
-      const blockRegex = regEx(
-        /^\s*(?<module>[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/.*)?$/,
-      );
       replaceMatches = blockRegex.exec(line)?.groups;
     }
 
