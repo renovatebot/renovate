@@ -387,6 +387,7 @@ const options: RenovateOptions[] = [
       'packageRules',
       ...AllManagersListLiteral,
       'hostRules',
+      'vulnerabilityAlerts',
       ...UpdateTypesOptions,
     ],
   },
