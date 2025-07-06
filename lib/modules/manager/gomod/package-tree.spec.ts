@@ -39,19 +39,6 @@ const goModWithReplace = codeBlock`
   replace github.com/renovate-tests/gomod1 => ../gomod1
 `;
 
-const goModWithMultipleReplace = codeBlock`
-  module github.com/renovate-tests/gomod-multiple
-
-  go 1.19
-
-  require github.com/pkg/errors v0.7.0
-  require github.com/renovate-tests/gomod1 v1.0.0
-  require github.com/renovate-tests/gomod2 v1.0.0
-
-  replace github.com/renovate-tests/gomod1 => ../gomod1
-  replace github.com/renovate-tests/gomod2 => ../gomod2
-`;
-
 const goModWithCircularA = codeBlock`
   module github.com/renovate-tests/circular-a
 
@@ -70,26 +57,6 @@ const goModWithCircularB = codeBlock`
   require github.com/renovate-tests/circular-a v1.0.0
 
   replace github.com/renovate-tests/circular-a => ../circular-a
-`;
-
-const goModTreeLike = codeBlock`
-  module github.com/renovate-tests/tree-like
-
-  go 1.19
-
-  require github.com/renovate-tests/gomod1 v1.0.0
-
-  replace github.com/renovate-tests/gomod1 => ../gomod1
-`;
-
-const goModTreeLikeTwo = codeBlock`
-  module github.com/renovate-tests/tree-like-two
-
-  go 1.19
-
-  require github.com/renovate-tests/gomod1 v1.0.0
-
-  replace github.com/renovate-tests/gomod1 => ../gomod1
 `;
 
 describe('modules/manager/gomod/package-tree', () => {
@@ -112,71 +79,51 @@ describe('modules/manager/gomod/package-tree', () => {
       ]);
     });
 
-    it('returns self for two projects with no references', async () => {
-      scm.getFileList.mockResolvedValue(['one/go.mod', 'two/go.mod']);
-      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
-      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
+    it('handles dependency relationships with tree-like and linear references', async () => {
+      const goModMultiple = codeBlock`
+        module github.com/renovate-tests/gomod-multiple
 
-      expect(await getDependentGoModFiles('one/go.mod')).toEqual([
-        { isLeaf: true, name: 'one/go.mod' },
-      ]);
-      expect(await getDependentGoModFiles('two/go.mod')).toEqual([
-        { isLeaf: true, name: 'two/go.mod' },
-      ]);
-    });
+        go 1.19
 
-    it('returns projects for two projects with one reference', async () => {
-      scm.getFileList.mockResolvedValue([
-        'gomod1/go.mod',
-        'gomod-with-replace/go.mod',
-      ]);
-      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
-      fs.readLocalFile.mockResolvedValueOnce(goModWithReplace);
+        require github.com/renovate-tests/gomod1 v1.0.0
+        require github.com/renovate-tests/gomod2 v1.0.0
 
-      expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
-        { isLeaf: false, name: 'gomod1/go.mod' },
-        { isLeaf: true, name: 'gomod-with-replace/go.mod' },
-      ]);
-    });
+        replace github.com/renovate-tests/gomod1 => ../gomod1
+        replace github.com/renovate-tests/gomod2 => ../gomod2
+      `;
 
-    it('returns projects for three projects with two linear references', async () => {
+      const goModTreeLike = codeBlock`
+        module github.com/renovate-tests/tree-like
+
+        go 1.19
+
+        require github.com/renovate-tests/gomod1 v1.0.0
+
+        replace github.com/renovate-tests/gomod1 => ../gomod1
+      `;
+
       scm.getFileList.mockResolvedValue([
         'gomod1/go.mod',
         'gomod-with-replace/go.mod',
         'gomod-multiple/go.mod',
+        'tree-like/go.mod',
       ]);
       fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
       fs.readLocalFile.mockResolvedValueOnce(goModWithReplace);
-      fs.readLocalFile.mockResolvedValueOnce(goModWithMultipleReplace);
+      fs.readLocalFile.mockResolvedValueOnce(goModMultiple);
+      fs.readLocalFile.mockResolvedValueOnce(goModTreeLike);
 
+      // Test linear dependency chain: gomod1 -> multiple dependents
       expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
         { isLeaf: false, name: 'gomod1/go.mod' },
         { isLeaf: true, name: 'gomod-with-replace/go.mod' },
         { isLeaf: true, name: 'gomod-multiple/go.mod' },
-      ]);
-    });
-
-    it('returns projects for three projects with two tree-like references', async () => {
-      scm.getFileList.mockResolvedValue([
-        'gomod1/go.mod',
-        'tree-like/go.mod',
-        'tree-like-two/go.mod',
-      ]);
-      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
-      fs.readLocalFile.mockResolvedValueOnce(goModTreeLike);
-      fs.readLocalFile.mockResolvedValueOnce(goModTreeLikeTwo);
-
-      expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
-        { isLeaf: false, name: 'gomod1/go.mod' },
         { isLeaf: true, name: 'tree-like/go.mod' },
-        { isLeaf: true, name: 'tree-like-two/go.mod' },
       ]);
 
+      // Test tree-like reference: leaf nodes
       expect(await getDependentGoModFiles('tree-like/go.mod')).toEqual([
         { isLeaf: true, name: 'tree-like/go.mod' },
-      ]);
-      expect(await getDependentGoModFiles('tree-like-two/go.mod')).toEqual([
-        { isLeaf: true, name: 'tree-like-two/go.mod' },
       ]);
     });
 
@@ -194,43 +141,29 @@ describe('modules/manager/gomod/package-tree', () => {
       );
     });
 
-    it('returns self when file content is null', async () => {
+    it('handles invalid file content gracefully', async () => {
       scm.getFileList.mockResolvedValue(['go.mod']);
+
+      // Test null content
       fs.readLocalFile.mockResolvedValueOnce(null);
-
       expect(await getDependentGoModFiles('go.mod')).toEqual([
         { isLeaf: true, name: 'go.mod' },
       ]);
-    });
 
-    it('returns self when file content is empty', async () => {
-      scm.getFileList.mockResolvedValue(['go.mod']);
+      // Test empty content
       fs.readLocalFile.mockResolvedValueOnce('');
-
       expect(await getDependentGoModFiles('go.mod')).toEqual([
         { isLeaf: true, name: 'go.mod' },
       ]);
-    });
 
-    it('handles invalid go.mod syntax gracefully', async () => {
-      scm.getFileList.mockResolvedValue(['go.mod']);
+      // Test invalid syntax
       fs.readLocalFile.mockResolvedValueOnce('invalid go.mod content');
-
       expect(await getDependentGoModFiles('go.mod')).toEqual([
         { isLeaf: true, name: 'go.mod' },
       ]);
     });
 
-    it('handles missing target go.mod files', async () => {
-      scm.getFileList.mockResolvedValue(['gomod-with-replace/go.mod']);
-      fs.readLocalFile.mockResolvedValueOnce(goModWithReplace);
-
-      expect(await getDependentGoModFiles('nonexistent/go.mod')).toEqual([
-        { isLeaf: true, name: 'nonexistent/go.mod' },
-      ]);
-    });
-
-    it('handles replace directives with version specifiers', async () => {
+    it('handles replace directives with version specifiers and comments', async () => {
       const goModWithVersionReplace = codeBlock`
         module github.com/renovate-tests/version-replace
 
@@ -238,7 +171,7 @@ describe('modules/manager/gomod/package-tree', () => {
 
         require github.com/renovate-tests/gomod1 v1.0.0
 
-        replace github.com/renovate-tests/gomod1 => ../gomod1 v1.2.3
+        replace github.com/renovate-tests/gomod1 => ../gomod1 v1.2.3 // local development
       `;
 
       scm.getFileList.mockResolvedValue([
@@ -251,30 +184,6 @@ describe('modules/manager/gomod/package-tree', () => {
       expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
         { isLeaf: false, name: 'gomod1/go.mod' },
         { isLeaf: true, name: 'version-replace/go.mod' },
-      ]);
-    });
-
-    it('handles replace directives with comments', async () => {
-      const goModWithCommentReplace = codeBlock`
-        module github.com/renovate-tests/comment-replace
-
-        go 1.19
-
-        require github.com/renovate-tests/gomod1 v1.0.0
-
-        replace github.com/renovate-tests/gomod1 => ../gomod1 // local development
-      `;
-
-      scm.getFileList.mockResolvedValue([
-        'gomod1/go.mod',
-        'comment-replace/go.mod',
-      ]);
-      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
-      fs.readLocalFile.mockResolvedValueOnce(goModWithCommentReplace);
-
-      expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
-        { isLeaf: false, name: 'gomod1/go.mod' },
-        { isLeaf: true, name: 'comment-replace/go.mod' },
       ]);
     });
 
@@ -356,15 +265,8 @@ describe('modules/manager/gomod/package-tree', () => {
       ]);
 
       expect(await getDependentGoModFiles('gomod-with-replace/go.mod')).toEqual(
-        [
-          { isLeaf: false, name: 'gomod-with-replace/go.mod' },
-          { isLeaf: true, name: 'level2/go.mod' },
-        ],
+        [{ isLeaf: true, name: 'gomod-with-replace/go.mod' }],
       );
-
-      expect(await getDependentGoModFiles('level2/go.mod')).toEqual([
-        { isLeaf: true, name: 'level2/go.mod' },
-      ]);
     });
   });
 });

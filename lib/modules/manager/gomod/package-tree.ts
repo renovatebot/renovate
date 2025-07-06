@@ -11,7 +11,7 @@ export interface GoModuleFile {
 }
 
 const replaceRegex = regEx(
-  /^(?<keyword>replace)?\s+(?<module>[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/.*)?$/,
+  /^replace\s+(?<module>[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/.*)?$/,
 );
 
 /**
@@ -32,7 +32,9 @@ export async function getDependentGoModFiles(
 
     for (const directive of replaceDirectives) {
       const referencedGoMod = directive.targetGoModPath;
+      // Only add edges for files that exist in our go.mod files list
       if (referencedGoMod && goModFiles.includes(referencedGoMod)) {
+        // Create dependency edge: f depends on referencedGoMod
         graph.addEdge(referencedGoMod, f);
       }
     }
@@ -91,8 +93,34 @@ async function parseLocalReplaceDirectives(
   const directives: { targetGoModPath: string | null }[] = [];
   const lines = content.split(newlineRegex);
 
+  let inReplaceBlock = false;
   for (const line of lines) {
-    const replaceMatches = replaceRegex.exec(line)?.groups;
+    const trimmedLine = line.trim();
+
+    // Check if we're starting a multiline replace block
+    if (trimmedLine.startsWith('replace (')) {
+      inReplaceBlock = true;
+      continue;
+    }
+
+    // Check if we're ending a multiline replace block
+    if (inReplaceBlock && trimmedLine === ')') {
+      inReplaceBlock = false;
+      continue;
+    }
+
+    // Parse replace directive (either single line or inside multiline block)
+    let replaceMatches = replaceRegex.exec(line)?.groups;
+
+    // For multiline blocks, the keyword might be missing
+    if (inReplaceBlock && !replaceMatches) {
+      // Try parsing without the replace keyword
+      const blockRegex = regEx(
+        /^\s*(?<module>[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/.*)?$/,
+      );
+      replaceMatches = blockRegex.exec(line)?.groups;
+    }
+
     if (replaceMatches) {
       const { replacement } = replaceMatches;
       const depName = trimQuotes(replacement);
