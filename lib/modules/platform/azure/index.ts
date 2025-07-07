@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import type {
+  GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
   GitStatus,
@@ -128,6 +129,8 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
+  let item: GitItem | undefined;
+
   try {
     const azureApiGit = await azureApi.gitApi();
 
@@ -144,8 +147,6 @@ export async function getRawFile(
       logger.debug('No repoId so cannot getRawFile');
       return null;
     }
-
-    let item: any = null;
 
     // Try to get file from repo with branch, if not found, then try with tag #36835
     for (const versionType of [GitVersionType.Branch, GitVersionType.Tag]) {
@@ -183,7 +184,6 @@ export async function getRawFile(
         throw err;
       } /* v8 ignore stop */
     }
-    return item?.content ?? null;
   } catch (err) /* v8 ignore start */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
@@ -201,6 +201,8 @@ export async function getRawFile(
     }
     throw err;
   } /* v8 ignore stop */
+
+  return item?.content ?? null;
 }
 
 export async function getJsonFile(
