@@ -2043,7 +2043,7 @@ describe('modules/platform/azure/index', () => {
         resolveLfs?: boolean,
         sanitize?: boolean,
       ) => {
-        callArgs.push(versionDescriptor);
+        callArgs.push(versionDescriptor?.versionType);
         if (
           versionDescriptor &&
           versionDescriptor.versionType === GitVersionType.Branch
@@ -2074,7 +2074,7 @@ describe('modules/platform/azure/index', () => {
     );
     const result = await azure.getJsonFile('file.json', 'some/repo', '1.1.1');
     expect(result).toEqual({ test: 'tag content' });
-    expect(callArgs[0].versionType).toBe(GitVersionType.Branch);
-    expect(callArgs[1].versionType).toBe(GitVersionType.Tag);
+    expect(callArgs[0]).toBe(GitVersionType.Branch);
+    expect(callArgs[1]).toBe(GitVersionType.Tag);
   });
 });
