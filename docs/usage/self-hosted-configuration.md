@@ -324,8 +324,7 @@ Example:
 In this example:
 
 - `datasource-rubygems` gets 120 minutes (exact match - highest priority)
-- `datasource-crate` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
-- `datasource-go` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
 - `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
 - `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
 - `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
