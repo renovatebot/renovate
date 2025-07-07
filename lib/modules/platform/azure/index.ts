@@ -160,16 +160,16 @@ export async function getRawFile(
           `Looking for file: ${fileName} ${repoName} with ${versionType} ${branchOrTag}`,
         );
         item = await azureApiGit.getItem(
-          repoId,
-          fileName,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          versionDescriptor,
-          true,
+          repoId, // repositoryId
+          fileName, // path
+          undefined, // project
+          undefined, // scopePath
+          undefined, // recursionLevel
+          undefined, // includeContentMetadata
+          undefined, // latestProcessedChange
+          undefined, // download
+          branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+          true, // includeContent
         );
         if (item) {
           break; // exit loop if item is found
