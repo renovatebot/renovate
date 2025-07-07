@@ -171,10 +171,12 @@ export async function getRawFile(
         break; // exit loop if item is found
       } else {
         logger.debug(
-          `File: ${fileName} not found in ${repoName} as ${versionType} ${branchOrTag} - trying next versionType`,
+          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag} - trying next versionType`,
         );
+        continue;
       }
     }
+    return item?.content ?? null;
   } catch (err) /* v8 ignore start */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
@@ -192,8 +194,6 @@ export async function getRawFile(
     }
     throw err;
   } /* v8 ignore stop */
-
-  return item?.content ?? null;
 }
 
 export async function getJsonFile(
