@@ -111,7 +111,13 @@ Calls to the APIs require authentication with a personal access token from the G
 The token must be included in the request header as the `authorization` property.
 
 You can use a [classic token](https://github.com/settings/tokens) or a [fine-grained token](https://github.com/settings/personal-access-tokens).
-No additional scopes or permissions are required for the token.
+Mend recommends the use of fine-grained tokens for enhanced security.
+
+#### Scopes and permissions for tokens
+
+When calling APIs on _private_ repositories, the following scopes and permissions are required:
+- Classic tokens require `repo` scope (Full control of private repositories)
+- Fine-grained tokens must be for the `resource` of the org that the API is being called on, and must have a minimum of `metadata:read-only` permission on the selected repositories.
 
 ## Known Issues
 
