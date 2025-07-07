@@ -146,8 +146,8 @@ export async function getRawFile(
       return null;
     }
 
-        let item: GitItem | undefined;
-        const versionDescriptor: GitVersionDescriptor = {
+    let item: GitItem | undefined;
+    const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
     // Try to get file from repo with branch, if not found, then try with tag #36835
