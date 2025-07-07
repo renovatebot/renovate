@@ -305,7 +305,7 @@ You can use:
 Priority order:
 
 1. Exact namespace matches take highest priority
-2. If no exact match, the last matching pattern wins
+2. If no exact match, patterns are evaluated in the order they appear in the object, and the first matching pattern wins
 
 Examples:
 
@@ -325,7 +325,7 @@ In this example:
 
 - `datasource-docker-tags` gets 120 minutes (exact match)
 - `datasource-npm` gets 90 minutes (exact match)
-- Other datasources like `datasource-maven` get 15 minutes (matches `*` which is evaluated last)
+- Other datasources like `datasource-maven` get 60 minutes (matches `datasource-*` pattern)
 - Changelog namespaces like `changelog-github` get 30 minutes (regex match)
 - Everything else gets 15 minutes (wildcard match)
 

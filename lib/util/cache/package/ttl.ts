@@ -7,7 +7,7 @@ export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
   const overrides = GlobalConfig.get('cacheTtlOverride', {});
-  let ttl: number | undefined = overrides[namespace];
+  const ttl: number | undefined = overrides[namespace];
   if (is.number(ttl)) {
     return ttl;
   }
@@ -18,12 +18,8 @@ export function getTtlOverride(
     }
 
     if (matchRegexOrGlob(namespace, key)) {
-      ttl = value;
+      return value;
     }
-  }
-
-  if (is.number(ttl)) {
-    return ttl;
   }
 
   return undefined;

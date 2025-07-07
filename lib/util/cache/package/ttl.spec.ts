@@ -61,7 +61,7 @@ describe('util/cache/package/ttl', () => {
         expect(getTtlOverride('datasource-maven' as never)).toBe(90);
       });
 
-      it('matches wildcard pattern', () => {
+      it('matches wildcard pattern for all namespaces', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             '*': 45,
@@ -120,10 +120,10 @@ describe('util/cache/package/ttl', () => {
           },
         });
         expect(getTtlOverride('datasource-npm' as never)).toBe(120);
-        expect(getTtlOverride('datasource-docker' as never)).toBe(45); // '*' wins because it's processed first in reverse order
+        expect(getTtlOverride('datasource-docker' as never)).toBe(90); // 'datasource-*' wins because it's the first match
       });
 
-      it('applies last matching pattern when multiple patterns match', () => {
+      it('applies first matching pattern when multiple patterns match', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-*': 90,
@@ -131,11 +131,11 @@ describe('util/cache/package/ttl', () => {
             '*': 45,
           },
         });
-        // Should return 45 because entries are processed in reverse order and '*' matches last
-        expect(getTtlOverride('datasource-npm' as never)).toBe(45);
+        // Should return 90 because 'datasource-*' is the first matching pattern
+        expect(getTtlOverride('datasource-npm' as never)).toBe(90);
       });
 
-      it('skips non-numeric values in pattern matching', () => {
+      it('skips non-numeric values and finds next matching pattern', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-*': 'invalid',
@@ -143,7 +143,7 @@ describe('util/cache/package/ttl', () => {
             '*': 45,
           },
         });
-        expect(getTtlOverride('datasource-npm' as never)).toBe(45);
+        expect(getTtlOverride('datasource-npm' as never)).toBe(100);
       });
 
       it('returns undefined when no patterns match', () => {
@@ -232,7 +232,7 @@ describe('util/cache/package/ttl', () => {
           },
         });
         // minimatch should be case-insensitive by default
-        expect(getTtlOverride('datasource-npm' as never)).toBe(90); // Last match wins in reverse order
+        expect(getTtlOverride('datasource-docker' as never)).toBe(120); // First match wins
       });
     });
   });
