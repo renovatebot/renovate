@@ -23,7 +23,6 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
-import { getJsonFile } from '.';
 import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
