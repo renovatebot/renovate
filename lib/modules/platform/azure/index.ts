@@ -172,7 +172,7 @@ export async function getRawFile(
           true,
         );
         if (item) {
-          break;
+          break; // exit loop if item is found
         }
       } catch (err) /* v8 ignore start */ {
         if (err.statusCode && err.statusCode === 404) {
