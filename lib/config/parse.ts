@@ -1,5 +1,6 @@
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
+import stripJsonComments from 'strip-json-comments';
 import upath from 'upath';
 import { logger } from '../logger';
 import { parseJson } from '../util/common';
@@ -29,40 +30,39 @@ export function parseFileConfig(
       };
     }
   } else {
+    const jsonString = stripJsonComments(fileContents);
+    let allowDuplicateKeys = true;
+    let jsonValidationError = jsonValidator.validate(
+      jsonString,
+      allowDuplicateKeys,
+    );
+    if (jsonValidationError) {
+      const validationError = 'Invalid JSON (parsing failed)';
+      const validationMessage = jsonValidationError;
+      return {
+        success: false,
+        validationError,
+        validationMessage,
+      };
+    }
+    allowDuplicateKeys = false;
+    jsonValidationError = jsonValidator.validate(
+      jsonString,
+      allowDuplicateKeys,
+    );
+    if (jsonValidationError) {
+      const validationError = 'Duplicate keys in JSON';
+      const validationMessage = JSON.stringify(jsonValidationError);
+      return {
+        success: false,
+        validationError,
+        validationMessage,
+      };
+    }
     try {
-      const parsedContents = parseJson(fileContents, fileName);
-      const jsonString = JSON.stringify(parsedContents);
-      let allowDuplicateKeys = true;
-      let jsonValidationError = jsonValidator.validate(
-        jsonString,
-        allowDuplicateKeys,
-      );
-      if (jsonValidationError) {
-        const validationError = 'Invalid JSON (parsing failed)';
-        const validationMessage = jsonValidationError;
-        return {
-          success: false,
-          validationError,
-          validationMessage,
-        };
-      }
-      allowDuplicateKeys = false;
-      jsonValidationError = jsonValidator.validate(
-        jsonString,
-        allowDuplicateKeys,
-      );
-      if (jsonValidationError) {
-        const validationError = 'Duplicate keys in JSON';
-        const validationMessage = JSON.stringify(jsonValidationError);
-        return {
-          success: false,
-          validationError,
-          validationMessage,
-        };
-      }
       return {
         success: true,
-        parsedContents,
+        parsedContents: parseJson(fileContents, fileName),
       };
     } catch (err) {
       logger.debug({ fileContents }, 'Error parsing renovate config');

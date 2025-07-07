@@ -253,6 +253,7 @@
     "simple-git": "3.28.0",
     "slugify": "1.6.6",
     "source-map-support": "0.5.21",
+    "strip-json-comments": "5.0.2",
     "toml-eslint-parser": "0.10.0",
     "tslib": "2.8.1",
     "upath": "2.0.1",
