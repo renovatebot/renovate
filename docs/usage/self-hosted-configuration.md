@@ -312,7 +312,7 @@ Example:
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker": 120,
+    "datasource-rubygems": 120,
     "datasource-*": 60,
     "datasource-{crate,go}": 90,
     "/^changelog-/": 45,
@@ -323,7 +323,7 @@ Example:
 
 In this example:
 
-- `datasource-docker` gets 120 minutes (exact match - highest priority)
+- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
 - `datasource-crate` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
 - `datasource-go` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
 - `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
