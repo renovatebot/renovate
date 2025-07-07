@@ -1,8 +1,11 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import * as hostRules from '../../../util/host-rules';
+import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { asTimestamp } from '../../../util/timestamp';
@@ -244,9 +247,19 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       serviceDiscovery,
       repository,
     );
+
+    const opts: HostRule & HttpOptions = hostRules.find({
+      hostType: TerraformProviderDatasource.id,
+      url: registryURL,
+    });
+    const options: HttpOptions = {
+      throwHttpErrors: opts.abortOnError,
+    };
+
     const versionsResponse = (
       await this.http.getJsonUnchecked<TerraformRegistryVersions>(
         `${backendURL}/versions`,
+        options,
       )
     ).body;
     if (!versionsResponse.versions) {
@@ -270,6 +283,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
           const res = (
             await this.http.getJsonUnchecked<TerraformRegistryBuildResponse>(
               buildURL,
+              options,
             )
           ).body;
           const newBuild: TerraformBuild = {
