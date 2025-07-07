@@ -66,11 +66,9 @@ const CargoDep = z.union([
           skipReason = 'inherited-dependency';
         } else if (git) {
           applyGitSource(dep, git, rev, tag, branch);
-          if (semver.parse(dep.currentValue)) {
-            dep.versioning = semverVersioning.id;
-          } else {
-            dep.versioning = looseVersioning.id;
-          }
+            dep.versioning = semver.parse(dep.currentValue)
+                 ? semverVersioning.id
+                 : looseVersioning.id;
         } else if (!version) {
           skipReason = 'invalid-dependency-specification';
         }

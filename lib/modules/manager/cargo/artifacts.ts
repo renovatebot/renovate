@@ -121,7 +121,7 @@ async function updateArtifactsImpl(
     if (isLockFileMaintenance) {
       await cargoUpdate(packageFileName, true, config.constraints?.rust);
     } else {
-      const nonCrateDep = updatedDeps.find(
+      const hasNonCrateDep = updatedDeps.some(
         (dep) => dep.datasource !== CrateDatasource.id,
       );
       const crateDepWithoutLockedVersion = updatedDeps.find(
@@ -130,7 +130,7 @@ async function updateArtifactsImpl(
       // Non-crate dependencies (like git ones) do not have locked versions.
       // For crate dependencies, a locked version is expected.
       // In both situations, perform a regular workspace lockfile update.
-      if (nonCrateDep || crateDepWithoutLockedVersion) {
+      if (hasNonCrateDep || crateDepWithoutLockedVersion) {
         if (crateDepWithoutLockedVersion) {
           // Only warn when a crate dependency has no locked version
           logger.warn(
