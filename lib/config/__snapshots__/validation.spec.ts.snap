@@ -88,14 +88,14 @@ exports[`config/validation > validateConfig(config) > errors for all types 1`] =
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > errors for unsafe fileMatches 1`] = `
+exports[`config/validation > validateConfig(config) > errors for unsafe managerFilePatterns 1`] = `
 [
   {
-    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
+    "message": "Failed to parse regex pattern for dockerfile.managerFilePatterns: /x?+/",
     "topic": "Configuration Error",
   },
   {
-    "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Failed to parse regex pattern for npm.managerFilePatterns: /abc ([a-z]+) ([a-z]+))/",
     "topic": "Configuration Error",
   },
 ]
@@ -106,24 +106,6 @@ exports[`config/validation > validateConfig(config) > errors if customManager fi
   {
     "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
     "topic": "Configuration Error",
-  },
-]
-`;
-
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 1`] = `
-[
-  {
-    "message": ""fileMatch" may not be defined at the top level of a config and must instead be within a manager block",
-    "topic": "Config error",
-  },
-]
-`;
-
-exports[`config/validation > validateConfig(config) > errors if fileMatch has wrong parent 2`] = `
-[
-  {
-    "message": ""fileMatch" must be configured in a manager block and not here: npm.minor",
-    "topic": "Config warning",
   },
 ]
 `;
@@ -169,6 +151,19 @@ exports[`config/validation > validateConfig(config) > errors if manager objects 
   {
     "message": "The "gradle" object can only be configured at the top level of a config but was found inside "maven"",
     "topic": "Configuration Error",
+  },
+]
+`;
+
+exports[`config/validation > validateConfig(config) > errors if managerFilePatterns has wrong parent 1`] = `
+[
+  {
+    "message": "managerFilePatterns should only be configured within one of "ansible or ansible-galaxy or argocd or asdf or azure-pipelines or batect or batect-wrapper or bazel or bazel-module or bazelisk or bicep or bitbucket-pipelines or bitrise or buildkite or buildpacks or bun or bun-version or bundler or cake or cargo or cdnurl or circleci or cloudbuild or cocoapods or composer or conan or copier or cpanfile or crossplane or deps-edn or devbox or devcontainer or docker-compose or dockerfile or droneci or fleet or flux or fvm or git-submodules or github-actions or gitlabci or gitlabci-include or glasskube or gleam or gomod or gradle or gradle-wrapper or haskell-cabal or helm-requirements or helm-values or helmfile or helmsman or helmv3 or hermit or homebrew or html or jenkins or jsonnet-bundler or kotlin-script or kubernetes or kustomize or leiningen or maven or maven-wrapper or meteor or mint or mise or mix or nix or nodenv or npm or nuget or nvm or ocb or osgi or pep621 or pep723 or pip-compile or pip_requirements or pip_setup or pipenv or pixi or poetry or pre-commit or pub or puppet or pyenv or renovate-config-presets or ruby-version or runtime-version or sbt or scalafmt or setup-cfg or sveltos or swift or tekton or terraform or terraform-version or terragrunt or terragrunt-version or tflint-plugin or travis or unity3d or velaci or vendir or woodpecker or customManagers" objects. Was found in .",
+    "topic": "managerFilePatterns",
+  },
+  {
+    "message": "managerFilePatterns should only be configured within one of "ansible or ansible-galaxy or argocd or asdf or azure-pipelines or batect or batect-wrapper or bazel or bazel-module or bazelisk or bicep or bitbucket-pipelines or bitrise or buildkite or buildpacks or bun or bun-version or bundler or cake or cargo or cdnurl or circleci or cloudbuild or cocoapods or composer or conan or copier or cpanfile or crossplane or deps-edn or devbox or devcontainer or docker-compose or dockerfile or droneci or fleet or flux or fvm or git-submodules or github-actions or gitlabci or gitlabci-include or glasskube or gleam or gomod or gradle or gradle-wrapper or haskell-cabal or helm-requirements or helm-values or helmfile or helmsman or helmv3 or hermit or homebrew or html or jenkins or jsonnet-bundler or kotlin-script or kubernetes or kustomize or leiningen or maven or maven-wrapper or meteor or mint or mise or mix or nix or nodenv or npm or nuget or nvm or ocb or osgi or pep621 or pep723 or pip-compile or pip_requirements or pip_setup or pipenv or pixi or poetry or pre-commit or pub or puppet or pyenv or renovate-config-presets or ruby-version or runtime-version or sbt or scalafmt or setup-cfg or sveltos or swift or tekton or terraform or terraform-version or terragrunt or terragrunt-version or tflint-plugin or travis or unity3d or velaci or vendir or woodpecker or customManagers" objects. Was found in minor",
+    "topic": "npm.minor.managerFilePatterns",
   },
 ]
 `;
@@ -239,10 +234,10 @@ exports[`config/validation > validateConfig(config) > selectors outside packageR
 ]
 `;
 
-exports[`config/validation > validateConfig(config) > validates regEx for each fileMatch 1`] = `
+exports[`config/validation > validateConfig(config) > validates regEx for each managerFilePatterns of format regex 1`] = `
 [
   {
-    "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
+    "message": "Failed to parse regex pattern for customManagers[0].managerFilePatterns: /***$}{]][/",
     "topic": "Configuration Error",
   },
 ]

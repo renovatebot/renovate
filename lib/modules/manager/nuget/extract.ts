@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import type { XmlNode } from 'xmldoc';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -12,7 +12,12 @@ import type {
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types';
-import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
+import {
+  applyRegistries,
+  findVersion,
+  getConfiguredRegistries,
+  isXmlElement,
+} from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -26,10 +31,6 @@ const elemNames = new Set([
   'DotNetCliToolReference',
   'GlobalPackageReference',
 ]);
-
-function isXmlElem(node: XmlNode): node is XmlElement {
-  return node instanceof XmlElement;
-}
 
 function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
   const results: NugetPackageDependency[] = [];
@@ -134,7 +135,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         const propertyGroup = child.childNamed('PropertyGroup');
         if (propertyGroup) {
           for (const propChild of propertyGroup.children) {
-            if (isXmlElem(propChild)) {
+            if (isXmlElement(propChild)) {
               const { name, val } = propChild;
               if (!['Version', 'TargetFramework'].includes(name)) {
                 vars.set(name, val);
@@ -144,7 +145,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         }
       }
 
-      todo.push(...child.children.filter(isXmlElem));
+      todo.push(...child.children.filter(isXmlElement));
     }
   }
   return results;

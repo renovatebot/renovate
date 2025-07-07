@@ -334,7 +334,7 @@ export async function getReleaseNotesMd(
   project: ChangeLogProject,
   release: ChangeLogRelease,
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository } = project;
+  const { baseUrl, repository, packageName } = project;
   const version = release.version;
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
 
@@ -366,33 +366,45 @@ export async function getReleaseNotesMd(
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
             .filter(Boolean);
-          let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
+          const notesSourceUrl = getNotesSourceUrl(
+            baseUrl,
+            repository,
+            project,
+            changelogFile,
+          );
+          const mdHeadingLink = title
+            .filter((word) => !isHttpUrl(word))
+            .join('-')
+            .replace(regEx(/[^A-Za-z0-9-]/g), '');
+          const url = `${notesSourceUrl}#${mdHeadingLink}`;
+          // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              const notesSourceUrl = getNotesSourceUrl(
-                baseUrl,
-                repository,
-                project,
-                changelogFile,
-              );
-              const mdHeadingLink = title
-                .filter((word) => !isHttpUrl(word))
-                .join('-')
-                .replace(regEx(/[^A-Za-z0-9-]/g), '');
-              const url = `${notesSourceUrl}#${mdHeadingLink}`;
-              body = massageBody(body, baseUrl);
-              if (body?.length) {
-                try {
-                  body = await linkify(body, {
-                    repository: `${baseUrl}${repository}`,
-                  });
-                } catch (err) /* istanbul ignore next */ {
-                  logger.warn({ body, err }, 'linkify error');
-                }
-              }
               return {
-                body,
+                body: await linkifyBody(project, body),
+                url,
+                notesSourceUrl,
+              };
+            }
+          }
+          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+          const releasesRegex = regEx(/([0-9]{4}-[0-9]{2}-[0-9]{2})/);
+          if (packageName && heading.search(releasesRegex) !== -1) {
+            // Now check if any line contains both the package name and the version
+            const bodyLines = body.split('\n');
+            if (
+              bodyLines.some(
+                (line) =>
+                  line.includes(packageName) &&
+                  line.includes(version) &&
+                  !isHttpUrl(line),
+              )
+            ) {
+              logger.trace({ body }, 'Found release notes for v' + version);
+              return {
+                body: await linkifyBody(project, body),
                 url,
                 notesSourceUrl,
               };
@@ -523,4 +535,21 @@ function getNotesSourceUrl(
     'HEAD',
     changelogFile,
   );
+}
+
+async function linkifyBody(
+  { baseUrl, repository }: ChangeLogProject,
+  bodyStr: string,
+): Promise<string> {
+  const body = massageBody(bodyStr, baseUrl);
+  if (body?.length) {
+    try {
+      return await linkify(body, {
+        repository: `${baseUrl}${repository}`,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ body, err }, 'linkify error');
+    }
+  }
+  return body;
 }

@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
-import { applySecretsToConfig } from '../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -20,6 +20,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import {
+  AbandonedPackageStats,
   DatasourceCacheStats,
   HttpCacheStats,
   HttpStats,
@@ -49,7 +50,11 @@ export async function renovateRepository(
 ): Promise<ProcessResult | undefined> {
   splitInit();
   let config = GlobalConfig.set(
-    applySecretsToConfig(repoConfig, undefined, false),
+    applySecretsAndVariablesToConfig({
+      config: repoConfig,
+      deleteVariables: false,
+      deleteSecrets: false,
+    }),
   );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
@@ -111,7 +116,7 @@ export async function renovateRepository(
           configMigrationRes,
         );
       }
-      await finalizeRepo(config, branchList);
+      await finalizeRepo(config, branchList, repoConfig);
       // TODO #22198
       repoResult = processResult(config, res!);
     }
@@ -149,6 +154,7 @@ export async function renovateRepository(
   HttpCacheStats.report();
   LookupStats.report();
   ObsoleteCacheHitLogger.report();
+  AbandonedPackageStats.report();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   resetRepositoryLogLevelRemaps();

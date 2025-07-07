@@ -16,6 +16,11 @@ export interface DecoratorCachedRecord {
   cachedAt: string;
 }
 
+/* IMPORTANT:
+ * These namespaces below are used as part of the cacheTtlOverride feature
+ * It's OK to add to them (e.g. for new datasources) but we should avoid
+ * backwards-incompatible changes in non-major releases
+ */
 export type PackageCacheNamespace =
   | '_test-namespace'
   | 'changelog-bitbucket-notes@v2'
@@ -80,10 +85,8 @@ export type PackageCacheNamespace =
   | 'datasource-hexpm-bob'
   | 'datasource-java-version'
   | 'datasource-jenkins-plugins'
-  | 'datasource-maven'
-  | 'datasource-maven:head-requests-timeout'
-  | 'datasource-maven:head-requests'
-  | 'datasource-maven:metadata-xml'
+  | 'datasource-maven:cache-provider'
+  | 'datasource-maven:postprocess-reject'
   | 'datasource-node-version'
   | 'datasource-npm:cache-provider'
   | 'datasource-nuget-v3'
@@ -93,6 +96,7 @@ export type PackageCacheNamespace =
   | 'datasource-python-version'
   | 'datasource-releases'
   | 'datasource-repology'
+  | 'datasource-rpm'
   | 'datasource-ruby-version'
   | 'datasource-rubygems'
   | 'datasource-sbt-package'
@@ -107,4 +111,5 @@ export type PackageCacheNamespace =
   | 'terraform-provider-hash'
   | 'url-sha256';
 
-export type CombinedKey = `global%%${PackageCacheNamespace}%%${string}`;
+export type CombinedKey =
+  `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

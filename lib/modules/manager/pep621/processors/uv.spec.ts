@@ -226,6 +226,48 @@ describe('modules/manager/pep621/processors/uv', () => {
     ]);
   });
 
+  it('index with optional name', () => {
+    const pyproject = {
+      tool: {
+        uv: {
+          index: [
+            {
+              url: 'https://foo.com/simple',
+              default: true,
+              explicit: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const dependencies = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+      },
+    ];
+
+    const result = processor.process(pyproject, dependencies);
+
+    expect(result).toEqual([
+      {
+        depName: 'dep1',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep1',
+      },
+      {
+        depName: 'dep2',
+        registryUrls: ['https://foo.com/simple'],
+        packageName: 'dep2',
+      },
+    ]);
+  });
+
   it('override implicit default index', () => {
     const pyproject = {
       tool: {
@@ -359,7 +401,16 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        {
+          project: {
+            'requires-python': '==3.11.1',
+          },
+          tool: {
+            uv: {
+              'required-version': '==0.2.35',
+            },
+          },
+        },
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -378,9 +429,9 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
-            'install-tool python 3.11.2 ' +
+            'install-tool python 3.11.1 ' +
             '&& ' +
-            'install-tool uv 0.2.28 ' +
+            'install-tool uv 0.2.35 ' +
             '&& ' +
             'uv lock --upgrade-package dep1' +
             '"',
@@ -430,8 +481,8 @@ describe('modules/manager/pep621/processors/uv', () => {
       const updatedDeps = [
         { packageName: 'dep1', depType: depTypes.dependencies },
         { packageName: 'dep2', depType: depTypes.dependencies },
-        { depName: 'group1/dep3', depType: depTypes.optionalDependencies },
-        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        { depName: 'dep3', depType: depTypes.optionalDependencies },
+        { depName: 'dep4', depType: depTypes.optionalDependencies },
         { depName: 'dep5', depType: depTypes.uvDevDependencies },
         { depName: 'dep6', depType: depTypes.uvDevDependencies },
         { depName: 'dep7', depType: depTypes.buildSystemRequires },
@@ -440,7 +491,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: {
+            constraints: {},
+          },
           updatedDeps,
         },
         {},
@@ -530,6 +583,12 @@ describe('modules/manager/pep621/processors/uv', () => {
           datasource: PypiDatasource.id,
           registryUrls: ['https://pinned.com/simple'],
         },
+        {
+          packageName: 'dep7',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://unnamed.com/simple'],
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -551,6 +610,11 @@ describe('modules/manager/pep621/processors/uv', () => {
                   default: false,
                   explicit: true,
                 },
+                {
+                  url: 'https://unnamed.com/simple',
+                  default: false,
+                  explicit: true,
+                },
               ],
             },
           },
@@ -567,7 +631,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package dep2 --upgrade-package dep3 --upgrade-package dep4 --upgrade-package dep5 --upgrade-package dep6 --upgrade-package dep7',
           options: {
             env: {
               GIT_CONFIG_COUNT: '6',

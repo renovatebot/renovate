@@ -165,7 +165,8 @@ export class UvProcessor implements PyProjectProcessor {
       };
       const uvConstraint: ToolConstraint = {
         toolName: 'uv',
-        constraint: config.constraints?.uv,
+        constraint:
+          config.constraints?.uv ?? project.tool?.uv?.['required-version'],
       };
 
       const extraEnv = {
@@ -231,7 +232,7 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   for (const dep of updatedDeps) {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
-        deps.push(dep.depName!.split('/')[1]);
+        deps.push(dep.depName!);
         break;
       }
       case depTypes.uvDevDependencies:
@@ -341,6 +342,11 @@ async function getUvIndexCredentials(
     const parsedUrl = parseUrl(url);
     // istanbul ignore if
     if (!parsedUrl) {
+      continue;
+    }
+
+    // If no name is provided for the index, authentication information must be passed through alternative methods
+    if (!name) {
       continue;
     }
 

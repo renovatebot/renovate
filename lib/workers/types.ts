@@ -79,6 +79,7 @@ export interface BranchUpgradeConfig
 
   hasReleaseNotes?: boolean;
   homepage?: string;
+  changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;
@@ -163,7 +164,7 @@ export interface BranchSummary {
 export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
-  fileMatch?: string[];
+  managerFilePatterns?: string[];
   includePaths?: string[];
   ignorePaths?: string[];
   enabled?: boolean;

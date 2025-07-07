@@ -72,6 +72,7 @@ const UvSource = z.union([
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
+  'required-version': z.string().optional(),
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
@@ -80,7 +81,7 @@ const UvSchema = z.object({
   index: z
     .array(
       z.object({
-        name: z.string(),
+        name: z.string().optional(),
         url: z.string(),
         default: z.boolean().default(false),
         explicit: z.boolean().default(false),

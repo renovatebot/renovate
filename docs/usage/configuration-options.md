@@ -25,6 +25,11 @@ You can store your Renovate configuration file in one of these locations:
 !!! warning
     Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+     We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
+
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
 
@@ -48,6 +53,43 @@ When an array or object configuration option is `mergeable`, it means that value
     Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
 ---
+
+## abandonmentThreshold
+
+The `abandonmentThreshold` option allows Renovate to flag packages as abandoned when they haven't received updates for a specified period of time.
+
+Renovate adds an `isAbandoned` boolean property to the package lookup result when:
+
+- `abandonmentThreshold` is defined (not `null`)
+- The package has a `mostRecentTimestamp` timestamp available from the datasource
+
+The `mostRecentTimestamp` timestamp represents the release date of the highest version, but only if that version also has the most recent timestamp among all releases.
+This ensures abandonment detection is based on normal package release patterns.
+
+If a package's most recent release date plus the `abandonmentThreshold` duration is in the past, the package is marked as abandoned (`isAbandoned: true`).
+
+This option accepts time duration strings like `1 year`, `6 months`, `90 days`, etc.
+
+Example usage:
+
+```json
+{
+  "abandonmentThreshold": "2 years"
+}
+```
+
+You can also apply this setting selectively using `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "abandonmentThreshold": "1 year"
+    }
+  ]
+}
+```
 
 ## addLabels
 
@@ -114,6 +156,8 @@ This option _adds_ to the existing reviewer list, rather than _replacing_ it lik
 Use `additionalReviewers` when you want to add to a preset or base list, without replacing the original.
 For example, when adding focused reviewers for a specific package group.
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## assignAutomerge
 
 By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
@@ -133,6 +177,10 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
 
 ## assigneesSampleSize
 
@@ -460,6 +508,141 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 
 For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
 
+## bumpVersions
+
+The `bumpVersions` option allows Renovate to update semantic version strings in your code when dependencies are updated.
+This is useful for files or version fields that Renovate does not natively support or for custom versioning needs.
+
+The option is an array of rules, each specifying how and where to bump versions. Each rule includes the following fields:
+
+- `filePatterns`: A list of regex patterns to match file names. These patterns follow Renovate's [string pattern matching syntax](./string-pattern-matching.md). Templates can also be used for dynamic patterns.
+- `matchStrings`: An array of regex patterns to locate version strings within the matched files. Any of the regexes can match the content. Each pattern must include a named capture group `version` to extract the version string.
+- `bumpType`: Specifies the type of version bump which defaults to `patch`. This field supports templates for conditional logic. Supported values are documented in the [bumpType section](#bumptype).
+- `name` (optional): A descriptive name for the rule, which is used in logs for easier identification.
+
+<!-- prettier-ignore -->
+!!! tip
+    You can use templates in `filePatternTemplates`, `bumpType`, and `matchStrings`.
+    This way you can leverage the power of Renovate's templating engine to change based on the context of the upgrade.
+
+Here is an example of a `bumpVersions` configuration:
+
+```json
+{
+  "bumpVersions": [
+    {
+      "name": "Updating release version file",
+      "filePatterns": [".release-version"],
+      "bumpType": "minor",
+      "matchStrings": ["^(?<version>.+)$"]
+    }
+  ]
+}
+```
+
+In this example:
+
+- Renovate scans files named `.release-version`.
+- It matches the entire file content as the version string.
+- It bumps the version to the next minor release.
+
+**Conditional Bumping with `packageRules`:**
+
+You can use `packageRules` to apply `bumpVersions` conditionally.
+For example, to bump versions only for updates in the `charts/` directory:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["charts/**"],
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+In this configuration:
+
+- If Renovate updates dependencies in the `charts/` directory check the `Chart.yaml` file next to the updated file.
+- The version string is extracted from lines matching `version: <value>`.
+- The `bumpType` is dynamically set to `patch` for if the dependency update is a patch update and `minor` otherwise.
+
+**debugging `bumpVersions`**
+
+Use [`logLevelRemap`](#loglevelremap) to remap, `trace` log level messages to a higher level e.g. `debug`.
+All messages are prefixed with `bumpVersions` or `bumpVersions(<name>)` to help you filter them in the logs.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/bumpVersions/",
+      "newLogLevel": "debug"
+    }
+  ]
+}
+```
+
+### bumpType
+
+The `bumpType` field specifies the type of version bump to apply.
+Supported values are:
+
+- `prerelease`
+- `patch`
+- `minor`
+- `major`
+
+This field supports templates for conditional logic.
+For example:
+
+```json
+{
+  "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+}
+```
+
+In this example, the bump type is set to `patch` for patch updates and `minor` for all other cases.
+
+### filePatterns
+
+The `filePatterns` field defines which files should be scanned for version strings.
+It accepts one or more patterns following Renovate's [string pattern matching syntax](./string-pattern-matching.md).
+Templates can also be used for dynamic patterns. See [Templates](./templates.md) for more information.
+
+For example:
+
+```json
+{
+  "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
+}
+```
+
+This configuration matches files named `version.txt` in any directory and `Chart.yaml` files in specific package directories.
+
+---
+
+### name
+
+The `name` field is an optional identifier for the bump version rule. It is used in logs to help identify which rule is being applied.
+
+For example:
+
+```json
+{
+  "name": "Update release version"
+}
+```
+
+This name will appear in Renovate logs, making it easier to debug or trace specific rules.
+
 ## cloneSubmodules
 
 Enabling this option will mean that detected Git submodules will be cloned at time of repository clone.
@@ -610,9 +793,10 @@ For more details, read the [config migration documentation](./config-migration.m
 
 ## configWarningReuseIssue
 
-Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
-However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
-Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+If no existing issue is found, Renovate's default behavior is to create a new Config Warning issue.
+Accordingly, you'll get a new issue each time you have a Config Warning, although never more than one open at a time.
+Configure this option to `true` if you prefer Renovate to reopen any found matching closed issue whenever there is a config warning.
+The downside of this is that you may end up with a very old issue getting "recycled" each time and it will sort older than others.
 
 ## constraints
 
@@ -719,9 +903,9 @@ Renovate has two custom managers:
 | `regex`        | Regular Expression, with named capture groups. |
 | `jsonata`      | JSONata query.                                 |
 
-To use a custom manager, you need give some information:
+To use a custom manager, you must give Renovate this information:
 
-1. `fileMatch`: name/pattern of the file to extract deps from
+1. `managerFilePatterns`: regex/glob pattern of the file to extract deps from
 1. `matchStrings`: `regex` patterns or `jsonata` queries used to process the file
 
 The `matchStrings` must capture/extract the following three fields:
@@ -763,7 +947,7 @@ image: my.old.registry/aRepository/andImage:1.18-alpine
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
@@ -802,7 +986,7 @@ Example:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["values.yaml$"],
+      "managerFilePatterns": ["/values.yaml$/"],
       "matchStrings": [
         "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
       ]
@@ -817,7 +1001,7 @@ Example:
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": ["file.json"],
+      "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
       ]
@@ -864,7 +1048,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "json",
-      "fileMatch": [".renovaterc"],
+      "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -879,7 +1063,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "fileMatch": ["file.yml"],
+      "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -894,7 +1078,7 @@ Only the `json`, `toml` and `yaml` formats are supported.
     {
       "customType": "jsonata",
       "fileFormat": "toml",
-      "fileMatch": ["file.toml"],
+      "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
       ]
@@ -953,7 +1137,7 @@ As example the following configuration will update all three lines in the Docker
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "managerFilePatterns": ["/^Dockerfile$/"],
       "matchStringsStrategy": "any",
       "matchStrings": [
         "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
@@ -991,7 +1175,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"backup\":\\s*{[^}]*}",
@@ -1001,7 +1185,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^example.json$"],
+      "managerFilePatterns": ["/^example.json$/"],
       "matchStringsStrategy": "recursive",
       "matchStrings": [
         "\"test\":\\s*\\{[^}]*}",
@@ -1047,7 +1231,7 @@ Matched group values will be merged to form a single dependency.
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1056,7 +1240,7 @@ Matched group values will be merged to form a single dependency.
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["^main.yml$"],
+      "managerFilePatterns": ["/^main.yml$/"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
         "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
@@ -1192,7 +1376,7 @@ You can configure Renovate to wait for approval for:
 - specific package upgrades
 - upgrades coming from specific package managers
 
-If you want to approve _all_ upgrades, set `dependencyDashboardApproval` to `true`:
+If you want to require approval for _all_ upgrades, set `dependencyDashboardApproval` to `true`:
 
 ```json
 {
@@ -1250,6 +1434,15 @@ You will only get OSV-based vulnerability alerts for direct dependencies.
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
+
+## dependencyDashboardReportAbandonment
+
+Controls whether abandoned packages are reported in the dependency dashboard.
+
+When enabled (default), Renovate will display a collapsible section in the dependency dashboard listing packages that have been identified as abandoned based on the `abandonmentThreshold` configuration.
+This helps you identify dependencies that may need attention due to lack of maintenance.
+
+Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
 ## dependencyDashboardTitle
 
@@ -1502,35 +1695,6 @@ If you are running on any platform except `github.com`, you need to [configure a
     Renovate can only show changelogs from some platforms and some package managers.
     We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
-
-## fileMatch
-
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
-`fileMatch` patterns in the user config are added to the default values and do not replace them.
-The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
-
-Some `fileMatch` patterns are short, like Renovate's default Go Modules `fileMatch` for example.
-Here Renovate looks for _any_ `go.mod` file.
-In this case you can probably keep using that default `fileMatch`.
-
-At other times, the possible files is too vague for Renovate to have any default.
-For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
-
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
-For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$', '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$']`.
-This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
-Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could add the missing file like this:
-
-```json
-{
-  "dockerfile": {
-    "fileMatch": ["^ACTUALLY_A_DOCKERFILE\\.template$"]
-  }
-}
-```
-
-If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -2263,9 +2427,32 @@ In the case that a user is automatically added as reviewer (such as Renovate App
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## ignoreScripts
 
-Applicable for npm, bun, Composer and Copier only for now. Set this to `true` if running scripts causes problems.
+By default, Renovate will disable package manager scripts.
+Allowing packager manager scripts is a risk:
+
+- Untrusted or compromised repository users could use package manager scripts to exploit the system where Renovate runs, and
+- Malicious package authors could use scripts to exploit a repository and Renovate system, for example to exfiltrate source code and secrets
+
+**No script execution on free Mend-hosted Renovate**
+
+The Mend Renovate App does not allow scripts to run.
+We do not plan to let users on free tiers run scripts, because the risk of abuse is too high.
+
+**Renovate Enterprise Cloud can be configured to run scripts**
+
+Scripts can be enabled for paying customers on Mend.io hosted apps.
+Please ask Mend.io sales about "Renovate Enterprise Cloud".
+
+**Allowing scripts if self-hosting Renovate**
+
+If you are self-hosting Renovate, and want to allow Renovate to run any scripts:
+
+1. Set the self-hosted config option [`allowScripts`](./self-hosted-configuration.md#allowscripts) to `true` in your bot/admin configuration
+1. Set `ignoreScripts` to `false` for the package managers you want to allow to run scripts (only works for the supportedManagers listed in the table above)
 
 ## ignoreTests
 
@@ -2372,28 +2559,29 @@ Renovate then commits that lock file to the update branch and creates the lock f
 
 Supported lock files:
 
-- `.terraform.lock.hcl`
-- `Cargo.lock`
-- `Chart.lock`
-- `composer.lock`
-- `conan.lock`
-- `flake.lock`
-- `Gemfile.lock`
-- `gradle.lockfile`
-- `jsonnetfile.lock.json`
-- `manifest.toml`
-- `package-lock.json`
-- `packages.lock.json`
-- `pdm.lock`
-- `Pipfile.lock`
-- `pnpm-lock.yaml`
-- `poetry.lock`
-- `pubspec.lock`
-- `pyproject.toml`
-- `requirements.txt`
-- `uv.lock`
-- `yarn.lock`
-- `pixi.lock`
+| Manager           | Lockfile                                           |
+| ----------------- | -------------------------------------------------- |
+| `bun`             | `bun.lockb`, `bun.lock`                            |
+| `bundler`         | `Gemfile.lock`                                     |
+| `cargo`           | `Cargo.lock`                                       |
+| `composer`        | `composer.lock`                                    |
+| `conan`           | `conan.lock`                                       |
+| `devbox`          | `devbox.lock`                                      |
+| `gleam`           | `manifest.toml`                                    |
+| `gradle`          | `gradle.lockfile`                                  |
+| `helmv3`          | `Chart.lock`                                       |
+| `jsonnet-bundler` | `jsonnetfile.lock.json`                            |
+| `mix`             | `mix.lock`                                         |
+| `nix`             | `flake.lock`                                       |
+| `npm`             | `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock` |
+| `nuget`           | `packages.lock.json`                               |
+| `pep621`          | `pdm.lock`, `uv.lock`                              |
+| `pip-compile`     | `requirements.txt`                                 |
+| `pipenv`          | `Pipfile.lock`                                     |
+| `pixi`            | `pixi.lock`                                        |
+| `poetry`          | `poetry.lock`                                      |
+| `pub`             | `pubspec.lock`                                     |
+| `terraform`       | `.terraform.lock.hcl`                              |
 
 Support for new lock files may be added via feature request.
 
@@ -2437,6 +2625,47 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## managerFilePatterns
+
+Formerly known as `fileMatch`, which supported regex-only.
+
+`managerFilePatterns` supports both regex and glob patterns.
+Any existing config containing `fileMatch` patterns will be automatically migrated.
+
+Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
+
+`managerFilePatterns` tells Renovate which repository files to parse and extract.
+Patterns in the user config are _added_ to the default values, they do not replace the default values.
+
+The default `managerFilePatterns` patterns can not be removed.
+If you need to include, or exclude, specific paths then use the [`ignorePaths`](#ignorepaths) or [`includePaths`](#includepaths) instead.
+
+Some managers have sensible defaults.
+For example, the Go manager looks for _any_ `go.mod` file by default, which covers most cases without extra configuration.
+
+At other times, the possible files is too vague for Renovate to have any default.
+For example, Kubernetes manifests can exist in any `*.yaml` file.
+We do not want Renovate to parse every YAML file in every repository, just in case _some_ of them have a Kubernetes manifest.
+Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
+Because the array is empty, you as user must tell Renovate which directories/files to check.
+
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
+For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
+This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
+Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
+
+```json
+{
+  "dockerfile": {
+    "managerFilePatterns": ["/^ACTUALLY_A_DOCKERFILE\\.template$/"]
+  }
+}
+```
+
+You must configure `managerFilePatterns` _inside_ a manager object.
+In the example above, the manager object is the `dockerfile`.
+For reference, here is a [list of supported managers](modules/manager/index.md#supported-managers).
 
 ## milestone
 
@@ -2663,7 +2892,10 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` glob (which can include an exact file name match) or RE2 regex.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -2705,9 +2937,13 @@ For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 
 
 Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
+<!-- prettier-ignore -->
+!!! warning
+    `allowedVersions` and `matchUpdateTypes` cannot be used in the same package rule.
+
 #### Using regular expressions
 
-You can use Regular Expressions in the `allowedVersion` config.
+You can use Regular Expressions in the `allowedVersions` config.
 You must _begin_ and _end_ your Regular Expression with the `/` character!
 
 For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
@@ -2998,11 +3234,18 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
+This matching can be an exact match, Glob match, or Regular Expression match.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
 Invalid if used outside of a `packageRule`.
 
 ### matchFileNames
 
-Renovate will compare `matchFileNames` glob matching against the dependency's package file and also lock file if one exists.
+Renovate will compare `matchFileNames` glob or RE2 regex matching against the dependency's package file and also lock file if one exists.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
@@ -3040,6 +3283,20 @@ The following example matches any file in directories starting with `app/`:
       "description": "Group all dependencies from the app directory",
       "matchFileNames": ["app/**"],
       "groupName": "App dependencies"
+    }
+  ]
+}
+```
+
+The following example matches any `.toml` file in a `v2` or `v3` directory:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from legacy projects",
+      "matchFileNames": ["/v[123]/.*\\.toml/"],
+      "groupName": "Legacy project dependencies"
     }
   ]
 }
@@ -3222,6 +3479,10 @@ For more details on supported syntax see Renovate's [string pattern matching doc
     Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
     When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
     Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
+
+<!-- prettier-ignore -->
+!!! warning
+    `matchUpdateTypes` and `allowedVersions` cannot be used in the same package rule.
 
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
@@ -3543,7 +3804,7 @@ Table with options:
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
 | `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                               |
 | `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
-| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
+| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                         |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -3571,17 +3832,42 @@ e.g.
 }
 ```
 
-The `postUpgradeTasks` configuration consists of three fields:
+The `postUpgradeTasks` configuration consists of four fields:
 
 ### commands
 
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
-You can use variable templating in your commands as long as [`allowCommandTemplating`](./self-hosted-configuration.md#allowcommandtemplating) is enabled.
+You can use Handlebars templating in these commands.
+They will be compiled _prior_ to the comparison against [`allowedCommands`](./self-hosted-configuration.md#allowedcommands).
 
 <!-- prettier-ignore -->
 !!! note
     Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](#filefilters) instead.
+
+### dataFileTemplate
+
+A template to create data file from.
+The template uses the same format as `commands`.
+The data file is created as a temporary file and the path to the data file is stored in the `RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE` environment variable avaliable to each post-upgrade command.
+The primary purpose of the data file is to store some update information in a file which would be consumed from a post-upgrade command.
+This is particularly useful if a post-upgrade command needs to have a long line of arguments.
+Example:
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": [
+      "my-script.py --data-file \"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+    ],
+    "dataFileTemplate": "[{{#each upgrades}}{\"depName\": \"{{{depName}}}\", \"currentValue\": \"{{{currentValue}}}\", \"newValue\": \"{{{newValue}}}\"}{{#unless @last}},{{\/unless}}{{\/each}}]"
+  }
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+   `dataFileTemplate` is ignored if there is no `commands` configured.
 
 ### executionMode
 
@@ -3983,6 +4269,8 @@ For example: if the username or team name is `bar` then you would set the config
 }
 ```
 
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
@@ -3992,6 +4280,12 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitHub Docs, About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
+
+Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
+<!-- prettier-ignore -->
+!!! note
+    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
 
 ## reviewersSampleSize
 
@@ -4311,6 +4605,27 @@ We do not recommend overriding the default versioning, but there are some cases 
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
 Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
+
+A key characteristic of the `"docker"` versioning is that it attempts to preserve the precision of the current version string. For example, if your current version has two parts (e.g., 5.6), Renovate will propose updates that also have two parts (e.g., 5.7), rather than a three-part SemVer equivalent (e.g., 5.7.0).
+
+Example Use Case: "Floating Patch Versions" using 2 digits versioning
+
+You may want to use a 2-part version like 5.6 to indicate the minor version while automatically receiving the latest patch updates (a "floating patch"). At the same time, you still want Renovate to create merge requests for minor or major updates like 5.7 or 6.2. The default semver versioning would update 5.6 to a 3-part version like 5.6.1, which would break the floating patch behavior.
+
+In the below `renovate.json` extract example, Renovate will use the `docker` versioning for the `.gitlab-ci.yml` file, so you can pin the minor version while still receiving the latest patch updates.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageFileNames": [".gitlab-ci.yml"],
+      "versioning": "docker"
+    }
+  ]
+}
+```
+
+When using this strategy, make sure that the package you're referencing does support 2-part versions, e.g. that it has a version like `5.6` available in the registry in addition to `5.6.1` or `5.6.2`.
 
 ## vulnerabilityAlerts
 

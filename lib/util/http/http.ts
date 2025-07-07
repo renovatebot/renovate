@@ -10,8 +10,10 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { getEnv } from '../env';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { Toml } from '../schema-utils';
 import { ObsoleteCacheHitLogger } from '../stats';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url';
 import { parseSingleYaml } from '../yaml';
@@ -82,7 +84,7 @@ export abstract class HttpBase<
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    const retryLimit = getEnv().NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<InternalGotOptions>(
       options,
       {
@@ -160,6 +162,7 @@ export abstract class HttpBase<
     const { cacheProvider } = options;
 
     const memCacheKey =
+      !process.env.RENOVATE_X_DISABLE_HTTP_MEMCACHE &&
       !cacheProvider &&
       options.memCache !== false &&
       (options.method === 'get' || options.method === 'head')
@@ -205,7 +208,9 @@ export abstract class HttpBase<
       const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
+      const queuedTask = queue
+        ? () => queue.add(throttledTask, { throwOnTimeout: true })
+        : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
       resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
@@ -652,5 +657,44 @@ export abstract class HttpBase<
     combinedOptions = applyAuthorization(combinedOptions);
 
     return stream(resolvedUrl, combinedOptions);
+  }
+
+  async getToml<Schema extends ZodType<any, any, any>>(
+    url: string,
+    schema?: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getToml<Schema extends ZodType<any, any, any>>(
+    url: string,
+    options: JSONOpts,
+    schema: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  async getToml<Schema extends ZodType<any, any, any>>(
+    arg1: string,
+    arg2?: JSONOpts | Schema,
+    arg3?: Schema,
+  ): Promise<HttpResponse<Infer<Schema>>> {
+    const { url, schema, httpOptions } = this.resolveArgs<Infer<Schema>>(
+      arg1,
+      arg2,
+      arg3,
+    );
+
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/toml',
+        ...httpOptions?.headers,
+      },
+    };
+
+    const res = await this.getText(url, opts);
+    if (schema) {
+      res.body = await Toml.pipe(schema).parseAsync(res.body);
+    } else {
+      res.body = (await Toml.parseAsync(res.body)) as Infer<Schema>;
+    }
+
+    return res;
   }
 }

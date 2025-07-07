@@ -32,6 +32,7 @@
     "aspnet extensions": "https://github.com/aspnet/Extensions",
     "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
+    "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
     "auto": "https://github.com/intuit/auto",
     "autofixture": "https://github.com/AutoFixture/AutoFixture",
@@ -272,10 +273,12 @@
     "dot-swashbuckle": "https://github.com/Havunen/DotSwashbuckle",
     "dotnet": [
       "https://github.com/dotnet/aspnetcore",
+      "https://github.com/dotnet/dotnet",
       "https://github.com/dotnet/efcore",
       "https://github.com/dotnet/extensions",
       "https://github.com/dotnet/fsharp",
       "https://github.com/dotnet/maui",
+      "https://github.com/dotnet/msbuild",
       "https://github.com/dotnet/roslyn",
       "https://github.com/dotnet/runtime",
       "https://github.com/dotnet/scaffolding",
@@ -299,6 +302,7 @@
     "embla-carousel": "https://github.com/davidjerleke/embla-carousel",
     "emojibase": "https://github.com/milesj/emojibase",
     "emotion": "https://github.com/emotion-js/emotion",
+    "enumeratum": "https://github.com/lloydmeta/enumeratum",
     "envelop": "https://github.com/n1ru4l/envelop",
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
@@ -319,11 +323,17 @@
     ],
     "formatjs": "https://github.com/formatjs/formatjs",
     "framework7": "https://github.com/framework7io/framework7",
+    "fumadocs": "https://github.com/fuma-nama/fumadocs",
     "funogram": "https://github.com/Dolfik1/Funogram",
+    "fusioncache": "https://github.com/ZiggyCreatures/FusionCache",
     "gatsby": "https://github.com/gatsbyjs/gatsby",
     "gitbeaker": "https://github.com/jdalrymple/gitbeaker",
     "github-workflows-kt": "https://github.com/typesafegithub/github-workflows-kt",
     "go-cloud": "https://github.com/google/go-cloud",
+    "gomock": [
+      "https://github.com/uber-go/mock",
+      "https://github.com/uber/mock"
+    ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
@@ -359,7 +369,8 @@
       "https://github.com/FasterXML/jackson-dataformats-binary",
       "https://github.com/FasterXML/jackson-dataformats-text",
       "https://github.com/FasterXML/jackson-jaxrs-providers",
-      "https://github.com/FasterXML/jackson-module-kotlin"
+      "https://github.com/FasterXML/jackson-module-kotlin",
+      "https://github.com/FasterXML/jackson-module-scala"
     ],
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
@@ -373,7 +384,10 @@
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
-    "junit5": "https://github.com/junit-team/junit5",
+    "junit-framework": [
+      "https://github.com/junit-team/junit5",
+      "https://github.com/junit-team/junit-framework"
+    ],
     "kernelmemory": "https://github.com/microsoft/kernel-memory",
     "kiota": "https://github.com/microsoft/kiota",
     "kotlin": "https://github.com/JetBrains/kotlin",
@@ -435,6 +449,7 @@
       "https://github.com/vercel/next.js"
     ],
     "nextra": "https://github.com/shuding/nextra",
+    "ngx-cookie-service": "https://github.com/stevermeister/ngx-cookie-service",
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly",
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
@@ -447,6 +462,7 @@
       "https://github.com/nuxt/nuxt"
     ],
     "okhttp": "https://github.com/square/okhttp",
+    "openapi-dotnet": "https://github.com/microsoft/OpenAPI.NET",
     "opencost": [
       "https://github.com/opencost/opencost",
       "https://github.com/opencost/opencost-ui"
@@ -467,9 +483,14 @@
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
+    "oxlint": [
+      "https://github.com/oxc-project/oxc",
+      "https://github.com/oxc-project/eslint-plugin-oxlint"
+    ],
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
+    "pdfme": "https://github.com/pdfme/pdfme",
     "percy-cli": "https://github.com/percy/cli",
     "picassojs": "https://github.com/qlik-oss/picasso.js",
     "pixijs": [
@@ -478,7 +499,9 @@
     ],
     "playwright": "https://github.com/microsoft/playwright",
     "playwright-dotnet": "https://github.com/microsoft/playwright-dotnet",
+    "pnpcore": "https://github.com/pnp/pnpcore",
     "pnpjs": "https://github.com/pnp/pnpjs",
+    "polly": "https://github.com/App-vNext/Polly",
     "pollyjs": "https://github.com/Netflix/pollyjs",
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
@@ -502,6 +525,7 @@
       "https://github.com/remix-run/react-router"
     ],
     "react-spectrum": "https://github.com/adobe/react-spectrum",
+    "react-spring": "https://github.com/pmndrs/react-spring",
     "reactivestack-cookies": "https://github.com/reactivestack/cookies",
     "reakit": "https://github.com/reakit/reakit",
     "redwood": "https://github.com/redwoodjs/redwood",
@@ -521,6 +545,7 @@
     "sanity": "https://github.com/sanity-io/sanity",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "scaffdog": "https://github.com/scaffdog/scaffdog",
+    "scalar": "https://github.com/scalar/scalar",
     "sea-orm": "https://github.com/SeaQL/sea-orm",
     "secretlint": "https://github.com/secretlint/secretlint",
     "sendgrid-nodejs": "https://github.com/sendgrid/sendgrid-nodejs",
@@ -544,6 +569,7 @@
     "slim-message-bus": "https://github.com/zarusz/SlimMessageBus",
     "spectre-console": "https://github.com/spectreconsole/spectre.console",
     "springfox": "https://github.com/springfox/springfox",
+    "stack-exchange-redis-extensions": "https://github.com/imperugo/StackExchange.Redis.Extensions",
     "steeltoe": "https://github.com/SteeltoeOSS/steeltoe",
     "storybook": "https://github.com/storybookjs/storybook",
     "storybook-react-native": "https://github.com/storybookjs/react-native",
@@ -551,15 +577,21 @@
     "strum": "https://github.com/Peternator7/strum",
     "stryker-js": "https://github.com/stryker-mutator/stryker-js",
     "stylex-swc": "https://github.com/Dwlad90/stylex-swc-plugin",
-    "surveyjs": "https://github.com/surveyjs/surveyjs",
+    "surveyjs": [
+      "https://github.com/surveyjs/surveyjs",
+      "https://github.com/surveyjs/survey-library",
+      "https://github.com/surveyjs/survey-creator"
+    ],
     "swashbuckle-aspnetcore": "https://github.com/domaindrivendev/Swashbuckle.AspNetCore",
     "system.io.abstractions": "https://github.com/System-IO-Abstractions/System.IO.Abstractions/",
     "tailwindcss": "https://github.com/tailwindlabs/tailwindcss",
+    "taiga-ui": "https://github.com/taiga-family/taiga-ui",
     "tamagui": "https://github.com/tamagui/tamagui",
     "tanstack-form": "https://github.com/TanStack/form",
     "tanstack-query": "https://github.com/TanStack/query",
     "tanstack-router": "https://github.com/TanStack/router",
     "tanstack-table": "https://github.com/TanStack/table",
+    "tanstack-virtual": "https://github.com/TanStack/virtual",
     "tauri": "https://github.com/tauri-apps/tauri",
     "telus-tds": "https://github.com/telusdigital/tds",
     "telus-tds-core": "https://github.com/telus/tds-core",
@@ -595,6 +627,7 @@
     "utoipa": "https://github.com/juhaku/utoipa",
     "vaadin-hilla": "https://github.com/vaadin/hilla",
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
+    "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
@@ -607,6 +640,7 @@
     "webdriverio": "https://github.com/webdriverio/webdriverio",
     "wolverine": "https://github.com/jasperfx/wolverine",
     "workbox": "https://github.com/googlechrome/workbox",
+    "wyw-in-js": "https://github.com/Anber/wyw-in-js",
     "xstate": "https://github.com/statelyai/xstate",
     "xterm": "https://github.com/xtermjs/xterm.js",
     "xunit-dotnet": [
