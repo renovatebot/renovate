@@ -2029,51 +2029,52 @@ describe('modules/platform/azure/index', () => {
   it('returns tag if branch not found', async () => {
     await initRepo({ repository: 'some/repo' });
     const callArgs: any[] = [];
-    // Mock getItem to simulate branch not found, then tag found
-    const gitApiMock = {
-      getItem: vi.fn(
-        (
-          repositoryId: string,
-          path: string,
-          project?: string,
-          scopePath?: string,
-          recursionLevel?: any,
-          includeContentMetadata?: boolean,
-          latestProcessedChange?: boolean,
-          download?: boolean,
-          versionDescriptor?: GitVersionDescriptor,
-          includeContent?: boolean,
-          resolveLfs?: boolean,
-          sanitize?: boolean,
-        ) => {
-          callArgs.push(versionDescriptor);
-          // First call: simulate branch not found (simulate throwing 404 error)
-          if (
-            versionDescriptor &&
-            versionDescriptor.versionType === GitVersionType.Branch
-          ) {
-            return Promise.reject(
-              Object.assign(new Error('Branch not found'), { statusCode: 404 }),
-            );
-          }
-          // Second call: simulate tag found
-          if (
-            versionDescriptor &&
-            versionDescriptor.versionType === GitVersionType.Tag &&
-            versionDescriptor.version === '1.1.1'
-          ) {
-            return Promise.resolve({ content: '{ "test": "tag content" }' });
-          }
-          throw new Error('Unexpected call');
-        },
-      ),
-      getRepositories: vi
-        .fn()
-        .mockResolvedValue([
-          { id: '123456', name: 'repo', project: { name: 'some' } },
-        ]),
-    };
-    azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+    const getItemMock = vi.fn(
+      (
+        repositoryId: string,
+        path: string,
+        project?: string,
+        scopePath?: string,
+        recursionLevel?: any,
+        includeContentMetadata?: boolean,
+        latestProcessedChange?: boolean,
+        download?: boolean,
+        versionDescriptor?: GitVersionDescriptor,
+        includeContent?: boolean,
+        resolveLfs?: boolean,
+        sanitize?: boolean,
+      ) => {
+        callArgs.push(versionDescriptor);
+        if (
+          versionDescriptor &&
+          versionDescriptor.versionType === GitVersionType.Branch
+        ) {
+          return Promise.reject(
+            Object.assign(new Error('Branch not found'), { statusCode: 404 }),
+          );
+        }
+        if (
+          versionDescriptor &&
+          versionDescriptor.versionType === GitVersionType.Tag &&
+          versionDescriptor.version === '1.1.1'
+        ) {
+          return Promise.resolve({ content: '{ "test": "tag content" }' });
+        }
+        throw new Error('Unexpected call');
+      },
+    );
+
+    azureApi.gitApi.mockImplementationOnce(
+      () =>
+        ({
+          getItem: getItemMock,
+          getRepositories: vi
+            .fn()
+            .mockResolvedValue([
+              { id: '123456', name: 'repo', project: { name: 'some' } },
+            ]),
+        }) as any,
+    );
     const result = await azure.getJsonFile('file.json', 'some/repo', '1.1.1');
     expect(result).toEqual({ test: 'tag content' });
     expect(callArgs[0].versionType).toBe(GitVersionType.Branch);
