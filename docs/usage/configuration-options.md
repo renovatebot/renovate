@@ -1676,7 +1676,7 @@ For example, to add reviewers from the "default reviewers" approval rule to all 
 
 <!-- prettier-ignore -->
 !!! note
-GitLab approval rules are only available for the 'Premium' or 'Ultimate' GitLab Tier
+    GitLab approval rules are only available for the 'Premium' or 'Ultimate' GitLab Tier
 
 ## goGetDirs
 

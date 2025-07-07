@@ -764,8 +764,12 @@ export async function createPr({
       `Fetching reviewers from GitLab approval rule: ${platformPrOptions.gitLabReviewersFromApprovalRule}`,
     );
     try {
+      const opts: GitlabHttpOptions = {};
+      opts.cacheProvider = memCacheProvider;
+
       const approvalRules = await gitlabApi.getJson(
         `projects/${config.repository}/approval_rules`,
+        opts,
         GitLabApprovalRules,
       );
 
