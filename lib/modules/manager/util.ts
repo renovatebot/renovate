@@ -1,5 +1,5 @@
 import { detectPlatform } from '../../util/common';
-import { parseGitUrl } from '../../util/git/url';
+import { getHttpUrl, parseGitUrl } from '../../util/git/url';
 import { GitRefsDatasource } from '../datasource/git-refs';
 import { GitTagsDatasource } from '../datasource/git-tags';
 import { GithubTagsDatasource } from '../datasource/github-tags';
@@ -20,10 +20,9 @@ export function applyGitSource(
         platform === 'github'
           ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
-      const { protocol, source, full_name } = parseGitUrl(git);
-      dep.registryUrls = [
-        `${protocol === 'ssh' ? 'https' : protocol}://${source}`,
-      ];
+      const httpUrl = getHttpUrl(git);
+      const { protocol, source, full_name } = parseGitUrl(httpUrl);
+      dep.registryUrls = [`${protocol}://${source}`];
       dep.packageName = full_name;
     } else {
       dep.datasource = GitTagsDatasource.id;
