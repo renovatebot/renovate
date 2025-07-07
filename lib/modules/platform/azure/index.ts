@@ -170,7 +170,7 @@ export async function getRawFile(
         break; // exit loop if item is found
       } else {
         logger.debug(
-          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag}`
+          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag}`,
         );
       }
     }
