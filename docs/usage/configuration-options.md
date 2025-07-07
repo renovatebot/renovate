@@ -1663,7 +1663,8 @@ Renovate can use a GitLab's project approval rule to determine who should review
 This is particularly useful for teams that already have well-defined approval processes in GitLab.
 
 To enable this functionality, use the `gitLabReviewersFromApprovalRule` option to specify the name of the GitLab approval rule to use for selecting reviewers.
-Renovate will then add all reviewers from that rule to the created merge requests. It will add the reviewers only at time of MR creation and does not update them after that.
+Renovate will then add all reviewers from that rule to merge requests it creates.
+It will add the reviewers only at time of MR creation and does not update them after that.
 
 For example, to add reviewers from the "default reviewers" approval rule to all dependency updates:
 
