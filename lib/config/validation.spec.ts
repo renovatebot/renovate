@@ -21,6 +21,20 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
+    it('allow enabled field in vulnerabilityAlerts', async () => {
+      const config = {
+        vulnerabilityAlerts: {
+          enabled: false,
+        },
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toHaveLength(0);
+      expect(warnings).toHaveLength(0);
+    });
+
     it('catches global options in repo config', async () => {
       const config = {
         binarySource: 'something',
