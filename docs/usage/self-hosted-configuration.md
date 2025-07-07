@@ -11,6 +11,10 @@ Do _not_ put the self-hosted config options listed on this page in your "reposit
 
 The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
+<!-- prettier-ignore -->
+!!! note
+     Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
 <!-- prettier-ignore -->
@@ -1307,6 +1311,48 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 You don't need to configure `username` directly if you have already configured `token`.
 Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
+
+## variables
+
+Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
+For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
+
+```js
+module.exports = {
+  variables: {
+    SOME_VARIABLE: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      variables: {
+        SOME_VARIABLE: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["{{ variables.SOME_VARIABLE }}"]
+    }
+  ]
+}
+```
 
 ## writeDiscoveredRepos
 

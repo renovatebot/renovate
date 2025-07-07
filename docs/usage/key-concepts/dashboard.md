@@ -23,7 +23,7 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 
 ```json
 {
-  "extends": ["config:recommended", ":dependencyDashboard"]
+  "extends": ["schedule:automergeDaily", ":dependencyDashboard"]
 }
 ```
 
@@ -65,6 +65,24 @@ Here is an example of how this can look:
 | ---------- | ------------------- | --------------------------------------------------------------------------------- |
 | npm        | `airbnb-prop-types` | ![Available](https://img.shields.io/badge/available-green?style=flat-square)      |
 | npm        | `left-pad`          | ![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square) |
+
+#### Abandonment detection
+
+Renovate includes the `abandonments:recommended` preset (automatically included in `config:best-practices`) to help identify potentially abandoned packages. This preset:
+
+- Sets a default [`abandonmentThreshold`](../configuration-options.md#abandonmentthreshold) of `1 year` for all packages
+- Includes community-sourced overrides for packages that appear abandoned but are still maintained
+- Prevents updates to truly abandoned packages while allowing updates to packages with irregular release schedules
+
+**Usage:**
+
+```json
+{
+  "extends": ["abandonments:recommended"]
+}
+```
+
+You can contribute additional overrides by updating the [`abandonments.json`](https://github.com/renovatebot/renovate/blob/main/lib/data/abandonments.json) file.
 
 ### Visibility into rejected/deferred updates
 
