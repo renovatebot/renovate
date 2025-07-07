@@ -9,6 +9,7 @@ import type {
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
+  GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -127,71 +128,77 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-    const azureApiGit = await azureApi.gitApi();
+  const azureApiGit = await azureApi.gitApi();
 
-    let repoId: string | undefined;
-    if (repoName) {
-      const repos = await azureApiGit.getRepositories();
-      const repo = getRepoByName(repoName, repos);
-      repoId = repo?.id;
-    } else {
-      repoId = config.repoId;
-    }
+  let repoId: string | undefined;
+  if (repoName) {
+    const repos = await azureApiGit.getRepositories();
+    const repo = getRepoByName(repoName, repos);
+    repoId = repo?.id;
+  } else {
+    repoId = config.repoId;
+  }
 
-    if (!repoId) {
-      logger.debug('No repoId so cannot getRawFile');
-      return null;
-    }
+  if (!repoId) {
+    logger.debug('No repoId so cannot getRawFile');
+    return null;
+  }
 
-    let item: any = null;
+  let item: any = null;
 
-    // Try to get file from repo with branch, if not found, then try with tag #36835
-    for (const versionType of ['branch', 'tag']) {
-      const versionDescriptor: GitVersionDescriptor = {
-        version: branchOrTag,
-        // versionDescriptor uses branch by default and do so in case of undefined branchOrTag
-        versionType: versionType == 'branch' ? undefined : 'tag',
-      } as GitVersionDescriptor;
+  // Try to get file from repo with branch, if not found, then try with tag #36835
+  for (const versionType of [GitVersionType.Branch, GitVersionType.Tag]) {
+    const versionDescriptor: GitVersionDescriptor = {
+      version: branchOrTag,
+      versionType,
+    };
 
-      try {
-        logger.debug(`Looking for file: ${fileName} ${repoName} with ${versionType} ${branchOrTag}`);
-        item = await azureApiGit.getItem(
-          repoId,
-          fileName,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          versionDescriptor,
-          true,
+    try {
+      logger.debug(
+        `Looking for file: ${fileName} ${repoName} with ${versionType} ${branchOrTag}`,
+      );
+      item = await azureApiGit.getItem(
+        repoId,
+        fileName,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        versionDescriptor,
+        true,
+      );
+      if (item) {
+        break;
+      }
+    } catch (err) /* v8 ignore start */ {
+      if (err.statusCode && err.statusCode === 404) {
+        logger.debug(
+          `File: ${fileName} not found in ${repoName} as a ${versionType} ${branchOrTag} - trying next versionType`,
         );
-        if (item) break;
-      } catch (err) /* v8 ignore start */ {
-        if (err.statusCode && err.statusCode == 404) {
-          logger.debug(`File: ${fileName} not found in ${repoName} as a ${versionType} ${branchOrTag} - trying next versionType`);
-          continue; // try next versionType
-        }
-        if (
-          err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
-        ) {
-          logger.debug(
-            'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError',
-          );
-          throw new ExternalHostError(err, id);
-        }
-        if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-          throw new ExternalHostError(err, id);
-        }
-        if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-          throw new ExternalHostError(err, id);
-        }
-        throw err;
-      } /* v8 ignore stop */
-
-      return item?.content ?? null;
-    }
+        continue; // try next versionType
+      }
+      if (
+        err.message?.includes(
+          '<title>Azure DevOps Services Unavailable</title>',
+        )
+      ) {
+        logger.debug(
+          'Azure DevOps is currently unavailable when attempting to fetch file - throwing ExternalHostError',
+        );
+        throw new ExternalHostError(err, id);
+      }
+      if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
+        throw new ExternalHostError(err, id);
+      }
+      if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+        throw new ExternalHostError(err, id);
+      }
+      throw err;
+    } /* v8 ignore stop */
+  }
+  return item?.content ?? null;
 }
 
 export async function getJsonFile(
