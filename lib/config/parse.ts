@@ -29,38 +29,40 @@ export function parseFileConfig(
       };
     }
   } else {
-    let allowDuplicateKeys = true;
-    let jsonValidationError = jsonValidator.validate(
-      fileContents,
-      allowDuplicateKeys,
-    );
-    if (jsonValidationError) {
-      const validationError = 'Invalid JSON (parsing failed)';
-      const validationMessage = jsonValidationError;
-      return {
-        success: false,
-        validationError,
-        validationMessage,
-      };
-    }
-    allowDuplicateKeys = false;
-    jsonValidationError = jsonValidator.validate(
-      fileContents,
-      allowDuplicateKeys,
-    );
-    if (jsonValidationError) {
-      const validationError = 'Duplicate keys in JSON';
-      const validationMessage = JSON.stringify(jsonValidationError);
-      return {
-        success: false,
-        validationError,
-        validationMessage,
-      };
-    }
     try {
+      const parsedContents = parseJson(fileContents, fileName);
+      const jsonString = JSON.stringify(parsedContents);
+      let allowDuplicateKeys = true;
+      let jsonValidationError = jsonValidator.validate(
+        jsonString,
+        allowDuplicateKeys,
+      );
+      if (jsonValidationError) {
+        const validationError = 'Invalid JSON (parsing failed)';
+        const validationMessage = jsonValidationError;
+        return {
+          success: false,
+          validationError,
+          validationMessage,
+        };
+      }
+      allowDuplicateKeys = false;
+      jsonValidationError = jsonValidator.validate(
+        jsonString,
+        allowDuplicateKeys,
+      );
+      if (jsonValidationError) {
+        const validationError = 'Duplicate keys in JSON';
+        const validationMessage = JSON.stringify(jsonValidationError);
+        return {
+          success: false,
+          validationError,
+          validationMessage,
+        };
+      }
       return {
         success: true,
-        parsedContents: parseJson(fileContents, fileName),
+        parsedContents,
       };
     } catch (err) {
       logger.debug({ fileContents }, 'Error parsing renovate config');
