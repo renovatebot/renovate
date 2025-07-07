@@ -353,7 +353,8 @@ Configuring this to `true` means that Renovate will mark all PR Tasks as complet
 
 ## bbUseDefaultReviewers
 
-Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only). Renovate will add the reviewers only at time of PR creation and not update them after that.
+Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
+Renovate will add the reviewers only at time of PR creation and not update them after that.
 
 ## branchConcurrentLimit
 
