@@ -129,8 +129,6 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  let item: GitItem | undefined;
-
   try {
     const azureApiGit = await azureApi.gitApi();
 
@@ -148,12 +146,13 @@ export async function getRawFile(
       return null;
     }
 
+        let item: GitItem | undefined;
+        const versionDescriptor: GitVersionDescriptor = {
+      version: branchOrTag,
+    } satisfies GitVersionDescriptor;
     // Try to get file from repo with branch, if not found, then try with tag #36835
     for (const versionType of [GitVersionType.Branch, GitVersionType.Tag]) {
-      const versionDescriptor: GitVersionDescriptor = {
-        version: branchOrTag,
-        versionType,
-      };
+      versionDescriptor.versionType = versionType;
 
       item = await azureApiGit.getItem(
         repoId, // repositoryId
@@ -171,9 +170,8 @@ export async function getRawFile(
         break; // exit loop if item is found
       } else {
         logger.debug(
-          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag} - trying next versionType`,
+          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag}`
         );
-        continue;
       }
     }
     return item?.content ?? null;
