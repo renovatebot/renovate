@@ -1,10 +1,14 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
-import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type {
+  GitPullRequest,
+  GitVersionDescriptor,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
+  GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { Mocked, MockedObject } from 'vitest';
@@ -19,6 +23,7 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
+import { getJsonFile } from '.';
 import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
@@ -2019,5 +2024,59 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toBeNull();
     });
+  });
+
+  it('returns tag if branch not found', async () => {
+    await initRepo({ repository: 'some/repo' });
+    const callArgs: any[] = [];
+    // Mock getItem to simulate branch not found, then tag found
+    const gitApiMock = {
+      getItem: vi.fn(
+        (
+          repositoryId: string,
+          path: string,
+          project?: string,
+          scopePath?: string,
+          recursionLevel?: any,
+          includeContentMetadata?: boolean,
+          latestProcessedChange?: boolean,
+          download?: boolean,
+          versionDescriptor?: GitVersionDescriptor,
+          includeContent?: boolean,
+          resolveLfs?: boolean,
+          sanitize?: boolean,
+        ) => {
+          callArgs.push(versionDescriptor);
+          // First call: simulate branch not found (simulate throwing 404 error)
+          if (
+            versionDescriptor &&
+            versionDescriptor.versionType === GitVersionType.Branch
+          ) {
+            return Promise.reject(
+              Object.assign(new Error('Branch not found'), { statusCode: 404 }),
+            );
+          }
+          // Second call: simulate tag found
+          if (
+            versionDescriptor &&
+            versionDescriptor.versionType === GitVersionType.Tag &&
+            versionDescriptor.version === '1.1.1'
+          ) {
+            return Promise.resolve({ content: '{ "test": "tag content" }' });
+          }
+          throw new Error('Unexpected call');
+        },
+      ),
+      getRepositories: vi
+        .fn()
+        .mockResolvedValue([
+          { id: '123456', name: 'repo', project: { name: 'some' } },
+        ]),
+    };
+    azureApi.gitApi.mockImplementation(() => gitApiMock as any);
+    const result = await azure.getJsonFile('file.json', 'some/repo', '1.1.1');
+    expect(result).toEqual({ test: 'tag content' });
+    expect(callArgs[0].versionType).toBe(GitVersionType.Branch);
+    expect(callArgs[1].versionType).toBe(GitVersionType.Tag);
   });
 });
