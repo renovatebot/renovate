@@ -2048,9 +2048,7 @@ describe('modules/platform/azure/index', () => {
           versionDescriptor &&
           versionDescriptor.versionType === GitVersionType.Branch
         ) {
-          return Promise.reject(
-            Object.assign(new Error('Branch not found'), { statusCode: 404 }),
-          );
+          return Promise.resolve(null);
         }
         if (
           versionDescriptor &&

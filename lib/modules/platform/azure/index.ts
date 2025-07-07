@@ -155,34 +155,25 @@ export async function getRawFile(
         versionType,
       };
 
-      try {
+      item = await azureApiGit.getItem(
+        repoId, // repositoryId
+        fileName, // path
+        undefined, // project
+        undefined, // scopePath
+        undefined, // recursionLevel
+        undefined, // includeContentMetadata
+        undefined, // latestProcessedChange
+        undefined, // download
+        branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+        true, // includeContent
+      );
+      if (item) {
+        break; // exit loop if item is found
+      } else {
         logger.debug(
-          `Looking for file: ${fileName} ${repoName} with ${versionType} ${branchOrTag}`,
+          `File: ${fileName} not found in ${repoName} as ${versionType} ${branchOrTag} - trying next versionType`,
         );
-        item = await azureApiGit.getItem(
-          repoId, // repositoryId
-          fileName, // path
-          undefined, // project
-          undefined, // scopePath
-          undefined, // recursionLevel
-          undefined, // includeContentMetadata
-          undefined, // latestProcessedChange
-          undefined, // download
-          branchOrTag ? versionDescriptor : undefined, // versionDescriptor
-          true, // includeContent
-        );
-        if (item) {
-          break; // exit loop if item is found
-        }
-      } catch (err) /* v8 ignore start */ {
-        if (err.statusCode && err.statusCode === 404) {
-          logger.debug(
-            `File: ${fileName} not found in ${repoName} as a ${versionType} ${branchOrTag} - trying next versionType`,
-          );
-          continue; // try next versionType
-        }
-        throw err;
-      } /* v8 ignore stop */
+      }
     }
   } catch (err) /* v8 ignore start */ {
     if (
