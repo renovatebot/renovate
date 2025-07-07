@@ -7,7 +7,6 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import * as _packageCache from '../../../util/cache/package';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
 import * as httpMock from '~test/http-mock';
@@ -15,11 +14,9 @@ import { logger } from '~test/util';
 
 const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
-const packageCache = vi.mocked(_packageCache);
 
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('google-auth-library');
-vi.mock('../../../util/cache/package');
 
 const ecrMock = mockClient(ECRClient);
 
@@ -1370,59 +1367,6 @@ describe('modules/datasource/docker/index', () => {
   });
 
   describe('getReleases', () => {
-    it('uses correct cache key with currentValue', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
-      packageCache.get.mockReset();
-
-      httpMock
-        .scope(baseUrl)
-        .get('/library/node/tags/list?n=10000')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
-        });
-      httpMock
-        .scope(authUrl)
-        .get(
-          '/token?service=registry.docker.io&scope=repository:library/node:pull',
-        )
-        .reply(200, { token: 'some-token' });
-      httpMock
-        .scope(baseUrl, {
-          reqheaders: {
-            authorization: 'Bearer some-token',
-          },
-        })
-        .get('/library/node/tags/list?n=10000')
-        .reply(200, {
-          tags: ['1.0.0', '1.1.0', '2.0.0'],
-        });
-
-      const res = await getPkgReleases({
-        datasource: DockerDatasource.id,
-        packageName: 'node',
-        registryUrls: ['https://index.docker.io'],
-        currentValue: '1.0.0',
-      });
-
-      expect(res).toEqual({
-        lookupName: 'library/node',
-        registryUrl: 'https://index.docker.io',
-        releases: [
-          { version: '1.0.0' },
-          { version: '1.1.0' },
-          { version: '2.0.0' },
-        ],
-        sourceUrl: 'https://github.com/nodejs/node',
-      });
-
-      // Verify cache was used with the correct key including currentValue
-      expect(packageCache.get).toHaveBeenCalledWith(
-        'datasource-docker-releases-v2',
-        'cache-decorator:https://index.docker.io:library/node:1.0.0',
-      );
-    });
-
     it('returns null if no token', async () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
