@@ -305,29 +305,30 @@ You can use:
 Priority order:
 
 1. Exact namespace matches take highest priority
-2. If no exact match, patterns are evaluated in the order they appear in the object, and the first matching pattern wins
+2. If no exact match, the longest (most specific) matching pattern wins
 
-Examples:
+Example:
 
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker-tags": 120,
-    "datasource-npm": 90,
+    "datasource-docker": 120,
     "datasource-*": 60,
-    "/^changelog-/": 30,
-    "*": 15
+    "datasource-{crate,go}": 90,
+    "/^changelog-/": 45,
+    "*": 30
   }
 }
 ```
 
 In this example:
 
-- `datasource-docker-tags` gets 120 minutes (exact match)
-- `datasource-npm` gets 90 minutes (exact match)
-- Other datasources like `datasource-maven` get 60 minutes (matches `datasource-*` pattern)
-- Changelog namespaces like `changelog-github` get 30 minutes (regex match)
-- Everything else gets 15 minutes (wildcard match)
+- `datasource-docker` gets 120 minutes (exact match - highest priority)
+- `datasource-crate` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-go` gets 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
+- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
+- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
 
 Valid codes for namespaces are as follows:
 

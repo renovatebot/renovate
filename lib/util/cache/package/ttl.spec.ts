@@ -120,10 +120,10 @@ describe('util/cache/package/ttl', () => {
           },
         });
         expect(getTtlOverride('datasource-npm' as never)).toBe(120);
-        expect(getTtlOverride('datasource-docker' as never)).toBe(90); // 'datasource-*' wins because it's the first match
+        expect(getTtlOverride('datasource-docker' as never)).toBe(90); // 'datasource-*' wins because it's longer than '*'
       });
 
-      it('applies first matching pattern when multiple patterns match', () => {
+      it('applies longest matching pattern when multiple patterns match', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-*': 90,
@@ -131,11 +131,28 @@ describe('util/cache/package/ttl', () => {
             '*': 45,
           },
         });
-        // Should return 90 because 'datasource-*' is the first matching pattern
-        expect(getTtlOverride('datasource-npm' as never)).toBe(90);
+        // Should return 100 because 'datasource-n*' is the longest matching pattern
+        expect(getTtlOverride('datasource-npm' as never)).toBe(100);
       });
 
-      it('skips non-numeric values and finds next matching pattern', () => {
+      it('demonstrates longer pattern wins over shorter patterns', () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            '*': 10, // length 1
+            'datasource-*': 20, // length 12
+            'datasource-npm*': 30, // length 15
+            'datasource-npm-*': 40, // length 16
+          },
+        });
+        // Should return 40 because 'datasource-npm-*' is the longest matching pattern
+        expect(getTtlOverride('datasource-npm-registry' as never)).toBe(40);
+        // Should return 30 because 'datasource-npm*' is the longest matching pattern for this namespace
+        expect(getTtlOverride('datasource-npmjs' as never)).toBe(30);
+        // Should return 20 because 'datasource-*' is the longest matching pattern for this namespace
+        expect(getTtlOverride('datasource-docker' as never)).toBe(20);
+      });
+
+      it('skips non-numeric values and finds next longest matching pattern', () => {
         GlobalConfig.set({
           cacheTtlOverride: {
             'datasource-*': 'invalid',
@@ -232,7 +249,7 @@ describe('util/cache/package/ttl', () => {
           },
         });
         // minimatch should be case-insensitive by default
-        expect(getTtlOverride('datasource-docker' as never)).toBe(120); // First match wins
+        expect(getTtlOverride('datasource-docker' as never)).toBe(120); // First match wins when patterns are equal length
       });
     });
   });
