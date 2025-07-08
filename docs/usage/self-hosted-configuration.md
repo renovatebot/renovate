@@ -331,6 +331,8 @@ In this example:
 
 Valid codes for namespaces are as follows:
 
+<!-- cache-namespaces-begin -->
+
 - `changelog-bitbucket-notes@v2`
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`
@@ -418,6 +420,8 @@ Valid codes for namespaces are as follows:
 - `preset`
 - `terraform-provider-hash`
 - `url-sha256`
+
+<!-- cache-namespaces-end -->
 
 ## checkedBranches
 
