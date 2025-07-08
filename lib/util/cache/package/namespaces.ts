@@ -3,8 +3,9 @@
  * It's OK to add to them (e.g. for new datasources) but we should avoid
  * backwards-incompatible changes in non-major releases
  */
+
+/* v8 ignore start -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
-  // Don't forget to update `self-hosted-configuration.md`
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
   'changelog-bitbucket-release',
@@ -93,7 +94,7 @@ export const packageCacheNamespaces = [
   'preset',
   'terraform-provider-hash',
   'url-sha256',
-] as const;
+] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
 
 export type PackageCacheNamespace = (typeof packageCacheNamespaces)[number];
 
