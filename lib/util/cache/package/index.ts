@@ -42,6 +42,9 @@ export async function set(
   await setRawTtl(namespace, key, value, rawTtl);
 }
 
+/**
+ * This MUST NOT be used outside of cache implementation
+ */
 export async function setRawTtl(
   namespace: PackageCacheNamespace,
   key: string,
