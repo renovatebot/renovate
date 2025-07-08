@@ -170,4 +170,26 @@
     'kustomize.toolkit.fluxcd.io/v1',
     'kustomize.config.k8s.io/v1beta1',
   ],
+
+  // https://external-secrets.io/latest/api/spec/
+  ExternalSecret: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  ClusterExternalSecret: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  SecretStore: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  ClusterSecretStore: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
 }
