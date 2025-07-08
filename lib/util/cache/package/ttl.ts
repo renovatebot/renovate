@@ -2,6 +2,11 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import type { PackageCacheNamespace } from './types';
 
+/**
+ * This MUST NOT be used outside of cache implementation
+ *
+ * @param namespace
+ */
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
