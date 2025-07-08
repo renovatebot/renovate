@@ -7,7 +7,6 @@ import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
-import writeFileAtomic from 'write-file-atomic';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -263,9 +262,9 @@ export async function updateCredentialStore(url: string): Promise<void> {
     logger.debug(
       `Updating the Git credential store file at ${credentialsPath}`,
     );
-    await writeFileAtomic(credentialsPath, result.join('\n') + '\n', {
+    await fs.writeFile(credentialsPath, result.join('\n') + '\n', {
       encoding: 'utf8',
-      fsync: true,
+      mode: 0o600,
     });
   }
 }
