@@ -588,6 +588,13 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
+    name: 'composerUpdateWithAllDependencies',
+    description:
+      'Configure use of `--with-all-dependencies` instead of the default `--with-dependencies` when running Composer update command.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'goGetDirs',
     description: 'Directory pattern to run `go get` on.',
     type: 'array',
