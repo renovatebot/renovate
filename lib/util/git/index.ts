@@ -7,6 +7,7 @@ import semver from 'semver';
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
+import writeFileAtomic from 'write-file-atomic';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
@@ -213,6 +214,7 @@ export async function enableCredentialStore(): Promise<void> {
 
 export async function updateCredentialStore(url: string): Promise<void> {
   const credentialsPath = upath.join(homedir(), '.git-credentials');
+  logger.debug(`Checking the Git credential store file at ${credentialsPath}`);
   let lines: string[] = [];
   try {
     const content = await fs.readFile(credentialsPath, 'utf-8');
@@ -224,18 +226,26 @@ export async function updateCredentialStore(url: string): Promise<void> {
   }
 
   const newUrl = new URL.URL(url);
-  let updated = false;
+  let storeUpdated = false;
+  let urlFound = false;
 
   const result = lines.map((line) => {
     try {
       const existing = new URL.URL(line);
-      const sameTarget =
+      if (
         existing.protocol === newUrl.protocol &&
         existing.hostname === newUrl.hostname &&
-        existing.port === newUrl.port;
-      if (sameTarget) {
-        updated = true;
-        return url;
+        existing.port === newUrl.port
+      ) {
+        urlFound = true;
+        if (
+          existing.username !== newUrl.username ||
+          existing.password !== newUrl.password
+        ) {
+          logger.debug(`Updating ${url} in the Git credential store`);
+          storeUpdated = true;
+          return url;
+        }
       }
       return line;
     } catch {
@@ -243,14 +253,21 @@ export async function updateCredentialStore(url: string): Promise<void> {
     }
   });
 
-  if (!updated) {
+  if (!urlFound) {
+    logger.debug(`Adding ${url} to the Git credential store`);
     result.push(url);
+    storeUpdated = true;
   }
 
-  await fs.writeFile(credentialsPath, result.join('\n') + '\n', {
-    encoding: 'utf-8',
-    mode: 0o600,
-  });
+  if (storeUpdated) {
+    logger.debug(
+      `Updating the Git credential store file at ${credentialsPath}`,
+    );
+    await writeFileAtomic(credentialsPath, result.join('\n') + '\n', {
+      encoding: 'utf8',
+      fsync: true,
+    });
+  }
 }
 
 async function fetchBranchCommits(preferUpstream = true): Promise<void> {
