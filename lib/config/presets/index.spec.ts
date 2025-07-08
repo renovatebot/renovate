@@ -438,7 +438,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.setRawTtl.mock.calls[0][3]).toBe(15);
+      expect(packageCache.setWithRawTtl.mock.calls[0][3]).toBe(15);
     });
 
     it('use packageCache when presetCachePersistence is set', async () => {
@@ -482,7 +482,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.setRawTtl.mock.calls[0][3]).toBe(60);
+      expect(packageCache.setWithRawTtl.mock.calls[0][3]).toBe(60);
     });
 
     it('throws', async () => {

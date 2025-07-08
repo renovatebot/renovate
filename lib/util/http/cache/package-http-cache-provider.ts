@@ -46,7 +46,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   async persist(url: string, data: HttpCache): Promise<void> {
-    await packageCache.setRawTtl(
+    await packageCache.setWithRawTtl(
       this.namespace,
       url,
       data,

@@ -39,13 +39,13 @@ export async function set(
   minutes: number,
 ): Promise<void> {
   const rawTtl = getTtlOverride(namespace) ?? minutes;
-  await setRawTtl(namespace, key, value, rawTtl);
+  await setWithRawTtl(namespace, key, value, rawTtl);
 }
 
 /**
  * This MUST NOT be used outside of cache implementation
  */
-export async function setRawTtl(
+export async function setWithRawTtl(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,

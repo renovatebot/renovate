@@ -136,7 +136,7 @@ export function cache<T>({
           cachedAt: DateTime.local().toISO(),
           value: newData,
         };
-        await packageCache.setRawTtl(
+        await packageCache.setWithRawTtl(
           finalNamespace,
           finalKey,
           newRecord,
