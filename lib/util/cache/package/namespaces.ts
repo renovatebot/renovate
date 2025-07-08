@@ -4,6 +4,7 @@
  * backwards-incompatible changes in non-major releases
  */
 export const packageCacheNamespaces = [
+  // Don't forget to update `self-hosted-configuration.md`
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
   'changelog-bitbucket-release',
