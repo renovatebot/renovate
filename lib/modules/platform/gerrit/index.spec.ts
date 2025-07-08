@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
@@ -885,9 +886,30 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
-      expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');
+      expect(
+        gerrit.massageMarkdown(codeBlock`
+          Pull Request
+          PR
+          Branch creation
+          Disabled because a matching PR was automerged previously
+          Whenever PR becomes conflicted
+          close this Pull Request unmerged
+          Close this PR
+          you tick the rebase/retry checkbox
+          checking the rebase/retry box above
+          `),
+      ).toBe(codeBlock`
+        change
+        change
+        Change creation
+        Disabled because a matching change was automerged previously
+        Whenever change becomes conflicted
+        abandon or vote this change with Code-Review -2
+        Abandon or vote this change with Code-Review -2
+        add \`rebase!\` at the beginning of the commit message
+        adding \`rebase!\` at the beginning of the commit message
+        `);
     });
-    //TODO: add some tests for Gerrit-specific replacements..
   });
 
   describe('currently unused/not-implemented functions', () => {

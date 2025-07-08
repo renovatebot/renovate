@@ -197,9 +197,9 @@ If you want Renovate to commit directly to your base branch without opening a PR
 There are many different registries, and many ways to authenticate to those registries.
 We will explain how to authenticate for the most common registries.
 
-#### DockerHub
+#### Docker Hub
 
-Here is an example of configuring a default Docker username/password in `config.js`.
+Here is an example of configuring a Docker username/password for Docker Hub in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
 ```js title="config.js"
@@ -207,6 +207,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'docker',
+      matchHost: 'docker.io',
       username: '<your-username>',
       password: process.env.DOCKER_HUB_PASSWORD,
     },
@@ -476,7 +477,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:41.17.2
+FROM renovate/renovate:41.23.2
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...
