@@ -7,3 +7,5 @@ export { RequestError as HttpError, EmptyResultError };
 export type * from './types';
 
 export class Http extends HttpBase {}
+
+// alles doof
