@@ -199,7 +199,7 @@ We will explain how to authenticate for the most common registries.
 
 #### DockerHub
 
-Here is an example of configuring a default Docker username/password in `config.js`.
+Here is an example of configuring a Docker username/password for DockerHub in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
 ```js title="config.js"
@@ -207,6 +207,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'docker',
+      matchHost: 'docker.io',
       username: '<your-username>',
       password: process.env.DOCKER_HUB_PASSWORD,
     },
