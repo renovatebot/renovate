@@ -2025,7 +2025,7 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  it('returns tag if branch not found', async () => {
+  it('getRawFile should check tag first and then return branch if tag was not found', async () => {
     await initRepo({ repository: 'some/repo' });
     const callArgs: any[] = [];
     const getItemMock = vi.fn(
@@ -2048,14 +2048,13 @@ describe('modules/platform/azure/index', () => {
           versionDescriptor &&
           versionDescriptor.versionType === GitVersionType.Branch
         ) {
-          return Promise.resolve(null);
+          return Promise.resolve({ content: '{ "test": "branch content" }' });
         }
         if (
           versionDescriptor &&
-          versionDescriptor.versionType === GitVersionType.Tag &&
-          versionDescriptor.version === '1.1.1'
+          versionDescriptor.versionType === GitVersionType.Tag
         ) {
-          return Promise.resolve({ content: '{ "test": "tag content" }' });
+          return Promise.resolve(null);
         }
         throw new Error('Unexpected call');
       },
@@ -2072,9 +2071,13 @@ describe('modules/platform/azure/index', () => {
             ]),
         }) as any,
     );
-    const result = await azure.getJsonFile('file.json', 'some/repo', '1.1.1');
-    expect(result).toEqual({ test: 'tag content' });
-    expect(callArgs[0]).toBe(GitVersionType.Branch);
-    expect(callArgs[1]).toBe(GitVersionType.Tag);
+    const result = await azure.getJsonFile(
+      'file.json',
+      'some/repo',
+      'some-branch',
+    );
+    expect(result).toEqual({ test: 'branch content' });
+    expect(callArgs[0]).toBe(GitVersionType.Tag);
+    expect(callArgs[1]).toBe(GitVersionType.Branch);
   });
 });

@@ -150,8 +150,8 @@ export async function getRawFile(
     const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
-    // Try to get file from repo with branch, if not found, then try with tag #36835
-    for (const versionType of [GitVersionType.Branch, GitVersionType.Tag]) {
+    // Try to get file from repo with tag first, if not found, then try with branch #36835
+    for (const versionType of [GitVersionType.Tag, GitVersionType.Branch]) {
       versionDescriptor.versionType = versionType;
 
       item = await azureApiGit.getItem(
