@@ -438,15 +438,12 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.setWithRawTtl.mock.calls[0][3]).toBe(15);
+      expect(packageCache.set.mock.calls[0][3]).toBe(15);
     });
 
     it('use packageCache when presetCachePersistence is set', async () => {
       GlobalConfig.set({
         presetCachePersistence: true,
-        cacheTtlOverride: {
-          preset: 60,
-        },
       });
 
       config.extends = ['github>username/preset-repo'];
@@ -482,7 +479,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.setWithRawTtl.mock.calls[0][3]).toBe(60);
+      expect(packageCache.set.mock.calls[0][3]).toBe(15);
     });
 
     it('throws', async () => {
