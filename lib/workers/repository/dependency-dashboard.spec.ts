@@ -1115,14 +1115,14 @@ describe('workers/repository/dependency-dashboard', () => {
 
         ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+        The following branches are pending approval. To create them, click on a checkbox below.
 
          - [ ] <!-- approve-branch=branchName1 -->pr1
          - [x] <!-- approve-branch=branchName2 -->pr2
 
         ## Awaiting Schedule
 
-        These updates are awaiting their schedule. Click on a checkbox to get an update now.
+        The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
          - [x] <!-- unschedule-branch=branchName3 -->pr3
 
