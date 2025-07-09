@@ -5,11 +5,7 @@ You can override the default behavior with the `registryUrls` config option. For
 ```json
 {
   "matchDatasources": ["unity3d-packages"],
-  "matchPackageNames": [
-    "com.cysharp.unitask"
-  ],
-  "registryUrls": [
-    "https://package.openupm.com"
-  ]
+  "matchPackageNames": ["com.cysharp.unitask"],
+  "registryUrls": ["https://package.openupm.com"]
 }
 ```
