@@ -693,7 +693,7 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 ## gitCredentialPassing
 
 Uses the URL-embedded credentials by default or when set to `url`, or the [Git Credential Store](https://git-scm.com/docs/git-credential-store) when set to `store`.
-The Renovate Bot creates or updates the `~/.git-credentials` file when it does not contain the GitLab URL with the current username and password.
+The Renovate Bot creates or updates the `~/.git-credentials` file (which must be writeable) when it does not contain the GitLab URL with the current username and password.
 Please note that the bot does not revert the changes when finishing.
 
 Using the Git Credential Store works around a [long-standing and well-known issue in Git and its underlying libcurl](https://docs.gitlab.com/integration/kerberos/#http-git-access-with-kerberos-token-passwordless-authentication), which causes authentication with a Kerberos-enabled GitLab instance to always fail.
