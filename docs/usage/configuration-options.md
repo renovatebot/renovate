@@ -749,7 +749,7 @@ The Composer output should inform you about the reasons the update failed.
 
 ## composerUpdateWithAllDependencies
 
-By default, Renovate will invoke `composer update` with the `-- with-dependencies` flag. 
+By default, Renovate will invoke `composer update` with the `--with-dependencies` flag. 
 Set this option to `true` to use the `--with-all-dependencies` flag instead.
 
 ## confidential
