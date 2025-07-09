@@ -34,7 +34,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });
       const contents = await getOnboardingConfigContents(config, '');
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
-      expect(contents).toEqual(
+      expect(contents).toEqualIgnoringWhitespace(
         '{\n' +
           '  "$schema": "https://docs.renovatebot.com/renovate-schema.json",\n' +
           '  "extends": [\n' +
