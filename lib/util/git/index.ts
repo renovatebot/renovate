@@ -211,7 +211,7 @@ export async function enableCredentialStore(): Promise<void> {
   }
 }
 
-export async function updateCredentialStore(url: string): Promise<void> {
+export async function updateCredentialStore(url: URL): Promise<void> {
   const credentialsPath = upath.join(homedir(), '.git-credentials');
   logger.debug(`Checking the Git credential store file at ${credentialsPath}`);
   let lines: string[] = [];
@@ -224,7 +224,7 @@ export async function updateCredentialStore(url: string): Promise<void> {
     }
   }
 
-  const newUrl = new URL.URL(url);
+  const newUrl = parseUrl(url);
   let storeUpdated = false;
   let urlFound = false;
 

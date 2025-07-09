@@ -133,7 +133,7 @@ export async function initPlatform({
   if (gitCredentialPassing === 'store') {
     logger.debug('Enable the Git credential store');
     await git.enableCredentialStore();
-    const data = new URL.URL(defaults.endpoint);
+    const data = parseUrl(defaults.endpoint);
     try {
       await git.updateCredentialStore(`https://oauth2:${token}@${data.host}`);
     } catch (err) {
