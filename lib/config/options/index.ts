@@ -1289,6 +1289,7 @@ const options: RenovateOptions[] = [
     name: 'azureBypassPolicyReason',
     description: 'The reason to set when bypassing policies.',
     type: 'string',
+    globalOnly: true,
     default: 'Auto-merge by Renovate',
     supportedPlatforms: ['azure'],
   },
