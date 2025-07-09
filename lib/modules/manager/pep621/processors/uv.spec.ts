@@ -286,6 +286,11 @@ describe('modules/manager/pep621/processors/uv', () => {
 
     const dependencies = [
       {
+        depName: 'python',
+        packageName: 'python',
+        depType: 'requires-python',
+      },
+      {
         depName: 'dep1',
         packageName: 'dep1',
       },
@@ -298,6 +303,11 @@ describe('modules/manager/pep621/processors/uv', () => {
     const result = processor.process(pyproject, dependencies);
 
     expect(result).toEqual([
+      {
+        depName: 'python',
+        depType: 'requires-python',
+        packageName: 'python',
+      },
       {
         depName: 'dep1',
         registryUrls: ['https://foo.com/simple'],
