@@ -38,26 +38,6 @@ exports[`config/validation > validateConfig(config) > catches invalid templates 
 exports[`config/validation > validateConfig(config) > errors for all types 1`] = `
 [
   {
-    "message": "Configuration option \`azureBypassPolicyMinimumNumberOfReviewers\` should be boolean. Found: 1 (number)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Configuration option \`azureBypassPolicyReason\` should be boolean. Found: 1 (number)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Configuration option \`azureBypassPolicyRequiredReviewers\` should be boolean. Found: 1 (number)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Configuration option \`azureBypassPolicyTypeUuids\` should be a list (Array)",
-    "topic": "Configuration Error",
-  },
-  {
-    "message": "Configuration option \`azureBypassPolicyWorkItemLinking\` should be boolean. Found: 1 (number)",
-    "topic": "Configuration Error",
-  },
-  {
     "message": "Configuration option \`azureWorkItemId\` should be an integer. Found: false (boolean).",
     "topic": "Configuration Error",
   },

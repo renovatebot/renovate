@@ -515,8 +515,6 @@ describe('config/validation', () => {
         timezone: 'Asia',
         labels: 5 as any,
         azureWorkItemId: false as any,
-        azureBypassPolicyTypes: 2 as any,
-        azureBypassPolicyReason: 1 as any,
         semanticCommitType: 7 as any,
         lockFileMaintenance: false as any,
         extends: [':timezone(Europe/Brussel)'],
@@ -539,7 +537,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(14);
+      expect(errors).toHaveLength(12);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
