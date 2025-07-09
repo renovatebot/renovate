@@ -27,7 +27,7 @@ import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
-import { AzurePolicyTypeId, AzurePrVote } from './types';
+import { AzurePolicyTypes, AzurePrVote } from './types';
 import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
@@ -1936,7 +1936,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AzurePolicyTypeId.MinimumNumberOfReviewers,
+                  id: AzurePolicyTypes.MinimumNumberOfReviewers,
                 },
               },
               status: PolicyEvaluationStatus.Queued,
@@ -1954,7 +1954,7 @@ describe('modules/platform/azure/index', () => {
         id: pullRequestIdMock,
         strategy: 'auto',
         platformOptions: {
-          azureBypassPolicyMinimumNumberOfReviewers: true,
+          azureBypassPolicyTypes: ['MinimumNumberOfReviewers'],
           azureBypassPolicyReason: bypassReasonMock,
         },
       });
@@ -2005,7 +2005,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AzurePolicyTypeId.Build,
+                  id: AzurePolicyTypes.Build,
                 },
               },
               status: PolicyEvaluationStatus.Queued,

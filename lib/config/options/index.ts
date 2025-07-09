@@ -2,6 +2,7 @@ import { AllManagersListLiteral } from '../../manager-list.generated';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
+import { getAzurePolicyTypes } from '../../modules/platform/azure/types';
 import { getVersioningList } from '../../modules/versioning';
 import { supportedDatasources } from '../presets/internal/merge-confidence';
 import { type RenovateOptions, UpdateTypesOptions } from '../types';
@@ -1274,39 +1275,21 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureBypassPolicyRequiredReviewers',
-    description: 'Allow to bypass the policy for required reviewers.',
-    type: 'boolean',
-    default: false,
-    supportedPlatforms: ['azure'],
-  },
-  {
-    name: 'azureBypassPolicyMinimumNumberOfReviewers',
-    description: 'Allow to bypass the policy for minimum number of reviewers.',
-    type: 'boolean',
-    default: false,
-    supportedPlatforms: ['azure'],
-  },
-  {
-    name: 'azureBypassPolicyWorkItemLinking',
-    description: 'Allow to bypass the policy for work item linking.',
-    type: 'boolean',
-    default: false,
-    supportedPlatforms: ['azure'],
-  },
-  {
-    name: 'azureBypassPolicyTypeUuids',
-    description: 'A list of policy type UUIDs to allow bypassing.',
+    name: 'azureBypassPolicyTypes',
+    description: 'A list of policy type UUIDs allowed to be bypassed.',
     type: 'array',
+    globalOnly: true,
     subType: 'string',
+    allowString: true,
+    allowedValues: getAzurePolicyTypes(),
     default: [],
     supportedPlatforms: ['azure'],
   },
   {
     name: 'azureBypassPolicyReason',
     description: 'The reason to set when bypassing policies.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'Auto-merge by Renovate',
     supportedPlatforms: ['azure'],
   },
   {

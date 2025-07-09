@@ -346,27 +346,6 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
-## azureBypassPolicyMinimumNumberOfReviewers
-
-If you have branch policies in Azure DevOps that require a minimum number of reviewers, you can set this to `true` to bypass this policy.
-
-## azureBypassPolicyReason
-
-If renovate uses bypass to automerge this will be the reason for the bypass.
-
-## azureBypassPolicyRequiredReviewers
-
-If you have branch policies in Azure DevOps that set required reviewers, you can set this to `true` to bypass this policy.
-
-## azureBypassPolicyTypeUuids
-
-If you have branch policies in Azure DevOps that prevent Renovate from merging PRs, you can set this to a list of UUIDs of the policies you want to bypass.
-
-## azureBypassPolicyWorkItemLinking
-
-If you have branch policies in Azure DevOps that require work item linking, you can set this to `true` to bypass this policy
-This can be used instead of setting `azureWorkItemId`.
-
 ## azureWorkItemId
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).

@@ -9,7 +9,7 @@ import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
 import { WrappedExceptionSchema } from './schema';
-import { AzurePolicyTypeId } from './types';
+import { AzurePolicyTypes } from './types';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -154,7 +154,7 @@ export async function getMergeMethod(
     ).getPolicyConfigurations(
       project,
       undefined,
-      AzurePolicyTypeId.RequireAMergeStrategy,
+      AzurePolicyTypes.RequireAMergeStrategy,
     )
   )
     .filter((p) => p.settings.scope.some(isRelevantScope))

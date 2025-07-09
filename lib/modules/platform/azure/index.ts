@@ -49,7 +49,7 @@ import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import type { AzurePr } from './types';
-import { AzurePolicyTypeId, AzurePrVote } from './types';
+import { AzurePolicyTypes, AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -800,21 +800,14 @@ export async function mergePr({
 
   let bypassPolicy: boolean | undefined;
 
-  const bypassPolicyTypes = new Set(
-    [
-      platformOptions?.ignoreTests ? AzurePolicyTypeId.Build : [],
-      platformOptions?.azureBypassPolicyRequiredReviewers
-        ? AzurePolicyTypeId.RequiredReviewers
-        : [],
-      platformOptions?.azureBypassPolicyMinimumNumberOfReviewers
-        ? AzurePolicyTypeId.MinimumNumberOfReviewers
-        : [],
-      platformOptions?.azureBypassPolicyWorkItemLinking
-        ? AzurePolicyTypeId.WorkItemLinking
-        : [],
-      platformOptions?.azureBypassPolicyTypeUuids ?? [],
-    ].flat(),
-  );
+  const bypassPolicyTypeUuids =
+    platformOptions?.azureBypassPolicyTypes?.map(
+      (policyType) =>
+        AzurePolicyTypes[policyType as keyof typeof AzurePolicyTypes] ??
+        policyType,
+    ) ?? [];
+
+  const bypassPolicyTypes = new Set<string>(bypassPolicyTypeUuids);
 
   if (bypassPolicyTypes.size > 0) {
     const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.project}/${pullRequestId}`;
@@ -835,7 +828,7 @@ export async function mergePr({
   }
 
   const bypassReason = bypassPolicy
-    ? (platformOptions?.azureBypassPolicyReason ?? 'Renovate automerge')
+    ? (platformOptions?.azureBypassPolicyReason ?? 'Auto-merge by Renovate')
     : undefined;
 
   const objToUpdate: GitPullRequest = {

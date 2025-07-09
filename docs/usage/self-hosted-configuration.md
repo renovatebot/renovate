@@ -219,6 +219,54 @@ For example:
 }
 ```
 
+## azureBypassPolicyTypes
+
+Add a list of policy UUIDs which might be failing but should not block auto-merge.
+
+This is useful to bypass required reviewers, required work-items.
+
+For this to work renovate must be running with the appropriate permissions to bypass policies for a given azure repository.
+
+Policy Types can be defined by their UUID or Name
+
+| UUID                                 | Policy Type Name         |
+| ------------------------------------ | ------------------------ |
+| fd2167ab-b0be-447a-8ec8-39368250530e | RequiredReviewers        |
+| fa4e907d-c16b-4a4c-9dfa-4916e5d171ab | RequireAMergeStrategy    |
+| fa4e907d-c16b-4a4c-9dfa-4906e5d171dd | MinimumNumberOfReviewers |
+| 0609b952-1397-4640-95ec-e00a01b2c241 | Build                    |
+| 40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e | WorkItemLinking          |
+
+For example:
+
+```json
+{
+  "azureAutoMergePoliciesBypass": [
+    "RequiredReviewers",
+    "MinimumNumberOfReviewers",
+    "WorkItemLinking"
+  ]
+}
+```
+
+Or by UUID (same result as above):
+
+```json
+{
+  "azureAutoMergePoliciesBypass": [
+    "fd2167ab-b0be-447a-8ec8-39368250530e",
+    "fa4e907d-c16b-4a4c-9dfa-4906e5d171dd",
+    "40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e"
+  ]
+}
+```
+
+## azureBypassPolicyReason
+
+By default the reason for bypassing policies is set to "Auto-merge by Renovate".
+
+Define a custom reason when policies are being bypassed to perform auto-merge.
+
 ## baseDir
 
 By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.

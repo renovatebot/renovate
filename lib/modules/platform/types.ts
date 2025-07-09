@@ -1,6 +1,7 @@
 import type { MergeStrategy } from '../../config/types';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
+import type { AzurePolicyType } from './azure/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -106,11 +107,7 @@ export interface PlatformPrOptions {
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
-  ignoreTests?: boolean;
-  azureBypassPolicyRequiredReviewers?: boolean;
-  azureBypassPolicyMinimumNumberOfReviewers?: boolean;
-  azureBypassPolicyWorkItemLinking?: boolean;
-  azureBypassPolicyTypeUuids?: string[];
+  azureBypassPolicyTypes?: AzurePolicyType[];
   azureBypassPolicyReason?: string;
 }
 export interface CreatePRConfig {
