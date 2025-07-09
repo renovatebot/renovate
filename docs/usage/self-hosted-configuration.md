@@ -295,15 +295,39 @@ In the self-hosted setup, use option to enable caching of private packages to im
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
-For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+You can use:
+
+- **Exact matches**: Direct namespace names
+- **Glob patterns**: Wildcards like `datasource-*` or `*`
+- **Regex patterns**: Regular expressions like `/^datasource-/`
+
+Priority order:
+
+1. Exact namespace matches take highest priority
+2. If no exact match, the longest (most specific) matching pattern wins
+
+Example:
 
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker-tags": 120
+    "datasource-rubygems": 120,
+    "datasource-*": 60,
+    "datasource-{crate,go}": 90,
+    "/^changelog-/": 45,
+    "*": 30
   }
 }
 ```
+
+In this example:
+
+- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
+- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
+- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
+- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
 
 Valid codes for namespaces are as follows:
 
