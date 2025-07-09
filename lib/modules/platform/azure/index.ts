@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import type {
+  GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
   GitStatus,
@@ -9,6 +10,7 @@ import type {
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
+  GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
@@ -144,23 +146,34 @@ export async function getRawFile(
       return null;
     }
 
+    let item: GitItem | undefined;
     const versionDescriptor: GitVersionDescriptor = {
       version: branchOrTag,
     } satisfies GitVersionDescriptor;
+    // Try to get file from repo with tag first, if not found, then try with branch #36835
+    for (const versionType of [GitVersionType.Tag, GitVersionType.Branch]) {
+      versionDescriptor.versionType = versionType;
 
-    const item = await azureApiGit.getItem(
-      repoId, // repositoryId
-      fileName, // path
-      undefined, // project
-      undefined, // scopePath
-      undefined, // recursionLevel
-      undefined, // includeContentMetadata
-      undefined, // latestProcessedChange
-      undefined, // download
-      branchOrTag ? versionDescriptor : undefined, // versionDescriptor
-      true, // includeContent
-    );
-
+      item = await azureApiGit.getItem(
+        repoId, // repositoryId
+        fileName, // path
+        undefined, // project
+        undefined, // scopePath
+        undefined, // recursionLevel
+        undefined, // includeContentMetadata
+        undefined, // latestProcessedChange
+        undefined, // download
+        branchOrTag ? versionDescriptor : undefined, // versionDescriptor
+        true, // includeContent
+      );
+      if (item) {
+        break; // exit loop if item is found
+      } else {
+        logger.debug(
+          `File: ${fileName} not found in ${repoName} with ${versionType}: ${branchOrTag}`,
+        );
+      }
+    }
     return item?.content ?? null;
   } catch (err) /* v8 ignore start */ {
     if (
