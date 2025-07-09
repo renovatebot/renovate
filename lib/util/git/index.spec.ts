@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
@@ -1227,6 +1228,29 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+  });
+
+  describe('pushCommit', () => {
+    it('should pass pushOptions to git.push', async () => {
+      const pushSpy = vi
+        .spyOn(SimpleGit.prototype, 'push')
+        .mockResolvedValue({} as PushResult);
+      await expect(
+        git.pushCommit({
+          sourceRef: defaultBranch,
+          targetRef: defaultBranch,
+          files: [],
+          pushOptions: ['ci.skip', 'foo=bar'],
+        }),
+      ).resolves.toBeTrue();
+      expect(pushSpy).toHaveBeenCalledWith(
+        'origin',
+        `${defaultBranch}:${defaultBranch}`,
+        expect.objectContaining({
+          '--push-option': ['ci.skip', 'foo=bar'],
+        }),
+      );
     });
   });
 
