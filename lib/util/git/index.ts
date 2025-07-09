@@ -58,6 +58,7 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
+import { parseUrl } from '../../util/url';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
