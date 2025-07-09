@@ -262,7 +262,7 @@ export async function updateCredentialStore(url: URL): Promise<void> {
     logger.debug(
       `Updating the Git credential store file at ${credentialsPath}`,
     );
-    await fs.writeFile(credentialsPath, result.join('\n') + '\n', {
+    await fs.writeFile(credentialsPath, `${result.join('\n')}\n`, {
       encoding: 'utf8',
       mode: 0o600,
     });
