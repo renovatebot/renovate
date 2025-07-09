@@ -8,7 +8,6 @@ For example:
 ```json
 {
   "matchDatasources": ["unity3d-packages"],
-  "matchPackageNames": ["com.cysharp.unitask"],
   "registryUrls": ["https://package.openupm.com"]
 }
 ```
