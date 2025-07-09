@@ -590,7 +590,7 @@ const options: RenovateOptions[] = [
   {
     name: 'composerUpdateWithAllDependencies',
     description:
-      'Configure use of `--with-all-dependencies` instead of the default `--with-dependencies` when running Composer update command.',
+      'Configure use of `--with-all-dependencies` flag instead of the default `--with-dependencies` when running Composer update command.',
     type: 'boolean',
     default: false,
   },
