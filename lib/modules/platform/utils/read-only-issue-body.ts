@@ -1,6 +1,7 @@
 import { regEx } from '../../../util/regex';
 
 export function readOnlyIssueBody(body: string): string {
+  // TODO ADAM update this
   return body
     .replace(' only once you click their checkbox below', '')
     .replace(' unless you click a checkbox below', '')
