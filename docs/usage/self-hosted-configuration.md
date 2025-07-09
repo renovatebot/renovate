@@ -307,8 +307,12 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 
 Valid codes for namespaces are as follows:
 
+<!-- cache-namespaces-begin -->
+
 - `changelog-bitbucket-notes@v2`
 - `changelog-bitbucket-release`
+- `changelog-bitbucket-server-notes@v2`
+- `changelog-bitbucket-server-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -318,11 +322,14 @@ Valid codes for namespaces are as follows:
 - `datasource-artifactory`
 - `datasource-aws-machine-image`
 - `datasource-aws-rds`
+- `datasource-aws-eks-addon`
 - `datasource-azure-bicep-resource`
 - `datasource-azure-pipelines-tasks`
 - `datasource-bazel`
 - `datasource-bitbucket-tags`
+- `datasource-bitbucket-server-tags`
 - `datasource-bitrise`
+- `datasource-buildpacks-registry`
 - `datasource-cdnjs`
 - `datasource-conan`
 - `datasource-conda`
@@ -367,7 +374,7 @@ Valid codes for namespaces are as follows:
 - `datasource-maven:cache-provider`
 - `datasource-maven:postprocess-reject`
 - `datasource-node-version`
-- `datasource-npm:data`
+- `datasource-npm:cache-provider`
 - `datasource-nuget-v3`
 - `datasource-orb`
 - `datasource-packagist`
@@ -375,6 +382,7 @@ Valid codes for namespaces are as follows:
 - `datasource-python-version`
 - `datasource-releases`
 - `datasource-repology`
+- `datasource-rpm`
 - `datasource-ruby-version`
 - `datasource-rubygems`
 - `datasource-sbt-package`
@@ -389,6 +397,8 @@ Valid codes for namespaces are as follows:
 - `preset`
 - `terraform-provider-hash`
 - `url-sha256`
+
+<!-- cache-namespaces-end -->
 
 ## checkedBranches
 
@@ -1312,6 +1322,48 @@ Otherwise, it will default to `RenovateBot/${renovateVersion} (https://github.co
 The only time where `username` is required is if using `username` + `password` credentials for the `bitbucket` platform.
 You don't need to configure `username` directly if you have already configured `token`.
 Renovate will use the token to discover its username on the platform, including if you're running Renovate as a GitHub App.
+
+## variables
+
+Variables may be configured by a bot admin in `config.js`, which will then make them available for templating within repository configs.
+This config option behaves exactly like [secrets](#secrets), except that it won't be masked in the logs.
+For example, to configure a `SOME_VARIABLE` to be accessible by all repositories:
+
+```js
+module.exports = {
+  variables: {
+    SOME_VARIABLE: 'abc123',
+  },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      variables: {
+        SOME_VARIABLE: 'abc123',
+      },
+    },
+  ],
+};
+```
+
+It could then be used in a repository config or preset like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["{{ variables.SOME_VARIABLE }}"]
+    }
+  ]
+}
+```
 
 ## writeDiscoveredRepos
 
