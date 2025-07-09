@@ -89,12 +89,18 @@ async function getRegistryReleases(
   }
 
   // cache non-null responses unless marked as private
-  if (datasource.caching && res) {
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
-    if (cachePrivatePackages || !res.isPrivate) {
+  if (res) {
+    let cachingAllowed = false;
+
+    if (GlobalConfig.get('cachePrivatePackages', false)) {
+      cachingAllowed = true;
+    }
+
+    if (datasource.caching && !res.isPrivate) {
+      cachingAllowed = true;
+    }
+
+    if (cachingAllowed) {
       logger.trace({ cacheKey }, 'Caching datasource response');
       const cacheMinutes = 15;
       await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
