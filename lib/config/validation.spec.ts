@@ -539,7 +539,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(17);
+      expect(errors).toHaveLength(14);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
