@@ -1,8 +1,8 @@
-This datasource finds Unity package updates from Unity package feeds. 
+This datasource finds Unity package updates from Unity package feeds.
 
 By default, Renovate checks `https://packages.unity.com` for Unity packages.
 
-You can override the default behavior with the `registryUrls` config option. 
+You can override the default behavior with the `registryUrls` config option.
 For example:
 
 ```json
