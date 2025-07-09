@@ -48,6 +48,22 @@ describe('util/template/index', () => {
     expect(output).toContain('True');
   });
 
+  it('ifChanged - yes', () => {
+    const userTemplate =
+      '{{#ifChanged depName newName}}{{{newName}}}{{/ifChanged}}';
+    const input = { depName: 'nodemon', newName: 'nodemon-new' };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemon-new');
+  });
+
+  it('ifChanged - no', () => {
+    const userTemplate =
+      '{{#ifChanged depName newName}}{{{newName}}}{{/ifChanged}}';
+    const input = { depName: 'nodemon', newName: 'nodemon' };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBeEmptyString();
+  });
+
   it('not containsString', () => {
     const userTemplate =
       "{{#if (containsString platform 'hub')}}True{{else}}False{{/if}}";
