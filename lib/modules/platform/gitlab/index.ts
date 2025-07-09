@@ -137,8 +137,11 @@ export async function initPlatform({
     try {
       await git.updateCredentialStore(`https://oauth2:${token}@${data.host}`);
     } catch (err) {
-      logger.fatal({ err }, `Cannot update the Git credentials store: ${err}`);
-      process.exit(1);
+      logger.error(
+        { err },
+        `Failed to update the Git credentials store: ${err}`,
+      );
+      throw new Error('Init: Cannot update the Git credential store');
     }
   }
 
