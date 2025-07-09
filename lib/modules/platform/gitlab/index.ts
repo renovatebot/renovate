@@ -283,7 +283,7 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-function getRepoUrl(
+export function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>,
