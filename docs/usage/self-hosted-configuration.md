@@ -305,7 +305,11 @@ For example, to override the default TTL of 60 minutes for the `docker` datasour
 }
 ```
 
-Valid codes for namespaces are as follows:
+Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+When releases for a datasource are fetched, they are stored in this namespace.
+Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
+
+Other valid cache namespaces are as follows:
 
 <!-- cache-namespaces-begin -->
 
@@ -380,7 +384,6 @@ Valid codes for namespaces are as follows:
 - `datasource-packagist`
 - `datasource-pod`
 - `datasource-python-version`
-- `datasource-releases-{{datasource}}`: special short-lived cache for final results of the particular datasource fetches
 - `datasource-repology`
 - `datasource-rpm`
 - `datasource-ruby-version`
