@@ -135,7 +135,9 @@ export async function initPlatform({
     await git.enableCredentialStore();
     const data = parseUrl(defaults.endpoint);
     try {
-      await git.updateCredentialStore(`https://oauth2:${token}@${data.host}`);
+      await git.updateCredentialStore(
+        parseUrl(`https://oauth2:${token}@${data!.host}`)!,
+      );
     } catch (err) {
       logger.error(
         { err },

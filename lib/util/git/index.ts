@@ -58,7 +58,6 @@ import type {
   StorageConfig,
   TreeItem,
 } from './types';
-import { parseUrl } from '../../util/url';
 
 export { setNoVerify } from './config';
 export { setPrivateKey } from './private-key';
@@ -225,7 +224,6 @@ export async function updateCredentialStore(url: URL): Promise<void> {
     }
   }
 
-  const newUrl = parseUrl(url);
   let storeUpdated = false;
   let urlFound = false;
 
@@ -233,16 +231,16 @@ export async function updateCredentialStore(url: URL): Promise<void> {
     try {
       const existing = new URL.URL(line);
       if (
-        existing.protocol === newUrl.protocol &&
-        existing.hostname === newUrl.hostname &&
-        existing.port === newUrl.port
+        existing.protocol === url.protocol &&
+        existing.hostname === url.hostname &&
+        existing.port === url.port
       ) {
         urlFound = true;
         if (
-          existing.username !== newUrl.username ||
-          existing.password !== newUrl.password
+          existing.username !== url.username ||
+          existing.password !== url.password
         ) {
-          logger.debug(`Updating ${url} in the Git credential store`);
+          logger.debug(`Updating ${url.href} in the Git credential store`);
           storeUpdated = true;
           return url;
         }
