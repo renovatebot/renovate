@@ -472,7 +472,7 @@ export async function ensureDependencyDashboard(
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
-      'The following updates have all been created. To force a retry/rebase of any, click a checkbox below.\n\n';
+      'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.\n\n';
     for (const branch of inProgress) {
       issueBody += getListItem(branch, 'rebase');
     }
