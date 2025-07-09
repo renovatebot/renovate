@@ -219,6 +219,12 @@ For example:
 }
 ```
 
+## azureBypassPolicyReason
+
+By default the reason for bypassing policies is set to "Auto-merge by Renovate".
+
+Define a custom reason when policies are being bypassed to perform auto-merge.
+
 ## azureBypassPolicyTypes
 
 Add a list of policy UUIDs which might be failing but should not block auto-merge.
@@ -260,12 +266,6 @@ Or by UUID (same result as above):
   ]
 }
 ```
-
-## azureBypassPolicyReason
-
-By default the reason for bypassing policies is set to "Auto-merge by Renovate".
-
-Define a custom reason when policies are being bypassed to perform auto-merge.
 
 ## baseDir
 
