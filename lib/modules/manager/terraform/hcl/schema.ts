@@ -29,17 +29,18 @@ const NORMALISE_KEYS = new Set([
   'selector',
 ]);
 
-function normalise(node: any): any {
+function normalise(node: TfLiteral): TfLiteral {
   if (Array.isArray(node)) {
-    let arr: any[] = node;
-    while (arr.length === 1 && Array.isArray(arr[0])) {
-      arr = arr[0];
-    }
-    return arr.map(normalise);
+    // Recursively flatten nested arrays
+    const flatten = (arr: TfLiteral[]): TfLiteral[] =>
+      arr.flatMap((item) =>
+        Array.isArray(item) ? flatten(item) : [normalise(item)],
+      );
+    return flatten(node);
   }
 
   if (node && typeof node === 'object') {
-    const out: Record<string, any> = {};
+    const out: Record<string, TfLiteral> = {};
     for (const [k, v] of Object.entries(node)) {
       let val = normalise(v);
       if (NORMALISE_KEYS.has(k)) {
@@ -53,7 +54,13 @@ function normalise(node: any): any {
   return node;
 }
 
-const oneOrMany: any = <T extends z.ZodTypeAny>(schema: T) =>
+const oneOrMany = <T extends z.ZodTypeAny>(
+  schema: T,
+): z.ZodEffects<
+  z.ZodUnion<[T, z.ZodArray<T>]>,
+  z.infer<T>[],
+  z.infer<T> | z.infer<T>[]
+> =>
   z
     .union([schema, z.array(schema)])
     .transform((v) => (Array.isArray(v) ? v : [v]));
@@ -119,7 +126,7 @@ const DockerServiceInstance = z
 const GenericResourceInstance = z.record(tfLiteral);
 const GenericResourceSchema = z.record(oneOrMany(GenericResourceInstance));
 
-const KubernetesInstance = z.any().transform((orig) => {
+const KubernetesInstance = tfLiteral.transform((orig) => {
   const n = normalise(orig);
   return Array.isArray(n) ? n : [n];
 });
