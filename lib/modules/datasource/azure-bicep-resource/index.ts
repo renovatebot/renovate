@@ -4,8 +4,8 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BicepResourceVersionIndex } from './schema';
 
-const BICEP_TYPES_INDEX_URL =
-  'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';
+const DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com';
+const BICEP_TYPES_INDEX_PATH = 'Azure/bicep-types-az/main/generated/index.json';
 
 export class AzureBicepResourceDatasource extends Datasource {
   static readonly id = 'azure-bicep-resource';
@@ -18,6 +18,8 @@ export class AzureBicepResourceDatasource extends Datasource {
       Resource: '{{{depNameLinked}}}',
     },
   };
+
+  override readonly defaultRegistryUrls = [DEFAULT_REGISTRY_URL];
 
   override readonly defaultVersioning = azureRestApiVersioningApi.id;
 
@@ -39,7 +41,9 @@ export class AzureBicepResourceDatasource extends Datasource {
   async getReleases(
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const resourceVersionIndex = await this.getResourceVersionIndex();
+    const resourceVersionIndex = await this.getResourceVersionIndex(
+      getReleasesConfig.registryUrl ?? DEFAULT_REGISTRY_URL,
+    );
     const packageName = getReleasesConfig.packageName.toLowerCase();
     const versions = resourceVersionIndex[packageName];
     if (!versions?.length) {
@@ -59,9 +63,11 @@ export class AzureBicepResourceDatasource extends Datasource {
     key: 'getResourceVersionIndex',
     ttlMinutes: 24 * 60,
   })
-  async getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
+  async getResourceVersionIndex(
+    registryUrl: string,
+  ): Promise<BicepResourceVersionIndex> {
     const { body } = await this.http.getJson(
-      BICEP_TYPES_INDEX_URL,
+      `${registryUrl}/${BICEP_TYPES_INDEX_PATH}`,
       BicepResourceVersionIndex,
     );
     return body;
