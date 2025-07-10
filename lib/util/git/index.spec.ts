@@ -438,6 +438,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
+  describe('getBranchFilesFromCommit(sha)', () => {
+    it('detects changed files compared to the parent commit', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const sha = await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFilesFromCommit(sha!);
+      expect(branchFiles).toEqual(['some-new-file']);
+    });
+  });
+
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await git.mergeBranch('renovate/future_branch');
