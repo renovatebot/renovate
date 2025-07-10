@@ -297,6 +297,34 @@ describe('config/presets/gitlab/index', () => {
       );
       expect(result).toBe('just-a-filename.json');
     });
+
+    it('should handle URL with empty pathname', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com',
+      );
+      expect(result).toBe('');
+    });
+
+    it('should handle URL with pathname that is just "/raw"', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/raw',
+      );
+      expect(result).toBe('');
+    });
+
+    it('should handle URL with pathname that becomes empty after removing /raw', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/raw?ref=main',
+      );
+      expect(result).toBe('');
+    });
+
+    it('should handle URL with root-level path', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/config.json5',
+      );
+      expect(result).toBe('config.json5');
+    });
   });
 
   describe('getPreset()', () => {
