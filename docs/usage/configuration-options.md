@@ -4253,6 +4253,11 @@ For example: if the username or team name is `bar` then you would set the config
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
+<!-- prettier-ignore -->
+!!! note
+    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
