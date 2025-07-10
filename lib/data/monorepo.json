@@ -311,6 +311,7 @@
     "expo": "https://github.com/expo/expo",
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",
+    "faro-web-sdk": "https://github.com/grafana/faro-web-sdk",
     "feathers": "https://github.com/feathersjs/feathers",
     "featuremanagement-dotnet": "https://github.com/microsoft/FeatureManagement-Dotnet",
     "feign": "https://github.com/OpenFeign/feign",
