@@ -41,9 +41,12 @@ export class AzureBicepResourceDatasource extends Datasource {
   async getReleases(
     getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const resourceVersionIndex = await this.getResourceVersionIndex(
-      getReleasesConfig.registryUrl ?? DEFAULT_REGISTRY_URL,
-    );
+    if (!getReleasesConfig.registryUrl) {
+      return null;
+    }
+
+    const resourceVersionIndex =
+      await this.getResourceVersionIndex(getReleasesConfig.registryUrl);
     const packageName = getReleasesConfig.packageName.toLowerCase();
     const versions = resourceVersionIndex[packageName];
     if (!versions?.length) {
