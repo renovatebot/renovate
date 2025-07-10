@@ -329,7 +329,11 @@ In this example:
 - `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
 - `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
 
-Valid codes for namespaces are as follows:
+Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+When releases for a datasource are fetched, they are stored in this namespace.
+Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
+
+Other valid cache namespaces are as follows:
 
 <!-- cache-namespaces-begin -->
 
@@ -404,7 +408,6 @@ Valid codes for namespaces are as follows:
 - `datasource-packagist`
 - `datasource-pod`
 - `datasource-python-version`
-- `datasource-releases`
 - `datasource-repology`
 - `datasource-rpm`
 - `datasource-ruby-version`

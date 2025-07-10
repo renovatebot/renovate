@@ -78,7 +78,6 @@ export const packageCacheNamespaces = [
   'datasource-packagist',
   'datasource-pod',
   'datasource-python-version',
-  'datasource-releases',
   'datasource-repology',
   'datasource-rpm',
   'datasource-ruby-version',
@@ -97,7 +96,9 @@ export const packageCacheNamespaces = [
   'url-sha256',
 ] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
 
-export type PackageCacheNamespace = (typeof packageCacheNamespaces)[number];
+export type PackageCacheNamespace =
+  | (typeof packageCacheNamespaces)[number]
+  | `datasource-releases-${string}`;
 
 export type CombinedKey =
   `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

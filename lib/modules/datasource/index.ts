@@ -7,6 +7,8 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { coerceArray } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
+import { resolveTtlValues } from '../../util/cache/package/ttl';
+import type { PackageCacheNamespace } from '../../util/cache/package/types';
 import { clone } from '../../util/clone';
 import { filterMap } from '../../util/filter-map';
 import { AsyncResult, Result } from '../../util/result';
@@ -40,8 +42,6 @@ export { isGetPkgReleasesConfig } from './common';
 export const getDatasources = (): Map<string, DatasourceApi> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
-const cacheNamespace = 'datasource-releases';
-
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
 // TODO: fix error Type
@@ -66,7 +66,9 @@ async function getRegistryReleases(
   config: GetReleasesConfig,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
-  const cacheKey = `${datasource.id} ${registryUrl} ${config.packageName}`;
+  const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
+  const cacheKey = `${registryUrl}:${config.packageName}`;
+
   if (datasource.caching) {
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
@@ -102,7 +104,13 @@ async function getRegistryReleases(
 
     if (cachingAllowed) {
       logger.trace({ cacheKey }, 'Caching datasource response');
-      const cacheMinutes = 15;
+
+      // This is meant to be short-lived cache, so we ignore `hardTtlMinutes`
+      // and stick to the `softTtlMinutes` value
+      const { softTtlMinutes: cacheMinutes } = resolveTtlValues(
+        cacheNamespace,
+        15,
+      );
       await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
       DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
     } else {
