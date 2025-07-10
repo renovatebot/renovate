@@ -267,6 +267,11 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
+<!-- prettier-ignore -->
+!!! note
+    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+
 **Automerge and GitHub branch protection rules**
 
 You must select at least one status check in the _Require status checks to pass before merging_ section of your branch protection rules on GitHub, if you match all three conditions:
@@ -2605,19 +2610,21 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 ## managerFilePatterns
 
-`managerFilePatterns` were formerly known as `fileMatch`, and regex-only.
-`managerFilePatterns` instead supports regex or glob patterns, and any existing config containing `fileMatch` patterns will be automatically migrated.
+Formerly known as `fileMatch`, which supported regex-only.
+
+`managerFilePatterns` supports both regex and glob patterns.
+Any existing config containing `fileMatch` patterns will be automatically migrated.
+
 Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
 
 `managerFilePatterns` tells Renovate which repository files to parse and extract.
-`managerFilePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
+Patterns in the user config are _added_ to the default values, they do not replace the default values.
 
 The default `managerFilePatterns` patterns can not be removed.
-If you need to include, or exclude, specific paths then use the `ignorePaths` or `includePaths` configuration options.
+If you need to include, or exclude, specific paths then use the [`ignorePaths`](#ignorepaths) or [`includePaths`](#includepaths) instead.
 
-Some `managerFilePatterns` patterns are short, like Renovate's default Go Modules `managerFilePatterns` for example.
-Here Renovate looks for _any_ `go.mod` file.
-In this case you can probably keep using that default `managerFilePatterns`.
+Some managers have sensible defaults.
+For example, the Go manager looks for _any_ `go.mod` file by default, which covers most cases without extra configuration.
 
 At other times, the possible files is too vague for Renovate to have any default.
 For example, Kubernetes manifests can exist in any `*.yaml` file.
@@ -2625,7 +2632,7 @@ We do not want Renovate to parse every YAML file in every repository, just in ca
 Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
 Because the array is empty, you as user must tell Renovate which directories/files to check.
 
-Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess about.
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
 For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
@@ -4245,6 +4252,11 @@ For example: if the username or team name is `bar` then you would set the config
 ```
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
+<!-- prettier-ignore -->
+!!! note
+    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
 ## reviewersFromCodeOwners
 

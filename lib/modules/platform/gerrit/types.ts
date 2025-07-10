@@ -48,6 +48,7 @@ export interface GerritChange {
   subject: string;
   status: GerritChangeStatus;
   created: string;
+  hashtags: string[];
   /** Requires o=SUBMITTABLE. */
   submittable?: boolean;
   _number: number;

@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
@@ -433,6 +434,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes',
       );
+      expect(branchFiles).toEqual(['some-new-file']);
+    });
+  });
+
+  describe('getBranchFilesFromCommit(sha)', () => {
+    it('detects changed files compared to the parent commit', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const sha = await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFilesFromCommit(sha!);
       expect(branchFiles).toEqual(['some-new-file']);
     });
   });
@@ -1227,6 +1248,29 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+  });
+
+  describe('pushCommit', () => {
+    it('should pass pushOptions to git.push', async () => {
+      const pushSpy = vi
+        .spyOn(SimpleGit.prototype, 'push')
+        .mockResolvedValue({} as PushResult);
+      await expect(
+        git.pushCommit({
+          sourceRef: defaultBranch,
+          targetRef: defaultBranch,
+          files: [],
+          pushOptions: ['ci.skip', 'foo=bar'],
+        }),
+      ).resolves.toBeTrue();
+      expect(pushSpy).toHaveBeenCalledWith(
+        'origin',
+        `${defaultBranch}:${defaultBranch}`,
+        expect.objectContaining({
+          '--push-option': ['ci.skip', 'foo=bar'],
+        }),
+      );
     });
   });
 
