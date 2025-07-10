@@ -5,8 +5,8 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
-import { parseUrl } from '../../../util/url';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
