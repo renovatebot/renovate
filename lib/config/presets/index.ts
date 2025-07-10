@@ -7,7 +7,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { getTtlOverride } from '../../util/cache/package/ttl';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -136,12 +135,7 @@ export async function getPreset(
       tag,
     });
     if (presetCachePersistence) {
-      await packageCache.set(
-        presetCacheNamespace,
-        cacheKey,
-        presetConfig,
-        getTtlOverride(presetCacheNamespace) ?? 15,
-      );
+      await packageCache.set(presetCacheNamespace, cacheKey, presetConfig, 15);
     } else {
       memCache.set(cacheKey, presetConfig);
     }

@@ -6,6 +6,7 @@ import * as fileCache from './file';
 import { getCombinedKey } from './key';
 import * as redisCache from './redis';
 import { SqlitePackageCache } from './sqlite';
+import { getTtlOverride } from './ttl';
 import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
@@ -32,6 +33,19 @@ export async function get<T = any>(
 }
 
 export async function set(
+  namespace: PackageCacheNamespace,
+  key: string,
+  value: unknown,
+  minutes: number,
+): Promise<void> {
+  const rawTtl = getTtlOverride(namespace) ?? minutes;
+  await setWithRawTtl(namespace, key, value, rawTtl);
+}
+
+/**
+ * This MUST NOT be used outside of cache implementation
+ */
+export async function setWithRawTtl(
   namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
