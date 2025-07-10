@@ -666,6 +666,33 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('substitutes {{args}}', async () => {
+      local.getPreset.mockResolvedValueOnce({
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['{{args}}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
+      });
+      const res = await presets.getPreset(
+        'local>customManager(**/{*.py, *.yaml})',
+        {},
+      );
+      expect(res).toEqual({
+        customManagers: [
+          {
+            customType: 'regex',
+            // The space after comma is obviously incorrect here.
+            // But the test must ensure that spaces aren't removed.
+            managerFilePatterns: ['**/{*.py, *.yaml}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
+      });
+    });
+
     it('handles 404 packages', async () => {
       let e: Error | undefined;
       try {

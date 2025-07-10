@@ -6,7 +6,7 @@ import upath from 'upath';
 import * as configParser from '../../config';
 import { GlobalConfig } from '../../config/global';
 import { resolveConfigPresets } from '../../config/presets';
-import { validateConfigSecrets } from '../../config/secrets';
+import { validateConfigSecretsAndVariables } from '../../config/secrets';
 import type {
   AllConfig,
   RenovateConfig,
@@ -143,8 +143,8 @@ export async function start(): Promise<number> {
 
       checkEnv();
 
-      // validate secrets. Will throw and abort if invalid
-      validateConfigSecrets(config);
+      // validate secrets and variables. Will throw and abort if invalid
+      validateConfigSecretsAndVariables(config);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
