@@ -614,6 +614,26 @@ describe('modules/datasource/nuget/index', () => {
       expect(res?.sourceUrl).toBeDefined();
     });
 
+    it('captures release notes', async () => {
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndexV3)
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
+        .reply(200, pkgListV3Registration)
+        .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .reply(200, pkgInfoV3FromNuget);
+      const res = await getPkgReleases({
+        ...configV3,
+      });
+      expect(res?.changelogContent)
+        .toBe(`This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need
+      to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to
+      execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.
+    `);
+    });
+
     it('processes real data (v3) feed is azure devops', async () => {
       httpMock
         .scope('https://pkgs.dev.azure.com')
