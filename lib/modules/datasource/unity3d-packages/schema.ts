@@ -4,9 +4,14 @@ const Upm = z.object({
   changelog: z.string().optional(),
 });
 
+const Repository = z.object({
+  url: z.string().optional(),
+});
+
 const UnityPackageRelease = z.object({
   _upm: Upm.optional(),
   documentationUrl: z.string().optional(),
+  repository: Repository.optional(),
   version: z.string(),
 });
 
