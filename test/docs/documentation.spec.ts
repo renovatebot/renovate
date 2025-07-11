@@ -41,7 +41,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/configuration-options.md', () => {
       function getConfigHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(regEx(/\n## (.*?)\n/g)) ?? [];
         return matches
           .map((match) => match.substring(4, match.length - 1))
           .filter(
@@ -73,7 +73,7 @@ describe('docs/documentation', () => {
 
       function getConfigSubHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n### (.*?)\n/g) ?? [];
+        const matches = content.match(regEx(/\n### (.*?)\n/g)) ?? [];
         return matches
           .map((match) => match.substring(5, match.length - 1))
           .sort();
@@ -133,7 +133,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/self-hosted-configuration.md', () => {
       function getSelfHostedHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(regEx(/\n## (.*?)\n/g)) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 
@@ -160,7 +160,7 @@ describe('docs/documentation', () => {
     describe('docs/usage/self-hosted-experimental.md', () => {
       function getSelfHostedExperimentalConfigHeaders(file: string): string[] {
         const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
-        const matches = content.match(/\n## (.*?)\n/g) ?? [];
+        const matches = content.match(regEx(/\n## (.*?)\n/g)) ?? [];
         return matches.map((match) => match.substring(4, match.length - 1));
       }
 

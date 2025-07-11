@@ -1,4 +1,5 @@
 import { query as q } from 'good-enough-parser';
+import { regEx } from '../../../util/regex';
 import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as perlVersioning from '../../versioning/perl';
@@ -42,7 +43,9 @@ const perlVersionMatch = q
     return ctx;
   });
 
-const requirementMatch = q.sym<Ctx>(/^(?:requires|recommends|suggests)$/);
+const requirementMatch = q.sym<Ctx>(
+  regEx(/^(?:requires|recommends|suggests)$/),
+);
 
 const phasedRequiresMatch = q.sym<Ctx>(
   /^(?:configure|build|test|author)_requires$/,

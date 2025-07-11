@@ -1,5 +1,6 @@
 import { resolveConfigPresets } from '../';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { regEx } from '../../../util/regex';
 import { massageConfig } from '../../massage';
 import { validateConfig } from '../../validation';
 import * as npm from '../npm';
@@ -57,7 +58,7 @@ describe('config/presets/internal/index', () => {
         ),
       )
       .flat()
-      .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
+      .forEach((preset) => expect(preset).not.toMatch(regEx(/{{.*}}/)));
   });
 
   it('returns undefined for unknown preset', () => {
