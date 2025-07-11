@@ -262,7 +262,7 @@
     "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
     "yaml": "2.8.0",
-    "zod": "3.25.73"
+    "zod": "3.25.74"
   },
   "optionalDependencies": {
     "better-sqlite3": "12.2.0",
