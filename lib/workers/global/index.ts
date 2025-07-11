@@ -16,7 +16,7 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { exportStats, finalizeReport } from '../../instrumentation/reporting';
-import { getProblems, logLevel, logger, setMeta } from '../../logger';
+import { getProblems, logFatal, logLevel, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import { getEnv } from '../../util/env';
 import * as hostRules from '../../util/host-rules';
@@ -199,12 +199,13 @@ export async function start(): Promise<number> {
     await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
-      logger.fatal(
-        { errorMessage: err.message.substring(6) },
-        'Initialization error',
-      );
+      logFatal('INITIALIZATION_ERROR', {
+        errorMessage: err.message.substring(6),
+      });
     } else {
-      logger.fatal({ err }, 'Unknown error');
+      logFatal('UNKNOWN_GLOBAL_ERROR', {
+        err: is.plainObject(err) ? err : { message: err.message },
+      });
     }
     if (!config!) {
       // return early if we can't parse config options
