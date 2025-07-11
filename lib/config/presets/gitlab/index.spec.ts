@@ -325,6 +325,31 @@ describe('config/presets/gitlab/index', () => {
       );
       expect(result).toBe('config.json5');
     });
+
+    it('should handle URL with only slashes in pathname', () => {
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com///',
+      );
+      expect(result).toBe('');
+    });
+
+    it('should handle URL with pathname that becomes empty after processing', () => {
+      // Test the specific line 83 fallback: pathWithoutQuery.split('/').pop() ?? ''
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/',
+      );
+      expect(result).toBe('');
+    });
+
+    it('should handle URL with complex path that results in empty filename', () => {
+      // Additional test for line 83: pathWithoutQuery.split('/').pop() ?? ''
+      // This tests the defensive programming fallback even though split('/').pop()
+      // should never return undefined in practice
+      const result = gitlab.extractFilenameFromGitLabPath(
+        'https://gitlab.example.com/projects/123/repository/files//raw',
+      );
+      expect(result).toBe('');
+    });
   });
 
   describe('getPreset()', () => {
