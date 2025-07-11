@@ -1,3 +1,4 @@
+import urlJoin from 'url-join';
 import { cache } from '../../../util/cache/package/decorator';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api';
 import { Datasource } from '../datasource';
@@ -70,7 +71,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     registryUrl: string,
   ): Promise<BicepResourceVersionIndex> {
     const { body } = await this.http.getJson(
-      `${registryUrl}/${BICEP_TYPES_INDEX_PATH}`,
+      urlJoin(registryUrl, BICEP_TYPES_INDEX_PATH),
       BicepResourceVersionIndex,
     );
     return body;
