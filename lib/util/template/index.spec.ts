@@ -48,17 +48,17 @@ describe('util/template/index', () => {
     expect(output).toContain('True');
   });
 
-  it('ifChanged - yes', () => {
+  it('ifNotEquals - yes', () => {
     const userTemplate =
-      '{{#ifChanged depName newName}}{{{newName}}}{{/ifChanged}}';
+      '{{#ifNotEquals depName newName}}{{{newName}}}{{/ifNotEquals}}';
     const input = { depName: 'nodemon', newName: 'nodemon-new' };
     const output = template.compile(userTemplate, input, false);
     expect(output).toBe('nodemon-new');
   });
 
-  it('ifChanged - no', () => {
+  it('ifNotEquals - no', () => {
     const userTemplate =
-      '{{#ifChanged depName newName}}{{{newName}}}{{/ifChanged}}';
+      '{{#ifNotEquals depName newName}}{{{newName}}}{{/ifNotEquals}}';
     const input = { depName: 'nodemon', newName: 'nodemon' };
     const output = template.compile(userTemplate, input, false);
     expect(output).toBeEmptyString();

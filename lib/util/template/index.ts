@@ -15,14 +15,9 @@ handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
 handlebars.registerHelper(
-  'ifChanged',
-  function (
-    this: any,
-    depName: string,
-    newName: string,
-    options: HelperOptions,
-  ) {
-    if (newName && newName !== depName) {
+  'ifNotEquals',
+  function (this: any, a: string, b: string, options: HelperOptions) {
+    if (a && b && a !== b) {
       return options.fn(this);
     } else {
       return options.inverse(this);

@@ -260,7 +260,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       branchName: 'some-branch',
       prBodyDefinitions: {
         Package:
-          '{{{depNameLinked}}}{{#ifChanged depName newName}} → {{{newNameLinked}}}{{/ifChanged}}',
+          '{{{depNameLinked}}}{{#ifNotEquals depName newName}} → {{{newNameLinked}}}{{/ifNotEquals}}',
         Type: '{{{depType}}}',
         Update: '{{{updateType}}}',
         'Current value': '{{{currentValue}}}',
@@ -290,7 +290,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {
         Package:
-          '{{{depNameLinked}}}{{#ifChanged depName newName}} → {{{newNameLinked}}}{{/ifChanged}}',
+          '{{{depNameLinked}}}{{#ifNotEquals depName newName}} → {{{newNameLinked}}}{{/ifNotEquals}}',
         Type: '{{{depType}}}',
         Update: '{{{updateType}}}',
         'Current value': '{{{currentValue}}}',
