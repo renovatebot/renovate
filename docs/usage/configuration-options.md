@@ -317,6 +317,7 @@ You may choose from these values:
 - `fast-forward`, "fast-forwarding" the main branch reference, no new commits in the resultant tree
 - `merge-commit`, create a new merge commit
 - `rebase`, rewrite history as part of the merge, but usually keep the individual commits
+- `rebase-merge`, create a new merge commit, but rebase the commits prior merging (azure-only)
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
