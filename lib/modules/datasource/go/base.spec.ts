@@ -119,7 +119,7 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
-      it.skip('supports Go submodules in GitLab repo', async () => {
+      it('supports Go submodules in GitLab repo', async () => {
         httpMock
           .scope('https://gitlab.com')
           .get('/example/module/submodule?go-get=1')
