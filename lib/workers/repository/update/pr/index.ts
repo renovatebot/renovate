@@ -62,6 +62,8 @@ export function getPlatformPrOptions(
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
+    azureBypassPolicyTypes: config.azureBypassPolicyTypes ?? [],
+    azureBypassPolicyReason: config.azureBypassPolicyReason,
     usePlatformAutomerge,
   };
 }
