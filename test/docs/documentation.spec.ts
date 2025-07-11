@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options';
+import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces';
 import { regEx } from '../../lib/util/regex';
 
 const options = getOptions();
@@ -154,6 +155,41 @@ describe('docs/documentation', () => {
         expect(getSelfHostedHeaders('self-hosted-configuration.md')).toEqual(
           getRequiredSelfHostedOptions(),
         );
+      });
+
+      function getCacheNamespacesFromDocs(file: string): string[] {
+        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
+        const beginMarker = '<!-- cache-namespaces-begin -->';
+        const endMarker = '<!-- cache-namespaces-end -->';
+
+        const beginIndex = content.indexOf(beginMarker);
+        const endIndex = content.indexOf(endMarker);
+
+        if (beginIndex === -1 || endIndex === -1) {
+          return [];
+        }
+
+        const cacheNamespacesSection = content.substring(
+          beginIndex + beginMarker.length,
+          endIndex,
+        );
+        const matches = cacheNamespacesSection.match(/- `([^`]+)`/g) ?? [];
+
+        return matches
+          .map((match) => match.substring(3, match.length - 1))
+          .sort();
+      }
+
+      function getExpectedCacheNamespaces(): string[] {
+        return packageCacheNamespaces
+          .filter((namespace) => namespace !== '_test-namespace')
+          .sort();
+      }
+
+      it('has complete cache namespaces list', () => {
+        expect(
+          getCacheNamespacesFromDocs('self-hosted-configuration.md'),
+        ).toEqual(getExpectedCacheNamespaces());
       });
     });
 
