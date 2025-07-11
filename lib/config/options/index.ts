@@ -2827,6 +2827,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitLabNotesMerge',
+    description: `Uses Gitlab's Note API instead of the /merge API. Supports adding to merge trains.`,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'customManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',
