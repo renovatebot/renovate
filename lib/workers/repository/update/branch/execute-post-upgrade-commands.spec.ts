@@ -342,6 +342,97 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
     });
+
+    it('does not add back files that are renamed', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+          {
+            type: 'addition',
+            path: 'bin/.orc-1.96.1.pkg',
+            contents: '',
+          },
+          {
+            type: 'deletion',
+            path: 'bin/.orc-1.96.0.pkg',
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          not_added: [],
+          conflicted: [],
+          created: [],
+          deleted: [],
+          modified: ['bin/orc'],
+          renamed: [
+            {
+              from: 'bin/.orc-1.96.0.pkg',
+              to: 'bin/.orc-1.96.1.pkg',
+            },
+          ],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toMatchObject([
+        {
+          type: 'addition',
+          path: 'bin/orc',
+          contents: '[content]',
+        },
+        {
+          type: 'addition',
+          path: 'bin/.orc-1.96.1.pkg',
+          contents: '',
+        },
+        {
+          type: 'deletion',
+          path: 'bin/.orc-1.96.0.pkg',
+        },
+      ]);
+    });
+
     it('retains previously deleted files too', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
