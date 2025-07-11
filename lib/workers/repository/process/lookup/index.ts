@@ -723,6 +723,56 @@ export async function lookupUpdates(
             update.registryUrl = registryUrl;
           }
         }
+
+        if (
+          config.manager === 'gomod' &&
+          update.newDigest &&
+          update.newValue?.startsWith('v') &&
+          !update.newValue.endsWith(update.newDigest.slice(0, 12)) && // Go pseudo-versions use 12 chars of the commit
+          update.updateType === 'digest'
+        ) {
+          // Try to find the timestamp for the commit in the releases
+          let commitTimestamp: string | undefined;
+          const matchingRelease = dependency?.releases.find(
+            (r) =>
+              update.newDigest && r.newDigest?.startsWith(update.newDigest),
+          );
+          if (matchingRelease?.releaseTimestamp) {
+            // Format: 2025-07-01T07:06:29.000Z
+            const d = new Date(matchingRelease.releaseTimestamp);
+            const pad = (n: number): string => n.toString().padStart(2, '0');
+            commitTimestamp = `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
+          } else {
+            // Fallback: use current time (not ideal, but ensures a valid pseudo-version)
+            const d = new Date();
+            const pad = (n: number): string => n.toString().padStart(2, '0');
+            commitTimestamp = `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
+          }
+
+          // Extract major version from the module path or fallback to 0
+          let major = '0',
+            minor = '0',
+            patch = '0';
+          const versionMatch = /^v?(\d+)\.(\d+)\.(\d+)/.exec(
+            update.newVersion ?? res.currentVersion ?? '',
+          );
+          if (versionMatch) {
+            major = versionMatch[1];
+            minor = versionMatch[2];
+            patch = versionMatch[3];
+          }
+
+          // Compose the new pseudo-version
+          update.newValue = `v${major}.${minor}.${patch}-${commitTimestamp}-${update.newDigest.slice(0, 12)}`;
+          logger.info(
+            {
+              packageName: config.packageName,
+              newDigest: update.newDigest,
+              newPseudoVersion: update.newValue,
+            },
+            'Generated new Go pseudo-version for latest digest',
+          );
+        }
       }
     }
 
