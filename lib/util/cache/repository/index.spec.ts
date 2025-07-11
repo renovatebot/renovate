@@ -2,7 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { printRepositoryProblems } from '../../../workers/repository';
 import { initRepoCache } from './init';
 import type { RepoCacheConfig } from './types';
-import { getCache, isCacheModified, resetCache, saveCache } from '.';
+import { cleanup, getCache, isCacheModified, resetCache, saveCache } from '.';
 import { fs, logger } from '~test/util';
 
 vi.mock('../../fs');
@@ -51,6 +51,11 @@ describe('util/cache/repository/index', () => {
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
     expect(isCacheModified()).toBeUndefined();
+  });
+
+  it('performs cleanup', async () => {
+    await initRepoCache({ ...config, repositoryCache: 'enabled' });
+    await expect(cleanup()).resolves.not.toThrow();
   });
 
   it('prints repository problems', () => {
