@@ -164,6 +164,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2021-01-05T17:57:41.000Z',
+          sourceUrl: undefined,
           version: '0.1.2-preview.2',
         },
         {
@@ -172,6 +173,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2021-02-11T19:26:19.000Z',
+          sourceUrl: undefined,
           version: '1.0.0-pre.1',
         },
         {
@@ -181,6 +183,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2024-07-03T15:24:28.000Z',
+          sourceUrl: undefined,
           version: '1.12.0-exp.1',
         },
         {
@@ -191,6 +194,7 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: true,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2025-04-18T18:06:12.036Z',
+          sourceUrl: undefined,
           version: '1.14.3',
         },
       ],
@@ -209,19 +213,11 @@ describe('modules/datasource/unity3d-packages/index', () => {
           },
           "1.12.0-exp.1": {
             "version": "1.12.0-exp.1"
-          },
-          "1.0.0-pre.1": {
-            "version": "1.0.0-pre.1"
-          },
-          "0.1.2-preview.2": {
-            "version": "0.1.2-preview.2"
           }
         },
         "time": {
           "1.14.3": "2025-04-18T18:06:12.036Z",
-          "1.12.0-exp.1": "2024-07-03T15:24:28.000Z",
-          "1.0.0-pre.1": "2021-02-11T19:26:19.000Z",
-          "0.1.2-preview.2": "2021-01-05T17:57:41.000Z"
+          "1.12.0-exp.1": "2024-07-03T15:24:28.000Z"
         }
       }
     `;
@@ -238,8 +234,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
     });
 
     expect(res).toStrictEqual({
-      homepage:
-        'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.14/manual/index.html',
       registryUrl: 'https://packages.unity.com',
       releases: [
         {
@@ -247,24 +241,8 @@ describe('modules/datasource/unity3d-packages/index', () => {
           changelogUrl: undefined,
           isStable: false,
           registryUrl: 'https://packages.unity.com',
-          releaseTimestamp: '2021-01-05T17:57:41.000Z',
-          version: '0.1.2-preview.2',
-        },
-        {
-          changelogContent: undefined,
-          changelogUrl: undefined,
-          isStable: false,
-          registryUrl: 'https://packages.unity.com',
-          releaseTimestamp: '2021-02-11T19:26:19.000Z',
-          version: '1.0.0-pre.1',
-        },
-        {
-          changelogContent: undefined,
-          changelogUrl:
-            'https://docs.unity3d.com/Packages/com.unity.xr.openxr@1.12/changelog/CHANGELOG.html',
-          isStable: false,
-          registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2024-07-03T15:24:28.000Z',
+          sourceUrl: undefined,
           version: '1.12.0-exp.1',
         },
         {
