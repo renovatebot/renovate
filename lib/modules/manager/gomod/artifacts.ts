@@ -28,6 +28,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
+import { getDependentGoModFiles } from './package-tree';
 
 const { major, valid } = semver;
 
@@ -426,6 +427,18 @@ export async function updateArtifacts({
       logger.debug('Found updated go.mod after go.sum update');
       res.push(artifactResult);
     }
+
+    if (config.postUpdateOptions?.includes('gomodTidyAll')) {
+      const dependentResults = await updateDependentGoModFiles(
+        goModFileName,
+        execOptions,
+        tidyOpts,
+      );
+      if (dependentResults.length > 0) {
+        res.push(...dependentResults);
+      }
+    }
+
     return res;
   } catch (err) {
     // istanbul ignore if
@@ -433,6 +446,94 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update go.sum');
+    return [
+      {
+        artifactError: {
+          lockFile: sumFileName,
+          stderr: err.message,
+        },
+      },
+    ];
+  }
+}
+
+/**
+ * Update dependent go.mod files when gomodTidyAll is enabled
+ */
+async function updateDependentGoModFiles(
+  packageFileName: string,
+  execOptions: ExecOptions,
+  tidyOpts: string,
+): Promise<UpdateArtifactsResult[]> {
+  const dependentFiles = await getDependentGoModFiles(packageFileName);
+  const results: UpdateArtifactsResult[] = [];
+
+  // Filter out the main go.mod file since it's already been processed
+  const dependentModules = dependentFiles.filter(
+    (file) => file.name !== packageFileName,
+  );
+
+  for (const file of dependentModules) {
+    const result = await tidyDependentModule(file.name, execOptions, tidyOpts);
+    if (result) {
+      results.push(...result);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Run go mod tidy on a dependent module
+ */
+async function tidyDependentModule(
+  goModFileName: string,
+  execOptions: ExecOptions,
+  tidyOpts: string,
+): Promise<UpdateArtifactsResult[] | null> {
+  const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
+  const cmd = 'go';
+  const args = 'mod tidy' + tidyOpts;
+
+  const dependentExecOptions: ExecOptions = {
+    ...execOptions,
+    cwdFile: goModFileName,
+  };
+
+  try {
+    await exec([`${cmd} ${args}`], dependentExecOptions);
+    const status = await getRepoStatus();
+    const res: UpdateArtifactsResult[] = [];
+
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: sumFileName,
+          contents: await readLocalFile(sumFileName),
+        },
+      });
+    }
+
+    if (status.modified.includes(goModFileName)) {
+      logger.debug('Returning updated go.mod');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goModFileName,
+          contents: await readLocalFile(goModFileName, 'utf8'),
+        },
+      });
+    }
+
+    return res.length > 0 ? res : null;
+  } catch (err) {
+    // istanbul ignore if
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.debug({ err, goModFileName }, 'Failed to update dependent go.mod');
     return [
       {
         artifactError: {
