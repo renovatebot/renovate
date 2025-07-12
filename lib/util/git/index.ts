@@ -1,4 +1,5 @@
 import URL from 'node:url';
+import { homedir } from 'os';
 import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
@@ -197,6 +198,79 @@ export async function validateGitVersion(): Promise<boolean> {
   }
   logger.debug(`Found valid git version: ${version}`);
   return true;
+}
+
+export async function enableCredentialStore(): Promise<void> {
+  const currentHelper = await simpleGit().getConfig(
+    'credential.helper',
+    'global',
+  );
+
+  if (!currentHelper.values.includes('store')) {
+    await simpleGit().addConfig('credential.helper', 'store', true, 'global');
+  }
+}
+
+export async function updateCredentialStore(url: URL): Promise<void> {
+  const credentialsPath = upath.join(homedir(), '.git-credentials');
+  logger.debug(`Checking the Git credential store file at ${credentialsPath}`);
+  let lines: string[] = [];
+  try {
+    const content = await fs.readFile(credentialsPath, 'utf-8');
+    lines = content.split('\n').filter((line) => line.trim() !== '');
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw err;
+    }
+  }
+
+  let storeUpdated = false;
+  let urlFound = false;
+
+  const result = lines.map((line) => {
+    try {
+      const existing = new URL.URL(line);
+      if (
+        existing.protocol === url.protocol &&
+        existing.hostname === url.hostname &&
+        existing.port === url.port
+      ) {
+        urlFound = true;
+        if (
+          existing.username !== url.username ||
+          existing.password !== url.password
+        ) {
+          logger.debug(`Updating ${url.href} in the Git credential store`);
+          storeUpdated = true;
+          return url;
+        }
+      }
+      return line;
+    } catch {
+      return line;
+    }
+  });
+
+  if (!urlFound) {
+    logger.debug(`Adding ${url} to the Git credential store`);
+    result.push(url);
+    storeUpdated = true;
+  }
+
+  if (storeUpdated) {
+    logger.debug(
+      `Updating the Git credential store file at ${credentialsPath}`,
+    );
+    try {
+      await fs.writeFile(credentialsPath, `${result.join('\n')}\n`, {
+        encoding: 'utf8',
+        mode: 0o600,
+      });
+    } catch (err) {
+      logger.error({ err }, `Cannot write the Git credentials store: ${err}`);
+      throw new Error('Cannot update the Git credential store file');
+    }
+  }
 }
 
 async function fetchBranchCommits(preferUpstream = true): Promise<void> {

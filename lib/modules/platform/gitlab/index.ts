@@ -3,6 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -114,6 +115,7 @@ export async function initPlatform({
   username,
   token,
   gitAuthor,
+  gitCredentialPassing,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -127,6 +129,24 @@ export async function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
+
+  if (gitCredentialPassing === 'store') {
+    logger.debug('Enable the Git credential store');
+    await git.enableCredentialStore();
+    const data = parseUrl(defaults.endpoint);
+    try {
+      await git.updateCredentialStore(
+        parseUrl(`https://oauth2:${token}@${data!.host}`)!,
+      );
+    } catch (err) {
+      logger.error(
+        { err },
+        `Failed to update the Git credentials store: ${err}`,
+      );
+      throw new Error('Init: Cannot update the Git credential store');
+    }
+  }
+
   let gitlabVersion: string;
   try {
     if (!gitAuthor) {
@@ -263,7 +283,7 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-function getRepoUrl(
+export function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
   res: HttpResponse<RepoResponse>,
@@ -281,6 +301,12 @@ function getRepoUrl(
     url: defaults.endpoint,
   });
   const env = getEnv();
+
+  const credentialPassing = GlobalConfig.get('gitCredentialPassing');
+  const authData =
+    !credentialPassing || credentialPassing === 'url'
+      ? `oauth2:${opts.token!}`
+      : null;
 
   if (
     gitUrl === 'endpoint' ||
@@ -304,7 +330,7 @@ function getRepoUrl(
         /* v8 ignore next: should never happen */
         protocol.slice(0, -1) || 'https',
       // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
+      auth: authData,
       host,
       pathname: `${newPathname}/${repository}.git`,
     });
@@ -315,7 +341,8 @@ function getRepoUrl(
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
   const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
   // TODO: types (#22198)
-  repoUrl.auth = `oauth2:${opts.token!}`;
+  repoUrl.auth = authData;
+
   return URL.format(repoUrl);
 }
 
