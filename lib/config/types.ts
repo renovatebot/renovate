@@ -310,6 +310,8 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+
+  composerUpdateWithAllDependencies?: boolean;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
