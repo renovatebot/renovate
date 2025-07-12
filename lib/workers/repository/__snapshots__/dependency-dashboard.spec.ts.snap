@@ -460,7 +460,7 @@ Renovate tried to run on this repository, but found these problems.
 
 ## Pending Status Checks
 
-These updates await pending status checks. To force their creation now, click the checkbox below.
+The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
@@ -482,7 +482,7 @@ platform is github
 
 ## Pending Status Checks
 
-These updates await pending status checks. To force their creation now, click the checkbox below.
+The following updates await pending status checks. To force their creation now, click on a checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName1 -->pr1
 
@@ -526,7 +526,7 @@ exports[`workers/repository/dependency-dashboard > ensureDependencyDashboard() >
 
 ## Pending Approval
 
-These branches will be created by Renovate only once you click their checkbox below.
+The following branches are pending approval. To create them, click on a checkbox below.
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
@@ -534,7 +534,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
 ## Awaiting Schedule
 
-These updates are awaiting their schedule. Click on a checkbox to get an update now.
+The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
  - [x] <!-- unschedule-branch=branchName3 -->pr3
 
