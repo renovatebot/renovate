@@ -33,7 +33,7 @@ const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
   beforeEach(() => {
-    process.env = {};
+    delete process.env.LOG_FILE_LEVEL;
   });
 
   it('inits', () => {
