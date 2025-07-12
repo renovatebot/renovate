@@ -63,11 +63,22 @@ function createLogFileStream(logFile: string): bunyan.Stream {
   const directoryName = upath.dirname(logFile);
   fs.ensureDirSync(directoryName);
 
-  return {
+  const file: bunyan.Stream = {
     name: 'logfile',
     path: logFile,
     level: validateLogLevel(getEnv('LOG_FILE_LEVEL'), 'debug'),
   };
+
+  const logFileFormat = getEnv('LOG_FILE_FORMAT');
+
+  if (
+    is.nonEmptyStringAndNotWhitespace(logFileFormat) &&
+    logFileFormat === 'pretty'
+  ) {
+    file.type = 'raw';
+  }
+
+  return file;
 }
 
 function serializedSanitizedLogger(streams: bunyan.Stream[]): bunyan {
