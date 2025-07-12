@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
-import { configFileNames } from '../../../config/app-strings';
+import { getConfigFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { migrateConfig } from '../../../config/migration';
@@ -41,7 +41,7 @@ import type { RepoFileConfig } from './types';
 
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
-  for (const fileName of configFileNames) {
+  for (const fileName of getConfigFileNames()) {
     if (fileName === 'package.json') {
       try {
         const pJson = JSON.parse(
