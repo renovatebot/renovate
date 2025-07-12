@@ -7,6 +7,7 @@ import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { hashBody } from '../pr-body';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -30,8 +31,13 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { client } from './client';
+import * as prCache from './pr-cache';
 import { configureScm } from './scm';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
+import type {
+  GerritChange,
+  GerritLabelTypeInfo,
+  GerritProjectInfo,
+} from './types';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
@@ -139,6 +145,17 @@ export async function initRepo({
 }
 
 export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
+  if (!findPRConfig.refreshCache) {
+    const cached = (await retrievePrsFromCacheOrInitCache(
+      findPRConfig,
+      1,
+    )) as Pr | null;
+    logger.debug(
+      `findPr: using cached gerrit change ${cached?.number} for ${findPRConfig.branchName}`,
+    );
+    return cached;
+  }
+
   const change = (
     await client.findChanges(config.repository!, {
       ...findPRConfig,
@@ -146,44 +163,70 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: findPRConfig.branchName,
-      })
-    : null;
+  if (!change) {
+    return null;
+  }
+  const pr = mapGerritChangeToPr(change, {
+    sourceBranch: findPRConfig.branchName,
+  })!;
+
+  logger.debug(`findPr: saving gerrit change ${pr.number} to cache`);
+  prCache.set(config.repository!, [pr]);
+
+  return pr;
 }
 
 export async function getPr(
   number: number,
   refreshCache?: boolean,
 ): Promise<Pr | null> {
-  try {
-    const change = await client.getChange(
-      number,
-      refreshCache,
-      REQUEST_DETAILS_FOR_PRS,
+  if (!refreshCache) {
+    const cached = (await retrievePrsFromCacheOrInitCache(number)) as Pr | null;
+    logger.debug(
+      `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
     );
-    return mapGerritChangeToPr(change);
+    return cached;
+  }
+
+  let change: GerritChange;
+  try {
+    change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
   } catch (err) {
     if (err.statusCode === 404) {
       return null;
     }
     throw err;
   }
+  const pr = mapGerritChangeToPr(change);
+  if (!pr) {
+    return null;
+  }
+
+  logger.debug(`getPr: saving gerrit change ${number} to cache`);
+  prCache.set(config.repository!, [pr]);
+
+  return pr;
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  const cached = (await retrievePrsFromCacheOrInitCache(prConfig.number)) as Pr;
   if (prConfig.prBody) {
     await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
+    cached.bodyStruct = {
+      hash: hashBody(prConfig.prBody),
+    };
   }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
+    cached.state = 'closed';
   }
+  logger.debug(`updatePr: updating gerrit change ${prConfig.number} in cache`);
+  prCache.set(config.repository!, [cached]);
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
@@ -198,7 +241,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       targetBranch: prConfig.targetBranch,
       state: 'open',
       limit: 1,
-      refreshCache: true,
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
@@ -220,30 +262,33 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     TAG_PULL_REQUEST_BODY,
     change.messages,
   );
-  return mapGerritChangeToPr(change, {
+  const pr = mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
     prBody: prConfig.prBody,
-  });
+  })!;
+
+  logger.debug(`createPr: saving gerrit change ${pr.number} to cache`);
+  prCache.set(config.repository!, [pr]);
+
+  return pr;
 }
 
 export async function getBranchPr(
   branchName: string,
   targetBranch?: string,
 ): Promise<Pr | null> {
-  const change = (
-    await client.findChanges(config.repository!, {
+  const cached = (await retrievePrsFromCacheOrInitCache(
+    {
       branchName,
       state: 'open',
       targetBranch,
-      limit: 1,
-      requestDetails: REQUEST_DETAILS_FOR_PRS,
-    })
-  ).pop();
-  return change
-    ? mapGerritChangeToPr(change, {
-        sourceBranch: branchName,
-      })
-    : null;
+    },
+    1,
+  )) as Pr | null;
+  logger.debug(
+    `getBranchPr: using cached gerrit change ${cached?.number} for ${branchName}`,
+  );
+  return cached;
 }
 
 export async function refreshPr(number: number): Promise<void> {
@@ -251,21 +296,37 @@ export async function refreshPr(number: number): Promise<void> {
   await getPr(number, true);
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
+  if (!refreshCache) {
+    const cached = (await retrievePrsFromCacheOrInitCache()) as Pr[];
+    logger.debug(`getPrList: using ${cached.length} cached changes`);
+    return cached;
+  }
+
   const changes = await client.findChanges(config.repository!, {
     branchName: '',
     requestDetails: REQUEST_DETAILS_FOR_PRS,
   });
-  return changes.map((change) => mapGerritChangeToPr(change)).filter(isTruthy);
+  const prs = changes
+    .map((change) => mapGerritChangeToPr(change))
+    .filter(isTruthy);
+
+  logger.debug(`getPrList: saving ${prs.length} changes to cache`);
+  prCache.set(config.repository!, prs);
+
+  return prs;
 }
 
-export async function mergePr(config: MergePRConfig): Promise<boolean> {
+export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
   logger.debug(
-    `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
+    `mergePr(${mergeConfig.id}, ${mergeConfig.branchName!}, ${mergeConfig.strategy!})`,
   );
+  const cached = (await retrievePrsFromCacheOrInitCache(mergeConfig.id)) as Pr;
   try {
-    const change = await client.submitChange(config.id);
-    return change.status === 'MERGED';
+    const change = await client.submitChange(mergeConfig.id);
+    if (change.status !== 'MERGED') {
+      return false;
+    }
   } catch (err) {
     if (err.statusCode === 409) {
       logger.warn(
@@ -276,6 +337,10 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
     }
     throw err;
   }
+  cached.state = 'merged';
+  logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
+  prCache.set(config.repository!, [cached]);
+  return true;
 }
 
 /**
@@ -291,7 +356,6 @@ export async function getBranchStatus(
       state: 'open',
       branchName,
       limit: 1,
-      refreshCache: true,
       requestDetails: ['LABELS', 'SUBMITTABLE', 'CHECK'],
     })
   ).pop();
@@ -330,7 +394,6 @@ export async function getBranchStatusCheck(
         branchName,
         state: 'open',
         limit: 1,
-        refreshCache: true,
         requestDetails: ['LABELS'],
       })
     ).pop();
@@ -512,4 +575,20 @@ export function findIssue(title: string): Promise<Issue | null> {
 
 export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
+}
+
+async function retrievePrsFromCacheOrInitCache(
+  prNumberOrFindConfig?: number | FindPRConfig,
+  limit?: number,
+): Promise<Pr | Pr[] | null> {
+  if (!prCache.initialized(config.repository!)) {
+    await getPrList(true);
+  }
+  if (prNumberOrFindConfig === undefined) {
+    return prCache.getAll(config.repository!)!;
+  }
+  if (typeof prNumberOrFindConfig === 'number') {
+    return prCache.get(config.repository!, prNumberOrFindConfig)!;
+  }
+  return prCache.find(config.repository!, prNumberOrFindConfig, limit)!;
 }
