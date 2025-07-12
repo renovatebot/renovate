@@ -29,6 +29,25 @@ export function parseFileConfig(
         validationMessage,
       };
     }
+  } else if (fileType === '.jsonc') {
+    try {
+      return {
+        success: true,
+        parsedContents: parseJson(fileContents, fileName),
+      };
+    } catch (err) {
+      logger.debug({ fileName, fileContents }, 'Error parsing JSONC file');
+      const validationError = 'Invalid JSONC (parsing failed)';
+      const validationMessage = `JSONC.parse error: \`${err.message.replaceAll(
+        '`',
+        "'",
+      )}\``;
+      return {
+        success: false,
+        validationError,
+        validationMessage,
+      };
+    }
   } else {
     const jsonString = stripJsonComments(fileContents);
     let allowDuplicateKeys = true;
