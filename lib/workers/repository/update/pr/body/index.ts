@@ -129,7 +129,7 @@ export function getPrBody(
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-    prBody = platform.massageMarkdown(prBody);
+    prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(
