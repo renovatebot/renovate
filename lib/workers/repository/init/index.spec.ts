@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global';
 import * as _secrets from '../../../config/secrets';
+import { expectMultipleBaseBranches } from '../../../util/multiple-base-branches';
 import * as _onboarding from '../onboarding/branch';
 import * as _apis from './apis';
 import * as _config from './config';
@@ -68,6 +69,34 @@ describe('workers/repository/init/index', () => {
         { platform: undefined },
         "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
       );
+    });
+
+    it('sets expected multiple base branches', async () => {
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      onboarding.checkOnboardingBranch.mockResolvedValue({});
+      config.getRepoConfig
+        .mockResolvedValueOnce({ baseBranches: ['one'] })
+        .mockResolvedValueOnce({ baseBranches: ['/one/'] })
+        .mockResolvedValueOnce({ baseBranches: ['one', 'two'] })
+        .mockResolvedValueOnce({})
+        .mockResolvedValueOnce({ baseBranches: ['!/^rELEasE/.*$/i'] });
+      merge.mergeRenovateConfig.mockResolvedValue({});
+      secrets.applySecretsToConfig.mockImplementation((c) => c);
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeFalse();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeFalse();
+
+      await initRepo({});
+      expect(expectMultipleBaseBranches()).toBeTrue();
     });
   });
 });
