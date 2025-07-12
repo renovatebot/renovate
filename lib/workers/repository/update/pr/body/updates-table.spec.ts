@@ -253,4 +253,65 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '\n',
     );
   });
+
+  it('handles replacements with new names', () => {
+    const upgrade = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package:
+          '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change:
+          "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
+      },
+      updateType: 'replacement',
+      depNameLinked: '[mocha](https://mochajs.org/)',
+      depType: 'devDependencies',
+      depName: 'mocha',
+      currentValue: '6.2.3',
+      newValue: '6.2.4',
+      currentVersion: '6.2.3',
+      newVersion: '6.2.4',
+      displayFrom: '6.2.3',
+      displayTo: '6.2.4',
+      newName: 'mochaNew',
+      newNameLinked: '[mochaNew](https://mochajs.org/)',
+    });
+
+    const configObj: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [upgrade],
+      prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyDefinitions: {
+        Package:
+          '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: 'All locks refreshed',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+      },
+    };
+    const result = getPrUpdatesTable(configObj);
+    expect(result).toMatch(
+      '\n' +
+        '\n' +
+        'This PR contains the following updates:\n' +
+        '\n' +
+        '| Package | Type | Update | Change |\n' +
+        '|---|---|---|---|\n' +
+        '| [mocha](https://mochajs.org/) → [mochaNew](https://mochajs.org/) | devDependencies | replacement | [`6.2.3` -> `6.2.4`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.4) |\n' +
+        '\n' +
+        '\n',
+    );
+  });
 });
