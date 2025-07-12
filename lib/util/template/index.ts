@@ -14,17 +14,6 @@ type Options = HelperOptions & {
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
-handlebars.registerHelper(
-  'ifNotEquals',
-  function (this: any, a: string, b: string, options: HelperOptions) {
-    if (a && b && a !== b) {
-      return options.fn(this);
-    } else {
-      return options.inverse(this);
-    }
-  },
-);
-
 handlebars.registerHelper('encodeBase64', (str: string) =>
   Buffer.from(str ?? '').toString('base64'),
 );

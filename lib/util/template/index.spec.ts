@@ -48,20 +48,28 @@ describe('util/template/index', () => {
     expect(output).toContain('True');
   });
 
-  it('ifNotEquals - yes', () => {
+  it('unless with equals - 1', () => {
     const userTemplate =
-      '{{#ifNotEquals depName newName}}{{{newName}}}{{/ifNotEquals}}';
-    const input = { depName: 'nodemon', newName: 'nodemon-new' };
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+      newName: 'nodemon-new',
+      newNameLinked: 'nodemonNewLinked',
+    };
     const output = template.compile(userTemplate, input, false);
-    expect(output).toBe('nodemon-new');
+    expect(output).toBe('nodemonLinked -> nodemonNewLinked');
   });
 
-  it('ifNotEquals - no', () => {
+  it('unless with equals - 2', () => {
     const userTemplate =
-      '{{#ifNotEquals depName newName}}{{{newName}}}{{/ifNotEquals}}';
-    const input = { depName: 'nodemon', newName: 'nodemon' };
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+    };
     const output = template.compile(userTemplate, input, false);
-    expect(output).toBeEmptyString();
+    expect(output).toBe('nodemonLinked');
   });
 
   it('not containsString', () => {

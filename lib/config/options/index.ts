@@ -2732,7 +2732,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     default: {
       Package:
-        '{{{depNameLinked}}}{{#ifNotEquals depName newName}} → {{{newNameLinked}}}{{/ifNotEquals}}',
+        '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
       Type: '{{{depType}}}',
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',
