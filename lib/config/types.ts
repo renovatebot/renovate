@@ -236,7 +236,8 @@ export interface RenovateConfig
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
-  baseBranches?: string[];
+  /** user configurable base branch patterns*/
+  baseBranchPatterns?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
