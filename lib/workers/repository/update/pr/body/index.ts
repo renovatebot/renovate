@@ -27,9 +27,11 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#22198)
     let depNameLinked = upgrade.depName!;
+    let newNameLinked = upgrade.newName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
+      newNameLinked = `[${newNameLinked}](${primaryLink})`;
     }
 
     let sourceRootPath = 'tree/HEAD';
@@ -58,6 +60,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
       depNameLinked += ` (${otherLinks.join(', ')})`;
     }
     upgrade.depNameLinked = depNameLinked;
+    upgrade.newNameLinked = newNameLinked;
     const references: string[] = [];
     if (homepage) {
       references.push(`[homepage](${homepage})`);
