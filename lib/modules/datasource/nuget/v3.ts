@@ -229,7 +229,10 @@ export class NugetV3Api {
           cacheProvider: memCacheProvider,
         });
         const nuspec = new XmlDocument(metaresult.body);
-        dep.changelogContent = nuspec.valueWithPath('metadata.releaseNotes');
+        const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
+        if (releaseNotes) {
+          dep.changelogContent = releaseNotes;
+        }
         const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
