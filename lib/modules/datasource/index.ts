@@ -69,13 +69,15 @@ async function getRegistryReleases(
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
   const cacheKey = `${registryUrl}:${config.packageName}`;
 
-  if (datasource.caching) {
+  const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
+  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+
+  if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
       cacheNamespace,
       cacheKey,
     );
 
-    // istanbul ignore if
     if (cachedResult) {
       logger.trace({ cacheKey }, 'Returning cached datasource response');
       DatasourceCacheStats.hit(datasource.id, registryUrl, config.packageName);
@@ -90,32 +92,30 @@ async function getRegistryReleases(
     res.registryUrl ??= registryUrl;
   }
 
-  // cache non-null responses unless marked as private
-  if (res) {
-    let cachingAllowed = false;
+  if (!res) {
+    return null;
+  }
 
-    if (GlobalConfig.get('cachePrivatePackages', false)) {
-      cachingAllowed = true;
-    }
+  let cache = false;
+  if (cacheForced) {
+    cache = true;
+  } else if (cacheEnabled && !res.isPrivate) {
+    cache = true;
+  }
 
-    if (datasource.caching && !res.isPrivate) {
-      cachingAllowed = true;
-    }
+  if (cache) {
+    logger.trace({ cacheKey }, 'Caching datasource response');
 
-    if (cachingAllowed) {
-      logger.trace({ cacheKey }, 'Caching datasource response');
-
-      // This is meant to be short-lived cache, so we ignore `hardTtlMinutes`
-      // and stick to the `softTtlMinutes` value
-      const { softTtlMinutes: cacheMinutes } = resolveTtlValues(
-        cacheNamespace,
-        15,
-      );
-      await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
-      DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
-    } else {
-      DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
-    }
+    // This is meant to be short-lived cache, so we ignore `hardTtlMinutes`
+    // and stick to the `softTtlMinutes` value
+    const { softTtlMinutes: cacheMinutes } = resolveTtlValues(
+      cacheNamespace,
+      15,
+    );
+    await packageCache.set(cacheNamespace, cacheKey, res, cacheMinutes);
+    DatasourceCacheStats.set(datasource.id, registryUrl, config.packageName);
+  } else {
+    DatasourceCacheStats.skip(datasource.id, registryUrl, config.packageName);
   }
 
   return res;
