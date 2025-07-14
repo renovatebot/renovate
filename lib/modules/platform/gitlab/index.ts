@@ -82,6 +82,7 @@ let config: {
   email: string;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
+  mergeTrainsEnabled: boolean;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
   cloneSubmodulesFilter: string[] | undefined;
@@ -375,6 +376,7 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     } /* v8 ignore stop */
     config.mergeMethod = res.body.merge_method || 'merge';
+    config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
         res.body.squash_option === 'always' ||
@@ -416,7 +418,8 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase = config?.mergeMethod !== 'merge';
+  const forceRebase =
+    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
