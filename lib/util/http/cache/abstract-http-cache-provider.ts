@@ -54,7 +54,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
-      HttpCacheStats.incRemoteMisses(url);
+      HttpCacheStats.etagMiss(url);
 
       const httpResponse = copyResponse(resp, true);
       const timestamp = new Date().toISOString();
@@ -89,7 +89,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
-      HttpCacheStats.incRemoteHits(url);
+      HttpCacheStats.etagHit(url);
       const cachedResp = copyResponse(
         httpCache.httpResponse as HttpResponse<T>,
         true,
