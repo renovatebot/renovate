@@ -1237,7 +1237,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('syncGit()', () => {
     it('should clone a specified base branch', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
+      GlobalConfig.set({
+        baseBranchPatterns: ['develop'],
+        localDir: tmpDir.path,
+      });
       await git.initRepo({
         url: origin.path,
         defaultBranch: 'develop',

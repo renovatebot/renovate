@@ -52,7 +52,7 @@ describe('workers/repository/process/extract-update', () => {
   });
 
   describe('extract()', () => {
-    it('runs with no baseBranches', async () => {
+    it('runs with no baseBranchPatterns', async () => {
       const config = {
         repoIsOnboarded: true,
       };
@@ -75,9 +75,9 @@ describe('workers/repository/process/extract-update', () => {
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });
 
-    it('runs with baseBranches', async () => {
+    it('runs with baseBranchPatterns', async () => {
       const config = {
-        baseBranches: ['master', 'dev'],
+        baseBranchPatterns: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
         javascript: {
