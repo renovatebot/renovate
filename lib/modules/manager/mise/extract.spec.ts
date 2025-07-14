@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '~test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 vi.mock('../../../util/fs');
 
@@ -129,18 +129,18 @@ describe('modules/manager/mise/extract', () => {
             packageName: 'ccache/ccache',
           },
           {
-            currentValue: '1.14.3',
-            datasource: 'github-releases',
-            depName: 'consul',
-            extractVersion: '^v(?<version>\\S+)',
-            packageName: 'hashicorp/consul',
-          },
-          {
             currentValue: '1.1.7',
             datasource: 'github-releases',
             depName: 'committed',
             extractVersion: '^v(?<version>\\S+)',
             packageName: 'crate-ci/committed',
+          },
+          {
+            currentValue: '1.14.3',
+            datasource: 'github-releases',
+            depName: 'consul',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/consul',
           },
           {
             currentValue: '3.3.0',
