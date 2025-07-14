@@ -244,7 +244,7 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
-  "dotenv-linter": {
+  'dotenv-linter': {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'dotenv-linter/dotenv-linter',
