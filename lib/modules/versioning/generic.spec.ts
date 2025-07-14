@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex';
 import type { GenericVersion } from './generic';
 import { GenericVersioningApi } from './generic';
 import type { NewValueConfig } from './types';
@@ -34,10 +35,9 @@ describe('modules/versioning/generic', () => {
   describe('GenericVersioningApi', () => {
     class DummyScheme extends GenericVersioningApi {
       protected _parse(version: string): GenericVersion | null {
-        const matchGroups =
-          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)(?:-(?<prerelease>.+))?$/.exec(
-            version,
-          )?.groups;
+        const matchGroups = regEx(
+          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)(?:-(?<prerelease>.+))?$/,
+        ).exec(version)?.groups;
         if (!matchGroups) {
           return null;
         }

@@ -286,6 +286,11 @@ describe('modules/manager/pep621/processors/uv', () => {
 
     const dependencies = [
       {
+        depName: 'python',
+        packageName: 'python',
+        depType: 'requires-python',
+      },
+      {
         depName: 'dep1',
         packageName: 'dep1',
       },
@@ -298,6 +303,11 @@ describe('modules/manager/pep621/processors/uv', () => {
     const result = processor.process(pyproject, dependencies);
 
     expect(result).toEqual([
+      {
+        depName: 'python',
+        depType: 'requires-python',
+        packageName: 'python',
+      },
       {
         depName: 'dep1',
         registryUrls: ['https://foo.com/simple'],
@@ -401,7 +411,16 @@ describe('modules/manager/pep621/processors/uv', () => {
           config: {},
           updatedDeps,
         },
-        {},
+        {
+          project: {
+            'requires-python': '==3.11.1',
+          },
+          tool: {
+            uv: {
+              'required-version': '==0.2.35',
+            },
+          },
+        },
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -420,9 +439,9 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar ' +
             'bash -l -c "' +
-            'install-tool python 3.11.2 ' +
+            'install-tool python 3.11.1 ' +
             '&& ' +
-            'install-tool uv 0.2.28 ' +
+            'install-tool uv 0.2.35 ' +
             '&& ' +
             'uv lock --upgrade-package dep1' +
             '"',
@@ -482,7 +501,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: {
+            constraints: {},
+          },
           updatedDeps,
         },
         {},

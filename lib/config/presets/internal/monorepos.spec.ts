@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex';
 import { presets } from './monorepos';
 
 const todo = new Set([
@@ -20,7 +21,7 @@ const todo = new Set([
 describe('config/presets/internal/monorepos', () => {
   it('presets should have right name', () => {
     for (const name of Object.keys(presets).filter((name) => !todo.has(name))) {
-      expect(name).toMatch(/^[a-z0-9-]+$/);
+      expect(name).toMatch(regEx(/^[a-z0-9-]+$/));
     }
   });
 });

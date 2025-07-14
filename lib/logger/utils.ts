@@ -128,6 +128,10 @@ export default function prepareError(err: Error): Record<string, unknown> {
     response.stack = err.stack;
   }
 
+  if (err instanceof AggregateError) {
+    response.errors = err.errors.map((error) => prepareError(error));
+  }
+
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
@@ -255,7 +259,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n'); // TODO #12874
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n',
+            );
       stream.write(result, enc, cb);
     };
 

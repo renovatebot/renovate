@@ -60,7 +60,7 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = /by Poetry ([\d\\.]+)/.exec(firstLine);
+  const poetryVersionMatch = regEx(/by Poetry ([\d\\.]+)/).exec(firstLine);
   if (poetryVersionMatch?.[1]) {
     const poetryVersion = poetryVersionMatch[1];
     logger.debug(

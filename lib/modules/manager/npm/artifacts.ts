@@ -2,9 +2,14 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { readLocalFile, writeLocalFile } from '../../../util/fs';
+import {
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from './constants';
 import { getNodeToolConstraint } from './post-update/node-version';
 import { processHostRules } from './post-update/rules';
 import { lazyLoadPackageJson } from './post-update/utils';
@@ -61,8 +66,19 @@ export async function updateArtifacts({
     lazyPkgJson,
   );
 
+  const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
+  const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      // To make sure pnpm store location is consistent between "corepack use"
+      // here and the pnpm commands in ./post-update/pnpm.ts. Check
+      // ./post-update/pnpm.ts for more details.
+      npm_config_cache_dir: pnpmConfigCacheDir,
+      npm_config_store_dir: pnpmConfigStoreDir,
+      pnpm_config_cache_dir: pnpmConfigCacheDir,
+      pnpm_config_store_dir: pnpmConfigStoreDir,
+    },
     toolConstraints: [
       nodeConstraints,
       {

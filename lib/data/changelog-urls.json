@@ -6,7 +6,7 @@
     "flow-bin": "https://github.com/facebook/flow/blob/master/Changelog.md",
     "gatsby": "https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md",
     "react-native": "https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md",
-    "sharp": "https://github.com/lovell/sharp/blob/main/docs/changelog.md",
+    "sharp": "https://github.com/lovell/sharp/blob/main/docs/src/content/docs/changelog.md",
     "tailwindcss-classnames": "https://github.com/muhammadsammy/tailwindcss-classnames/blob/master/CHANGELOG.md",
     "zone.js": "https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md"
   },
@@ -49,5 +49,10 @@
     "org.slf4j:slf4j-nop": "https://www.slf4j.org/news.html",
     "org.slf4j:slf4j-reload4j": "https://www.slf4j.org/news.html",
     "org.slf4j:slf4j-simple": "https://www.slf4j.org/news.html"
+  },
+  "nuget": {
+    "Scalar.AspNetCore": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md",
+    "Scalar.AspNetCore.Microsoft": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md",
+    "Scalar.AspNetCore.Swashbuckle": "https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/CHANGELOG.md"
   }
 }

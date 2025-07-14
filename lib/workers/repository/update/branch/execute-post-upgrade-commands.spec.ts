@@ -1,3 +1,6 @@
+import { dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { StatusResult } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
@@ -8,6 +11,18 @@ vi.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
+    let tmpDir: DirectoryResult;
+
+    beforeEach(async () => {
+      GlobalConfig.reset();
+
+      tmpDir = await dir({ unsafeCleanup: true });
+    });
+
+    afterEach(async () => {
+      await tmpDir.cleanup();
+    });
+
     it('handles an artifact which is a directory', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
@@ -114,6 +129,119 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
     });
 
+    it('creates data file for commands', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            dataFileTemplate:
+              '[{{#each upgrades}}{"depName": "{{{depName}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
+      expect(fs.outputCacheFile).toHaveBeenCalledWith(
+        expect.stringMatching(
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+        ),
+        '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
+      );
+    });
+
+    it('should not create data file if no commands given', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: [],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+    });
+
     it('logs files which do not match fileFilters', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {
@@ -214,6 +342,97 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       expect(res.updatedArtifacts).toHaveLength(0);
     });
+
+    it('does not add back files that are renamed', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+          {
+            type: 'addition',
+            path: 'bin/.orc-1.96.1.pkg',
+            contents: '',
+          },
+          {
+            type: 'deletion',
+            path: 'bin/.orc-1.96.0.pkg',
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          not_added: [],
+          conflicted: [],
+          created: [],
+          deleted: [],
+          modified: ['bin/orc'],
+          renamed: [
+            {
+              from: 'bin/.orc-1.96.0.pkg',
+              to: 'bin/.orc-1.96.1.pkg',
+            },
+          ],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: __dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toMatchObject([
+        {
+          type: 'addition',
+          path: 'bin/orc',
+          contents: '[content]',
+        },
+        {
+          type: 'addition',
+          path: 'bin/.orc-1.96.1.pkg',
+          contents: '',
+        },
+        {
+          type: 'deletion',
+          path: 'bin/.orc-1.96.0.pkg',
+        },
+      ]);
+    });
+
     it('retains previously deleted files too', async () => {
       const commands = partial<BranchUpgradeConfig>([
         {

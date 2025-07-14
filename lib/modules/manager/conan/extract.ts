@@ -21,7 +21,7 @@ function setDepType(content: string, originalType: string): string {
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   // only process sections where requirements are defined
-  const sections = content.split(/def |\n\[/).filter(
+  const sections = content.split(regEx(/def |\n\[/)).filter(
     (part) =>
       part.includes('python_requires') || // only matches python_requires
       part.includes('build_require') || // matches [build_requires], build_requirements(), and build_requires
@@ -37,7 +37,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       if (!isComment(rawLine)) {
         depType = setDepType(rawLine, depType);
         // extract all dependencies from each line
-        const lines = rawLine.split(/["'],/);
+        const lines = rawLine.split(regEx(/["'],/));
         for (const line of lines) {
           const matches = regex.exec(line.trim());
           if (matches?.groups) {

@@ -62,10 +62,8 @@ describe('modules/manager/bazel-module/extract', () => {
             remote = "https://github.com/example/rules_foo.git",
         )
         `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -102,10 +100,8 @@ describe('modules/manager/bazel-module/extract', () => {
             remote = "https://github.com/example/rules_foo.git",
         )
         `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
       expect(result).toEqual({
         deps: [
           {
@@ -128,10 +124,8 @@ describe('modules/manager/bazel-module/extract', () => {
     it('returns dependencies and custom registry URLs when specified in a bazelrc', async () => {
       const packageFile = 'extract/multiple-bazelrcs/MODULE.bazel';
       const input = Fixtures.get(packageFile);
+
       const result = await extractPackageFile(input, packageFile);
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
       expect(result).toEqual({
         registryUrls: [
           'https://example.com/custom_registry.git',
@@ -158,10 +152,8 @@ describe('modules/manager/bazel-module/extract', () => {
           ],
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -191,10 +183,8 @@ describe('modules/manager/bazel-module/extract', () => {
           ],
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -221,10 +211,8 @@ describe('modules/manager/bazel-module/extract', () => {
           urls = "/path/to/repo",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -252,10 +240,8 @@ describe('modules/manager/bazel-module/extract', () => {
           urls = "/path/to/repo",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -283,10 +269,8 @@ describe('modules/manager/bazel-module/extract', () => {
           registry = "https://example.com/custom_registry",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -318,10 +302,8 @@ describe('modules/manager/bazel-module/extract', () => {
           registry = "https://example.com/custom_registry",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -351,10 +333,8 @@ describe('modules/manager/bazel-module/extract', () => {
           registry = "https://example.com/custom_registry",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -412,10 +392,8 @@ describe('modules/manager/bazel-module/extract', () => {
             version_conflict_policy = "pinned",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -459,9 +437,6 @@ describe('modules/manager/bazel-module/extract', () => {
       `;
 
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -498,9 +473,6 @@ describe('modules/manager/bazel-module/extract', () => {
       `;
 
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -542,10 +514,8 @@ describe('modules/manager/bazel-module/extract', () => {
             version_conflict_policy = "pinned",
         )
       `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
@@ -575,24 +545,72 @@ describe('modules/manager/bazel-module/extract', () => {
       });
     });
 
-    it('returns git_repository dependencies', async () => {
+    it('returns git_repository dependencies with digest', async () => {
       const input = codeBlock`
         git_repository(
             name = "rules_foo",
             commit = "850cb49c8649e463b80ef7984e7c744279746170",
-            remote = "https://github.com/example/rules_foo.git",
+            remote = "https://github.com/example/rules_foo.git"
         )
-        `;
+      `;
+
       const result = await extractPackageFile(input, 'MODULE.bazel');
-      if (!result) {
-        throw new Error('Expected a result.');
-      }
 
       expect(result).toEqual({
         deps: [
           {
             depType: 'git_repository',
             depName: 'rules_foo',
+            currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            datasource: GithubTagsDatasource.id,
+            packageName: 'example/rules_foo',
+          },
+        ],
+      });
+    });
+
+    it('returns git_repository dependencies with tag', async () => {
+      const input = codeBlock`
+        git_repository(
+            name = "rules_foo",
+            tag = "1.2.3",
+            remote = "https://github.com/example/rules_foo.git"
+        )
+      `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'git_repository',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            datasource: GithubTagsDatasource.id,
+            packageName: 'example/rules_foo',
+          },
+        ],
+      });
+    });
+
+    it('returns new_git_repository dependencies', async () => {
+      const input = codeBlock`
+        new_git_repository(
+            name = "rules_foo",
+            commit = "850cb49c8649e463b80ef7984e7c744279746170",
+            remote = "https://github.com/example/rules_foo.git",
+            tag = "1.2.3"
+        )
+        `;
+
+      const result = await extractPackageFile(input, 'MODULE.bazel');
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'new_git_repository',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             datasource: GithubTagsDatasource.id,
             packageName: 'example/rules_foo',

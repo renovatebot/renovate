@@ -73,7 +73,7 @@ function depSkipHandler(ctx: Context): Context {
 
 const incompleteDepString = q
   .str<Context>(new RegExp(cleanupNamedGroups(depPattern)))
-  .op(/^\+|\*$/);
+  .op(regEx(/^\+|\*$/));
 
 const depString = q
   .str<Context>(new RegExp(cleanupNamedGroups(depPattern)), depStringHandler)

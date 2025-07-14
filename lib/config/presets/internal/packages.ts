@@ -80,6 +80,7 @@ export const presets: Record<string, Preset> = {
       'ts-auto-mock',
       'ts-jest',
       'vitest',
+      '@jest/**',
       '@testing-library/**',
       '@types/testing-library__**',
       '@vitest/**',

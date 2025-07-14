@@ -144,11 +144,13 @@ There are two recommended approaches:
 
 If you want to make config edits directly, follow these steps:
 
-1. Create a new Git branch to work on
-1. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
+1. Create a new branch named `renovate/reconfigure`
 1. Edit your Renovate configuration file
-1. [Validate your config](../config-validation.md)
-1. If the improved config passes the validation, merge the branch into your mainline branch
+1. Create a pull request from the `renovate/reconfigure` branch
+1. Run renovate on your repository(if self-hosted), or wait for the hosted app to process the changes
+1. Renovate will comment on your PR, outlining the expected changes from your modified configuration
+1. You can continue to edit the configuration file in the same PR, and the bot will update its comment accordingly
+1. If you only want to validate your configuration changes, check out: [Validate your config](../config-validation.md)
 
 ### Nuke config and re-onboard
 
