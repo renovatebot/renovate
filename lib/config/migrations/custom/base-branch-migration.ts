@@ -6,11 +6,12 @@ export class BaseBranchMigration extends AbstractMigration {
   override readonly propertyName = 'baseBranch';
 
   override run(value: unknown): void {
+    const baseBranchPatterns = this.get('baseBranchPatterns') ?? [];
     if (is.array<string>(value)) {
-      this.setSafely('baseBranches', value);
+      this.setHard('baseBranchPatterns', baseBranchPatterns.concat(value));
     }
     if (is.string(value)) {
-      this.setSafely('baseBranches', [value]);
+      this.setHard('baseBranchPatterns', baseBranchPatterns.concat([value]));
     }
   }
 }
