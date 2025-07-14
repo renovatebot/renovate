@@ -68,6 +68,11 @@ export interface RepoResponse {
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;
+  /**
+   * only available with paid plans
+   * https://docs.gitlab.com/ci/pipelines/merge_trains
+   */
+  merge_trains_enabled?: boolean;
   path_with_namespace: string;
   squash_option?: 'never' | 'always' | 'default_on' | 'default_off';
 }
