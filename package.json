@@ -198,7 +198,7 @@
     "dequal": "2.0.3",
     "detect-indent": "7.0.1",
     "diff": "8.0.2",
-    "editorconfig": "3.0.0",
+    "editorconfig": "3.0.1",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.4.0",
     "emojibase": "16.0.0",
@@ -262,7 +262,7 @@
     "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
     "yaml": "2.8.0",
-    "zod": "3.25.71"
+    "zod": "3.25.75"
   },
   "optionalDependencies": {
     "better-sqlite3": "12.2.0",
