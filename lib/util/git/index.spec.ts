@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import { GlobalConfig } from '../../config/global';
@@ -440,7 +441,27 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('mergeBranch(branchName, fast-forward)', () => {
+  describe('getBranchFilesFromCommit(sha)', () => {
+    it('detects changed files compared to the parent commit', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const sha = await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [
+          file,
+          { type: 'addition', path: 'dummy', contents: null as never },
+        ],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFilesFromCommit(sha!);
+      expect(branchFiles).toEqual(['some-new-file']);
+    });
+  });
+
+  describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge with fast-forward', async () => {
       await git.mergeBranch('renovate/future_branch', 'auto');
       const merged = await Git(origin.path).branch([
@@ -630,7 +651,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const files = lsTree
         .trim()
         .split(newlineRegex)
-        .map((x) => x.split(/\s/))
+        .map((x) => x.split(regEx(/\s/)))
         .map(([mode, type, _hash, name]) => [mode, type, name]);
       expect(files).toContainEqual(['100644', 'blob', 'past_file']);
       expect(files).toContainEqual(['120000', 'blob', 'future_link']);
@@ -1267,7 +1288,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
   describe('syncGit()', () => {
     it('should clone a specified base branch', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
-      GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
+      GlobalConfig.set({
+        baseBranchPatterns: ['develop'],
+        localDir: tmpDir.path,
+      });
       await git.initRepo({
         url: origin.path,
         defaultBranch: 'develop',
@@ -1278,6 +1302,29 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
       ).trim();
       expect(branch).toBe('develop');
+    });
+  });
+
+  describe('pushCommit', () => {
+    it('should pass pushOptions to git.push', async () => {
+      const pushSpy = vi
+        .spyOn(SimpleGit.prototype, 'push')
+        .mockResolvedValue({} as PushResult);
+      await expect(
+        git.pushCommit({
+          sourceRef: defaultBranch,
+          targetRef: defaultBranch,
+          files: [],
+          pushOptions: ['ci.skip', 'foo=bar'],
+        }),
+      ).resolves.toBeTrue();
+      expect(pushSpy).toHaveBeenCalledWith(
+        'origin',
+        `${defaultBranch}:${defaultBranch}`,
+        expect.objectContaining({
+          '--push-option': ['ci.skip', 'foo=bar'],
+        }),
+      );
     });
   });
 
