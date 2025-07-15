@@ -244,10 +244,26 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'dotenv-linter': {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'dotenv-linter/dotenv-linter',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   hivemind: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'DarthSim/hivemind',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  hk: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'jdx/hk',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
     },
@@ -258,14 +274,6 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       packageName: 'jqlang/jq',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^jq-v(?<version>\\S+)',
-    },
-  },
-  hk: {
-    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
-    config: {
-      packageName: 'jdx/hk',
-      datasource: GithubReleasesDatasource.id,
-      extractVersion: '^v(?<version>\\S+)',
     },
   },
   kafka: {
@@ -299,12 +307,34 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  lychee: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'lycheeverse/lychee',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^lychee-v(?<version>\\S+)',
+    },
+  },
   opentofu: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'opentofu/opentofu',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  pipx: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'pypa/pipx',
+      datasource: GithubReleasesDatasource.id,
+    },
+  },
+  pkl: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'apple/pkl',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   protoc: {
@@ -353,12 +383,27 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  sqlite: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'sqlite/sqlite',
+      datasource: GithubTagsDatasource.id,
+      extractVersion: '^version-(?<version>\\S+)',
+    },
+  },
   stripe: {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'stripe/stripe-cli',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  taplo: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'tamasfe/taplo',
+      datasource: GithubReleasesDatasource.id,
     },
   },
   terragrunt: {
@@ -381,6 +426,14 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
     config: {
       packageName: 'tus/tusd',
+      datasource: GithubReleasesDatasource.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  usage: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'jdx/usage',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
     },
