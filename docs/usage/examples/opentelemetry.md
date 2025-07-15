@@ -36,7 +36,7 @@ services:
   otel-collector:
     # Using the Contrib version to access the spanmetrics connector.
     # If you don't need the spanmetrics connector, you can use the standard version
-    image: otel/opentelemetry-collector-contrib:0.129.1
+    image: otel/opentelemetry-collector-contrib:0.130.0
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:
