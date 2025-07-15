@@ -56,6 +56,7 @@ describe('modules/platform/local/scm', () => {
       expect(execSync).toHaveBeenCalledOnce();
       expect(execSync).toHaveBeenCalledWith('git ls-files', {
         encoding: 'utf-8',
+        maxBuffer: 1024 * 1024 * 10,
       });
     });
 
