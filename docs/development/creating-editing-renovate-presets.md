@@ -43,3 +43,9 @@ We only want a user's tests to fail because of _broken references_ to the old pa
 1. The primary use case of monorepo presets is finding packages from the same origin source repository which should be updated together
 1. Packages from the same repository which are developed and versioned independently do not need to be grouped as a monorepo, but in many cases we still do
 1. Packages from separate repositories but which are released together and dependent on each other may also be added to the "monorepo" definitions even if not strictly true
+
+#### Rules for migrating presets
+
+1. Removing a preset: Add the preset name to the `removedPresets` object in [`presets/common`](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/common.ts#L1) and set its value to `null`
+1. Renaming a preset: Add the old preset name to the `removedPresets` object in [`presets/common`](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/common.ts#L1) and set its value to the new preset name
+1. Renaming a monorepo preset: Add the old monorepo name to the `renamedMonorepos` object in [`presets/common`](https://github.com/renovatebot/renovate/blob/79f0888ebff8034ee80c905ceaca0811ddc1c8b8/lib/config/presets/common.ts#L50) and set its value to the new monorepo name

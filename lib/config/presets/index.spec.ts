@@ -444,9 +444,6 @@ describe('config/presets/index', () => {
     it('use packageCache when presetCachePersistence is set', async () => {
       GlobalConfig.set({
         presetCachePersistence: true,
-        cacheTtlOverride: {
-          preset: 60,
-        },
       });
 
       config.extends = ['github>username/preset-repo'];
@@ -482,7 +479,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(packageCache.set.mock.calls[0][3]).toBe(60);
+      expect(packageCache.set.mock.calls[0][3]).toBe(15);
     });
 
     it('throws', async () => {
@@ -663,6 +660,33 @@ describe('config/presets/index', () => {
           'Use version pinning (maintain a single version only and not SemVer ranges).',
         ],
         rangeStrategy: 'pin',
+      });
+    });
+
+    it('substitutes {{args}}', async () => {
+      local.getPreset.mockResolvedValueOnce({
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['{{args}}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
+      });
+      const res = await presets.getPreset(
+        'local>customManager(**/{*.py, *.yaml})',
+        {},
+      );
+      expect(res).toEqual({
+        customManagers: [
+          {
+            customType: 'regex',
+            // The space after comma is obviously incorrect here.
+            // But the test must ensure that spaces aren't removed.
+            managerFilePatterns: ['**/{*.py, *.yaml}'],
+            matchStrings: ['# renovate: ...'],
+          },
+        ],
       });
     });
 
