@@ -8,7 +8,11 @@ import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { incCountValue, setCount } from '../../global/limits';
-import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
+import type {
+  BranchConfig,
+  CacheFingerprintMatchResult,
+  UpgradeFingerprintConfig,
+} from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import {
@@ -36,7 +40,7 @@ export function generateCommitFingerprintConfig(
 export function compareCacheFingerprint(
   branchState: BranchCache,
   commitFingerprint: string,
-): 'no-fingerprint' | 'no-match' | 'matched' {
+): CacheFingerprintMatchResult {
   if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
     return 'no-fingerprint';
