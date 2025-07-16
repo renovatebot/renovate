@@ -96,8 +96,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       '@renovatebot/osv-offline':
-        specifier: 1.6.6
-        version: 1.6.6
+        specifier: 1.6.7
+        version: 1.6.7
       '@renovatebot/pep440':
         specifier: 4.1.0
         version: 4.1.0
@@ -1587,8 +1587,8 @@ packages:
     resolution: {integrity: sha512-TyrARTT/m1NK/5Ir3eC9U6iL0XMkKYkivuO8kFCVEGUdrTXvVHwn74K5V7ZPNtC1Ye0qRbKN3fVz+b4uTtlhLQ==}
     engines: {node: '>=18.12.0'}
 
-  '@renovatebot/osv-offline@1.6.6':
-    resolution: {integrity: sha512-xyhxVMGTk95b9nJte9Br1iu2mrkbPVnc7XXE1Klpnjc3hy0B7j9YXlhZzEgvWlVQ21/WmNuMft0/QCaLgFABrQ==}
+  '@renovatebot/osv-offline@1.6.7':
+    resolution: {integrity: sha512-ae/4FHq2URKcdkyCMHxSX5ayMDsC48u8Ov7ZgrigEnunUMPWChlk/N6ZjJD3nXJapjoKbfdUPx8EwYvLquY7/w==}
     engines: {node: '>=18.12.0'}
 
   '@renovatebot/pep440@4.1.0':
@@ -8038,7 +8038,7 @@ snapshots:
     dependencies:
       '@seald-io/nedb': 4.1.2
 
-  '@renovatebot/osv-offline@1.6.6':
+  '@renovatebot/osv-offline@1.6.7':
     dependencies:
       '@renovatebot/osv-offline-db': 1.7.4
       adm-zip: 0.5.16
