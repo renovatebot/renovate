@@ -113,6 +113,11 @@ export type BranchResult =
   | 'rebase'
   | 'update-not-scheduled';
 
+export type CacheFingerprintMatchResult =
+  | 'matched'
+  | 'no-match'
+  | 'no-fingerprint';
+
 export interface BranchConfig
   extends BranchUpgradeConfig,
     LegacyAdminConfig,
@@ -135,7 +140,7 @@ export interface BranchConfig
   stopUpdating?: boolean;
   isConflicted?: boolean;
   commitFingerprint?: string;
-  skipBranchUpdate?: boolean;
+  cacheFingerprintMatch?: CacheFingerprintMatchResult;
 }
 
 export interface BranchMetadata {

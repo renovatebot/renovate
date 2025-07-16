@@ -3,6 +3,11 @@ import { GlobalConfig } from '../../../config/global';
 import { matchRegexOrGlob } from '../../string-match';
 import type { PackageCacheNamespace } from './types';
 
+/**
+ * This MUST NOT be used outside of cache implementation
+ *
+ * @param namespace
+ */
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {

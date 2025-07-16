@@ -816,10 +816,12 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function getPrList(): Promise<GhPr[]> {
   if (!config.prList) {
     const repo = config.parentRepo ?? config.repository;
-    const username =
-      !config.forkToken && !config.ignorePrAuthor && config.renovateUsername
-        ? config.renovateUsername
-        : null;
+
+    let username = config.renovateUsername;
+    if (config.forkToken || config.ignorePrAuthor) {
+      username = undefined;
+    }
+
     // TODO: check null `repo` (#22198)
     const prCache = await getPrCache(githubApi, repo!, username);
     config.prList = Object.values(prCache).sort(
