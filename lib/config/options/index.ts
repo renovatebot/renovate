@@ -1191,6 +1191,7 @@ const options: RenovateOptions[] = [
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
+      'crow',
       'devcontainer',
       'docker-compose',
       'dockerfile',
