@@ -54,9 +54,9 @@ function migrateUrl(url: string, upgrade: Upgrade): string {
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
   if (
     url.endsWith('/rules_webtesting.tar.gz') &&
-    !newValue?.match(/^0\.[0123]\./)
+    !newValue?.match(regEx(/^0\.[0123]\./))
   ) {
-    return url.replace(/\.tar\.gz$/, `-${newValue}.tar.gz`);
+    return url.replace(regEx(/\.tar\.gz$/), `-${newValue}.tar.gz`);
   }
 
   return url;

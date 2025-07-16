@@ -1087,7 +1087,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'baseBranches',
+    name: 'baseBranchPatterns',
     description:
       'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
@@ -2750,7 +2750,8 @@ const options: RenovateOptions[] = [
     freeChoice: true,
     mergeable: true,
     default: {
-      Package: '{{{depNameLinked}}}',
+      Package:
+        '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
       Type: '{{{depType}}}',
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',

@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import type { FileOwnerRule, Pr } from '../../../../modules/platform';
 import { platform } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
-import { getBranchFiles } from '../../../../util/git';
+import { getBranchFiles, getBranchFilesFromCommit } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
 interface FileOwnersScore {
@@ -100,7 +100,10 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     logger.debug(`Found CODEOWNERS file: ${codeOwnersFile}`);
 
     // Get list of modified files in PR
-    const prFiles = await getBranchFiles(pr.sourceBranch);
+    // if the commit sha is known, we can directly compare against the parent, otherwise use the branch
+    const prFiles = pr.sha
+      ? await getBranchFilesFromCommit(pr.sha)
+      : await getBranchFiles(pr.sourceBranch);
 
     if (!prFiles?.length) {
       logger.debug('PR includes no files');

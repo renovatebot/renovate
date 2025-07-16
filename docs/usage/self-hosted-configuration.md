@@ -295,17 +295,45 @@ In the self-hosted setup, use option to enable caching of private packages to im
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
-For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+You can use:
+
+- **Exact matches**: Direct namespace names
+- **Glob patterns**: Wildcards like `datasource-*` or `*`
+- **Regex patterns**: Regular expressions like `/^datasource-/`
+
+Priority order:
+
+1. Exact namespace matches take highest priority
+2. If no exact match, the longest (most specific) matching pattern wins
+
+Example:
 
 ```json
 {
   "cacheTtlOverride": {
-    "datasource-docker-tags": 120
+    "datasource-rubygems": 120,
+    "datasource-*": 60,
+    "datasource-{crate,go}": 90,
+    "/^changelog-/": 45,
+    "*": 30
   }
 }
 ```
 
-Valid codes for namespaces are as follows:
+In this example:
+
+- `datasource-rubygems` gets 120 minutes (exact match - highest priority)
+- `datasource-crate` and `datasource-go` get 90 minutes (matches `datasource-{crate,go}` - longest pattern)
+- `datasource-hex` gets 60 minutes (matches `datasource-*` - shorter pattern)
+- `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
+- `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
+
+Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+When releases for a datasource are fetched, they are stored in this namespace.
+Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
+
+Other valid cache namespaces are as follows:
 
 <!-- cache-namespaces-begin -->
 
@@ -380,7 +408,6 @@ Valid codes for namespaces are as follows:
 - `datasource-packagist`
 - `datasource-pod`
 - `datasource-python-version`
-- `datasource-releases`
 - `datasource-repology`
 - `datasource-rpm`
 - `datasource-ruby-version`
@@ -390,6 +417,7 @@ Valid codes for namespaces are as follows:
 - `datasource-terraform-provider`
 - `datasource-terraform`
 - `datasource-unity3d`
+- `datasource-unity3d-packages`
 - `github-releases-datasource-v2`
 - `github-tags-datasource-v2`
 - `merge-confidence`
