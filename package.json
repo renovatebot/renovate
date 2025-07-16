@@ -142,8 +142,8 @@
     "pnpm": "^10.0.0"
   },
   "volta": {
-    "node": "22.17.0",
-    "pnpm": "10.12.4"
+    "node": "22.17.1",
+    "pnpm": "10.13.1"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.840.0",
@@ -158,10 +158,10 @@
     "@cdktf/hcl2json": "0.21.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/context-async-hooks": "2.0.1",
-    "@opentelemetry/exporter-trace-otlp-http": "0.202.0",
-    "@opentelemetry/instrumentation": "0.202.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.203.0",
+    "@opentelemetry/instrumentation": "0.203.0",
     "@opentelemetry/instrumentation-bunyan": "0.48.0",
-    "@opentelemetry/instrumentation-http": "0.202.0",
+    "@opentelemetry/instrumentation-http": "0.203.0",
     "@opentelemetry/resource-detector-aws": "2.2.0",
     "@opentelemetry/resource-detector-azure": "0.9.0",
     "@opentelemetry/resource-detector-gcp": "0.36.0",
@@ -174,7 +174,7 @@
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/detect-tools": "1.1.0",
     "@renovatebot/kbpgp": "4.0.1",
-    "@renovatebot/osv-offline": "1.6.5",
+    "@renovatebot/osv-offline": "1.6.6",
     "@renovatebot/pep440": "4.1.0",
     "@renovatebot/ruby-semver": "4.0.0",
     "@sindresorhus/is": "7.0.2",
@@ -198,7 +198,7 @@
     "dequal": "2.0.3",
     "detect-indent": "7.0.1",
     "diff": "8.0.2",
-    "editorconfig": "3.0.0",
+    "editorconfig": "3.0.1",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.4.0",
     "emojibase": "16.0.0",
@@ -262,7 +262,7 @@
     "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
     "yaml": "2.8.0",
-    "zod": "3.25.68"
+    "zod": "3.25.76"
   },
   "optionalDependencies": {
     "better-sqlite3": "12.2.0",
@@ -320,7 +320,7 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.0.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.25.6",
     "eslint": "9.30.1",
     "eslint-config-prettier": "10.1.5",
     "eslint-formatter-gha": "1.6.0",
@@ -345,14 +345,14 @@
     "tsx": "4.20.3",
     "type-fest": "4.41.0",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.35.1",
+    "typescript-eslint": "8.36.0",
     "unified": "11.0.5",
     "vite": "6.3.5",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4",
     "vitest-mock-extended": "3.1.0"
   },
-  "packageManager": "pnpm@10.12.4",
+  "packageManager": "pnpm@10.13.1",
   "files": [
     "dist",
     "renovate-schema.json"
@@ -373,7 +373,7 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.25.5"
+      "esbuild": "0.25.6"
     }
   }
 }

@@ -172,6 +172,7 @@ describe('config/migration', () => {
       expect(migratedConfig.automerge).toBe(false);
       expect(migratedConfig.packageRules).toHaveLength(11);
       expect(migratedConfig.hostRules).toHaveLength(1);
+      expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
     });
 
     it('migrates before and after schedules', () => {
@@ -391,7 +392,7 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(migratedConfig).toEqual({
-        baseBranches: [],
+        baseBranchPatterns: [],
         commitMessage: 'test',
         ignorePaths: [],
         includePaths: ['test'],
@@ -770,5 +771,14 @@ describe('config/migration', () => {
     config = { dryRun: false };
     res = configMigration.migrateConfig(config);
     expect(res.isMigrated).toBeTrue();
+  });
+
+  it('migrates baseBranches and baseBranch', () => {
+    const config = { baseBranches: ['main', 'dev'] };
+    const res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig).toEqual({
+      baseBranchPatterns: ['main', 'dev'],
+    });
   });
 });
