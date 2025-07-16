@@ -209,6 +209,7 @@ export type RenovateRepository =
   | {
       repository: string;
       secrets?: Record<string, string>;
+      variables?: Record<string, string>;
     };
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
@@ -235,7 +236,8 @@ export interface RenovateConfig
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
-  baseBranches?: string[];
+  /** user configurable base branch patterns*/
+  baseBranchPatterns?: string[];
   commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
@@ -298,6 +300,7 @@ export interface RenovateConfig
 
   fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
+  variables?: Record<string, string>;
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean | null;
@@ -365,6 +368,21 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
+// These are the update types which can have configuration
+export const UpdateTypesOptions = [
+  'major',
+  'minor',
+  'patch',
+  'pin',
+  'digest',
+  'pinDigest',
+  'lockFileMaintenance',
+  'rollback',
+  'replacement',
+] as const;
+
+export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
+
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
@@ -411,6 +429,7 @@ export interface ValidationMessage {
 }
 
 export type AllowedParents =
+  | '.'
   | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
@@ -419,7 +438,8 @@ export type AllowedParents =
   | 'packageRules'
   | 'postUpgradeTasks'
   | 'vulnerabilityAlerts'
-  | ManagerName;
+  | ManagerName
+  | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.

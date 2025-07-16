@@ -33,7 +33,7 @@ You can store your Renovate configuration file in one of these locations:
 When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
 Renovate stops the search after it finds the first match.
 
-Renovate always uses the config from the repository's default branch, even if that configuration specifies multiple `baseBranches`.
+Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
 Renovate does not read/override the config from within each base branch if present.
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
@@ -178,10 +178,6 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
-<!-- prettier-ignore -->
-!!! note
-    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
-
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -267,6 +263,11 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
+<!-- prettier-ignore -->
+!!! note
+    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+
 **Automerge and GitHub branch protection rules**
 
 You must select at least one status check in the _Require status checks to pass before merging_ section of your branch protection rules on GitHub, if you match all three conditions:
@@ -351,24 +352,27 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
-## baseBranches
+## baseBranchPatterns
+
+This configuration option was formerly known as `baseBranches`.
 
 By default, Renovate will detect and process only the repository's default branch.
 For most projects, this is the expected approach.
-Renovate also allows users to explicitly configure `baseBranches`, e.g. for use cases such as:
+Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
-- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranches": ["main", "/^release\\/.*/"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranchPatterns": ["dev"]`
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranchPatterns": ["main", "next"]`
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranchPatterns": ["main", "/^release\\/.*/"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
-`baseBranches` supports Regular Expressions that must begin and end with `/`, e.g.:
+The simplest approach is exact matches, e.g. `["main", "dev"]`.
+`baseBranchPatterns` also supports Regular Expressions that must begin and end with `/`, e.g.:
 
 ```json
 {
-  "baseBranches": ["main", "/^release\\/.*/"]
+  "baseBranchPatterns": ["main", "/^release\\/.*/"]
 }
 ```
 
@@ -378,7 +382,7 @@ With a negation, all branches except those matching the regex will be added to t
 
 ```json
 {
-  "baseBranches": ["!/^pre-release\\/.*/"]
+  "baseBranchPatterns": ["!/^pre-release\\/.*/"]
 }
 ```
 
@@ -386,13 +390,13 @@ You can also use the special `"$default"` string to denote the repository's defa
 
 ```json
 {
-  "baseBranches": ["$default", "/^release\\/.*/"]
+  "baseBranchPatterns": ["$default", "/^release\\/.*/"]
 }
 ```
 
 <!-- prettier-ignore -->
 !!! note
-    Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
+    Do _not_ use the `baseBranchPatterns` config option when you've set a `forkToken`.
     You may need a `forkToken` when you're using the Forking Renovate app.
 
 ## bbAutoResolvePrTasks
@@ -772,12 +776,12 @@ To help you with this, Renovate will create config migration pull requests, when
 
 Example:
 
-After we changed the [`baseBranches`](#basebranches) feature, the Renovate configuration migration pull request would make this change:
+After we changed the [`baseBranchPatterns`](#basebranchpatterns) feature, the Renovate configuration migration pull request would make this change:
 
 ```diff
 {
 - "baseBranch": "main"
-+ "baseBranches": ["main"]
++ "baseBranchPatterns": ["main"]
 }
 ```
 
@@ -2605,19 +2609,21 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 ## managerFilePatterns
 
-`managerFilePatterns` were formerly known as `fileMatch`, and regex-only.
-`managerFilePatterns` instead supports regex or glob patterns, and any existing config containing `fileMatch` patterns will be automatically migrated.
+Formerly known as `fileMatch`, which supported regex-only.
+
+`managerFilePatterns` supports both regex and glob patterns.
+Any existing config containing `fileMatch` patterns will be automatically migrated.
+
 Do not use the below guide for `fileMatch` if you are using an older version of Renovate.
 
 `managerFilePatterns` tells Renovate which repository files to parse and extract.
-`managerFilePatterns` patterns in the user config are _added_ to the default values, they do not replace the default values.
+Patterns in the user config are _added_ to the default values, they do not replace the default values.
 
 The default `managerFilePatterns` patterns can not be removed.
-If you need to include, or exclude, specific paths then use the `ignorePaths` or `includePaths` configuration options.
+If you need to include, or exclude, specific paths then use the [`ignorePaths`](#ignorepaths) or [`includePaths`](#includepaths) instead.
 
-Some `managerFilePatterns` patterns are short, like Renovate's default Go Modules `managerFilePatterns` for example.
-Here Renovate looks for _any_ `go.mod` file.
-In this case you can probably keep using that default `managerFilePatterns`.
+Some managers have sensible defaults.
+For example, the Go manager looks for _any_ `go.mod` file by default, which covers most cases without extra configuration.
 
 At other times, the possible files is too vague for Renovate to have any default.
 For example, Kubernetes manifests can exist in any `*.yaml` file.
@@ -2625,7 +2631,7 @@ We do not want Renovate to parse every YAML file in every repository, just in ca
 Therefore Renovate's default `managerFilePatterns` for the `kubernetes` manager is an empty array (`[]`).
 Because the array is empty, you as user must tell Renovate which directories/files to check.
 
-Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess about.
+Finally, there are cases where Renovate's default `managerFilePatterns` is good, but you may be using file patterns that a bot couldn't possibly guess.
 For example, Renovate's default `managerFilePatterns` for `Dockerfile` is `['/(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$/', '/(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$/']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `managerFilePatterns` is "mergeable", you can add the missing file to the `filePattern` like this:
@@ -4246,6 +4252,11 @@ For example: if the username or team name is `bar` then you would set the config
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
 
+<!-- prettier-ignore -->
+!!! note
+    By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
+    By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
+
 ## reviewersFromCodeOwners
 
 If enabled Renovate tries to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
@@ -4257,10 +4268,6 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
-
-<!-- prettier-ignore -->
-!!! note
-    GitLab `CODEOWNERS` files with default owners are _not_ supported. See [#29202](https://github.com/renovatebot/renovate/issues/29202).
 
 ## reviewersSampleSize
 

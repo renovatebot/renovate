@@ -112,17 +112,17 @@ Read our documentation on the [dependencyDashboardApproval](./configuration-opti
 ### Use an alternative branch as my Pull Request target
 
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
-You can configure the PR target branch via the `baseBranches` option.
+You can configure the PR target branch via the `baseBranchPatterns` option.
 
 Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
 
 ```json
 {
-  "baseBranches": ["next"]
+  "baseBranchPatterns": ["next"]
 }
 ```
 
-You can set more than one PR target branch in the `baseBranches` array.
+You can set more than one PR target branch in the `baseBranchPatterns` array.
 
 ### Support private npm modules
 
