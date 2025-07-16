@@ -197,9 +197,9 @@ If you want Renovate to commit directly to your base branch without opening a PR
 There are many different registries, and many ways to authenticate to those registries.
 We will explain how to authenticate for the most common registries.
 
-#### DockerHub
+#### Docker Hub
 
-Here is an example of configuring a default Docker username/password in `config.js`.
+Here is an example of configuring a Docker username/password for Docker Hub in `config.js`.
 The Docker Hub password is stored in a process environment variable.
 
 ```js title="config.js"
@@ -207,6 +207,7 @@ module.exports = {
   hostRules: [
     {
       hostType: 'docker',
+      matchHost: 'docker.io',
       username: '<your-username>',
       password: process.env.DOCKER_HUB_PASSWORD,
     },
@@ -307,7 +308,7 @@ Renovate will get the credentials with the [`google-auth-library`](https://www.n
     service_account: ${{ env.SERVICE_ACCOUNT }}
 
 - name: renovate
-  uses: renovatebot/github-action@v42.0.3
+  uses: renovatebot/github-action@v43.0.3
   env:
     RENOVATE_HOST_RULES: |
       [
@@ -341,7 +342,6 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
 1. Base64 encode the service account credentials by running `cat service-account.json | base64`
 1. Add the encoded service account to your configuration file
-
    1. If you want to add it to your self-hosted configuration file:
 
       ```json
@@ -394,7 +394,6 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 
 1. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
 1. Add the prefixed and encoded service account to your configuration file
-
    1. If you want to add it to your self-hosted configuration file:
 
       ```json
@@ -478,7 +477,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:40.31.0
+FROM renovate/renovate:41.32.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

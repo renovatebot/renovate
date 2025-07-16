@@ -176,9 +176,10 @@ export async function extract(
         packageFiles,
       };
     }
+
     // Clean up cached branch extracts
-    const baseBranches = is.nonEmptyArray(config.baseBranches)
-      ? config.baseBranches
+    const baseBranches = is.nonEmptyArray(config.baseBranchPatterns)
+      ? config.baseBranchPatterns
       : [baseBranch];
     Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {

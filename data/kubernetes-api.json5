@@ -148,9 +148,12 @@
   ImageRepository: ['image.toolkit.fluxcd.io/v1beta2'],
   ImageUpdateAutomation: [
     'image.toolkit.fluxcd.io/v1beta1',
-    'image.toolkit.fluxcd.io/v1beta2'
-    ],
-  OCIRepository: ['source.toolkit.fluxcd.io/v1beta2'],
+    'image.toolkit.fluxcd.io/v1beta2',
+  ],
+  OCIRepository: [
+    'source.toolkit.fluxcd.io/v1beta2',
+    'source.toolkit.fluxcd.io/v1',
+  ],
   Provider: [
     'notification.toolkit.fluxcd.io/v1beta2',
     'notification.toolkit.fluxcd.io/v1beta3',
@@ -166,5 +169,27 @@
     'kustomize.toolkit.fluxcd.io/v1beta2',
     'kustomize.toolkit.fluxcd.io/v1',
     'kustomize.config.k8s.io/v1beta1',
+  ],
+
+  // https://external-secrets.io/latest/api/spec/
+  ExternalSecret: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  ClusterExternalSecret: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  SecretStore: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
+  ],
+  ClusterSecretStore: [
+    'external-secrets.io/v1alpha1',
+    'external-secrets.io/v1beta1',
+    'external-secrets.io/v1',
   ],
 }

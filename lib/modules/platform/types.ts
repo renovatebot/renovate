@@ -221,6 +221,13 @@ export interface AutodiscoverConfig {
   projects?: string[];
 }
 
+export interface FileOwnerRule {
+  usernames: string[];
+  pattern: string;
+  score: number;
+  match: (path: string) => boolean;
+}
+
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
@@ -242,7 +249,14 @@ export interface Platform {
   ensureIssue(
     issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
-  massageMarkdown(prBody: string): string;
+  massageMarkdown(
+    prBody: string,
+    /**
+     * Useful for suggesting the use of rebase label when there is no better
+     * way, e.g. for Gerrit.
+     */
+    rebaseLabel?: string,
+  ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
@@ -280,6 +294,7 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
+  extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
   labelCharLimit?(): number;

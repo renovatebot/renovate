@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { regEx } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 
 export const VendirResource = z.object({
@@ -8,7 +9,7 @@ export const VendirResource = z.object({
 
 export const GitRef = z.object({
   ref: z.string(),
-  url: z.string().regex(/^(?:ssh|https?):\/\/.+/),
+  url: z.string().regex(regEx(/^(?:ssh|https?):\/\/.+/)),
   depth: z.number().optional(),
 });
 
@@ -21,7 +22,7 @@ export const HelmChart = z.object({
   name: z.string(),
   version: z.string(),
   repository: z.object({
-    url: z.string().regex(/^(?:oci|https?):\/\/.+/),
+    url: z.string().regex(regEx(/^(?:oci|https?):\/\/.+/)),
   }),
 });
 

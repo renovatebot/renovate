@@ -5,7 +5,6 @@ import pMap from 'p-map';
 import semver from 'semver';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
-  PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -65,6 +64,7 @@ import {
   isUserBusy,
 } from './http';
 import { getMR, updateMR } from './merge-request';
+import { GitlabPrCache } from './pr-cache';
 import { LastPipelineId } from './schema';
 import type {
   GitLabMergeRequest,
@@ -75,13 +75,14 @@ import type {
   RepoResponse,
 } from './types';
 import { DRAFT_PREFIX, DRAFT_PREFIX_DEPRECATED, prInfo } from './utils';
+export { extractRulesFromCodeOwnersLines } from './code-owners';
 
 let config: {
   repository: string;
   email: string;
-  prList: GitlabPr[] | undefined;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
+  mergeTrainsEnabled: boolean;
   defaultBranch: string;
   cloneSubmodules: boolean | undefined;
   cloneSubmodulesFilter: string[] | undefined;
@@ -107,9 +108,11 @@ const defaults = {
 export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
+let botUserName: string;
 
 export async function initPlatform({
   endpoint,
+  username,
   token,
   gitAuthor,
 }: PlatformParams): Promise<PlatformResult> {
@@ -139,6 +142,7 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
+      botUserName = user.name;
     }
     const env = getEnv();
     /* v8 ignore start: experimental feature */
@@ -166,6 +170,8 @@ export async function initPlatform({
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
+
+  botUserName ??= username!;
 
   return platformConfig;
 }
@@ -370,13 +376,13 @@ export async function initRepo({
       throw new Error(TEMPORARY_ERROR);
     } /* v8 ignore stop */
     config.mergeMethod = res.body.merge_method || 'merge';
+    config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
         res.body.squash_option === 'always' ||
         res.body.squash_option === 'default_on';
     }
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-    delete config.prList;
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
     await git.initRepo({
@@ -412,7 +418,8 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase = config?.mergeMethod !== 'merge';
+  const forceRebase =
+    config?.mergeMethod !== 'merge' && !config.mergeTrainsEnabled;
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
@@ -557,37 +564,13 @@ export async function getBranchStatus(
 }
 
 // Pull Request
-
-async function fetchPrList(): Promise<Pr[]> {
-  const searchParams = {
-    per_page: '100',
-  } as any;
-  /* v8 ignore start */
-  if (!config.ignorePrAuthor) {
-    searchParams.scope = 'created_by_me';
-  } /* v8 ignore stop */
-  const query = getQueryString(searchParams);
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
-      urlString,
-      {
-        paginate: true,
-      },
-    );
-    return res.body.map((pr) => prInfo(pr));
-  } catch (err) /* v8 ignore start */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  } /* v8 ignore stop */
-}
-
 export async function getPrList(): Promise<Pr[]> {
-  config.prList ??= await fetchPrList();
-  return config.prList;
+  return await GitlabPrCache.getPrs(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    !!config.ignorePrAuthor,
+  );
 }
 
 async function ignoreApprovals(pr: number): Promise<void> {
@@ -778,11 +761,13 @@ export async function createPr({
   );
 
   const pr = prInfo(res.body);
-
-  /* v8 ignore start */
-  if (config.prList) {
-    config.prList.push(pr);
-  } /* v8 ignore stop */
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    pr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
     await approveMr(pr.number);
@@ -846,22 +831,13 @@ export async function updatePr({
   ).body;
 
   const updatedPr = prInfo(updatedPrInfo);
-
-  if (config.prList) {
-    const existingIndex = config.prList.findIndex(
-      (pr) => pr.number === updatedPr.number,
-    );
-    /* v8 ignore start: should not happen */
-    if (existingIndex === -1) {
-      logger.warn(
-        { pr: updatedPr },
-        'Possible error: Updated PR was not found in the PRs that were returned from getPrList().',
-      );
-      config.prList.push(updatedPr);
-    } /* v8 ignore stop */ else {
-      config.prList[existingIndex] = updatedPr;
-    }
-  }
+  await GitlabPrCache.setPr(
+    gitlabApi,
+    config.repository,
+    botUserName,
+    updatedPr,
+    !!config.ignorePrAuthor,
+  );
 
   if (platformPrOptions?.autoApprove) {
     await approveMr(iid);
