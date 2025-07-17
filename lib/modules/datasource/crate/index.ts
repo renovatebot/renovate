@@ -326,10 +326,7 @@ export class CrateDatasource extends Datasource {
           cacheKeyForError,
         );
 
-        memCache.set(
-          cacheKey,
-          clonePromise,
-        );
+        memCache.set(cacheKey, clonePromise);
         await clonePromise;
       }
 
