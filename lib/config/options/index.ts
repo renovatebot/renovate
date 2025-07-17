@@ -4,7 +4,7 @@ import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
 import { supportedDatasources } from '../presets/internal/merge-confidence';
-import type { RenovateOptions } from '../types';
+import { type RenovateOptions, UpdateTypesOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
@@ -297,6 +297,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'variables',
+    description: 'Object which holds variable name/value pairs.',
+    type: 'object',
+    globalOnly: true,
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'statusCheckNames',
     description: 'Custom strings to use as status check names.',
     type: 'object',
@@ -367,10 +378,18 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'enabled',
-    description: `Enable or disable Renovate bot.`,
+    description: `Enable or disable corresponding functionality.`,
     stage: 'package',
     type: 'boolean',
     default: true,
+    parents: [
+      '.',
+      'packageRules',
+      ...AllManagersListLiteral,
+      'hostRules',
+      'vulnerabilityAlerts',
+      ...UpdateTypesOptions,
+    ],
   },
   {
     name: 'constraintsFiltering',
@@ -1068,7 +1087,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'baseBranches',
+    name: 'baseBranchPatterns',
     description:
       'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
@@ -1851,7 +1870,7 @@ const options: RenovateOptions[] = [
     description:
       'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit'],
   },
   {
     name: 'rollbackPrs',
@@ -1891,7 +1910,7 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit'],
   },
   {
     name: 'minimumReleaseAge',
@@ -2731,7 +2750,8 @@ const options: RenovateOptions[] = [
     freeChoice: true,
     mergeable: true,
     default: {
-      Package: '{{{depNameLinked}}}',
+      Package:
+        '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
       Type: '{{{depType}}}',
       Update: '{{{updateType}}}',
       'Current value': '{{{currentValue}}}',

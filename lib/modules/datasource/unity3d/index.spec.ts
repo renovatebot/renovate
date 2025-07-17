@@ -1,4 +1,5 @@
 import { getPkgReleases } from '..';
+import { UnityReleasesJSON } from './schema';
 import { Unity3dDatasource } from '.';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
@@ -23,12 +24,38 @@ describe('modules/datasource/unity3d/index', () => {
     }
   };
 
+  function createUnityReleases(
+    total: number,
+    offset: number,
+    resultCount: number,
+  ): UnityReleasesJSON {
+    const results = [];
+
+    for (let i = 1; i <= resultCount; i++) {
+      results.push({
+        version: `6000.0.${offset + i}f1`,
+        releaseDate: '2024-12-18T08:40:10.134Z',
+        releaseNotes: {
+          url: 'testUrl',
+        },
+        shortRevision: '0115cb901a32',
+      });
+    }
+
+    return UnityReleasesJSON.parse({
+      total,
+      results,
+    });
+  }
+
   it.each([
     Unity3dDatasource.streams.lts,
     Unity3dDatasource.legacyStreams.lts,
     Unity3dDatasource.legacyStreams.stable,
   ])('returns lts if requested %s', async (registryUrl) => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -58,7 +85,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns tech if requested', async () => {
-    mockUnityReleasesApi({ tech: Unity3dDatasource.streams.tech });
+    mockUnityReleasesApi({
+      tech: `${Unity3dDatasource.streams.tech}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -88,7 +117,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns alpha if requested', async () => {
-    mockUnityReleasesApi({ alpha: Unity3dDatasource.streams.alpha });
+    mockUnityReleasesApi({
+      alpha: `${Unity3dDatasource.streams.alpha}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -121,7 +152,9 @@ describe('modules/datasource/unity3d/index', () => {
     Unity3dDatasource.streams.beta,
     Unity3dDatasource.legacyStreams.beta,
   ])('returns beta if requested %s', async (registryUrl) => {
-    mockUnityReleasesApi({ beta: Unity3dDatasource.streams.beta });
+    mockUnityReleasesApi({
+      beta: `${Unity3dDatasource.streams.beta}&limit=25&offset=0`,
+    });
     const responses = (await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -151,7 +184,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns lts releases by default', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -197,7 +232,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns hash if requested', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responsesWithHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
@@ -218,7 +255,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns no hash if not requested', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responsesWithoutHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
@@ -239,7 +278,9 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns only lts by default', async () => {
-    mockUnityReleasesApi({ lts: Unity3dDatasource.streams.lts });
+    mockUnityReleasesApi({
+      lts: `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
@@ -259,5 +300,32 @@ describe('modules/datasource/unity3d/index', () => {
         registryUrl: expect.stringMatching(/(releases|lts)/),
       }),
     );
+  });
+
+  it('uses pagination', async () => {
+    const uriPageOne = new URL(
+      `${Unity3dDatasource.streams.lts}&limit=25&offset=0`,
+    );
+    const uriPageTwo = new URL(
+      `${Unity3dDatasource.streams.lts}&limit=25&offset=25`,
+    );
+
+    const total = 30;
+
+    httpMock
+      .scope(uriPageOne.origin)
+      .get(`${uriPageOne.pathname}${uriPageOne.search}`)
+      .reply(200, createUnityReleases(total, 0, 25));
+    httpMock
+      .scope(uriPageTwo.origin)
+      .get(`${uriPageTwo.pathname}${uriPageTwo.search}`)
+      .reply(200, createUnityReleases(total, 25, 5));
+
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+    });
+
+    expect(responses?.releases).toBeArrayOfSize(total);
   });
 });

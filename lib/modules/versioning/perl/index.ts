@@ -51,7 +51,7 @@ class PerlVersioningApi extends GenericVersioningApi {
     }
     const [, versionValue] = matches;
     const prerelease = versionValue.includes('_') ? 'alpha' : '';
-    const release = versionValue.split(/[._]/).map(Number);
+    const release = versionValue.split(regEx(/[._]/)).map(Number);
     return { release, prerelease };
   }
 }

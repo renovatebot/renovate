@@ -23,7 +23,7 @@ export function getConfig(): AllConfig {
   const options = getOptions();
   const config: AllConfig = {};
   options.forEach((option) => {
-    if (!option.parents) {
+    if (!option.parents || option.parents.includes('.')) {
       config[option.name] = getDefault(option);
     }
   });

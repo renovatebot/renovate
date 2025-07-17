@@ -401,7 +401,7 @@ export async function validateConfig(
                     ...matchBaseBranchesValidator.check({
                       resolvedRule,
                       currentPath: `${currentPath}[${subIndex}]`,
-                      baseBranches: config.baseBranches!,
+                      baseBranchPatterns: config.baseBranchPatterns!,
                     }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
@@ -558,15 +558,15 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'baseBranches') {
-              for (const baseBranch of val as string[]) {
+            if (key === 'baseBranchPatterns') {
+              for (const baseBranchPattern of val as string[]) {
                 if (
-                  isRegexMatch(baseBranch) &&
-                  !getRegexPredicate(baseBranch)
+                  isRegexMatch(baseBranchPattern) &&
+                  !getRegexPredicate(baseBranchPattern)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Invalid regExp for ${currentPath}: \`${baseBranch}\``,
+                    message: `Invalid regExp for ${currentPath}: \`${baseBranchPattern}\``,
                   });
                 }
               }

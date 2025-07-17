@@ -26,7 +26,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       return Promise.resolve(res);
     });
 
-    packageCache.set.mockImplementation((_ns, k, v, _ttl) => {
+    packageCache.setWithRawTtl.mockImplementation((_ns, k, v, _ttl) => {
       cache[k] = v as HttpCache;
       return Promise.resolve(null as never);
     });
@@ -78,7 +78,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.getText(url, { cacheProvider });
 
     expect(res.body).toBe('cached response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
 
     mockTime('2024-06-15T00:15:00.000Z');
     httpMock.scope(url).get('').reply(200, 'new response', {
@@ -88,7 +88,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     const res2 = await http.getText(url, { cacheProvider });
     expect(res2.body).toBe('new response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('handles cache miss', async () => {
@@ -135,7 +135,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
   it('prevents caching when the request contains authorization header', async () => {
@@ -155,7 +155,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).not.toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
   it('allows caching when cache-control is private but cachePrivatePackages=true', async () => {
@@ -177,7 +177,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('allows caching when cache-control is private but checkCacheControlHeader=false', async () => {
@@ -197,7 +197,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
-    expect(packageCache.set).toHaveBeenCalled();
+    expect(packageCache.setWithRawTtl).toHaveBeenCalled();
   });
 
   it('serves stale response during revalidation error', async () => {
