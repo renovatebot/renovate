@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { getPkgReleases } from '..';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { range } from '../../../util/range';
@@ -5,8 +6,16 @@ import { datasource, defaultRegistryUrl, pageSize } from './common';
 import { Fixtures } from '~test/fixtures';
 import * as httpMock from '~test/http-mock';
 
-function getPath(page: number, imageType = 'jdk'): string {
-  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&page=${page}`;
+vi.mock('node:os', () => ({
+  arch: () => 'arm64',
+}));
+
+function getPath(
+  page: number,
+  architecture: string,
+  imageType = 'jdk',
+): string {
+  return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&architecture=${architecture}&sort_method=DATE&sort_order=DESC&page=${page}`;
 }
 
 const packageName = 'java';
@@ -16,7 +25,7 @@ describe('modules/datasource/java-version/index', () => {
     it('throws for error', async () => {
       httpMock
         .scope(defaultRegistryUrl)
-        .get(getPath(0))
+        .get(getPath(0, 'aarch64'))
         .replyWithError('error');
       await expect(
         getPkgReleases({
@@ -27,7 +36,7 @@ describe('modules/datasource/java-version/index', () => {
     });
 
     it('returns null for 404', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(404);
+      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'aarch64')).reply(404);
       expect(
         await getPkgReleases({
           datasource,
@@ -37,7 +46,10 @@ describe('modules/datasource/java-version/index', () => {
     });
 
     it('returns null for empty result', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(200, {});
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(getPath(0, 'aarch64'))
+        .reply(200, {});
       expect(
         await getPkgReleases({
           datasource,
@@ -49,7 +61,7 @@ describe('modules/datasource/java-version/index', () => {
     it('returns null for empty 200 OK', async () => {
       httpMock
         .scope(defaultRegistryUrl)
-        .get(getPath(0))
+        .get(getPath(0, 'aarch64'))
         .reply(200, { versions: [] });
       expect(
         await getPkgReleases({
@@ -60,7 +72,7 @@ describe('modules/datasource/java-version/index', () => {
     });
 
     it('throws for 5xx', async () => {
-      httpMock.scope(defaultRegistryUrl).get(getPath(0)).reply(502);
+      httpMock.scope(defaultRegistryUrl).get(getPath(0, 'aarch64')).reply(502);
       await expect(
         getPkgReleases({
           datasource,
@@ -72,7 +84,7 @@ describe('modules/datasource/java-version/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(defaultRegistryUrl)
-        .get(getPath(0))
+        .get(getPath(0, 'aarch64'))
         .reply(200, Fixtures.get('page.json'));
       const res = await getPkgReleases({
         datasource,
@@ -85,7 +97,7 @@ describe('modules/datasource/java-version/index', () => {
     it('processes real data (jre)', async () => {
       httpMock
         .scope(defaultRegistryUrl)
-        .get(getPath(0, 'jre'))
+        .get(getPath(0, 'aarch64', 'jre'))
         .reply(200, Fixtures.get('jre.json'));
       const res = await getPkgReleases({
         datasource,
@@ -101,9 +113,9 @@ describe('modules/datasource/java-version/index', () => {
       }));
       httpMock
         .scope(defaultRegistryUrl)
-        .get(getPath(0))
+        .get(getPath(0, 'aarch64'))
         .reply(200, { versions })
-        .get(getPath(1))
+        .get(getPath(1, 'aarch64'))
         .reply(404);
       const res = await getPkgReleases({
         datasource,

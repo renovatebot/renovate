@@ -1,3 +1,4 @@
+import { arch } from 'node:os';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -67,8 +68,11 @@ export class JavaVersionDatasource extends Datasource {
       { registryUrl, packageName, imageType },
       'fetching java release',
     );
+
+    const architecture = this.getJvmArch();
+
     // TODO: types (#22198)
-    const url = `${registryUrl!}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    const url = `${registryUrl!}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&architecture=${architecture}&sort_method=DATE&sort_order=DESC`;
 
     const result: ReleaseResult = {
       homepage: 'https://adoptium.net',
@@ -95,5 +99,17 @@ export class JavaVersionDatasource extends Datasource {
     }
 
     return result.releases.length ? result : null;
+  }
+
+  private getJvmArch() {
+    switch (arch()) {
+      case 'arm64':
+        return 'aarch64';
+      case 'x64':
+        return 'x64';
+      default:
+        // should never happen
+        throw new Error('Unsupported architecture: ' + arch());
+    }
   }
 }
