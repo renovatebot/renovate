@@ -328,8 +328,9 @@ export class CrateDatasource extends Datasource {
 
         memCache.set(
           cacheKey,
-          clonePromise.then(() => clonePath).catch(() => null),
+          clonePromise,
         );
+        await clonePromise;
       }
 
       if (!clonePath) {
@@ -353,16 +354,17 @@ export class CrateDatasource extends Datasource {
     clonePath: string,
     packageName: string,
     cacheKeyForError: string,
-  ): Promise<string> {
+  ): Promise<string | null> {
     const git = Git({
       ...simpleGitConfig(),
       maxConcurrentProcesses: 1,
     }).env(getChildEnv());
 
     try {
-      return await git.clone(registryFetchUrl, clonePath, {
+      await git.clone(registryFetchUrl, clonePath, {
         '--depth': 1,
       });
+      return clonePath;
     } catch (err) {
       if (
         err.message.includes(
@@ -374,7 +376,8 @@ export class CrateDatasource extends Datasource {
           'failed to shallow clone git registry, doing full clone',
         );
         try {
-          return await git.clone(registryFetchUrl, clonePath);
+          await git.clone(registryFetchUrl, clonePath);
+          return clonePath;
         } catch (err) {
           logger.warn(
             { err, packageName, registryFetchUrl },
@@ -382,7 +385,7 @@ export class CrateDatasource extends Datasource {
           );
           memCache.set(cacheKeyForError, err);
 
-          throw new Error(err);
+          return null;
         }
       } else {
         logger.warn(
@@ -391,7 +394,7 @@ export class CrateDatasource extends Datasource {
         );
         memCache.set(cacheKeyForError, err);
 
-        throw new Error(err);
+        return null;
       }
     }
   }
