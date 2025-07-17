@@ -35,7 +35,6 @@ export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
   composerIgnorePlatformReqs?: string[];
-  composerUpdateWithAllDependencies?: boolean;
   goGetDirs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
