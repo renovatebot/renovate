@@ -63,6 +63,7 @@ const renamedMonorepos: Record<string, string> = {
   hamcrest: 'javahamcrest',
   HotChocolate: 'hotchocolate',
   infrastructure: 'infrastructure-ui',
+  junit5: 'junit-framework',
   lingui: 'linguijs',
   MassTransit: 'masstransit',
   material: 'material-components-web',
