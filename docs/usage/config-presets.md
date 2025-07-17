@@ -12,8 +12,7 @@ Shareable config presets must use the JSON or JSON5 formats, other formats are n
 
 <!-- prettier-ignore -->
 !!! tip
-    Describe what your preset does in the `"description"` field.
-    This way your configuration is self-documenting.
+    Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
 
 ## Extending from a preset
 
@@ -169,6 +168,10 @@ Parameters must be strings, non-quoted, and separated by commas if there are mor
 
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterized presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
+
+Also, the entire parameter string is available as `{{args}}`.
+It includes everything between parentheses, verbatim, without the parentheses themselves.
+If you want to include a comma in the parameter value, you need to use `{{args}}` instead of `{{arg0}}`.
 
 ## GitHub-hosted Presets
 

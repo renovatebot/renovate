@@ -162,10 +162,6 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
-      tags: {
-        latest: '1.0.3-SNAPSHOT',
-        release: '1.0.3-SNAPSHOT',
-      },
     });
   });
 
@@ -197,10 +193,6 @@ describe('modules/datasource/maven/index', () => {
       packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [{ version: '1.0.3-SNAPSHOT' }],
-      tags: {
-        latest: '1.0.3-SNAPSHOT',
-        release: '1.0.3-SNAPSHOT',
-      },
     });
   });
 
@@ -479,10 +471,6 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);
@@ -528,10 +516,6 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.5-SNAPSHOT' },
         { version: '2.0.0' },
       ],
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
       isPrivate: true,
     });
     expect(googleAuth).toHaveBeenCalledTimes(2);

@@ -18,6 +18,10 @@ handlebars.registerHelper('encodeBase64', (str: string) =>
   Buffer.from(str ?? '').toString('base64'),
 );
 
+handlebars.registerHelper('decodeBase64', (str: string) =>
+  Buffer.from(str ?? '', 'base64').toString(),
+);
+
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
@@ -147,6 +151,7 @@ export const exposedConfigOptions = [
   'semanticCommitType',
   'separateMajorMinor',
   'separateMinorPatch',
+  'separateMultipleMinor',
   'sourceDirectory',
 ];
 
@@ -202,6 +207,8 @@ export const allowedFields = {
     'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
   newName:
     'The name of the new dependency that replaces the current deprecated dependency',
+  newNameLinked:
+    'The new dependency name already linked to its home page using markdown',
   newValue:
     'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
   newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
