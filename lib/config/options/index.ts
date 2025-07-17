@@ -588,13 +588,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'composerUpdateWithAllDependencies',
-    description:
-      'Configure use of `--with-all-dependencies` flag instead of the default `--with-dependencies` when running Composer update command.',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'goGetDirs',
     description: 'Directory pattern to run `go get` on.',
     type: 'array',
@@ -2492,6 +2485,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
+      'composerUpdateAllDependencies',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',

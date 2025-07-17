@@ -190,7 +190,7 @@ export async function updateArtifacts({
             .map((dep) => quote(dep))
             .join(' ')
         ).trim() +
-        (config.composerUpdateWithAllDependencies
+        (config.postUpdateOptions?.includes('composerUpdateAllDependencies')
           ? ' --with-all-dependencies'
           : ' --with-dependencies');
     }

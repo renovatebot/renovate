@@ -1210,7 +1210,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
-  it('uses --with-all-dependencies instead of --with-dependencies when composerUpdateWithAllDependencies is true', async () => {
+  it('uses --with-all-dependencies instead of --with-dependencies when composerUpdateWithAllDependencies is set in postUpdateOptions', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -1223,7 +1223,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          composerUpdateWithAllDependencies: true,
+          postUpdateOptions: ['composerUpdateAllDependencies'],
         },
       }),
     ).toBeNull();
