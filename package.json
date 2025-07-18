@@ -271,7 +271,7 @@
   },
   "devDependencies": {
     "@containerbase/eslint-plugin": "1.1.6",
-    "@eslint/js": "9.30.1",
+    "@eslint/js": "9.31.0",
     "@hyrious/marshal": "0.3.3",
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.1.3",
