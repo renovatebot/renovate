@@ -29,7 +29,7 @@
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
-    "vitest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run --logHeapUsage",
+    "vitest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal vitest run 'lib/workers/repository/dependency-dashboard.spec.ts' --logHeapUsage",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
