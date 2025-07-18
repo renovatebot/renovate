@@ -86,7 +86,7 @@ export class PackageFiles {
     let deps = '';
 
     for (const [branch, packageFiles] of Array.from(data).sort(([a], [b]) =>
-      a.localeCompare(b),
+      a.localeCompare(b, undefined, { numeric: true }),
     )) {
       deps += pad
         ? `<details><summary>Branch ${branch}</summary>\n<blockquote>\n\n`
