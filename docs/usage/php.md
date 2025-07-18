@@ -72,4 +72,4 @@ You may encrypt your `password` only, but you can encrypt your `username` as wel
 ## Update all dependencies
 
 By default, Renovate will invoke `composer update` with the `--with-dependencies` flag.
-Add `composerAllDependencies` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
+Add `composerWithAll` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
