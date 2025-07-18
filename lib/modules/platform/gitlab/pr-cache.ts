@@ -105,7 +105,9 @@ export class GitlabPrCache {
     const { items: oldItems } = this.cache;
     let { updated_at } = this.cache;
 
-    let needNextPage = true;
+    if (rawItems.length === 0) {
+      return false;
+    }
 
     for (const rawItem of rawItems) {
       const id = rawItem.iid;
@@ -116,7 +118,6 @@ export class GitlabPrCache {
       const itemNewTime = DateTime.fromISO(rawItem.updated_at);
 
       if (dequal(oldItem, newItem)) {
-        needNextPage = false;
         continue;
       }
 
@@ -129,7 +130,8 @@ export class GitlabPrCache {
     }
 
     this.cache.updated_at = updated_at;
-    return needNextPage;
+    
+    return true;
   }
 
   private async sync(http: GitlabHttp): Promise<GitlabPrCache> {
