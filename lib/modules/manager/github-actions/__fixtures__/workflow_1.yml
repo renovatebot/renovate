@@ -37,7 +37,29 @@ jobs:
       redis:
         image: redis:5
       postgres: postgres:10
+  container-job-with-comment-and-sha:
+    runs-on: ubuntu-latest
+    container: node@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896 # 16-bullseye
+  container-job-with-comment-and-sha-quoted:
+    runs-on: ubuntu-latest
+    container: "node@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896" # 16-bullseye
+  container-job-with-comment-no-sha:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye # v1.2.3
   container-job-with-image-keyword:
     runs-on: ubuntu-latest
     container:
-      image: node:16-bullseye
+      image: 'node:16-bullseye'
+  container-job-with-image-keyword-and-sha:
+    runs-on: ubuntu-latest
+    container:
+      image: 'node@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896' # 16-bullseye
+  container-job-with-comment-and-sha-version-inline:
+    runs-on: ubuntu-latest
+    # The comment should be ignored (the version should be 16-bullseye)
+    container: node:16-bullseye@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896 # 999-bullseye
+  container-job-with-image-keyword-and-sha-version-inline:
+    runs-on: ubuntu-latest
+    container:
+    # The comment should be ignored (the version should be 16-bullseye)
+      image: 'node:16-bullseye@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896' # 999-bullseye
