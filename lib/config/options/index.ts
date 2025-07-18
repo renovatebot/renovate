@@ -2485,7 +2485,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     allowedValues: [
       'bundlerConservative',
-      'composerUpdateAllDependencies',
+      'composerWithAll',
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',

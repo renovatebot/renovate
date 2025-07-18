@@ -1223,7 +1223,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          postUpdateOptions: ['composerUpdateAllDependencies'],
+          postUpdateOptions: ['composerWithAll'],
         },
       }),
     ).toBeNull();
