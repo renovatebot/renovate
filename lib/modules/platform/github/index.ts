@@ -19,7 +19,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token';
@@ -268,7 +268,8 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
       return res.body;
     }
   } catch (err) /* v8 ignore start */ {
-    logger.error({ err }, `GitHub getRepos error`);
+    logger.debug({ err }, 'Failed to retrieve repositories');
+    logError('GET_REPOS_ERROR', {});
     throw err;
   } /* v8 ignore stop */
 }
