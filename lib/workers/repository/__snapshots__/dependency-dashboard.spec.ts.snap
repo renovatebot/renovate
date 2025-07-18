@@ -18,23 +18,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-<details><summary>npm</summary>
-<blockquote>
-
-<details><summary>package.json</summary>
-
-
-</details>
-
-</blockquote>
-</details>
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -75,6 +58,23 @@ This repository currently has no open or pending branches.
 <details><summary>pyproject.toml</summary>
 
  - \`six <=1.3.0\`
+
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>package.json</summary>
+
 
 </details>
 
@@ -94,7 +94,7 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
+<details><summary>Branch dev</summary>
 <blockquote>
 
 <details><summary>dockerfile</summary>
@@ -143,7 +143,7 @@ This repository currently has no open or pending branches.
 </blockquote>
 </details>
 
-<details><summary>Branch dev</summary>
+<details><summary>Branch main</summary>
 <blockquote>
 
 <details><summary>dockerfile</summary>
@@ -202,14 +202,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-None detected
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -255,6 +247,14 @@ None detected
 
 </blockquote>
 </details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
 
 </blockquote>
 </details>
@@ -269,14 +269,6 @@ This repository currently has no open or pending branches.
 
 ## Detected dependencies
 
-<details><summary>Branch main</summary>
-<blockquote>
-
-None detected
-
-</blockquote>
-</details>
-
 <details><summary>Branch dev</summary>
 <blockquote>
 
@@ -322,6 +314,14 @@ None detected
 
 </blockquote>
 </details>
+
+</blockquote>
+</details>
+
+<details><summary>Branch main</summary>
+<blockquote>
+
+None detected
 
 </blockquote>
 </details>
