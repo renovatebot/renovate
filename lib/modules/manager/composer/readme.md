@@ -12,4 +12,4 @@ For example, the package `acme/foo` would need an entry in [repositories](https:
 ```
 
 By default, Renovate will invoke `composer update` with the `--with-dependencies` flag.
-Add `composerAllDependencies` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
+Add `composerWithAll` to your `postUpdateOptions` array to use the `--with-all-dependencies` flag instead.
