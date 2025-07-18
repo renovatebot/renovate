@@ -124,7 +124,7 @@ describe('workers/repository/dependency-dashboard', () => {
         title: '',
         number: 1,
         body:
-          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
             '- [ ]',
             '- [x]',
           ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
@@ -151,7 +151,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-10-PR.txt'),
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -176,7 +176,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- approve-all-pending-prs -->',
           '- [x] <!-- approve-all-pending-prs -->',
         ),
@@ -203,7 +203,7 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body: Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- create-all-rate-limited-prs -->',
           '- [x] <!-- create-all-rate-limited-prs -->',
         ),
@@ -458,7 +458,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
-    it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other', async () => {
+    it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
       const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
@@ -524,14 +524,6 @@ describe('workers/repository/dependency-dashboard', () => {
           prBlockedBy: 'BranchAutomerge',
           branchName: 'branchName9',
         },
-        {
-          ...mock<BranchConfig>(),
-          prTitle: 'pr10',
-          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep10' }],
-          result: 'done',
-          prBlockedBy: undefined,
-          branchName: 'branchName10',
-        },
       ];
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(
@@ -546,7 +538,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-10-PR.txt'),
+        Fixtures.get('dependency-dashboard-with-8-PR.txt'),
       );
 
       // same with dry run
