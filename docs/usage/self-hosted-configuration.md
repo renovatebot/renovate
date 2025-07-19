@@ -341,6 +341,8 @@ Other valid cache namespaces are as follows:
 - `changelog-bitbucket-release`
 - `changelog-bitbucket-server-notes@v2`
 - `changelog-bitbucket-server-release`
+- `changelog-forgejo-notes@v2`
+- `changelog-forgejo-release`
 - `changelog-gitea-notes@v2`
 - `changelog-gitea-release`
 - `changelog-github-notes@v2`
@@ -376,6 +378,8 @@ Other valid cache namespaces are as follows:
 - `datasource-docker-tags`
 - `datasource-dotnet-version`
 - `datasource-endoflife-date`
+- `datasource-forgejo-releases`
+- `datasource-forgejo-tags`
 - `datasource-galaxy-collection`
 - `datasource-galaxy`
 - `datasource-git-refs`

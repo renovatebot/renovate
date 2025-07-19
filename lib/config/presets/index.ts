@@ -16,6 +16,7 @@ import * as migration from '../migration';
 import type { AllConfig, RenovateConfig } from '../types';
 import { mergeChildConfig } from '../utils';
 import { removedPresets } from './common';
+import * as forgejo from './forgejo';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -38,6 +39,7 @@ const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
+  forgejo,
   gitea,
   local,
   internal,

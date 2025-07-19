@@ -13,6 +13,7 @@ import { isHttpUrl, joinUrlParts } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as bitbucketServer from './bitbucket-server';
+import * as forgejo from './forgejo';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -37,6 +38,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'forgejo':
+        return await forgejo.getReleaseList(project, release);
       case 'gitea':
         return await gitea.getReleaseList(project, release);
       case 'gitlab':
@@ -262,6 +265,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'forgejo':
+        return await forgejo.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       case 'gitea':
         return await gitea.getReleaseNotesMd(
           repository,
