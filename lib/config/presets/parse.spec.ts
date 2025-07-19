@@ -490,7 +490,7 @@ describe('config/presets/parse', () => {
       });
     });
 
-    it('parses HTTPS URLs', () => {
+    it('parses HTTPS URLs for gitea', () => {
       expect(
         parsePreset(
           'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
@@ -505,7 +505,7 @@ describe('config/presets/parse', () => {
       });
     });
 
-    it('parses HTTPS URLs', () => {
+    it('parses HTTPS URLs for forgejo', () => {
       expect(
         parsePreset(
           'https://my.server/forgejo/renovate-config/raw/branch/main/default.json',
@@ -535,7 +535,7 @@ describe('config/presets/parse', () => {
       });
     });
 
-    it('parses HTTPS URLs with parameters', () => {
+    it('parses HTTPS URLs with parameters for gitea', () => {
       expect(
         parsePreset(
           'https://my.server/gitea/renovate-config/raw/branch/main/default.json(param1)',
@@ -550,7 +550,7 @@ describe('config/presets/parse', () => {
       });
     });
 
-    it('parses HTTPS URLs with parameters', () => {
+    it('parses HTTPS URLs with parameters for forgejo', () => {
       expect(
         parsePreset(
           'https://my.server/forgejo/renovate-config/raw/branch/main/default.json(param1)',
