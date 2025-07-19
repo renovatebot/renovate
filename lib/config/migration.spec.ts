@@ -29,6 +29,7 @@ describe('config/migration', () => {
         },
         extends: [
           ':automergeBranchMergeCommit',
+          ':disableLockFiles',
           'default:js-app',
           'config:library',
           ':masterIssue',
@@ -53,6 +54,7 @@ describe('config/migration', () => {
         gomodTidy: true,
         upgradeInRange: true,
         trustLevel: 'high',
+        updateLockFiles: false,
         automergeType: 'branch-push',
         branchName:
           '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
