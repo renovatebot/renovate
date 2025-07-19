@@ -685,6 +685,20 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 
 ## commitBodyTable
 
+## commitHourlyLimit
+
+This config option slows down the _rate_ at which Renovate creates commits. This includes commits for branch creation and rebasing.
+
+Slowing down commits creation can be helpful when you're onboarding a repository with many dependencies or when you have frequent rebasing that triggers excessive CI runs.
+
+To prevent excessive CI runs you can set `commitHourlyLimit` to a value like `5` or `10`.
+Renovate will only create that many commits within each hourly period (`:00` through `:59`).
+
+<!-- prettier-ignore -->
+!!! tip
+    The `commitHourlyLimit` setting limits the _rate_ of commits for branch creation and rebasing.
+    The `commitHourlyLimit` setting is enforced on a per-repository basis.
+
 ## commitMessage
 
 ## commitMessageAction

@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
@@ -57,9 +58,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await fs.writeFile(base.path + '/master_file', defaultBranch);
     await fs.writeFile(base.path + '/file_to_delete', 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    await repo.commit('master message', [
-      '--date=' + masterCommitDate.toISOString(),
-    ]);
+    process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
+    await repo.commit('master message');
+    delete process.env.GIT_COMMITTER_DATE;
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
     await fs.writeFile(base.path + '/future_file', 'future');
@@ -413,6 +414,22 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
     it('should return null', () => {
       expect(git.getBranchCommit('not_found')).toBeNull();
+    });
+  });
+
+  describe('getBranchUpdateDate(branchName)', () => {
+    it('should return same value for equal refs', async () => {
+      await git.checkoutBranchFromRemote('renovate/equal_branch', 'origin');
+      await git.fetchBranch(defaultBranch);
+      const date = git.getBranchUpdateDate('renovate/equal_branch');
+      expect(date!.toISO()).toBe(
+        git.getBranchUpdateDate(defaultBranch)!.toISO(),
+      );
+      expect(date).toBeInstanceOf(DateTime);
+    });
+
+    it('should return null', () => {
+      expect(git.getBranchUpdateDate('not_found')).toBeNull();
     });
   });
 

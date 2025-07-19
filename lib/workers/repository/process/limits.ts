@@ -19,7 +19,7 @@ export async function getPrHourlyCount(
       (pr) =>
         pr.sourceBranch !== config.onboardingBranch &&
         pr.sourceBranch.startsWith(config.branchPrefix!) &&
-        DateTime.fromISO(pr.createdAt!) > currentHourStart,
+        DateTime.fromISO(pr.createdAt!, { zone: 'utc' }) > currentHourStart,
     );
     logger.debug(
       `${soFarThisHour.length} PRs have been created so far in this hour.`,
@@ -62,6 +62,29 @@ export async function getConcurrentPrsCount(
 
   logger.debug(`${openPrCount} PRs are currently open`);
   return openPrCount;
+}
+
+export async function getCommitsHourlyCount(
+  branches: BranchConfig[],
+): Promise<number> {
+  try {
+    const currentHourStart = DateTime.local().setZone('utc').startOf('hour');
+    logger.debug(
+      `Calculating commits so far in this hour currentHourStart=${String(currentHourStart)}`,
+    );
+    let soFarThisHour = 0;
+    for (const branch of branches) {
+      const updateDate = await scm.getBranchUpdateDate(branch.branchName);
+      if (updateDate && updateDate > currentHourStart) {
+        soFarThisHour++;
+      }
+    }
+    logger.debug(`${soFarThisHour} commits so far in this hour.`);
+    return soFarThisHour;
+  } catch (err) {
+    logger.error({ err }, 'Error checking commits per hour');
+    return 0;
+  }
 }
 
 export async function getConcurrentBranchesCount(

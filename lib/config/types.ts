@@ -278,6 +278,7 @@ export interface RenovateConfig
   postUpdateOptions?: string[];
   branchConcurrentLimit?: number | null;
   prConcurrentLimit?: number;
+  commitHourlyLimit?: number;
   prHourlyLimit?: number;
   forkModeDisallowMaintainerEdits?: boolean;
 
