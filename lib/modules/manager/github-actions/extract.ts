@@ -15,6 +15,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { communityActions } from './community';
 import type { Steps } from './schema';
 import { WorkflowSchema } from './schema';
 
@@ -182,6 +183,12 @@ function extractSteps(
   deps: PackageDependency<Record<string, any>>[],
 ): void {
   for (const step of steps) {
+    const res = communityActions.safeParse(step);
+    if (res.success) {
+      deps.push(res.data);
+      continue;
+    }
+
     for (const [action, versioning] of Object.entries(versionedActions)) {
       const actionName = `actions/setup-${action}`;
       if (step.uses === actionName || step.uses?.startsWith(`${actionName}@`)) {
