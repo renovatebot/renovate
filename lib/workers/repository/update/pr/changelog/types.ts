@@ -26,6 +26,7 @@ export interface ChangeLogRelease {
 export type ChangeLogPlatform =
   | 'bitbucket'
   | 'bitbucket-server'
+  | 'forgejo'
   | 'gitea'
   | 'github'
   | 'gitlab';

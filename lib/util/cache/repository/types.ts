@@ -134,6 +134,9 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
+    forgejo?: {
+      pullRequestsCache?: unknown;
+    };
     gitea?: {
       pullRequestsCache?: unknown;
     };
