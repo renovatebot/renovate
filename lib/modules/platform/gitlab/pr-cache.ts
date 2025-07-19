@@ -151,7 +151,6 @@ export class GitlabPrCache {
 
   /**
    * Ensure the pr cache starts with the most recent PRs.
-   * JavaScript ensures that the cache is sorted by PR number.
    */
   private updateItems(): void {
     this.items = Object.values(this.cache.items).sort(
