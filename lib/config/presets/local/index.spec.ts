@@ -1,18 +1,18 @@
 import { GlobalConfig } from '../../global';
-import * as _gitea from '../gitea';
 import * as _forgejo from '../forgejo';
+import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
 import { platform } from '~test/util';
 
-vi.mock('../gitea');
 vi.mock('../forgejo');
+vi.mock('../gitea');
 vi.mock('../github');
 vi.mock('../gitlab');
 
-const gitea = vi.mocked(_gitea);
 const forgejo = vi.mocked(_forgejo);
+const gitea = vi.mocked(_gitea);
 const github = vi.mocked(_github);
 const gitlab = vi.mocked(_gitlab);
 
