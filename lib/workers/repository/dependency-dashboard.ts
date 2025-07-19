@@ -335,7 +335,7 @@ export async function ensureDependencyDashboard(
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
-    issueBody += `These branches will be created by Renovate only once you click their checkbox below.\n\n`;
+    issueBody += `The following branches are pending approval. To create them, click on a checkbox below.\n\n`;
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
     }
@@ -352,7 +352,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
+      'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -367,7 +367,7 @@ export async function ensureDependencyDashboard(
   if (rateLimited.length) {
     issueBody += '## Rate-Limited\n\n';
     issueBody +=
-      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
+      'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
     }
@@ -382,7 +382,7 @@ export async function ensureDependencyDashboard(
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
-      'These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.\n\n';
+      'The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.\n\n';
     for (const branch of errorList) {
       issueBody += getListItem(branch, 'retry');
     }
@@ -394,7 +394,7 @@ export async function ensureDependencyDashboard(
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
     issueBody +=
-      "These branches exist but PRs won't be created until you approve them by clicking on a checkbox.\n\n";
+      'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.\n\n';
     for (const branch of awaitingPr) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -403,7 +403,7 @@ export async function ensureDependencyDashboard(
   const prEdited = branches.filter((branch) => branch.result === 'pr-edited');
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
-    issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.\n\n`;
+    issueBody += `The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.\n\n`;
     for (const branch of prEdited) {
       issueBody += getListItem(branch, 'rebase');
     }
@@ -412,7 +412,7 @@ export async function ensureDependencyDashboard(
   const prPending = branches.filter((branch) => branch.result === 'pending');
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
-    issueBody += `These updates await pending status checks. To force their creation now, click the checkbox below.\n\n`;
+    issueBody += `The following updates await pending status checks. To force their creation now, click on a checkbox below.\n\n`;
     for (const branch of prPending) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -423,7 +423,7 @@ export async function ensureDependencyDashboard(
   );
   if (prPendingBranchAutomerge.length) {
     issueBody += '## Pending Branch Automerge\n\n';
-    issueBody += `These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.\n\n`;
+    issueBody += `The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.\n\n`;
     for (const branch of prPendingBranchAutomerge) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -460,7 +460,7 @@ export async function ensureDependencyDashboard(
   // istanbul ignore if
   if (otherBranches.length) {
     issueBody += '## Other Branches\n\n';
-    issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
+    issueBody += `The following updates are pending. To force the creation of a PR, click on a checkbox below.\n\n`;
     for (const branch of otherBranches) {
       issueBody += getListItem(branch, 'other');
     }
@@ -472,7 +472,7 @@ export async function ensureDependencyDashboard(
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
-      'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.\n\n';
+      'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.\n\n';
     for (const branch of inProgress) {
       issueBody += getListItem(branch, 'rebase');
     }
@@ -490,7 +490,7 @@ export async function ensureDependencyDashboard(
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
-      'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
+      'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
       issueBody += getListItem(branch, 'recreate');
     }
