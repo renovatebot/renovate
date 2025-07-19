@@ -162,7 +162,7 @@ describe('modules/platform/github/api-cache', () => {
         { number: 5, updated_at: t5 },
       ]);
       expect(res1).toBeTrue();
-      expect(res2).toBeTrue();
+      expect(res2).toBeFalse();
     });
 
     it('does not require new page if all items are old', () => {
