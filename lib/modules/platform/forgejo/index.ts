@@ -207,7 +207,9 @@ const platform: Platform = {
     token,
   }: PlatformParams): Promise<PlatformResult> {
     if (!token) {
-      throw new Error('Init: You must configure a Forgejo personal access token');
+      throw new Error(
+        'Init: You must configure a Forgejo personal access token',
+      );
     }
 
     if (endpoint) {

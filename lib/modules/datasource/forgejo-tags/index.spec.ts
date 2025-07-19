@@ -18,7 +18,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
             sha: '35fcb41ce2d03b44186cc82d4ea619dc2fcb6f7d',
             created: '2023-08-21T16:27:29Z',
           },
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v13.0.0.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v13.0.0.zip',
           tarball_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v13.0.0.tar.gz',
         },
@@ -31,7 +32,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
             sha: '1ea6cb4633c2e01d02dc910bcb67d7710842abc7',
             created: '2023-07-31T07:04:49Z',
           },
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v12.5.4.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v12.5.4.zip',
           tarball_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v12.5.4.tar.gz',
         },
@@ -44,7 +46,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
             sha: '478fd6044e971d3c991e34fa449201397c2f5ea8',
             created: '2023-07-22T12:06:30Z',
           },
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.4.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.4.zip',
           tarball_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.4.tar.gz',
         },
@@ -57,7 +60,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
             sha: 'aa8f543c08f874754ccc3e5f136e0b46742b3992',
             created: '2023-07-19T21:45:28Z',
           },
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.3.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.3.zip',
           tarball_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.3.tar.gz',
         },
@@ -70,7 +74,8 @@ describe('modules/datasource/forgejo-tags/index', () => {
             sha: '81612bd7882f0b3b5d70308a8e7fcfb5d165ec7c',
             created: '2023-07-19T19:54:12Z',
           },
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.2.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.2.zip',
           tarball_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.2.tar.gz',
         },
@@ -279,8 +284,10 @@ describe('modules/datasource/forgejo-tags/index', () => {
           sha: '29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed',
           created: '2023-07-19T08:42:55+02:00',
         },
-        zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.1.zip',
-        tarball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.1.tar.gz',
+        zipball_url:
+          'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.1.zip',
+        tarball_url:
+          'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v9.0.1.tar.gz',
       };
       httpMock
         .scope('https://code.forgejo.org')

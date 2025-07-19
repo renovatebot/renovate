@@ -1010,9 +1010,9 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.getBranchStatus('some-branch', true)).rejects.toThrow(
-        REPOSITORY_CHANGED,
-      );
+      await expect(
+        forgejo.getBranchStatus('some-branch', true),
+      ).rejects.toThrow(REPOSITORY_CHANGED);
     });
 
     it('should propagate any other errors', async () => {
@@ -1023,9 +1023,9 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      await expect(forgejo.getBranchStatus('some-branch', true)).rejects.toThrow(
-        'unknown error',
-      );
+      await expect(
+        forgejo.getBranchStatus('some-branch', true),
+      ).rejects.toThrow('unknown error');
     });
 
     it('should treat internal checks as success', async () => {

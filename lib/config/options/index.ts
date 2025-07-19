@@ -1870,7 +1870,14 @@ const options: RenovateOptions[] = [
     description:
       'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit', 'forgejo'],
+    supportedPlatforms: [
+      'azure',
+      'gitea',
+      'github',
+      'gitlab',
+      'gerrit',
+      'forgejo',
+    ],
   },
   {
     name: 'rollbackPrs',
@@ -1910,7 +1917,14 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'gerrit', 'forgejo'],
+    supportedPlatforms: [
+      'azure',
+      'gitea',
+      'github',
+      'gitlab',
+      'gerrit',
+      'forgejo',
+    ],
   },
   {
     name: 'minimumReleaseAge',

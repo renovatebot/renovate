@@ -30,8 +30,12 @@ describe('constants/platform', () => {
   it('should be part of the FORGEJO_API_USING_HOST_TYPES', () => {
     expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo')).toBeTrue();
     expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-tags')).toBeTrue();
-    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-releases')).toBeTrue();
-    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog')).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-releases'),
+    ).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog'),
+    ).toBeTrue();
   });
 
   it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {

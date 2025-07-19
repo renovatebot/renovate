@@ -69,7 +69,12 @@ export class ForgejoPrCache {
     ignorePrAuthor: boolean,
     author: string,
   ): Promise<Pr[]> {
-    const prCache = await ForgejoPrCache.init(http, repo, ignorePrAuthor, author);
+    const prCache = await ForgejoPrCache.init(
+      http,
+      repo,
+      ignorePrAuthor,
+      author,
+    );
     return prCache.getPrs();
   }
 
@@ -85,7 +90,12 @@ export class ForgejoPrCache {
     author: string,
     item: Pr,
   ): Promise<void> {
-    const prCache = await ForgejoPrCache.init(http, repo, ignorePrAuthor, author);
+    const prCache = await ForgejoPrCache.init(
+      http,
+      repo,
+      ignorePrAuthor,
+      author,
+    );
     prCache.setPr(item);
   }
 

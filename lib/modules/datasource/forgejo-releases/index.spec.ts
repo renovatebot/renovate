@@ -15,10 +15,12 @@ describe('modules/datasource/forgejo-releases/index', () => {
           name: 'v9.2.1',
           body: 'Fix a helm template check preventing from scaling up to more than one replica (#488)',
           url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/266974',
-          html_url: 'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.2.1',
+          html_url:
+            'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.2.1',
           tarball_url:
             'https://code.forgejo.org/forgejo/helm-chart/archive/v9.2.1.tar.gz',
-          zipball_url: 'https://code.forgejo.org/forgejo/helm-chart/archive/v9.2.1.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo/helm-chart/archive/v9.2.1.zip',
           upload_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/266974/assets',
           draft: false,
@@ -33,10 +35,12 @@ describe('modules/datasource/forgejo-releases/index', () => {
           name: 'v9.2.0',
           body: 'Bump to Forgejo 1.20.3\r\n\r\nFull changes found here: https://code.forgejo.org/forgejo/helm-chart/compare/v9.1.0...v9.2.0',
           url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/265923',
-          html_url: 'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.2.0',
+          html_url:
+            'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.2.0',
           tarball_url:
             'https://code.forgejo.org/forgejo/helm-chart/archive/v9.2.0.tar.gz',
-          zipball_url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v13.0.0.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo-helm/forgejo-helm/archive/v13.0.0.zip',
           upload_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/265923/assets',
           draft: false,
@@ -51,10 +55,12 @@ describe('modules/datasource/forgejo-releases/index', () => {
           name: 'v9.1.0',
           body: 'Bump to Forgejo 1.20.2',
           url: 'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/263748',
-          html_url: 'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.1.0',
+          html_url:
+            'https://code.forgejo.org/forgejo/helm-chart/releases/tag/v9.1.0',
           tarball_url:
             'https://code.forgejo.org/forgejo/helm-chart/archive/v9.1.0.tar.gz',
-          zipball_url: 'https://code.forgejo.org/forgejo/helm-chart/archive/v9.1.0.zip',
+          zipball_url:
+            'https://code.forgejo.org/forgejo/helm-chart/archive/v9.1.0.zip',
           upload_url:
             'https://code.forgejo.org/forgejo-helm/forgejo-helm/releases/263748/assets',
           draft: false,
@@ -300,8 +306,10 @@ describe('modules/datasource/forgejo-releases/index', () => {
           sha: '29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed',
           created: '2023-07-19T08:42:55+02:00',
         },
-        zipball_url: 'https://code.forgejo.org/forgejo/helm-chart/archive/v9.0.1.zip',
-        tarball_url: 'https://code.forgejo.org/forgejo/helm-chart/archive/v9.0.1.tar.gz',
+        zipball_url:
+          'https://code.forgejo.org/forgejo/helm-chart/archive/v9.0.1.zip',
+        tarball_url:
+          'https://code.forgejo.org/forgejo/helm-chart/archive/v9.0.1.tar.gz',
       };
       httpMock
         .scope('https://code.forgejo.org')

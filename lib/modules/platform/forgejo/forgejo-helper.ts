@@ -51,7 +51,9 @@ export async function getCurrentUser(
   return res.body;
 }
 
-export async function getVersion(options?: ForgejoHttpOptions): Promise<string> {
+export async function getVersion(
+  options?: ForgejoHttpOptions,
+): Promise<string> {
   const url = `${API_PATH}/version`;
   const res = await forgejoHttp.getJsonUnchecked<{ version: string }>(
     url,
