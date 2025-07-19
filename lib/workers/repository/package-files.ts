@@ -85,7 +85,9 @@ export class PackageFiles {
     const pad = data.size > 1; // padding condition for a multi base branch repo
     let deps = '';
 
-    for (const [branch, packageFiles] of data) {
+    for (const [branch, packageFiles] of Array.from(data).sort(([a], [b]) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    )) {
       deps += pad
         ? `<details><summary>Branch ${branch}</summary>\n<blockquote>\n\n`
         : '';
@@ -95,7 +97,7 @@ export class PackageFiles {
         continue;
       }
 
-      const managers = Object.keys(packageFiles);
+      const managers = Object.keys(packageFiles).sort();
       if (managers.length === 0) {
         deps += none;
         deps += pad ? '</blockquote>\n</details>\n\n' : '';
@@ -104,7 +106,9 @@ export class PackageFiles {
 
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
-        for (const packageFile of packageFiles[manager]) {
+        for (const packageFile of Array.from(packageFiles[manager]).sort(
+          (a, b) => a.packageFile.localeCompare(b.packageFile),
+        )) {
           deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
