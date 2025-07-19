@@ -773,7 +773,7 @@ describe('modules/platform/forgejo/index', () => {
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: `https://${token}@forgejo.com/${mockRepo.full_name}.git`,
+          url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
       );
     });
@@ -1837,7 +1837,7 @@ describe('modules/platform/forgejo/index', () => {
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: fail',
+        'Forgejo-native automerge: fail',
       );
     });
 
@@ -1864,7 +1864,7 @@ describe('modules/platform/forgejo/index', () => {
       });
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        'Forgejo-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
       );
     });
 
