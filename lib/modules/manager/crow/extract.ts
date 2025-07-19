@@ -5,9 +5,7 @@ import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { CrowConfig } from './types';
 
-function crowVersionDecider(
-  CrowConfig: CrowConfig,
-): (keyof CrowConfig)[] {
+function crowVersionDecider(CrowConfig: CrowConfig): (keyof CrowConfig)[] {
   const keys = ['clone', 'steps', 'pipeline', 'services'];
   return Object.keys(CrowConfig).filter((key) =>
     keys.includes(key),
