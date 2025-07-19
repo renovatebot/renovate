@@ -556,7 +556,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to merge method "fast-forward-only"', async () => {
+    it('should fall back to fast-forward-only merge method', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -577,7 +577,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to merge method "rebase-merge"', async () => {
+    it('should fall back to rebase-merge method', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -598,7 +598,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to merge method "squash"', async () => {
+    it('should fall back to squash merge method', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
@@ -619,7 +619,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should fall back to merge method "merge"', async () => {
+    it('should fall back to standard merge method', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
