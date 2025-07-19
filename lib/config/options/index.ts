@@ -967,6 +967,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'gitCredentialPassing',
+    description: 'Method to pass credentials to Git.',
+    stage: 'repository',
+    type: 'string',
+    globalOnly: true,
+    default: 'url',
+    allowedValues: ['url', 'store'],
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'username',
     description: 'Username for authentication.',
     stage: 'repository',
