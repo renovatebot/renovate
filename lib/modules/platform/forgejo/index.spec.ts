@@ -347,7 +347,7 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('getRepos', () => {
-    it('should propagate any other errors', async () => {
+    it('should propagate any other errors from getRepos', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/search')
@@ -911,7 +911,7 @@ describe('modules/platform/forgejo/index', () => {
       ).toResolve();
     });
 
-    it('should gracefully fail with warning', async () => {
+    it('should gracefully fail with warning when setting branch status', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post(
@@ -1015,7 +1015,7 @@ describe('modules/platform/forgejo/index', () => {
       ).rejects.toThrow(REPOSITORY_CHANGED);
     });
 
-    it('should propagate any other errors', async () => {
+    it('should propagate any other errors from getBranchStatus', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/commits/some-branch/statuses')
@@ -1310,7 +1310,7 @@ describe('modules/platform/forgejo/index', () => {
       expect(res).toMatchObject({ number: 1, title: 'Some PR' });
     });
 
-    it('should return null for missing pull request', async () => {
+    it('should return null for missing pull request in getPr', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/pulls')
@@ -1480,7 +1480,7 @@ describe('modules/platform/forgejo/index', () => {
       });
     });
 
-    it('should return null for missing pull request', async () => {
+    it('should return null for missing pull request in findPr', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/pulls')
@@ -2198,7 +2198,7 @@ describe('modules/platform/forgejo/index', () => {
       });
     });
 
-    it('should return null for disabled issues', async () => {
+    it('should return null for disabled issues in getIssue', async () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       await initFakePlatform(scope);
       await initFakeRepo(scope, { has_issues: false });
@@ -2567,7 +2567,7 @@ describe('modules/platform/forgejo/index', () => {
       await expect(forgejo.getIssueList()).toResolve();
     });
 
-    it('should gracefully fail with warning', async () => {
+    it('should gracefully fail with warning when ensuring issue', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/issues')
@@ -2589,7 +2589,7 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should return null for disabled issues', async () => {
+    it('should return null for disabled issues in ensureIssue', async () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       await initFakePlatform(scope);
       await initFakeRepo(scope, { has_issues: false });
@@ -2744,7 +2744,7 @@ describe('modules/platform/forgejo/index', () => {
       expect(res).toBeTrue();
     });
 
-    it('should gracefully fail with warning', async () => {
+    it('should gracefully fail with warning when ensuring comment', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/issues/1/comments')
@@ -2805,7 +2805,7 @@ describe('modules/platform/forgejo/index', () => {
       ).toResolve();
     });
 
-    it('should gracefully fail with warning', async () => {
+    it('should gracefully fail with warning when removing comment', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/issues/1/comments')
