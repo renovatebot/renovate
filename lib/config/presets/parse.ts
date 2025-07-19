@@ -29,6 +29,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitea>')) {
     presetSource = 'gitea';
     str = str.substring('gitea>'.length);
+  } else if (str.startsWith('forgejo>')) {
+    presetSource = 'forgejo';
+    str = str.substring('forgejo>'.length);
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);

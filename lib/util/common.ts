@@ -4,6 +4,7 @@ import type { JsonValue } from 'type-fest';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -24,6 +25,7 @@ export function detectPlatform(
   | 'azure'
   | 'bitbucket'
   | 'bitbucket-server'
+  | 'forgejo'
   | 'gitea'
   | 'github'
   | 'gitlab'
@@ -64,6 +66,9 @@ export function detectPlatform(
   }
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
+  }
+  if (FORGEJO_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'forgejo';
   }
   if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
     return 'gitea';

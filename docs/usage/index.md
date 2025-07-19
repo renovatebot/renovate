@@ -69,7 +69,9 @@ Renovate works on these platforms:
 - [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
 - [Azure DevOps](./modules/platform/azure/index.md)
 - [AWS CodeCommit](./modules/platform/codecommit/index.md)
-- [Gitea and Forgejo](./modules/platform/gitea/index.md)
+- [Gitea](./modules/platform/gitea/index.md)
+- [Forgejo](./modules/platform/forgejo/index.md)
+
 - [Gerrit (experimental)](./modules/platform/gerrit/index.md)
 
 ## Who Uses Renovate?

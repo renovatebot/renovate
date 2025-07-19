@@ -70,6 +70,10 @@ describe('util/common', () => {
         matchHost: 'gt.example.com',
       });
       hostRules.add({
+        hostType: 'forgejo',
+        matchHost: 'fj.example.com',
+      });
+      hostRules.add({
         hostType: 'github-changelog',
         matchHost: 'gh.example.com',
       });
@@ -87,6 +91,9 @@ describe('util/common', () => {
       );
       expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBe(
         'gitea',
+      );
+      expect(detectPlatform('https://fj.example.com/chalk/chalk')).toBe(
+        'forgejo',
       );
       expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
         'github',

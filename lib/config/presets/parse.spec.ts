@@ -167,6 +167,17 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('parses forgejo', () => {
+      expect(parsePreset('forgejo>some/repo')).toEqual({
+        repo: 'some/repo',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'forgejo',
+      });
+    });
+
     it('parses local', () => {
       expect(parsePreset('local>some/repo')).toEqual({
         repo: 'some/repo',
@@ -494,6 +505,21 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('parses HTTPS URLs', () => {
+      expect(
+        parsePreset(
+          'https://my.server/forgejo/renovate-config/raw/branch/main/default.json',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/forgejo/renovate-config/raw/branch/main/default.json',
+        params: undefined,
+        rawParams: undefined,
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
     it('parses HTTP URLs', () => {
       expect(
         parsePreset(
@@ -516,6 +542,21 @@ describe('config/presets/parse', () => {
         ),
       ).toEqual({
         repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: ['param1'],
+        rawParams: 'param1',
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTPS URLs with parameters', () => {
+      expect(
+        parsePreset(
+          'https://my.server/forgejo/renovate-config/raw/branch/main/default.json(param1)',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/forgejo/renovate-config/raw/branch/main/default.json',
         params: ['param1'],
         rawParams: 'param1',
         presetName: '',

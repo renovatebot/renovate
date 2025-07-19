@@ -91,6 +91,7 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
     platform:bitbucket-server
     platform:codecommit
     platform:gitea
+    platform:forgejo
     platform:github
     platform:gitlab
 
