@@ -176,10 +176,6 @@ exports[`config/validation > validateConfig(config) > included managers of the w
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
     "topic": "Configuration Error",
   },
-  {
-    "message": "packageRules: Managers should be type of List. You have included string.",
-    "topic": "Configuration Error",
-  },
 ]
 `;
 

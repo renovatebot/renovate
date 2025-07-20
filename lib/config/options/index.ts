@@ -1366,6 +1366,7 @@ const options: RenovateOptions[] = [
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
+    patternMatch: true,
     cli: false,
     env: false,
   },
