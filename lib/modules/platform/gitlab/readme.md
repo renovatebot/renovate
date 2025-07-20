@@ -80,7 +80,7 @@ You may also use a dedicated [Deploy Token](https://docs.gitlab.com/ee/user/proj
 
 #### Get colored output
 
-You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
+You may want to set `FORCE_COLOR: 3` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
 
 ## Features awaiting implementation
