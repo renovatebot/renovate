@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { ExecError } from '../util/exec/exec-error';
 import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
@@ -130,6 +131,12 @@ export default function prepareError(err: Error): Record<string, unknown> {
 
   if (err instanceof AggregateError) {
     response.errors = err.errors.map((error) => prepareError(error));
+  }
+
+  // handle rawExec error
+  if (err instanceof ExecError && is.nonEmptyObject(err.options?.env)) {
+    const env = Object.keys(err.options.env);
+    response.options = { ...err.options, env };
   }
 
   // handle got error
