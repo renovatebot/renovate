@@ -36,14 +36,14 @@ import {
 } from './util';
 
 const presetSources: Record<string, PresetApi> = {
-  github,
-  npm,
-  gitlab,
   forgejo,
   gitea,
-  local,
-  internal,
+  github,
+  gitlab,
   http,
+  internal,
+  local,
+  npm,
 };
 
 const presetCacheNamespace = 'preset';

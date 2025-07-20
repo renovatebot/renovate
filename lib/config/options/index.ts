@@ -32,7 +32,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
-    supportedPlatforms: ['gitea', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea'],
   },
   {
     name: 'autodiscoverRepoSort',
@@ -42,7 +42,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    supportedPlatforms: ['gitea', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea'],
   },
   {
     name: 'allowedEnv',
@@ -461,7 +461,7 @@ const options: RenovateOptions[] = [
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'forgejo'],
+    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'dryRun',
@@ -629,7 +629,7 @@ const options: RenovateOptions[] = [
       'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['gitea', 'github', 'gitlab', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea', 'github', 'gitlab'],
     globalOnly: true,
     experimental: true,
     experimentalIssues: [17633],
@@ -1044,7 +1044,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitea', 'gitlab', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverProjects',
@@ -1066,7 +1066,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitea', 'github', 'gitlab', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -1873,11 +1873,11 @@ const options: RenovateOptions[] = [
     type: 'string',
     supportedPlatforms: [
       'azure',
+      'forgejo',
       'gitea',
       'github',
       'gitlab',
       'gerrit',
-      'forgejo',
     ],
   },
   {
@@ -1920,11 +1920,11 @@ const options: RenovateOptions[] = [
     default: 'stop-updating',
     supportedPlatforms: [
       'azure',
+      'forgejo',
       'gitea',
       'github',
       'gitlab',
       'gerrit',
-      'forgejo',
     ],
   },
   {
@@ -2104,7 +2104,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'gitea', 'github', 'forgejo'],
+    supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
   {
     name: 'automergeComment',
@@ -3027,7 +3027,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['gitea', 'gitlab', 'bitbucket-server', 'forgejo'],
+    supportedPlatforms: ['forgejo', 'gitea', 'gitlab', 'bitbucket-server'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
