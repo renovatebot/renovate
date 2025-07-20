@@ -46,7 +46,7 @@ export function detectPlatform(
   ) {
     return 'gitea';
   }
-  if (hostname && hostname.includes('forgejo')) {
+  if (hostname?.includes('forgejo')) {
     return 'forgejo';
   }
   if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
