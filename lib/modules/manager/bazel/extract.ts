@@ -36,6 +36,7 @@ export function extractPackageFile(
       deps.push(dep);
     }
   }
-
+  console.log('TEST3', { deps });
+  console.log(JSON.stringify(deps, null, 3));
   return deps.length ? { deps } : null;
 }
