@@ -1104,11 +1104,11 @@ export class DockerDatasource extends Datasource {
       return registryHost === 'https://index.docker.io';
     },
   })
-  async getReleases({
-    packageName,
-    registryUrl,
-    currentValue,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  async getReleases(
+    releaseConfig: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    const { packageName, registryUrl, currentValue } = releaseConfig;
+
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
       registryUrl!,
