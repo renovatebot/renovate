@@ -123,18 +123,18 @@ function detectDatasource(registryUrl: string): PackageDependency {
   const platform = detectPlatform(registryUrl);
 
   switch (platform) {
-    case 'github':
-      return { registryUrls: [registryUrl] };
-    case 'gitea':
-      return {
-        registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
-      };
     case 'forgejo':
       return {
         registryUrls: [registryUrl],
         datasource: ForgejoTagsDatasource.id,
       };
+    case 'gitea':
+      return {
+        registryUrls: [registryUrl],
+        datasource: GiteaTagsDatasource.id,
+      };
+    case 'github':
+      return { registryUrls: [registryUrl] };
   }
 
   return {

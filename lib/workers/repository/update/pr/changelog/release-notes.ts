@@ -49,10 +49,10 @@ export async function getReleaseList(
         return await forgejo.getReleaseList(project, release);
       case 'gitea':
         return await gitea.getReleaseList(project, release);
-      case 'gitlab':
-        return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
+      case 'gitlab':
+        return await gitlab.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -265,6 +265,18 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'bitbucket':
+        return await bitbucket.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
+      case 'bitbucket-server':
+        return await bitbucketServer.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       case 'forgejo':
         return await forgejo.getReleaseNotesMd(
           repository,
@@ -277,26 +289,14 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory,
         );
-      case 'gitlab':
-        return await gitlab.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
       case 'github':
         return await github.getReleaseNotesMd(
           repository,
           apiBaseUrl,
           sourceDirectory,
         );
-      case 'bitbucket':
-        return await bitbucket.getReleaseNotesMd(
-          repository,
-          apiBaseUrl,
-          sourceDirectory,
-        );
-      case 'bitbucket-server':
-        return await bitbucketServer.getReleaseNotesMd(
+      case 'gitlab':
+        return await gitlab.getReleaseNotesMd(
           repository,
           apiBaseUrl,
           sourceDirectory,
