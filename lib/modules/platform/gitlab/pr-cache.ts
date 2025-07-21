@@ -3,6 +3,7 @@ import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { GitlabHttp, GitlabHttpOptions } from '../../../util/http/gitlab';
+import { regEx } from '../../../util/regex';
 import { getQueryString } from '../../../util/url';
 import type { GitLabMergeRequest, GitlabPr, GitlabPrCacheData } from './types';
 import { prInfo } from './utils';
