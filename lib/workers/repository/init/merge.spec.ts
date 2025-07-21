@@ -14,7 +14,7 @@ import {
   checkForRepoConfigError,
   detectRepoFileConfig,
   mergeRenovateConfig,
-  mergeStaticRepoEnvConfig,
+  resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
 } from './merge';
 import { fs, logger, partial, platform, scm } from '~test/util';
@@ -505,7 +505,7 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
-    describe('mergeStaticRepoEnvConfig()', () => {
+    describe('resolveStaticRepoConfig()', () => {
       interface MergeRepoEnvTestCase {
         name: string;
         currentConfig: AllConfig;
@@ -540,7 +540,7 @@ describe('workers/repository/init/merge', () => {
       it.each(testCases)(
         '$name',
         async ({ env, currentConfig, want }: MergeRepoEnvTestCase) => {
-          const got = await mergeStaticRepoEnvConfig(currentConfig, env);
+          const got = await resolveStaticRepoConfig(currentConfig, env);
 
           expect(got).toEqual(want);
         },
