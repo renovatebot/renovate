@@ -90,8 +90,8 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
     platform:bitbucket
     platform:bitbucket-server
     platform:codecommit
-    platform:gitea
     platform:forgejo
+    platform:gitea
     platform:github
     platform:gitlab
 

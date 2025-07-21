@@ -68,11 +68,10 @@ Renovate works on these platforms:
 - [Bitbucket Cloud](./modules/platform/bitbucket/index.md)
 - [Bitbucket Server](./modules/platform/bitbucket-server/index.md)
 - [Forgejo](./modules/platform/forgejo/index.md)
+- [Gerrit (experimental)](./modules/platform/gerrit/index.md)
+- [Gitea](./modules/platform/gitea/index.md)
 - [GitHub (.com and Enterprise Server)](./modules/platform/github/index.md)
 - [GitLab (.com and CE/EE)](./modules/platform/gitlab/index.md)
-- [Gitea](./modules/platform/gitea/index.md)
-
-- [Gerrit (experimental)](./modules/platform/gerrit/index.md)
 
 ## Who Uses Renovate?
 

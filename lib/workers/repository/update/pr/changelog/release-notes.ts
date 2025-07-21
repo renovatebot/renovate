@@ -38,6 +38,13 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'bitbucket':
+        return bitbucket.getReleaseList(project, release);
+      case 'bitbucket-server':
+        logger.trace(
+          'Unsupported Bitbucket Server feature. Skipping release fetching.',
+        );
+        return [];
       case 'forgejo':
         return await forgejo.getReleaseList(project, release);
       case 'gitea':
@@ -46,13 +53,6 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
-      case 'bitbucket':
-        return bitbucket.getReleaseList(project, release);
-      case 'bitbucket-server':
-        logger.trace(
-          'Unsupported Bitbucket Server feature. Skipping release fetching.',
-        );
-        return [];
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];

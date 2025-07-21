@@ -1,11 +1,10 @@
-# Gitea and Forgejo
+# Forgejo
 
-Renovate supports [Gitea](https://gitea.io) and the [Forgejo](https://forgejo.org) fork.
-Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
+Renovate supports [Forgejo](https://forgejo.org).
 
 ## Authentication
 
-First, [create a Personal Access Token (PAT)](https://docs.gitea.io/en-us/api-usage/#authentication) for the bot account.
+First, [create a Personal Access Token (PAT)](https://forgejo.org/docs/latest/user/api-usage/#authentication) for the bot account.
 The bot account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
@@ -17,7 +16,7 @@ You must set `platform=forgejo` in your Renovate config file.
 
 The PAT should have these permissions:
 
-| Scope          | Permission       | Valid for Gitea versions       | Notes                         |
+| Scope          | Permission       | Valid for Forgejo versions     | Notes                         |
 | -------------- | ---------------- | ------------------------------ | ----------------------------- |
 | `repo`         | `Read and Write` | all                            |                               |
 | `user`         | `Read`           | all                            |                               |
@@ -26,13 +25,11 @@ The PAT should have these permissions:
 | `email`        | `Read`           | `<= 1.19.3`                    |                               |
 | `misc`         | `Read`           | Only for `1.20.0` and `1.20.1` |                               |
 
-If you use Gitea packages, add the `read:packages` scope.
+If you use Forgejo packages, add the `read:packages` scope.
 
 ## Unsupported platform features/concepts
 
-- **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
-- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Gitea versions older than v1.24.0 and Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
-- **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
+- **`platformAutomerge` (`true` by default) for platform-native automerge not supported**: Forgejo versions older than v10.0.0 don't support required branch autodelete for automerge.
 
 ## Features awaiting implementation
 
@@ -40,7 +37,7 @@ If you use Gitea packages, add the `read:packages` scope.
 
 ## Repo autodiscover
 
-Renovate can discover repositories on Gitea using the `autodiscover` feature.
+Renovate can discover repositories on Forgejo using the `autodiscover` feature.
 Repositories are ignored when one of the following conditions is met:
 
 - The repository is a `mirror`
@@ -49,4 +46,4 @@ Repositories are ignored when one of the following conditions is met:
 
 You can change the default server-side sort method and order for autodiscover API.
 Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
-Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.
+Read the [Forgejo swagger docs](https://code.forgejo.org/api/swagger#/repository/repoSearch) for more details.

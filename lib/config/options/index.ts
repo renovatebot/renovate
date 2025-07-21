@@ -1874,10 +1874,10 @@ const options: RenovateOptions[] = [
     supportedPlatforms: [
       'azure',
       'forgejo',
+      'gerrit',
       'gitea',
       'github',
       'gitlab',
-      'gerrit',
     ],
   },
   {
@@ -1921,10 +1921,10 @@ const options: RenovateOptions[] = [
     supportedPlatforms: [
       'azure',
       'forgejo',
+      'gerrit',
       'gitea',
       'github',
       'gitlab',
-      'gerrit',
     ],
   },
   {
@@ -3027,7 +3027,7 @@ const options: RenovateOptions[] = [
     description:
       'Overrides the default resolution for Git remote, e.g. to switch GitLab from HTTPS to SSH-based.',
     type: 'string',
-    supportedPlatforms: ['forgejo', 'gitea', 'gitlab', 'bitbucket-server'],
+    supportedPlatforms: ['bitbucket-server', 'forgejo', 'gitea', 'gitlab'],
     allowedValues: ['default', 'ssh', 'endpoint'],
     default: 'default',
     stage: 'repository',
@@ -3044,7 +3044,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab', 'forgejo'],
+    supportedPlatforms: ['azure', 'forgejo', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'userStrings',

@@ -40,17 +40,17 @@ export function detectPlatform(
   if (hostname?.includes('bitbucket')) {
     return 'bitbucket-server';
   }
-  if (
-    hostname &&
-    (['gitea.com'].includes(hostname) || hostname.includes('gitea'))
-  ) {
-    return 'gitea';
-  }
   if (hostname?.includes('forgejo')) {
     return 'forgejo';
   }
   if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
     return 'forgejo';
+  }
+  if (
+    hostname &&
+    (['gitea.com'].includes(hostname) || hostname.includes('gitea'))
+  ) {
+    return 'gitea';
   }
   if (hostname === 'github.com' || hostname?.includes('github')) {
     return 'github';

@@ -2519,7 +2519,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 Behavior details:
 
-- On Forgejo. GitHub, GitLab and Gitea: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
+- On Forgejo, Gitea, GitHub and GitLab: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
 - For other platforms, Renovate will add labels only at time of PR creation and not update them after that.
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.

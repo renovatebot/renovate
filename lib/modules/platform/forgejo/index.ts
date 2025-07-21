@@ -82,7 +82,6 @@ const defaults = {
   hostType: 'forgejo',
   endpoint: 'https://code.forgejo.org/',
   version: '0.0.0',
-  isForgejo: false,
 };
 
 let config: ForgejoRepoConfig = {} as any;
@@ -96,7 +95,6 @@ export function resetPlatform(): void {
   defaults.hostType = 'forgejo';
   defaults.endpoint = 'https://code.forgejo.org/';
   defaults.version = '0.0.0';
-  defaults.isForgejo = false;
   setBaseUrl(defaults.endpoint);
 }
 
@@ -234,12 +232,8 @@ const platform: Platform = {
       } /* v8 ignore stop */ else {
         defaults.version = await helper.getVersion({ token });
       }
-      if (defaults.version?.includes('forgejo-')) {
-        defaults.isForgejo = true;
-      }
-      logger.debug(
-        `${defaults.isForgejo ? 'Forgejo' : 'Gitea'} version: ${defaults.version}`,
-      );
+
+      logger.debug(`Forgejo version: ${defaults.version}`);
     } catch (err) {
       logger.debug(
         { err },
@@ -611,11 +605,10 @@ const platform: Platform = {
       });
 
       if (platformPrOptions?.usePlatformAutomerge) {
-        // Only Forgejo v10.0.0+ and Gitea v1.24.0+ support delete_branch_after_merge.
+        // Only Forgejo v10.0.0+ support delete_branch_after_merge.
         // This is required to not have undesired behavior when renovate finds existing branches on next run.
-        if (
-          semver.gte(defaults.version, defaults.isForgejo ? '10.0.0' : '1.24.0')
-        ) {
+        // Codeberg usees git versioning like `11.0.1-99-c504062+gitea-1.22.0` so allow any version >= 10.0.0-0.
+        if (semver.gte(defaults.version, '10.0.0-0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
               Do:
@@ -638,7 +631,7 @@ const platform: Platform = {
         } else {
           logger.debug(
             { prNumber: gpr.number },
-            `Forgejo-native automerge: not supported on this version of ${defaults.isForgejo ? 'Forgejo' : 'Gitea'}. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer.`,
+            `Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.`,
           );
         }
       }
@@ -1062,13 +1055,6 @@ const platform: Platform = {
 
   async addReviewers(number: number, reviewers: string[]): Promise<void> {
     logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
-    if (semver.lt(defaults.version, '1.14.0')) {
-      logger.debug(
-        { version: defaults.version },
-        'Adding reviewer not yet supported.',
-      );
-      return;
-    }
     try {
       await helper.requestPrReviewers(config.repository, number, { reviewers });
     } catch (err) {

@@ -36,6 +36,7 @@ describe('constants/platform', () => {
     expect(
       FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog'),
     ).toBeTrue();
+    expect(FORGEJO_API_USING_HOST_TYPES).toHaveLength(4);
   });
 
   it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
