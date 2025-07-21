@@ -116,7 +116,11 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'Drupal core',
-        matchPackageNames: ['drupal/core', 'drupal/core-*'],
+        matchPackageNames: [
+          'drupal/core',
+          'drupal/core-*',
+          'pantheon-systems/drupal-integrations'
+        ],
       },
     ],
   },
