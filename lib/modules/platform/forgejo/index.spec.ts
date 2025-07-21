@@ -31,7 +31,7 @@ import { git, hostRules, logger, partial } from '~test/util';
 /**
  * latest tested forgejo version.
  */
-const GITEA_VERSION = '11.0.1-99-c504062+gitea-1.22.0';
+const FORGEJO_VERSION = '11.0.1-99-c504062+gitea-1.22.0';
 
 describe('modules/platform/forgejo/index', () => {
   function mockedRepo(opts: Partial<Repo>): Repo {
@@ -241,7 +241,7 @@ describe('modules/platform/forgejo/index', () => {
 
   async function initFakePlatform(
     scope: httpMock.Scope,
-    version = GITEA_VERSION,
+    version = FORGEJO_VERSION,
   ): Promise<void> {
     scope
       .get('/user')
@@ -282,7 +282,7 @@ describe('modules/platform/forgejo/index', () => {
         .get('/user')
         .reply(200, mockUser)
         .get('/version')
-        .reply(200, { version: GITEA_VERSION });
+        .reply(200, { version: FORGEJO_VERSION });
 
       expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://code.forgejo.org/',
@@ -296,7 +296,7 @@ describe('modules/platform/forgejo/index', () => {
         .get('/user')
         .reply(200, mockUser)
         .get('/version')
-        .reply(200, { version: GITEA_VERSION });
+        .reply(200, { version: FORGEJO_VERSION });
 
       expect(
         await forgejo.initPlatform({
@@ -315,7 +315,7 @@ describe('modules/platform/forgejo/index', () => {
         .get('/user')
         .reply(200, mockUser)
         .get('/version')
-        .reply(200, { version: GITEA_VERSION });
+        .reply(200, { version: FORGEJO_VERSION });
 
       expect(
         await forgejo.initPlatform({
@@ -337,7 +337,7 @@ describe('modules/platform/forgejo/index', () => {
           full_name: undefined,
         })
         .get('/version')
-        .reply(200, { version: GITEA_VERSION });
+        .reply(200, { version: FORGEJO_VERSION });
 
       expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://code.forgejo.org/',
@@ -1747,7 +1747,7 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
-      await initFakePlatform(scope, '1.24.0');
+      await initFakePlatform(scope, '10.0.0-13-c504062+gitea-1.22.0');
       await initFakeRepo(scope);
 
       const res = await forgejo.createPr({
@@ -1820,7 +1820,7 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .replyWithError('unknown error');
-      await initFakePlatform(scope, '1.24.0');
+      await initFakePlatform(scope);
       await initFakeRepo(scope);
 
       const res = await forgejo.createPr({
@@ -1864,7 +1864,7 @@ describe('modules/platform/forgejo/index', () => {
       });
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Forgejo-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.',
       );
     });
 
@@ -1875,7 +1875,7 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, mockNewPR)
         .post('/repos/some/repo/pulls/42/merge')
         .reply(200);
-      await initFakePlatform(scope, '10.0.0+forgejo-1.22.0');
+      await initFakePlatform(scope);
       await initFakeRepo(scope);
 
       const res = await forgejo.createPr({
@@ -1913,7 +1913,7 @@ describe('modules/platform/forgejo/index', () => {
             Do: prMergeStrategy,
             merge_when_checks_succeed: true,
           });
-        await initFakePlatform(scope, '1.24.0');
+        await initFakePlatform(scope);
         await initFakeRepo(scope);
 
         const res = await forgejo.createPr({
@@ -2906,14 +2906,6 @@ describe('modules/platform/forgejo/index', () => {
       await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
 
       expect(logger.logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('should do nothing for older Gitea versions', async () => {
-      const scope = httpMock.scope('https://code.forgejo.org/api/v1');
-      await initFakePlatform(scope, '1.10.0');
-      await initFakeRepo(scope);
-
-      await expect(forgejo.addReviewers(1, ['me', 'you'])).toResolve();
     });
 
     it('catches errors', async () => {
