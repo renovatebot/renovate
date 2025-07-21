@@ -1108,7 +1108,6 @@ export class DockerDatasource extends Datasource {
     releaseConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const { packageName, registryUrl, currentValue } = releaseConfig;
-
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
       registryUrl!,
