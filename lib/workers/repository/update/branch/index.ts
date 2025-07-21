@@ -525,6 +525,12 @@ export async function processBranch(
         additionalFiles.updatedArtifacts,
       );
       if (config.updatedArtifacts?.length) {
+        // eslint-disable-next-line
+        console.log(
+          'i am here',
+          config.reuseExistingBranch,
+          config.cacheFingerprintMatch,
+        );
         logger.debug(
           {
             updatedArtifacts: config.updatedArtifacts.map((f) =>
