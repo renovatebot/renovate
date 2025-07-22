@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
@@ -488,227 +489,302 @@ describe('workers/repository/init/merge', () => {
     });
   });
 
-  describe('static repository config', () => {
-    const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
+  interface staticConfigTestSuite {
+    suite: 'env' | 'file';
+  }
 
-    beforeEach(() => {
-      migrate.migrateConfig.mockImplementation((c) => ({
-        isMigrated: true,
-        migratedConfig: c,
-      }));
-      migrateAndValidate.migrateAndValidate.mockImplementationOnce((_, c) => {
-        return Promise.resolve({
-          ...c,
-          warnings: [],
-          errors: [],
+  describe.each<staticConfigTestSuite>([{ suite: 'env' }, { suite: 'file' }])(
+    'static repository config $suite',
+    ({ suite }: staticConfigTestSuite) => {
+      const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
+      const repoStaticConfigFileKey = 'RENOVATE_STATIC_REPO_CONFIG_FILE';
+      const exitFunc = vi.fn((code: number) => {
+        throw new Error(`exit(${code})`);
+      });
+
+      beforeEach(() => {
+        migrate.migrateConfig.mockImplementation((c) => ({
+          isMigrated: true,
+          migratedConfig: c,
+        }));
+        migrateAndValidate.migrateAndValidate.mockImplementationOnce((_, c) => {
+          return Promise.resolve({
+            ...c,
+            warnings: [],
+            errors: [],
+          });
         });
       });
-    });
 
-    describe('resolveStaticRepoConfig()', () => {
-      interface MergeRepoEnvTestCase {
-        name: string;
-        currentConfig: AllConfig;
-        env: NodeJS.ProcessEnv;
-        want: AllConfig;
-      }
+      describe('resolveStaticRepoConfig()', () => {
+        interface MergeRepoEnvTestCase {
+          name: string;
+          env: NodeJS.ProcessEnv;
+          currentConfig: AllConfig;
+          staticConfig: AllConfig | undefined;
+          want: AllConfig;
+        }
 
-      const testCases: MergeRepoEnvTestCase[] = [
-        {
-          name: 'it does nothing',
-          env: {},
-          currentConfig: { repositories: ['some/repo'] },
-          want: { repositories: ['some/repo'] },
-        },
-        {
-          name: 'it merges env with the current config',
-          env: { [repoStaticConfigKey]: '{"dependencyDashboard":true}' },
-          currentConfig: { repositories: ['some/repo'] },
-          want: {
-            dependencyDashboard: true,
-            repositories: ['some/repo'],
+        const testCases: MergeRepoEnvTestCase[] = [
+          {
+            name: 'it does nothing',
+            env: {},
+            staticConfig: undefined,
+            currentConfig: { repositories: ['some/repo'] },
+            want: { repositories: ['some/repo'] },
           },
-        },
-        {
-          name: 'it ignores env with other renovate specific configuration options',
-          env: { RENOVATE_CONFIG: '{"dependencyDashboard":true}' },
-          currentConfig: { repositories: ['some/repo'] },
-          want: { repositories: ['some/repo'] },
-        },
-      ];
+          {
+            name: 'it merges env with the current config',
+            env: {},
+            staticConfig: { dependencyDashboard: true },
+            currentConfig: { repositories: ['some/repo'] },
+            want: {
+              dependencyDashboard: true,
+              repositories: ['some/repo'],
+            },
+          },
+          {
+            name: 'it ignores env with other renovate specific configuration options',
+            env: { RENOVATE_CONFIG: '{"dependencyDashboard":true}' },
+            staticConfig: undefined,
+            currentConfig: { repositories: ['some/repo'] },
+            want: { repositories: ['some/repo'] },
+          },
+        ];
 
-      it.each(testCases)(
-        '$name',
-        async ({ env, currentConfig, want }: MergeRepoEnvTestCase) => {
-          const got = await resolveStaticRepoConfig(currentConfig, env);
+        it.each(testCases)(
+          '$name',
+          async ({
+            env,
+            currentConfig,
+            staticConfig,
+            want,
+          }: MergeRepoEnvTestCase) => {
+            if (!is.nullOrUndefined(staticConfig)) {
+              switch (suite) {
+                case 'env':
+                  env[repoStaticConfigKey] = JSON.stringify(staticConfig);
+                  break;
+                case 'file':
+                  env[repoStaticConfigFileKey] = 'static_config.json5';
+                  fs.readLocalFile.mockResolvedValueOnce(
+                    JSON.stringify(staticConfig),
+                  );
+                  break;
+              }
+            }
 
-          expect(got).toEqual(want);
-        },
-      );
-    });
+            const got = await resolveStaticRepoConfig(
+              currentConfig,
+              env,
+              exitFunc,
+            );
 
-    describe('mergeRenovateConfig() with a static repository config', () => {
-      beforeEach(() => {
-        delete process.env[repoStaticConfigKey];
+            expect(got).toEqual(want);
+            expect(exitFunc).not.toHaveBeenCalled();
+          },
+        );
 
-        scm.getFileList.mockResolvedValueOnce(['renovate.json']);
+        it('should terminate when static config is invalid or missing', async () => {
+          const env: NodeJS.ProcessEnv = {};
+
+          switch (suite) {
+            case 'env':
+              env[repoStaticConfigKey] = 'invalid_json';
+              break;
+            case 'file':
+              env[repoStaticConfigFileKey] = 'static_config.json';
+              fs.readLocalFile.mockResolvedValueOnce(null);
+              break;
+            default:
+            // fallthrough and fail
+          }
+
+          await expect(
+            resolveStaticRepoConfig({}, env, exitFunc),
+          ).rejects.toThrow('exit(1)');
+
+          expect(exitFunc).toHaveBeenCalledOnce();
+          expect(exitFunc).toHaveBeenCalledWith(1);
+        });
       });
 
-      interface MergeRepoFileAndEnvConfigTestCase {
-        name: string;
-        currentConfig: AllConfig;
-        repoFileConfig: AllConfig;
-        staticConfig: AllConfig;
-        wantConfig: AllConfig;
-      }
+      describe('mergeRenovateConfig() with a static repository config', () => {
+        beforeEach(() => {
+          delete process.env[repoStaticConfigKey];
 
-      it.each<MergeRepoFileAndEnvConfigTestCase>([
-        {
-          name: 'it does nothing',
-          currentConfig: {},
-          repoFileConfig: {},
-          staticConfig: {},
-          wantConfig: {
-            renovateJsonPresent: true,
-            warnings: [],
-          },
-        },
-        {
-          name: 'it should resolve and use the repo file config when the static config is not set',
-          currentConfig: {},
-          repoFileConfig: {
-            extends: ['group:socketio'],
-          },
-          staticConfig: {},
-          wantConfig: {
-            description: ['Group socket.io packages.'],
-            packageRules: [
-              {
-                groupName: 'socket.io packages',
-                matchPackageNames: ['socket.io**'],
-              },
-            ],
-            renovateJsonPresent: true,
-            warnings: [],
-          },
-        },
-        {
-          name: 'it should resolve and use the static config when no repo file present',
-          currentConfig: {},
-          repoFileConfig: {},
-          staticConfig: { extends: ['group:socketio'] },
-          wantConfig: {
-            description: ['Group socket.io packages.'],
-            packageRules: [
-              {
-                groupName: 'socket.io packages',
-                matchPackageNames: ['socket.io**'],
-              },
-            ],
-            renovateJsonPresent: true,
-            warnings: [],
-          },
-        },
-        {
-          name: 'it should merge both configs and and repo config is higher priority',
-          currentConfig: {},
-          repoFileConfig: {
-            extends: ['group:socketio'],
-            packageRules: [
-              {
-                matchConfidence: ['high', 'very high'],
-                groupName: 'high merge confidence',
-              },
-            ],
-          },
-          staticConfig: {
-            dependencyDashboard: true,
-            packageRules: [
-              {
-                groupName: 'my-custom-socketio-override',
-                matchPackageNames: ['socket.io**'],
-              },
-            ],
-          },
-          wantConfig: {
-            dependencyDashboard: true,
-            description: ['Group socket.io packages.'],
-            packageRules: [
-              {
-                groupName: 'socket.io packages',
-                matchPackageNames: ['socket.io**'],
-              },
-              {
-                groupName: 'my-custom-socketio-override',
-                matchPackageNames: ['socket.io**'],
-              },
-              {
-                groupName: 'high merge confidence',
-                matchConfidence: ['high', 'very high'],
-              },
-            ],
-            renovateJsonPresent: true,
-            warnings: [],
-          },
-        },
-        {
-          name: 'it should merge extends from both a repo config and static repo config by appending it',
-          currentConfig: {},
-          repoFileConfig: {
-            extends: ['group:springAndroid'],
-          },
-          staticConfig: {
-            dependencyDashboard: true,
-            extends: ['group:springAmqp'],
-            packageRules: [
-              {
-                groupName: 'some-package-rule',
-                matchPackageNames: ['anything**'],
-              },
-            ],
-          },
-          wantConfig: {
-            dependencyDashboard: true,
-            description: [
-              'Group Java Spring AMQP packages.',
-              'Group Java Spring Android packages.',
-            ],
-            packageRules: [
-              {
-                groupName: 'spring amqp',
-                matchPackageNames: ['org.springframework.amqp:**'],
-              },
-              {
-                groupName: 'spring android',
-                matchPackageNames: ['org.springframework.android:**'],
-              },
-              {
-                groupName: 'some-package-rule',
-                matchPackageNames: ['anything**'],
-              },
-            ],
-            renovateJsonPresent: true,
-            warnings: [],
-          },
-        },
-      ])(
-        '$name',
-        async ({
-          staticConfig,
-          repoFileConfig,
-          currentConfig,
-          wantConfig,
-        }: MergeRepoFileAndEnvConfigTestCase) => {
-          fs.readLocalFile.mockResolvedValueOnce(
-            JSON.stringify(repoFileConfig),
-          );
-          process.env[repoStaticConfigKey] = JSON.stringify(staticConfig);
+          scm.getFileList.mockResolvedValueOnce(['renovate.json']);
+        });
 
-          const got = await mergeRenovateConfig(currentConfig);
+        interface MergeRepoFileAndEnvConfigTestCase {
+          name: string;
+          currentConfig: AllConfig;
+          repoFileConfig: AllConfig;
+          staticConfig: AllConfig;
+          wantConfig: AllConfig;
+        }
 
-          expect(got).toStrictEqual(wantConfig);
-        },
-      );
-    });
-  });
+        it.each<MergeRepoFileAndEnvConfigTestCase>([
+          {
+            name: 'it does nothing',
+            currentConfig: {},
+            repoFileConfig: {},
+            staticConfig: {},
+            wantConfig: {
+              renovateJsonPresent: true,
+              warnings: [],
+            },
+          },
+          {
+            name: 'it should resolve and use the repo file config when the static config is not set',
+            currentConfig: {},
+            repoFileConfig: {
+              extends: ['group:socketio'],
+            },
+            staticConfig: {},
+            wantConfig: {
+              description: ['Group socket.io packages.'],
+              packageRules: [
+                {
+                  groupName: 'socket.io packages',
+                  matchPackageNames: ['socket.io**'],
+                },
+              ],
+              renovateJsonPresent: true,
+              warnings: [],
+            },
+          },
+          {
+            name: 'it should resolve and use the static config when no repo file present',
+            currentConfig: {},
+            repoFileConfig: {},
+            staticConfig: { extends: ['group:socketio'] },
+            wantConfig: {
+              description: ['Group socket.io packages.'],
+              packageRules: [
+                {
+                  groupName: 'socket.io packages',
+                  matchPackageNames: ['socket.io**'],
+                },
+              ],
+              renovateJsonPresent: true,
+              warnings: [],
+            },
+          },
+          {
+            name: 'it should merge both configs and and repo config is higher priority',
+            currentConfig: {},
+            repoFileConfig: {
+              extends: ['group:socketio'],
+              packageRules: [
+                {
+                  matchConfidence: ['high', 'very high'],
+                  groupName: 'high merge confidence',
+                },
+              ],
+            },
+            staticConfig: {
+              dependencyDashboard: true,
+              packageRules: [
+                {
+                  groupName: 'my-custom-socketio-override',
+                  matchPackageNames: ['socket.io**'],
+                },
+              ],
+            },
+            wantConfig: {
+              dependencyDashboard: true,
+              description: ['Group socket.io packages.'],
+              packageRules: [
+                {
+                  groupName: 'socket.io packages',
+                  matchPackageNames: ['socket.io**'],
+                },
+                {
+                  groupName: 'my-custom-socketio-override',
+                  matchPackageNames: ['socket.io**'],
+                },
+                {
+                  groupName: 'high merge confidence',
+                  matchConfidence: ['high', 'very high'],
+                },
+              ],
+              renovateJsonPresent: true,
+              warnings: [],
+            },
+          },
+          {
+            name: 'it should merge extends from both a repo config and static repo config by appending it',
+            currentConfig: {},
+            repoFileConfig: {
+              extends: ['group:springAndroid'],
+            },
+            staticConfig: {
+              dependencyDashboard: true,
+              extends: ['group:springAmqp'],
+              packageRules: [
+                {
+                  groupName: 'some-package-rule',
+                  matchPackageNames: ['anything**'],
+                },
+              ],
+            },
+            wantConfig: {
+              dependencyDashboard: true,
+              description: [
+                'Group Java Spring AMQP packages.',
+                'Group Java Spring Android packages.',
+              ],
+              packageRules: [
+                {
+                  groupName: 'spring amqp',
+                  matchPackageNames: ['org.springframework.amqp:**'],
+                },
+                {
+                  groupName: 'spring android',
+                  matchPackageNames: ['org.springframework.android:**'],
+                },
+                {
+                  groupName: 'some-package-rule',
+                  matchPackageNames: ['anything**'],
+                },
+              ],
+              renovateJsonPresent: true,
+              warnings: [],
+            },
+          },
+        ])(
+          '$name',
+          async ({
+            staticConfig,
+            repoFileConfig,
+            currentConfig,
+            wantConfig,
+          }: MergeRepoFileAndEnvConfigTestCase) => {
+            fs.readLocalFile.mockResolvedValueOnce(
+              JSON.stringify(repoFileConfig),
+            );
+
+            switch (suite) {
+              case 'env':
+                process.env[repoStaticConfigKey] = JSON.stringify(staticConfig);
+                break;
+              case 'file':
+                process.env[repoStaticConfigFileKey] = 'static_config.json';
+                fs.readLocalFile.mockResolvedValueOnce(
+                  JSON.stringify(staticConfig),
+                );
+                break;
+              default:
+              // fallthrough and fail
+            }
+
+            const got = await mergeRenovateConfig(currentConfig);
+
+            expect(got).toStrictEqual(wantConfig);
+          },
+        );
+      });
+    },
+  );
 });

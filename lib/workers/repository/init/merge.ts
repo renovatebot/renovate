@@ -202,6 +202,7 @@ export async function mergeRenovateConfig(
   const configFileAndEnv = await resolveStaticRepoConfig(
     configFileParsed,
     process.env,
+    (c) => process.exit(c),
   );
 
   if (is.nonEmptyArray(returnConfig.extends)) {
@@ -345,13 +346,20 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
 export async function resolveStaticRepoConfig(
   config: AllConfig,
   env: NodeJS.ProcessEnv,
+  exitFunc: (code: number) => never,
 ): Promise<AllConfig> {
-  const fileConfig = await tryReadStaticRepoFileConfig(
-    config,
-    env.RENOVATE_STATIC_REPO_CONFIG_FILE,
-  );
+  let fileConfig: AllConfig | undefined;
 
-  const envConfig = await tryLoadStaticRepoEnvConfig(env);
+  try {
+    fileConfig = await tryReadStaticRepoFileConfig(
+      env.RENOVATE_STATIC_REPO_CONFIG_FILE,
+    );
+  } catch (err) {
+    logger.fatal({ err }, 'Failed to load static repository config file');
+    exitFunc(1);
+  }
+
+  const envConfig = await tryLoadStaticRepoEnvConfig(env, exitFunc);
 
   const staticRepoConfig = fileConfig ?? envConfig;
 
@@ -363,7 +371,6 @@ export async function resolveStaticRepoConfig(
 }
 
 export async function tryReadStaticRepoFileConfig(
-  config: AllConfig,
   staticRepoConfigFile: string | undefined,
 ): Promise<AllConfig | undefined> {
   if (!is.nonEmptyString(staticRepoConfigFile)) {
@@ -374,27 +381,23 @@ export async function tryReadStaticRepoFileConfig(
 
   const staticConfigRaw = await readLocalFile(staticRepoConfigFile, 'utf8');
   if (is.nullOrUndefined(staticConfigRaw)) {
-    logger.fatal(
-      { staticRepoConfigFile },
-      'Null contents when reading static repo config file',
+    throw new Error(
+      `Failed to read static repo config file: "${staticRepoConfigFile}"`,
     );
-    process.exit(1);
   }
 
-  const staticConfig = await tryParseOrExit(
-    staticConfigRaw,
-    staticRepoConfigFile,
-  );
-
-  return mergeChildConfig(staticConfig, config);
+  const parsed = parseJson(staticConfigRaw, staticRepoConfigFile) as AllConfig;
+  return migrateAndValidateConfig(parsed, staticRepoConfigFile);
 }
 
 export async function tryLoadStaticRepoEnvConfig(
   env: NodeJS.ProcessEnv,
+  exitFunc: (code: number) => never,
 ): Promise<AllConfig | undefined> {
   const repoEnvConfig = await parseAndValidateOrExit(
     env,
     'RENOVATE_STATIC_REPO_CONFIG',
+    exitFunc,
   );
 
   if (is.nonEmptyObject(repoEnvConfig)) {
@@ -414,16 +417,6 @@ export function mergeStaticConfig(
     delete staticRepoConfig.extends;
   }
 
-  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG
+  // renovate repo config overrides RENOVATE_STATIC_REPO_CONFIG[_FILE]
   return mergeChildConfig(staticRepoConfig, config);
-}
-
-function tryParseOrExit(content: string, filename: string): Promise<AllConfig> {
-  try {
-    const parsed = parseJson(content, filename) as AllConfig;
-    return migrateAndValidateConfig(parsed, filename);
-  } catch (err) {
-    logger.fatal({ filename, err }, `Could not parse file content`);
-    process.exit(1);
-  }
 }
