@@ -571,6 +571,8 @@ describe('workers/repository/init/merge', () => {
                     JSON.stringify(staticConfig),
                   );
                   break;
+                default:
+                // fallthrough and fail
               }
             }
 
