@@ -23,21 +23,21 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_STATIC_REPO_CONFIG`
-
-If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
-
-> [!warning]
-> An invalid value will result in the scan being aborted.
-
 ## `RENOVATE_STATIC_REPO_CONFIG_FILE`
 
 If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
 
 This takes precedence over the `RENOVATE_STATIC_REPO_CONFIG` environment variable, if both are defined.
 
-> [!warning]
-> If the file is missing or contains invalid configuration, the scan will be aborted.
+!!! note The file must be located within Renovate’s current repository local working directory.
+
+!!! warning If the file is missing or contains invalid configuration, the scan will be aborted.
+
+## `RENOVATE_STATIC_REPO_CONFIG`
+
+If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+!!! warning An invalid value will result in the scan being aborted.
 
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
