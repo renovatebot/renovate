@@ -30,6 +30,15 @@ If set to a _valid_ `JSON` string containing a _valid_ Renovate configuration, i
 > [!warning]
 > An invalid value will result in the scan being aborted.
 
+## `RENOVATE_STATIC_REPO_CONFIG_FILE`
+
+If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
+
+This takes precedence over the `RENOVATE_STATIC_REPO_CONFIG` environment variable, if both are defined.
+
+> [!warning]
+> If the file is missing or contains invalid configuration, the scan will be aborted.
+
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
