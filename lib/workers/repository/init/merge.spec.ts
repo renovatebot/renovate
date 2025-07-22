@@ -785,6 +785,29 @@ describe('workers/repository/init/merge', () => {
           },
         );
       });
+
+      it.skipIf(suite === 'env')(
+        'should use file config when both env and file configs are set',
+        async () => {
+          const env: NodeJS.ProcessEnv = {
+            [repoStaticConfigKey]: JSON.stringify({
+              commitMessagePrefix: 'from_env',
+            }),
+            [repoStaticConfigFileKey]: 'static_config.json5',
+          };
+
+          const fileConfig = {
+            commitMessagePrefix: 'from_file',
+          };
+
+          fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(fileConfig));
+
+          const got = await resolveStaticRepoConfig({}, env, exitFunc);
+
+          expect(got).toStrictEqual(fileConfig);
+          expect(exitFunc).not.toHaveBeenCalled();
+        },
+      );
     },
   );
 });

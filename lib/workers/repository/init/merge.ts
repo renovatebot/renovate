@@ -363,6 +363,13 @@ export async function resolveStaticRepoConfig(
 
   const staticRepoConfig = fileConfig ?? envConfig;
 
+  if (fileConfig && envConfig) {
+    logger.warn(
+      { fileConfig, envConfig },
+      'Both file and env static repository configs found — using file config',
+    );
+  }
+
   if (is.nullOrUndefined(staticRepoConfig)) {
     return config;
   }
@@ -377,17 +384,30 @@ export async function tryReadStaticRepoFileConfig(
     return undefined;
   }
 
-  logger.debug({ staticRepoConfigFile }, 'reading static repo config');
+  logger.debug({ staticRepoConfigFile }, 'reading static repo config file');
 
-  const staticConfigRaw = await readLocalFile(staticRepoConfigFile, 'utf8');
-  if (is.nullOrUndefined(staticConfigRaw)) {
+  const staticRepoConfigRaw = await readLocalFile(staticRepoConfigFile, 'utf8');
+  if (is.nullOrUndefined(staticRepoConfigRaw)) {
     throw new Error(
       `Failed to read static repo config file: "${staticRepoConfigFile}"`,
     );
   }
 
-  const parsed = parseJson(staticConfigRaw, staticRepoConfigFile) as AllConfig;
-  return migrateAndValidateConfig(parsed, staticRepoConfigFile);
+  const parsed = parseJson(
+    staticRepoConfigRaw,
+    staticRepoConfigFile,
+  ) as AllConfig;
+  const staticRepoConfig = await migrateAndValidateConfig(
+    parsed,
+    staticRepoConfigFile,
+  );
+
+  logger.debug(
+    { staticRepoConfig },
+    'Static repository config file successfully parsed and validated',
+  );
+
+  return staticRepoConfig;
 }
 
 export async function tryLoadStaticRepoEnvConfig(
