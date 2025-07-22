@@ -99,6 +99,7 @@ kubebuilder 3.10.0
 kubectl 1.26.3
 kubetail 1.6.19
 kustomize 4.5.7
+localstack 4.5.0
 lua 5.4.4
 markdownlint-cli2 0.13.0
 maven 3.9.6
@@ -521,6 +522,13 @@ dummy 1.2.3
             packageName: 'kubernetes-sigs/kustomize',
             depName: 'kustomize',
             extractVersion: '^kustomize/v(?<version>\\S+)',
+          },
+          {
+            currentValue: '4.5.0',
+            datasource: 'github-tags',
+            packageName: 'localstack/localstack',
+            depName: 'localstack',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '5.4.4',

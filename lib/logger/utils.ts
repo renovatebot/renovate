@@ -259,7 +259,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n'); // TODO #12874
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n',
+            );
       stream.write(result, enc, cb);
     };
 

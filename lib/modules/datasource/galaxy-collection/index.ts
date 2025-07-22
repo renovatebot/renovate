@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
@@ -51,10 +52,12 @@ export class GalaxyCollectionDatasource extends Datasource {
     const { val: baseProject, err: baseErr } = await this.http
       .getJsonSafe(baseUrl, GalaxyV3)
       .onError((err) => {
-        logger.warn(
-          { url: baseUrl, datasource: this.id, packageName, err },
-          'Error fetching from url',
-        );
+        if (!(err instanceof HttpError && err.response?.statusCode === 404)) {
+          logger.warn(
+            { url: baseUrl, datasource: this.id, packageName, err },
+            'Error fetching from url',
+          );
+        }
       })
       .unwrap();
     if (baseErr) {

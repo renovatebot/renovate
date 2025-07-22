@@ -132,7 +132,7 @@ export function bumpPackageVersion(
   try {
     const project = new XmlDocument(content);
     const versionNode = project.childNamed('version')!;
-    const startTagPosition = versionNode.startTagPosition;
+    const startTagPosition = versionNode.startTagPosition!; // TODO: should not be null
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
     let newPomVersion: string | null = null;

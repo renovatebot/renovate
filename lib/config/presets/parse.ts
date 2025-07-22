@@ -5,10 +5,10 @@ import type { ParsedPreset } from './types';
 import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util';
 
 const nonScopedPresetWithSubdirRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
+  /^(?<repo>~?[\w\-. /%]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
 );
 const gitPresetRegex = regEx(
-  /^(?<repo>~?[\w\-. /]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/,
+  /^(?<repo>~?[\w\-. /%]+)(?::(?<presetName>[\w\-.+/]+))?(?:#(?<tag>[\w\-./]+?))?$/,
 );
 
 export function parsePreset(input: string): ParsedPreset {
@@ -18,6 +18,7 @@ export function parsePreset(input: string): ParsedPreset {
   let repo: string;
   let presetName: string;
   let tag: string | undefined;
+  let rawParams: string | undefined;
   let params: string[] | undefined;
   if (str.startsWith('github>')) {
     presetSource = 'github';
@@ -28,6 +29,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitea>')) {
     presetSource = 'gitea';
     str = str.substring('gitea>'.length);
+  } else if (str.startsWith('forgejo>')) {
+    presetSource = 'forgejo';
+    str = str.substring('forgejo>'.length);
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
@@ -43,14 +47,12 @@ export function parsePreset(input: string): ParsedPreset {
   str = str.replace(regEx(/^npm>/), '');
   presetSource = presetSource ?? 'npm';
   if (str.includes('(')) {
-    params = str
-      .slice(str.indexOf('(') + 1, -1)
-      .split(',')
-      .map((elem) => elem.trim());
+    rawParams = str.slice(str.indexOf('(') + 1, -1);
+    params = rawParams.split(',').map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
   if (presetSource === 'http') {
-    return { presetSource, repo: str, presetName: '', params };
+    return { presetSource, repo: str, presetName: '', params, rawParams };
   }
   const presetsPackages = [
     'abandonments',
@@ -124,5 +126,6 @@ export function parsePreset(input: string): ParsedPreset {
     presetName,
     tag,
     params,
+    rawParams,
   };
 }

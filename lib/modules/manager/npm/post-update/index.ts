@@ -20,6 +20,12 @@ import { dump, parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
+import {
+  NPM_CACHE_DIR,
+  PNPM_CACHE_BASE_DIR,
+  YARN_CACHE_DIR,
+  YARN_GLOBAL_DIR,
+} from '../constants';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmManagerData } from '../types';
 import {
@@ -401,10 +407,10 @@ export async function getAdditionalFiles(
   // But pass custom env and user vars.
   const env = {
     ...getEnv(),
-    NPM_CONFIG_CACHE: await ensureCacheDir('npm'),
-    YARN_CACHE_FOLDER: await ensureCacheDir('yarn'),
-    YARN_GLOBAL_FOLDER: await ensureCacheDir('berry'),
-    npm_config_store: await ensureCacheDir('pnpm'),
+    NPM_CONFIG_CACHE: await ensureCacheDir(NPM_CACHE_DIR),
+    YARN_CACHE_FOLDER: await ensureCacheDir(YARN_CACHE_DIR),
+    YARN_GLOBAL_FOLDER: await ensureCacheDir(YARN_GLOBAL_DIR),
+    npm_config_store: await ensureCacheDir(PNPM_CACHE_BASE_DIR),
     NODE_ENV: 'dev',
   };
 

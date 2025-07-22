@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { setPrivateKeys } from '../../../../config/decrypt';
 import * as defaultsParser from '../../../../config/defaults';
 import { resolveConfigPresets } from '../../../../config/presets';
-import { applySecretsToConfig } from '../../../../config/secrets';
+import { applySecretsAndVariablesToConfig } from '../../../../config/secrets';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages';
@@ -146,9 +146,18 @@ export async function parseConfigs(
   }
 
   // do not add these secrets to repoSecrets and,
-  //  do not delete the secrets object after applying on global config as it needs to be re-used for repo config
-  if (is.nonEmptyObject(config.secrets)) {
-    config = applySecretsToConfig(config, undefined, false);
+  //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
+  if (
+    is.nonEmptyObject(config.secrets) ||
+    is.nonEmptyObject(config.variables)
+  ) {
+    config = applySecretsAndVariablesToConfig({
+      config,
+      secrets: config.secrets,
+      variables: config.variables,
+      deleteSecrets: false,
+      deleteVariables: false,
+    });
     // adding these secrets to the globalSecrets set so that they can be redacted from logs
     for (const secret of Object.values(config.secrets!)) {
       addSecretForSanitizing(secret, 'global');
