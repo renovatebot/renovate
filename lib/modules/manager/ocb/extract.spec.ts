@@ -35,7 +35,7 @@ describe('modules/manager/ocb/extract', () => {
           datasource: 'go',
           depName: 'go.opentelemetry.io/collector',
           depType: 'collector',
-          extractVersion: '^v(?<version>\\S+)',
+          extractVersion: ['^v(?<version>\\S+)'],
         },
         {
           currentValue: 'v0.86.0',

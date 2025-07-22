@@ -67,7 +67,9 @@ exports[`modules/manager/custom/regex/index > extracts extractVersion 1`] = `
       "currentValue": "0.30",
       "datasource": "github-tags",
       "depName": "openresty/headers-more-nginx-module",
-      "extractVersion": "^v(?<version>.*)$",
+      "extractVersion": [
+        "^v(?<version>.*)$",
+      ],
       "replaceString": "ENV NGINX_MODULE_HEADERS_MORE_VERSION=0.30 # github-tags/openresty/headers-more-nginx-module&versioning=loose&extractVersion=^v(?<version>.*)$
 ",
       "versioning": "loose",

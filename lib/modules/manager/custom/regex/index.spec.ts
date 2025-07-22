@@ -97,7 +97,7 @@ describe('modules/manager/custom/regex/index', () => {
       res?.deps.find(
         (dep) => dep.depName === 'openresty/headers-more-nginx-module',
       )?.extractVersion,
-    ).toBe('^v(?<version>.*)$');
+    ).toEqual(['^v(?<version>.*)$']);
   });
 
   it('extracts registryUrl', async () => {

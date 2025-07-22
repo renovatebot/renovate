@@ -175,7 +175,10 @@ export async function getReleaseNotes(
     );
   }
   if (isUndefined(matchedRelease) && config.extractVersion) {
-    const extractVersionRegEx = regEx(config.extractVersion);
+    const extractVersionPattern = Array.isArray(config.extractVersion)
+      ? config.extractVersion[0]
+      : config.extractVersion;
+    const extractVersionRegEx = regEx(extractVersionPattern);
     matchedRelease = releases.find((r) => {
       const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
         ?.version;

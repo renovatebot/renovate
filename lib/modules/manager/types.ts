@@ -173,7 +173,7 @@ export interface PackageDependency<T = Record<string, any>>
   autoReplaceStringTemplate?: string;
   editFile?: string;
   separateMinorPatch?: boolean;
-  extractVersion?: string;
+  extractVersion?: string | [string, string] | [string];
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;

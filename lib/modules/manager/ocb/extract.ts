@@ -43,7 +43,7 @@ export function extractPackageFile(
       depType: 'collector',
       depName: 'go.opentelemetry.io/collector',
       currentValue: definition.dist.otelcol_version,
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     });
   }
 

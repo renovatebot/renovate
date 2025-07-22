@@ -5,6 +5,7 @@ import {
 import { logger } from '../../logger';
 import { filterMap } from '../../util/filter-map';
 import { regEx } from '../../util/regex';
+import { compile } from '../../util/template';
 import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
@@ -101,23 +102,78 @@ export function applyVersionCompatibility(
 
 export function applyExtractVersion(
   releaseResult: ReleaseResult,
-  extractVersion: string | undefined,
+  extractVersion: string | [string, string] | [string] | undefined,
 ): ReleaseResult {
   if (!extractVersion) {
     return releaseResult;
   }
 
-  const extractVersionRegEx = regEx(extractVersion);
-  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
-    const version = extractVersionRegEx.exec(release.version)?.groups?.version;
-    if (!version) {
-      return null;
+  // Handle array format
+  if (Array.isArray(extractVersion)) {
+    if (extractVersion.length === 1) {
+      // Handle [regex] format - extract version group (same as legacy string behavior)
+      const extractVersionRegEx = regEx(extractVersion[0]);
+      releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+        const version = extractVersionRegEx.exec(release.version)?.groups
+          ?.version;
+        if (!version) {
+          return null;
+        }
+
+        release.versionOrig = release.version;
+        release.version = version;
+        return release;
+      });
+    } else if (extractVersion.length === 2) {
+      // Handle [regex, template] format - new enhanced version with transformation
+      const [extractRegex, transformTemplate] = extractVersion;
+      const extractVersionRegEx = regEx(extractRegex);
+
+      releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+        const match = extractVersionRegEx.exec(release.version);
+        if (!match?.groups) {
+          return null;
+        }
+
+        release.versionOrig = release.version;
+
+        try {
+          // Apply transformation using handlebars template with captured groups
+          const transformedVersion = compile(
+            transformTemplate,
+            match.groups,
+            false,
+          );
+          release.version = transformedVersion;
+          return release;
+        } catch (err) {
+          logger.debug(
+            { err, transformTemplate, groups: match.groups },
+            'Error transforming version with template',
+          );
+          return null;
+        }
+      });
     }
 
-    release.versionOrig = release.version;
-    release.version = version;
-    return release;
-  });
+    return releaseResult;
+  }
+
+  // Handle string format - legacy extractVersion behavior
+  if (typeof extractVersion === 'string') {
+    const extractVersionRegEx = regEx(extractVersion);
+    releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+      const version = extractVersionRegEx.exec(release.version)?.groups
+        ?.version;
+      if (!version) {
+        return null;
+      }
+
+      release.versionOrig = release.version;
+      release.version = version;
+      return release;
+    });
+  }
 
   return releaseResult;
 }
