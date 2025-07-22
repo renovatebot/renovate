@@ -27,6 +27,7 @@ export abstract class ChangeLogSource {
     private readonly datasource:
       | 'bitbucket-tags'
       | 'bitbucket-server-tags'
+      | 'forgejo-tags'
       | 'gitea-tags'
       | 'github-tags'
       | 'gitlab-tags',

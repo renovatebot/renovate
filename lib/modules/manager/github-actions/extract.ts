@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
@@ -122,13 +123,18 @@ function detectDatasource(registryUrl: string): PackageDependency {
   const platform = detectPlatform(registryUrl);
 
   switch (platform) {
-    case 'github':
-      return { registryUrls: [registryUrl] };
+    case 'forgejo':
+      return {
+        registryUrls: [registryUrl],
+        datasource: ForgejoTagsDatasource.id,
+      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
         datasource: GiteaTagsDatasource.id,
       };
+    case 'github':
+      return { registryUrls: [registryUrl] };
   }
 
   return {
