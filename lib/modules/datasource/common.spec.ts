@@ -120,6 +120,95 @@ describe('modules/datasource/common', () => {
         releases: [{ version: '1.0.0', versionOrig: 'v1.0.0' }],
       });
     });
+
+    it('should transform version using array format with handlebars template', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: '1.2.3' }, { version: '2.4.6' }],
+      };
+      const transformConfig: [string, string] = [
+        '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        '{{major}}-{{minor}}-{{patch}}',
+      ];
+      const result = applyExtractVersion(releaseResult, transformConfig);
+      expect(result).toEqual({
+        releases: [
+          { version: '1-2-3', versionOrig: '1.2.3' },
+          { version: '2-4-6', versionOrig: '2.4.6' },
+        ],
+      });
+    });
+
+    it('should filter out releases that do not match array format regex', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: '1.2.3' }, { version: 'invalid-version' }],
+      };
+      const transformConfig: [string, string] = [
+        '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        '{{major}}-{{minor}}-{{patch}}',
+      ];
+      const result = applyExtractVersion(releaseResult, transformConfig);
+      expect(result).toEqual({
+        releases: [{ version: '1-2-3', versionOrig: '1.2.3' }],
+      });
+    });
+
+    it('should handle transformation template errors gracefully', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: '1.2.3' }],
+      };
+      const transformConfig: [string, string] = [
+        '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        '{{invalid_variable}}', // This will cause a template error
+      ];
+      const result = applyExtractVersion(releaseResult, transformConfig);
+      expect(result).toEqual({
+        releases: [{ version: '', versionOrig: '1.2.3' }], // Template error results in empty string
+      });
+    });
+
+    it('should support legacy string format for extractVersion', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      };
+      const result = applyExtractVersion(releaseResult, '^v(?<version>.+)$');
+      expect(result).toEqual({
+        releases: [
+          { version: '1.0.0', versionOrig: 'v1.0.0' },
+          { version: '2.0.0', versionOrig: 'v2.0.0' },
+        ],
+      });
+    });
+
+    it('should support single-element array format [regex]', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      };
+      const arrayConfig: [string] = ['^v(?<version>.+)$'];
+      const result = applyExtractVersion(releaseResult, arrayConfig);
+      expect(result).toEqual({
+        releases: [
+          { version: '1.0.0', versionOrig: 'v1.0.0' },
+          { version: '2.0.0', versionOrig: 'v2.0.0' },
+        ],
+      });
+    });
+
+    it('should support array format for enhanced extraction and transformation', () => {
+      const releaseResult: ReleaseResult = {
+        releases: [{ version: 'release-1.2.3' }, { version: 'release-4.5.6' }],
+      };
+      const arrayConfig: [string, string] = [
+        '^release-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        '{{major}}_{{minor}}_{{patch}}',
+      ];
+      const result = applyExtractVersion(releaseResult, arrayConfig);
+      expect(result).toEqual({
+        releases: [
+          { version: '1_2_3', versionOrig: 'release-1.2.3' },
+          { version: '4_5_6', versionOrig: 'release-4.5.6' },
+        ],
+      });
+    });
   });
 
   describe('filterValidVersions', () => {

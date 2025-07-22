@@ -5,6 +5,7 @@ import {
 import { logger } from '../../logger';
 import { filterMap } from '../../util/filter-map';
 import { regEx } from '../../util/regex';
+import { compile } from '../../util/template';
 import { defaultVersioning } from '../versioning';
 import * as allVersioning from '../versioning';
 import datasources from './api';
@@ -99,15 +100,15 @@ export function applyVersionCompatibility(
   return releaseResult;
 }
 
-export function applyExtractVersion(
+/**
+ * Extracts version from a release using simple regex pattern.
+ * Expects a named capture group 'version' in the regex.
+ */
+function extractSimpleVersion(
   releaseResult: ReleaseResult,
-  extractVersion: string | undefined,
+  pattern: string,
 ): ReleaseResult {
-  if (!extractVersion) {
-    return releaseResult;
-  }
-
-  const extractVersionRegEx = regEx(extractVersion);
+  const extractVersionRegEx = regEx(pattern);
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const version = extractVersionRegEx.exec(release.version)?.groups?.version;
     if (!version) {
@@ -118,6 +119,70 @@ export function applyExtractVersion(
     release.version = version;
     return release;
   });
+
+  return releaseResult;
+}
+
+/**
+ * Extracts and transforms version using regex pattern and handlebars template.
+ * All named capture groups from the regex are available as template variables.
+ */
+function extractAndTransformVersion(
+  releaseResult: ReleaseResult,
+  pattern: string,
+  template: string,
+): ReleaseResult {
+  const extractVersionRegEx = regEx(pattern);
+
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const match = extractVersionRegEx.exec(release.version);
+    if (!match?.groups) {
+      return null;
+    }
+
+    release.versionOrig = release.version;
+
+    try {
+      const transformedVersion = compile(template, match.groups, false);
+      release.version = transformedVersion;
+      return release;
+    } catch (err) {
+      logger.debug(
+        { err, template, groups: match.groups },
+        'Error transforming version with template',
+      );
+      return null;
+    }
+  });
+
+  return releaseResult;
+}
+
+export function applyExtractVersion(
+  releaseResult: ReleaseResult,
+  extractVersion: string | [string, string] | [string] | undefined,
+): ReleaseResult {
+  if (!extractVersion) {
+    return releaseResult;
+  }
+
+  // Normalize input: convert string to single-element array
+  const normalized =
+    typeof extractVersion === 'string' ? [extractVersion] : extractVersion;
+
+  // Handle [regex] format - extract version group
+  if (normalized.length === 1) {
+    return extractSimpleVersion(releaseResult, normalized[0]);
+  }
+
+  // Handle [regex, template] format - extract and transform
+  if (normalized.length === 2) {
+    return extractAndTransformVersion(
+      releaseResult,
+      normalized[0],
+      normalized[1],
+    );
+  }
 
   return releaseResult;
 }

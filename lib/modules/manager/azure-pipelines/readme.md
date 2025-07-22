@@ -21,7 +21,7 @@ To use the standard convention for Azure Pipelines, add:
   "packageRules": [
     {
       "matchDatasources": ["azure-pipelines-tasks"],
-      "extractVersion": "^(?<version>\\d+)"
+      "extractVersion": ["^(?<version>\\d+)"]
     }
   ]
 }

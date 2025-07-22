@@ -21,6 +21,7 @@ import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
+import { ExtractVersionMigration } from './custom/extract-version-migration';
 import { FetchReleaseNotesMigration } from './custom/fetch-release-notes-migration';
 import { FileMatchMigration } from './custom/file-match-migration';
 import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
@@ -129,6 +130,7 @@ export class MigrationsService {
     ComposerIgnorePlatformReqsMigration,
     EnabledManagersMigration,
     ExtendsMigration,
+    ExtractVersionMigration,
     GoModTidyMigration,
     HostRulesMigration,
     IgnoreNodeModulesMigration,

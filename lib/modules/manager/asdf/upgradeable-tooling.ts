@@ -32,7 +32,7 @@ const hugoDefinition: ToolingDefinition = {
   config: (version) => ({
     datasource: GithubReleasesDatasource.id,
     packageName: 'gohugoio/hugo',
-    extractVersion: '^v(?<version>\\S+)',
+    extractVersion: ['^v(?<version>\\S+)'],
     // The asdf hugo plugin supports prefixing the version with
     // `extended_`. Extended versions feature Sass support.
     currentValue: version.replace(/^extended_/, ''),
@@ -45,15 +45,15 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'nektos/act',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   actionlint: {
     asdfPluginUrl: 'https://github.com/crazy-matt/asdf-actionlint',
     config: {
-      datasource: GithubReleasesDatasource.id,
-      packageName: 'rhysd/actionlint',
-      extractVersion: '^v(?<version>\\S+)',
+      datasource: GithubTagsDatasource.id,
+      packageName: 'reviewdog/actionlint',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'adr-tools': {
@@ -68,7 +68,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'argoproj/argo-cd',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'asdf-plugin-manager': {
@@ -76,7 +76,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'asdf-community/asdf-plugin-manager',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   atmos: {
@@ -84,7 +84,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'cloudposse/atmos',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   awscli: {
@@ -99,7 +99,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'Azure/azure-cli',
-      extractVersion: '^azure-cli-(?<version>\\S+)',
+      extractVersion: ['^azure-cli-(?<version>\\S+)'],
     },
   },
   bun: {
@@ -107,7 +107,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'oven-sh/bun',
-      extractVersion: '^bun-v(?<version>\\S+)',
+      extractVersion: ['^bun-v(?<version>\\S+)'],
     },
   },
   'cargo-make': {
@@ -137,7 +137,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes-sigs/cluster-api',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   conftest: {
@@ -145,7 +145,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'open-policy-agent/conftest',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'container-structure-test': {
@@ -154,7 +154,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'GoogleContainerTools/container-structure-test',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   cookiecutter: {
@@ -170,7 +170,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sigstore/cosign',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   crystal: {
@@ -191,7 +191,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'denoland/deno',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   direnv: {
@@ -199,7 +199,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'direnv/direnv',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'dotnet-core': {
@@ -221,7 +221,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kayac/ecspresso',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'editorconfig-checker': {
@@ -229,7 +229,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'editorconfig-checker/editorconfig-checker',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   elixir: {
@@ -250,7 +250,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'erlang/otp',
-      extractVersion: '^OTP-(?<version>\\S+)',
+      extractVersion: ['^OTP-(?<version>\\S+)'],
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$`,
     },
   },
@@ -267,7 +267,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'fluxcd/flux2',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   gauche: {
@@ -282,7 +282,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'cli/cli',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   gitleaks: {
@@ -290,7 +290,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'gitleaks/gitleaks',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   ginkgo: {
@@ -298,7 +298,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'onsi/ginkgo',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   gleam: {
@@ -306,7 +306,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'gleam-lang/gleam',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   gohugo: hugoDefinition,
@@ -315,7 +315,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golang/go',
-      extractVersion: '^go(?<version>\\S+)',
+      extractVersion: ['^go(?<version>\\S+)'],
     },
   },
   'golangci-lint': {
@@ -323,7 +323,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golangci/golangci-lint',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   gomplate: {
@@ -331,7 +331,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hairyhenderson/gomplate',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   gotestsum: {
@@ -347,7 +347,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'hadolint/hadolint',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   haskell: {
@@ -355,7 +355,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'ghc/ghc',
-      extractVersion: '^ghc-(?<version>\\S+?)-release',
+      extractVersion: ['^ghc-(?<version>\\S+?)-release'],
     },
   },
   helm: {
@@ -363,7 +363,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'helm/helm',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'helm-docs': {
@@ -371,7 +371,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'norwoodj/helm-docs',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   helmfile: {
@@ -379,7 +379,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'helmfile/helmfile',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   hugo: hugoDefinition,
@@ -388,7 +388,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'idris-lang/Idris-dev',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   istioctl: {
@@ -451,7 +451,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'JuliaLang/julia',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   just: {
@@ -466,7 +466,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'k3s-io/k3s',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   kind: {
@@ -474,7 +474,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes-sigs/kind',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   kotlin: {
@@ -482,7 +482,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'JetBrains/kotlin',
-      extractVersion: '^(Kotlin |v)(?<version>\\S+)',
+      extractVersion: ['^(Kotlin |v)(?<version>\\S+)'],
     },
   },
   kubebuilder: {
@@ -490,7 +490,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'kubernetes-sigs/kubebuilder',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   kubectl: {
@@ -498,7 +498,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'kubernetes/kubernetes',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   kubetail: {
@@ -513,7 +513,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes-sigs/kustomize',
-      extractVersion: '^kustomize/v(?<version>\\S+)',
+      extractVersion: ['^kustomize/v(?<version>\\S+)'],
     },
   },
   localstack: {
@@ -521,7 +521,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'localstack/localstack',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   lua: {
@@ -529,7 +529,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'lua/lua',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   'markdownlint-cli2': {
@@ -538,7 +538,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'DavidAnson/markdownlint-cli2',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   maven: {
@@ -553,7 +553,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'grafana/mimir',
-      extractVersion: '^mimir-(?<version>\\S+)',
+      extractVersion: ['^mimir-(?<version>\\S+)'],
     },
   },
   minikube: {
@@ -561,7 +561,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes/minikube',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   mockery: {
@@ -577,7 +577,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'nim-lang/Nim',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   nodejs: {
@@ -599,7 +599,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'oracle/oci-cli',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   opa: {
@@ -607,7 +607,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'open-policy-agent/opa',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   opentofu: {
@@ -615,7 +615,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'opentofu/opentofu',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   packer: {
@@ -623,7 +623,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/packer',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   perl: {
@@ -631,7 +631,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'Perl/perl5',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   php: {
@@ -639,7 +639,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'php/php-src',
-      extractVersion: '^php-(?<version>\\S+)',
+      extractVersion: ['^php-(?<version>\\S+)'],
     },
   },
   pnpm: {
@@ -662,7 +662,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'pre-commit/pre-commit',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   protoc: {
@@ -670,7 +670,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'protocolbuffers/protobuf',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   pulumi: {
@@ -678,7 +678,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'pulumi/pulumi',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   python: {
@@ -686,7 +686,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'python/cpython',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   rebar: {
@@ -716,7 +716,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sbt/sbt',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   scala: {
@@ -726,7 +726,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         return {
           datasource: GithubTagsDatasource.id,
           packageName: 'scala/scala',
-          extractVersion: '^v(?<version>\\S+)',
+          extractVersion: ['^v(?<version>\\S+)'],
         };
       }
       if (version.startsWith('3')) {
@@ -744,7 +744,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'koalaman/shellcheck',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   shfmt: {
@@ -752,7 +752,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mvdan/sh',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   skaffold: {
@@ -760,7 +760,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'GoogleContainerTools/skaffold',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   sops: {
@@ -768,7 +768,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mozilla/sops',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   steampipe: {
@@ -776,7 +776,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'turbot/steampipe',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   talhelper: {
@@ -784,7 +784,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'budimanjojo/talhelper',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   talosctl: {
@@ -792,23 +792,24 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'siderolabs/talos',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   terraform: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
-    config: {
-      datasource: GithubReleasesDatasource.id,
+    config: (version: string) => ({
+      datasource: 'github-releases' as const,
       packageName: 'hashicorp/terraform',
-      extractVersion: '^v(?<version>\\S+)',
-    },
+      versioning: 'terraform',
+      extractVersion: ['^v?(?<version>\\S+)'],
+    }),
   },
   'terraform-docs': {
     asdfPluginUrl: 'https://github.com/looztra/asdf-terraform-docs.git',
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'terraform-docs/terraform-docs',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   terraformer: {
@@ -820,18 +821,20 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   terragrunt: {
     asdfPluginUrl: 'https://github.com/ohmer/asdf-terragrunt',
-    config: {
-      datasource: GithubReleasesDatasource.id,
+    config: (version: string) => ({
+      datasource: 'github-releases' as const,
       packageName: 'gruntwork-io/terragrunt',
-      extractVersion: '^v(?<version>\\S+)',
-    },
+      versioning:
+        'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>.*))?$',
+      extractVersion: ['^v?(?<version>\\S+)'],
+    }),
   },
   terramate: {
     asdfPluginUrl: 'https://github.com/martinlindner/asdf-terramate',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'terramate-io/terramate',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   tflint: {
@@ -839,7 +842,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'terraform-linters/tflint',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   tfsec: {
@@ -847,7 +850,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'aquasecurity/tfsec',
-      extractVersion: '^v(?<version>.+)',
+      extractVersion: ['^v(?<version>.+)'],
     },
   },
   trivy: {
@@ -855,7 +858,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'aquasecurity/trivy',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   vault: {
@@ -863,7 +866,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/vault',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   yamllint: {
@@ -871,7 +874,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'adrienverge/yamllint',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   yq: {
@@ -879,7 +882,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mikefarah/yq',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   zig: {
@@ -894,7 +897,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mobile-dev-inc/maestro',
-      extractVersion: '^cli-(?<version>\\S+)',
+      extractVersion: ['^cli-(?<version>\\S+)'],
     },
   },
   detekt: {
@@ -902,7 +905,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'detekt/detekt',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   ktlint: {
@@ -917,7 +920,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'google/yamlfmt',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   tuist: {
@@ -932,7 +935,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'crate-ci/typos',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: ['^v(?<version>\\S+)'],
     },
   },
   uv: {

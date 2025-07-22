@@ -37,7 +37,7 @@ const perlVersionMatch = q
         currentValue: ctx.perlVersion,
         datasource: GithubTagsDatasource.id,
         versioning: perlVersioning.id,
-        extractVersion: '^v(?<version>\\S+)',
+        extractVersion: ['^v(?<version>\\S+)'],
       });
     }
     return ctx;

@@ -36,7 +36,7 @@ export function createAquaToolConfig(
     datasource: GithubTagsDatasource.id,
     // Trim the leading 'v' from both the current and extracted version
     currentValue: version.replace(regEx(/^v/), ''),
-    extractVersion: '^v?(?<version>.+)',
+    extractVersion: ['^v?(?<version>.+)'],
   };
 }
 
@@ -230,10 +230,15 @@ export function createUbiToolConfig(
     extractVersion = `^${hasVPrefix ? '' : 'v?'}(?<version>${tagRegex})`;
   }
 
-  return {
+  const result: BackendToolingConfig = {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
     currentValue: version,
-    ...(isString(extractVersion) ? { extractVersion } : {}),
   };
+
+  if (isString(extractVersion)) {
+    result.extractVersion = [extractVersion];
+  }
+
+  return result;
 }

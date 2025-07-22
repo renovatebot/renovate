@@ -22,7 +22,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   bun: {
     datasource: 'github-releases',
     packageName: 'oven-sh/bun',
-    extractVersion: '^bun-v(?<version>.*)$',
+    extractVersion: ['^bun-v(?<version>.*)$'],
     versioning: npmVersioningId,
   },
   bundler: {
@@ -129,7 +129,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   kustomize: {
     datasource: 'github-releases',
     packageName: 'kubernetes-sigs/kustomize',
-    extractVersion: '^kustomize/v(?<version>.*)$',
+    extractVersion: ['^kustomize/v(?<version>.*)$'],
     versioning: semverVersioningId,
   },
   maven: {
@@ -182,7 +182,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'prefix-dev/pixi',
     versioning: condaVersioningId,
-    extractVersion: '^v(?<version>.*)$',
+    extractVersion: ['^v(?<version>.*)$'],
   },
   poetry: {
     datasource: 'pypi',

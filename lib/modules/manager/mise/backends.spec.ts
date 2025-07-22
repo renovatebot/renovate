@@ -19,7 +19,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-tags',
         currentValue: '14.1.1',
-        extractVersion: '^v?(?<version>.+)',
+        extractVersion: ['^v?(?<version>.+)'],
       });
     });
 
@@ -30,7 +30,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'BurntSushi/ripgrep',
         datasource: 'github-tags',
         currentValue: '14.1.1',
-        extractVersion: '^v?(?<version>.+)',
+        extractVersion: ['^v?(?<version>.+)'],
       });
     });
   });
@@ -198,7 +198,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'nekto/act',
         datasource: 'github-releases',
         currentValue: '0.2.70',
-        extractVersion: '^v?(?<version>.+)',
+        extractVersion: ['^v?(?<version>.+)'],
       });
     });
 
@@ -207,7 +207,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cli/cli',
         datasource: 'github-releases',
         currentValue: '2.64.0',
-        extractVersion: '^v?(?<version>.+)',
+        extractVersion: ['^v?(?<version>.+)'],
       });
     });
 
@@ -226,7 +226,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cli/cli',
         datasource: 'github-releases',
         currentValue: '2.64.0',
-        extractVersion: '^v?(?<version>.+)',
+        extractVersion: ['^v?(?<version>.+)'],
       });
     });
 
@@ -239,7 +239,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: '1.10.17',
-        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+        extractVersion: ['^v?(?<version>\\d+\\.\\d+\\.)'],
       });
     });
 
@@ -252,7 +252,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: 'v1.10.17',
-        extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
+        extractVersion: ['^(?<version>\\d+\\.\\d+\\.)'],
       });
     });
 
@@ -265,7 +265,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: 'v1.10.17',
-        extractVersion: '^(?<version>\\d+\\.\\d+\\.)',
+        extractVersion: ['^(?<version>\\d+\\.\\d+\\.)'],
       });
     });
 
@@ -278,7 +278,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: 'v1.10.17',
-        extractVersion: '^(?<version>v\\d+\\.\\d+\\.)',
+        extractVersion: ['^(?<version>v\\d+\\.\\d+\\.)'],
       });
     });
 
@@ -291,7 +291,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: '1.10.17',
-        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+        extractVersion: ['^v?(?<version>\\d+\\.\\d+\\.)'],
       });
     });
 
@@ -304,7 +304,7 @@ describe('modules/manager/mise/backends', () => {
         packageName: 'cargo-bins/cargo-binstall',
         datasource: 'github-releases',
         currentValue: '1.10.17',
-        extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+        extractVersion: ['^v?(?<version>\\d+\\.\\d+\\.)'],
       });
     });
   });

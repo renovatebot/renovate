@@ -91,7 +91,7 @@ export interface RenovateSharedConfig {
   enabledManagers?: string[];
   encrypted?: Record<string, string>;
   extends?: string[];
-  extractVersion?: string;
+  extractVersion?: string | [string, string] | [string];
   managerFilePatterns?: string[];
   followTag?: string;
   force?: RenovateConfig;
