@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type { ForgejoHttpOptions } from '../../../util/http/forgejo';
 import { ForgejoHttp } from '../../../util/http/forgejo';
+import { fromBase64 } from '../../../util/string';
 import { getQueryString } from '../../../util/url';
 import type {
   Branch,
@@ -117,7 +118,7 @@ export async function getRepoContents(
   const res = await forgejoHttp.getJsonUnchecked<RepoContents>(url, options);
 
   if (res.body.content) {
-    res.body.contentString = Buffer.from(res.body.content, 'base64').toString();
+    res.body.contentString = fromBase64(res.body.content);
   }
 
   return res.body;

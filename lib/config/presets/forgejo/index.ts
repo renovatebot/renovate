@@ -2,7 +2,6 @@ import { logger } from '../../../logger';
 import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper';
 import type { RepoContents } from '../../../modules/platform/forgejo/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
@@ -30,7 +29,7 @@ export async function fetchJSONFile(
   }
 
   // TODO: null check #22198
-  return parsePreset(fromBase64(res.content!), fileName);
+  return parsePreset(res.contentString!, fileName);
 }
 
 export function getPresetFromEndpoint(
