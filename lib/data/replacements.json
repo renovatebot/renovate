@@ -16,7 +16,6 @@
       "replacements:eslint-plugin-vitest-to-scoped",
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
-      "replacements:gradle-wrapper-validation-action",
       "replacements:hapi-to-scoped",
       "replacements:jade-to-pug",
       "replacements:joi-to-scoped",
@@ -668,18 +667,6 @@
         "matchPackageNames": ["fastify-zipkin"],
         "replacementName": "@fastify/zipkin",
         "replacementVersion": "3.0.0"
-      }
-    ]
-  },
-  "gradle-wrapper-validation-action": {
-    "description": "gradle/wrapper-validation-action got renamed to gradle/actions/wrapper-validation",
-    "packageRules": [
-      {
-        "matchCurrentVersion": "/^3/",
-        "matchDatasources": ["github-actions"],
-        "matchPackageNames": ["gradle/wrapper-validation-action"],
-        "replacementName": "gradle/actions/wrapper-validation",
-        "replacementVersion": "3.5.0"
       }
     ]
   },

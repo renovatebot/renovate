@@ -2,7 +2,7 @@ This issue lists Renovate updates and detected dependencies. Read the [Dependenc
 
 ## Pending Approval
 
-These branches will be created by Renovate only once you click their checkbox below.
+The following branches are pending approval. To create them, click on a checkbox below.
 
 ### Category #1
 
@@ -22,7 +22,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
 ## Awaiting Schedule
 
-These updates are awaiting their schedule. Click on a checkbox to get an update now.
+The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
 ### Category #1
 
@@ -34,7 +34,7 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
 
 ## Rate-Limited
 
-These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
 
 ### Category #3
 
@@ -47,14 +47,14 @@ These updates are currently rate-limited. Click on a checkbox below to force the
 
 ## Errored
 
-These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.
+The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
 
  - [ ] <!-- retry-branch=branchName7 -->pr7
  - [ ] <!-- retry-branch=branchName8 -->pr8
 
 ## Pending Branch Automerge
 
-These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.
+The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.
 
  - [ ] <!-- approvePr-branch=branchName9 -->pr9
 

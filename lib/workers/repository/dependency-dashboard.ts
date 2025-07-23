@@ -408,7 +408,7 @@ export async function ensureDependencyDashboard(
     branches,
     (branch) => branch.result === 'needs-approval',
     'Pending Approval',
-    'These branches will be created by Renovate only once you click their checkbox below.',
+    'The following branches are pending approval. To create them, click on a checkbox below.',
     'approve',
     approveAllPendingPrs,
     'Create all pending approval PRs at once',
@@ -418,7 +418,7 @@ export async function ensureDependencyDashboard(
     branches,
     (branch) => branch.result === 'not-scheduled',
     'Awaiting Schedule',
-    'These updates are awaiting their schedule. Click on a checkbox to get an update now.',
+    'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.',
     'unschedule',
   );
   issueBody += getBranchesListMd(
@@ -428,7 +428,7 @@ export async function ensureDependencyDashboard(
       branch.result === 'pr-limit-reached' ||
       branch.result === 'commit-limit-reached',
     'Rate-Limited',
-    'These updates are currently rate-limited. Click on a checkbox below to force their creation now.',
+    'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.',
     'unlimit',
     createAllRateLimitedPrs,
     'Create all rate-limited PRs at once',
@@ -438,33 +438,33 @@ export async function ensureDependencyDashboard(
     branches,
     (branch) => branch.result === 'error',
     'Errored',
-    'These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.',
+    'The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.',
     'retry',
   );
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'needs-pr-approval',
     'PR Creation Approval Required',
-    "These branches exist but PRs won't be created until you approve them by clicking on a checkbox.",
+    'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.',
   );
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pr-edited',
     'Edited/Blocked',
-    'These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.',
+    'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
-    'These updates await pending status checks. To force their creation now, click the checkbox below.',
+    'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
   );
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
     'Pending Branch Automerge',
-    'These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.',
+    'The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.',
   );
 
   const warn = getDepWarningsDashboard(packageFiles, config);
@@ -495,14 +495,14 @@ export async function ensureDependencyDashboard(
     inProgress,
     (branch) => !!branch.prBlockedBy || !branch.prNo,
     'Other Branches',
-    'These updates are pending. To force PRs open, click the checkbox below.',
+    'The following updates are pending. To force the creation of a PR, click on a checkbox below.',
     'other',
   );
   issueBody += getBranchesListMd(
     inProgress,
     (branch) => branch.prNo && !branch.prBlockedBy,
     'Open',
-    'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.',
+    'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.',
     'rebase',
     rebaseAllOpenPrs,
     'Click on this checkbox to rebase all open PRs at once',
@@ -511,7 +511,7 @@ export async function ensureDependencyDashboard(
     branches,
     (branch) => branch.result === 'already-existed',
     'Ignored or Blocked',
-    'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.',
+    'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.',
     'recreate',
   );
 
