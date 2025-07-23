@@ -1,5 +1,6 @@
 import type { PlatformId } from '../../../constants';
 import { GlobalConfig } from '../../global';
+import * as forgejo from '../forgejo';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
@@ -21,6 +22,7 @@ const resolvers = {
   bitbucket: local,
   'bitbucket-server': local,
   codecommit: null,
+  forgejo,
   gerrit: local,
   gitea,
   github,
