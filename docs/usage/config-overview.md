@@ -11,6 +11,7 @@ Renovate reads the configuration files in this order (from from top to bottom):
 1. Default config
 2. Global config
    - File config
+   - Additional file config
    - Environment config
    - CLI config
 3. Inherited config
