@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
-import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper';
-import type { RepoContents } from '../../../modules/platform/gitea/types';
+import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper';
+import type { RepoContents } from '../../../modules/platform/forgejo/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
