@@ -11,7 +11,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as _artifactsExtra from './artifacts-extra';
 import * as _packageTree from './package-tree';
 import * as gomod from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
 import { env, fs, git, partial } from '~test/util';
 
 type FS = typeof import('../../../util/fs');
@@ -2584,5 +2584,335 @@ describe('modules/manager/gomod/artifacts', () => {
       { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);
     expect(execSnapshots).toMatchObject([]);
+  });
+
+  // Additional test cases to cover more scenarios and edge cases
+  it('supports gomodTidyAll with dependent modules that have changes', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    packageTree.getDependentGoModFiles.mockResolvedValueOnce([
+      { name: 'go.mod', isLeaf: false },
+      { name: 'services/auth/go.mod', isLeaf: true },
+      { name: 'services/api/go.mod', isLeaf: true },
+    ]);
+    const execSnapshots = mockExecAll();
+
+    // Main module changes
+    git.getRepoStatus
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['go.sum'],
+        }),
+      )
+      // Dependent module 1 changes
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['services/auth/go.sum', 'services/auth/go.mod'],
+        }),
+      )
+      // Dependent module 2 changes
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['services/api/go.sum'],
+        }),
+      );
+
+    fs.readLocalFile
+      // Main module files
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod')
+      // Dependent module 1 files
+      .mockResolvedValueOnce('New auth go.sum')
+      .mockResolvedValueOnce('New auth go.mod')
+      // Dependent module 2 files
+      .mockResolvedValueOnce('New api go.sum');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodTidyAll'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'services/auth/go.sum',
+          contents: 'New auth go.sum',
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'services/auth/go.mod',
+          contents: 'New auth go.mod',
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'services/api/go.sum',
+          contents: 'New api go.sum',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo/services/auth' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo/services/api' },
+      },
+    ]);
+
+    expect(packageTree.getDependentGoModFiles).toHaveBeenCalledWith('go.mod');
+  });
+
+  it('supports gomodTidyAll with tidy options on dependent modules', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    packageTree.getDependentGoModFiles.mockResolvedValueOnce([
+      { name: 'go.mod', isLeaf: false },
+      { name: 'services/auth/go.mod', isLeaf: true },
+    ]);
+    const execSnapshots = mockExecAll();
+
+    // Main module changes
+    git.getRepoStatus
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['go.sum'],
+        }),
+      )
+      // Dependent module changes
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['services/auth/go.sum'],
+        }),
+      );
+
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod')
+      .mockResolvedValueOnce('New auth go.sum');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodTidyAll', 'gomodTidyE', 'gomodTidy1.17'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+      {
+        file: {
+          type: 'addition',
+          path: 'services/auth/go.sum',
+          contents: 'New auth go.sum',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -compat=1.17 -e',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -compat=1.17 -e',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy -compat=1.17 -e',
+        options: { cwd: '/tmp/github/some/repo/services/auth' },
+      },
+    ]);
+  });
+
+  it('handles error in tidyDependentModule function', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    packageTree.getDependentGoModFiles.mockResolvedValueOnce([
+      { name: 'go.mod', isLeaf: false },
+      { name: 'services/auth/go.mod', isLeaf: true },
+    ]);
+    // Simulate go mod tidy failure on dependent module
+    const execSnapshots = mockExecSequence([
+      { stdout: '', stderr: '' },
+      new Error('go mod tidy failed'),
+    ]);
+
+    // Main module changes
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodTidyAll'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+      {
+        artifactError: {
+          lockFile: 'services/auth/go.sum',
+          stderr: 'go mod tidy failed',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toHaveLength(2);
+    expect(execSnapshots[1]).toMatchObject({
+      cmd: 'go mod tidy',
+      options: expect.objectContaining({
+        cwd: '/tmp/github/some/repo/services/auth',
+      }),
+    });
+  });
+
+  it('handles TEMPORARY_ERROR in tidyDependentModule function', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    packageTree.getDependentGoModFiles.mockResolvedValueOnce([
+      { name: 'go.mod', isLeaf: false },
+      { name: 'services/auth/go.mod', isLeaf: true },
+    ]);
+    // Simulate temporary error during dependent module processing
+    mockExecSequence([
+      { stdout: '', stderr: '' },
+      new Error('temporary-error'),
+    ]);
+
+    // Main module changes
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    await expect(
+      gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidyAll'],
+        },
+      }),
+    ).rejects.toThrow('temporary-error');
+  });
+
+  it('handles TEMPORARY_ERROR in main gomodTidyAll flow', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+    // Simulate temporary error during main execution
+    mockExecAll(new Error('temporary-error'));
+
+    await expect(
+      gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidyAll'],
+        },
+      }),
+    ).rejects.toThrow('temporary-error');
+  });
+
+  it('supports gomodTidyAll when dependent module has no changes', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    packageTree.getDependentGoModFiles.mockResolvedValueOnce([
+      { name: 'go.mod', isLeaf: false },
+      { name: 'services/auth/go.mod', isLeaf: true },
+    ]);
+    const execSnapshots = mockExecAll();
+
+    // Main module changes
+    git.getRepoStatus
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['go.sum'],
+        }),
+      )
+      // Dependent module has no changes
+      .mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+        }),
+      );
+
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodTidyAll'],
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo/services/auth' },
+      },
+    ]);
   });
 });

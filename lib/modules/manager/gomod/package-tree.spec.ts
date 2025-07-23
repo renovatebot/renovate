@@ -268,5 +268,48 @@ describe('modules/manager/gomod/package-tree', () => {
         [{ isLeaf: true, name: 'gomod-with-replace/go.mod' }],
       );
     });
+
+    it('handles complex dependency chains with already visited packages', async () => {
+      const goModLevel2 = codeBlock`
+        module github.com/renovate-tests/level2
+
+        go 1.19
+
+        require github.com/renovate-tests/gomod-with-replace v1.0.0
+        require github.com/renovate-tests/gomod1 v1.0.0
+
+        replace github.com/renovate-tests/gomod-with-replace => ../gomod-with-replace
+        replace github.com/renovate-tests/gomod1 => ../gomod1
+      `;
+
+      const goModLevel3 = codeBlock`
+        module github.com/renovate-tests/level3
+
+        go 1.19
+
+        require github.com/renovate-tests/level2 v1.0.0
+
+        replace github.com/renovate-tests/level2 => ../level2
+      `;
+
+      scm.getFileList.mockResolvedValue([
+        'gomod1/go.mod',
+        'gomod-with-replace/go.mod',
+        'level2/go.mod',
+        'level3/go.mod',
+      ]);
+      fs.readLocalFile.mockResolvedValueOnce(sampleGoMod);
+      fs.readLocalFile.mockResolvedValueOnce(goModWithReplace);
+      fs.readLocalFile.mockResolvedValueOnce(goModLevel2);
+      fs.readLocalFile.mockResolvedValueOnce(goModLevel3);
+
+      // Ensure packages aren't processed multiple times in complex dependency chains
+      expect(await getDependentGoModFiles('gomod1/go.mod')).toEqual([
+        { isLeaf: false, name: 'gomod1/go.mod' },
+        { isLeaf: false, name: 'gomod-with-replace/go.mod' },
+        { isLeaf: false, name: 'level2/go.mod' },
+        { isLeaf: true, name: 'level3/go.mod' },
+      ]);
+    });
   });
 });
