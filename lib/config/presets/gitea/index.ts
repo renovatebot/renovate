@@ -23,7 +23,9 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(`Preset file ${fileName} not found in ${repo}`);
+    logger.debug(
+      `Preset file ${fileName} not found in ${repo}: ${err.message}`,
+    );
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
