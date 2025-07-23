@@ -1,0 +1,64 @@
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Pending Approval
+
+These branches will be created by Renovate only once you click their checkbox below.
+
+### Category #1
+
+ - [ ] <!-- approve-branch=branchName2 -->pr2
+
+### Category #2
+
+ - [ ] <!-- approve-branch=branchName0 -->pr0
+
+### Others
+
+ - [ ] <!-- approve-branch=branchName1 -->pr1
+
+### All
+
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+## Awaiting Schedule
+
+These updates are awaiting their schedule. Click on a checkbox to get an update now.
+
+### Category #1
+
+ - [ ] <!-- unschedule-branch=branchName4 -->pr4
+
+### Others
+
+ - [ ] <!-- unschedule-branch=branchName3 -->pr3
+
+## Rate-Limited
+
+These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+
+### Category #3
+
+ - [ ] <!-- unlimit-branch=branchName5 -->pr5
+ - [ ] <!-- unlimit-branch=branchName6 -->pr6
+
+### All
+
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+## Errored
+
+These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.
+
+ - [ ] <!-- retry-branch=branchName7 -->pr7
+ - [ ] <!-- retry-branch=branchName8 -->pr8
+
+## Pending Branch Automerge
+
+These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.
+
+ - [ ] <!-- approvePr-branch=branchName9 -->pr9
+
+## Detected dependencies
+
+None detected
+

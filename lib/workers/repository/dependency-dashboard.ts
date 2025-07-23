@@ -205,16 +205,52 @@ function getBranchesListMd(
   if (filteredBranches.length === 0) {
     return '';
   }
-  let result = `## ${title}\n\n${description}\n\n`;
+
+  let result = `## ${title}\n\n${description}`;
+  const ensureNewLines = (n = 2): void => {
+    result = result.trimEnd() + '\n'.repeat(n);
+  };
+
+  const categorized: Record<string, BranchConfig[]> = {};
+  const uncategorized: BranchConfig[] = [];
+  for (const branch of filteredBranches) {
+    if (branch.dependencyDashboardCategory) {
+      (categorized[branch.dependencyDashboardCategory] ??= []).push(branch);
+    } else {
+      uncategorized.push(branch);
+    }
+  }
+
   const toListItem = (branch: BranchConfig): string =>
     getListItem(branch, listItemType);
-  result += `${filteredBranches.map(toListItem).join('')}`;
+  if (Object.keys(categorized).length > 0) {
+    for (const [category, branches] of Object.entries(categorized).sort(
+      ([keyA], [keyB]) => keyA.localeCompare(keyB),
+    )) {
+      ensureNewLines();
+      result += `### ${category}\n\n`;
+      result += branches.map(toListItem).join('');
+    }
+    if (uncategorized.length > 0) {
+      ensureNewLines();
+      result += `### Others`;
+    }
+  }
+  ensureNewLines();
+  result += uncategorized.map(toListItem).join('');
+
   if (filteredBranches.length > 1 && bulkComment && bulkMessage) {
+    if (Object.keys(categorized).length > 0) {
+      ensureNewLines();
+      result += '### All\n\n';
+    }
     result += ' - [ ] ';
     result += `<!-- ${bulkComment} -->`;
-    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}\n`;
+    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
   }
-  return result + '\n';
+
+  ensureNewLines();
+  return result;
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
