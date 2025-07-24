@@ -208,7 +208,7 @@ By default, it is essentially an empty config with only the Renovate JSON schema
 
 If you configure `onboardingConfig` in either Global config or Inherited config then Renovate will use that config directly instead of the default.
 
-If you self-host Renovate in GitLab using [`renovate-runner`](https://gitlab.com/gitlab-com/gl-infra/renovate/renovate-runner), the CI will contain a default [RENOVATE_ONBOARDING_CONFIG](https://gitlab.com/gitlab-com/gl-infra/renovate/renovate-runner/-/blob/d33f9812a326f5496695249f11600591c4d2418b/templates/renovate.gitlab-ci.yml#L5) that will merge with your own configuration settings. For example, the CI by default contains:
+If you self-host Renovate in GitLab using [`renovate-runner`](https://gitlab.com/gitlab-com/gl-infra/renovate/renovate-runner), the CI will contain a default [RENOVATE_ONBOARDING_CONFIG](https://gitlab.com/renovate-bot/renovate-runner/-/blob/main/templates/renovate.gitlab-ci.yml#L5) that will merge with your own configuration settings. For example, the CI by default contains:
 
 ```yml
 RENOVATE_ONBOARDING_CONFIG: '{"$$schema": "https://docs.renovatebot.com/renovate-schema.json", "extends": ["config:recommended"] }'
