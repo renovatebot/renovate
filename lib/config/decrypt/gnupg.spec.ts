@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig, setPrivateKeys } from '../decrypt';
 import type { RenovateConfig } from '../types';
@@ -6,7 +7,23 @@ import { Fixtures } from '~test/fixtures';
 import { logger } from '~test/util';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
-const privateKeyEcc = Fixtures.get('private-pgp-ecc.pem', '..');
+const privateKeyEcc = codeBlock`
+  -----BEGIN PGP PRIVATE KEY BLOCK-----
+
+  lFgEaIInBxYJKwYBBAHaRw8BAQdA3sIP1X2sD3ZhqCfsDK8XxYcIXWX69X/3/GNx
+  5CaBOoEAAQDDWad/QZsw8kb+Mgay806FAAz0UAgxAlZWUSavqp5zxA4RtDdXaGl0
+  ZVNvdXJjZSBSZW5vdmF0ZSA8cmVub3ZhdGVAd2hpdGVzb3VyY2Vzb2Z0d2FyZS5j
+  b20+iJMEExYKADsWIQT2bRiAlIgt3xD8h1s7X4hIOZTAnAUCaIInBwIbAwULCQgH
+  AgIiAgYVCgkICwIEFgIDAQIeBwIXgAAKCRA7X4hIOZTAnNsAAQCZEdlHC7bVp0jX
+  bleru7PkdWHLJMrM3xrsiYgmOhvMNAD/dMnoeuUq2JpTMOTGouTsFkY5yq+ue672
+  /VaWKUAgSwGcXQRogicHEgorBgEEAZdVAQUBAQdASRmOaEd461jnRjjMNYfPPU3t
+  zwgd1afFG+Yp9w7+yA8DAQgHAAD/Rk411EVr2OoJf6Xd0zoIs8E/VeZIJftG0bsY
+  HkRtD0gPk4h4BBgWCgAgFiEE9m0YgJSILd8Q/IdbO1+ISDmUwJwFAmiCJwcCGwwA
+  CgkQO1+ISDmUwJzUuAD/dHGdjs4fR3PsbjnR7Xi5j0LcOE5Q9dMjvSFQ9fBJzesB
+  ANU4vFbrMABZjdOelzYSj+Z/DRQ4UfK40J8qkQKekbYG
+  =iXr1
+  -----END PGP PRIVATE KEY BLOCK-----
+`;
 const repository = 'abc/def';
 
 vi.unmock('../../util/exec/common');
