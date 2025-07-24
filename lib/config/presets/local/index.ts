@@ -1,4 +1,5 @@
 import type { PlatformId } from '../../../constants';
+import type { Nullish } from '../../../types';
 import { GlobalConfig } from '../../global';
 import * as forgejo from '../forgejo';
 import * as gitea from '../gitea';
@@ -14,7 +15,7 @@ interface Resolver {
     presetPath?: string,
     endpoint?: string,
     tag?: string,
-  ): Promise<Preset | undefined>;
+  ): Promise<Nullish<Preset>>;
 }
 
 const resolvers = {
@@ -35,7 +36,7 @@ export function getPreset({
   presetName = 'default',
   presetPath,
   tag,
-}: PresetConfig): Promise<Preset | undefined> {
+}: PresetConfig): Promise<Nullish<Preset>> {
   const platform = GlobalConfig.get('platform');
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
