@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import type { Nullable } from '../../types';
+import type { Nullish } from '../../types';
 import { parseJson } from '../../util/common';
 import { regEx } from '../../util/regex';
 import { ensureTrailingSlash } from '../../util/url';
@@ -20,7 +20,7 @@ export async function fetchPreset({
   endpoint: _endpoint,
   tag,
   fetch,
-}: FetchPresetConfig): Promise<Nullable<Preset>> {
+}: FetchPresetConfig): Promise<Nullish<Preset>> {
   // TODO: fix me, can be undefiend #22198
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const endpoint = ensureTrailingSlash(_endpoint!);
@@ -89,11 +89,11 @@ export async function fetchPreset({
 }
 
 export function parsePreset(
-  content: Nullable<string>,
+  content: Nullish<string>,
   fileName: string,
-): Nullable<Preset> {
+): Nullish<Preset> {
   try {
-    return parseJson(content, fileName) as Nullable<Preset>;
+    return parseJson(content, fileName) as Nullish<Preset>;
   } catch {
     throw new Error(PRESET_INVALID_JSON);
   }

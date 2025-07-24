@@ -16,6 +16,11 @@ export type AutoMergeType = 'branch' | 'pr' | 'pr-comment';
 
 type Val = NonNullable<unknown>;
 
-export type Nullable<T extends Val> = T | null | undefined;
+/**
+ * A type that can be null or undefined.
+ *
+ * @see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#nullish-coalescing
+ */
+export type Nullish<T extends Val> = T | null | undefined;
 
 export type MaybePromise<T> = T | Promise<T>;

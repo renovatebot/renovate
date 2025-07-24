@@ -1,4 +1,4 @@
-import type { MaybePromise, Nullable } from '../../types';
+import type { MaybePromise, Nullish } from '../../types';
 import type { RenovateConfig } from '../types';
 
 // TODO: Proper typing
@@ -12,7 +12,7 @@ export interface PresetConfig {
 }
 
 export interface PresetApi {
-  getPreset(config: PresetConfig): MaybePromise<Nullable<Preset>>;
+  getPreset(config: PresetConfig): MaybePromise<Nullish<Preset>>;
 }
 
 export interface ParsedPreset {
@@ -30,7 +30,7 @@ export type PresetFetcher = (
   fileName: string,
   endpoint: string,
   tag?: string,
-) => Promise<Nullable<Preset>>;
+) => Promise<Nullish<Preset>>;
 
 export interface FetchPresetConfig {
   repo: string;

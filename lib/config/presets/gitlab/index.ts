@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import type { Nullable } from '../../../types';
+import type { Nullish } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitlabProject } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
@@ -26,7 +26,7 @@ export async function fetchJSONFile(
   fileName: string,
   endpoint: string,
   tag?: string,
-): Promise<Nullable<Preset>> {
+): Promise<Nullish<Preset>> {
   let url = endpoint;
   let ref = '';
   let res: HttpResponse;
@@ -64,7 +64,7 @@ export function getPresetFromEndpoint(
   presetPath?: string,
   endpoint = Endpoint,
   tag?: string,
-): Promise<Nullable<Preset>> {
+): Promise<Nullish<Preset>> {
   return fetchPreset({
     repo,
     filePreset: presetName,
@@ -80,6 +80,6 @@ export function getPreset({
   presetPath,
   presetName = 'default',
   tag = undefined,
-}: PresetConfig): Promise<Nullable<Preset>> {
+}: PresetConfig): Promise<Nullish<Preset>> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

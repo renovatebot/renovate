@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { getRepoContents } from '../../../modules/platform/forgejo/forgejo-helper';
 import type { RepoContents } from '../../../modules/platform/forgejo/types';
-import type { Nullable } from '../../../types';
+import type { Nullish } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
@@ -13,7 +13,7 @@ export async function fetchJSONFile(
   fileName: string,
   endpoint: string,
   tag?: string | null,
-): Promise<Nullable<Preset>> {
+): Promise<Nullish<Preset>> {
   let res: RepoContents;
   try {
     res = await getRepoContents(repo, fileName, tag, {
@@ -38,7 +38,7 @@ export function getPresetFromEndpoint(
   presetPath?: string,
   endpoint = Endpoint,
   tag?: string,
-): Promise<Nullable<Preset>> {
+): Promise<Nullish<Preset>> {
   return fetchPreset({
     repo,
     filePreset,
@@ -54,6 +54,6 @@ export function getPreset({
   presetName = 'default',
   presetPath,
   tag = undefined,
-}: PresetConfig): Promise<Nullable<Preset>> {
+}: PresetConfig): Promise<Nullish<Preset>> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }
