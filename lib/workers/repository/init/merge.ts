@@ -384,13 +384,13 @@ export async function tryReadStaticRepoFileConfig(
 
   logger.debug({ staticRepoConfigFile }, 'reading static repo config file');
 
-  const staticRepoConfigRaw = await readSystemFile(
-    staticRepoConfigFile,
-    'utf8',
-  );
-  if (is.nullOrUndefined(staticRepoConfigRaw)) {
+  let staticRepoConfigRaw: string | undefined;
+  try {
+    staticRepoConfigRaw = await readSystemFile(staticRepoConfigFile, 'utf8');
+  } catch (err) {
     throw new Error(
       `Failed to read static repo config file: "${staticRepoConfigFile}"`,
+      { cause: err },
     );
   }
 
