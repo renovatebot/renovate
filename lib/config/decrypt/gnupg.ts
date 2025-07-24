@@ -1,6 +1,7 @@
 import os from 'node:os';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { mkdtemp, outputFile, rm } from 'fs-extra';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
@@ -18,7 +19,7 @@ export async function tryDecryptGnupg(
       const keyFilePath = upath.join(tmpDir, 'key.pem');
       await outputFile(keyFilePath, privateKey);
       const { stdout, stderr } = await exec(
-        `gpg --batch --no-tty --yes --import ${keyFilePath}`,
+        `gpg --batch --no-tty --yes --import ${quote(keyFilePath)}`,
       );
       keyImported.add(privateKey);
 
@@ -44,7 +45,7 @@ export async function tryDecryptGnupg(
     await outputFile(encryptedFilePath, armoredMessage);
 
     const { stdout, stderr } = await exec(
-      `gpg --batch --no-tty --yes --decrypt ${encryptedFilePath}`,
+      `gpg --batch --no-tty --yes --decrypt ${quote(encryptedFilePath)}`,
     );
 
     logger.debug({ stderr }, 'Decrypted config using gnupg');
