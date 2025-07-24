@@ -127,7 +127,7 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+Use `openpgp` instead of `gnugp` for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 
