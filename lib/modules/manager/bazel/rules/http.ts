@@ -73,19 +73,6 @@ export function parseGithubPath(
   }
 
   value = stripArchiveSuffix(value);
-  console.log('TEST4', {
-    value,
-    datasource,
-    packageName,
-    p0,
-    p1,
-    p2,
-    p3,
-    p4,
-    p5,
-  });
-  console.log(isHash(value));
-  console.log(is.string(value));
   return isHash(value)
     ? { datasource, packageName, currentDigest: value }
     : { datasource, packageName, currentValue: value };
@@ -120,7 +107,6 @@ export function parseArchiveUrl(
   }
 
   const url = parseUrl(urlString);
-  console.log('TEST5', { url, urlString });
   if (url?.host === 'github.com') {
     return parseGithubPath(url.pathname);
   }
@@ -153,7 +139,6 @@ export const HttpTarget = z
     if (!parsedUrl) {
       return [];
     }
-    console.log('TEST6', { parsedUrl });
     const dep: PackageDependency = {
       datasource: parsedUrl.datasource,
       depType: rule,

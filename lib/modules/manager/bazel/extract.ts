@@ -4,6 +4,7 @@ import { extractDepsFromFragment } from './rules';
 import { dockerRules } from './rules/docker';
 import { gitRules } from './rules/git';
 import { goRules } from './rules/go';
+import { httpRules } from './rules/http';
 import { ociRules } from './rules/oci';
 import type { RecordFragment } from './types';
 
@@ -25,7 +26,13 @@ export function extractPackageFile(
 
       // Selectively provide `replaceString` in order to make auto-replace
       // functionality work correctly.
-      const rules = [...dockerRules, ...ociRules, ...gitRules, ...goRules];
+      const rules = [
+        ...dockerRules,
+        ...ociRules,
+        ...gitRules,
+        ...goRules,
+        ...httpRules,
+      ];
       const replaceString = fragment.value;
       if (rules.some((rule) => replaceString.startsWith(rule))) {
         if (dep.currentValue && dep.currentDigest) {
@@ -36,7 +43,5 @@ export function extractPackageFile(
       deps.push(dep);
     }
   }
-  console.log('TEST3', { deps });
-  console.log(JSON.stringify(deps, null, 3));
   return deps.length ? { deps } : null;
 }

@@ -545,6 +545,19 @@ export async function processBranch(
       removeMeta(['dep']);
 
       if (config.artifactErrors?.length) {
+        // Check if any artifact error is a SHA-256 calculation failure
+        const hasHashErrors = config.artifactErrors.some((err) =>
+          err.stderr?.includes('Could not calculate sha256'),
+        );
+
+        if (hasHashErrors) {
+          logger.debug(
+            'SHA-256 calculation failed - throwing error to stop processing',
+          );
+          throw new Error(MANAGER_LOCKFILE_ERROR);
+        }
+
+        // Keep existing logic for other artifact errors
         if (config.releaseTimestamp) {
           logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
