@@ -11,6 +11,12 @@ importers:
 
   .:
     dependencies:
+      '@ast-grep/lang-ruby':
+        specifier: 0.0.3
+        version: 0.0.3(tree-sitter-cli@0.25.6)
+      '@ast-grep/napi':
+        specifier: 0.39.1
+        version: 0.39.1
       '@aws-sdk/client-codecommit':
         specifier: 3.840.0
         version: 3.840.0
@@ -579,6 +585,9 @@ importers:
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
+      tree-sitter-cli:
+        specifier: 0.25.6
+        version: 0.25.6
       tsx:
         specifier: 4.20.3
         version: 4.20.3
@@ -625,6 +634,75 @@ packages:
 
   '@arcanis/slice-ansi@1.1.1':
     resolution: {integrity: sha512-xguP2WR2Dv0gQ7Ykbdb7BNCnPnIPB94uTi0Z2NvkRBEnhbwjOQ7QyQKJXrVQg4qDpiD9hA5l5cCwy/z2OXgc3w==}
+
+  '@ast-grep/lang-ruby@0.0.3':
+    resolution: {integrity: sha512-Gp2O/1o/xLRdJWf9D5Ka2/iTdTmrO/JvflVYZtTZT57G/LqU5UKQ7kSpNBqZT0c4WFd6QQvKl/a/MilRdHS+1w==}
+    peerDependencies:
+      tree-sitter-cli: 0.25.6
+    peerDependenciesMeta:
+      tree-sitter-cli:
+        optional: true
+
+  '@ast-grep/napi-darwin-arm64@0.39.1':
+    resolution: {integrity: sha512-g+Bf940b/k6/yrLwWTCXDaZ4Nt5NjUM30MJcwnBbTXsmlRIYnoFIktR8X7kS33DSCu7knT22QdF3B393mHoyVg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@ast-grep/napi-darwin-x64@0.39.1':
+    resolution: {integrity: sha512-jPtuBBnQT7BC+oA0UudC2nGUcIUQF//f1CKnz4DnEj3AebgsW8RAkIUTSw20Y6uhPTjbSQ9fx9AjDvbQZe/I5A==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@ast-grep/napi-linux-arm64-gnu@0.39.1':
+    resolution: {integrity: sha512-N7wH7ExECtYLeXe6Q1/s7NZFCDGJQrkmQaYa2vooSFYZB1i4BAtFu92K3IzpTlMXxbwqrGIEZGPcRmZOYW68cA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@ast-grep/napi-linux-arm64-musl@0.39.1':
+    resolution: {integrity: sha512-mc2yJV3mFVth1hwRwz3UTnAEVykRQhGMz8pfjC0GEistHqe6a18KYTIUwYFmQD300O/rLTCLvgV64ICzqD8k4A==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@ast-grep/napi-linux-x64-gnu@0.39.1':
+    resolution: {integrity: sha512-xvIINrydi0WTU8yS48UhfHNv/xawF0Cjob2Km+UyVKgNZc5HDlAnn/BxXnTgvV6gla1ynC1FVmxHKmixoUnA3A==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@ast-grep/napi-linux-x64-musl@0.39.1':
+    resolution: {integrity: sha512-ehAce6LVhZPS612lVH0unXgmSP2kyNI1hs7vXpboJTbZkuNTNn+vWBICSP6XaInsV1BqZ6VejAIgA42iH6BrqQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@ast-grep/napi-win32-arm64-msvc@0.39.1':
+    resolution: {integrity: sha512-HWl/jX3RT69XR/2JNdv2L1Rh7YeXHvuwq8GVBJcWhNtj3wFT9h5h8MSzfWgPLLmB6VAhjulPrG1iU7LAjvWaYQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@ast-grep/napi-win32-ia32-msvc@0.39.1':
+    resolution: {integrity: sha512-fivsR5Et5/UHQ/BArzQgeTV05J49JcB+vjZSi0H/6uiNoq2+GOcwPkdlEGGM3HdDH64olaeXgRku0L9993r1Qw==}
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@ast-grep/napi-win32-x64-msvc@0.39.1':
+    resolution: {integrity: sha512-e7+eTU2aTDgE6c+vrkCkiJLxvzHm2Keirp/cHOx69KgZSYVWbfGrPj8VpLBIUHHapI58BKzLd4j+yFdD51fryg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@ast-grep/napi@0.39.1':
+    resolution: {integrity: sha512-omVL1aWHuc/gCMqtJRHLKJMM1VFRnaHU18IxL0tKeQHQJGVRU15I6MKi6z8RAeey4CFVw26l+HlXdfHMWMIyWQ==}
+    engines: {node: '>= 10'}
+
+  '@ast-grep/setup-lang@0.0.3':
+    resolution: {integrity: sha512-+ZNOuf0r7ABVwOANrrQpUrUv7xyuhsZGyQ88WZCH/euQmIEvSH3JsUFevg/60M7hi8NVh4vfSQs6ajTpumSzxg==}
 
   '@aws-crypto/crc32@5.2.0':
     resolution: {integrity: sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==}
@@ -5937,6 +6015,11 @@ packages:
     peerDependencies:
       tslib: '2'
 
+  tree-sitter-cli@0.25.6:
+    resolution: {integrity: sha512-UhkXRkMPtBgE4OatZtYVtDsT3HFUliqAJcs49XQaZv8d2sbeTzEhpJVpMaCqBR3HGhb1WpyoodaFXQaMuOLPEg==}
+    engines: {node: '>=12.0.0'}
+    hasBin: true
+
   treeify@1.1.0:
     resolution: {integrity: sha512-1m4RA7xVAJrSGrrXGs0L3YTwyvBs2S8PbRHaLZAkFw7JR8oIFwYtysxlBZhYIa7xSyiYJKZ3iGrrk55cGA3i9A==}
     engines: {node: '>=0.6'}
@@ -6457,6 +6540,53 @@ snapshots:
   '@arcanis/slice-ansi@1.1.1':
     dependencies:
       grapheme-splitter: 1.0.4
+
+  '@ast-grep/lang-ruby@0.0.3(tree-sitter-cli@0.25.6)':
+    dependencies:
+      '@ast-grep/setup-lang': 0.0.3
+    optionalDependencies:
+      tree-sitter-cli: 0.25.6
+
+  '@ast-grep/napi-darwin-arm64@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-darwin-x64@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-linux-arm64-gnu@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-linux-arm64-musl@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-linux-x64-gnu@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-linux-x64-musl@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-win32-arm64-msvc@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-win32-ia32-msvc@0.39.1':
+    optional: true
+
+  '@ast-grep/napi-win32-x64-msvc@0.39.1':
+    optional: true
+
+  '@ast-grep/napi@0.39.1':
+    optionalDependencies:
+      '@ast-grep/napi-darwin-arm64': 0.39.1
+      '@ast-grep/napi-darwin-x64': 0.39.1
+      '@ast-grep/napi-linux-arm64-gnu': 0.39.1
+      '@ast-grep/napi-linux-arm64-musl': 0.39.1
+      '@ast-grep/napi-linux-x64-gnu': 0.39.1
+      '@ast-grep/napi-linux-x64-musl': 0.39.1
+      '@ast-grep/napi-win32-arm64-msvc': 0.39.1
+      '@ast-grep/napi-win32-ia32-msvc': 0.39.1
+      '@ast-grep/napi-win32-x64-msvc': 0.39.1
+
+  '@ast-grep/setup-lang@0.0.3': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -13001,6 +13131,8 @@ snapshots:
   tree-dump@1.0.3(tslib@2.8.1):
     dependencies:
       tslib: 2.8.1
+
+  tree-sitter-cli@0.25.6: {}
 
   treeify@1.1.0: {}
 

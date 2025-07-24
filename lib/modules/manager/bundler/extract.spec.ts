@@ -225,7 +225,7 @@ describe('modules/manager/bundler/extract', () => {
       gem 'foo', git: 'https://github.com/foo/foo', ref: 'fd184883048b922b176939f851338d0a4971a532'
       gem 'bar', git: 'https://github.com/bar/bar', tag: 'v1.0.0'
       gem 'baz', github: 'baz/baz', branch: 'master'
-      `;
+    `;
 
     fs.readLocalFile.mockResolvedValueOnce(gitRefGemfile);
     const res = await extractPackageFile(gitRefGemfile, 'Gemfile');

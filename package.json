@@ -146,6 +146,8 @@
     "pnpm": "10.13.1"
   },
   "dependencies": {
+    "@ast-grep/lang-ruby": "0.0.3",
+    "@ast-grep/napi": "0.39.1",
     "@aws-sdk/client-codecommit": "3.840.0",
     "@aws-sdk/client-ec2": "3.840.0",
     "@aws-sdk/client-ecr": "3.840.0",
@@ -342,6 +344,7 @@
     "semantic-release": "24.2.7",
     "tar": "7.4.3",
     "tmp-promise": "3.0.3",
+    "tree-sitter-cli": "0.25.6",
     "tsx": "4.20.3",
     "type-fest": "4.41.0",
     "typescript": "5.8.3",
@@ -369,6 +372,7 @@
       "safe-json-stringify"
     ],
     "onlyBuiltDependencies": [
+      "@ast-grep/lang-ruby",
       "better-sqlite3",
       "re2"
     ],

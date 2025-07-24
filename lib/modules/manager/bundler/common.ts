@@ -7,8 +7,6 @@ import {
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact } from '../types';
 
-export const delimiters = ['"', "'"];
-
 export function extractRubyVersion(txt: string): string | null {
   const rubyMatch = regEx(/^ruby\s+("[^"]+"|'[^']+')\s*$/gm).exec(txt);
   if (rubyMatch?.length !== 2) {
