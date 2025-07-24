@@ -1,4 +1,8 @@
-import { getYarnLock, getYarnVersionFromLock } from './yarn';
+import {
+  extractYarnCatalogsFromYml,
+  getYarnLock,
+  getYarnVersionFromLock,
+} from './yarn';
 import { Fixtures } from '~test/fixtures';
 import { fs } from '~test/util';
 
@@ -73,5 +77,75 @@ describe('modules/manager/npm/extract/yarn', () => {
     expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 3 })).toBe(
       '^2.0.0',
     );
+  });
+
+  describe('.extractYarnCatalogsFromYml()', () => {
+    it('handles empty catalog entries', async () => {
+      expect(
+        await extractYarnCatalogsFromYml(undefined, 'package.json'),
+      ).toMatchObject({
+        deps: [],
+      });
+    });
+
+    it('parses valid pnpm-workspace.yaml file', async () => {
+      const plocktest1Lock = Fixtures.get('yarn2/yarn.lock', '..');
+      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+      expect(
+        await extractYarnCatalogsFromYml(
+          {
+            list: {
+              react: '18.3.0',
+              react17: {
+                react: '17.0.2',
+              },
+            },
+          },
+          'package.json',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '18.3.0',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'yarn.catalog.default',
+            prettyDepType: 'yarn.catalog.default',
+          },
+          {
+            currentValue: '17.0.2',
+            datasource: 'npm',
+            depName: 'react',
+            depType: 'yarn.catalog.react17',
+            prettyDepType: 'yarn.catalog.react17',
+          },
+        ],
+        managerData: {
+          yarnShrinkwrap: 'yarn.lock',
+        },
+      });
+    });
+
+    it('finds relevant lockfile', async () => {
+      const lockfileContent = Fixtures.get('yarn2/yarn.lock', '..');
+
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      fs.getSiblingFileName.mockReturnValueOnce('yarn.lock');
+      expect(
+        await extractYarnCatalogsFromYml(
+          {
+            list: {
+              react: '18.3.1',
+            },
+          },
+          'package.json',
+        ),
+      ).toMatchObject({
+        managerData: {
+          yarnShrinkwrap: 'yarn.lock',
+        },
+      });
+    });
   });
 });

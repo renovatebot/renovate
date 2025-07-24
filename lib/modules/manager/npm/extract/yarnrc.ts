@@ -5,6 +5,13 @@ import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
 import { Yaml } from '../../../../util/schema-utils';
 
+export const YarnCatalogsSchema = z
+  .object({
+    options: z.optional(z.union([z.string(), z.array(z.string())])),
+    list: z.record(z.union([z.string(), z.record(z.string())])),
+  })
+  .optional();
+
 const YarnrcYmlSchema = Yaml.pipe(
   z.object({
     npmRegistryServer: z.string().optional(),
@@ -15,6 +22,7 @@ const YarnrcYmlSchema = Yaml.pipe(
         }),
       )
       .optional(),
+    catalogs: YarnCatalogsSchema,
   }),
 );
 

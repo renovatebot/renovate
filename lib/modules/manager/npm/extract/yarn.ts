@@ -1,13 +1,18 @@
 import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
+import type z from 'zod';
 import { logger } from '../../../../logger';
 import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import type { LockFile } from './types';
+import type { PackageFileContent } from '../../types';
+import type { NpmManagerData } from '../types';
+import { extractCatalogDeps } from './common/catalogs';
+import type { Catalog, LockFile } from './types';
+import type { YarnCatalogsSchema } from './yarnrc';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -120,4 +125,56 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   }
 
   return '^2.0.0';
+}
+
+type YarnCatalogs = z.TypeOf<typeof YarnCatalogsSchema>;
+
+export async function extractYarnCatalogsFromYml(
+  catalogs: YarnCatalogs,
+  packageFile: string,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  logger.trace(`yarn.extractYarnCatalogsFromYml(${packageFile})`);
+
+  const yarnCatalogs = yarnCatalogsToArray(catalogs);
+
+  const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
+
+  let yarnShrinkwrap;
+  const filePath = getSiblingFileName(packageFile, 'yarn.lock');
+
+  if (await readLocalFile(filePath, 'utf8')) {
+    yarnShrinkwrap = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      yarnShrinkwrap,
+    },
+  };
+}
+
+function yarnCatalogsToArray(catalogs: YarnCatalogs): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (catalogs?.list !== undefined) {
+    for (const [
+      depNameOrCatalogName,
+      depsVersionOrNamedCatalog,
+    ] of Object.entries(catalogs.list)) {
+      if (is.object(depsVersionOrNamedCatalog)) {
+        result.push({
+          name: depNameOrCatalogName,
+          dependencies: depsVersionOrNamedCatalog,
+        });
+      } else {
+        result.push({
+          name: 'default',
+          dependencies: { [depNameOrCatalogName]: depsVersionOrNamedCatalog },
+        });
+      }
+    }
+  }
+
+  return result;
 }
