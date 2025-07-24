@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import type { MockInstance } from 'vitest';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
@@ -29,6 +30,17 @@ const migrateAndValidate = vi.mocked(_migrateAndValidate);
 const onboardingCache = vi.mocked(_onboardingCache);
 
 let config: RenovateConfig;
+
+function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
+  const mockedError = new Error('mocked exit called');
+
+  return [
+    vi.spyOn(process, 'exit').mockImplementationOnce((code?) => {
+      throw mockedError;
+    }),
+    mockedError,
+  ];
+}
 
 beforeEach(() => {
   memCache.init();
@@ -498,9 +510,6 @@ describe('workers/repository/init/merge', () => {
     ({ suite }: staticConfigTestSuite) => {
       const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
       const repoStaticConfigFileKey = 'RENOVATE_STATIC_REPO_CONFIG_FILE';
-      const exitFunc = vi.fn((code: number) => {
-        throw new Error(`exit(${code})`);
-      });
 
       beforeEach(() => {
         migrate.migrateConfig.mockImplementation((c) => ({
@@ -560,6 +569,8 @@ describe('workers/repository/init/merge', () => {
             staticConfig,
             want,
           }: MergeRepoEnvTestCase) => {
+            const [exitMock] = mockProcessExitOnce();
+
             if (!is.nullOrUndefined(staticConfig)) {
               switch (suite) {
                 case 'env':
@@ -576,18 +587,16 @@ describe('workers/repository/init/merge', () => {
               }
             }
 
-            const got = await resolveStaticRepoConfig(
-              currentConfig,
-              env,
-              exitFunc,
-            );
+            const got = await resolveStaticRepoConfig(currentConfig, env);
 
             expect(got).toEqual(want);
-            expect(exitFunc).not.toHaveBeenCalled();
+            expect(exitMock).not.toHaveBeenCalled();
           },
         );
 
         it('should terminate when static config is invalid or missing', async () => {
+          const [exitMock, error] = mockProcessExitOnce();
+
           const env: NodeJS.ProcessEnv = {};
 
           switch (suite) {
@@ -602,12 +611,10 @@ describe('workers/repository/init/merge', () => {
             // fallthrough and fail
           }
 
-          await expect(
-            resolveStaticRepoConfig({}, env, exitFunc),
-          ).rejects.toThrow('exit(1)');
+          await expect(resolveStaticRepoConfig({}, env)).rejects.toThrow(error);
 
-          expect(exitFunc).toHaveBeenCalledOnce();
-          expect(exitFunc).toHaveBeenCalledWith(1);
+          expect(exitMock).toHaveBeenCalledOnce();
+          expect(exitMock).toHaveBeenCalledWith(1);
         });
       });
 
@@ -791,6 +798,8 @@ describe('workers/repository/init/merge', () => {
       it.skipIf(suite === 'env')(
         'should use file config when both env and file configs are set',
         async () => {
+          const [exitMock] = mockProcessExitOnce();
+
           const env: NodeJS.ProcessEnv = {
             [repoStaticConfigKey]: JSON.stringify({
               commitMessagePrefix: 'from_env',
@@ -804,10 +813,10 @@ describe('workers/repository/init/merge', () => {
 
           fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(fileConfig));
 
-          const got = await resolveStaticRepoConfig({}, env, exitFunc);
+          const got = await resolveStaticRepoConfig({}, env);
 
           expect(got).toStrictEqual(fileConfig);
-          expect(exitFunc).not.toHaveBeenCalled();
+          expect(exitMock).not.toHaveBeenCalled();
         },
       );
     },

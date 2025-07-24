@@ -243,7 +243,6 @@ export function prepareEnv(inputEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 export async function parseAndValidateOrExit(
   env: NodeJS.ProcessEnv,
   configEnvKey: string,
-  exitFunc: (code: number) => never = (c) => process.exit(c),
 ): Promise<AllConfig> {
   if (!env[configEnvKey]) {
     return {};
@@ -259,6 +258,6 @@ export async function parseAndValidateOrExit(
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
   } catch (err) {
     logger.fatal({ err }, `Could not parse ${configEnvKey}`);
-    exitFunc(1);
+    process.exit(1);
   }
 }

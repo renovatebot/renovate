@@ -202,7 +202,6 @@ export async function mergeRenovateConfig(
   const configFileAndEnv = await resolveStaticRepoConfig(
     configFileParsed,
     process.env,
-    (c) => process.exit(c),
   );
 
   if (is.nonEmptyArray(returnConfig.extends)) {
@@ -346,7 +345,6 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
 export async function resolveStaticRepoConfig(
   config: AllConfig,
   env: NodeJS.ProcessEnv,
-  exitFunc: (code: number) => never,
 ): Promise<AllConfig> {
   let fileConfig: AllConfig | undefined;
 
@@ -356,10 +354,10 @@ export async function resolveStaticRepoConfig(
     );
   } catch (err) {
     logger.fatal({ err }, 'Failed to load static repository config file');
-    exitFunc(1);
+    process.exit(1);
   }
 
-  const envConfig = await tryLoadStaticRepoEnvConfig(env, exitFunc);
+  const envConfig = await tryLoadStaticRepoEnvConfig(env);
 
   const staticRepoConfig = fileConfig ?? envConfig;
 
@@ -412,12 +410,10 @@ export async function tryReadStaticRepoFileConfig(
 
 export async function tryLoadStaticRepoEnvConfig(
   env: NodeJS.ProcessEnv,
-  exitFunc: (code: number) => never,
 ): Promise<AllConfig | undefined> {
   const repoEnvConfig = await parseAndValidateOrExit(
     env,
     'RENOVATE_STATIC_REPO_CONFIG',
-    exitFunc,
   );
 
   if (is.nonEmptyObject(repoEnvConfig)) {
