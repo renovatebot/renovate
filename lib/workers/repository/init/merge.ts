@@ -20,7 +20,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { parseJson } from '../../../util/common';
 import { setUserEnv } from '../../../util/env';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile, readSystemFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
@@ -384,7 +384,10 @@ export async function tryReadStaticRepoFileConfig(
 
   logger.debug({ staticRepoConfigFile }, 'reading static repo config file');
 
-  const staticRepoConfigRaw = await readLocalFile(staticRepoConfigFile, 'utf8');
+  const staticRepoConfigRaw = await readSystemFile(
+    staticRepoConfigFile,
+    'utf8',
+  );
   if (is.nullOrUndefined(staticRepoConfigRaw)) {
     throw new Error(
       `Failed to read static repo config file: "${staticRepoConfigFile}"`,

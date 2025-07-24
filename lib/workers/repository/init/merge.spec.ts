@@ -578,7 +578,7 @@ describe('workers/repository/init/merge', () => {
                   break;
                 case 'file':
                   env[repoStaticConfigFileKey] = 'static_config.json5';
-                  fs.readLocalFile.mockResolvedValueOnce(
+                  fs.readSystemFile.mockResolvedValueOnce(
                     JSON.stringify(staticConfig),
                   );
                   break;
@@ -605,7 +605,7 @@ describe('workers/repository/init/merge', () => {
               break;
             case 'file':
               env[repoStaticConfigFileKey] = 'static_config.json';
-              fs.readLocalFile.mockResolvedValueOnce(null);
+              fs.readSystemFile.mockRejectedValueOnce('missing');
               break;
             default:
             // fallthrough and fail
@@ -780,7 +780,7 @@ describe('workers/repository/init/merge', () => {
                 break;
               case 'file':
                 process.env[repoStaticConfigFileKey] = 'static_config.json';
-                fs.readLocalFile.mockResolvedValueOnce(
+                fs.readSystemFile.mockResolvedValueOnce(
                   JSON.stringify(staticConfig),
                 );
                 break;
@@ -811,7 +811,7 @@ describe('workers/repository/init/merge', () => {
             commitMessagePrefix: 'from_file',
           };
 
-          fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(fileConfig));
+          fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(fileConfig));
 
           const got = await resolveStaticRepoConfig({}, env);
 

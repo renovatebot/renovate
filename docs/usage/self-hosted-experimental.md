@@ -29,8 +29,6 @@ If set to a valid path pointing to a file containing a _valid_ Renovate configur
 
 This takes precedence over the `RENOVATE_STATIC_REPO_CONFIG` environment variable, if both are defined.
 
-!!! note The file must be located within Renovate’s current repository local working directory.
-
 !!! warning If the file is missing or contains invalid configuration, the scan will be aborted.
 
 ## `RENOVATE_STATIC_REPO_CONFIG`
