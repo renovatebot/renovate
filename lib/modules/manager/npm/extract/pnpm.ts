@@ -21,7 +21,7 @@ import type { PnpmCatalogsSchema } from '../schema';
 import { PnpmWorkspaceFileSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractDependency, parseDepName } from './common/dependency';
-import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
+import type { LockFile, Catalog, PnpmWorkspaceFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -304,9 +304,8 @@ function getCatalogDepType(name: string): string {
   const CATALOG_DEPENDENCY = 'pnpm.catalog';
   return `${CATALOG_DEPENDENCY}.${name}`;
 }
-
 function extractPnpmCatalogDeps(
-  catalogs: PnpmCatalog[],
+  catalogs: Catalog[],
 ): PackageDependency<NpmManagerData>[] {
   const deps: PackageDependency<NpmManagerData>[] = [];
 
@@ -330,8 +329,8 @@ function extractPnpmCatalogDeps(
 function pnpmCatalogsToArray({
   catalog: defaultCatalogDeps,
   catalogs: namedCatalogs,
-}: PnpmCatalogs): PnpmCatalog[] {
-  const result: PnpmCatalog[] = [];
+}: PnpmCatalogs): Catalog[] {
+  const result: Catalog[] = [];
 
   if (defaultCatalogDeps !== undefined) {
     result.push({ name: 'default', dependencies: defaultCatalogDeps });
