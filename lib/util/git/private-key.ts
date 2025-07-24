@@ -52,7 +52,7 @@ abstract class PrivateKey {
   protected abstract importKey(): Promise<string | undefined>;
 }
 
-class GPGKey extends PrivateKey {
+export class GPGKey extends PrivateKey {
   protected readonly gpgFormat = 'openpgp';
 
   constructor(key: string) {
