@@ -2,6 +2,7 @@
 import _timers from 'timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import type { RepoParams } from '..';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -14,9 +15,12 @@ import type { BranchStatus } from '../../../types';
 import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import type { LongCommitSha } from '../../../util/git/types';
+import type { HttpResponse } from '../../../util/http/types';
 import { toBase64 } from '../../../util/string';
 import * as prBodyModule from '../utils/pr-body';
+import type { RepoResponse } from './types';
 import * as gitlab from '.';
+import { getRepoUrl } from './index';
 import * as httpMock from '~test/http-mock';
 import { git, hostRules, logger } from '~test/util';
 
@@ -49,6 +53,41 @@ describe('modules/platform/gitlab/index', () => {
     gitlab.resetPlatform();
     memCache.init();
     repoCache.resetCache();
+    GlobalConfig.reset();
+  });
+
+  describe('getRepoUrl()', () => {
+    const repository = 'my/repo';
+    const gitUrl = 'https://gitlab.selfhosted.example.com';
+    const repoUrl = `${gitUrl}/${repository}.git`;
+    const res = {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json' },
+      body: {
+        http_url_to_repo: repoUrl,
+      },
+    } as HttpResponse<RepoResponse>;
+
+    it('should include credentials in the URL when they should be passed through it', () => {
+      GlobalConfig.set({ gitCredentialPassing: 'url' });
+      const url = getRepoUrl(repository, 'default', res);
+
+      const opts = hostRules.find({
+        hostType: 'gitlab',
+        url: gitUrl,
+      });
+
+      expect(url).toBe(
+        gitUrl.replace(/^https:\/\//, `https://oauth2:${opts.token!}@`) +
+          `/${repository}.git`,
+      );
+    });
+
+    it('should NOT include credentials when they should be passed through the Git credentials store', () => {
+      GlobalConfig.set({ gitCredentialPassing: 'store' });
+      const url = getRepoUrl(repository, 'default', res);
+      expect(url).toBe(repoUrl);
+    });
   });
 
   async function initFakePlatform(version: string) {
