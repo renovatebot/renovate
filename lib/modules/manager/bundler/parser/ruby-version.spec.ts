@@ -123,4 +123,69 @@ describe('modules/manager/bundler/parser/ruby-version', () => {
       managerData: { lineNumber: expect.any(Number) },
     });
   });
+
+  it('extracts double version range', async () => {
+    const content = 'ruby ">= 2.0.0", "< 3.0.0"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: expect.stringContaining('>= 2.0.0'),
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
+
+  it('extracts double version range with different operators', async () => {
+    const content = 'ruby ">= 2.7", "< 4.0"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: expect.stringContaining('>= 2.7'),
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
+
+  it('extracts double version range with precise versions', async () => {
+    const content = 'ruby ">= 2.7.2", "< 3.1.0"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: expect.stringContaining('>= 2.7.2'),
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
+
+  it('does not extract double version range when first argument does not start with >', async () => {
+    const content = 'ruby "2.7.0", "< 3.0.0"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: '"2.7.0", "< 3.0.0"',
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
+
+  it('handles single version when only one argument provided', async () => {
+    const content = 'ruby ">= 2.7.0"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: '>= 2.7.0',
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
 });

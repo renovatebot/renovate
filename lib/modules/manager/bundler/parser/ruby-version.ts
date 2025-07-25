@@ -22,7 +22,47 @@ const rubyVersionPattern = astGrep.rule`
                 - kind: simple_symbol
 `;
 
+const rubyDoubleVersionPattern = astGrep.rule`
+  rule:
+    kind: program
+    has:
+      kind: call
+      all:
+        - has:
+            field: method
+            pattern: $_
+            regex: ^ruby$
+        - has:
+            field: arguments
+            pattern: $_
+            all:
+              - has:
+                  kind: string
+                  nthChild: 1
+                  pattern: $LOWER
+              - has:
+                  kind: string
+                  nthChild: 2
+                  pattern: $HIGHER
+`;
+
 export function extractRubyVersion(root: SgNode): PackageDependency | null {
+  const [lower, higher] = astGrep.extractMatches(
+    root,
+    rubyDoubleVersionPattern,
+    ['LOWER', 'HIGHER'],
+  );
+  if (lower && higher) {
+    const start = lower.range().start.index;
+    const end = higher.range().end.index;
+    return {
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: root.text().slice(start, end),
+      managerData: { lineNumber: lower.range().start.line },
+    };
+  }
+
   const node = root.find(rubyVersionPattern)?.getMatch('RUBY_VERSION');
   if (!node) {
     return null;
