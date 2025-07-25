@@ -5,6 +5,7 @@ export const removedPresets: Record<string, string | null> = {
   ':automergeBranchPush': ':automergeBranch',
   ':base': 'config:recommended',
   ':app': 'config:js-app',
+  ':disableLockFiles': ':skipArtifactsUpdate',
   ':enableGradleLite': null,
   ':js-app': 'config:js-app',
   ':library': 'config:js-lib',
