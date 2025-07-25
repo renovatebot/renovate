@@ -11,6 +11,7 @@ Renovate reads the configuration files in this order (from top to bottom):
 1. Default config
 2. Global config
    - File config
+   - Additional file config
    - Environment config
    - CLI config
 3. Inherited config
@@ -65,6 +66,21 @@ If the file is found but cannot be parsed then Renovate will also error and exit
 
 Global config files can be `.js` or `.json` files.
 You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
+
+#### Additional file config
+
+Renovate tried to read an additional config file only if the env var `RENOVATE_ADDITIONAL_CONFIG_FILE` is set, for example: `RENOVATE_ADDITIONAL_CONFIG_FILE=/tmp/my-additional-renovate-config.js`.
+
+By default Renovate allows the config file to be _missing_ and does not error if it cannot find it.
+But if you have configured `RENOVATE_ADDITIONAL_CONFIG_FILE` and the path you specified is not found then Renovate will error and exit, because it assumes you have a configuration problem.
+If the file is found but cannot be parsed then Renovate will also error and exit.
+
+Global config files can be `.js` or `.json` files.
+You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
+
+<!-- prettier-ignore -->
+!!! warning
+    Do not name the additional config file `config.js` as it is reserved for file config.
 
 #### Environment config
 
