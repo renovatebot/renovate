@@ -1,10 +1,12 @@
 import is from '@sindresorhus/is';
+import type { Document } from 'yaml';
+import { isMap, isScalar, isSeq } from 'yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
+import { parseSingleYamlDocument } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { extractDependency as npmExtractDependency } from '../npm/extract/common/dependency';
@@ -80,15 +82,20 @@ function determineDatasource(
 function extractDependency(
   tag: string,
   repository: string,
-): {
-  depName?: string;
-  depType?: string;
-  datasource?: string;
-  packageName?: string;
-  skipReason?: SkipReason;
-  currentValue?: string;
-} {
-  logger.debug(`Found version ${tag}`);
+  comment?: string,
+): PackageDependency {
+  let currentValue = tag;
+  let currentDigest: string | undefined;
+
+  if (tag.length === 40 && comment) {
+    const match = regEx(/.*frozen: (.+)$/).exec(comment);
+    if (match?.[1]) {
+      currentValue = match[1];
+      currentDigest = tag;
+    }
+  }
+
+  logger.debug(`Found version ${currentValue}`);
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
@@ -106,13 +113,18 @@ function extractDependency(
       const hostname = match.groups.hostname;
       const depName = match.groups.depName.replace(regEx(/\.git$/i), ''); // TODO 12071
       const sourceDef = determineDatasource(repository, hostname);
-      return {
+      const dep: PackageDependency = {
         ...sourceDef,
         depName,
         depType: 'repository',
         packageName: depName,
-        currentValue: tag,
+        currentValue,
       };
+      if (currentDigest) {
+        dep.currentDigest = currentDigest;
+        dep.replaceString = `${currentDigest} # frozen: ${currentValue}`;
+      }
+      return dep;
     }
   }
   logger.info(
@@ -125,22 +137,51 @@ function extractDependency(
     datasource: undefined,
     packageName: undefined,
     skipReason: 'invalid-url',
-    currentValue: tag,
-  };
+    currentValue,
+  } as PackageDependency;
 }
 
 /**
  * Find all supported dependencies in the pre-commit yaml object.
  *
  * @param precommitFile the parsed yaml config file
+ * @param doc the YAML Document AST (optional, for comment extraction)
  */
-function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
+function findDependencies(
+  precommitFile: PreCommitConfig,
+  doc?: Document,
+): PackageDependency[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
     return [];
   }
   const packageDependencies: PackageDependency[] = [];
-  precommitFile.repos.forEach((item) => {
+
+  // Map for quick lookup of comments by repo index
+  const repoComments: Record<number, string | undefined> = {};
+  if (doc?.contents && isMap(doc.contents)) {
+    const reposPair = doc.contents.items.find(
+      (pair: any) => pair.key && pair.key.value === 'repos',
+    );
+    if (reposPair?.value && isSeq(reposPair.value)) {
+      reposPair.value.items.forEach((repoItem: any, idx: number) => {
+        if (repoItem && isMap(repoItem)) {
+          const revPair = repoItem.items.find(
+            (pair: any) => pair.key && pair.key.value === 'rev',
+          );
+          if (
+            revPair?.value &&
+            isScalar(revPair.value) &&
+            typeof revPair.value.comment === 'string'
+          ) {
+            repoComments[idx] = revPair.value.comment;
+          }
+        }
+      });
+    }
+  }
+
+  precommitFile.repos.forEach((item, idx) => {
     // meta hooks is defined from pre-commit and doesn't support `additional_dependencies`
     if (item.repo !== 'meta') {
       item.hooks?.forEach((hook) => {
@@ -182,8 +223,7 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
       logger.trace(item, 'Matched pre-commit dependency spec');
       const repository = String(item.repo);
       const tag = String(item.rev);
-      const dep = extractDependency(tag, repository);
-
+      const dep = extractDependency(tag, repository, repoComments[idx]);
       packageDependencies.push(dep);
     } else {
       logger.trace(item, 'Did not find pre-commit repo spec');
@@ -196,11 +236,13 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  type ParsedContent = Record<string, unknown> | PreCommitConfig;
-  let parsedContent: ParsedContent;
+  let parsedContent: Record<string, unknown>;
+  let doc: Document;
+
   try {
     // TODO: use schema (#9610)
-    parsedContent = parseSingleYaml(content);
+    doc = parseSingleYamlDocument(content);
+    parsedContent = doc.toJS({ maxAliasCount: 10000 });
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },
@@ -223,7 +265,7 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps = findDependencies(parsedContent);
+    const deps = findDependencies(parsedContent, doc);
     if (deps.length) {
       logger.trace({ deps }, 'Found dependencies in pre-commit config');
       return { deps };
