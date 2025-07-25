@@ -9,14 +9,9 @@ export async function extractPackageFile(
   content: string,
   packageFile?: string,
 ): Promise<PackageFileContent | null> {
-  const deps = await parseGemfile(content);
+  const res = await parseGemfile(content);
 
-  if (!deps.length) {
-    return null;
-  }
-
-  const res: PackageFileContent = { deps };
-  if (packageFile) {
+  if (res && packageFile) {
     const gemfileLockPath = await getLockFilePath(packageFile);
     const lockContent = await readLocalFile(gemfileLockPath, 'utf8');
     if (lockContent) {

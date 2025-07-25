@@ -5,7 +5,7 @@ import is from '@sindresorhus/is';
 import * as astGrep from '../../../util/ast-grep';
 import { regEx } from '../../../util/regex';
 import { uniq } from '../../../util/uniq';
-import type { PackageDependency } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 registerDynamicLanguage({ ruby });
 
@@ -511,15 +511,15 @@ const gemArgListPattern = astGrep.rule`
 
 export async function parseGemfile(
   content: string,
-): Promise<PackageDependency[]> {
-  const result: PackageDependency[] = [];
+): Promise<PackageFileContent | null> {
+  const deps: PackageDependency[] = [];
 
   const ast = await parseAsync('ruby', content);
   const astRoot = ast.root();
 
   const rubyDep = extractRubyVersion(astRoot);
   if (rubyDep) {
-    result.push(rubyDep);
+    deps.push(rubyDep);
   }
 
   const globalRegistryUrls = extractGlobalRegistries(astRoot);
@@ -542,7 +542,7 @@ export async function parseGemfile(
     const { path } = kvArgs;
     if (is.string(path)) {
       dep.skipReason = 'internal-package';
-      result.push(dep);
+      deps.push(dep);
       continue;
     }
 
@@ -569,7 +569,7 @@ export async function parseGemfile(
         dep.currentValue = branch;
       }
 
-      result.push(dep);
+      deps.push(dep);
       continue;
     }
 
@@ -599,8 +599,12 @@ export async function parseGemfile(
       dep.skipReason ??= 'unknown-registry';
     }
 
-    result.push(dep);
+    deps.push(dep);
   }
 
-  return result;
+  if (!deps.length) {
+    return null;
+  }
+
+  return { deps };
 }
