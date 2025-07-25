@@ -696,11 +696,11 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        config.rebaseWhen === 'never' &&
         !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
-          'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',
+          'Branch cannot automerge because it is behind base branch and rebaseWhen=never disallows rebasing - raising a PR instead',
         );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
