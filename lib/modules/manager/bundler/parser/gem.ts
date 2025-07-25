@@ -61,11 +61,13 @@ export const gemDefPattern = astGrep.rule`
 
 export function extractDepNameData(
   gemDefNode: SgNode,
-): Pick<PackageDependency, 'depName' | 'skipReason'> {
+): Pick<PackageDependency, 'depName' | 'skipReason' | 'managerData'> {
   const node = gemDefNode.getMatch('DEP_NAME');
   if (!node) {
     return { skipReason: 'missing-depname' };
   }
+
+  const managerData = { lineNumber: node.range().start.line };
 
   if (node.kind() === 'string') {
     const children = namedChildren(node);
@@ -74,25 +76,26 @@ export function extractDepNameData(
       return {
         depName,
         skipReason: 'invalid-name',
+        managerData,
       };
     }
 
     const [child] = children;
     const depName = child.text();
     if (child.kind() !== 'string_content') {
-      return { depName, skipReason: 'invalid-name' };
+      return { depName, skipReason: 'invalid-name', managerData };
     }
 
-    return { depName };
+    return { depName, managerData };
   }
 
   if (node.kind() === 'simple_symbol') {
     const depName = node.text().replace(regEx(/^:/), '');
-    return { depName };
+    return { depName, managerData };
   }
 
   const depName = node.text();
-  return { depName, skipReason: 'invalid-name' };
+  return { depName, skipReason: 'invalid-name', managerData };
 }
 
 export function extractVersionData(

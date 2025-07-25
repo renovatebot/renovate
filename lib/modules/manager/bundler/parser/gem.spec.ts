@@ -48,6 +48,7 @@ describe('modules/manager/bundler/parser/gem', () => {
       const result = extractDepNameData(gemNode!);
       expect(result).toEqual({
         depName: 'rails',
+        managerData: { lineNumber: expect.any(Number) },
       });
     });
 
@@ -59,6 +60,7 @@ describe('modules/manager/bundler/parser/gem', () => {
       const result = extractDepNameData(gemNode!);
       expect(result).toEqual({
         depName: 'rails',
+        managerData: { lineNumber: expect.any(Number) },
       });
     });
 
@@ -84,6 +86,7 @@ describe('modules/manager/bundler/parser/gem', () => {
       expect(result).toEqual({
         depName: 'rails-#{version}',
         skipReason: 'invalid-name',
+        managerData: { lineNumber: expect.any(Number) },
       });
     });
 
@@ -96,6 +99,7 @@ describe('modules/manager/bundler/parser/gem', () => {
       expect(result).toEqual({
         depName: '',
         skipReason: 'invalid-name',
+        managerData: { lineNumber: expect.any(Number) },
       });
     });
   });
