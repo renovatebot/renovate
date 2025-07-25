@@ -152,6 +152,9 @@ importers:
       commander:
         specifier: 14.0.0
         version: 14.0.0
+      common-tags:
+        specifier: 1.8.2
+        version: 1.8.2
       conventional-commits-detector:
         specifier: 1.0.3
         version: 1.0.3
@@ -510,9 +513,6 @@ importers:
       callsite:
         specifier: 1.0.0
         version: 1.0.0
-      common-tags:
-        specifier: 1.8.2
-        version: 1.8.2
       conventional-changelog-conventionalcommits:
         specifier: 9.1.0
         version: 9.1.0
