@@ -475,12 +475,21 @@ export async function processBranch(
         'Base branch changed by user, rebasing the branch onto new base',
       );
       config.reuseExistingBranch = false;
+    } else if (config.cacheFingerprintMatch === 'no-match') {
+      logger.debug(
+        'Cache fingerprint does not match, cannot reuse existing branch',
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = await shouldReuseExistingBranch(config);
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
+    if (
+      !(
+        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
+      )
+    ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
@@ -882,7 +891,7 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
-        content = platform.massageMarkdown(content);
+        content = platform.massageMarkdown(content, config.rebaseLabel);
         if (
           !(
             config.suppressNotifications!.includes('artifactErrors') ||
