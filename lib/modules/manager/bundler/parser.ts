@@ -7,7 +7,14 @@ import { regEx } from '../../../util/regex';
 import { uniq } from '../../../util/uniq';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-registerDynamicLanguage({ ruby });
+let rubyLoaded = false;
+
+function loadRuby(): void {
+  if (!rubyLoaded) {
+    registerDynamicLanguage({ ruby });
+    rubyLoaded = true;
+  }
+}
 
 function namedChildren(node: SgNode): SgNode[] {
   return node.children().filter((child) => child.isNamed());
@@ -539,6 +546,8 @@ const gemDefPattern = astGrep.rule`
 export async function parseGemfile(
   content: string,
 ): Promise<PackageFileContent | null> {
+  loadRuby();
+
   const deps: PackageDependency[] = [];
 
   const ast = await parseAsync('ruby', content);
