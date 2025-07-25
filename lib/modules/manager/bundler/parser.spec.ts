@@ -349,7 +349,7 @@ describe('modules/manager/bundler/parser', () => {
       ]);
     });
 
-    it('handles multiple groups with multiple gems', async () => {
+    it('handles many groups with multiple gems', async () => {
       const src = codeBlock`
         group :test, "development" do
           gem 'foo', '1.0.0', group: :foo
