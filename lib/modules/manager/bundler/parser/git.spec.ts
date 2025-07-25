@@ -14,7 +14,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
         currentDigest: 'abc123456789def',
       });
     });
@@ -30,7 +30,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
         currentValue: 'v1.2.3',
       });
     });
@@ -61,7 +61,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
       });
     });
 
@@ -92,7 +92,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
         currentDigest: 'abc123456789def',
       });
     });
@@ -109,7 +109,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
         currentValue: 'v1.2.3',
       });
     });
@@ -126,7 +126,7 @@ describe('modules/manager/bundler/parser/git', () => {
       expect(result).toEqual({
         datasource: 'git-refs',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
         currentDigest: 'abc123456789def',
       });
     });
@@ -195,7 +195,7 @@ describe('modules/manager/bundler/parser/git', () => {
         datasource: 'git-refs',
         currentValue: '1.2.3',
         packageName: 'https://github.com/user/repo.git',
-        sourceUrl: 'https://github.com/user/repo.git',
+        sourceUrl: 'https://github.com/user/repo',
       });
     });
   });

@@ -924,7 +924,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
         "lineNumber": 99,
       },
       "packageName": "https://github.com/ruby-rdf/json-ld.git",
-      "sourceUrl": "https://github.com/ruby-rdf/json-ld.git",
+      "sourceUrl": "https://github.com/ruby-rdf/json-ld",
     },
     {
       "currentValue": "~> 3.0",

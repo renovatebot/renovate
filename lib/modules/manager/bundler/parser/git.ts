@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { KvArgs } from './common';
 
@@ -22,7 +23,7 @@ export function extractGitRefData(kvArgs: KvArgs): GitRefData | null {
 
   if (is.string(git)) {
     result.packageName = git;
-    result.sourceUrl = git;
+    result.sourceUrl = git.replace(regEx(/\.git$/), '');
   } else if (is.string(github)) {
     const fullUrl = `https://github.com/${github}`;
     result.packageName = fullUrl;
