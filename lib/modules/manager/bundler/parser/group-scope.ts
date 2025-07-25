@@ -1,7 +1,7 @@
 import type { SgNode } from '@ast-grep/napi';
 import is from '@sindresorhus/is';
 import * as astGrep from '../../../../util/ast-grep';
-import { coerceToString, namedChildren } from './common';
+import { coerceToString, extractKvArgs, namedChildren } from './common';
 
 const groupScopePattern = astGrep.rule`
   rule:
@@ -29,11 +29,17 @@ export function extractScopedGroups(node: SgNode): string[] {
       continue;
     }
 
-    depTypes.push(
-      namedChildren(args)
-        .map((arg) => coerceToString(arg))
-        .filter(is.truthy),
-    );
+    const scopeDepTypes = namedChildren(args)
+      .map((arg) => coerceToString(arg))
+      .filter(is.truthy);
+
+    const kvArgs = extractKvArgs(ancestor);
+    const isOptional = kvArgs.optional === true;
+    if (scopeDepTypes.length && isOptional) {
+      scopeDepTypes.push('optional');
+    }
+
+    depTypes.push(scopeDepTypes);
   }
 
   return depTypes.reverse().flat();

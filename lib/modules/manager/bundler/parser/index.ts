@@ -34,6 +34,12 @@ function getDepTypesData(
   }
 
   depTypes = uniq(depTypes);
+
+  const isOptional = kvArgs.optional === true;
+  if (depTypes.length && isOptional) {
+    depTypes.push('optional');
+  }
+
   if (depTypes.length) {
     return { depTypes };
   }
@@ -45,7 +51,7 @@ type RegistryUrlsData = Pick<PackageDependency, 'registryUrls' | 'skipReason'>;
 
 function getRegistryUrlsData(
   gemDef: SgNode,
-  gemRegistryUrls: string | symbol | (string | symbol)[] | undefined | null,
+  gemRegistryUrls: KvArgs[string] | undefined | null,
   blockRegistryUrls: string[],
   globalRegistryUrls: string[],
 ): RegistryUrlsData {

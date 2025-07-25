@@ -210,5 +210,59 @@ describe('modules/manager/bundler/parser/group-scope', () => {
       const mysqlResult = extractScopedGroups(mysqlNode!);
       expect(mysqlResult).toEqual(['db']);
     });
+
+    it('handles optional groups', async () => {
+      const content = `
+        group :development, optional: true do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedGroups(gemNode!);
+      expect(result).toEqual(['development', 'optional']);
+    });
+
+    it('handles optional groups with false value', async () => {
+      const content = `
+        group :development, optional: false do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedGroups(gemNode!);
+      expect(result).toEqual(['development']);
+    });
+
+    it('handles simple optional without group', async () => {
+      const content = `
+        group optional: true do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedGroups(gemNode!);
+      expect(result).toBeEmpty();
+    });
+
+    it('handles nested optional groups', async () => {
+      const content = `
+        group :development do
+          group :test, optional: true do
+            gem "rails"
+          end
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedGroups(gemNode!);
+      expect(result).toEqual(['development', 'test', 'optional']);
+    });
   });
 });

@@ -407,6 +407,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "depName": "devise_pam_authenticatable2",
       "depTypes": [
         "pam_authentication",
+        "optional",
       ],
       "lockedVersion": "9.2.0",
       "managerData": {
@@ -2240,6 +2241,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses sourceG
       "depName": "wirble",
       "depTypes": [
         "development",
+        "optional",
       ],
       "managerData": {
         "lineNumber": 14,
@@ -2251,6 +2253,7 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses sourceG
       "depName": "faker",
       "depTypes": [
         "development",
+        "optional",
       ],
       "managerData": {
         "lineNumber": 15,

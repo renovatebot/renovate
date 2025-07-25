@@ -186,6 +186,10 @@ describe('modules/manager/bundler/parser/index', () => {
         ${`gem 'foo', '1.0.0', :group => :test`}                     | ${'foo'} | ${'1.0.0'} | ${['test']}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test`}             | ${'foo'} | ${'1.0.0'} | ${['test']}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test, bar: "bar"`} | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', optional: true`}                      | ${'foo'} | ${'1.0.0'} | ${undefined}
+        ${`gem 'foo', '1.0.0', optional: false`}                     | ${'foo'} | ${'1.0.0'} | ${undefined}
+        ${`gem 'foo', '1.0.0', group: :test, optional: true`}        | ${'foo'} | ${'1.0.0'} | ${['test', 'optional']}
+        ${`gem 'foo', '1.0.0', group: :test, optional: false`}       | ${'foo'} | ${'1.0.0'} | ${['test']}
       `('$input', async ({ input, depName, version, depTypes }) => {
         const deps = await parseGemfile(input);
         expect(deps).toMatchObject({
