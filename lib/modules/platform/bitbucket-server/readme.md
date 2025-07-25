@@ -35,7 +35,7 @@ In line with their instructions, the following commands bring up a new server:
 
 ```
 docker volume create --name bitbucketVolume
-docker run -v bitbucketVolume:/var/atlassian/application-data/bitbucket --name="bitbucket" -d -p 7990:7990 -p 7999:7999 atlassian/bitbucket-server:5.12.3
+docker run -v bitbucketVolume:/var/atlassian/application-data/bitbucket --name="bitbucket" -d -p 7990:7990 -p 7999:7999 atlassian/bitbucket-server:8.9.6
 ```
 
 Once it's running and initialized, the quickest way to testing with Renovate is:
@@ -49,7 +49,7 @@ Once it's running and initialized, the quickest way to testing with Renovate is:
 At this point you should have a project ready for Renovate, and the `@renovate-bot` account ready to run on it. You can then run like this:
 
 ```
-npx renovate --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs=http --username=renovate-bot --password=abc123456789! --log-level=debug --autodiscover=true
+pnpm start --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs=http --username=renovate-bot --password=abc123456789! --log-level=debug --autodiscover=true
 ```
 
 Alternatively using env:
@@ -61,7 +61,7 @@ export RENOVATE_GIT_FS=http
 export RENOVATE_USERNAME=renovate-bot
 export RENOVATE_PASSWORD=abc123456789!
 export LOG_LEVEL=debug
-npx renovate --autodiscover=true
+pnpm start --autodiscover=true
 ```
 
 You should then get a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.

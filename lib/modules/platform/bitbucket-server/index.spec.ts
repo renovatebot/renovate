@@ -813,7 +813,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
 
           expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
         });
@@ -830,7 +850,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
 
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
@@ -862,6 +902,26 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }])
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
@@ -887,7 +947,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .twice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .twice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -907,7 +987,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -923,45 +1023,122 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .thrice()
-            .reply(409);
+            .reply(409)
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
             REPOSITORY_CHANGED,
           );
         });
 
-        it('throws on invalid reviewers', async () => {
+        it('deals correctly with resolving reviewers', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
+            .twice()
+            .reply(200, prMock(url, 'SOME', 'repo'));
+
+          scope
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                const reviewers = body.reviewers.map(
+                  (r: { user: { name: any } }) => r.user.name,
+                );
+                // Expect the resolved usernames to be in the order we provided and without invalid user
+                expect(reviewers).toEqual([
+                  'userName2',
+                  'usernamefoundbyemail',
+                  'usernamefoundbyname',
+                ]);
+                return true;
+              },
             )
-            .reply(409, {
-              errors: [
-                {
-                  context: 'reviewers',
-                  message:
-                    'Errors encountered while adding some reviewers to this pull request.',
-                  exceptionName:
-                    'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
-                  reviewerErrors: [
-                    {
-                      context: 'name',
-                      message: 'name is not a user.',
-                      exceptionName: null,
-                    },
-                  ],
-                  validReviewers: [],
-                },
-              ],
-            });
+            .once()
+            .reply(200);
+
+          scope
+            // Not found user, so it should not be added to the PR
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'test@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'usernamefoundbyemail', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'Jane Doe' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'usernamefoundbyname', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'inactive' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'inactive', active: false }]);
 
           await expect(
-            bitbucket.addReviewers(5, ['name']),
-          ).rejects.toThrowErrorMatchingSnapshot();
+            bitbucket.addReviewers(5, [
+              'name',
+              'userName2',
+              'test@test.com',
+              'Jane Doe',
+              'inactive',
+            ]),
+          ).toResolve();
         });
 
         it('throws', async () => {
@@ -974,7 +1151,15 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(405);
+            .reply(405)
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query((q) => q.filter === 'name')
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query((q) => q.filter === 'userName2')
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(
             bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();
@@ -2534,6 +2719,444 @@ Followed by some information.
             )
             .replyWithError('some error');
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+        });
+      });
+      describe('modules/platform/bitbucket-server/code-owners', () => {
+        it('ignores comments and empty lines', () => {
+          const lines = ['# This is a comment', '', 'docs/** @dev@example.com'];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules).toHaveLength(1);
+          expect(rules[0].pattern).toBe('docs/**');
+          expect(rules[0].usernames).toEqual(['@dev@example.com']);
+        });
+
+        it('parses usernames with escaped spaces', () => {
+          const lines = [String.raw`src/** @Jane\\ Doe @john@example.com`];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules[0].usernames).toEqual([
+            '@Jane Doe',
+            '@john@example.com',
+          ]);
+        });
+
+        it('parses groups with escaped spaces', () => {
+          const lines = [
+            String.raw`src/** @reviewer-group/Jane\\ Doe @john@example.com`,
+          ];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules[0].usernames).toEqual([
+            '@reviewer-group/Jane Doe',
+            '@john@example.com',
+          ]);
+        });
+
+        it('supports reviewer groups with :random and :random(N)', () => {
+          const lines = [
+            'docs/** @reviewer-group/content-designers:random',
+            'docs/api/** @reviewer-group/devs:random(2)',
+          ];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules[0].usernames).toEqual([
+            '@reviewer-group/devs:random(2)',
+          ]);
+          expect(rules[1].usernames).toEqual([
+            '@reviewer-group/content-designers:random',
+          ]);
+        });
+
+        it('matches paths correctly using glob patterns', () => {
+          const lines = ['**.css @css-owner', 'frontend/** @frontend-dev'];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          // Rules should be reversed: last line has higher precedence
+          expect(rules[0].pattern).toBe('frontend/**');
+          expect(rules[1].pattern).toBe('**.css');
+
+          // Path matches
+          expect(rules[0].match('frontend/app/main.ts')).toBe(true);
+          expect(rules[1].match('styles/theme.css')).toBe(true);
+
+          // Non-match
+          expect(rules[1].match('scripts/app.js')).toBe(false);
+        });
+
+        it('respects bottom-to-top rule precedence', () => {
+          const lines = ['** @fallback-user', 'docs/** @docs-user'];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          // Rule order should be reversed (bottom to top)
+          expect(rules[0].pattern).toBe('docs/**');
+          expect(rules[1].pattern).toBe('**');
+        });
+
+        it('supports rules with no owners (ownership ignored)', () => {
+          const lines = ['docs/images/**'];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules[0].pattern).toBe('docs/images/**');
+          expect(rules[0].usernames).toEqual([]);
+          expect(rules[0].match('docs/images/logo.png')).toBe(true);
+        });
+
+        it('unescapes multiple escaped spaces correctly', () => {
+          const lines = [String.raw`docs/** @reviewer-group/UX\\ Team\\ Lead`];
+
+          const rules = bitbucket.extractRulesFromCodeOwnersLines(lines);
+
+          expect(rules[0].usernames).toEqual(['@reviewer-group/UX Team Lead']);
+        });
+      });
+      describe('expandGroupMembers()', () => {
+        it('returns input when it is not a group', async () => {
+          const users = await bitbucket.expandGroupMembers([
+            '@alice',
+            'user@user.com',
+          ]);
+          expect(users).toEqual(['@alice', 'user@user.com']);
+        });
+        it('returns only active users from the matching reviewer group', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: [
+                    {
+                      slug: 'alice',
+                      active: true,
+                      emailAddress: 'alice@alice.com',
+                    },
+                    {
+                      slug: 'bob',
+                      active: false,
+                      emailAddresses: 'bob@bob.com',
+                    },
+                    {
+                      slug: 'carol',
+                      active: true,
+                      emailAddress: 'carol@carol.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group',
+          ]);
+          expect(users).toEqual(['alice@alice.com', 'carol@carol.com']);
+        });
+        it('returns empty array if group is not found', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'other-group',
+                  users: [
+                    {
+                      slug: 'dave',
+                      active: true,
+                      emailAddress: 'dave@dave.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/nonexistent-group',
+          ]);
+          expect(users).toEqual([]);
+        });
+        it('returns empty array if API call fails', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(500);
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group',
+          ]);
+          expect(users).toEqual([]);
+        });
+        it('returns empty array if all users in group are inactive', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  users: [
+                    {
+                      slug: 'user1',
+                      active: false,
+                      emailAddress: 'user1@user1.com',
+                    },
+                    {
+                      slug: 'user2',
+                      active: false,
+                      emailAddress: 'user2@user2.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group',
+          ]);
+          expect(users).toEqual([]);
+        });
+        it('prefers repository-level reviewer group over project-level group with same name', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-group',
+                  scope: {
+                    type: 'PROJECT',
+                  },
+                  users: [
+                    {
+                      slug: 'jane',
+                      active: true,
+                      emailAddress: 'jane@project.com',
+                    },
+                  ],
+                },
+                {
+                  name: 'my-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: [
+                    {
+                      slug: 'zoe',
+                      active: true,
+                      emailAddress: 'zoe@repo.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-group',
+          ]);
+          expect(users).toEqual(['zoe@repo.com']);
+        });
+
+        it('uses project-level group when repository-level group is not available', async () => {
+          const scope = await initRepo();
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-group',
+                  scope: {
+                    type: 'PROJECT',
+                  },
+                  users: [
+                    {
+                      slug: 'jane',
+                      active: true,
+                      emailAddress: 'jane@project.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-group',
+          ]);
+          expect(users).toEqual(['jane@project.com']);
+        });
+
+        it('handles random without number correctly', async () => {
+          const scope = await initRepo();
+
+          const userArray = [
+            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'user1',
+              active: true,
+              emailAddress: 'user1@user1.com',
+            },
+            {
+              slug: 'user2',
+              active: true,
+              emailAddress: 'user2@user2.com',
+            },
+          ];
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: userArray,
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group:random',
+          ]);
+          expect(users).toHaveLength(1);
+          expect(userArray.map((u) => u.emailAddress)).toContain(users[0]);
+        });
+        it('handles random with number correctly', async () => {
+          const scope = await initRepo();
+          const userArray = [
+            { slug: 'zoe', active: true, emailAddress: 'zoe@zoe.com' },
+            {
+              slug: 'user1',
+              active: true,
+              emailAddress: 'user1@user1.com',
+            },
+            {
+              slug: 'user2',
+              active: true,
+              emailAddress: 'user2@user2.com',
+            },
+          ];
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: userArray,
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group:random(2)',
+          ]);
+          expect(users).toHaveLength(2);
+          users.forEach((user) => {
+            expect(userArray.map((u) => u.emailAddress)).toContain(user);
+          });
+        });
+        it('handles paginated responses and finds matching group in next page', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100`,
+            )
+            .reply(200, {
+              isLastPage: false,
+              nextPageStart: 1,
+              values: [
+                {
+                  name: 'not-this-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: [
+                    {
+                      slug: 'nope',
+                      active: true,
+                      emailAddress: 'nope@nope.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/settings/reviewer-groups?limit=100&start=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                {
+                  name: 'my-reviewer-group',
+                  scope: {
+                    type: 'REPOSITORY',
+                  },
+                  users: [
+                    {
+                      slug: 'alice',
+                      active: true,
+                      emailAddress: 'alice@alice.com',
+                    },
+                    {
+                      slug: 'bob',
+                      active: true,
+                      emailAddress: 'bob@bob.com',
+                    },
+                  ],
+                },
+              ],
+            });
+
+          const users = await bitbucket.expandGroupMembers([
+            '@reviewer-group/my-reviewer-group',
+          ]);
+          expect(users).toEqual(['alice@alice.com', 'bob@bob.com']);
         });
       });
     });
