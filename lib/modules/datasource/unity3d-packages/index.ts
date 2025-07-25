@@ -57,6 +57,7 @@ export class Unity3dPackagesDatasource extends Datasource {
           : undefined,
         isStable: Unity3dPackagesVersioning.default.isStable(release.version),
         registryUrl,
+        sourceUrl: release.repository?.url,
       });
     }
 
