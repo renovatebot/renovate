@@ -1,7 +1,7 @@
 import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
+import { logError, logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
@@ -145,7 +145,8 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
 
     return repos.map(({ owner, name }) => `${owner}/${name}`);
   } catch (err) /* v8 ignore start */ {
-    logger.error({ err }, `bitbucket getRepos error`);
+    logger.debug({ err }, 'Bitbucket getRepos error');
+    logError('GET_REPOS_ERROR', {});
     throw err;
   } /* v8 ignore stop */
 }
