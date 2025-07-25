@@ -20,11 +20,11 @@ import { extractPackageJson } from './common/package-file';
 import { extractPnpmWorkspaceFile, tryParsePnpmWorkspaceYaml } from './pnpm';
 import { postExtract } from './post';
 import type { NpmPackage } from './types';
-import { isZeroInstall } from './yarn';
+import { extractYarnCatalogsFromYml, isZeroInstall } from './yarn';
 import type { YarnConfig } from './yarnrc';
 import {
   loadConfigFromLegacyYarnrc,
-  loadConfigFromYarnrcYml,
+  loadYarnRcYml,
   resolveRegistryUrl,
 } from './yarnrc';
 
@@ -137,13 +137,7 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
-    : null;
-  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
-    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-  }
+  let yarnConfig: YarnConfig | null = await loadYarnRcYml(yarnrcYmlFileName);
 
   const legacyYarnrcFileName = await findLocalSiblingOrParent(
     packageFile,
@@ -252,6 +246,29 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
+        if (packageFile === 'package.json') {
+          const yarnrcYmlFileName = await findLocalSiblingOrParent(
+            packageFile,
+            '.yarnrc.yml',
+          );
+
+          const yarnConfig: YarnConfig | null =
+            await loadYarnRcYml(yarnrcYmlFileName);
+
+          if (yarnConfig?.catalogs) {
+            const deps = await extractYarnCatalogsFromYml(
+              yarnConfig.catalogs,
+              packageFile,
+            );
+            if (deps) {
+              npmFiles.push({
+                ...deps,
+                packageFile: '.yarnrc.yml',
+              });
+            }
+          }
+        }
+
         logger.trace({ packageFile }, `Extracting as a package.json file`);
         const deps = await extractPackageFile(content, packageFile, config);
         if (deps) {
@@ -265,7 +282,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, `No content found`);
     }
   }
-
   await postExtract(npmFiles);
   return npmFiles;
 }

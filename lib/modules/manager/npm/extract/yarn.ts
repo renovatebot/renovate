@@ -9,10 +9,10 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFileContent } from '../../types';
+import type { YarnCatalogsSchema } from '../schema';
 import type { NpmManagerData } from '../types';
 import { extractCatalogDeps } from './common/catalogs';
 import type { Catalog, LockFile } from './types';
-import type { YarnCatalogsSchema } from './yarnrc';
 
 export async function getYarnLock(filePath: string): Promise<LockFile> {
   // TODO #22198
@@ -130,7 +130,7 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
 type YarnCatalogs = z.TypeOf<typeof YarnCatalogsSchema>;
 
 export async function extractYarnCatalogsFromYml(
-  catalogs: YarnCatalogs,
+  catalogs: YarnCatalogs | undefined,
   packageFile: string,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`yarn.extractYarnCatalogsFromYml(${packageFile})`);
@@ -139,22 +139,23 @@ export async function extractYarnCatalogsFromYml(
 
   const deps = extractCatalogDeps(yarnCatalogs, 'yarn');
 
-  let yarnShrinkwrap;
+  let yarnLock;
   const filePath = getSiblingFileName(packageFile, 'yarn.lock');
 
   if (await readLocalFile(filePath, 'utf8')) {
-    yarnShrinkwrap = filePath;
+    yarnLock = filePath;
   }
 
   return {
     deps,
     managerData: {
-      yarnShrinkwrap,
+      yarnLock,
+      hasPackageManager: true,
     },
   };
 }
 
-function yarnCatalogsToArray(catalogs: YarnCatalogs): Catalog[] {
+function yarnCatalogsToArray(catalogs: YarnCatalogs | undefined): Catalog[] {
   const result: Catalog[] = [];
 
   if (catalogs?.list !== undefined) {

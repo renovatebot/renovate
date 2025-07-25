@@ -1267,6 +1267,86 @@ describe('modules/manager/npm/extract/index', () => {
         },
       ]);
     });
+    it('extracts yarnrc.yml and adds it as packageFile', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(input02Content);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.yarnrc.yml');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        nodeLinker: node-modules
+
+        plugins:
+          - checksum: 4cb9601cfc0c71e5b0ffd0a85b78e37430b62257040714c2558298ce1fc058f4e918903f0d1747a4fef3f58e15722c35bd76d27492d9d08aa5b04e235bf43b22
+            path: .yarn/plugins/@yarnpkg/plugin-catalogs.cjs
+            spec: 'https://raw.githubusercontent.com/toss/yarn-plugin-catalogs/main/bundles/%40yarnpkg/plugin-catalogs.js'
+
+        catalogs:
+          list:
+            is-positive: 1.0.0
+      `);
+
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'package.json',
+      ]);
+
+      expect(res).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'is-positive',
+              depType: 'yarn.catalog.default',
+              prettyDepType: 'yarn.catalog.default',
+            },
+          ],
+          managerData: {
+            hasPackageManager: true,
+          },
+          packageFile: '.yarnrc.yml',
+        },
+        {
+          deps: [
+            {
+              currentValue: '7.0.0',
+              datasource: 'npm',
+              depName: '@babel/core',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+            {
+              currentValue: '1.21.0',
+              datasource: 'npm',
+              depName: 'config',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+            {
+              currentValue: '0.7.0',
+              datasource: 'npm',
+              depName: 'express>cookie',
+              packageName: 'cookie',
+              depType: 'pnpm.overrides',
+              prettyDepType: 'overrides',
+            },
+          ],
+          extractedConstraints: {},
+          managerData: {
+            hasPackageManager: false,
+            npmLock: undefined,
+            packageJsonName: 'renovate',
+            pnpmShrinkwrap: undefined,
+            workspacesPackages: undefined,
+            workspaces: undefined,
+            yarnLock: undefined,
+            npmrcFileName: undefined,
+            yarnZeroInstall: false,
+          },
+          npmrc: undefined,
+          packageFile: 'package.json',
+          packageFileVersion: '1.0.0',
+          skipInstalls: true,
+        },
+      ]);
+    });
   });
 
   describe('.postExtract()', () => {

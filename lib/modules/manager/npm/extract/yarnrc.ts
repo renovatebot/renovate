@@ -1,30 +1,11 @@
 import is from '@sindresorhus/is';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { logger } from '../../../../logger';
+import { readLocalFile } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import { Result } from '../../../../util/result';
 import { Yaml } from '../../../../util/schema-utils';
-
-export const YarnCatalogsSchema = z
-  .object({
-    options: z.optional(z.union([z.string(), z.array(z.string())])),
-    list: z.record(z.union([z.string(), z.record(z.string())])),
-  })
-  .optional();
-
-const YarnrcYmlSchema = Yaml.pipe(
-  z.object({
-    npmRegistryServer: z.string().optional(),
-    npmScopes: z
-      .record(
-        z.object({
-          npmRegistryServer: z.string().optional(),
-        }),
-      )
-      .optional(),
-    catalogs: YarnCatalogsSchema,
-  }),
-);
+import { YarnrcYmlSchema } from '../schema';
 
 export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
 
@@ -54,7 +35,7 @@ export function loadConfigFromLegacyYarnrc(
 }
 
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
-  return Result.parse(yarnrcYml, YarnrcYmlSchema)
+  return Result.parse(yarnrcYml, Yaml.pipe(YarnrcYmlSchema))
     .onError((err) => {
       logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     })
@@ -76,4 +57,17 @@ export function resolveRegistryUrl(
     return yarnConfig.npmRegistryServer;
   }
   return null;
+}
+
+export async function loadYarnRcYml(
+  yarnrcYmlFileName: string | null,
+): Promise<YarnConfig | null> {
+  let yarnConfig: YarnConfig | null = null;
+  const repoYarnrcYml = yarnrcYmlFileName
+    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
+    : null;
+  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
+  return yarnConfig;
 }

@@ -122,7 +122,8 @@ describe('modules/manager/npm/extract/yarn', () => {
           },
         ],
         managerData: {
-          yarnShrinkwrap: 'yarn.lock',
+          yarnLock: 'yarn.lock',
+          hasPackageManager: true,
         },
       });
     });
@@ -143,7 +144,8 @@ describe('modules/manager/npm/extract/yarn', () => {
         ),
       ).toMatchObject({
         managerData: {
-          yarnShrinkwrap: 'yarn.lock',
+          yarnLock: 'yarn.lock',
+          hasPackageManager: true,
         },
       });
     });
