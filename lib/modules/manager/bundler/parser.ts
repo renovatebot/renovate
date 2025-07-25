@@ -13,6 +13,41 @@ function namedChildren(node: SgNode): SgNode[] {
   return node.children().filter((child) => child.isNamed());
 }
 
+function extractPlainString(node: SgNode | null): string | null {
+  if (node?.kind() === 'string') {
+    const children = namedChildren(node);
+    if (children.length === 1 && children[0].kind() === 'string_content') {
+      return children[0].text();
+    }
+  }
+
+  return null;
+}
+
+function coerceNodeToString(node: SgNode | null): string | null {
+  if (!node) {
+    return null;
+  }
+
+  if (node.kind() === 'identifier') {
+    return node.text();
+  }
+
+  if (node.kind() === 'hash_key_symbol') {
+    return node.text();
+  }
+
+  if (node.kind() === 'simple_symbol') {
+    return node.text().replace(regEx(/^:/), '');
+  }
+
+  if (node.kind() === 'float' || node.kind() === 'integer') {
+    return node.text();
+  }
+
+  return extractPlainString(node);
+}
+
 function extractDepNameData(
   gemArgList: SgNode,
 ): Pick<PackageDependency, 'depName' | 'skipReason'> {
@@ -244,6 +279,7 @@ const globalSourcePattern = astGrep.rule`
             any:
               - kind: string
               - kind: simple_symbol
+              - kind: identifier
 `;
 
 function extractGlobalRegistries(root: SgNode): string[] {
@@ -261,6 +297,13 @@ function extractGlobalRegistries(root: SgNode): string[] {
       const [child] = children;
       if (children.length === 1 && child.kind() === 'string_content') {
         result.push(child.text());
+      }
+    }
+
+    if (node.kind() === 'identifier') {
+      const resolvedValue = resolveIdentifier(node);
+      if (resolvedValue) {
+        result.push(resolvedValue);
       }
     }
   }
@@ -284,37 +327,6 @@ const kvArgsPattern = astGrep.rule`
           pattern: $VAL
 `;
 
-function extractPlainString(node: SgNode | null): string | null {
-  if (node?.kind() === 'string') {
-    const children = namedChildren(node);
-    if (children.length === 1 && children[0].kind() === 'string_content') {
-      return children[0].text();
-    }
-  }
-
-  return null;
-}
-
-function extractStringValue(node: SgNode | null): string | null {
-  if (!node) {
-    return null;
-  }
-
-  if (node.kind() === 'hash_key_symbol') {
-    return node.text();
-  }
-
-  if (node.kind() === 'simple_symbol') {
-    return node.text().replace(regEx(/^:/), '');
-  }
-
-  if (node.kind() === 'float' || node.kind() === 'integer') {
-    return node.text();
-  }
-
-  return extractPlainString(node);
-}
-
 function extractKvArgs(
   argsListNode: SgNode,
 ): Record<string, string | string[]> {
@@ -325,12 +337,12 @@ function extractKvArgs(
   ]);
 
   for (const [keyNode, valNode] of pairs) {
-    const key = extractStringValue(keyNode);
+    const key = coerceNodeToString(keyNode);
     if (!key) {
       continue;
     }
 
-    const val = extractStringValue(valNode);
+    const val = coerceNodeToString(valNode);
     if (val) {
       result[key] = val;
       continue;
@@ -338,7 +350,7 @@ function extractKvArgs(
 
     if (valNode.kind() === 'array') {
       const children = namedChildren(valNode);
-      const stringValues = children.map((child) => extractStringValue(child));
+      const stringValues = children.map((child) => coerceNodeToString(child));
       if (stringValues.every((value) => value !== null)) {
         result[key] = stringValues;
       }
@@ -387,7 +399,7 @@ function extractParentBlockData(node: SgNode): [string[], string[]] {
     if (method === 'group') {
       depTypes.push(
         namedChildren(args)
-          .map((arg) => extractStringValue(arg))
+          .map((arg) => coerceNodeToString(arg))
           .filter(is.truthy),
       );
     }
@@ -395,7 +407,11 @@ function extractParentBlockData(node: SgNode): [string[], string[]] {
     if (method === 'source') {
       registryUrls.push(
         namedChildren(args)
-          .map((arg) => extractStringValue(arg))
+          .map((arg) =>
+            arg.kind() === 'identifier'
+              ? resolveIdentifier(arg)
+              : coerceNodeToString(arg),
+          )
           .filter(is.truthy)
           .map(aliasRubygemsSource),
       );
@@ -403,6 +419,73 @@ function extractParentBlockData(node: SgNode): [string[], string[]] {
   }
 
   return [depTypes.reverse().flat(), registryUrls.flat()];
+}
+
+const stringAssignmentPattern = astGrep.rule`
+  rule:
+    kind: assignment
+    all:
+      - has:
+          field: left
+          pattern: $LEFT
+      - has:
+          field: right
+          pattern: $RIGHT
+`;
+
+type StringAssignmentResult =
+  | { result: string; error?: undefined }
+  | { result?: undefined; error: 'continue' | 'break' };
+
+function matchAssignment(
+  node: SgNode,
+  variable: string,
+): StringAssignmentResult {
+  const [left, right] = astGrep.extractMatches(node, stringAssignmentPattern, [
+    'LEFT',
+    'RIGHT',
+  ]);
+
+  const identifier = coerceNodeToString(left);
+  if (identifier !== variable) {
+    return { error: 'continue' };
+  }
+
+  const result = extractPlainString(right);
+  if (!result) {
+    return { error: 'break' };
+  }
+
+  return { result };
+}
+
+function resolveIdentifier(node: SgNode): string | null {
+  if (node.kind() !== 'identifier') {
+    return null;
+  }
+
+  const identifier = node.text();
+  let cursor = node.parent()?.prev();
+  while (cursor) {
+    if (!cursor.isNamed()) {
+      cursor = cursor.prev() ?? cursor.parent();
+      continue;
+    }
+
+    const { result, error } = matchAssignment(cursor, identifier);
+
+    if (result) {
+      return result;
+    }
+
+    if (error === 'break') {
+      return null;
+    }
+
+    cursor = cursor.prev() ?? cursor.parent();
+  }
+
+  return null;
 }
 
 const gemArgListPattern = astGrep.rule`

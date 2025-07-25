@@ -532,6 +532,30 @@ describe('modules/manager/bundler/parser', () => {
         },
       ]);
     });
+
+    it('resolves variables', async () => {
+      const src = codeBlock`
+        foo = "foo"
+        bar = "bar"
+
+        source foo
+
+        source bar do
+          gem "foo", "1.0.0"
+        end
+      `;
+
+      const res = await parseGemfile(src);
+
+      expect(res).toEqual([
+        {
+          datasource: 'rubygems',
+          depName: 'foo',
+          currentValue: '1.0.0',
+          registryUrls: ['bar', 'foo'],
+        },
+      ]);
+    });
   });
 
   describe('git refs', () => {
