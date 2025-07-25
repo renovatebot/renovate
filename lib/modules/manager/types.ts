@@ -6,6 +6,7 @@ import type {
 } from '../../config/types';
 import type { Category } from '../../constants';
 import type {
+  MaybePromise,
   ModuleApi,
   RangeStrategy,
   SkipReason,
@@ -16,8 +17,6 @@ import type { MergeConfidence } from '../../util/merge-confidence/types';
 import type { Timestamp } from '../../util/timestamp';
 import type { RegistryStrategy } from '../datasource';
 import type { CustomExtractConfig } from './custom/types';
-
-export type MaybePromise<T> = T | Promise<T>;
 
 export interface ManagerData<T> {
   managerData?: T;
