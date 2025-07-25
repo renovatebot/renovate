@@ -1,13 +1,11 @@
 import is from '@sindresorhus/is';
+import type { PackageDependency } from '../../types';
 import type { KvArgs } from './common';
 
-export interface GitRefData {
-  datasource: 'git-refs';
-  packageName: string;
-  sourceUrl: string;
-  currentDigest?: string;
-  currentValue?: string;
-}
+type GitRefData = Pick<
+  PackageDependency,
+  'datasource' | 'packageName' | 'sourceUrl' | 'currentDigest' | 'currentValue'
+>;
 
 export function extractGitRefData(kvArgs: KvArgs): GitRefData | null {
   const { git, github, ref, tag, branch } = kvArgs;

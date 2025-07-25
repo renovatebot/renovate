@@ -54,8 +54,8 @@ export async function parseGemfile(
     // Handle git refs
     const gitRefData = extractGitRefData(kvArgs);
     if (gitRefData) {
-      Object.assign(dep, gitRefData);
       delete dep.skipReason;
+      Object.assign(dep, gitRefData);
       deps.push(dep);
       continue;
     }
