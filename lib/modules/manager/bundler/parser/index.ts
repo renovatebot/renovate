@@ -6,12 +6,13 @@ import type { PackageDependency, PackageFileContent } from '../../types';
 import { extractKvArgs, loadRuby, resolveIdentifier } from './common';
 import { extractDepNameData, extractVersionData, gemDefPattern } from './gem';
 import { extractGitRefData } from './git';
+import { extractScopedGroups } from './group-scope';
 import { extractRubyVersion } from './ruby-version';
 import {
   aliasRubygemsSource,
   extractGlobalRegistries,
-  extractParentBlockData,
-} from './scope';
+  extractScopedSources,
+} from './source-scope';
 
 interface DependencyTypesData {
   depType?: string;
@@ -31,9 +32,7 @@ function getDepTypesData(
   }
 
   depTypes = uniq(depTypes);
-  if (depTypes.length === 1) {
-    return { depType: depTypes[0] };
-  } else if (depTypes.length > 1) {
+  if (depTypes.length) {
     return { depTypes };
   }
 
@@ -102,12 +101,15 @@ export async function parseGemfile(
 
   for (const gemDef of astRoot.findAll(gemDefPattern)) {
     const kvArgs = extractKvArgs(gemDef);
-    const [blockDepTypes, blockRegistryUrls] = extractParentBlockData(gemDef);
 
     const dep: PackageDependency = { datasource: 'rubygems' };
 
     const depNameData = extractDepNameData(gemDef);
     mergeData(dep, depNameData);
+
+    const blockDepTypes = extractScopedGroups(gemDef);
+    const depTypesData = getDepTypesData(blockDepTypes, kvArgs.group);
+    mergeData(dep, depTypesData);
 
     const { path } = kvArgs;
     if (is.string(path)) {
@@ -129,10 +131,8 @@ export async function parseGemfile(
     const versionData = extractVersionData(gemDef);
     mergeData(dep, versionData);
 
-    const depTypesData = getDepTypesData(blockDepTypes, kvArgs.group);
-    mergeData(dep, depTypesData);
-
     const gemRegistryUrls = kvArgs.source;
+    const blockRegistryUrls = extractScopedSources(gemDef);
     const registryUrlsData = getRegistryUrlsData(
       gemDef,
       gemRegistryUrls,

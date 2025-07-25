@@ -60,14 +60,13 @@ export function extractGlobalRegistries(root: SgNode): string[] {
   return result.reverse();
 }
 
-const scopedCallPattern = astGrep.rule`
+const sourceScopePattern = astGrep.rule`
   rule:
     kind: call
     all:
       - has:
           field: method
-          pattern: $METHOD
-          regex: ^(?:group|source)$
+          regex: ^source$
       - has:
           field: arguments
           pattern: $ARGS
@@ -76,43 +75,28 @@ const scopedCallPattern = astGrep.rule`
           pattern: $_
 `;
 
-export function extractParentBlockData(node: SgNode): [string[], string[]] {
-  const depTypes: string[][] = [];
+export function extractScopedSources(node: SgNode): string[] {
   const registryUrls: string[][] = [];
   const ancestors = node.ancestors();
   for (const ancestor of ancestors) {
-    if (ancestor.kind() !== 'call') {
+    const [args] = astGrep.extractMatches(ancestor, sourceScopePattern, [
+      'ARGS',
+    ]);
+    if (!args) {
       continue;
     }
 
-    const match = ancestor.find(scopedCallPattern);
-    if (!match) {
-      continue;
-    }
-
-    const method = match.getMatch('METHOD')!.text();
-    const args = match.getMatch('ARGS')!;
-    if (method === 'group') {
-      depTypes.push(
-        namedChildren(args)
-          .map((arg) => coerceToString(arg))
-          .filter(is.truthy),
-      );
-    }
-
-    if (method === 'source') {
-      registryUrls.push(
-        namedChildren(args)
-          .map((arg) =>
-            arg.kind() === 'identifier'
-              ? resolveIdentifier(arg)
-              : coerceToString(arg),
-          )
-          .filter(is.truthy)
-          .map(aliasRubygemsSource),
-      );
-    }
+    registryUrls.push(
+      namedChildren(args)
+        .map((arg) =>
+          arg.kind() === 'identifier'
+            ? resolveIdentifier(arg)
+            : coerceToString(arg),
+        )
+        .filter(is.truthy)
+        .map(aliasRubygemsSource),
+    );
   }
 
-  return [depTypes.reverse().flat(), registryUrls.flat()];
+  return registryUrls.flat();
 }

@@ -173,7 +173,7 @@ describe('modules/manager/bundler/extract', () => {
         currentValue: '~> 1',
         datasource: 'rubygems',
         depName: 'internal_production_gem',
-        depType: 'production',
+        depTypes: ['production'],
         registryUrls: [
           'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
         ],

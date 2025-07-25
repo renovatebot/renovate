@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { parseGemfile } from './parser';
+import { parseGemfile } from '.';
 
-describe('modules/manager/bundler/parser', () => {
+describe('modules/manager/bundler/parser/index', () => {
   describe('ruby version', () => {
     it('extracts simple ruby version', async () => {
       const src = codeBlock`
@@ -176,17 +176,17 @@ describe('modules/manager/bundler/parser', () => {
 
     describe('common instructions', () => {
       it.each`
-        input                                                        | depName  | version    | depType
+        input                                                        | depName  | version    | depTypes
         ${`gem 'foo', '1.0.0'`}                                      | ${'foo'} | ${'1.0.0'} | ${undefined}
         ${`gem 'foo', 1`}                                            | ${'foo'} | ${'1'}     | ${undefined}
         ${`gem 'foo', 1.2`}                                          | ${'foo'} | ${'1.2'}   | ${undefined}
-        ${`gem 'foo', '1.0.0', group: "test"`}                       | ${'foo'} | ${'1.0.0'} | ${'test'}
-        ${`gem 'foo', '1.0.0', :group => "test"`}                    | ${'foo'} | ${'1.0.0'} | ${'test'}
-        ${`gem 'foo', '1.0.0', group: :test`}                        | ${'foo'} | ${'1.0.0'} | ${'test'}
-        ${`gem 'foo', '1.0.0', :group => :test`}                     | ${'foo'} | ${'1.0.0'} | ${'test'}
-        ${`gem 'foo', '1.0.0', foo: :foo, group: :test`}             | ${'foo'} | ${'1.0.0'} | ${'test'}
-        ${`gem 'foo', '1.0.0', foo: :foo, group: :test, bar: "bar"`} | ${'foo'} | ${'1.0.0'} | ${'test'}
-      `('$input', async ({ input, depName, version, depType }) => {
+        ${`gem 'foo', '1.0.0', group: "test"`}                       | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', :group => "test"`}                    | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', group: :test`}                        | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', :group => :test`}                     | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', foo: :foo, group: :test`}             | ${'foo'} | ${'1.0.0'} | ${['test']}
+        ${`gem 'foo', '1.0.0', foo: :foo, group: :test, bar: "bar"`} | ${'foo'} | ${'1.0.0'} | ${['test']}
+      `('$input', async ({ input, depName, version, depTypes }) => {
         const deps = await parseGemfile(input);
         expect(deps).toMatchObject({
           deps: [
@@ -195,7 +195,7 @@ describe('modules/manager/bundler/parser', () => {
               depName,
               currentValue: version,
               skipReason: 'unknown-registry',
-              ...(depType && { depType }),
+              ...(depTypes && { depTypes }),
             },
           ],
         });
@@ -219,7 +219,7 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            depType: 'test',
+            depTypes: ['test'],
             skipReason: 'unknown-registry',
           },
         ],
@@ -282,7 +282,7 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            depType: 'test',
+            depTypes: ['test'],
             skipReason: 'unknown-registry',
           },
         ],
@@ -305,14 +305,14 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            depType: 'test',
+            depTypes: ['test'],
             skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'bar',
             currentValue: '2.0.0',
-            depType: 'test',
+            depTypes: ['test'],
             skipReason: 'unknown-registry',
           },
         ],
@@ -346,7 +346,7 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'gem-1',
             currentValue: '1',
-            depType: 'foo',
+            depTypes: ['foo'],
             skipReason: 'unknown-registry',
           },
           {
@@ -374,7 +374,7 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'gem-5',
             currentValue: '5',
-            depType: 'foo',
+            depTypes: ['foo'],
             skipReason: 'unknown-registry',
           },
         ],

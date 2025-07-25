@@ -64,7 +64,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "foreman",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.86.0",
       "managerData": {
         "lineNumber": 14,
@@ -73,7 +75,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "sqlite3",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.4.2",
       "managerData": {
         "lineNumber": 15,
@@ -82,7 +86,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "listen",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "3.2.1",
       "managerData": {
         "lineNumber": 16,
@@ -91,7 +97,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "pg",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "1.2.1",
       "managerData": {
         "lineNumber": 20,
@@ -100,7 +108,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "newrelic_rpm",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "6.8.0.360",
       "managerData": {
         "lineNumber": 21,
@@ -110,7 +120,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
       "currentValue": "< 1.17.2",
       "datasource": "rubygems",
       "depName": "sqreen",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "1.17.0",
       "managerData": {
         "lineNumber": 22,
@@ -119,7 +131,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse Ruby CI 
     {
       "datasource": "rubygems",
       "depName": "airbrake",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "9.5.5",
       "managerData": {
         "lineNumber": 23,
@@ -391,7 +405,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 9.2",
       "datasource": "rubygems",
       "depName": "devise_pam_authenticatable2",
-      "depType": "pam_authentication",
+      "depTypes": [
+        "pam_authentication",
+      ],
       "lockedVersion": "9.2.0",
       "managerData": {
         "lineNumber": 38,
@@ -1023,7 +1039,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 3.29",
       "datasource": "rubygems",
       "depName": "capybara",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.29.0",
       "managerData": {
         "lineNumber": 117,
@@ -1033,7 +1051,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "climate_control",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.2.0",
       "managerData": {
         "lineNumber": 118,
@@ -1043,7 +1063,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.10",
       "datasource": "rubygems",
       "depName": "faker",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.10.0",
       "managerData": {
         "lineNumber": 119,
@@ -1053,7 +1075,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 4.2",
       "datasource": "rubygems",
       "depName": "microformats",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "4.2.0",
       "managerData": {
         "lineNumber": 120,
@@ -1063,7 +1087,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "rails-controller-testing",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "1.0.4",
       "managerData": {
         "lineNumber": 121,
@@ -1073,7 +1099,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "rspec-sidekiq",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.0.3",
       "managerData": {
         "lineNumber": 122,
@@ -1083,7 +1111,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.17",
       "datasource": "rubygems",
       "depName": "simplecov",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.17.1",
       "managerData": {
         "lineNumber": 123,
@@ -1093,7 +1123,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 3.7",
       "datasource": "rubygems",
       "depName": "webmock",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.7.6",
       "managerData": {
         "lineNumber": 124,
@@ -1103,7 +1135,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.30",
       "datasource": "rubygems",
       "depName": "parallel_tests",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.30.0",
       "managerData": {
         "lineNumber": 125,
@@ -1113,7 +1147,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "active_record_query_trace",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.7",
       "managerData": {
         "lineNumber": 129,
@@ -1123,7 +1159,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "annotate",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "3.0.3",
       "managerData": {
         "lineNumber": 130,
@@ -1133,7 +1171,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.5",
       "datasource": "rubygems",
       "depName": "better_errors",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "2.5.1",
       "managerData": {
         "lineNumber": 131,
@@ -1143,7 +1183,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.7",
       "datasource": "rubygems",
       "depName": "binding_of_caller",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.8.0",
       "managerData": {
         "lineNumber": 132,
@@ -1153,7 +1195,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "bullet",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "6.0.2",
       "managerData": {
         "lineNumber": 133,
@@ -1163,7 +1207,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 1.7",
       "datasource": "rubygems",
       "depName": "letter_opener",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.7.0",
       "managerData": {
         "lineNumber": 134,
@@ -1173,7 +1219,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 1.3",
       "datasource": "rubygems",
       "depName": "letter_opener_web",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.3.4",
       "managerData": {
         "lineNumber": 135,
@@ -1182,7 +1230,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
     {
       "datasource": "rubygems",
       "depName": "memory_profiler",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.9.14",
       "managerData": {
         "lineNumber": 136,
@@ -1192,7 +1242,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.78",
       "datasource": "rubygems",
       "depName": "rubocop",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.78.0",
       "managerData": {
         "lineNumber": 137,
@@ -1202,7 +1254,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.4",
       "datasource": "rubygems",
       "depName": "rubocop-rails",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "2.4.0",
       "managerData": {
         "lineNumber": 138,
@@ -1212,7 +1266,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 4.7",
       "datasource": "rubygems",
       "depName": "brakeman",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "4.7.2",
       "managerData": {
         "lineNumber": 139,
@@ -1222,7 +1278,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.6",
       "datasource": "rubygems",
       "depName": "bundler-audit",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.6.1",
       "managerData": {
         "lineNumber": 140,
@@ -1232,7 +1290,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 3.11",
       "datasource": "rubygems",
       "depName": "capistrano",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "3.11.2",
       "managerData": {
         "lineNumber": 142,
@@ -1242,7 +1302,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 1.4",
       "datasource": "rubygems",
       "depName": "capistrano-rails",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.4.0",
       "managerData": {
         "lineNumber": 143,
@@ -1252,7 +1314,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.1",
       "datasource": "rubygems",
       "depName": "capistrano-rbenv",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "2.1.4",
       "managerData": {
         "lineNumber": 144,
@@ -1262,7 +1326,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 2.0",
       "datasource": "rubygems",
       "depName": "capistrano-yarn",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "2.0.2",
       "managerData": {
         "lineNumber": 145,
@@ -1271,7 +1337,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
     {
       "datasource": "rubygems",
       "depName": "derailed_benchmarks",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.4.3",
       "managerData": {
         "lineNumber": 147,
@@ -1280,7 +1348,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
     {
       "datasource": "rubygems",
       "depName": "stackprof",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.2.15",
       "managerData": {
         "lineNumber": 148,
@@ -1290,7 +1360,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 0.11",
       "datasource": "rubygems",
       "depName": "lograge",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "0.11.2",
       "managerData": {
         "lineNumber": 152,
@@ -1300,7 +1372,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse mastodon
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "redis-rails",
-      "depType": "production",
+      "depTypes": [
+        "production",
+      ],
       "lockedVersion": "5.0.2",
       "managerData": {
         "lineNumber": 153,
@@ -1364,7 +1438,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse webpacke
       "currentValue": "~> 5.0",
       "datasource": "rubygems",
       "depName": "minitest",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "5.13.0",
       "managerData": {
         "lineNumber": 9,
@@ -1373,7 +1449,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parse webpacke
     {
       "datasource": "rubygems",
       "depName": "byebug",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "11.0.1",
       "managerData": {
         "lineNumber": 10,
@@ -1485,7 +1563,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "sdoc",
-      "depType": "doc",
+      "depTypes": [
+        "doc",
+      ],
       "lockedVersion": "1.0.0",
       "managerData": {
         "lineNumber": 32,
@@ -1495,7 +1575,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 3.2.3",
       "datasource": "rubygems",
       "depName": "redcarpet",
-      "depType": "doc",
+      "depTypes": [
+        "doc",
+      ],
       "lockedVersion": "3.2.3",
       "managerData": {
         "lineNumber": 33,
@@ -1504,7 +1586,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "w3c_validators",
-      "depType": "doc",
+      "depTypes": [
+        "doc",
+      ],
       "lockedVersion": "1.3.4",
       "managerData": {
         "lineNumber": 34,
@@ -1514,7 +1598,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 1.2.0",
       "datasource": "rubygems",
       "depName": "kindlerb",
-      "depType": "doc",
+      "depTypes": [
+        "doc",
+      ],
       "lockedVersion": "1.2.0",
       "managerData": {
         "lineNumber": 35,
@@ -1565,7 +1651,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "resque",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "1.27.4",
       "managerData": {
         "lineNumber": 49,
@@ -1574,7 +1662,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "resque-scheduler",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "4.3.1",
       "managerData": {
         "lineNumber": 50,
@@ -1583,7 +1673,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "sidekiq",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "5.2.3",
       "managerData": {
         "lineNumber": 51,
@@ -1592,7 +1684,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "sucker_punch",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "2.1.1",
       "managerData": {
         "lineNumber": 52,
@@ -1601,7 +1695,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "delayed_job",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "4.1.5",
       "managerData": {
         "lineNumber": 53,
@@ -1611,6 +1707,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "update-pg",
       "datasource": "git-refs",
       "depName": "queue_classic",
+      "depTypes": [
+        "job",
+      ],
       "managerData": {
         "lineNumber": 54,
       },
@@ -1620,7 +1719,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "sneakers",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "2.7.0",
       "managerData": {
         "lineNumber": 55,
@@ -1629,7 +1730,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "que",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "0.14.3",
       "managerData": {
         "lineNumber": 56,
@@ -1638,7 +1741,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "backburner",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "1.5.0",
       "managerData": {
         "lineNumber": 57,
@@ -1647,7 +1752,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "delayed_job_active_record",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "4.1.3",
       "managerData": {
         "lineNumber": 58,
@@ -1656,7 +1763,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "sequel",
-      "depType": "job",
+      "depTypes": [
+        "job",
+      ],
       "lockedVersion": "5.14.0",
       "managerData": {
         "lineNumber": 59,
@@ -1665,7 +1774,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "puma",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "3.12.0",
       "managerData": {
         "lineNumber": 64,
@@ -1674,7 +1785,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "hiredis",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "0.6.3",
       "managerData": {
         "lineNumber": 66,
@@ -1684,7 +1797,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 4.0",
       "datasource": "rubygems",
       "depName": "redis",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "4.0.3",
       "managerData": {
         "lineNumber": 67,
@@ -1693,7 +1808,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "redis-namespace",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "1.6.0",
       "managerData": {
         "lineNumber": 69,
@@ -1703,6 +1820,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "close-race",
       "datasource": "git-refs",
       "depName": "websocket-client-simple",
+      "depTypes": [
+        "cable",
+      ],
       "managerData": {
         "lineNumber": 71,
       },
@@ -1712,7 +1832,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "blade",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "0.7.1",
       "managerData": {
         "lineNumber": 73,
@@ -1721,7 +1843,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "blade-sauce_labs_plugin",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "0.7.3",
       "managerData": {
         "lineNumber": 74,
@@ -1730,7 +1854,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "sprockets-export",
-      "depType": "cable",
+      "depTypes": [
+        "cable",
+      ],
       "lockedVersion": "1.0.0",
       "managerData": {
         "lineNumber": 75,
@@ -1739,7 +1865,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "aws-sdk-s3",
-      "depType": "storage",
+      "depTypes": [
+        "storage",
+      ],
       "lockedVersion": "1.23.1",
       "managerData": {
         "lineNumber": 80,
@@ -1749,7 +1877,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 1.11",
       "datasource": "rubygems",
       "depName": "google-cloud-storage",
-      "depType": "storage",
+      "depTypes": [
+        "storage",
+      ],
       "lockedVersion": "1.15.0",
       "managerData": {
         "lineNumber": 81,
@@ -1758,7 +1888,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "azure-storage",
-      "depType": "storage",
+      "depTypes": [
+        "storage",
+      ],
       "lockedVersion": "0.15.0.preview",
       "managerData": {
         "lineNumber": 82,
@@ -1768,7 +1900,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "image_processing",
-      "depType": "storage",
+      "depTypes": [
+        "storage",
+      ],
       "lockedVersion": "1.7.1",
       "managerData": {
         "lineNumber": 84,
@@ -1793,7 +1927,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "qunit-selenium",
-      "depType": "ujs",
+      "depTypes": [
+        "ujs",
+      ],
       "lockedVersion": "0.0.4",
       "managerData": {
         "lineNumber": 92,
@@ -1802,7 +1938,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "chromedriver-helper",
-      "depType": "ujs",
+      "depTypes": [
+        "ujs",
+      ],
       "lockedVersion": "2.1.0",
       "managerData": {
         "lineNumber": 93,
@@ -1811,7 +1949,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "minitest-bisect",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "1.4.0",
       "managerData": {
         "lineNumber": 101,
@@ -1820,7 +1960,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "minitest-retry",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.1.9",
       "managerData": {
         "lineNumber": 102,
@@ -1829,7 +1971,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "stackprof",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.2.12",
       "managerData": {
         "lineNumber": 105,
@@ -1838,7 +1982,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "byebug",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "10.0.2",
       "managerData": {
         "lineNumber": 106,
@@ -1847,7 +1993,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
     {
       "datasource": "rubygems",
       "depName": "benchmark-ips",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.7.2",
       "managerData": {
         "lineNumber": 109,
@@ -1857,7 +2005,6 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
-      "depType": "db",
       "lockedVersion": "1.9.1",
       "managerData": {
         "lineNumber": 113,
@@ -1867,7 +2014,6 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">=1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
-      "depType": "db",
       "lockedVersion": "1.4.14",
       "managerData": {
         "lineNumber": 116,
@@ -1877,7 +2023,6 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
-      "depType": "db",
       "lockedVersion": "1.3.13",
       "managerData": {
         "lineNumber": 119,
@@ -1887,7 +2032,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 0.18.0",
       "datasource": "rubygems",
       "depName": "pg",
-      "depType": "db",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "1.1.3",
       "managerData": {
         "lineNumber": 122,
@@ -1897,7 +2044,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 0.4.10",
       "datasource": "rubygems",
       "depName": "mysql2",
-      "depType": "db",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "0.5.2",
       "managerData": {
         "lineNumber": 123,
@@ -1918,6 +2067,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "master",
       "datasource": "git-refs",
       "depName": "activerecord-jdbcmysql-adapter",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 131,
@@ -1929,6 +2081,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": "master",
       "datasource": "git-refs",
       "depName": "activerecord-jdbcpostgresql-adapter",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 132,
@@ -1940,7 +2095,6 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "depType": "db",
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 135,
@@ -1950,7 +2104,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcmysql-adapter",
-      "depType": "db",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 137,
@@ -1960,7 +2116,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses rails G
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcpostgresql-adapter",
-      "depType": "db",
+      "depTypes": [
+        "db",
+      ],
       "lockedVersion": "52.1-java",
       "managerData": {
         "lineNumber": 138,
@@ -2080,7 +2238,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses sourceG
     {
       "datasource": "rubygems",
       "depName": "wirble",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "managerData": {
         "lineNumber": 14,
       },
@@ -2089,7 +2249,9 @@ exports[`modules/manager/bundler/extract > extractPackageFile() > parses sourceG
     {
       "datasource": "rubygems",
       "depName": "faker",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "managerData": {
         "lineNumber": 15,
       },
@@ -2307,7 +2469,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.3.0",
       "datasource": "rubygems",
       "depName": "omniauth-kerberos",
-      "depType": "kerberos",
+      "depTypes": [
+        "kerberos",
+      ],
       "lockedVersion": "0.3.0",
       "managerData": {
         "lineNumber": 38,
@@ -2415,7 +2579,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "gssapi",
-      "depType": "kerberos",
+      "depTypes": [
+        "kerberos",
+      ],
       "lockedVersion": "1.2.0",
       "managerData": {
         "lineNumber": 52,
@@ -2990,7 +3156,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 5.4.1",
       "datasource": "rubygems",
       "depName": "unicorn",
-      "depType": "unicorn",
+      "depTypes": [
+        "unicorn",
+      ],
       "lockedVersion": "5.4.1",
       "managerData": {
         "lineNumber": 168,
@@ -3000,7 +3168,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.4.4",
       "datasource": "rubygems",
       "depName": "unicorn-worker-killer",
-      "depType": "unicorn",
+      "depTypes": [
+        "unicorn",
+      ],
       "lockedVersion": "0.4.4",
       "managerData": {
         "lineNumber": 169,
@@ -3010,7 +3180,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 4.3.1.gitlab.2",
       "datasource": "rubygems",
       "depName": "gitlab-puma",
-      "depType": "puma",
+      "depTypes": [
+        "puma",
+      ],
       "lockedVersion": "4.3.1.gitlab.2",
       "managerData": {
         "lineNumber": 173,
@@ -3020,7 +3192,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.1.1.gitlab.1",
       "datasource": "rubygems",
       "depName": "gitlab-puma_worker_killer",
-      "depType": "puma",
+      "depTypes": [
+        "puma",
+      ],
       "lockedVersion": "0.1.1.gitlab.1",
       "managerData": {
         "lineNumber": 174,
@@ -3029,7 +3203,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "rack-timeout",
-      "depType": "puma",
+      "depTypes": [
+        "puma",
+      ],
       "lockedVersion": "0.5.1",
       "managerData": {
         "lineNumber": 175,
@@ -3549,7 +3725,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 3.2.2",
       "datasource": "rubygems",
       "depName": "gettext",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "3.2.9",
       "managerData": {
         "lineNumber": 310,
@@ -3594,7 +3772,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.8",
       "datasource": "rubygems",
       "depName": "method_source",
-      "depType": "metrics",
+      "depTypes": [
+        "metrics",
+      ],
       "lockedVersion": "0.9.2",
       "managerData": {
         "lineNumber": 325,
@@ -3604,7 +3784,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.2",
       "datasource": "rubygems",
       "depName": "influxdb",
-      "depType": "metrics",
+      "depTypes": [
+        "metrics",
+      ],
       "lockedVersion": "0.2.3",
       "managerData": {
         "lineNumber": 326,
@@ -3614,7 +3796,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.9.10",
       "datasource": "rubygems",
       "depName": "prometheus-client-mmap",
-      "depType": "metrics",
+      "depTypes": [
+        "metrics",
+      ],
       "lockedVersion": "0.9.10",
       "managerData": {
         "lineNumber": 329,
@@ -3624,7 +3808,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.18",
       "datasource": "rubygems",
       "depName": "raindrops",
-      "depType": "metrics",
+      "depTypes": [
+        "metrics",
+      ],
       "lockedVersion": "0.19.0",
       "managerData": {
         "lineNumber": 330,
@@ -3634,7 +3820,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 4.2",
       "datasource": "rubygems",
       "depName": "brakeman",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "4.2.1",
       "managerData": {
         "lineNumber": 334,
@@ -3644,7 +3832,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 6.0",
       "datasource": "rubygems",
       "depName": "danger",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "6.0.9",
       "managerData": {
         "lineNumber": 335,
@@ -3654,7 +3844,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.3.4",
       "datasource": "rubygems",
       "depName": "letter_opener_web",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.3.4",
       "managerData": {
         "lineNumber": 337,
@@ -3664,7 +3856,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.3.6",
       "datasource": "rubygems",
       "depName": "rblineprof",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.3.6",
       "managerData": {
         "lineNumber": 338,
@@ -3674,7 +3868,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 2.5.0",
       "datasource": "rubygems",
       "depName": "better_errors",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "2.5.0",
       "managerData": {
         "lineNumber": 341,
@@ -3684,7 +3880,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.8.0",
       "datasource": "rubygems",
       "depName": "binding_of_caller",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "0.8.0",
       "managerData": {
         "lineNumber": 342,
@@ -3694,7 +3892,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.7.0",
       "datasource": "rubygems",
       "depName": "thin",
-      "depType": "development",
+      "depTypes": [
+        "development",
+      ],
       "lockedVersion": "1.7.2",
       "managerData": {
         "lineNumber": 345,
@@ -4055,7 +4255,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "fuubar",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.2.0",
       "managerData": {
         "lineNumber": 400,
@@ -4065,7 +4267,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.6.1",
       "datasource": "rubygems",
       "depName": "rspec-retry",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.6.1",
       "managerData": {
         "lineNumber": 401,
@@ -4075,7 +4279,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.0.5",
       "datasource": "rubygems",
       "depName": "rspec_profiling",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.0.5",
       "managerData": {
         "lineNumber": 402,
@@ -4085,7 +4291,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.1.3",
       "datasource": "rubygems",
       "depName": "rspec-set",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.1.3",
       "managerData": {
         "lineNumber": 403,
@@ -4094,7 +4302,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "rspec-parameterized",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.4.2",
       "managerData": {
         "lineNumber": 404,
@@ -4104,7 +4314,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 3.22.0",
       "datasource": "rubygems",
       "depName": "capybara",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.22.0",
       "managerData": {
         "lineNumber": 406,
@@ -4114,7 +4326,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.0.22",
       "datasource": "rubygems",
       "depName": "capybara-screenshot",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "1.0.22",
       "managerData": {
         "lineNumber": 407,
@@ -4124,7 +4338,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 3.142",
       "datasource": "rubygems",
       "depName": "selenium-webdriver",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.142.6",
       "managerData": {
         "lineNumber": 408,
@@ -4134,7 +4350,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 4.0.1",
       "datasource": "rubygems",
       "depName": "shoulda-matchers",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "4.0.1",
       "managerData": {
         "lineNumber": 410,
@@ -4144,7 +4362,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 2.2.0",
       "datasource": "rubygems",
       "depName": "email_spec",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.2.0",
       "managerData": {
         "lineNumber": 411,
@@ -4154,7 +4374,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 2.8.0",
       "datasource": "rubygems",
       "depName": "json-schema",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "2.8.0",
       "managerData": {
         "lineNumber": 412,
@@ -4164,7 +4386,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 3.5.1",
       "datasource": "rubygems",
       "depName": "webmock",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "3.5.1",
       "managerData": {
         "lineNumber": 413,
@@ -4173,7 +4397,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "rails-controller-testing",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "1.0.4",
       "managerData": {
         "lineNumber": 414,
@@ -4183,7 +4409,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.1",
       "datasource": "rubygems",
       "depName": "concurrent-ruby",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "1.1.5",
       "managerData": {
         "lineNumber": 415,
@@ -4193,7 +4421,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 0.10.0",
       "datasource": "rubygems",
       "depName": "test-prof",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.10.0",
       "managerData": {
         "lineNumber": 416,
@@ -4202,7 +4432,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "rspec_junit_formatter",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "0.4.1",
       "managerData": {
         "lineNumber": 417,
@@ -4211,7 +4443,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
     {
       "datasource": "rubygems",
       "depName": "guard-rspec",
-      "depType": "test",
+      "depTypes": [
+        "test",
+      ],
       "lockedVersion": "4.7.3",
       "managerData": {
         "lineNumber": 418,
@@ -4363,7 +4597,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "ed25519",
-      "depType": "ed25519",
+      "depTypes": [
+        "ed25519",
+      ],
       "lockedVersion": "1.2.4",
       "managerData": {
         "lineNumber": 453,
@@ -4373,7 +4609,9 @@ exports[`modules/manager/bundler/extract > parse Gitlab Foss Gemfile 1`] = `
       "currentValue": "~> 1.0",
       "datasource": "rubygems",
       "depName": "bcrypt_pbkdf",
-      "depType": "ed25519",
+      "depTypes": [
+        "ed25519",
+      ],
       "lockedVersion": "1.0.0",
       "managerData": {
         "lineNumber": 454,

@@ -4,10 +4,10 @@ import { gemDefPattern } from './gem';
 import {
   aliasRubygemsSource,
   extractGlobalRegistries,
-  extractParentBlockData,
-} from './scope';
+  extractScopedSources,
+} from './source-scope';
 
-describe('modules/manager/bundler/parser/scope', () => {
+describe('modules/manager/bundler/parser/source-scope', () => {
   beforeAll(() => {
     loadRuby();
   });
@@ -130,106 +130,7 @@ describe('modules/manager/bundler/parser/scope', () => {
     });
   });
 
-  describe('extractParentBlockData', () => {
-    it('handles single group with single gem', async () => {
-      const content = `
-        group :development do
-          gem "rails"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual(['development']);
-      expect(registryUrls).toEqual([]);
-    });
-
-    it('handles single group with multiple gems', async () => {
-      const content = `
-        group :development do
-          gem "rails"
-          gem "puma"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNodes = ast.root().findAll(gemDefPattern);
-
-      for (const gemNode of gemNodes) {
-        const [depTypes, registryUrls] = extractParentBlockData(gemNode);
-        expect(depTypes).toEqual(['development']);
-        expect(registryUrls).toEqual([]);
-      }
-    });
-
-    it('handles multiple groups', async () => {
-      const content = `
-        group :development, :test do
-          gem "rails"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual(['development', 'test']);
-      expect(registryUrls).toEqual([]);
-    });
-
-    it('handles nested group blocks', async () => {
-      const content = `
-        group :development do
-          group :test do
-            gem "rails"
-          end
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual(['development', 'test']);
-      expect(registryUrls).toEqual([]);
-    });
-
-    it('handles many groups with multiple gems', async () => {
-      const content = `
-        group :development do
-          gem "rails"
-        end
-
-        group :test do
-          gem "rspec"
-        end
-
-        group :production do
-          gem "puma"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNodes = ast.root().findAll(gemDefPattern);
-
-      expect(gemNodes).toHaveLength(3);
-
-      const railsNode = gemNodes.find((node) =>
-        node.getMatch('DEP_NAME')?.text().includes('rails'),
-      );
-      const [railsDepTypes] = extractParentBlockData(railsNode!);
-      expect(railsDepTypes).toEqual(['development']);
-
-      const rspecNode = gemNodes.find((node) =>
-        node.getMatch('DEP_NAME')?.text().includes('rspec'),
-      );
-      const [rspecDepTypes] = extractParentBlockData(rspecNode!);
-      expect(rspecDepTypes).toEqual(['test']);
-
-      const pumaNode = gemNodes.find((node) =>
-        node.getMatch('DEP_NAME')?.text().includes('puma'),
-      );
-      const [pumaDepTypes] = extractParentBlockData(pumaNode!);
-      expect(pumaDepTypes).toEqual(['production']);
-    });
-
+  describe('extractScopedSources', () => {
     it('handles source blocks', async () => {
       const content = `
         source "https://example.com" do
@@ -239,9 +140,8 @@ describe('modules/manager/bundler/parser/scope', () => {
       const ast = await parseAsync('ruby', content);
       const gemNode = ast.root().find(gemDefPattern);
 
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual(['https://example.com']);
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://example.com']);
     });
 
     it('handles nested source blocks', async () => {
@@ -255,12 +155,8 @@ describe('modules/manager/bundler/parser/scope', () => {
       const ast = await parseAsync('ruby', content);
       const gemNode = ast.root().find(gemDefPattern);
 
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual([
-        'https://example.com',
-        'https://rubygems.org',
-      ]);
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://example.com', 'https://rubygems.org']);
     });
 
     it('prioritizes inner sources', async () => {
@@ -274,9 +170,63 @@ describe('modules/manager/bundler/parser/scope', () => {
       const ast = await parseAsync('ruby', content);
       const gemNode = ast.root().find(gemDefPattern);
 
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual(['https://inner.com', 'https://outer.com']);
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://inner.com', 'https://outer.com']);
+    });
+
+    it('handles rubygems source alias', async () => {
+      const content = `
+        source "rubygems" do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://rubygems.org']);
+    });
+
+    it('handles gems outside of any source blocks', async () => {
+      const content = 'gem "rails"';
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual([]);
+    });
+
+    it('resolves variables in source blocks', async () => {
+      const content = `
+        registry_url = "https://example.com"
+        source registry_url do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNode = ast.root().find(gemDefPattern);
+
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://example.com']);
+    });
+
+    it('handles multiple source blocks', async () => {
+      const content = `
+        source "https://first.com" do
+          gem "first-gem"
+        end
+        source "https://second.com" do
+          gem "rails"
+        end
+      `;
+      const ast = await parseAsync('ruby', content);
+      const gemNodes = ast.root().findAll(gemDefPattern);
+      const railsNode = gemNodes.find((node) =>
+        node.getMatch('DEP_NAME')?.text().includes('rails'),
+      );
+
+      const result = extractScopedSources(railsNode!);
+      expect(result).toEqual(['https://second.com']);
     });
 
     it('handles mixed group and source blocks', async () => {
@@ -290,66 +240,8 @@ describe('modules/manager/bundler/parser/scope', () => {
       const ast = await parseAsync('ruby', content);
       const gemNode = ast.root().find(gemDefPattern);
 
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual(['development']);
-      expect(registryUrls).toEqual(['https://example.com']);
-    });
-
-    it('handles rubygems source alias', async () => {
-      const content = `
-        source "rubygems" do
-          gem "rails"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual(['https://rubygems.org']);
-    });
-
-    it('handles gems outside of any groups', async () => {
-      const content = 'gem "rails"';
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual([]);
-    });
-
-    it('resolves variables in source blocks', async () => {
-      const content = `
-        registry_url = "https://example.com"
-        source registry_url do
-          gem "rails"
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual([]);
-      expect(registryUrls).toEqual(['https://example.com']);
-    });
-
-    it('handles complex nested structure', async () => {
-      const content = `
-        group :development do
-          source "https://dev.com" do
-            group :test do
-              gem "rails"
-            end
-          end
-        end
-      `;
-      const ast = await parseAsync('ruby', content);
-      const gemNode = ast.root().find(gemDefPattern);
-
-      const [depTypes, registryUrls] = extractParentBlockData(gemNode!);
-      expect(depTypes).toEqual(['development', 'test']);
-      expect(registryUrls).toEqual(['https://dev.com']);
+      const result = extractScopedSources(gemNode!);
+      expect(result).toEqual(['https://example.com']);
     });
   });
 });
