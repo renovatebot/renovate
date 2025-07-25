@@ -206,6 +206,49 @@ describe('modules/manager/bundler/parser/common', () => {
       const result = extractKvArgs(callNode!);
       expect(Object.keys(result)).toHaveLength(0);
     });
+
+    it('handles boolean true values', async () => {
+      const content = 'gem "rails", require: true';
+      const ast = await parseAsync('ruby', content);
+      const callNode = ast.root().find(callPattern);
+
+      const result = extractKvArgs(callNode!);
+      expect(result.require).toBe(true);
+    });
+
+    it('handles boolean false values', async () => {
+      const content = 'gem "rails", require: false';
+      const ast = await parseAsync('ruby', content);
+      const callNode = ast.root().find(callPattern);
+
+      const result = extractKvArgs(callNode!);
+      expect(result.require).toBe(false);
+    });
+
+    it('handles mixed boolean and other values', async () => {
+      const content =
+        'gem "rails", "~> 7.0", require: true, optional: false, group: :development';
+      const ast = await parseAsync('ruby', content);
+      const callNode = ast.root().find(callPattern);
+
+      const result = extractKvArgs(callNode!);
+      expect(result.require).toBe(true);
+      expect(result.optional).toBe(false);
+      expect(result.group).toBe('development');
+    });
+
+    it('handles multiple boolean values in same gem', async () => {
+      const content =
+        'gem "rails", require: true, optional: false, prerelease: true, development: false';
+      const ast = await parseAsync('ruby', content);
+      const callNode = ast.root().find(callPattern);
+
+      const result = extractKvArgs(callNode!);
+      expect(result.require).toBe(true);
+      expect(result.optional).toBe(false);
+      expect(result.prerelease).toBe(true);
+      expect(result.development).toBe(false);
+    });
   });
 
   describe('resolveIdentifier', () => {

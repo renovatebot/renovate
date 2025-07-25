@@ -82,7 +82,8 @@ export const kvArgsPattern = astGrep.rule`
           pattern: $VAL
 `;
 
-export type KvArgs = Record<string, string | symbol | (string | symbol)[]>;
+type KvArgsVal = string | symbol | boolean;
+export type KvArgs = Record<string, KvArgsVal | KvArgsVal[]>;
 
 export function extractKvArgs(argsListNode: SgNode): KvArgs {
   const result: KvArgs = {};
@@ -109,6 +110,14 @@ export function extractKvArgs(argsListNode: SgNode): KvArgs {
       if (stringValues.every((value) => value !== null)) {
         result[key] = stringValues;
       }
+    }
+
+    if (valNode.kind() === 'true') {
+      result[key] = true;
+    }
+
+    if (valNode.kind() === 'false') {
+      result[key] = false;
     }
   }
 
