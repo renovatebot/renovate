@@ -132,7 +132,7 @@ const gemDoubleRangePattern = astGrep.rule`
 
 function extractVersionData(
   gemArgList: SgNode,
-): Pick<PackageDependency, 'currentValue' | 'skipReason'> {
+): Pick<PackageDependency, 'currentValue' | 'skipReason' | 'managerData'> {
   const doubleRangeMatch = astGrep.extractMatches(
     gemArgList,
     gemDoubleRangePattern,
@@ -157,19 +157,22 @@ function extractVersionData(
     return { skipReason: 'unspecified-version' };
   }
 
+  const managerData = { lineNumber: versionNode.range().start.line };
+
   if (versionNode.kind() === 'float' || versionNode.kind() === 'integer') {
-    return { currentValue: versionNode.text() };
+    return { currentValue: versionNode.text(), managerData };
   }
 
   const children = namedChildren(versionNode);
   if (children.length === 0) {
-    return { currentValue: '', skipReason: 'empty' };
+    return { currentValue: '', skipReason: 'empty', managerData };
   }
 
   if (children.length > 1) {
     return {
       currentValue: children.map((child) => child.text()).join(''),
       skipReason: 'version-placeholder',
+      managerData,
     };
   }
 
@@ -177,14 +180,14 @@ function extractVersionData(
   const currentValue = child.text();
 
   if (child.kind() === 'interpolation') {
-    return { currentValue, skipReason: 'version-placeholder' };
+    return { currentValue, skipReason: 'version-placeholder', managerData };
   }
 
   if (child.kind() !== 'string_content') {
-    return { skipReason: 'unsupported-version' };
+    return { skipReason: 'unsupported-version', managerData };
   }
 
-  return { currentValue };
+  return { currentValue, managerData };
 }
 
 const rubyVersionPattern = astGrep.rule`
@@ -212,6 +215,8 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
     return null;
   }
 
+  const managerData = { lineNumber: node.range().start.line };
+
   if (node.kind() === 'string') {
     const children = namedChildren(node);
     if (children.length === 0) {
@@ -220,6 +225,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
         datasource: 'ruby-version',
         currentValue: '',
         skipReason: 'empty',
+        managerData,
       };
     }
 
@@ -229,6 +235,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
         datasource: 'ruby-version',
         currentValue: children.map((child) => child.text()).join(''),
         skipReason: 'version-placeholder',
+        managerData,
       };
     }
 
@@ -241,6 +248,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
         datasource: 'ruby-version',
         currentValue,
         skipReason: 'version-placeholder',
+        managerData,
       };
     }
 
@@ -249,6 +257,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
         depName: 'ruby',
         datasource: 'ruby-version',
         currentValue,
+        managerData,
       };
     }
   }
@@ -259,6 +268,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
       datasource: 'ruby-version',
       currentValue: node.text(),
       skipReason: 'not-a-version',
+      managerData,
     };
   }
 
@@ -267,6 +277,7 @@ function extractRubyVersion(root: SgNode): PackageDependency | null {
     datasource: 'ruby-version',
     currentValue: node.text(),
     skipReason: 'unsupported-version',
+    managerData,
   };
 }
 

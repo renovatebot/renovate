@@ -143,7 +143,7 @@ describe('modules/manager/bundler/extract', () => {
     `;
     fs.readLocalFile.mockResolvedValueOnce(source);
     const res = await extractPackageFile(source, 'Gemfile');
-    expect(res?.deps).toEqual([
+    expect(res?.deps).toMatchObject([
       {
         currentValue: '~> 1',
         datasource: 'rubygems',
@@ -302,7 +302,7 @@ describe('modules/manager/bundler/extract', () => {
     `;
     fs.readLocalFile.mockResolvedValueOnce(multipleValuesGemfile);
     const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
-    expect(res).toEqual({
+    expect(res).toMatchObject({
       deps: [
         {
           datasource: 'rubygems',

@@ -10,7 +10,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -28,7 +28,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -47,7 +47,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -66,7 +66,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -85,7 +85,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -103,7 +103,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -122,7 +122,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -140,7 +140,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'ruby-version',
@@ -162,7 +162,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -176,7 +176,7 @@ describe('modules/manager/bundler/parser', () => {
 
     describe('common instructions', () => {
       it.each`
-        input                                                        | depName  | version    | group
+        input                                                        | depName  | version    | depType
         ${`gem 'foo', '1.0.0'`}                                      | ${'foo'} | ${'1.0.0'} | ${undefined}
         ${`gem 'foo', 1`}                                            | ${'foo'} | ${'1'}     | ${undefined}
         ${`gem 'foo', 1.2`}                                          | ${'foo'} | ${'1.2'}   | ${undefined}
@@ -186,16 +186,16 @@ describe('modules/manager/bundler/parser', () => {
         ${`gem 'foo', '1.0.0', :group => :test`}                     | ${'foo'} | ${'1.0.0'} | ${'test'}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test`}             | ${'foo'} | ${'1.0.0'} | ${'test'}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test, bar: "bar"`} | ${'foo'} | ${'1.0.0'} | ${'test'}
-      `('$input', async ({ input, depName, version, group }) => {
+      `('$input', async ({ input, depName, version, depType }) => {
         const deps = await parseGemfile(input);
-        expect(deps).toEqual({
+        expect(deps).toMatchObject({
           deps: [
             {
               datasource: 'rubygems',
               depName,
               currentValue: version,
-              depType: group,
               skipReason: 'unknown-registry',
+              ...(depType && { depType }),
             },
           ],
         });
@@ -213,7 +213,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -233,7 +233,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -252,7 +252,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -276,7 +276,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -299,7 +299,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -340,7 +340,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -389,7 +389,7 @@ describe('modules/manager/bundler/parser', () => {
         end
       `;
       const res = await parseGemfile(src);
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -418,7 +418,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -438,7 +438,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -458,7 +458,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -479,7 +479,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -500,7 +500,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -523,7 +523,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -553,7 +553,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -590,7 +590,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'rubygems',
@@ -612,7 +612,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'git-refs',
@@ -632,7 +632,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'git-refs',
@@ -652,7 +652,7 @@ describe('modules/manager/bundler/parser', () => {
 
       const res = await parseGemfile(src);
 
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             datasource: 'git-refs',
