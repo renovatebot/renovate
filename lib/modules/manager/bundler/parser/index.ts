@@ -5,7 +5,7 @@ import type { PackageDependency, PackageFileContent } from '../../types';
 import { extractKvArgs, loadRuby, resolveIdentifier } from './common';
 import { extractDepNameData, extractVersionData, gemDefPattern } from './gem';
 import { extractGitRefData } from './git';
-import { extractRubyVersion } from './ruby';
+import { extractRubyVersion } from './ruby-version';
 import {
   aliasRubygemsSource,
   extractGlobalRegistries,

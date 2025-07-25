@@ -1,8 +1,8 @@
 import { parseAsync } from '@ast-grep/napi';
 import { loadRuby } from './common';
-import { extractRubyVersion } from './ruby';
+import { extractRubyVersion } from './ruby-version';
 
-describe('modules/manager/bundler/parser/ruby', () => {
+describe('modules/manager/bundler/parser/ruby-version', () => {
   beforeAll(() => {
     loadRuby();
   });
