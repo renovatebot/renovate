@@ -86,6 +86,12 @@ export function processResult(
     status = 'unknown';
   }
   logger.debug(
+    {
+      result: res,
+      status,
+      enabled: enabled!,
+      onboarded: onboarded!,
+    },
     // TODO: types (#22198)
     `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
