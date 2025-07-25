@@ -2102,7 +2102,14 @@ const options: RenovateOptions[] = [
     description:
       'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
     type: 'string',
-    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    allowedValues: [
+      'auto',
+      'fast-forward',
+      'merge-commit',
+      'rebase',
+      'rebase-merge',
+      'squash',
+    ],
     default: 'auto',
     supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
