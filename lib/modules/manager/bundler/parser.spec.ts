@@ -168,9 +168,9 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             skipReason: 'unspecified-version',
-            registryUrls: ['https://rubygems.org'],
           },
         ],
+        registryUrls: ['https://rubygems.org'],
       });
     });
 
@@ -444,9 +444,9 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            registryUrls: ['https://example.com'],
           },
         ],
+        registryUrls: ['https://example.com'],
       });
     });
 
@@ -464,9 +464,9 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            registryUrls: ['https://rubygems.org'],
           },
         ],
+        registryUrls: ['https://rubygems.org'],
       });
     });
 
@@ -563,21 +563,16 @@ describe('modules/manager/bundler/parser', () => {
               'https://example-5.com',
               'https://example-4.com',
               'https://example-3.com',
-              'https://example-2.com',
-              'https://example-1.com',
             ],
           },
           {
             datasource: 'rubygems',
             depName: 'bar',
             currentValue: '2.0.0',
-            registryUrls: [
-              'https://rubygems.org',
-              'https://example-2.com',
-              'https://example-1.com',
-            ],
+            registryUrls: ['https://rubygems.org'],
           },
         ],
+        registryUrls: ['https://example-2.com', 'https://example-1.com'],
       });
     });
 
@@ -601,9 +596,10 @@ describe('modules/manager/bundler/parser', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: '1.0.0',
-            registryUrls: ['bar', 'foo'],
+            registryUrls: ['bar'],
           },
         ],
+        registryUrls: ['foo'],
       });
     });
   });
@@ -737,6 +733,39 @@ describe('modules/manager/bundler/parser', () => {
           },
         ],
       });
+    });
+
+    it('works', async () => {
+      const src = codeBlock`
+        foo = 'https://gems.foo.com'
+        bar = 'https://gems.bar.com'
+  
+        source foo
+  
+        source bar do
+          gem "some_internal_gem"
+        end
+      `;
+
+      const res = await parseGemfile(src);
+
+      expect(res).toMatchInlineSnapshot(`
+        {
+          "deps": [
+            {
+              "datasource": "rubygems",
+              "depName": "some_internal_gem",
+              "registryUrls": [
+                "https://gems.bar.com",
+              ],
+              "skipReason": "unspecified-version",
+            },
+          ],
+          "registryUrls": [
+            "https://gems.foo.com",
+          ],
+        }
+      `);
     });
   });
 });

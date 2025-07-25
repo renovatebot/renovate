@@ -231,7 +231,7 @@ describe('modules/manager/bundler/extract', () => {
         },
         {
           depName: 'inline_source_gem_with_version',
-          currentValue: '"~> 1"',
+          currentValue: '~> 1',
           registryUrls: ['https://gems.bar.com'],
         },
         {

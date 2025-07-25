@@ -24,7 +24,7 @@ function extractPlainString(node: SgNode | null): string | null {
   return null;
 }
 
-function coerceNodeToString(node: SgNode | null): string | null {
+function coerceToString(node: SgNode | null): string | null {
   if (!node) {
     return null;
   }
@@ -46,6 +46,18 @@ function coerceNodeToString(node: SgNode | null): string | null {
   }
 
   return extractPlainString(node);
+}
+
+function coerceToStringOrSymbol(node: SgNode | null): string | symbol | null {
+  if (!node) {
+    return null;
+  }
+
+  if (node.kind() === 'identifier') {
+    return Symbol(node.text());
+  }
+
+  return coerceToString(node);
 }
 
 function extractDepNameData(
@@ -327,22 +339,22 @@ const kvArgsPattern = astGrep.rule`
           pattern: $VAL
 `;
 
-function extractKvArgs(
-  argsListNode: SgNode,
-): Record<string, string | string[]> {
-  const result: Record<string, string | string[]> = {};
+type KvArgs = Record<string, string | symbol | (string | symbol)[]>;
+
+function extractKvArgs(argsListNode: SgNode): KvArgs {
+  const result: KvArgs = {};
   const pairs = astGrep.extractAllMatches(argsListNode, kvArgsPattern, [
     'KEY',
     'VAL',
   ]);
 
   for (const [keyNode, valNode] of pairs) {
-    const key = coerceNodeToString(keyNode);
+    const key = coerceToString(keyNode);
     if (!key) {
       continue;
     }
 
-    const val = coerceNodeToString(valNode);
+    const val = coerceToStringOrSymbol(valNode);
     if (val) {
       result[key] = val;
       continue;
@@ -350,10 +362,14 @@ function extractKvArgs(
 
     if (valNode.kind() === 'array') {
       const children = namedChildren(valNode);
-      const stringValues = children.map((child) => coerceNodeToString(child));
+      const stringValues = children.map((child) => coerceToString(child));
       if (stringValues.every((value) => value !== null)) {
         result[key] = stringValues;
       }
+    }
+
+    if (valNode.kind() === 'identifier') {
+      result[key] = Symbol.for(valNode.text());
     }
   }
 
@@ -399,7 +415,7 @@ function extractParentBlockData(node: SgNode): [string[], string[]] {
     if (method === 'group') {
       depTypes.push(
         namedChildren(args)
-          .map((arg) => coerceNodeToString(arg))
+          .map((arg) => coerceToString(arg))
           .filter(is.truthy),
       );
     }
@@ -410,7 +426,7 @@ function extractParentBlockData(node: SgNode): [string[], string[]] {
           .map((arg) =>
             arg.kind() === 'identifier'
               ? resolveIdentifier(arg)
-              : coerceNodeToString(arg),
+              : coerceToString(arg),
           )
           .filter(is.truthy)
           .map(aliasRubygemsSource),
@@ -446,7 +462,7 @@ function matchAssignment(
     'RIGHT',
   ]);
 
-  const identifier = coerceNodeToString(left);
+  const identifier = coerceToString(left);
   if (identifier !== variable) {
     return { error: 'continue' };
   }
@@ -459,16 +475,12 @@ function matchAssignment(
   return { result };
 }
 
-function resolveIdentifier(node: SgNode): string | null {
-  if (node.kind() !== 'identifier') {
-    return null;
-  }
-
-  const identifier = node.text();
-  let cursor = node.parent()?.prev();
+function resolveIdentifier(node: SgNode, variable?: string): string | null {
+  const identifier = variable ?? node.text();
+  let cursor = astGrep.recede(node);
   while (cursor) {
     if (!cursor.isNamed()) {
-      cursor = cursor.prev() ?? cursor.parent();
+      cursor = astGrep.recede(cursor);
       continue;
     }
 
@@ -482,13 +494,13 @@ function resolveIdentifier(node: SgNode): string | null {
       return null;
     }
 
-    cursor = cursor.prev() ?? cursor.parent();
+    cursor = astGrep.recede(cursor);
   }
 
   return null;
 }
 
-const gemArgListPattern = astGrep.rule`
+const gemDefPattern = astGrep.rule`
   utils:
     string-or-symbol:
       any:
@@ -524,9 +536,9 @@ export async function parseGemfile(
 
   const globalRegistryUrls = extractGlobalRegistries(astRoot);
 
-  for (const argList of astRoot.findAll(gemArgListPattern)) {
-    const depNameData = extractDepNameData(argList);
-    const versionData = extractVersionData(argList);
+  for (const gemDef of astRoot.findAll(gemDefPattern)) {
+    const depNameData = extractDepNameData(gemDef);
+    const versionData = extractVersionData(gemDef);
 
     const dep: PackageDependency = {
       datasource: 'rubygems',
@@ -534,9 +546,9 @@ export async function parseGemfile(
       ...versionData,
     };
 
-    const [blockDepTypes, blockRegistryUrls] = extractParentBlockData(argList);
+    const [blockDepTypes, registryUrls] = extractParentBlockData(gemDef);
 
-    const kvArgs = extractKvArgs(argList);
+    const kvArgs = extractKvArgs(gemDef);
 
     // Check for path argument (local gems)
     const { path } = kvArgs;
@@ -577,7 +589,7 @@ export async function parseGemfile(
     let depTypes: string[] = [...blockDepTypes];
     if (is.string(groupData)) {
       depTypes.push(groupData);
-    } else if (is.array(groupData)) {
+    } else if (is.array(groupData, is.string)) {
       depTypes.push(...groupData);
     }
     depTypes = uniq(depTypes);
@@ -587,15 +599,21 @@ export async function parseGemfile(
       Object.assign(dep, { depTypes });
     }
 
-    const registryUrls = uniq([...blockRegistryUrls, ...globalRegistryUrls]);
     const localRegistryUrl = kvArgs.source;
     if (is.string(localRegistryUrl)) {
       registryUrls.unshift(aliasRubygemsSource(localRegistryUrl));
+    } else if (is.symbol(localRegistryUrl)) {
+      const resolvedValue = resolveIdentifier(
+        gemDef,
+        localRegistryUrl.description,
+      );
+      if (resolvedValue) {
+        registryUrls.unshift(resolvedValue);
+      }
     }
-
-    if (registryUrls.length) {
-      dep.registryUrls = registryUrls;
-    } else {
+    if (registryUrls.length !== 0) {
+      dep.registryUrls = uniq(registryUrls);
+    } else if (globalRegistryUrls.length === 0) {
       dep.skipReason ??= 'unknown-registry';
     }
 
@@ -606,5 +624,11 @@ export async function parseGemfile(
     return null;
   }
 
-  return { deps };
+  const res: PackageFileContent = { deps };
+
+  if (globalRegistryUrls.length) {
+    res.registryUrls = globalRegistryUrls;
+  }
+
+  return res;
 }

@@ -34,3 +34,7 @@ export function extractAllMatches(
   }
   return result;
 }
+
+export function recede(node: SgNode): SgNode | null {
+  return node.prev() ?? node.parent();
+}
