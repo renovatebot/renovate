@@ -61,9 +61,9 @@ function coerceToStringOrSymbol(node: SgNode | null): string | symbol | null {
 }
 
 function extractDepNameData(
-  gemArgList: SgNode,
+  gemDefNode: SgNode,
 ): Pick<PackageDependency, 'depName' | 'skipReason'> {
-  const node = gemArgList.getMatch('DEP_NAME');
+  const node = gemDefNode.getMatch('DEP_NAME');
   if (!node) {
     return { skipReason: 'missing-depname' };
   }
@@ -131,30 +131,34 @@ const gemDoubleRangePattern = astGrep.rule`
 `;
 
 function extractVersionData(
-  gemArgList: SgNode,
+  gemDefNode: SgNode,
 ): Pick<PackageDependency, 'currentValue' | 'skipReason' | 'managerData'> {
   const doubleRangeMatch = astGrep.extractMatches(
-    gemArgList,
+    gemDefNode,
     gemDoubleRangePattern,
     ['LOWER', 'HIGHER'],
   );
   const [lowerStr, higherStr] = doubleRangeMatch.map(extractPlainString);
   if (lowerStr?.trim().startsWith('>') && higherStr) {
     const [lower, higher] = doubleRangeMatch;
-    const offset = gemArgList.range().start.index;
+    const offset = gemDefNode.range().start.index;
     const start = lower.range().start.index - offset;
     const end = higher.range().end.index - offset;
-    return { currentValue: gemArgList.text().slice(start, end) };
+    return {
+      currentValue: gemDefNode.text().slice(start, end),
+      managerData: { lineNumber: lower.range().start.line },
+    };
   }
 
   const [versionNode] = astGrep.extractMatches(
-    gemArgList,
+    gemDefNode,
     gemSingularVersionPattern,
     ['VERSION'],
   );
 
   if (!versionNode) {
-    return { skipReason: 'unspecified-version' };
+    const managerData = { lineNumber: gemDefNode.range().start.line };
+    return { skipReason: 'unspecified-version', managerData };
   }
 
   const managerData = { lineNumber: versionNode.range().start.line };
