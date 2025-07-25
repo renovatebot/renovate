@@ -455,6 +455,14 @@ export async function parseGemfile(
 
     const kvArgs = extractKvArgs(argList);
 
+    // Check for path argument (local gems)
+    const { path } = kvArgs;
+    if (is.string(path)) {
+      dep.skipReason = 'internal-package';
+      result.push(dep);
+      continue;
+    }
+
     const { git, github, ref, tag, branch } = kvArgs;
     if (is.string(git) || is.string(github)) {
       dep.datasource = 'git-refs';

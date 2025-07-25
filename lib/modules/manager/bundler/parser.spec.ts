@@ -589,4 +589,68 @@ describe('modules/manager/bundler/parser', () => {
       ]);
     });
   });
+
+  describe('local packages', () => {
+    it('parses local gem with path', async () => {
+      const src = codeBlock`
+        gem 'foo', '1.0.0', path: 'vendor/foo'
+      `;
+
+      const res = await parseGemfile(src);
+
+      expect(res).toEqual([
+        {
+          datasource: 'rubygems',
+          depName: 'foo',
+          currentValue: '1.0.0',
+          skipReason: 'internal-package',
+        },
+      ]);
+    });
+
+    it('parses local gem without version', async () => {
+      const src = codeBlock`
+        gem 'bar', path: 'vendor/bar'
+      `;
+
+      const res = await parseGemfile(src);
+
+      expect(res).toEqual([
+        {
+          datasource: 'rubygems',
+          depName: 'bar',
+          skipReason: 'internal-package',
+        },
+      ]);
+    });
+
+    it('parses multiple local gems', async () => {
+      const src = codeBlock`
+        gem 'foo', path: 'vendor/foo'
+        gem 'bar', '2.0.0'
+        gem 'baz', path: '../baz'
+      `;
+
+      const res = await parseGemfile(src);
+
+      expect(res).toEqual([
+        {
+          datasource: 'rubygems',
+          depName: 'foo',
+          skipReason: 'internal-package',
+        },
+        {
+          datasource: 'rubygems',
+          depName: 'bar',
+          currentValue: '2.0.0',
+          skipReason: 'unknown-registry',
+        },
+        {
+          datasource: 'rubygems',
+          depName: 'baz',
+          skipReason: 'internal-package',
+        },
+      ]);
+    });
+  });
 });

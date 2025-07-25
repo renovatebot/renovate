@@ -27,9 +27,6 @@ const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
 const sourceBlockWithNewLinesGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines',
 );
-const sourceBlockWithGroupsGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithGroups',
-);
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -85,7 +82,7 @@ describe('modules/manager/bundler/extract', () => {
             (dep) => is.string(dep.lockedVersion) && isValid(dep.lockedVersion),
           ),
       ).toBeTrue();
-      expect(res?.deps).toHaveLength(125);
+      expect(res?.deps).toHaveLength(126);
     });
 
     it('parse Ruby CI Gemfile', async () => {
@@ -130,16 +127,57 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses source blocks with groups in Gemfile', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
-    const res = await extractPackageFile(
-      sourceBlockWithGroupsGemfile,
-      'Gemfile',
-    );
-    expect(res?.deps).toMatchObject([
-      { depName: 'internal_test_gem', currentValue: '"~> 1"' },
-      { depName: 'internal_production_gem', currentValue: '"~> 1"' },
-      { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
-      { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
+    const source = codeBlock`
+      source 'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/' do
+        gem 'sfn_my_dep1', "~> 1"
+        gem 'sfn_my_dep2', "~> 1"
+
+        group :test, :development do
+          gem 'internal_test_gem', "~> 1"
+        end
+
+        group :production do
+          gem 'internal_production_gem', "~> 1"
+        end
+      end
+    `;
+    fs.readLocalFile.mockResolvedValueOnce(source);
+    const res = await extractPackageFile(source, 'Gemfile');
+    expect(res?.deps).toEqual([
+      {
+        currentValue: '~> 1',
+        datasource: 'rubygems',
+        depName: 'sfn_my_dep1',
+        registryUrls: [
+          'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
+        ],
+      },
+      {
+        currentValue: '~> 1',
+        datasource: 'rubygems',
+        depName: 'sfn_my_dep2',
+        registryUrls: [
+          'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
+        ],
+      },
+      {
+        currentValue: '~> 1',
+        datasource: 'rubygems',
+        depName: 'internal_test_gem',
+        depTypes: ['test', 'development'],
+        registryUrls: [
+          'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
+        ],
+      },
+      {
+        currentValue: '~> 1',
+        datasource: 'rubygems',
+        depName: 'internal_production_gem',
+        depType: 'production',
+        registryUrls: [
+          'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
+        ],
+      },
     ]);
   });
 
@@ -264,20 +302,27 @@ describe('modules/manager/bundler/extract', () => {
     `;
     fs.readLocalFile.mockResolvedValueOnce(multipleValuesGemfile);
     const res = await extractPackageFile(multipleValuesGemfile, 'Gemfile');
-    expect(res).toMatchObject({
+    expect(res).toEqual({
       deps: [
         {
+          datasource: 'rubygems',
           depName: 'gem_without_values',
+          skipReason: 'unspecified-version',
         },
         {
+          currentValue: '>= 3.0.5',
+          datasource: 'rubygems',
           depName: 'gem_with_one_value',
-          currentValue: '">= 3.0.5"',
+          skipReason: 'unknown-registry',
         },
         {
-          depName: 'gem_with_multiple_values',
           currentValue: '">= 3.0.5", "< 3.2"',
+          datasource: 'rubygems',
+          depName: 'gem_with_multiple_values',
+          skipReason: 'unknown-registry',
         },
       ],
+      lockFiles: ['Gemfile.lock'],
     });
   });
 
