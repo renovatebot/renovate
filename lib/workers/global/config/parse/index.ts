@@ -49,6 +49,11 @@ export async function parseConfigs(
   const envConfig = await envParser.getConfig(env);
 
   let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
+  // merge extends from file config and additional file config
+  if (is.nonEmptyArray(fileConfig.extends)) {
+    config.extends ??= [];
+    config.extends = [...config.extends, ...fileConfig.extends];
+  }
   config = mergeChildConfig(config, envConfig);
   config = mergeChildConfig(config, cliConfig);
 
