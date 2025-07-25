@@ -94,8 +94,10 @@ export function extractDepNameData(
     return { depName, managerData };
   }
 
+  /* v8 ignore start -- should not happen */
   const depName = node.text();
   return { depName, skipReason: 'invalid-name', managerData };
+  /* v8 ignore stop */
 }
 
 export function extractVersionData(

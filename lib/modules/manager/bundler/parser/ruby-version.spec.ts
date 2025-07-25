@@ -109,4 +109,18 @@ describe('modules/manager/bundler/parser/ruby-version', () => {
       managerData: { lineNumber: expect.any(Number) },
     });
   });
+
+  it('handles unsupported ruby version format', async () => {
+    const content = 'ruby "\\n"';
+    const ast = await parseAsync('ruby', content);
+    const result = extractRubyVersion(ast.root());
+
+    expect(result).toEqual({
+      depName: 'ruby',
+      datasource: 'ruby-version',
+      currentValue: '"\\n"',
+      skipReason: 'unsupported-version',
+      managerData: { lineNumber: expect.any(Number) },
+    });
+  });
 });

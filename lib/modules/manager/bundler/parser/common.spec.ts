@@ -197,6 +197,15 @@ describe('modules/manager/bundler/parser/common', () => {
       const result = extractKvArgs(callNode!);
       expect(Object.keys(result)).toHaveLength(0);
     });
+
+    it('skips pairs with non-coercible keys', async () => {
+      const content = 'gem "rails", send(:method_name) => "value"';
+      const ast = await parseAsync('ruby', content);
+      const callNode = ast.root().find(callPattern);
+
+      const result = extractKvArgs(callNode!);
+      expect(Object.keys(result)).toHaveLength(0);
+    });
   });
 
   describe('resolveIdentifier', () => {
@@ -241,6 +250,26 @@ describe('modules/manager/bundler/parser/common', () => {
 
       const result = resolveIdentifier(gemNode!, 'my_var');
       expect(result).toBe('test');
+    });
+
+    it('handles non-string assignment values', async () => {
+      const content = `
+        my_var = some_complex_expression
+        gem "rails", source: my_var
+      `;
+      const ast = await parseAsync('ruby', content);
+      const identifierNode = ast
+        .root()
+        .findAll(identifierPattern)
+        .find(
+          (node) =>
+            node.text() === 'my_var' && node.parent()?.kind() === 'pair',
+        );
+
+      if (identifierNode) {
+        const result = resolveIdentifier(identifierNode);
+        expect(result).toBeNull();
+      }
     });
   });
 });

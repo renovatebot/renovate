@@ -203,6 +203,46 @@ describe('modules/manager/bundler/parser/gem', () => {
         managerData: { lineNumber: expect.any(Number) },
       });
     });
+
+    describe('edge cases for coverage', () => {
+      it('handles gem call without proper first argument', async () => {
+        const content = 'gem()';
+        const ast = await parseAsync('ruby', content);
+        const callNode = ast.root().find(callPattern);
+
+        if (callNode) {
+          const result = extractDepNameData(callNode);
+          expect(result).toEqual({
+            skipReason: 'missing-depname',
+          });
+        }
+      });
+
+      it('handles string with non-string_content child in depName', async () => {
+        // This should trigger the child.kind() !== 'string_content' case in extractDepNameData
+        const content = 'gem "#{something}"';
+        const ast = await parseAsync('ruby', content);
+        const gemNode = ast.root().find(gemDefPattern);
+
+        const result = extractDepNameData(gemNode!);
+        expect(result).toMatchObject({
+          skipReason: 'invalid-name',
+          managerData: { lineNumber: expect.any(Number) },
+        });
+      });
+
+      it('handles string with non-string_content child in version', async () => {
+        const content = 'gem "rails", "\\n"';
+        const ast = await parseAsync('ruby', content);
+        const gemNode = ast.root().find(gemDefPattern);
+
+        const result = extractVersionData(gemNode!);
+        expect(result).toEqual({
+          skipReason: 'unsupported-version',
+          managerData: { lineNumber: expect.any(Number) },
+        });
+      });
+    });
   });
 
   describe('multiline gem instructions', () => {

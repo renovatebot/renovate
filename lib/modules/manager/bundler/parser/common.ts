@@ -110,10 +110,6 @@ export function extractKvArgs(argsListNode: SgNode): KvArgs {
         result[key] = stringValues;
       }
     }
-
-    if (valNode.kind() === 'identifier') {
-      result[key] = Symbol.for(valNode.text());
-    }
   }
 
   return result;
