@@ -551,10 +551,15 @@ export async function processBranch(
         );
 
         if (hasHashErrors) {
-          logger.debug(
-            'SHA-256 calculation failed - throwing error to stop processing',
+          logger.warn(
+            'SHA256 calculation failed, marking branch as error but continuing with other dependencies',
           );
-          throw new Error(MANAGER_LOCKFILE_ERROR);
+          return {
+            branchExists,
+            prNo: branchPr?.number,
+            result: 'error',
+            commitSha,
+          };
         }
 
         // Keep existing logic for other artifact errors
