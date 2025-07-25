@@ -3,6 +3,7 @@ import { parseAsync } from '@ast-grep/napi';
 import is from '@sindresorhus/is';
 import { uniq } from '../../../../util/uniq';
 import type { PackageDependency, PackageFileContent } from '../../types';
+import type { KvArgs } from './common';
 import { extractKvArgs, loadRuby, resolveIdentifier } from './common';
 import { extractDepNameData, extractVersionData, gemDefPattern } from './gem';
 import { extractGitRefData } from './git';
@@ -21,14 +22,15 @@ interface DependencyTypesData {
 
 function getDepTypesData(
   outerDepTypes: string[],
-  innerDepType: unknown,
+  kvArgs: KvArgs,
 ): DependencyTypesData {
   let depTypes: string[] = [...outerDepTypes];
 
-  if (is.string(innerDepType)) {
-    depTypes.push(innerDepType);
-  } else if (is.array(innerDepType, is.string)) {
-    depTypes.push(...innerDepType);
+  const group = kvArgs.group;
+  if (is.string(group)) {
+    depTypes.push(group);
+  } else if (is.array(group, is.string)) {
+    depTypes.push(...group);
   }
 
   depTypes = uniq(depTypes);
@@ -108,7 +110,7 @@ export async function parseGemfile(
     mergeData(dep, depNameData);
 
     const blockDepTypes = extractScopedGroups(gemDef);
-    const depTypesData = getDepTypesData(blockDepTypes, kvArgs.group);
+    const depTypesData = getDepTypesData(blockDepTypes, kvArgs);
     mergeData(dep, depTypesData);
 
     const { path } = kvArgs;
