@@ -3,13 +3,16 @@ import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
-import type { CrowConfig } from './types';
+import { crowConfig } from './schema';
+import type { CrowConfigDefinition } from './schema';
 
-function crowVersionDecider(CrowConfig: CrowConfig): (keyof CrowConfig)[] {
+function crowVersionDecider(
+  config: CrowConfigDefinition,
+): (keyof CrowConfigDefinition)[] {
   const keys = ['clone', 'steps', 'pipeline', 'services'];
-  return Object.keys(CrowConfig).filter((key) =>
+  return Object.keys(config).filter((key) =>
     keys.includes(key),
-  ) as (keyof CrowConfig)[];
+  ) as (keyof CrowConfigDefinition)[];
 }
 
 export function extractPackageFile(
@@ -18,24 +21,18 @@ export function extractPackageFile(
   extractConfig: ExtractConfig,
 ): PackageFileContent | null {
   logger.debug('crow  .extractPackageFile()');
-  let config: CrowConfig;
+  let config: CrowConfigDefinition;
   try {
-    // TODO: use schema (#9610)
-    config = parseSingleYaml(content);
-    if (!config) {
+    const rawConfig = parseSingleYaml(content);
+    const result = crowConfig.safeParse(rawConfig);
+    if (!result.success) {
       logger.debug(
-        { packageFile },
-        'Null config when parsing Crow Configuration content',
+        { packageFile, errors: result.error.errors },
+        'Invalid Crow Configuration schema',
       );
       return null;
     }
-    if (typeof config !== 'object') {
-      logger.debug(
-        { packageFile, type: typeof config },
-        'Unexpected type for Crow Configuration content',
-      );
-      return null;
-    }
+    config = result.data;
   } catch (err) {
     logger.debug(
       { packageFile, err },
