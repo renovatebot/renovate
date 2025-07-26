@@ -29,7 +29,7 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle empty .editorconfig file', async () => {
-    await fs.writeFile(`${tmpDir!.path}/.editorconfig`, '');
+    await fs.writeFile(`${tmpDir!.path}/.editorconfig`, 'root = true');
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
