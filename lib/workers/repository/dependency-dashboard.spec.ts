@@ -553,6 +553,167 @@ describe('workers/repository/dependency-dashboard', () => {
       await dryRun(branches, platform, 0, 1);
     });
 
+    it('checks an issue with dependency dashboard categories', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr0',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep0' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #2',
+          branchName: 'branchName0',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          dependencyDashboardCategory: 'Category #1',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          result: 'not-scheduled',
+          branchName: 'branchName3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr4',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
+          result: 'not-scheduled',
+          branchName: 'branchName4',
+          dependencyDashboardCategory: 'Category #1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr5',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName5',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr6',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
+          result: 'pr-limit-reached',
+          branchName: 'branchName6',
+          dependencyDashboardCategory: 'Category #3',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr7',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
+          result: 'error',
+          branchName: 'branchName7',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr8',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
+          result: 'error',
+          branchName: 'branchName8',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr9',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
+          result: 'done',
+          prBlockedBy: 'BranchAutomerge',
+          branchName: 'branchName9',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0]).toMatchObject({
+        title: config.dependencyDashboardTitle,
+        body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Pending Approval
+
+The following branches are pending approval. To create them, click on a checkbox below.
+
+### Category #1
+
+ - [ ] <!-- approve-branch=branchName2 -->pr2
+
+### Category #2
+
+ - [ ] <!-- approve-branch=branchName0 -->pr0
+
+### Others
+
+ - [ ] <!-- approve-branch=branchName1 -->pr1
+
+### All
+
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+## Awaiting Schedule
+
+The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
+
+### Category #1
+
+ - [ ] <!-- unschedule-branch=branchName4 -->pr4
+
+### Others
+
+ - [ ] <!-- unschedule-branch=branchName3 -->pr3
+
+## Rate-Limited
+
+The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
+
+### Category #3
+
+ - [ ] <!-- unlimit-branch=branchName5 -->pr5
+ - [ ] <!-- unlimit-branch=branchName6 -->pr6
+
+### All
+
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+## Errored
+
+The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
+
+ - [ ] <!-- retry-branch=branchName7 -->pr7
+ - [ ] <!-- retry-branch=branchName8 -->pr8
+
+## Pending Branch Automerge
+
+The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.
+
+ - [ ] <!-- approvePr-branch=branchName9 -->pr9
+
+## Detected dependencies
+
+None detected
+
+`,
+      });
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 1);
+    });
+
     it('checks an issue with 2 PR pr-edited', async () => {
       const branches: BranchConfig[] = [
         {
