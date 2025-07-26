@@ -2,7 +2,6 @@ import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 export { extractPackageFile } from './extract';
 
-export { extractPackageFile };
 export const url = 'https://crowci.dev';
 export const categories: Category[] = ['ci'];
 
