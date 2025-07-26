@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -31,6 +32,7 @@ import type {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
+  FileOwnerRule,
   FindPRConfig,
   Issue,
   MergePRConfig,
@@ -691,6 +693,43 @@ export async function addReviewers(
   ]);
 }
 
+/**
+ * Resolves Bitbucket users by username, display name, or email address (userinfo string),
+ * restricted to users who have REPO_READ permission on the target repository.
+ *
+ * Uses the Bitbucket Server REST API:
+ * https://developer.atlassian.com/server/bitbucket/rest/v906/api-group-system-maintenance/#api-api-latest-users-get
+ *
+ * Behavior:
+ * - If no users match the filter, returns empty array.
+ * - Returns the `slug` of the matching active users.
+ *
+ * @param userinfo - A string that could be the user's email, display name, or username.
+ * @returns An object containing the user's `slugs` for active found users.
+ */
+async function getUserDetails(userinfo: string): Promise<string[]> {
+  try {
+    const url = `./rest/api/1.0/users?filter=${encodeURIComponent(userinfo)}&permission.1=REPO_READ&permission.1.projectKey=${encodeURIComponent(
+      config.projectKey,
+    )}&permission.1.repositorySlug=${encodeURIComponent(config.repositorySlug)}`;
+    const response = await bitbucketServerHttp.getJsonUnchecked<
+      {
+        slug: string;
+        active: boolean;
+      }[]
+    >(url, {
+      paginate: true,
+    });
+
+    const users = response.body;
+
+    return users.filter((u) => u.active).map((u) => u.slug);
+  } catch (err) {
+    logger.debug({ err, userinfo }, 'Failed to get user info');
+    return [];
+  }
+}
+
 async function updatePRAndAddReviewers(
   prNo: number,
   reviewers: string[],
@@ -703,6 +742,18 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
+    const reviewerSlugs = new Set<string>();
+
+    // Find username, as reviever can be an emailaddress or a username, and the request only wants usernames
+    // If the user is not found, it will be removed from the reviewers list
+    for (const entry of reviewersSet) {
+      const users = await getUserDetails(entry);
+      if (users.length === 0) {
+        logger.debug({ entry }, 'No users found for reviewer');
+        continue;
+      }
+      users.forEach((u) => reviewerSlugs.add(u));
+    }
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -710,7 +761,7 @@ async function updatePRAndAddReviewers(
         body: {
           title: pr.title,
           version: pr.version,
-          reviewers: Array.from(reviewersSet).map((name) => ({
+          reviewers: Array.from(reviewerSlugs).map((name) => ({
             user: { name },
           })),
         },
@@ -718,7 +769,7 @@ async function updatePRAndAddReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
-    logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
+    logger.debug({ err, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (
@@ -1152,6 +1203,152 @@ export async function mergePr({
 
   logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
+}
+
+export async function expandGroupMembers(
+  reviewers: string[],
+): Promise<string[]> {
+  logger.debug(`expandGroupMembers(${reviewers.join(', ')})`);
+  const expandedUsers: string[] = [];
+
+  for (const reviewer of reviewers) {
+    const [baseEntry, modifier] = reviewer.split(':');
+
+    if (isReviewerGroup(baseEntry)) {
+      const groupName = baseEntry.replace(/^@reviewer-group\//, '');
+      const groupUsers = await getUsersFromReviewerGroup(groupName);
+      if (groupUsers.length === 0) {
+        continue;
+      }
+
+      if (modifier === undefined) {
+        expandedUsers.push(...groupUsers); // Add all users from the group
+        continue;
+      }
+      const randomCount = parseModifier(modifier);
+      if (randomCount === null) {
+        expandedUsers.push(...groupUsers);
+        continue;
+      }
+      expandedUsers.push(...resolveRandom(groupUsers, randomCount));
+    } else {
+      expandedUsers.push(baseEntry); // Add the user entry
+    }
+  }
+
+  return [...new Set(expandedUsers)];
+}
+
+export function extractRulesFromCodeOwnersLines(
+  cleanedLines: string[],
+): FileOwnerRule[] {
+  const results: FileOwnerRule[] = [];
+
+  const reversedLines = cleanedLines
+    .filter((line) => line.trim() !== '' && !line.trim().startsWith('#'))
+    .reverse();
+
+  for (const line of reversedLines) {
+    const safeLine = line.replace(/\\\\ /g, '<<SPACE>>'); // double-backslash before space
+    const [pattern, ...rawEntries] = safeLine.trim().split(/\s+/);
+    const realEntries = rawEntries.map((u) => u.replace(/<<SPACE>>/g, ' '));
+
+    const matcher = ignore().add(pattern);
+    results.push({
+      pattern,
+      usernames: [...new Set(realEntries)],
+      score: pattern.length,
+      match: (path: string) => matcher.ignores(path),
+    });
+  }
+
+  return results;
+}
+
+function isReviewerGroup(entry: string): boolean {
+  return entry.startsWith('@reviewer-group/');
+}
+
+function parseModifier(value: string): number | null {
+  const randomPrefix = 'random';
+
+  if (value.startsWith(randomPrefix)) {
+    const match = /^random\((\d+)\)$/.exec(value);
+    if (match) {
+      return parseInt(match[1], 10); // e.g., random(2) → 2
+    } else {
+      return 1; // plain "random"
+    }
+  }
+
+  return null; // Not a random selector
+}
+
+function resolveRandom(users: string[], count?: number): string[] {
+  if (!count || users.length <= count) {
+    return users;
+  }
+  const shuffled = [...users].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+// Gets active users by name, from a reviewer group
+// Returns an empty array if the group is not found or has no active users
+// As there is no direct API to get group by name, we get all reviewer groups per repo and filter them
+// This is not efficient, but it is the only way to get users from a group by name
+// Supports both repository-scoped and project-scoped groups following the BitBucket server logic described here:
+// https://confluence.atlassian.com/bitbucketserver/code-owners-1296171116.html#Codeowners-Whatifaprojectandrepositorycontainareviewergroupwiththesamename?
+async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
+  interface reviewerGroup {
+    name: string;
+    users: { emailAddress: string; active: boolean }[];
+    scope: { type: 'REPOSITORY' | 'PROJECT' };
+  }
+
+  const allGroups: reviewerGroup[] = [];
+
+  try {
+    const { body } = await bitbucketServerHttp.getJsonUnchecked<
+      reviewerGroup[]
+    >(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/reviewer-groups`,
+      { paginate: true },
+    );
+
+    allGroups.push(...body);
+  } catch (err) {
+    logger.debug({ err, groupName }, 'Failed to get reviewer groups for repo');
+    return [];
+  }
+
+  // First, try to find a repo-scoped group with this name
+  const repoGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'REPOSITORY',
+  );
+
+  if (repoGroup) {
+    return repoGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.emailAddress);
+  }
+
+  // If no repo-level group, fall back to project-level group
+  const projectGroup = allGroups.find(
+    (group) => group.name === groupName && group.scope?.type === 'PROJECT',
+  );
+
+  if (projectGroup) {
+    return projectGroup.users
+      .filter((user) => user.active)
+      .map((user) => user.emailAddress);
+  }
+
+  // Group not found at either level
+  logger.warn(
+    { groupName },
+    'Reviewer group not found at repo or project level',
+  );
+  return [];
 }
 
 export function massageMarkdown(input: string): string {
