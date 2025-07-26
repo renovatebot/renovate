@@ -544,8 +544,29 @@ export async function processBranch(
 
       removeMeta(['dep']);
 
+      function isHashError(artifactError: any): boolean {
+        return artifactError.stderr?.includes('Could not calculate sha256');
+      }
+
+      function hasOnlyHashErrors(artifactErrors: any[]): boolean {
+        return artifactErrors.length > 0 && artifactErrors.every(isHashError);
+      }
+
       if (config.artifactErrors?.length) {
-        if (config.releaseTimestamp) {
+        // Check if all artifact errors are hash-related
+        if (hasOnlyHashErrors(config.artifactErrors)) {
+          logger.warn(
+            { artifactErrors: config.artifactErrors },
+            'Hash calculation failed for artifact',
+          );
+
+          return {
+            branchExists,
+            prNo: branchPr?.number,
+            result: 'error',
+            commitSha,
+          };
+        } else if (config.releaseTimestamp) {
           logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
           if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {

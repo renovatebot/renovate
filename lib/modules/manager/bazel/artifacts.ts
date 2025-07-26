@@ -5,7 +5,12 @@ import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import type {
+  ArtifactError,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
 import type { RecordFragment, StringFragment } from './types';
 
@@ -124,6 +129,9 @@ export async function updateArtifacts(
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   const oldContents = updateArtifact.newPackageFileContent;
   let newContents = oldContents;
+
+  const results: UpdateArtifactsResult[] = [];
+  const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
     const { managerData } = upgrade;
     const idx = managerData?.idx as number;
@@ -151,10 +159,19 @@ export async function updateArtifacts(
 
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
+
       if (!hash) {
+        artifactErrors.push({
+          fileName: path,
+          stderr: `Could not calculate sha256 for ${upgrade.depName} at ${upgrade.newValue}. Checked URLs: ${urls.join(', ')}`,
+        });
         continue;
       }
 
+      logger.debug(
+        { urlFragments, urls },
+        'Updating Bazel http_archive/http_file rule',
+      );
       newContents = patchCodeAtFragments(
         newContents,
         urlFragments,
@@ -169,17 +186,19 @@ export async function updateArtifacts(
     }
   }
 
-  if (oldContents === newContents) {
-    return null;
-  }
-
-  return [
-    {
+  if (oldContents !== newContents) {
+    results.push({
       file: {
         type: 'addition',
         path,
         contents: newContents,
       },
-    },
-  ];
+    });
+  }
+
+  if (artifactErrors.length) {
+    results.push(...artifactErrors.map((artifactError) => ({ artifactError })));
+  }
+
+  return results.length ? results : null;
 }

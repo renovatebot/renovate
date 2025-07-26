@@ -218,7 +218,15 @@ describe('modules/manager/bazel/artifacts', () => {
         newPackageFileContent: input,
       }),
     );
-    expect(res).toBeNull();
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'WORKSPACE',
+          stderr:
+            'Could not calculate sha256 for bazel_skyfoo at 0.8.0. Checked URLs: https://github.com/bazelbuild/bazel-skyfoo/archive/0.8.0.tar.gz',
+        },
+      },
+    ]);
   });
 
   it('errors for http_archive without urls', async () => {
