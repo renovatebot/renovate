@@ -5,7 +5,7 @@ import { getEnv } from '../util/env';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash, parseUrl, trimSlashes } from '../util/url';
-import { tryDecryptKbPgp } from './decrypt/kbpgp';
+import { tryDecryptGnupg } from './decrypt/gnupg';
 import {
   tryDecryptPublicKeyDefault,
   tryDecryptPublicKeyPKCS1,
@@ -37,7 +37,7 @@ export async function tryDecrypt(
     const decryptedObjStr =
       getEnv().RENOVATE_X_USE_OPENPGP === 'true'
         ? await tryDecryptOpenPgp(key, encryptedStr)
-        : await tryDecryptKbPgp(key, encryptedStr);
+        : await tryDecryptGnupg(key, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
