@@ -1,4 +1,5 @@
 import { configFileNames } from '../../../../config/app-strings';
+import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -14,6 +15,35 @@ import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
 import { getSemanticCommitPrTitle } from '../common';
 
+/**
+ * Filter config file names based on the current platform
+ * Only include platform-specific folders for the current platform
+ */
+function getPlatformSpecificConfigFileNames(): string[] {
+  const platform = GlobalConfig.get('platform');
+  return configFileNames.filter((fileName) => {
+    // Always include root-level files and package.json
+    if (!fileName.includes('/')) {
+      return true;
+    }
+    
+    // Include platform-specific files only for the current platform
+    if (fileName.startsWith('.github/') && platform === 'github') {
+      return true;
+    }
+    if (fileName.startsWith('.gitlab/') && platform === 'gitlab') {
+      return true;
+    }
+    
+    // Exclude platform-specific files for other platforms
+    if (fileName.startsWith('.github/') || fileName.startsWith('.gitlab/')) {
+      return false;
+    }
+    
+    return true;
+  });
+}
+
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
   const fileList = await scm.getFileList();
@@ -21,7 +51,9 @@ async function findFile(fileName: string): Promise<boolean> {
 }
 
 async function configFileExists(): Promise<boolean> {
-  for (const fileName of configFileNames) {
+  const platformSpecificConfigFileNames = getPlatformSpecificConfigFileNames();
+  
+  for (const fileName of platformSpecificConfigFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
       logger.debug(`Config file exists, fileName: ${fileName}`);
       return true;

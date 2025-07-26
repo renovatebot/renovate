@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';
@@ -65,5 +66,82 @@ describe('workers/repository/onboarding/branch/check', () => {
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING,
     );
+  });
+
+  describe('platform-specific config detection', () => {
+    beforeEach(() => {
+      cache.getCache.mockReturnValue({});
+      platform.findPr.mockResolvedValue(null);
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('detects .github config only on github platform', async () => {
+      GlobalConfig.set({ platform: 'github' });
+      const fileList = [
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ];
+      scm.getFileList.mockResolvedValue(fileList);
+      platform.ensureIssueClosing.mockResolvedValue();
+      
+      const result = await isOnboarded(config);
+      expect(result).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config file exists, fileName: .github/renovate.json',
+      );
+    });
+
+    it('detects .gitlab config only on gitlab platform', async () => {
+      GlobalConfig.set({ platform: 'gitlab' });
+      const fileList = [
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ];
+      scm.getFileList.mockResolvedValue(fileList);
+      platform.ensureIssueClosing.mockResolvedValue();
+      
+      const result = await isOnboarded(config);
+      expect(result).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config file exists, fileName: .gitlab/renovate.json',
+      );
+    });
+
+    it('ignores platform-specific configs on different platform', async () => {
+      GlobalConfig.set({ platform: 'bitbucket' });
+      const fileList = [
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ];
+      scm.getFileList.mockResolvedValue(fileList);
+      
+      const result = await isOnboarded(config);
+      expect(result).toBeFalse();
+      expect(logger.debug).toHaveBeenCalledWith('config file not found');
+    });
+
+    it('always detects root-level config files regardless of platform', async () => {
+      GlobalConfig.set({ platform: 'bitbucket' });
+      const fileList = [
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+        'renovate.json',
+      ];
+      scm.getFileList.mockResolvedValue(fileList);
+      platform.ensureIssueClosing.mockResolvedValue();
+      
+      const result = await isOnboarded(config);
+      expect(result).toBeTrue();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config file exists, fileName: renovate.json',
+      );
+    });
   });
 });

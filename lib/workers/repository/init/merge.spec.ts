@@ -1,5 +1,6 @@
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
+import { GlobalConfig } from '../../../config/global';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
 import type { AllConfig } from '../../../config/types';
@@ -47,6 +48,10 @@ describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
     });
 
     it('returns config if not found', async () => {
@@ -199,6 +204,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('finds and parse renovate.jsonc', async () => {
+      const configFileRaw = `{
+        // this is jsonc format with comments
+        "extends": ["config:base"]
+      }`;
+      scm.getFileList.mockResolvedValue(['package.json', 'renovate.jsonc']);
+      fs.readLocalFile.mockResolvedValue(configFileRaw);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.jsonc',
+        configFileParsed: { extends: ['config:base'] },
+      });
+    });
+
     it('finds .github/renovate.json', async () => {
       scm.getFileList.mockResolvedValue([
         'package.json',
@@ -220,6 +238,36 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
+      });
+    });
+
+    it('finds .github/renovate.jsonc', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.jsonc',
+      ]);
+      fs.readLocalFile.mockResolvedValue(`{
+        // JSONC config with comments
+        "extends": ["config:base"]
+      }`);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.jsonc',
+        configFileParsed: { extends: ['config:base'] },
+      });
+    });
+
+    it('finds .gitlab/renovate.jsonc', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.gitlab/renovate.jsonc',
+      ]);
+      fs.readLocalFile.mockResolvedValue(`{
+        // JSONC config with comments
+        "enabled": true
+      }`);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitlab/renovate.jsonc',
+        configFileParsed: { enabled: true },
       });
     });
 
@@ -252,6 +300,63 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {
           something: 'new',
         },
+      });
+    });
+
+    it('finds .github config only on github platform', async () => {
+      GlobalConfig.set({ platform: 'github' });
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{"github": true}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.json',
+        configFileParsed: { github: true },
+      });
+    });
+
+    it('finds .gitlab config only on gitlab platform', async () => {
+      GlobalConfig.set({ platform: 'gitlab' });
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{"gitlab": true}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitlab/renovate.json',
+        configFileParsed: { gitlab: true },
+      });
+    });
+
+    it('ignores platform-specific configs on different platform', async () => {
+      GlobalConfig.set({ platform: 'bitbucket' });
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+        'renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{"root": true}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParsed: { root: true },
+      });
+    });
+
+    it('prioritizes platform-specific config over root config on github', async () => {
+      GlobalConfig.set({ platform: 'github' });
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.json',
+        '.gitlab/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{"github": true}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.json',
+        configFileParsed: { github: true },
       });
     });
   });
