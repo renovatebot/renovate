@@ -200,5 +200,10 @@ export async function updateArtifacts(
     results.push(...artifactErrors.map((artifactError) => ({ artifactError })));
   }
 
+  if (artifactErrors.length === results.length) {
+    // If all artifacts failed, return null
+    return null;
+  }
+
   return results.length ? results : null;
 }
