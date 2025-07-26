@@ -159,6 +159,7 @@ export async function updateArtifacts(
 
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
+
       if (!hash) {
         artifactErrors.push({
           fileName: path,

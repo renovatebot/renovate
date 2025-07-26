@@ -107,6 +107,7 @@ export function parseArchiveUrl(
   }
 
   const url = parseUrl(urlString);
+
   if (url?.host === 'github.com') {
     return parseGithubPath(url.pathname);
   }
@@ -139,6 +140,7 @@ export const HttpTarget = z
     if (!parsedUrl) {
       return [];
     }
+
     const dep: PackageDependency = {
       datasource: parsedUrl.datasource,
       depType: rule,
