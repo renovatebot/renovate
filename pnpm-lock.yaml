@@ -559,8 +559,8 @@ importers:
         specifier: 4.17.2
         version: 4.17.2
       nock:
-        specifier: 14.0.5
-        version: 14.0.5
+        specifier: 14.0.6
+        version: 14.0.6
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
@@ -1224,8 +1224,8 @@ packages:
     os: [darwin, linux, win32]
     hasBin: true
 
-  '@mswjs/interceptors@0.38.7':
-    resolution: {integrity: sha512-Jkb27iSn7JPdkqlTqKfhncFfnEZsIJVYxsFbUSWEkxdIPdsyngrhoDBk0/BGD2FQcRH99vlRrkHpNTyKqI+0/w==}
+  '@mswjs/interceptors@0.39.4':
+    resolution: {integrity: sha512-B82DbrGVCIBrNEfRJbqUFB0eNz0wVzqbenEpmbE71XLVU4yKZbDnRBuxz+7udc/uM7LDWDD4sRJ5tISzHf2QkQ==}
     engines: {node: '>=18'}
 
   '@napi-rs/wasm-runtime@0.2.12':
@@ -4782,8 +4782,8 @@ packages:
   nise@6.1.1:
     resolution: {integrity: sha512-aMSAzLVY7LyeM60gvBS423nBmIPP+Wy7St7hsb+8/fc1HmeoHJfLO8CKse4u3BtOZvQLJghYPI2i/1WZrEj5/g==}
 
-  nock@14.0.5:
-    resolution: {integrity: sha512-R49fALR9caB6vxuSWUIaK2eBYeTloZQUFBZ4rHO+TbhMGQHtwnhdqKLYki+o+8qMgLvoBYWrp/2KzGPhxL4S6w==}
+  nock@14.0.6:
+    resolution: {integrity: sha512-67n1OfusL/ON57fwFJ6ZurSJa/msYVQmqlz9rCel2HJYj4Zeb8v9TcmRdEW+PV2i9Fm2358umSvzZukhw/E8DA==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.75.0:
@@ -7616,7 +7616,7 @@ snapshots:
 
   '@ls-lint/ls-lint@2.3.1': {}
 
-  '@mswjs/interceptors@0.38.7':
+  '@mswjs/interceptors@0.39.4':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
       '@open-draft/logger': 0.3.0
@@ -11722,9 +11722,9 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 8.2.0
 
-  nock@14.0.5:
+  nock@14.0.6:
     dependencies:
-      '@mswjs/interceptors': 0.38.7
+      '@mswjs/interceptors': 0.39.4
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
 
