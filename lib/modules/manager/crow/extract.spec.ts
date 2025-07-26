@@ -23,16 +23,6 @@ describe('modules/manager/crow/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            depName: 'woodpeckerci/plugin-git',
-            packageName: 'woodpeckerci/plugin-git',
-            currentValue: '2.0.3',
-            currentDigest: undefined,
-            replaceString: 'woodpeckerci/plugin-git:2.0.3',
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            datasource: 'docker',
-          },
-          {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
             currentValue: 'alpine',
@@ -108,6 +98,16 @@ describe('modules/manager/crow/extract', () => {
             currentValue: undefined,
             currentDigest: undefined,
             replaceString: 'app-local-debug',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'woodpeckerci/plugin-git',
+            packageName: 'woodpeckerci/plugin-git',
+            currentValue: '2.0.3',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:2.0.3',
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
@@ -260,21 +260,21 @@ describe('modules/manager/crow/extract', () => {
       expect(res).toEqual({
         deps: [
           {
-            depName: 'woodpeckerci/plugin-git',
-            packageName: 'woodpeckerci/plugin-git',
-            currentValue: 'latest',
-            currentDigest: undefined,
-            replaceString: 'woodpeckerci/plugin-git:latest',
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            datasource: 'docker',
-          },
-          {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
             currentValue: 'alpine',
             currentDigest: undefined,
             replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+          {
+            depName: 'woodpeckerci/plugin-git',
+            packageName: 'woodpeckerci/plugin-git',
+            currentValue: 'latest',
+            currentDigest: undefined,
+            replaceString: 'woodpeckerci/plugin-git:latest',
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
