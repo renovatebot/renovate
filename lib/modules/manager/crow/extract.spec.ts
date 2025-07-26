@@ -323,5 +323,51 @@ describe('modules/manager/crow/extract', () => {
 
       expect(res).toBeNull();
     });
+
+    it('handles empty pipeline section gracefully', () => {
+      const res = extractPackageFile(
+        `
+        pipeline: {}
+        steps:
+          redis:
+            image: quay.io/something/redis:alpine
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depName: 'quay.io/something/redis',
+            packageName: 'quay.io/something/redis',
+            currentValue: 'alpine',
+            currentDigest: undefined,
+            replaceString: 'quay.io/something/redis:alpine',
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('returns null when pipeline keys exist but contain no valid images', () => {
+      const res = extractPackageFile(
+        `
+        pipeline:
+          test:
+            script: echo "hello"
+        steps:
+          build:
+            commands:
+              - make build
+        `,
+        '',
+        {},
+      );
+
+      expect(res).toBeNull();
+    });
   });
 });
