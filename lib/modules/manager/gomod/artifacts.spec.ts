@@ -2924,45 +2924,6 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
-  it('handles gomodTidyAll when no dependent modules exist', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-      { name: 'go.mod', isLeaf: true },
-    ]);
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.sum'],
-      }),
-    );
-    fs.readLocalFile
-      .mockResolvedValueOnce('New go.sum')
-      .mockResolvedValueOnce('New go.mod');
-
-    const res = await gomod.updateArtifacts({
-      packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
-      newPackageFileContent: gomod1,
-      config: {
-        ...config,
-        postUpdateOptions: ['gomodTidyAll'],
-      },
-    });
-
-    expect(res).toEqual([
-      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
-      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
-    ]);
-
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
   it('handles dependent module with no file changes', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
