@@ -39,8 +39,11 @@ export async function extractPackageFile(
 
   const deps: PackageDependency[] = allPackages.map((p) => {
     return {
+      depType: 'dependencies',
+      depName: p.name,
       packageName: p.name,
       currentVersion: p.version,
+      datasource: NugetDatasource.id,
     };
   });
 
