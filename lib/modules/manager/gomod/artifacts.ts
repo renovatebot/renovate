@@ -28,7 +28,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
-import { getDependentGoModFiles } from './package-tree';
+import { getTransitiveDependentModules } from './package-tree';
 
 const { major, valid } = semver;
 
@@ -429,7 +429,7 @@ export async function updateArtifacts({
     }
 
     if (config.postUpdateOptions?.includes('gomodTidyAll')) {
-      const dependentResults = await updateDependentGoModFiles(
+      const dependentResults = await tidyDependentModules(
         goModFileName,
         execOptions,
         tidyOpts,
@@ -460,12 +460,12 @@ export async function updateArtifacts({
 /**
  * Update dependent go.mod files when gomodTidyAll is enabled
  */
-async function updateDependentGoModFiles(
+async function tidyDependentModules(
   packageFileName: string,
   execOptions: ExecOptions,
   tidyOpts: string,
 ): Promise<UpdateArtifactsResult[]> {
-  const dependentFiles = await getDependentGoModFiles(packageFileName);
+  const dependentFiles = await getTransitiveDependentModules(packageFileName);
   const results: UpdateArtifactsResult[] = [];
 
   // Filter out the main go.mod file since it's already been processed

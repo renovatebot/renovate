@@ -17,10 +17,16 @@ const replaceRegex = regEx(
 /**
  * Get all dependent go.mod files that need to be updated when packageFileName changes
  */
-export async function getDependentGoModFiles(
+export async function getTransitiveDependentModules(
   packageFileName: string,
 ): Promise<GoModuleFile[]> {
   const goModFiles = await getAllGoModFiles();
+
+  // If the target file doesn't exist in the repository, return empty
+  if (!goModFiles.includes(packageFileName)) {
+    return [];
+  }
+
   const graph = new Graph();
 
   for (const f of goModFiles) {
