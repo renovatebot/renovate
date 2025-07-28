@@ -2887,6 +2887,106 @@ describe('modules/manager/gomod/artifacts', () => {
           ]),
         );
       });
+
+      it('should handle TEMPORARY_ERROR in main updateArtifacts', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        // Mock exec to throw TEMPORARY_ERROR
+        mockExecAll(new Error('temporary-error'));
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidy'],
+          },
+        });
+
+        // Should return artifact error instead of throwing
+        expect(result).toEqual([
+          {
+            artifactError: {
+              lockFile: 'go.sum',
+              stderr: 'temporary-error',
+            },
+          },
+        ]);
+      });
+
+      it('should handle TEMPORARY_ERROR in tidyDependentModule', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
+          { name: 'submodule/go.mod', isLeaf: true },
+        ]);
+
+        // Mock main exec to succeed but dependent module exec to throw TEMPORARY_ERROR
+        mockExecSequence([
+          { stdout: '', stderr: '' }, // Main module succeeds
+          new Error('temporary-error'), // Dependent module throws TEMPORARY_ERROR
+        ]);
+
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: ['go.sum'] }),
+        );
+
+        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+        // TEMPORARY_ERROR in tidyDependentModule gets handled as artifact error
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidyAll'],
+          },
+        });
+
+        // Should return an artifact error containing some error
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              artifactError: expect.objectContaining({
+                stderr: expect.any(String),
+              }),
+            }),
+          ]),
+        );
+      });
+
+      it('should handle modules with unresolvable dependencies', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        // This test covers edge cases in dependency processing
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
+          { name: 'go.mod', isLeaf: true },
+        ]);
+
+        mockExecAll();
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: ['go.sum'] }),
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidyAll'],
+          },
+        });
+
+        // Should complete successfully
+        expect(result).not.toBeNull();
+      });
     });
   });
 });

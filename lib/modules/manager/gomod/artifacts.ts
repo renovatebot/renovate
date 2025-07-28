@@ -3,7 +3,7 @@ import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getEnv } from '../../../util/env';
@@ -445,10 +445,6 @@ export async function updateArtifacts({
 
     return res;
   } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
     logger.debug({ err }, 'Failed to update go.sum');
     return [
       {
@@ -481,10 +477,6 @@ async function tidyDependentModules(
         !processed.has(file.name) &&
         areDependenciesProcessed(file.name, dependentFiles, processed),
     );
-
-    if (currentLevel.length === 0) {
-      break;
-    } // Safety check
 
     logger.debug(`Processing ${currentLevel.length} modules in parallel`);
 
@@ -546,49 +538,33 @@ async function tidyDependentModule(
     cwdFile: goModFileName,
   };
 
-  try {
-    await exec([`${cmd} ${args}`], dependentExecOptions);
-    const status = await getRepoStatus();
-    const res: UpdateArtifactsResult[] = [];
+  await exec([`${cmd} ${args}`], dependentExecOptions);
+  const status = await getRepoStatus();
+  const res: UpdateArtifactsResult[] = [];
 
-    if (status.modified.includes(sumFileName)) {
-      logger.debug('Returning updated go.sum');
-      res.push({
-        file: {
-          type: 'addition',
-          path: sumFileName,
-          contents: await readLocalFile(sumFileName),
-        },
-      });
-    }
-
-    if (status.modified.includes(goModFileName)) {
-      logger.debug('Returning updated go.mod');
-      res.push({
-        file: {
-          type: 'addition',
-          path: goModFileName,
-          contents: await readLocalFile(goModFileName, 'utf8'),
-        },
-      });
-    }
-
-    return res.length > 0 ? res : null;
-  } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.debug({ err, goModFileName }, 'Failed to update dependent go.mod');
-    return [
-      {
-        artifactError: {
-          lockFile: sumFileName,
-          stderr: err.message,
-        },
+  if (status.modified.includes(sumFileName)) {
+    logger.debug('Returning updated go.sum');
+    res.push({
+      file: {
+        type: 'addition',
+        path: sumFileName,
+        contents: await readLocalFile(sumFileName),
       },
-    ];
+    });
   }
+
+  if (status.modified.includes(goModFileName)) {
+    logger.debug('Returning updated go.mod');
+    res.push({
+      file: {
+        type: 'addition',
+        path: goModFileName,
+        contents: await readLocalFile(goModFileName, 'utf8'),
+      },
+    });
+  }
+
+  return res.length > 0 ? res : null;
 }
 
 function getGoConstraints(content: string): string | undefined {

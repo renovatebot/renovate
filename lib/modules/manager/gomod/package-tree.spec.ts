@@ -242,5 +242,53 @@ describe('modules/manager/gomod/package-tree', () => {
         { isLeaf: true, name: 'service/go.mod' },
       ]);
     });
+
+    it('handles modules with complex dependency graphs that revisit nodes', async () => {
+      scm.getFileList.mockResolvedValue([
+        'common/go.mod',
+        'service-a/go.mod',
+        'service-b/go.mod',
+        'service-c/go.mod',
+      ]);
+
+      // Module common - foundation
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+         module github.com/renovate-tests/monorepo/common
+         go 1.21
+       `);
+
+      // Service A depends on common
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+         module github.com/renovate-tests/monorepo/service-a
+         go 1.21
+         replace github.com/renovate-tests/monorepo/common => ../common
+       `);
+
+      // Service B depends on common (another path to same module)
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+         module github.com/renovate-tests/monorepo/service-b
+         go 1.21
+         replace github.com/renovate-tests/monorepo/common => ../common
+       `);
+
+      // Service C depends on both service-a and service-b (diamond dependency)
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+         module github.com/renovate-tests/monorepo/service-c
+         go 1.21
+         replace github.com/renovate-tests/monorepo/service-a => ../service-a
+         replace github.com/renovate-tests/monorepo/service-b => ../service-b
+       `);
+
+      const result = await getTransitiveDependentModules('common/go.mod');
+
+      // Should handle the diamond dependency correctly without duplicates
+      // This exercises the visited modules check (lines 71-72)
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: false, name: 'common/go.mod' },
+        { isLeaf: false, name: 'service-a/go.mod' },
+        { isLeaf: true, name: 'service-c/go.mod' },
+        { isLeaf: false, name: 'service-b/go.mod' },
+      ]);
+    });
   });
 });
