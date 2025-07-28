@@ -2516,5 +2516,57 @@ describe('modules/manager/gomod/artifacts', () => {
       const allCommands = execSnapshots.map((s) => s.cmd).join(' ');
       expect(allCommands).toContain('go mod tidy');
     });
+
+    it('does not call getTransitiveDependentModules when gomodTidyAll is not enabled', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['go.sum'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+      fs.readLocalFile.mockResolvedValueOnce('Updated go.mod');
+
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy'], // Using normal gomodTidy, not gomodTidyAll
+        },
+      });
+
+      // Should NOT call getTransitiveDependentModules when gomodTidyAll is not enabled
+      expect(packageTree.getTransitiveDependentModules).not.toHaveBeenCalled();
+    });
+
+    it('does not call getTransitiveDependentModules when no tidying options are enabled', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['go.sum'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+      fs.readLocalFile.mockResolvedValueOnce('Updated go.mod');
+
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          // No tidying options enabled
+        },
+      });
+
+      // Should NOT call getTransitiveDependentModules when no tidying options are enabled
+      expect(packageTree.getTransitiveDependentModules).not.toHaveBeenCalled();
+    });
   });
 });
