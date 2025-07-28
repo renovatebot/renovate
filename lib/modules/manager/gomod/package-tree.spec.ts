@@ -33,6 +33,30 @@ describe('modules/manager/gomod/package-tree', () => {
       ]);
     });
 
+    it('returns leaf module only for leaf nodes', async () => {
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
+
+      // Module common
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/common
+        go 1.21
+      `);
+
+      // Module service - depends on common via replace
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/service
+        go 1.21
+        replace github.com/renovate-tests/monorepo/common => ../common
+      `);
+
+      // Query for leaf module service
+      const result = await getTransitiveDependentModules('service/go.mod');
+
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: true, name: 'service/go.mod' },
+      ]);
+    });
+
     it('returns modules in dependency order (dependencies before dependents)', async () => {
       scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
 
@@ -59,30 +83,6 @@ describe('modules/manager/gomod/package-tree', () => {
       // Should return common first (dependency), then service (dependent)
       expect(result).toEqual<GoModuleFile[]>([
         { isLeaf: false, name: 'common/go.mod' },
-        { isLeaf: true, name: 'service/go.mod' },
-      ]);
-    });
-
-    it('returns leaf module only for leaf nodes', async () => {
-      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
-
-      // Module common
-      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/common
-        go 1.21
-      `);
-
-      // Module service - depends on common via replace
-      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/service
-        go 1.21
-        replace github.com/renovate-tests/monorepo/common => ../common
-      `);
-
-      // Query for leaf module service
-      const result = await getTransitiveDependentModules('service/go.mod');
-
-      expect(result).toEqual<GoModuleFile[]>([
         { isLeaf: true, name: 'service/go.mod' },
       ]);
     });
