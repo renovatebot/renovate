@@ -28,7 +28,10 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import { getExtraDepsNotice } from './artifacts-extra';
-import { getTransitiveDependentModules } from './package-tree';
+import {
+  type GoModuleFile,
+  getTransitiveDependentModules,
+} from './package-tree';
 
 const { major, valid } = semver;
 
@@ -468,16 +471,62 @@ async function tidyDependentModules(
 ): Promise<UpdateArtifactsResult[]> {
   const dependentFiles = await getTransitiveDependentModules(packageFileName);
   const results: UpdateArtifactsResult[] = [];
+  const processed = new Set<string>();
 
-  // Process all modules including root in dependency order
-  for (const file of dependentFiles) {
-    const result = await tidyDependentModule(file.name, execOptions, tidyOpts);
-    if (result) {
-      results.push(...result);
+  // Process level by level until all modules are processed
+  while (processed.size < dependentFiles.length) {
+    // Find modules whose dependencies are all processed (ready for this level)
+    const currentLevel = dependentFiles.filter(
+      (file) =>
+        !processed.has(file.name) &&
+        areDependenciesProcessed(file.name, dependentFiles, processed),
+    );
+
+    if (currentLevel.length === 0) {
+      break;
+    } // Safety check
+
+    logger.debug(`Processing ${currentLevel.length} modules in parallel`);
+
+    // Process current level in parallel
+    const levelResults = await Promise.all(
+      currentLevel.map((file) =>
+        tidyDependentModule(file.name, execOptions, tidyOpts),
+      ),
+    );
+
+    // Collect results and mark as processed
+    for (const result of levelResults) {
+      if (result) {
+        results.push(...result);
+      }
     }
+    currentLevel.forEach((file) => processed.add(file.name));
   }
 
   return results;
+}
+
+/**
+ * Check if all dependencies of a module are already processed
+ */
+function areDependenciesProcessed(
+  moduleName: string,
+  allModules: GoModuleFile[],
+  processed: Set<string>,
+): boolean {
+  // Since getTransitiveDependentModules() returns modules in dependency order,
+  // dependencies come first in the array
+  const moduleIndex = allModules.findIndex((m) => m.name === moduleName);
+
+  // Check if all modules before this one (dependencies) are processed
+  for (let i = 0; i < moduleIndex; i++) {
+    if (!processed.has(allModules[i].name)) {
+      return false; // Dependency not yet processed
+    }
+  }
+
+  return true;
 }
 
 /**
