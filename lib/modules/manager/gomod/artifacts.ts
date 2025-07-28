@@ -470,9 +470,7 @@ async function tidyDependentModules(
   const results: UpdateArtifactsResult[] = [];
 
   // Process all modules including root in dependency order
-  const dependentModules = dependentFiles; // Don't filter out packageFileName
-
-  for (const file of dependentModules) {
+  for (const file of dependentFiles) {
     const result = await tidyDependentModule(file.name, execOptions, tidyOpts);
     if (result) {
       results.push(...result);
