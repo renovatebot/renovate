@@ -643,17 +643,9 @@ export class DockerDatasource extends Datasource {
     return tags;
   }
 
-  /**
-   * Get Docker API tags from a registry
-   * @param registryHost - The registry host URL
-   * @param dockerRepository - The Docker repository name
-   * @param quayLastTagValue - Only used for Quay.io to optimize tag fetching by providing the last tag value seen
-   * @returns Array of tags or null if not found
-   */
   private async getDockerApiTags(
     registryHost: string,
     dockerRepository: string,
-    quayLastTagValue?: string,
   ): Promise<string[] | null> {
     let tags: string[] = [];
     // AWS ECR limits the maximum number of results to 1000
@@ -664,15 +656,8 @@ export class DockerDatasource extends Datasource {
         ? 1000
         : 10000;
 
-    // Base URL for fetching tags
     let url: string | null =
       `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
-
-    // Add the last parameter if quayLastTagValue is provided to optimize tag fetching for Quay
-    const isQuay = registryHost === 'https://quay.io';
-    if (isQuay && quayLastTagValue) {
-      url += `&last=${quayLastTagValue}`;
-    }
 
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
@@ -745,17 +730,9 @@ export class DockerDatasource extends Datasource {
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
   })
-  /**
-   * Get tags for a Docker repository
-   * @param registryHost - The registry host URL
-   * @param dockerRepository - The Docker repository name
-   * @param quayLastTagValue - Only used for Quay.io to optimize tag fetching by providing the last tag value seen
-   * @returns Array of tags or null if not found
-   */
   async getTags(
     registryHost: string,
     dockerRepository: string,
-    quayLastTagValue?: string,
   ): Promise<string[] | null> {
     try {
       const isQuay = registryHost === 'https://quay.io';
@@ -771,11 +748,7 @@ export class DockerDatasource extends Datasource {
               { registryHost, dockerRepository },
               'Quay v1 API unauthorized, falling back to Docker v2 API',
             );
-            tags = await this.getDockerApiTags(
-              registryHost,
-              dockerRepository,
-              quayLastTagValue,
-            );
+            tags = await this.getDockerApiTags(registryHost, dockerRepository);
           } else {
             throw err;
           }
@@ -1104,10 +1077,10 @@ export class DockerDatasource extends Datasource {
       return registryHost === 'https://index.docker.io';
     },
   })
-  async getReleases(
-    releaseConfig: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    const { packageName, registryUrl, currentValue } = releaseConfig;
+  async getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { registryHost, dockerRepository } = getRegistryRepository(
       packageName,
       registryUrl!,
@@ -1120,7 +1093,7 @@ export class DockerDatasource extends Datasource {
 
     const getTags = (): TagsResultType =>
       Result.wrapNullable(
-        this.getTags(registryHost, dockerRepository, currentValue),
+        this.getTags(registryHost, dockerRepository),
         'tags-error' as const,
       ).transform((tags) => tags.map((version) => ({ version })));
 

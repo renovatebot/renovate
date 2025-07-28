@@ -1564,32 +1564,6 @@ describe('modules/datasource/docker/index', () => {
       );
     });
 
-    it('uses quay api with last parameter for v2 API when currentValue is provided', async () => {
-      httpMock
-        .scope('https://quay.io')
-        .get(
-          '/api/v1/repository/bitnami/redis/tag/?limit=100&page=1&onlyActiveTags=true',
-        )
-        .reply(401, 'Unauthorized')
-        .get('/v2/')
-        .reply(200, '', {})
-        .get('/v2/bitnami/redis/tags/list?n=10000&last=1.0.0')
-        .reply(200, {})
-        .get('/v2/bitnami/redis/tags/list?n=10000&last=1.0.0')
-        .reply(200, { tags: ['1.0.1', '2.0.0'] })
-        .get('/v2/bitnami/redis/manifests/2.0.0')
-        .reply(200, '', {});
-
-      const config = {
-        datasource: DockerDatasource.id,
-        packageName: 'bitnami/redis',
-        registryUrls: ['https://quay.io'],
-        currentValue: '1.0.0',
-      };
-      const res = await getPkgReleases(config);
-      expect(res?.releases).toHaveLength(2);
-    });
-
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
       const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
