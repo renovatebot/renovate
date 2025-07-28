@@ -279,6 +279,7 @@ export async function updateArtifacts({
 
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
+      !config.postUpdateOptions?.includes('gomodTidyAll') &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
@@ -468,10 +469,8 @@ async function tidyDependentModules(
   const dependentFiles = await getTransitiveDependentModules(packageFileName);
   const results: UpdateArtifactsResult[] = [];
 
-  // Filter out the main go.mod file since it's already been processed
-  const dependentModules = dependentFiles.filter(
-    (file) => file.name !== packageFileName,
-  );
+  // Process all modules including root in dependency order
+  const dependentModules = dependentFiles; // Don't filter out packageFileName
 
   for (const file of dependentModules) {
     const result = await tidyDependentModule(file.name, execOptions, tidyOpts);

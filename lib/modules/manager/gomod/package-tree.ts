@@ -78,6 +78,7 @@ function recursivelyGetDependentGoModFiles(
     return;
   }
 
+  // Add current node first, then process dependents (pre-order traversal)
   deps.set(packageFileName, false);
 
   for (const dep of dependents) {
