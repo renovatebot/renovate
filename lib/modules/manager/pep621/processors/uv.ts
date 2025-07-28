@@ -62,9 +62,14 @@ export class UvProcessor implements PyProjectProcessor {
           continue;
         }
 
+        logger.info('Running uv processor');
+
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
         const depSource = uv.sources?.[dep.packageName];
+
+        logger.info(`depSource: ${JSON.stringify(depSource)}`);
+
         if (depSource) {
           // Dependency is pinned to a specific source.
           dep.depType = depTypes.uvSources;
@@ -83,6 +88,7 @@ export class UvProcessor implements PyProjectProcessor {
               depSource.tag,
               depSource.branch,
             );
+            logger.info(`Git dep: ${JSON.stringify(dep)}`);
           } else if ('url' in depSource) {
             dep.skipReason = 'unsupported-url';
           } else if ('path' in depSource) {
