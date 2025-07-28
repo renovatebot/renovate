@@ -150,5 +150,97 @@ describe('modules/manager/gomod/package-tree', () => {
       // Should return empty array when circular reference is detected
       expect(result).toEqual<GoModuleFile[]>([]);
     });
+
+    it('returns empty array when target file does not exist in repository', async () => {
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
+
+      // No file reading mocks needed since the target doesn't exist
+      const result = await getTransitiveDependentModules('nonexistent/go.mod');
+
+      // Should return empty array when the target file doesn't exist
+      expect(result).toEqual<GoModuleFile[]>([]);
+    });
+
+    it('handles null content when reading go.mod file', async () => {
+      scm.getFileList.mockResolvedValue(['go.mod']);
+
+      // Mock readLocalFile to return null (file cannot be read)
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const result = await getTransitiveDependentModules('go.mod');
+
+      // Should return the module itself even when content is null
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: true, name: 'go.mod' },
+      ]);
+    });
+
+    it('handles multiline replace blocks correctly', async () => {
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
+
+      // Module common
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/common
+        go 1.21
+      `);
+
+      // Module service with multiline replace block
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/service
+        go 1.21
+
+        replace (
+          github.com/renovate-tests/monorepo/common => ../common
+          github.com/external/dep => ../external/dep
+        )
+      `);
+
+      const result = await getTransitiveDependentModules('common/go.mod');
+
+      // Should properly parse multiline replace blocks
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: false, name: 'common/go.mod' },
+        { isLeaf: true, name: 'service/go.mod' },
+      ]);
+    });
+
+    it('handles multiline replace blocks with mixed formats', async () => {
+      scm.getFileList.mockResolvedValue([
+        'common/go.mod',
+        'utils/go.mod',
+        'service/go.mod',
+      ]);
+
+      // Module common
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/common
+        go 1.21
+      `);
+
+      // Module utils
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/utils
+        go 1.21
+      `);
+
+      // Module service with multiline replace block containing lines without 'replace' keyword
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/service
+        go 1.21
+
+        replace (
+          github.com/renovate-tests/monorepo/common => ../common
+          github.com/renovate-tests/monorepo/utils => ../utils
+        )
+      `);
+
+      const result = await getTransitiveDependentModules('common/go.mod');
+
+      // Should properly handle multiline blocks where lines don't have 'replace' keyword
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: false, name: 'common/go.mod' },
+        { isLeaf: true, name: 'service/go.mod' },
+      ]);
+    });
   });
 });

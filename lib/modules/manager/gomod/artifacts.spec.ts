@@ -11,7 +11,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as _artifactsExtra from './artifacts-extra';
 import * as _packageTree from './package-tree';
 import * as gomod from '.';
-import { envMock, mockExecAll } from '~test/exec-util';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
 import { env, fs, git, partial } from '~test/util';
 
 type FS = typeof import('../../../util/fs');
@@ -2725,6 +2725,167 @@ describe('modules/manager/gomod/artifacts', () => {
         expect(result).not.toBeNull();
         // Just verify it's an array - the content can vary based on error handling
         expect(Array.isArray(result)).toBe(true);
+      });
+
+      it('should handle infinite loop protection when currentLevel is empty', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        // Mock a scenario where no dependencies exist to trigger the break condition
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([]);
+
+        const execSnapshots = mockExecAll();
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: ['go.sum'] }),
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidyAll'],
+          },
+        });
+
+        expect(result).not.toBeNull();
+        expect(execSnapshots).toHaveLength(1); // Only main module processing
+      });
+
+      it('should handle error in main updateArtifacts processing', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        // Mock exec to throw an error
+        mockExecAll(new Error('go command failed'));
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidy'],
+          },
+        });
+
+        // Should return an artifact error
+        expect(result).toEqual([
+          {
+            artifactError: {
+              lockFile: 'go.sum',
+              stderr: 'go command failed',
+            },
+          },
+        ]);
+      });
+
+      it('should handle go.mod file modification in tidyDependentModule', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
+          { name: 'submodule/go.mod', isLeaf: true },
+        ]);
+
+        mockExecAll();
+        git.getRepoStatus
+          .mockResolvedValueOnce(
+            partial<StatusResult>({ modified: ['go.sum'] }),
+          )
+          .mockResolvedValueOnce(
+            partial<StatusResult>({
+              modified: ['submodule/go.sum', 'submodule/go.mod'], // Both sum and mod files modified
+            }),
+          );
+
+        fs.readLocalFile
+          .mockResolvedValueOnce('Updated go.sum')
+          .mockResolvedValueOnce('Updated submodule go.sum')
+          .mockResolvedValueOnce('Updated submodule go.mod');
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidyAll'],
+          },
+        });
+
+        // Should return results for both go.sum and go.mod files
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              file: expect.objectContaining({
+                path: 'go.sum',
+                type: 'addition',
+              }),
+            }),
+            expect.objectContaining({
+              file: expect.objectContaining({
+                path: 'submodule/go.sum',
+                type: 'addition',
+              }),
+            }),
+            expect.objectContaining({
+              file: expect.objectContaining({
+                path: 'submodule/go.mod',
+                type: 'addition',
+              }),
+            }),
+          ]),
+        );
+      });
+
+      it('should handle error in tidyDependentModule', async () => {
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
+          { name: 'submodule/go.mod', isLeaf: true },
+        ]);
+
+        // Mock main exec to succeed but dependent module exec to fail
+        mockExecSequence([
+          { stdout: '', stderr: '' }, // Main module succeeds
+          new Error('submodule go mod tidy failed'), // Dependent module fails
+        ]);
+
+        git.getRepoStatus
+          .mockResolvedValueOnce(
+            partial<StatusResult>({ modified: ['go.sum'] }),
+          )
+          .mockResolvedValueOnce(
+            partial<StatusResult>({ modified: [] }), // No changes in dependent module due to error
+          );
+
+        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: {
+            ...config,
+            postUpdateOptions: ['gomodTidyAll'],
+          },
+        });
+
+        // Should return results including the error for dependent module
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              artifactError: expect.objectContaining({
+                lockFile: expect.stringMatching(/go\.sum$/),
+                stderr: expect.any(String),
+              }),
+            }),
+          ]),
+        );
       });
     });
   });
