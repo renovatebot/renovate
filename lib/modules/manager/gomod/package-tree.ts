@@ -51,11 +51,11 @@ export async function getTransitiveDependentModules(
     return [];
   }
 
-  const deps = new Map<string, boolean>();
-  recursivelyGetDependentGoModFiles(packageFileName, graph, deps);
+  const visitedModules = new Map<string, boolean>();
+  recursivelyGetDependentGoModFiles(packageFileName, graph, visitedModules);
 
   // deduplicate
-  return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
+  return Array.from(visitedModules).map(([name, isLeaf]) => ({ name, isLeaf }));
 }
 
 /**
@@ -64,9 +64,9 @@ export async function getTransitiveDependentModules(
 function recursivelyGetDependentGoModFiles(
   packageFileName: string,
   graph: Graph,
-  deps: Map<string, boolean>,
+  visitedModules: Map<string, boolean>,
 ): void {
-  if (deps.has(packageFileName)) {
+  if (visitedModules.has(packageFileName)) {
     // we have already visited this package file
     return;
   }
@@ -74,15 +74,15 @@ function recursivelyGetDependentGoModFiles(
   const dependents = graph.adjacent(packageFileName);
 
   if (!dependents || dependents.size === 0) {
-    deps.set(packageFileName, true);
+    visitedModules.set(packageFileName, true);
     return;
   }
 
   // Add current node first, then process dependents (pre-order traversal)
-  deps.set(packageFileName, false);
+  visitedModules.set(packageFileName, false);
 
-  for (const dep of dependents) {
-    recursivelyGetDependentGoModFiles(dep, graph, deps);
+  for (const dependent of dependents) {
+    recursivelyGetDependentGoModFiles(dependent, graph, visitedModules);
   }
 }
 

@@ -285,7 +285,7 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -313,7 +313,7 @@ export async function updateArtifacts({
       }
 
       if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
+        args = `mod tidy${tidyOpts}`;
         logger.debug('go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
@@ -321,7 +321,7 @@ export async function updateArtifacts({
 
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
-      args = 'mod tidy' + tidyOpts;
+      args = `mod tidy${tidyOpts}`;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
@@ -490,7 +490,7 @@ async function tidyDependentModule(
 ): Promise<UpdateArtifactsResult[] | null> {
   const sumFileName = goModFileName.replace(regEx(/\.mod$/), '.sum');
   const cmd = 'go';
-  const args = 'mod tidy' + tidyOpts;
+  const args = `mod tidy${tidyOpts}`;
 
   const dependentExecOptions: ExecOptions = {
     ...execOptions,
