@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { minimatch } from '../../../util/minimatch';
-import { regEx } from '../../../util/regex';
+import { matchRegexOrGlob } from '../../../util/string-match';
 
 export function getIncludedFiles(
   fileList: string[],
@@ -53,14 +53,13 @@ export function getMatchingFiles(
   allFiles: string[],
 ): string[] {
   const fileList = getFilteredFileList(config, allFiles);
-  const { fileMatch, manager } = config;
+  const { managerFilePatterns, manager } = config;
   let matchedFiles: string[] = [];
   // TODO: types (#22198)
-  for (const match of fileMatch!) {
-    logger.debug(`Using file match: ${match} for manager ${manager!}`);
-    const re = regEx(match);
+  for (const pattern of managerFilePatterns!) {
+    logger.debug(`Using file pattern: ${pattern} for manager ${manager!}`);
     matchedFiles = matchedFiles.concat(
-      fileList.filter((file) => re.test(file)),
+      fileList.filter((file) => matchRegexOrGlob(file, pattern)),
     );
   }
   // filter out duplicates

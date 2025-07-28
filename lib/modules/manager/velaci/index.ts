@@ -8,7 +8,7 @@ export const url = 'https://go-vela.github.io/docs';
 export const categories: Category[] = ['ci'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.vela\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)\\.vela\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

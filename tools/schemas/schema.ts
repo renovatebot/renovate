@@ -65,3 +65,9 @@ export const SourceUrlsSchema = z
     $schema: z.string(),
   })
   .catchall(z.record(z.string(), z.string().url()));
+
+export const AbandonmentsSchema = z
+  .object({
+    $schema: z.string(),
+  })
+  .catchall(z.record(z.string(), z.string()));

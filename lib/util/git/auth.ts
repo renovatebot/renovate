@@ -3,6 +3,7 @@ import { PLATFORM_HOST_TYPES } from '../../constants/platforms';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
+import { getEnv } from '../env';
 import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
 import { createURLFromHostOrURL, isHttpUrl } from '../url';
@@ -33,9 +34,10 @@ export function getGitAuthenticatedEnvironmentVariables(
     return { ...environmentVariables };
   }
 
+  const env = getEnv();
   // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
   const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT ?? process.env.GIT_CONFIG_COUNT;
+    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
   let gitConfigCount = 0;
   if (gitConfigCountEnvVariable) {
     // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
@@ -43,7 +45,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
         {
-          GIT_CONFIG_COUNT: process.env.GIT_CONFIG_COUNT,
+          GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
         },
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
       );

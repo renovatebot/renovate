@@ -9,6 +9,7 @@ import { migrateConfig } from './config/migration';
 import type { RenovateConfig } from './config/types';
 import { validateConfig } from './config/validation';
 import { logger } from './logger';
+import { getEnv } from './util/env';
 import {
   getConfig as getFileConfig,
   getParsedContent,
@@ -136,9 +137,10 @@ interface PackageJson {
       // ignore
     }
     try {
-      const fileConfig = await getFileConfig(process.env);
+      const env = getEnv();
+      const fileConfig = await getFileConfig(env);
       if (!dequal(fileConfig, {})) {
-        const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
+        const file = env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
           await validate('global', file, fileConfig, strict);

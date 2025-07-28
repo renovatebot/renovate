@@ -9,6 +9,7 @@ import type {
   PackageDependency,
   PackageFile,
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
@@ -451,19 +452,16 @@ function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
   packageFileName: string,
-): BranchConfig {
-  const updatedConfig = { ...config };
+): UpdateArtifactsConfig {
+  // drop any lockFiles that happen to be defined on the branch config
+  const { lockFiles, ...updatedConfig } = config;
   if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
     const managerPackageFiles: PackageFile[] =
       updatedConfig.packageFiles?.[manager];
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (
-      packageFile &&
-      is.nonEmptyArray(updatedConfig.lockFiles) &&
-      is.nonEmptyArray(packageFile.lockFiles)
-    ) {
+    if (packageFile && is.nonEmptyArray(packageFile.lockFiles)) {
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }

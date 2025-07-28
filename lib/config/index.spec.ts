@@ -125,10 +125,13 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
-        ['fileMatch', ['(^|/)package\\.json$', '(^|/)pnpm-workspace\\.yaml$']],
+        [
+          'managerFilePatterns',
+          ['/(^|/)package\\.json$/', '/(^|/)pnpm-workspace\\.yaml$/'],
+        ],
       ]);
       expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
-        ['fileMatch', ['\\.html?$']],
+        ['managerFilePatterns', ['/\\.html?$/']],
       ]);
     });
 

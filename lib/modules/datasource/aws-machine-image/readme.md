@@ -62,7 +62,7 @@ module.exports = {
   customManagers: [
     {
       customType: 'regex',
-      fileMatch: ['.*'],
+      managerFilePatterns: ['/.*/'],
       matchStrings: [
         '.*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?["|\']?(?<currentValue>ami-[a-z0-9]{17})["|\']?.*',
       ],
@@ -81,7 +81,7 @@ Or as JSON:
     [
       {
         'customType': 'regex',
-        'fileMatch': ['.*'],
+        'managerFilePatterns': ['/.*/'],
         'matchStrings':
           [
             ".*amiFilter=(?<packageName>.*?)\n(.*currentImageName=(?<currentDigest>.*?)\n)?(.*\n)?.*?(?<depName>[a-zA-Z0-9-_:]*)[ ]*?[:|=][ ]*?[\"|']?(?<currentValue>ami-[a-z0-9]{17})[\"|']?.*",

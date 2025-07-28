@@ -15,7 +15,12 @@ export type CommitStatusType =
   | 'failure'
   | 'warning'
   | 'unknown';
-export type PRMergeMethod = 'merge' | 'rebase' | 'rebase-merge' | 'squash';
+export type PRMergeMethod =
+  | 'fast-forward-only'
+  | 'merge'
+  | 'rebase'
+  | 'rebase-merge'
+  | 'squash';
 
 export interface GiteaLabel {
   id: number;
@@ -69,13 +74,14 @@ export interface User {
 
 export interface Repo {
   id: number;
+  allow_fast_forward_only_merge: boolean;
   allow_merge_commits: boolean;
   allow_rebase: boolean;
   allow_rebase_explicit: boolean;
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
-  default_merge_style: string;
+  default_merge_style: PRMergeMethod;
   external_tracker?: unknown;
   has_issues: boolean;
   has_pull_requests: boolean;

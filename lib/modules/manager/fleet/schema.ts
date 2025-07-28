@@ -33,7 +33,7 @@ export const FleetFile = z.object({
   targetCustomizations: z
     .array(
       z.object({
-        name: z.string(),
+        name: z.string().optional(),
         helm: FleetHelmBlock.partial().optional(),
       }),
     )

@@ -16,7 +16,7 @@ You would configure a custom manager in your Renovate config file for files name
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^versions.ini$"],
+      "managerFilePatterns": ["/^versions.ini$/"],
       "matchStrings": ["GOOGLE_API_VERSION=(?<currentDigest>.*?)\\n"],
       "currentValueTemplate": "master",
       "depNameTemplate": "googleapis",

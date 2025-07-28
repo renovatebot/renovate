@@ -15,9 +15,16 @@ const GithubGraphqlTag = z.object({
     }),
     z.object({
       type: z.literal('Tag'),
-      target: z.object({
-        oid: z.string(),
-      }),
+      target: z.union([
+        z.object({
+          type: z.literal('Commit'),
+          oid: z.string(),
+        }),
+        z.object({
+          type: z.literal('Tag'),
+          target: z.object({ oid: z.string() }),
+        }),
+      ]),
       tagger: z.object({
         releaseTimestamp: Timestamp,
       }),
@@ -47,8 +54,14 @@ const query = prepareQuery(`
         }
         ... on Tag {
           target {
+            type: __typename
             ... on Commit {
               oid
+            }
+            ... on Tag {
+              target {
+                oid
+              }
             }
           }
           tagger {
@@ -64,12 +77,21 @@ function transform(item: GithubGraphqlTag): GithubTagItem | null {
   if (!res.success) {
     return null;
   }
+
   const { version, target } = item;
-  const releaseTimestamp =
-    target.type === 'Commit'
-      ? target.releaseTimestamp
-      : target.tagger.releaseTimestamp;
-  const hash = target.type === 'Commit' ? target.oid : target.target.oid;
+  if (target.type === 'Commit') {
+    const releaseTimestamp = target.releaseTimestamp;
+    const hash = target.oid;
+    return { version, gitRef: version, hash, releaseTimestamp };
+  }
+
+  const releaseTimestamp = target.tagger.releaseTimestamp;
+  if (target.target.type === 'Commit') {
+    const hash = target.target.oid;
+    return { version, gitRef: version, hash, releaseTimestamp };
+  }
+
+  const hash = target.target.target.oid;
   return { version, gitRef: version, hash, releaseTimestamp };
 }
 

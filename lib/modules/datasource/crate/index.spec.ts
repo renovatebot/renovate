@@ -45,7 +45,9 @@ function setupGitMocks(delayMs?: number): {
       },
     );
 
-  simpleGit.mockReturnValue(partial<SimpleGit>({ clone: mockClone }));
+  const gitMock = partial<SimpleGit>({ clone: mockClone });
+  gitMock.env = () => gitMock;
+  simpleGit.mockReturnValue(gitMock);
   return { mockClone };
 }
 
@@ -59,11 +61,11 @@ function setupErrorGitMock(): {
       Promise.reject(new Error('mocked error')),
     );
 
-  simpleGit.mockReturnValue(
-    partial<SimpleGit>({
-      clone: mockClone,
-    }),
-  );
+  const gitMock = partial<SimpleGit>({
+    clone: mockClone,
+  });
+  gitMock.env = () => gitMock;
+  simpleGit.mockReturnValue(gitMock);
 
   return { mockClone };
 }

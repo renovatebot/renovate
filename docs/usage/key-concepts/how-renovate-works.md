@@ -46,7 +46,7 @@ Here's an overview of the workflow:
 flowchart TB
     subgraph INITIALIZATION
         direction TB
-        MC[Merge configurations \n most important to least: \n cli > env > file > default]
+        MC[Merge configurations <br> most important to least: <br> cli > env > file > default]
         MC --> IP[Initialize platform]
         IP --> AD[Query the platform for repositories]
         AD --> NFIL[Narrow the list with filters]
@@ -77,8 +77,8 @@ flowchart TB
           UFEF -->|file 2| FED2[...]
           FED -->|dep 1| D1[...]
           D1 -..-> CU
-          FED -->|dep 2| D2[use datasource to \n fetch versions]
-          D2 --> J[use versioning to find \n next valid update]
+          FED -->|dep 2| D2[use datasource to <br> fetch versions]
+          D2 --> J[use versioning to find <br> next valid update]
           FED2 -...-> CU
           UD -....-> CU
           J --> CU[Look up updates]
@@ -87,8 +87,8 @@ flowchart TB
       subgraph WRITEU[WRITE UPDATES]
         direction TB
         FEU{{For each update}}
-        FEU --> AUCOND[Check if branch needed: \n existing/rebase/concurrent amount]
-        AUCOND --> AU[Create branch\nApply update\nCreate PR]
+        FEU --> AUCOND[Check if branch needed: <br> existing/rebase/concurrent amount]
+        AUCOND --> AU[Create branch<br>Apply update<br>Create PR]
       end
 
       subgraph FINALIZE[FINALIZE]

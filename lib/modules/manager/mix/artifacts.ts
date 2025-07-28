@@ -6,6 +6,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  ensureCacheDir,
   findLocalSiblingOrParent,
   getSiblingFileName,
   localPathExists,
@@ -144,6 +145,11 @@ export async function updateArtifacts({
   }, [] as string[]);
 
   const execOptions: ExecOptions = {
+    extraEnv: {
+      // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
+      // TODO: should include a version constraint
+      MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
+    },
     cwdFile: packageFileName,
     docker: {},
     toolConstraints: [

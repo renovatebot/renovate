@@ -7,8 +7,7 @@ on:
 env:
   NODE_VERSION: 22
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   update-data:

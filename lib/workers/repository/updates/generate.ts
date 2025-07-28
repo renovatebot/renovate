@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import mdTable from 'markdown-table';
+import { markdownTable } from 'markdown-table';
 import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
@@ -440,6 +440,8 @@ export function generateBranchConfig(
     config.updateType = 'major';
   }
 
+  config.isBreaking = config.upgrades.some((upgrade) => upgrade.isBreaking);
+
   // explicit set `isLockFileMaintenance` for the branch for groups
   if (config.upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
     config.isLockFileMaintenance = true;
@@ -482,7 +484,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += '\n\n' + mdTable(table) + '\n';
+    config.commitMessage += '\n\n' + markdownTable(table) + '\n';
   }
   const additionalReviewers = uniq(
     config.upgrades

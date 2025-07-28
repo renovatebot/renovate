@@ -96,6 +96,42 @@ function createEntry(line: string): BazelrcEntries | undefined {
   return undefined;
 }
 
+export function expandWorkspacePath(
+  value: string,
+  workspaceDir: string,
+): string | null {
+  if (!value.includes('%workspace%')) {
+    return value;
+  }
+  const absolutePath = upath.resolve(workspaceDir);
+  const expandedPath = value.replace('%workspace%', absolutePath);
+  if (!fs.isValidLocalPath(expandedPath)) {
+    return null;
+  }
+  return expandedPath;
+}
+
+export function sanitizeOptions(
+  options: BazelOption[],
+  workspaceDir: string,
+): BazelOption[] {
+  return options
+    .map((option) => {
+      if (!option.value) {
+        return option;
+      }
+      const expandedPath = expandWorkspacePath(option.value, workspaceDir);
+      if (!expandedPath) {
+        logger.debug(
+          `Skipping invalid workspace path: ${option.value} in ${workspaceDir}`,
+        );
+        return null;
+      }
+      return new BazelOption(option.name, expandedPath);
+    })
+    .filter(isNotNullOrUndefined);
+}
+
 export function parse(contents: string): BazelrcEntries[] {
   return contents
     .split('\n')
@@ -124,7 +160,10 @@ async function readFile(
   const results: CommandEntry[] = [];
   for (const entry of entries) {
     if (entry.entryType === 'command') {
-      results.push(entry);
+      const sanitizedOptions = sanitizeOptions(entry.options, workspaceDir);
+      results.push(
+        new CommandEntry(entry.command, sanitizedOptions, entry.config),
+      );
       continue;
     }
 
