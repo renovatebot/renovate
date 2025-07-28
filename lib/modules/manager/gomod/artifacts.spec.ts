@@ -2422,6 +2422,7 @@ describe('modules/manager/gomod/artifacts', () => {
       packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
         { name: 'go.mod', isLeaf: true },
       ]);
+      mockExecAll();
       git.getRepoStatus
         .mockResolvedValueOnce(
           partial<StatusResult>({
