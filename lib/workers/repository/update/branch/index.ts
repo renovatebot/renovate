@@ -870,13 +870,14 @@ export async function processBranch(
           { artifactErrors: config.artifactErrors },
           'artifactErrors',
         );
-        // TODO #22198
-        const userStrings = config.userStrings!;
         let content = `Renovate failed to update `;
         content +=
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content += ' related to this branch. ';
-        content += template.compile(userStrings.artifactErrorWarning, config);
+        content += template.compile(
+          config.userStrings!.artifactErrorWarning,
+          config,
+        );
         content += emojify(
           `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`,
         );

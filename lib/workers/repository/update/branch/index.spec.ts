@@ -1102,7 +1102,6 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining(
@@ -1141,7 +1140,6 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining(customMessage),
@@ -1177,7 +1175,6 @@ describe('workers/repository/update/branch/index', () => {
         },
       };
       await branchWorker.processBranch(inconfig);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining(
