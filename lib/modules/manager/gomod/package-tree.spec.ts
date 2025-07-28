@@ -22,7 +22,7 @@ describe('modules/manager/gomod/package-tree', () => {
     it('returns self for single project', async () => {
       scm.getFileList.mockResolvedValue(['go.mod']);
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module test/project
+        module github.com/renovate-tests/single-project
         go 1.21
       `);
 
@@ -34,32 +34,56 @@ describe('modules/manager/gomod/package-tree', () => {
     });
 
     it('returns modules in dependency order (dependencies before dependents)', async () => {
-      scm.getFileList.mockResolvedValue(['a/go.mod', 'b/go.mod']);
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
 
-      // Module A - no local dependencies
+      // Module common - no local dependencies
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/a
+        module github.com/renovate-tests/monorepo/common
         go 1.21
         require go.uber.org/zap v1.19.0
       `);
 
-      // Module B - depends on A via replace
+      // Module service - depends on common via replace
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/b
+        module github.com/renovate-tests/monorepo/service
         go 1.21
         require (
-          github.com/renovate-tests/monorepo/a v0.0.0-00010101000000-000000000000
+          github.com/renovate-tests/monorepo/common v0.0.0-00010101000000-000000000000
           go.uber.org/multierr v1.5.0 // indirect
         )
-        replace github.com/renovate-tests/monorepo/a => ../a
+        replace github.com/renovate-tests/monorepo/common => ../common
       `);
 
-      const result = await getTransitiveDependentModules('a/go.mod');
+      const result = await getTransitiveDependentModules('common/go.mod');
 
-      // Should return A first (dependency), then B (dependent)
+      // Should return common first (dependency), then service (dependent)
       expect(result).toEqual<GoModuleFile[]>([
-        { isLeaf: false, name: 'a/go.mod' },
-        { isLeaf: true, name: 'b/go.mod' },
+        { isLeaf: false, name: 'common/go.mod' },
+        { isLeaf: true, name: 'service/go.mod' },
+      ]);
+    });
+
+    it('returns leaf module only for leaf nodes', async () => {
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
+
+      // Module common
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/common
+        go 1.21
+      `);
+
+      // Module service - depends on common via replace
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/service
+        go 1.21
+        replace github.com/renovate-tests/monorepo/common => ../common
+      `);
+
+      // Query for leaf module service
+      const result = await getTransitiveDependentModules('service/go.mod');
+
+      expect(result).toEqual<GoModuleFile[]>([
+        { isLeaf: true, name: 'service/go.mod' },
       ]);
     });
 
@@ -99,30 +123,6 @@ describe('modules/manager/gomod/package-tree', () => {
         { isLeaf: false, name: 'common/go.mod' },
         { isLeaf: false, name: 'service/go.mod' },
         { isLeaf: true, name: 'api/go.mod' },
-      ]);
-    });
-
-    it('returns leaf module only for leaf nodes', async () => {
-      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
-
-      // Module A
-      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/common
-        go 1.21
-      `);
-
-      // Module service depends on common
-      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module github.com/renovate-tests/monorepo/service
-        go 1.21
-        replace github.com/renovate-tests/monorepo/common => ../common
-      `);
-
-      // Query for leaf module service
-      const result = await getTransitiveDependentModules('service/go.mod');
-
-      expect(result).toEqual<GoModuleFile[]>([
-        { isLeaf: true, name: 'service/go.mod' },
       ]);
     });
   });
