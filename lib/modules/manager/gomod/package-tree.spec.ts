@@ -38,20 +38,20 @@ describe('modules/manager/gomod/package-tree', () => {
 
       // Module A - no local dependencies
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/a
+        module github.com/renovate-tests/monorepo/a
         go 1.21
         require go.uber.org/zap v1.19.0
       `);
 
       // Module B - depends on A via replace
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/b
+        module github.com/renovate-tests/monorepo/b
         go 1.21
         require (
-          monorepo/a v0.0.0-00010101000000-000000000000
+          github.com/renovate-tests/monorepo/a v0.0.0-00010101000000-000000000000
           go.uber.org/multierr v1.5.0 // indirect
         )
-        replace monorepo/a => ../a
+        replace github.com/renovate-tests/monorepo/a => ../a
       `);
 
       const result = await getTransitiveDependentModules('a/go.mod');
@@ -65,66 +65,64 @@ describe('modules/manager/gomod/package-tree', () => {
 
     it('handles complex dependency chains', async () => {
       scm.getFileList.mockResolvedValue([
-        'root/go.mod',
-        'shared/go.mod',
+        'common/go.mod',
+        'service/go.mod',
         'api/go.mod',
       ]);
 
-      // Root module
+      // Common module
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/root
+        module github.com/renovate-tests/monorepo/common
         go 1.21
         require github.com/external/dep v1.0.0
       `);
 
-      // Shared depends on root
+      // Service depends on common
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/shared
+        module github.com/renovate-tests/monorepo/service
         go 1.21
-        require monorepo/root v0.0.0-00010101000000-000000000000
-        replace monorepo/root => ../root
+        replace github.com/renovate-tests/monorepo/common => ../common
       `);
 
-      // API depends on shared
+      // API depends on service
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/api
+        module github.com/renovate-tests/monorepo/api
         go 1.21
-        require monorepo/shared v0.0.0-00010101000000-000000000000
-        replace monorepo/shared => ../shared
+        require github.com/renovate-tests/monorepo/service v0.0.0-00010101000000-000000000000
+        replace github.com/renovate-tests/monorepo/service => ../service
       `);
 
-      const result = await getTransitiveDependentModules('root/go.mod');
+      const result = await getTransitiveDependentModules('common/go.mod');
 
-      // Should return root → shared → api (dependency order)
+      // Should return common → service → api (dependency order)
       expect(result).toEqual<GoModuleFile[]>([
-        { isLeaf: false, name: 'root/go.mod' },
-        { isLeaf: false, name: 'shared/go.mod' },
+        { isLeaf: false, name: 'common/go.mod' },
+        { isLeaf: false, name: 'service/go.mod' },
         { isLeaf: true, name: 'api/go.mod' },
       ]);
     });
 
     it('returns leaf module only for leaf nodes', async () => {
-      scm.getFileList.mockResolvedValue(['a/go.mod', 'b/go.mod']);
+      scm.getFileList.mockResolvedValue(['common/go.mod', 'service/go.mod']);
 
       // Module A
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/a
+        module github.com/renovate-tests/monorepo/common
         go 1.21
       `);
 
-      // Module B depends on A
+      // Module service depends on common
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-        module monorepo/b
+        module github.com/renovate-tests/monorepo/service
         go 1.21
-        require monorepo/a v0.0.0-00010101000000-000000000000
-        replace monorepo/a => ../a
+        replace github.com/renovate-tests/monorepo/common => ../common
       `);
 
-      // Query for leaf module B
-      const result = await getTransitiveDependentModules('b/go.mod');
+      // Query for leaf module service
+      const result = await getTransitiveDependentModules('service/go.mod');
 
       expect(result).toEqual<GoModuleFile[]>([
-        { isLeaf: true, name: 'b/go.mod' },
+        { isLeaf: true, name: 'service/go.mod' },
       ]);
     });
   });
