@@ -813,7 +813,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
 
           expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
         });
@@ -830,7 +850,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
 
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
@@ -862,6 +902,26 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }])
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
@@ -887,7 +947,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .twice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .twice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -907,7 +987,27 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'));
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -923,45 +1023,122 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .thrice()
-            .reply(409);
+            .reply(409)
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .thrice()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
             REPOSITORY_CHANGED,
           );
         });
 
-        it('throws on invalid reviewers', async () => {
+        it('deals correctly with resolving reviewers', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
+            .twice()
+            .reply(200, prMock(url, 'SOME', 'repo'));
+
+          scope
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                const reviewers = body.reviewers.map(
+                  (r: { user: { name: any } }) => r.user.name,
+                );
+                // Expect the resolved usernames to be in the order we provided and without invalid user
+                expect(reviewers).toEqual([
+                  'userName2',
+                  'usernamefoundbyemail',
+                  'usernamefoundbyname',
+                ]);
+                return true;
+              },
             )
-            .reply(409, {
-              errors: [
-                {
-                  context: 'reviewers',
-                  message:
-                    'Errors encountered while adding some reviewers to this pull request.',
-                  exceptionName:
-                    'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
-                  reviewerErrors: [
-                    {
-                      context: 'name',
-                      message: 'name is not a user.',
-                      exceptionName: null,
-                    },
-                  ],
-                  validReviewers: [],
-                },
-              ],
-            });
+            .once()
+            .reply(200);
+
+          scope
+            // Not found user, so it should not be added to the PR
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'name' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'userName2' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'test@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'usernamefoundbyemail', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'Jane Doe' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'usernamefoundbyname', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'inactive' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .once()
+            .reply(200, [{ slug: 'inactive', active: false }]);
 
           await expect(
-            bitbucket.addReviewers(5, ['name']),
-          ).rejects.toThrowErrorMatchingSnapshot();
+            bitbucket.addReviewers(5, [
+              'name',
+              'userName2',
+              'test@test.com',
+              'Jane Doe',
+              'inactive',
+            ]),
+          ).toResolve();
         });
 
         it('throws', async () => {
@@ -974,7 +1151,15 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(405);
+            .reply(405)
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query((q) => q.filter === 'name')
+            .once()
+            .reply(200, [{ slug: 'name', active: true }])
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query((q) => q.filter === 'userName2')
+            .once()
+            .reply(200, [{ slug: 'userName2', active: true }]);
           await expect(
             bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();

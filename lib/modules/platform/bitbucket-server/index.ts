@@ -691,6 +691,43 @@ export async function addReviewers(
   ]);
 }
 
+/**
+ * Resolves Bitbucket users by username, display name, or email address (userinfo string),
+ * restricted to users who have REPO_READ permission on the target repository.
+ *
+ * Uses the Bitbucket Server REST API:
+ * https://developer.atlassian.com/server/bitbucket/rest/v906/api-group-system-maintenance/#api-api-latest-users-get
+ *
+ * Behavior:
+ * - If no users match the filter, returns empty array.
+ * - Returns the `slug` of the matching active users.
+ *
+ * @param userinfo - A string that could be the user's email, display name, or username.
+ * @returns An object containing the user's `slugs` for active found users.
+ */
+async function getUserDetails(userinfo: string): Promise<string[]> {
+  try {
+    const url = `./rest/api/1.0/users?filter=${encodeURIComponent(userinfo)}&permission.1=REPO_READ&permission.1.projectKey=${encodeURIComponent(
+      config.projectKey,
+    )}&permission.1.repositorySlug=${encodeURIComponent(config.repositorySlug)}`;
+    const response = await bitbucketServerHttp.getJsonUnchecked<
+      {
+        slug: string;
+        active: boolean;
+      }[]
+    >(url, {
+      paginate: true,
+    });
+
+    const users = response.body;
+
+    return users.filter((u) => u.active).map((u) => u.slug);
+  } catch (err) {
+    logger.debug({ err, userinfo }, 'Failed to get user info');
+    return [];
+  }
+}
+
 async function updatePRAndAddReviewers(
   prNo: number,
   reviewers: string[],
@@ -703,6 +740,18 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
+    const reviewerSlugs = new Set<string>();
+
+    // Find username, as reviever can be an emailaddress or a username, and the request only wants usernames
+    // If the user is not found, it will be removed from the reviewers list
+    for (const entry of reviewersSet) {
+      const users = await getUserDetails(entry);
+      if (users.length === 0) {
+        logger.debug({ entry }, 'No users found for reviewer');
+        continue;
+      }
+      users.forEach((u) => reviewerSlugs.add(u));
+    }
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -710,7 +759,7 @@ async function updatePRAndAddReviewers(
         body: {
           title: pr.title,
           version: pr.version,
-          reviewers: Array.from(reviewersSet).map((name) => ({
+          reviewers: Array.from(reviewerSlugs).map((name) => ({
             user: { name },
           })),
         },
@@ -718,7 +767,7 @@ async function updatePRAndAddReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
-    logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
+    logger.debug({ err, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (
