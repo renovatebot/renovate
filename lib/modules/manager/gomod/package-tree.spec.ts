@@ -125,5 +125,30 @@ describe('modules/manager/gomod/package-tree', () => {
         { isLeaf: true, name: 'api/go.mod' },
       ]);
     });
+
+    it('returns empty array when circular reference is detected', async () => {
+      scm.getFileList.mockResolvedValue(['module-a/go.mod', 'module-b/go.mod']);
+
+      // Module A depends on Module B
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/module-a
+        go 1.21
+        require github.com/renovate-tests/monorepo/module-b v0.0.0-00010101000000-000000000000
+        replace github.com/renovate-tests/monorepo/module-b => ../module-b
+      `);
+
+      // Module B depends on Module A (circular reference)
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        module github.com/renovate-tests/monorepo/module-b
+        go 1.21
+        require github.com/renovate-tests/monorepo/module-a v0.0.0-00010101000000-000000000000
+        replace github.com/renovate-tests/monorepo/module-a => ../module-a
+      `);
+
+      const result = await getTransitiveDependentModules('module-a/go.mod');
+
+      // Should return empty array when circular reference is detected
+      expect(result).toEqual<GoModuleFile[]>([]);
+    });
   });
 });
