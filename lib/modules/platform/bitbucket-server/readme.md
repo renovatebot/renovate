@@ -35,7 +35,7 @@ In line with their instructions, the following commands bring up a new server:
 
 ```
 docker volume create --name bitbucketVolume
-docker run -v bitbucketVolume:/var/atlassian/application-data/bitbucket --name="bitbucket" -d -p 7990:7990 -p 7999:7999 atlassian/bitbucket-server:5.12.3
+docker run -v bitbucketVolume:/var/atlassian/application-data/bitbucket --name="bitbucket" -d -p 7990:7990 -p 7999:7999 atlassian/bitbucket-server:8.9.6
 ```
 
 Once it's running and initialized, the quickest way to testing with Renovate is:
