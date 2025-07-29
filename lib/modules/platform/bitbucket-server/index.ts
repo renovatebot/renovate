@@ -44,12 +44,13 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { BbsPrCache } from './pr-cache';
-import type {
+import {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
+  UserSchema,
+  UsersSchema,
 } from './schema';
-import { UserSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -332,6 +333,7 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
+
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -680,13 +682,36 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 
+/**
+ * Resolves reviewer identifiers (usernames, display names, or email addresses)
+ * to Bitbucket user slugs with REPO_READ permission and adds them to the pull request.
+ *
+ * This function performs user resolution once per reviewer input and filters out
+ * unknown or inactive users before passing them to the PR update logic.
+ *
+ * Retries the update logic up to 3 times if the repository content has changed.
+ *
+ * @param prNo - The pull request number to update.
+ * @param reviewers - List of reviewer identifiers (e.g. email, username).
+ */
 export async function addReviewers(
   prNo: number,
   reviewers: string[],
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+  const reviewerSlugs = new Set<string>();
+
+  for (const entry of reviewers) {
+    const slugs = await getUserDetails(entry);
+    if (!slugs.length) {
+      logger.debug({ entry }, 'No users found for reviewer');
+      continue;
+    }
+    slugs.forEach((slug) => reviewerSlugs.add(slug));
+  }
+
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
     REPOSITORY_CHANGED,
   ]);
 }
@@ -695,35 +720,54 @@ export async function addReviewers(
  * Resolves Bitbucket users by username, display name, or email address (userinfo string),
  * restricted to users who have REPO_READ permission on the target repository.
  *
- * Uses the Bitbucket Server REST API:
- * https://developer.atlassian.com/server/bitbucket/rest/v906/api-group-system-maintenance/#api-api-latest-users-get
- *
- * Behavior:
- * - If no users match the filter, returns empty array.
- * - Returns the `slug` of the matching active users.
+ * Lookup strategy:
+ *  1. Try exact slug match via `/users/{slug}`.
+ *  2. Fallback to `/users?filter=...` and return slugs of active users with exact match on
+ *     email.
  *
  * @param userinfo - A string that could be the user's email, display name, or username.
- * @returns An object containing the user's `slugs` for active found users.
+ * @returns List of user slugs for active, matched users.
  */
 async function getUserDetails(userinfo: string): Promise<string[]> {
+  // Step 1: Determine whether the user is a userSlug
   try {
-    const url = `./rest/api/1.0/users?filter=${encodeURIComponent(userinfo)}&permission.1=REPO_READ&permission.1.projectKey=${encodeURIComponent(
-      config.projectKey,
-    )}&permission.1.repositorySlug=${encodeURIComponent(config.repositorySlug)}`;
-    const response = await bitbucketServerHttp.getJsonUnchecked<
-      {
-        slug: string;
-        active: boolean;
-      }[]
-    >(url, {
-      paginate: true,
-    });
+    const directUrl = `./rest/api/latest/users/${userinfo}`;
+    const response = await bitbucketServerHttp.getJson(directUrl, UserSchema);
+    const user = response.body;
 
-    const users = response.body;
+    if (user.active) {
+      logger.debug({ userinfo }, 'Resolved user via slug match');
+      return [user.slug];
+    }
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      logger.debug(
+        { userinfo },
+        'Slug not found, falling back to filtered lookup',
+      );
+    } else {
+      logger.debug({ err, userinfo }, 'Slug lookup failed (non-404)');
+    }
+  }
 
-    return users.filter((u) => u.active).map((u) => u.slug);
+  // Step 2: Fallback - filtered search
+  try {
+    const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
+      config.projectKey
+    }&permission.1.repositorySlug=${config.repositorySlug}`;
+
+    const users = await bitbucketServerHttp.getJson(
+      filterUrl,
+      { paginate: true },
+      UsersSchema,
+    );
+
+    // Only return active users with exact match on email-address
+    return users.body
+      .filter((u) => u.active && u.emailAddress === userinfo)
+      .map((u) => u.slug);
   } catch (err) {
-    logger.debug({ err, userinfo }, 'Failed to get user info');
+    logger.debug({ err, userinfo }, 'Filtered lookup failed');
     return [];
   }
 }
@@ -740,18 +784,6 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
-    const reviewerSlugs = new Set<string>();
-
-    // Find username, as reviever can be an emailaddress or a username, and the request only wants usernames
-    // If the user is not found, it will be removed from the reviewers list
-    for (const entry of reviewersSet) {
-      const users = await getUserDetails(entry);
-      if (users.length === 0) {
-        logger.debug({ entry }, 'No users found for reviewer');
-        continue;
-      }
-      users.forEach((u) => reviewerSlugs.add(u));
-    }
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -759,7 +791,7 @@ async function updatePRAndAddReviewers(
         body: {
           title: pr.title,
           version: pr.version,
-          reviewers: Array.from(reviewerSlugs).map((name) => ({
+          reviewers: Array.from(reviewersSet).map((name) => ({
             user: { name },
           })),
         },
@@ -767,7 +799,7 @@ async function updatePRAndAddReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
-    logger.debug({ err, prNo }, `Failed to add reviewers`);
+    logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (
