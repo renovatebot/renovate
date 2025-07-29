@@ -4506,6 +4506,7 @@ If you want, you can change the text in the comment with the `userStrings` confi
 
 You can edit these user-facing strings:
 
+- `artifactErrorWarning`: Text of the PR comment when artifact errors occur during updates.
 - `ignoreDigest`: Text of the PR comment for digest upgrades.
 - `ignoreMajor`: Text of the PR comment for major upgrades.
 - `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
@@ -4516,6 +4517,7 @@ For example:
 ```json
 {
   "userStrings": {
+    "artifactErrorWarning": "Custom text for artifact errors.",
     "ignoreTopic": "Custom topic for PR comment",
     "ignoreMajor": "Custom text for major upgrades.",
     "ignoreDigest": "Custom text for digest upgrades.",

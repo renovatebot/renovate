@@ -258,7 +258,7 @@
     "tslib": "2.8.1",
     "upath": "2.0.1",
     "url-join": "5.0.0",
-    "validate-npm-package-name": "6.0.1",
+    "validate-npm-package-name": "6.0.2",
     "vuln-vects": "1.1.0",
     "xmldoc": "2.0.2",
     "yaml": "2.8.0",
@@ -303,7 +303,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "22.16.4",
+    "@types/node": "22.16.5",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -320,9 +320,9 @@
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "9.1.0",
     "emojibase-data": "16.0.3",
-    "esbuild": "0.25.6",
+    "esbuild": "0.25.8",
     "eslint": "9.31.0",
-    "eslint-config-prettier": "10.1.5",
+    "eslint-config-prettier": "10.1.8",
     "eslint-formatter-gha": "1.6.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import-x": "4.16.1",
@@ -335,7 +335,7 @@
     "lint-staged": "16.1.2",
     "markdownlint-cli2": "0.18.1",
     "memfs": "4.17.2",
-    "nock": "14.0.5",
+    "nock": "14.0.6",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
     "rimraf": "6.0.1",
@@ -345,7 +345,7 @@
     "tsx": "4.20.3",
     "type-fest": "4.41.0",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.37.0",
+    "typescript-eslint": "8.38.0",
     "unified": "11.0.5",
     "vite": "6.3.5",
     "vite-tsconfig-paths": "5.1.4",
@@ -373,7 +373,7 @@
       "re2"
     ],
     "overrides": {
-      "esbuild": "0.25.6"
+      "esbuild": "0.25.8"
     }
   }
 }
