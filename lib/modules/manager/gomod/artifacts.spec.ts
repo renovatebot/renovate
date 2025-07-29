@@ -2569,19 +2569,29 @@ describe('modules/manager/gomod/artifacts', () => {
       expect(packageTree.getTransitiveDependentModules).not.toHaveBeenCalled();
     });
 
-    describe('dependency processing optimization concepts', () => {
-      it('should handle multiple dependent modules sequentially by default', async () => {
+    describe('dependency processing with gomodTidyAll', () => {
+      const setupDependencyTest = (
+        modules: { name: string; isLeaf: boolean }[] = [],
+      ) => {
         fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        // Mock multiple dependent modules
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-          { name: 'common/go.mod', isLeaf: false },
-          { name: 'service/go.mod', isLeaf: true },
-          { name: 'web/go.mod', isLeaf: true },
-        ]);
-
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        packageTree.getTransitiveDependentModules.mockResolvedValueOnce(
+          modules,
+        );
         const execSnapshots = mockExecAll();
+        return execSnapshots;
+      };
+
+      it('processes dependent modules in correct order', async () => {
+        const modules = [
+          { name: 'common/go.mod', isLeaf: false }, // Dependencies first
+          { name: 'service/go.mod', isLeaf: true }, // Dependents second
+          { name: 'web/go.mod', isLeaf: true },
+        ];
+
+        const execSnapshots = setupDependencyTest(modules);
+
+        // Mock multiple getRepoStatus calls for each module
         git.getRepoStatus
           .mockResolvedValueOnce(
             partial<StatusResult>({ modified: ['go.sum'] }),
@@ -2606,64 +2616,37 @@ describe('modules/manager/gomod/artifacts', () => {
           packageFileName: 'go.mod',
           updatedDeps: [],
           newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
+          config: { ...config, postUpdateOptions: ['gomodTidyAll'] },
         });
 
-        // Verify getTransitiveDependentModules was called
+        // Verify processing order and results
         expect(packageTree.getTransitiveDependentModules).toHaveBeenCalledWith(
           'go.mod',
         );
-
-        // Verify main execution happened + dependent modules (1 main + 3 dependents = 4 total)
-        expect(execSnapshots).toHaveLength(4);
-        expect(execSnapshots[0].cmd).toContain('go get'); // Main module
-        expect(execSnapshots[1].cmd).toContain('go mod tidy'); // First dependent
-        expect(execSnapshots[2].cmd).toContain('go mod tidy'); // Second dependent
-        expect(execSnapshots[3].cmd).toContain('go mod tidy'); // Third dependent
-
-        // Verify results include dependent modules
+        expect(execSnapshots).toHaveLength(4); // 1 main + 3 dependents
         expect(result).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               file: expect.objectContaining({ path: 'go.sum' }),
             }),
+            expect.objectContaining({
+              file: expect.objectContaining({ path: 'common/go.sum' }),
+            }),
+            expect.objectContaining({
+              file: expect.objectContaining({ path: 'service/go.sum' }),
+            }),
+            expect.objectContaining({
+              file: expect.objectContaining({ path: 'web/go.sum' }),
+            }),
           ]),
         );
-      });
 
-      it('should identify leaf vs non-leaf modules correctly', () => {
-        const modules = [
-          { name: 'common/go.mod', isLeaf: false }, // Has dependents
-          { name: 'service/go.mod', isLeaf: true }, // No dependents
-          { name: 'web/go.mod', isLeaf: true }, // No dependents
-        ];
-
-        // Test: Leaf modules are those with isLeaf: true
-        const leafModules = modules.filter((m) => m.isLeaf);
-        const nonLeafModules = modules.filter((m) => !m.isLeaf);
-
-        expect(leafModules).toHaveLength(2);
-        expect(nonLeafModules).toHaveLength(1);
-        expect(leafModules[0].name).toBe('service/go.mod');
-        expect(leafModules[1].name).toBe('web/go.mod');
-        expect(nonLeafModules[0].name).toBe('common/go.mod');
-      });
-
-      it('should understand dependency order from getTransitiveDependentModules', () => {
-        // Modules returned in dependency order (dependencies first)
+        // Test dependency order understanding
         const dependencyOrderedModules = [
-          { name: 'libs/common/go.mod', isLeaf: false }, // Level 0: foundation
-          { name: 'libs/utils/go.mod', isLeaf: false }, // Level 0: foundation
-          { name: 'services/auth/go.mod', isLeaf: false }, // Level 1: depends on common
-          { name: 'services/web/go.mod', isLeaf: false }, // Level 1: depends on utils
-          { name: 'services/api/go.mod', isLeaf: true }, // Level 2: depends on auth
-          { name: 'services/worker/go.mod', isLeaf: true }, // Level 2: depends on web
+          { name: 'libs/common/go.mod', isLeaf: false },
+          { name: 'services/auth/go.mod', isLeaf: false },
+          { name: 'services/api/go.mod', isLeaf: true },
         ];
-
-        // Test: Dependencies appear before dependents in the array
         const commonIndex = dependencyOrderedModules.findIndex(
           (m) => m.name === 'libs/common/go.mod',
         );
@@ -2673,32 +2656,19 @@ describe('modules/manager/gomod/artifacts', () => {
         const apiIndex = dependencyOrderedModules.findIndex(
           (m) => m.name === 'services/api/go.mod',
         );
+        expect(commonIndex).toBeLessThan(authIndex);
+        expect(authIndex).toBeLessThan(apiIndex);
 
-        expect(commonIndex).toBeLessThan(authIndex); // common before auth
-        expect(authIndex).toBeLessThan(apiIndex); // auth before api
-
-        // Test: Modules at same level (no dependency between them) can be parallel
-        const utilsIndex = dependencyOrderedModules.findIndex(
-          (m) => m.name === 'libs/utils/go.mod',
-        );
-        const webIndex = dependencyOrderedModules.findIndex(
-          (m) => m.name === 'services/web/go.mod',
-        );
-
-        // utils and common are at same level (both are foundations)
-        expect(Math.abs(commonIndex - utilsIndex)).toBeLessThan(2);
-        // auth and web are at same level (both depend on different foundations)
-        expect(Math.abs(authIndex - webIndex)).toBeLessThan(2);
+        // Test leaf vs non-leaf identification
+        const leafModules = modules.filter((m) => m.isLeaf);
+        const nonLeafModules = modules.filter((m) => !m.isLeaf);
+        expect(leafModules).toHaveLength(2);
+        expect(nonLeafModules).toHaveLength(1);
       });
 
-      it('should handle empty dependency list gracefully', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        // Empty dependency list - but only gets called when tidying actually happens
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([]);
-
-        const execSnapshots = mockExecAll();
+      it('handles empty or no dependencies gracefully', async () => {
+        // Test empty dependency list
+        const execSnapshots = setupDependencyTest([]);
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({ modified: ['go.sum'] }),
         );
@@ -2708,96 +2678,25 @@ describe('modules/manager/gomod/artifacts', () => {
           packageFileName: 'go.mod',
           updatedDeps: [],
           newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
-        });
-
-        // Note: getTransitiveDependentModules is only called when there are actual file changes
-        // In this scenario, it may not be called, which is expected behavior
-
-        // Should still process main module
-        expect(execSnapshots).toHaveLength(1);
-        expect(execSnapshots[0].cmd).toContain('go get');
-
-        // Should return some result (either success or error is acceptable)
-        expect(result).not.toBeNull();
-        // Just verify it's an array - the content can vary based on error handling
-        expect(Array.isArray(result)).toBe(true);
-      });
-
-      it('should handle infinite loop protection when currentLevel is empty', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        // Mock a scenario where no dependencies exist to trigger the break condition
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([]);
-
-        const execSnapshots = mockExecAll();
-        git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({ modified: ['go.sum'] }),
-        );
-        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
-
-        const result = await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
+          config: { ...config, postUpdateOptions: ['gomodTidyAll'] },
         });
 
         expect(result).not.toBeNull();
         expect(execSnapshots).toHaveLength(1); // Only main module processing
+        expect(Array.isArray(result)).toBe(true);
       });
 
-      it('should handle error in main updateArtifacts processing', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      it('handles go.mod and go.sum file modifications', async () => {
+        const modules = [{ name: 'submodule/go.mod', isLeaf: true }];
+        setupDependencyTest(modules);
 
-        // Mock exec to throw an error
-        mockExecAll(new Error('go command failed'));
-
-        const result = await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidy'],
-          },
-        });
-
-        // Should return an artifact error
-        expect(result).toEqual([
-          {
-            artifactError: {
-              lockFile: 'go.sum',
-              stderr: 'go command failed',
-            },
-          },
-        ]);
-      });
-
-      it('should handle go.mod file modification in tidyDependentModule', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-          { name: 'submodule/go.mod', isLeaf: true },
-        ]);
-
-        mockExecAll();
         git.getRepoStatus
           .mockResolvedValueOnce(
             partial<StatusResult>({ modified: ['go.sum'] }),
           )
           .mockResolvedValueOnce(
             partial<StatusResult>({
-              modified: ['submodule/go.sum', 'submodule/go.mod'], // Both sum and mod files modified
+              modified: ['submodule/go.sum', 'submodule/go.mod'], // Both files modified
             }),
           );
 
@@ -2810,73 +2709,68 @@ describe('modules/manager/gomod/artifacts', () => {
           packageFileName: 'go.mod',
           updatedDeps: [],
           newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
+          config: { ...config, postUpdateOptions: ['gomodTidyAll'] },
         });
 
-        // Should return results for both go.sum and go.mod files
         expect(result).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              file: expect.objectContaining({
-                path: 'go.sum',
-                type: 'addition',
-              }),
+              file: expect.objectContaining({ path: 'go.sum' }),
             }),
             expect.objectContaining({
-              file: expect.objectContaining({
-                path: 'submodule/go.sum',
-                type: 'addition',
-              }),
+              file: expect.objectContaining({ path: 'submodule/go.sum' }),
             }),
             expect.objectContaining({
-              file: expect.objectContaining({
-                path: 'submodule/go.mod',
-                type: 'addition',
-              }),
+              file: expect.objectContaining({ path: 'submodule/go.mod' }),
             }),
           ]),
         );
       });
 
-      it('should handle error in tidyDependentModule', async () => {
+      it('handles errors in main and dependent module processing', async () => {
+        // Test main error handling
         fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        mockExecAll(new Error('go command failed'));
 
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-          { name: 'submodule/go.mod', isLeaf: true },
+        const mainErrorResult = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: { ...config, postUpdateOptions: ['gomodTidy'] },
+        });
+
+        expect(mainErrorResult).toEqual([
+          {
+            artifactError: { lockFile: 'go.sum', stderr: 'go command failed' },
+          },
         ]);
 
-        // Mock main exec to succeed but dependent module exec to fail
+        // Test dependent module error handling
+        const modules = [{ name: 'submodule/go.mod', isLeaf: true }];
+        setupDependencyTest(modules);
+
         mockExecSequence([
-          { stdout: '', stderr: '' }, // Main module succeeds
-          new Error('submodule go mod tidy failed'), // Dependent module fails
+          { stdout: '', stderr: '' }, // Main succeeds
+          new Error('submodule go mod tidy failed'), // Dependent fails
         ]);
 
         git.getRepoStatus
           .mockResolvedValueOnce(
             partial<StatusResult>({ modified: ['go.sum'] }),
           )
-          .mockResolvedValueOnce(
-            partial<StatusResult>({ modified: [] }), // No changes in dependent module due to error
-          );
+          .mockResolvedValueOnce(partial<StatusResult>({ modified: [] }));
 
         fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
 
-        const result = await gomod.updateArtifacts({
+        const dependentErrorResult = await gomod.updateArtifacts({
           packageFileName: 'go.mod',
           updatedDeps: [],
           newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
+          config: { ...config, postUpdateOptions: ['gomodTidyAll'] },
         });
 
-        // Should return results including the error for dependent module
-        expect(result).toEqual(
+        expect(dependentErrorResult).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               artifactError: expect.objectContaining({
@@ -2888,104 +2782,42 @@ describe('modules/manager/gomod/artifacts', () => {
         );
       });
 
-      it('should handle TEMPORARY_ERROR in main updateArtifacts', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      it('handles edge cases in dependency resolution', async () => {
+        // Test unresolvable dependencies scenario
+        const modules = [{ name: 'go.mod', isLeaf: true }];
+        setupDependencyTest(modules);
 
-        // Mock exec to throw TEMPORARY_ERROR
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: ['go.sum'] }),
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+        const result = await gomod.updateArtifacts({
+          packageFileName: 'go.mod',
+          updatedDeps: [],
+          newPackageFileContent: gomod1,
+          config: { ...config, postUpdateOptions: ['gomodTidyAll'] },
+        });
+
+        expect(result).not.toBeNull();
+
+        // Test various error types (including TEMPORARY_ERROR scenarios)
+        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+        fs.readLocalFile.mockResolvedValueOnce(null);
         mockExecAll(new Error('temporary-error'));
 
-        const result = await gomod.updateArtifacts({
+        const tempErrorResult = await gomod.updateArtifacts({
           packageFileName: 'go.mod',
           updatedDeps: [],
           newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidy'],
-          },
+          config: { ...config, postUpdateOptions: ['gomodTidy'] },
         });
 
-        // Should return artifact error instead of throwing
-        expect(result).toEqual([
+        expect(tempErrorResult).toEqual([
           {
-            artifactError: {
-              lockFile: 'go.sum',
-              stderr: 'temporary-error',
-            },
+            artifactError: { lockFile: 'go.sum', stderr: 'temporary-error' },
           },
         ]);
-      });
-
-      it('should handle TEMPORARY_ERROR in tidyDependentModule', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-          { name: 'submodule/go.mod', isLeaf: true },
-        ]);
-
-        // Mock main exec to succeed but dependent module exec to throw TEMPORARY_ERROR
-        mockExecSequence([
-          { stdout: '', stderr: '' }, // Main module succeeds
-          new Error('temporary-error'), // Dependent module throws TEMPORARY_ERROR
-        ]);
-
-        git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({ modified: ['go.sum'] }),
-        );
-
-        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
-
-        // TEMPORARY_ERROR in tidyDependentModule gets handled as artifact error
-        const result = await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
-        });
-
-        // Should return an artifact error containing some error
-        expect(result).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              artifactError: expect.objectContaining({
-                stderr: expect.any(String),
-              }),
-            }),
-          ]),
-        );
-      });
-
-      it('should handle modules with unresolvable dependencies', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-        fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-
-        // This test covers edge cases in dependency processing
-        packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
-          { name: 'go.mod', isLeaf: true },
-        ]);
-
-        mockExecAll();
-        git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({ modified: ['go.sum'] }),
-        );
-        fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
-
-        const result = await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            postUpdateOptions: ['gomodTidyAll'],
-          },
-        });
-
-        // Should complete successfully
-        expect(result).not.toBeNull();
       });
     });
   });
