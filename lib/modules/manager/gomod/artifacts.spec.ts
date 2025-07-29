@@ -1,8 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -12,11 +10,12 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _artifactsExtra from './artifacts-extra';
 import * as gomod from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
 type FS = typeof import('../../../util/fs');
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/http');
 vi.mock('../../../util/fs', async () => {
@@ -2121,6 +2120,86 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject(expectedResult);
   });
 
+  it('go.mod file contains go toolchain version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: `someText\n\ngo 1.13\n\ntoolchain go1.23.6\n\n${gomod1}`,
+      config: {
+        updateType: 'minor',
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool golang 1.23.6',
+      },
+      {
+        cmd: 'go get -d -t ./...',
+      },
+    ]);
+
+    expect(datasource.getPkgReleases).toBeCalledTimes(0);
+  });
+
+  it('go.mod file contains full go version without toolchain', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
+      newPackageFileContent: `someText\n\ngo 1.23.5\n\n${gomod1}`,
+      config: {
+        updateType: 'minor',
+      },
+    });
+
+    expect(res).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool golang 1.23.5',
+      },
+      {
+        cmd: 'go get -d -t ./...',
+      },
+    ]);
+
+    expect(datasource.getPkgReleases).toBeCalledTimes(0);
+  });
+
   it('returns artifact notices', async () => {
     artifactsExtra.getExtraDepsNotice.mockReturnValue('some extra notice');
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
@@ -2144,7 +2223,7 @@ describe('modules/manager/gomod/artifacts', () => {
       updatedDeps: [
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
-      newPackageFileContent: gomod1,
+      newPackageFileContent: `someText\n\ngo 1.17\n\n${gomod1}`,
       config: {
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],

@@ -1,16 +1,17 @@
+import { logger } from '../../../logger';
 import { joinUrlParts } from '../../../util/url';
 
 /**
- * Extracts the base release URL from a package URL by removing the last two path segments.
+ * Extracts the base suite URL from a package URL by removing the last two path segments.
  *
  * @param basePackageUrl - The base URL of the package.
- * @returns The base release URL.
+ * @returns The base suite URL.
  *
  * @example
  * // Returns 'https://deb.debian.org/debian/dists/bullseye'
  * getBaseReleaseUrl('https://deb.debian.org/debian/dists/bullseye/main/binary-amd64');
  */
-export function getBaseReleaseUrl(basePackageUrl: string): string {
+export function getBaseSuiteUrl(basePackageUrl: string): string {
   const urlParts = basePackageUrl.split('/');
   return urlParts.slice(0, urlParts.length - 2).join('/');
 }
@@ -24,13 +25,13 @@ export function getBaseReleaseUrl(basePackageUrl: string): string {
  */
 export function constructComponentUrls(registryUrl: string): string[] {
   const REQUIRED_PARAMS = ['components', 'binaryArch'];
-  const OPTIONAL_PARAMS = ['release', 'suite'];
+  const OPTIONAL_PARAMS = ['suite', 'release'];
 
   try {
     const url = new URL(registryUrl);
     validateUrlAndParams(url, REQUIRED_PARAMS);
 
-    const release = getReleaseParam(url, OPTIONAL_PARAMS);
+    const suite = getReleaseParam(url, OPTIONAL_PARAMS);
     const binaryArch = url.searchParams.get('binaryArch');
     const components = url.searchParams.get('components')!.split(',');
 
@@ -43,7 +44,7 @@ export function constructComponentUrls(registryUrl: string): string[] {
       joinUrlParts(
         url.toString(),
         `dists`,
-        release,
+        suite,
         component,
         `binary-${binaryArch}`,
       ),
@@ -63,29 +64,32 @@ export function constructComponentUrls(registryUrl: string): string[] {
  * @throws Will throw an error if a required parameter is missing.
  */
 function validateUrlAndParams(url: URL, requiredParams: string[]): void {
-  requiredParams.forEach((param) => {
+  for (const param of requiredParams) {
     if (!url.searchParams.has(param)) {
       throw new Error(`Missing required query parameter '${param}'`);
     }
-  });
+  }
 }
 
 /**
- * Retrieves the release parameter from the URL.
+ * Retrieves the suite parameter from the URL.
  *
- * @param url - The URL to retrieve the release parameter from.
+ * @param url - The URL to retrieve the suite parameter from.
  * @param optionalParams - The list of optional query parameters.
- * @returns The value of the release parameter.
+ * @returns The value of the suite parameter.
  * @throws Will throw an error if none of the optional parameters are found.
  */
 function getReleaseParam(url: URL, optionalParams: string[]): string {
   for (const param of optionalParams) {
     const paramValue = url.searchParams.get(param);
     if (paramValue !== null) {
+      if (param === 'release') {
+        logger.debug(
+          'Deprecation notice. Use `suite` instead of `release` for deb repo URLs',
+        );
+      }
       return paramValue;
     }
   }
-  throw new Error(
-    `Missing one of ${optionalParams.join(', ')} query parameter`,
-  );
+  throw new Error(`Missing one of suite query parameter`);
 }

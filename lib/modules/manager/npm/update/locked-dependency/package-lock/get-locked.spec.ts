@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../../../../test/fixtures';
 import { getLockedDependencies } from './get-locked';
+import { Fixtures } from '~test/fixtures';
 
 vi.mock('../../../../../../util/fs');
 

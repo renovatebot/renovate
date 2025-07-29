@@ -6,6 +6,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -55,6 +56,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
     "baseUrl": "https://gitlab-enterprise.example.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -104,6 +106,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://git.test.com/api/v4/",
     "baseUrl": "https://git.test.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -153,6 +156,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -222,6 +226,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
@@ -271,6 +276,7 @@ exports[`workers/repository/update/pr/changelog/gitlab/index > getChangeLogJSON 
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
+    "depName": undefined,
     "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,

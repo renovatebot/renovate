@@ -1,9 +1,9 @@
-import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 import { hostRules } from '~test/host-rules';
+import * as httpMock from '~test/http-mock';
 
 const githubApiHost = github.Endpoint;
 const basePath = '/repos/some/repo/contents';

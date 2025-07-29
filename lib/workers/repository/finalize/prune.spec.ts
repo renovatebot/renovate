@@ -1,10 +1,8 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { git, partial, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { Pr } from '../../../modules/platform/types';
 import * as cleanup from './prune';
-
-vi.mock('../../../util/git');
+import { git, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 let config: RenovateConfig;
 
@@ -84,7 +82,7 @@ describe('workers/repository/finalize/prune', () => {
 
     it('deletes with base branches', async () => {
       config.branchList = ['renovate/main-a'];
-      config.baseBranches = ['main', 'maint/v7'];
+      config.baseBranchPatterns = ['main', 'maint/v7'];
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat([
           'renovate/main-b',

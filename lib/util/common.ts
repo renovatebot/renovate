@@ -1,12 +1,16 @@
 import JSON5 from 'json5';
+import * as JSONC from 'jsonc-parser';
+import type { JsonValue } from 'type-fest';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   BITBUCKET_SERVER_API_USING_HOST_TYPES,
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../constants';
 import { logger } from '../logger';
+import type { Nullish } from '../types';
 import * as hostRules from './host-rules';
 import { parseUrl } from './url';
 
@@ -22,6 +26,7 @@ export function detectPlatform(
   | 'azure'
   | 'bitbucket'
   | 'bitbucket-server'
+  | 'forgejo'
   | 'gitea'
   | 'github'
   | 'gitlab'
@@ -36,11 +41,15 @@ export function detectPlatform(
   if (hostname?.includes('bitbucket')) {
     return 'bitbucket-server';
   }
+  if (hostname?.includes('forgejo')) {
+    return 'forgejo';
+  }
+  if (hostname && ['codeberg.org', 'codefloe.com'].includes(hostname)) {
+    return 'forgejo';
+  }
   if (
     hostname &&
-    (['gitea.com', 'codeberg.org'].includes(hostname) ||
-      hostname.includes('gitea') ||
-      hostname.includes('forgejo'))
+    (['gitea.com'].includes(hostname) || hostname.includes('gitea'))
   ) {
     return 'gitea';
   }
@@ -63,6 +72,9 @@ export function detectPlatform(
   if (BITBUCKET_API_USING_HOST_TYPES.includes(hostType)) {
     return 'bitbucket';
   }
+  if (FORGEJO_API_USING_HOST_TYPES.includes(hostType)) {
+    return 'forgejo';
+  }
   if (GITEA_API_USING_HOST_TYPES.includes(hostType)) {
     return 'gitea';
   }
@@ -80,31 +92,50 @@ export function noLeadingAtSymbol(input: string): string {
   return input.startsWith('@') ? input.slice(1) : input;
 }
 
-export function parseJson(content: string | null, filename: string): unknown {
+export function parseJson(
+  content: Nullish<string>,
+  filename: string,
+): JsonValue {
   if (!content) {
     return null;
   }
 
-  return filename.endsWith('.json5')
-    ? JSON5.parse(content)
-    : parseJsonWithFallback(content, filename);
+  if (filename.endsWith('.jsonc')) {
+    return parseJsonc(content);
+  }
+
+  if (filename.endsWith('.json5')) {
+    return JSON5.parse(content);
+  }
+
+  return parseJsonWithFallback(content, filename);
 }
 
 export function parseJsonWithFallback(
   content: string,
   context: string,
-): unknown {
-  let parsedJson: unknown;
+): JsonValue {
+  let parsedJson: JsonValue;
 
   try {
-    parsedJson = JSON.parse(content);
+    parsedJson = parseJsonc(content);
   } catch {
+    // warn if json5 format used in json
     parsedJson = JSON5.parse(content);
     logger.warn(
       { context },
-      'File contents are invalid JSON but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
+      'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
     );
   }
 
   return parsedJson;
+}
+
+export function parseJsonc(content: string): JsonValue {
+  const errors: JSONC.ParseError[] = [];
+  const value = JSONC.parse(content, errors, { allowTrailingComma: true });
+  if (errors.length === 0) {
+    return value;
+  }
+  throw new Error('Invalid JSONC');
 }

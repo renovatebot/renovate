@@ -1,6 +1,6 @@
 import { EOL } from 'node:os';
-import { Fixtures } from '../../../../test/fixtures';
 import { parsePuppetfile } from './puppetfile-parser';
+import { Fixtures } from '~test/fixtures';
 
 const puppetLabsRegistryUrl = 'https://forgeapi.puppetlabs.com';
 

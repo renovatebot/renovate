@@ -122,7 +122,7 @@ export function updateDependency({
   }
 
   const { depType, managerData } = upgrade;
-  const depName: string = managerData?.key || upgrade.depName;
+  const depName: string = managerData?.key ?? upgrade.depName;
   let { newValue } = upgrade;
 
   newValue = getNewGitValue(upgrade) ?? newValue;

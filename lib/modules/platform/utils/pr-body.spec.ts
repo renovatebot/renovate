@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { smartTruncate } from './pr-body';
+import { Fixtures } from '~test/fixtures';
 
 const prBody = Fixtures.get('pr-body.txt');
 

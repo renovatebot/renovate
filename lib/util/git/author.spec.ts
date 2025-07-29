@@ -1,9 +1,19 @@
+import addrs from 'email-addresses';
 import { parseGitAuthor } from './author';
+
+vi.mock('email-addresses', { spy: true });
 
 describe('util/git/author', () => {
   describe('parseGitAuthor', () => {
     it('returns null if empty email given', () => {
       expect(parseGitAuthor(undefined as never)).toBeNull();
+    });
+
+    it('catches errors', () => {
+      vi.mocked(addrs.parseOneAddress).mockImplementationOnce(() => {
+        throw new Error('foo');
+      });
+      expect(parseGitAuthor('renovate@whitesourcesoftware.com')).toBeNull();
     });
 
     it('handles a normal address', () => {

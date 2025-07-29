@@ -112,17 +112,17 @@ Read our documentation on the [dependencyDashboardApproval](./configuration-opti
 ### Use an alternative branch as my Pull Request target
 
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
-You can configure the PR target branch via the `baseBranches` option.
+You can configure the PR target branch via the `baseBranchPatterns` option.
 
 Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
 
 ```json
 {
-  "baseBranches": ["next"]
+  "baseBranchPatterns": ["next"]
 }
 ```
 
-You can set more than one PR target branch in the `baseBranches` array.
+You can set more than one PR target branch in the `baseBranchPatterns` array.
 
 ### Support private npm modules
 
@@ -277,3 +277,39 @@ It can be nice to get patch PRs when you're using automerge:
 - Get weekly updates for minor and major updates
 
 This means you barely notice Renovate during the week, while you still get the benefits of patch level updates.
+
+## What's the difference between `depName` and `packageName`?
+
+Renovate uses two important config options to define a dependency's name: `depName` and `packageName`.
+
+The `depName` is the short "pretty name" of the dependency.
+This is the user-facing name for the dependency.
+By default, Renovate uses the `depName`:
+
+- in the title of Pull Requests/Merge Requests
+- in commit messages
+- on the Dependency Dashboard
+
+The `packageName` is the full _exact_ name.
+Renovate uses the `packageName` to find the dependency in the package registry.
+
+Often `depName` and `packageName` are the same, but not always.
+
+Renovate uses the "pretty" `depName` in branch names and PR titles/content, because the `depName` is easier to read than the `packageName`.
+
+For instance, given the following Gradle plugin:
+
+```kotlin
+plugins {
+    id("com.gradle.develocity").version("3.18.1")
+}
+```
+
+Renovate will give the dependency these properties:
+
+- `depName=com.gradle.develocity`
+- `packageName: com.gradle.develocity:com.gradle.develocity.gradle.plugin`
+
+Again, often the `depName` and `packageName` are equal.
+The names Renovate uses for the `depName` and `packageName` depend on the package manager (and package ecosystem naming conventions).
+For instance, `depName` and `packageName` may be different when you proxy Docker images.

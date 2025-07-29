@@ -1,11 +1,10 @@
-import { mocked } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
 import type { DockerHubCacheData } from './dockerhub-cache';
 import { DockerHubCache } from './dockerhub-cache';
 import type { DockerHubTag } from './schema';
 
 vi.mock('../../../util/cache/package');
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 function oldCacheData(): DockerHubCacheData {
   return {

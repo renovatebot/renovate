@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
-import * as httpMock from '../../../../test/http-mock';
-import { AzureBicepResourceDatasource } from './index';
+import { getPkgReleases } from '..';
+import { AzureBicepResourceDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const indexPath = '/Azure/bicep-types-az/main/generated/index.json';
@@ -20,8 +21,8 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         `,
       );
 
-    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
-    const result = await azureBicepResourceDatasource.getReleases({
+    const result = await getPkgReleases({
+      datasource: AzureBicepResourceDatasource.id,
       packageName: 'unknown',
     });
 
@@ -55,8 +56,8 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         `,
       );
 
-    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
-    const result = await azureBicepResourceDatasource.getReleases({
+    const result = await getPkgReleases({
+      datasource: AzureBicepResourceDatasource.id,
       packageName: 'unknown',
     });
 
@@ -84,8 +85,8 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         `,
       );
 
-    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
-    const result = await azureBicepResourceDatasource.getReleases({
+    const result = await getPkgReleases({
+      datasource: AzureBicepResourceDatasource.id,
       packageName: 'Microsoft.Storage/storageAccounts',
     });
 
@@ -131,8 +132,8 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         `,
       );
 
-    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
-    const result = await azureBicepResourceDatasource.getReleases({
+    const result = await getPkgReleases({
+      datasource: AzureBicepResourceDatasource.id,
       packageName: 'Microsoft.OperationalInsights/workspaces',
     });
 

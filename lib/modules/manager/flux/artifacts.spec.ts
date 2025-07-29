@@ -1,7 +1,7 @@
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

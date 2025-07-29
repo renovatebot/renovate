@@ -1,9 +1,9 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { logger } from '../../../../test/util';
 import { addLibYears } from '../../../instrumentation/reporting';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { Timestamp } from '../../../util/timestamp';
 import { calculateLibYears } from './libyear';
+import { logger } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../instrumentation/reporting');
 
@@ -94,41 +94,46 @@ describe('workers/repository/process/libyear', () => {
         ],
       };
       calculateLibYears(config, packageFiles);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for some/image',
       );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No releaseTimestamp for dep1 update to 3.0.0',
       );
-      expect(logger.logger.debug).toHaveBeenCalledWith(
+      expect(logger.logger.once.debug).toHaveBeenCalledWith(
         'No currentVersionTimestamp for dep3',
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
-          managerLibYears: {
+          libYears: {
+            managers: {
+              bundler: 0.5027322404371585,
+              dockerfile: 0,
+              npm: 1,
+            },
+            total: 1.5027322404371586,
+          },
+          dependencyStatus: {
+            outdated: 4,
+            total: 5,
+          },
+        },
+        'Repository libYears',
+      );
+      expect(addLibYears).toHaveBeenCalledWith(config, {
+        libYears: {
+          managers: {
             bundler: 0.5027322404371585,
             dockerfile: 0,
             npm: 1,
           },
-          // eslint-disable-next-line no-loss-of-precision
-          totalLibYears: 1.5027322404371585,
-          totalDepsCount: 5,
-          outdatedDepsCount: 4,
+          total: 1.5027322404371586,
         },
-        'Repository libYears',
-      );
-      expect(addLibYears).toHaveBeenCalledWith(
-        config,
-        {
-          bundler: 0.5027322404371585,
-          dockerfile: 0,
-          npm: 1,
+        dependencyStatus: {
+          outdated: 4,
+          total: 5,
         },
-        // eslint-disable-next-line no-loss-of-precision
-        1.5027322404371585,
-        5,
-        4,
-      );
+      });
     });
 
     it('de-duplicates if same dep found in different files', () => {
@@ -193,14 +198,17 @@ describe('workers/repository/process/libyear', () => {
       calculateLibYears(config, packageFiles);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
-          managerLibYears: {
-            npm: 1,
-            regex: 1,
+          libYears: {
+            managers: {
+              npm: 1,
+              regex: 1,
+            },
+            total: 2,
           },
-
-          totalLibYears: 2,
-          totalDepsCount: 2,
-          outdatedDepsCount: 2,
+          dependencyStatus: {
+            outdated: 2,
+            total: 2,
+          },
         },
         'Repository libYears',
       );

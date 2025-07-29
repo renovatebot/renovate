@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const yamlFile1 = Fixtures.get('docker-compose.1.yml');
 const yamlFile3 = Fixtures.get('docker-compose.3.yml');
@@ -190,6 +190,41 @@ describe('modules/manager/docker-compose/extract', () => {
             depName: 'quay.io/nginx',
             packageName: 'quay.io/nginx',
             replaceString: 'quay.io/nginx:0.0.1',
+          },
+        ],
+      });
+    });
+
+    it('extract images from fragments', () => {
+      const compose = codeBlock`
+        ---
+        x-shared_setting: &shared_settings
+          image: debian:11
+          # Other shared properties here
+
+        services:
+          service-a:
+            <<: *shared_settings
+            environment:
+              - SERVICE=a
+          service-b:
+            <<: *shared_settings
+            environment:
+              - SERVICE=b
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '11',
+            datasource: 'docker',
+            depName: 'debian',
+            packageName: 'debian',
+            replaceString: 'debian:11',
+            versioning: 'debian',
           },
         ],
       });

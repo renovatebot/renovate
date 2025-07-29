@@ -4,7 +4,6 @@ import type {
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
-  UserEnv,
   ValidationMessage,
 } from '../config/types';
 import type { Release } from '../modules/datasource/types';
@@ -80,13 +79,13 @@ export interface BranchUpgradeConfig
 
   hasReleaseNotes?: boolean;
   homepage?: string;
+  changelogContent?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
   sourceUrl?: string;
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
-  env?: UserEnv;
 }
 
 export type PrBlockedBy =
@@ -114,6 +113,11 @@ export type BranchResult =
   | 'rebase'
   | 'update-not-scheduled';
 
+export type CacheFingerprintMatchResult =
+  | 'matched'
+  | 'no-match'
+  | 'no-fingerprint';
+
 export interface BranchConfig
   extends BranchUpgradeConfig,
     LegacyAdminConfig,
@@ -136,8 +140,7 @@ export interface BranchConfig
   stopUpdating?: boolean;
   isConflicted?: boolean;
   commitFingerprint?: string;
-  skipBranchUpdate?: boolean;
-  env?: UserEnv;
+  cacheFingerprintMatch?: CacheFingerprintMatchResult;
 }
 
 export interface BranchMetadata {
@@ -166,7 +169,7 @@ export interface BranchSummary {
 export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
-  fileMatch?: string[];
+  managerFilePatterns?: string[];
   includePaths?: string[];
   ignorePaths?: string[];
   enabled?: boolean;
@@ -190,7 +193,6 @@ export interface UpgradeFingerprintConfig {
   currentVersion?: string;
   datasource?: string;
   depName?: string;
-  env?: UserEnv;
   lockFile?: string;
   lockedVersion?: string;
   manager?: string | null;

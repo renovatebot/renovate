@@ -1,13 +1,5 @@
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
-import type { ExecSnapshots } from '../../../../../test/exec-util';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as docker from '../../../../util/exec/docker';
 import { getPkgReleases } from '../../../datasource';
@@ -15,12 +7,14 @@ import type { PostUpdateConfig } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import * as yarnHelper from './yarn';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import type { ExecSnapshots } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import * as util from '~test/util';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('../../../../../test/fixtures')>(
-      '../../../../../test/fixtures',
-    )
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
   ).fsExtra(),
 );
 vi.mock('../../../../util/exec/env');
@@ -39,7 +33,7 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
 
-env.getChildProcessEnv.mockReturnValue(envMock.basic);
+util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
 
 describe('modules/manager/npm/post-update/yarn', () => {
   const removeDockerContainer = vi.spyOn(docker, 'removeDockerContainer');
@@ -53,7 +47,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     removeDockerContainer.mockResolvedValue();
     docker.resetPrefetchedImages();
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
@@ -351,7 +345,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       // subdirectory isolated workspaces to work with Yarn 2+.
       expect(res.lockFile).toBe('');
       expect(fs.outputFile).toHaveBeenCalledTimes(1);
-      expect(mockedFunction(fs.outputFile).mock.calls[0][0]).toEndWith(
+      expect(vi.mocked(fs.outputFile).mock.calls[0][0]).toEndWith(
         'some-dir/sub_workspace/yarn.lock',
       );
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -415,14 +409,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
     const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
       constraints: {
         yarn: '^3.0.0',
@@ -465,14 +459,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
     const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
@@ -508,14 +502,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '0.10.0' }],
     });
     const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
       constraints: {
         yarn: '^3.0.0',
       },
@@ -560,7 +554,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       'some-dir',
     );
 
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [
         { version: '0.17.0' },
         { version: '0.17.1' },
@@ -573,7 +567,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
 
-    const config = partial<PostUpdateConfig<NpmManagerData>>({
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
       constraints: {
         yarn: '^3.0.0',
@@ -619,14 +613,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }, { version: '2.4.3' }],
     });
     const execSnapshots = mockExecAll({
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
       managerData: { hasPackageManager: true },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
@@ -634,6 +628,84 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
       { cmd: 'install-tool yarn-slim 1.22.18', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
+  it('uses devEngine.packageManager(object) instead of corepack', async () => {
+    // sanity check for later refactorings
+    expect(plocktest1YarnLockV1).toBeTruthy();
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "devEngines": {"packageManager": { "name": "yarn", "version": "1.22.19" } }, "packageManager": "yarn@1.22.18", "dependencies": { "chalk": "^2.4.1" } }',
+        'yarn.lock': plocktest1YarnLockV1,
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '1.22.19' }, { version: '2.4.3' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe(plocktest1YarnLockV1);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool yarn-slim 1.22.19', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
+  it('uses devEngine.packageManager(array) instead of corepack', async () => {
+    // sanity check for later refactorings
+    expect(plocktest1YarnLockV1).toBeTruthy();
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "devEngines": {"packageManager": [{ "name": "yarn", "version": "1.22.19" }] }, "packageManager": "yarn@1.22.18", "dependencies": { "chalk": "^2.4.1" } }',
+        'yarn.lock': plocktest1YarnLockV1,
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '1.22.19' }, { version: '2.4.3' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe(plocktest1YarnLockV1);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool yarn-slim 1.22.19', options: { cwd: 'some-dir' } },
       {
         cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
         options: { cwd: 'some-dir' },
@@ -655,7 +727,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
     const execSnapshots = mockExecSequence([
@@ -663,7 +735,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
     ]);
-    const config = partial<PostUpdateConfig<NpmManagerData>>({});
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8', cwd: 'some-dir' };
@@ -698,11 +770,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
       'some-dir',
     );
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [{ version: '1.22.18' }],
     });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
-    const config = partial<PostUpdateConfig<NpmManagerData>>({});
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { encoding: 'utf-8' };

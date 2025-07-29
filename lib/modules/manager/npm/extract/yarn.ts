@@ -71,7 +71,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
   }
   const paths = [
-    conf?.cacheFolder || './.yarn/cache',
+    conf?.cacheFolder ?? './.yarn/cache',
     '.pnp.cjs',
     '.pnp.js',
     '.pnp.loader.mjs',
@@ -80,7 +80,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
     conf &&
     miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false
   ) {
-    paths.push(conf.pnpDataPath || './.pnp.data.json');
+    paths.push(conf.pnpDataPath ?? './.pnp.data.json');
   }
   return paths;
 }

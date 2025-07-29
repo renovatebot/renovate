@@ -19,9 +19,7 @@ export function checkIfStringIsPath(path: string): boolean {
 }
 
 export function massageProviderLookupName(dep: PackageDependency): void {
-  if (!dep.packageName) {
-    dep.packageName = dep.depName;
-  }
+  dep.packageName ??= dep.depName;
 
   // TODO #22198
   if (!dep.packageName!.includes('/')) {

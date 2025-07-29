@@ -4,12 +4,12 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { mock } from 'vitest-mock-extended';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as hostRules from '../../../util/host-rules';
 import type { Upgrade } from '../types';
 import { updateDependency } from '.';
+import { fs } from '~test/util';
 vi.mock('../../../util/fs');
 
 vi.mock('simple-git');

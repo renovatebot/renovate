@@ -1,5 +1,3 @@
-import { mockExecAll } from '../../../../test/exec-util';
-import { mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { ExecError } from '../../../util/exec/exec-error';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
@@ -7,14 +5,15 @@ import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import { mockExecAll } from '~test/exec-util';
+import { partial } from '~test/util';
 
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 
-const getRepoStatusMock = mockedFunction(getRepoStatus);
+const getRepoStatusMock = vi.mocked(getRepoStatus);
 
-const lstatsMock = mockedFunction(localPathIsSymbolicLink);
-const readlinkMock = mockedFunction(readLocalSymlink);
+const lstatsMock = vi.mocked(localPathIsSymbolicLink);
+const readlinkMock = vi.mocked(readLocalSymlink);
 
 describe('modules/manager/hermit/artifacts', () => {
   describe('updateArtifacts', () => {
@@ -518,6 +517,41 @@ describe('modules/manager/hermit/artifacts', () => {
             lockFile: 'from: go-1.17, to: go-',
             stderr: `invalid package to update`,
           },
+        },
+      ]);
+    });
+
+    it('prevents injections', async () => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue('hermit');
+      GlobalConfig.set({ localDir: '' });
+      const execSnapshots = mockExecAll();
+      await updateArtifacts({
+        updatedDeps: [
+          {
+            depName: '|| date; echo ',
+            currentVersion: '1.0.0',
+            newValue: '1.0.1',
+          },
+          {
+            depName: '|| whoami',
+            currentVersion: '1.18.0',
+            newName: 'go',
+            newValue: '1.24.1',
+            updateType: 'replacement',
+          },
+        ],
+        packageFileName: './bin/hermit',
+        newPackageFileContent: '',
+        config: {},
+      });
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "./hermit uninstall '|| whoami'",
+        },
+        {
+          cmd: "./hermit install '|| date; echo -1.0.1' go-1.24.1",
         },
       ]);
     });

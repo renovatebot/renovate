@@ -189,7 +189,7 @@ export class RepologyDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }

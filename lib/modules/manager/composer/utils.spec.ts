@@ -5,6 +5,7 @@ import { Lockfile, PackageFile } from './schema';
 import {
   extractConstraints,
   getComposerArguments,
+  getComposerUpdateArguments,
   requireComposerDependencyInstallation,
 } from './utils';
 
@@ -314,6 +315,48 @@ describe('modules/manager/composer/utils', () => {
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
       );
     });
+  });
+
+  describe('getComposerUpdateArguments', () => {
+    it.each`
+      constraint
+      ${'2.6.0'}
+      ${'<=2.6'}
+      ${'<2.7'}
+    `(
+      'does not request an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        );
+      },
+    );
+
+    it.each`
+      constraint
+      ${'2.7.0'}
+      ${'2.8.0'}
+      ${'3.0.0'}
+      ${'^2.6'}
+      ${'^2.7'}
+      ${'^2.8'}
+      ${'^3.0'}
+      ${'>=2.6'}
+      ${'>=2.7'}
+      ${'>=2.8'}
+      ${'>=3.0'}
+    `(
+      'requests an update with minimal changes with $constraint',
+      ({ constraint }) => {
+        expect(
+          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+        ).toBe(
+          ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
+        );
+      },
+    );
   });
 
   describe('requireComposerDependencyInstallation', () => {

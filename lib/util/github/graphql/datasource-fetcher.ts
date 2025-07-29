@@ -1,4 +1,3 @@
-import AggregateError from 'aggregate-error';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -37,7 +36,7 @@ function isUnknownGraphqlError(err: Error): boolean {
 }
 
 function canBeSolvedByShrinking(err: Error): boolean {
-  const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
+  const errors: Error[] = err instanceof AggregateError ? err.errors : [err];
   return errors.some(
     (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e),
   );
@@ -163,11 +162,9 @@ export class GithubGraphqlDatasourceFetcher<
 
     this.queryCount += 1;
 
-    if (this.isPersistent === undefined) {
-      // For values other than explicit `false`,
-      // we assume that items can not be cached.
-      this.isPersistent = data.repository.isRepoPrivate === false;
-    }
+    // For values other than explicit `false`,
+    // we assume that items can not be cached.
+    this.isPersistent ??= data.repository.isRepoPrivate === false;
 
     const res = data.repository.payload;
     return [res, null];

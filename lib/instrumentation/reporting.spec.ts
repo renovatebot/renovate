@@ -1,7 +1,5 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
-import { s3 } from '../../test/s3';
-import { fs, logger } from '../../test/util';
 import type { RenovateConfig } from '../config/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
@@ -15,6 +13,8 @@ import {
   resetReport,
 } from './reporting';
 import type { Report } from './types';
+import { s3 } from '~test/s3';
+import { fs, logger } from '~test/util';
 
 vi.mock('../util/fs', () => mockDeep());
 vi.mock('../util/s3', () => mockDeep());
@@ -79,7 +79,10 @@ describe('instrumentation/reporting', () => {
       branches: [],
       packageFiles: {},
     });
-    addLibYears(config, {}, 0, 0, 0);
+    addLibYears(config, {
+      libYears: { managers: {}, total: 0 },
+      dependencyStatus: { outdated: 0, total: 0 },
+    });
 
     expect(getReport()).toEqual({
       problems: [],
@@ -240,7 +243,10 @@ describe('instrumentation/reporting', () => {
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
-    addLibYears(config, { npm: 1 }, 1, 1, 1);
+    addLibYears(config, {
+      libYears: { managers: { npm: 1 }, total: 1 },
+      dependencyStatus: { outdated: 1, total: 1 },
+    });
 
     expect(getReport()).toEqual({
       problems: [],
@@ -249,11 +255,17 @@ describe('instrumentation/reporting', () => {
           problems: [],
           branches: branchInformation,
           packageFiles,
-          libYears: {
-            managerLibYears: { npm: 1 },
-            totalLibYears: 1,
-            totalDepsCount: 1,
-            outdatedDepsCount: 1,
+          libYearsWithStatus: {
+            libYears: {
+              managers: {
+                npm: 1,
+              },
+              total: 1,
+            },
+            dependencyStatus: {
+              outdated: 1,
+              total: 1,
+            },
           },
         },
       },

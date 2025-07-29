@@ -6,7 +6,7 @@ Renovate can manage these parts of the `kustomization.yaml` file:
 1. [helm charts](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/chart.md)
 1. [remote bases](https://github.com/kubernetes-sigs/kustomize/blob/master/examples/remoteBuild.md) (deprecated since Kustomize `v2.1.0`)
 
-**How It Works**
+### How It Works
 
 1. Renovate searches in each repository for any `kustomization.yaml` files
 1. Dependencies are extracted from remote bases, image tags and Helm charts
@@ -20,7 +20,29 @@ This manager uses three `depType`s to allow fine-grained control of which depend
 - HelmChart
 - OCIChart
 
-**Limitations**
+### Helm charts inflation
+
+Renovate will inflate helm charts referenced in a kustomization if any of the following is true:
+
+1. The version Renovate is upgrading from was inflated, OR
+1. The `kustomizeInflateHelmCharts` option in `postUpdateOptions` is enabled
+
+**Note:** To prevent Renovate from updating dependencies in the expanded charts, you'll need to manually exclude the folders from Helm managers.
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchFileNames": ["**/charts/**"],
+      "matchManagers": ["helmv3", "helm-values"],
+      "enabled": false
+    }
+  ]
+}
+```
+
+### Limitations
 
 - Using HTTPS to fetch the repositories is not tested
 - The keys for the image tags can be in any order

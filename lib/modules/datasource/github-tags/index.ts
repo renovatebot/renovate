@@ -4,6 +4,7 @@ import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../util/github/graphql/types';
 import { findCommitOfTag } from '../../../util/github/tags';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
 import type {
@@ -43,7 +44,9 @@ export class GithubTagsDatasource extends Datasource {
     let digest: string | null = null;
     try {
       const url = `${apiBaseUrl}repos/${githubRepo}/commits?per_page=1`;
-      const res = await this.http.getJsonUnchecked<{ sha: string }[]>(url);
+      const res = await this.http.getJsonUnchecked<{ sha: string }[]>(url, {
+        cacheProvider: memCacheProvider,
+      });
       digest = res.body[0].sha;
     } catch (err) {
       logger.debug(

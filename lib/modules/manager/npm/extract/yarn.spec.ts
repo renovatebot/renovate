@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../../test/fixtures';
-import { fs } from '../../../../../test/util';
 import { getYarnLock, getYarnVersionFromLock } from './yarn';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../../util/fs');
 

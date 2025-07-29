@@ -1,16 +1,19 @@
 import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
-import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type {
+  GitPullRequest,
+  GitVersionDescriptor,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import {
   GitPullRequestMergeStrategy,
   GitStatusState,
+  GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
-import { partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -20,10 +23,10 @@ import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
+import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
 vi.mock('./azure-helper', () => mockDeep());
-vi.mock('../../../util/git', () => mockDeep());
 vi.mock('../../../util/host-rules', () => mockDeep());
 vi.mock('../../../util/sanitize', () =>
   mockDeep({ sanitize: (s: string) => s }),
@@ -1023,6 +1026,7 @@ describe('modules/platform/azure/index', () => {
         ${'fast-forward'}
         ${'merge-commit'}
         ${'rebase'}
+        ${'rebase-merge'}
         ${'squash'}
       `(
         'should not call getMergeMethod when automergeStrategy is $automergeStrategy',
@@ -1076,6 +1080,7 @@ describe('modules/platform/azure/index', () => {
         ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
         ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
         ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+        ${'rebase-merge'} | ${GitPullRequestMergeStrategy.RebaseMerge}
         ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
       `(
         'should create PR with mergeStrategy $prMergeStrategy',
@@ -1728,6 +1733,7 @@ describe('modules/platform/azure/index', () => {
       ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
       ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
       ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+      ${'rebase-merge'} | ${GitPullRequestMergeStrategy.RebaseMerge}
       ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
     `(
       'should complete PR with mergeStrategy $prMergeStrategy',
@@ -2020,5 +2026,61 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toBeNull();
     });
+  });
+
+  it('getRawFile should check tag first and then return branch if tag was not found', async () => {
+    await initRepo({ repository: 'some/repo' });
+    const callArgs: any[] = [];
+    const getItemMock = vi.fn(
+      (
+        repositoryId: string,
+        path: string,
+        project?: string,
+        scopePath?: string,
+        recursionLevel?: any,
+        includeContentMetadata?: boolean,
+        latestProcessedChange?: boolean,
+        download?: boolean,
+        versionDescriptor?: GitVersionDescriptor,
+        includeContent?: boolean,
+        resolveLfs?: boolean,
+        sanitize?: boolean,
+      ) => {
+        callArgs.push(versionDescriptor?.versionType);
+        if (
+          versionDescriptor &&
+          versionDescriptor.versionType === GitVersionType.Branch
+        ) {
+          return Promise.resolve({ content: '{ "test": "branch content" }' });
+        }
+        if (
+          versionDescriptor &&
+          versionDescriptor.versionType === GitVersionType.Tag
+        ) {
+          return Promise.resolve(null);
+        }
+        throw new Error('Unexpected call');
+      },
+    );
+
+    azureApi.gitApi.mockImplementationOnce(
+      () =>
+        ({
+          getItem: getItemMock,
+          getRepositories: vi
+            .fn()
+            .mockResolvedValue([
+              { id: '123456', name: 'repo', project: { name: 'some' } },
+            ]),
+        }) as any,
+    );
+    const result = await azure.getJsonFile(
+      'file.json',
+      'some/repo',
+      'some-branch',
+    );
+    expect(result).toEqual({ test: 'branch content' });
+    expect(callArgs[0]).toBe(GitVersionType.Tag);
+    expect(callArgs[1]).toBe(GitVersionType.Branch);
   });
 });

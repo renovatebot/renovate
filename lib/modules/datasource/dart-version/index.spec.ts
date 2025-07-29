@@ -1,8 +1,8 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { DartVersionDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://storage.googleapis.com';
 const urlPath =

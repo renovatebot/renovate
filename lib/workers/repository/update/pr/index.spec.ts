@@ -1,12 +1,4 @@
 import { DateTime } from 'luxon';
-import {
-  git,
-  logger,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -30,27 +22,27 @@ import * as _participants from './participants';
 import * as _prCache from './pr-cache';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint';
 import { ensurePr } from '.';
+import { git, logger, partial, platform, scm } from '~test/util';
 
-vi.mock('../../../../util/git');
 vi.mock('../../changelog');
 
 vi.mock('../../../global/limits');
-const limits = mocked(_limits);
+const limits = vi.mocked(_limits);
 
 vi.mock('../branch/status-checks');
-const checks = mocked(_statusChecks);
+const checks = vi.mocked(_statusChecks);
 
 vi.mock('./body');
-const prBody = mocked(_prBody);
+const prBody = vi.mocked(_prBody);
 
 vi.mock('./participants');
-const participants = mocked(_participants);
+const participants = vi.mocked(_participants);
 
 vi.mock('../../../../modules/platform/comment');
-const comment = mocked(_comment);
+const comment = vi.mocked(_comment);
 
 vi.mock('./pr-cache');
-const prCache = mocked(_prCache);
+const prCache = vi.mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {

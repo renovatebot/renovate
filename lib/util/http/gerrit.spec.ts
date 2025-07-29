@@ -1,5 +1,5 @@
-import * as httpMock from '../../../test/http-mock';
 import { GerritHttp, setBaseUrl } from './gerrit';
+import * as httpMock from '~test/http-mock';
 
 const baseUrl = 'https://gerrit.example.com/';
 

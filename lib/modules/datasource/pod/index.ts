@@ -212,7 +212,7 @@ export class PodDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -226,7 +226,9 @@ export class PodDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
     const match = githubRegex.exec(baseUrl);
-    if (match?.groups) {
+    // We would ideally have a reliable way to differentiate between
+    // a CDN URL and a Github URL, but we'll start with detecting Artifactory
+    if (match?.groups && !baseUrl.includes('/api/pods/')) {
       baseUrl = massageGithubUrl(baseUrl);
       const { hostURL, account, repo } = match.groups;
       const opts = { hostURL, account, repo };

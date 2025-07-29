@@ -1,12 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import {
-  fs,
-  logger,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../test/util';
 import * as decrypt from '../../../config/decrypt';
 import { getConfig } from '../../../config/defaults';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
@@ -16,6 +7,7 @@ import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
+import { getUserEnv } from '../../../util/env';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
 import { OnboardingState } from '../onboarding/common';
 import {
@@ -25,14 +17,15 @@ import {
   mergeStaticRepoEnvConfig,
   setNpmTokenInNpmrc,
 } from './merge';
+import { fs, logger, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../onboarding/branch/onboarding-branch-cache');
 
-const migrate = mocked(_migrate);
-const migrateAndValidate = mocked(_migrateAndValidate);
-const onboardingCache = mocked(_onboardingCache);
+const migrate = vi.mocked(_migrate);
+const migrateAndValidate = vi.mocked(_migrateAndValidate);
+const onboardingCache = vi.mocked(_onboardingCache);
 
 let config: RenovateConfig;
 
@@ -440,6 +433,28 @@ describe('workers/repository/init/merge', () => {
       const res = await mergeRenovateConfig(config);
       expect(res.npmrc).toBe('something_authToken=token');
     });
+
+    it('deletes user conifgured env after setting in mem cache', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{"env": { "var": "value" }}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        env: {
+          var: 'value',
+        },
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      const res = await mergeRenovateConfig(config);
+      expect(res.env).toBeUndefined();
+      expect(getUserEnv()).toEqual({
+        var: 'value',
+      });
+    });
   });
 
   describe('setNpmTokenInNpmrc', () => {
@@ -595,7 +610,7 @@ describe('workers/repository/init/merge', () => {
           },
         },
         {
-          name: 'it should merge a static repo config into the repo config by appending it',
+          name: 'it should merge both configs and and repo config is higher priority',
           currentConfig: {},
           repoFileConfig: {
             extends: ['group:socketio'],
@@ -624,12 +639,52 @@ describe('workers/repository/init/merge', () => {
                 matchPackageNames: ['socket.io**'],
               },
               {
+                groupName: 'my-custom-socketio-override',
+                matchPackageNames: ['socket.io**'],
+              },
+              {
                 groupName: 'high merge confidence',
                 matchConfidence: ['high', 'very high'],
               },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should merge extends from both a repo config and static repo config by appending it',
+          currentConfig: {},
+          repoFileConfig: {
+            extends: ['group:springAndroid'],
+          },
+          staticConfig: {
+            dependencyDashboard: true,
+            extends: ['group:springAmqp'],
+            packageRules: [
               {
-                groupName: 'my-custom-socketio-override',
-                matchPackageNames: ['socket.io**'],
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
+              },
+            ],
+          },
+          wantConfig: {
+            dependencyDashboard: true,
+            description: [
+              'Group Java Spring AMQP packages.',
+              'Group Java Spring Android packages.',
+            ],
+            packageRules: [
+              {
+                groupName: 'spring amqp',
+                matchPackageNames: ['org.springframework.amqp:**'],
+              },
+              {
+                groupName: 'spring android',
+                matchPackageNames: ['org.springframework.android:**'],
+              },
+              {
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
               },
             ],
             renovateJsonPresent: true,

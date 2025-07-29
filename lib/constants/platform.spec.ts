@@ -1,3 +1,4 @@
+import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags';
 import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
 import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
@@ -11,6 +12,8 @@ import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/chang
 import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  BITBUCKET_SERVER_API_USING_HOST_TYPES,
+  FORGEJO_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
@@ -22,6 +25,18 @@ describe('constants/platform', () => {
       GITEA_API_USING_HOST_TYPES.includes(GiteaTagsDatasource.id),
     ).toBeTrue();
     expect(GITEA_API_USING_HOST_TYPES.includes('gitea')).toBeTrue();
+  });
+
+  it('should be part of the FORGEJO_API_USING_HOST_TYPES', () => {
+    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo')).toBeTrue();
+    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-tags')).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-releases'),
+    ).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog'),
+    ).toBeTrue();
+    expect(FORGEJO_API_USING_HOST_TYPES).toHaveLength(4);
   });
 
   it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
@@ -70,5 +85,16 @@ describe('constants/platform', () => {
       BITBUCKET_API_USING_HOST_TYPES.includes(BitbucketTagsDatasource.id),
     ).toBeTrue();
     expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
+  });
+
+  it('should be part of the BITBUCKET_SERVER_API_USING_HOST_TYPES', () => {
+    expect(
+      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(
+        BitbucketServerTagsDatasource.id,
+      ),
+    ).toBeTrue();
+    expect(
+      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
+    ).toBeTrue();
   });
 });

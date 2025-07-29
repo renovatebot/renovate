@@ -128,9 +128,7 @@ export class DistroInfo {
 
     // ubuntu: does not have eol_lts
     // debian: only "Stable" has no eol_lts, old and oldold has both
-    if (!end) {
-      end = endLts;
-    }
+    end ??= endLts;
 
     if (end) {
       const now = DateTime.now().toUTC();

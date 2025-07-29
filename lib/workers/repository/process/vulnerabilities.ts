@@ -598,7 +598,7 @@ export class Vulnerabilities {
 
     if (cvssVector) {
       const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
-      severityLevel = severity.toUpperCase();
+      severityLevel = severity ? severity.toUpperCase() : 'UNKNOWN';
       score = baseScore
         ? `${baseScore} / 10 (${titleCase(severityLevel)})`
         : 'Unknown';

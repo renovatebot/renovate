@@ -51,9 +51,11 @@ export interface GetPkgReleasesConfig {
   replacementName?: string;
   replacementVersion?: string;
   constraintsFiltering?: ConstraintsFilter;
+  registryStrategy?: RegistryStrategy;
 }
 
 export interface Release {
+  changelogContent?: string;
   changelogUrl?: string;
   checksumUrl?: string;
   downloadUrl?: string;
@@ -80,6 +82,7 @@ export interface ReleaseResult {
   isPrivate?: boolean;
   releases: Release[];
   tags?: Record<string, string> | undefined;
+  changelogContent?: string;
   // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
@@ -92,6 +95,8 @@ export interface ReleaseResult {
   replacementVersion?: string;
   lookupName?: string;
   packageScope?: string;
+  mostRecentTimestamp?: Timestamp;
+  isAbandoned?: boolean;
 }
 
 export interface PostprocessReleaseConfig {
@@ -143,9 +148,11 @@ export interface DatasourceApi extends ModuleApi {
   sourceUrlNote?: string;
 
   /**
-   * Whether to perform caching in the datasource index/wrapper or not.
-   * true: datasoure index wrapper should cache all results (based on registryUrl/packageName)
-   * false: caching is not performed, or performed within the datasource implementation
+   * Whether to perform centralized caching in the datasource index/wrapper or not.
+   *
+   * - `true`: datasource index wrapper will cache all results (based on registryUrl/packageName)
+   *   - **Must be set only if datasource is able to determine and return `isPrivate` flag**
+   * - `false`: centralized caching is not performed, implementation still could do caching internally
    */
   caching?: boolean | undefined;
 

@@ -1,7 +1,7 @@
-import { Fixtures } from '../../../../../../../test/fixtures';
-import { partial } from '../../../../../../../test/util';
 import type { UpdateLockedConfig } from '../../../../types';
 import { updateLockedDependency } from '.';
+import { Fixtures } from '~test/fixtures';
+import { partial } from '~test/util';
 
 const yarnLock1 = Fixtures.get('express.yarn.lock');
 const yarn2Lock = Fixtures.get('yarn2.lock');

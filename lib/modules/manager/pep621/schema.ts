@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { normalizePythonDepName } from '../../datasource/pypi/common';
+import { PixiConfigSchema } from '../pixi/schema';
 
 export type PyProject = z.infer<typeof PyProjectSchema>;
 
@@ -71,6 +72,7 @@ const UvSource = z.union([
 
 const UvSchema = z.object({
   'dev-dependencies': DependencyListSchema,
+  'required-version': z.string().optional(),
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
@@ -79,7 +81,7 @@ const UvSchema = z.object({
   index: z
     .array(
       z.object({
-        name: z.string(),
+        name: z.string().optional(),
         url: z.string(),
         default: z.boolean().default(false),
         explicit: z.boolean().default(false),
@@ -112,6 +114,7 @@ export const PyProjectSchema = z.object({
     .optional(),
   tool: z
     .object({
+      pixi: PixiConfigSchema.optional(),
       pdm: PdmSchema.optional(),
       hatch: HatchSchema.optional(),
       uv: UvSchema.optional(),

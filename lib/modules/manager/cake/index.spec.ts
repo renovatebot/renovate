@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/cake/index', () => {
   it('extracts', () => {

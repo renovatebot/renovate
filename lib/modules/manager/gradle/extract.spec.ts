@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig, PackageDependency } from '../types';
 import { matchesContentDescriptor } from './extract';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger, partial } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -705,6 +705,118 @@ describe('modules/manager/gradle/extract', () => {
         ]);
       });
     });
+
+    it('exclusiveContent', async () => {
+      const fsMock = {
+        'build.gradle': codeBlock`
+          repositories {
+            google()
+            exclusiveContent {
+              forRepository {
+                maven {
+                  url "https://artifactory.foo.bar/artifactory/test"
+                }
+              }
+              filter {
+                includeGroup "foo.bar"
+              }
+            }
+          }
+
+          dependencies {
+            implementation "com.google.protobuf:protobuf-java:2.17.1"
+            implementation "foo.bar:protobuf-java:2.17.0"
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+
+      expect(res).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'com.google.protobuf:protobuf-java',
+              currentValue: '2.17.1',
+              registryUrls: ['https://dl.google.com/android/maven2/'],
+            },
+            {
+              depName: 'foo.bar:protobuf-java',
+              currentValue: '2.17.0',
+              registryUrls: ['https://artifactory.foo.bar/artifactory/test'],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('exclusiveContent with repeated repository definition', async () => {
+      const fsMock = {
+        'build.gradle': codeBlock`
+          repositories {
+            google()
+            exclusiveContent {
+              forRepository {
+                maven {
+                  url "https://artifactory.foo.bar/artifactory/test"
+                }
+              }
+              filter {
+                includeGroup "some.dll"
+              }
+            }
+            exclusiveContent {
+              forRepository {
+                maven {
+                  url "https://artifactory.foo.bar/artifactory/test"
+                }
+              }
+              filter {
+                includeGroup "foo.bar"
+              }
+            }
+          }
+
+          dependencies {
+            implementation "com.google.protobuf:protobuf-java:2.17.1"
+            implementation "foo.bar:protobuf-java:2.17.0"
+            implementation "some.dll:dll-1:1.0.0"
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+
+      expect(res).toMatchObject([
+        {
+          deps: [
+            {
+              depName: 'com.google.protobuf:protobuf-java',
+              currentValue: '2.17.1',
+              registryUrls: ['https://dl.google.com/android/maven2/'],
+            },
+            {
+              depName: 'foo.bar:protobuf-java',
+              currentValue: '2.17.0',
+              registryUrls: ['https://artifactory.foo.bar/artifactory/test'],
+            },
+            {
+              depName: 'some.dll:dll-1',
+              currentValue: '1.0.0',
+              registryUrls: ['https://artifactory.foo.bar/artifactory/test'],
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('version catalogs', () => {
@@ -1039,7 +1151,7 @@ describe('modules/manager/gradle/extract', () => {
 
     it('prevents inclusion of non-Gradle files', async () => {
       const fsMock = {
-        'build.gradle': "apply from: '../../test.non-gradle'",
+        'build.gradle': "apply from: '~test.non-gradle'",
       };
       mockFs(fsMock);
 

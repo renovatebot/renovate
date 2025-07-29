@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const yamlFile = Fixtures.get('.woodpecker.yml');
 

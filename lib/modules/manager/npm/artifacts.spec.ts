@@ -1,16 +1,12 @@
 import { join } from 'upath';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import { env, fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import * as rules from './post-update/rules';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');

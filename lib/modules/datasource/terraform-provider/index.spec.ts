@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { TerraformProviderDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');

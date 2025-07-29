@@ -20,7 +20,7 @@
      5. Fill out the information in your repository's `README.md`.
      6. Add the link to your reproduction to the first post of your Discussion. If you are not the original author, you can post a new comment with the link.
 
-    If you need help with running renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
+    If you need help with running Renovate on your minimal reproduction repository, please refer to our [Running Renovate guide](https://docs.renovatebot.com/getting-started/running/).
 
     Good luck,
 
@@ -260,7 +260,7 @@
 
 
     ```ts
-    /* v8 ignore next: typescript strict null check */
+    /* v8 ignore next -- typescript strict null check */
     if (!url) {
       return null;
     }
@@ -370,7 +370,7 @@
     Hi, please format any copy/pasted code or logs so they're readable.
 
 
-    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+    You can read a [Markdown code formatting guide](https://www.markdownguide.org/basic-syntax/#code) as well as [some GitHub-specific information formatting code blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 
 
     Thanks, the Renovate team
@@ -632,10 +632,10 @@
     Hi there,
 
 
-    You are seeing this message because someone - maybe you - has suggested that the documentation should be improved.
+    Someone (maybe even you) suggested the documentation should be improved.
 
 
-    The good news is that essentially all Renovate documentation is Open Source in this repository and can be improved by you too! If you have a suggestion for improvement, please consider opening a PR to improve the documentation, instead of just complaining about it (however subtlely or politely you intended it). Even if English isn't your first language or you're not _sure_ what to write, take a shot at it and we will guide you during the PR review. Documentation updates can be done easily in your browser on GitHub.com and do not require you to clone any code.
+    Good news, nearly all Renovate documentation is Open Source. This means you can improve the docs yourself! Please consider opening a PR to improve our documentation, instead of complaining (however subtly or politely). Even if English isn't your first language, or you're not _sure_ what to write, please open a PR anyway. We will help you to finish the PR. You can make changes to our docs in your browser on GitHub.com. You don't need to clone any code with Git.
 
 
     Thanks, the Renovate
@@ -652,6 +652,41 @@
 
 
     If you're the type of person who's busy and not got time to figure things out yourself or spend much time trying, or you consider your time too valuable, then you should be investigating an Enterprise support contract or hiring a consultant - such options are easily available.
+
+
+    Thanks, the Renovate team
+
+'auto:custom-config-help':
+  comment: >
+    Hi there,
+
+
+    Custom manager and/or datasource questions are often complex to resolve, and unfortunately the maintainers do not have the time to debug each one raised. As always, if we can spot the problem quickly and help you, we will. Additionally, if your use case seems like one which could benefit a lot of users, we might still choose to work on it, even if it takes a long time.
+
+
+    However, we generally don't have time to assist in-depth with each custom manager or datasource config question. Doing so would be like the maintainers of PostgreSQL debugging every SQL statement anyone has.
+
+
+    Your discussion can remain open indefinitely, but please be patient and do not nudge or bump this discussion just to get attention. Please also read [Getting more help](https://github.com/renovatebot/renovate/blob/main/CODE_OF_CONDUCT.md#getting-more-help) in our Code of Conduct.
+
+
+    Thanks, the Renovate team
+
+'auto:disputed-issue':
+  comment: >
+    Hi there,
+
+
+    In this repo, the purpose of Issues is to track clearly actionable (ready to be worked on) items. Discussions are a triaging ground for general questions, ideas, and other non-actionable items.
+
+
+    If an Issue like this one attracts many comments, it's an indication that its scope is disputed, and therefore it's not actionable. If this is the case, it should be converted back to a Discussion.
+
+
+    If you are commenting in this Issue because you disagree with its requirements or think they're unclear, then please let us know and we will convert this Issue back to a Discussion.
+
+
+    Otherwise, please be aware that excessive comments or debates inside Issue comments result in them being less likely to be worked on, not more likely.
 
 
     Thanks, the Renovate team

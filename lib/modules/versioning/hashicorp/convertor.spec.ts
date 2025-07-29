@@ -28,6 +28,31 @@ describe('modules/versioning/hashicorp/convertor', () => {
     },
   );
 
+  // These are cases where $hashicorp === $npm
+  it.each`
+    version
+    ${'1.0.0-0'}
+    ${'1.0.0-1'}
+    ${'1.0.0-1.1'}
+    ${'1.0.0-10.21.32'}
+    ${'1.0.0-1.alpha.2'}
+    ${'1.0.0-alpha.beta'}
+    ${'1.0.0-alpha.beta.1'}
+    ${'1.0.0-alpha0.valid'}
+    ${'1.0.0-alpha.0valid'}
+    ${'1.0.0-alpha1test'}
+    ${'1.0.0-a.b'}
+    ${'1.0.0-a-b'}
+    ${'1.0.0-a1.-1-0-.09-9-'}
+    ${'1.0.0-a--.b'}
+  `(
+    'hashicorp2npm("$version") === $version && npm2hashicorp("$version") === $version',
+    ({ version }) => {
+      expect(hashicorp2npm(version)).toBe(version);
+      expect(npm2hashicorp(version)).toBe(version);
+    },
+  );
+
   // These are non-reflective cases for hashicorp2npm
   it.each`
     hashicorp        | npm

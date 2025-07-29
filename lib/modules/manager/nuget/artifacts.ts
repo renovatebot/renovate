@@ -64,7 +64,6 @@ async function runDotnetRestore(
     (await findGlobalJson(packageFileName))?.sdk?.version;
   const execOptions: ExecOptions = {
     docker: {},
-    userConfiguredEnv: config.env,
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
@@ -187,7 +186,7 @@ export async function updateArtifacts({
         artifactError: {
           lockFile: lockFileNames.join(', '),
           // error is written to stdout
-          stderr: err.stdout || err.message,
+          stderr: err.stdout ?? err.message,
         },
       },
     ];

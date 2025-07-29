@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -195,7 +195,7 @@ describe('modules/manager/composer/extract', () => {
             registryUrls: [
               'https://wpackagist.org',
               'https://gitlab.vendor.com/api/v4/group/2/-/packages/composer',
-              'https://packagist.org',
+              'https://repo.packagist.org',
             ],
           },
           {
@@ -255,7 +255,10 @@ describe('modules/manager/composer/extract', () => {
             datasource: 'packagist',
             depName: 'aws/aws-sdk-php',
             depType: 'require',
-            registryUrls: ['https://wpackagist.org', 'https://packagist.org'],
+            registryUrls: [
+              'https://wpackagist.org',
+              'https://repo.packagist.org',
+            ],
           },
           {
             currentValue: 'dev-trunk',

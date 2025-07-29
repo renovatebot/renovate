@@ -1,3 +1,26 @@
+### Updating of Go mod and toolchain directives
+
+In `go.mod`, the `go` directive essentially means "Compatible with this version or later".
+It is generally recommended for Go projects to _not_ bump this version unless necessary, and therefore Renovate's default behavior is not to propose upgrades to it.
+If you need to update it once or irregularly, it's recommended to do it manually.
+If you are sure you want to always bump it to latest, then you need the following configuration:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang"],
+      "rangeStrategy": "bump"
+    }
+  ]
+}
+```
+
+In `go.mod`, the `toolchain` directive essentially means "Use this exact version of go".
+Unlike the `go` directive, it's valid to keep bumping this, and you should see updates to it proposed by default.
+
 ### Post-Update Options
 
 You might be interested in the following `postUpdateOptions`:
@@ -18,7 +41,7 @@ You might be interested in the following `postUpdateOptions`:
 When Renovate is running using `binarySource=docker` (such as in the Mend Renovate App) then it will pick the latest compatible version of Go to run, i.e. the latest `1.x` release.
 Even if the `go.mod` has a version like `go 1.22`, Renovate will treat it as a `^1.22` constraint and not `=1.22`.
 
-Indirect updates are disabled by default. To enable them, add a package rule such as:
+Unless matching `tool` directives exist, indirect updates are disabled by default. To enable them, add a package rule such as:
 
 ```json
 {

@@ -4,6 +4,7 @@ import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
 import { ZodError } from 'zod';
+import { ExecError } from '../util/exec/exec-error';
 import { regEx } from '../util/regex';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
@@ -96,7 +97,7 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
 export function prepareZodError(err: ZodError): Record<string, unknown> {
   Object.defineProperty(err, 'message', {
     get: () => 'Schema error',
-    /* v8 ignore next 3: TODO: drop set? */
+    /* v8 ignore next 3 -- TODO: drop set? */
     set: () => {
       /* intentionally empty */
     },
@@ -126,6 +127,16 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // Required as stack is non-enumerable
   if (!response.stack && err.stack) {
     response.stack = err.stack;
+  }
+
+  if (err instanceof AggregateError) {
+    response.errors = err.errors.map((error) => prepareError(error));
+  }
+
+  // handle rawExec error
+  if (err instanceof ExecError && is.nonEmptyObject(err.options?.env)) {
+    const env = Object.keys(err.options.env);
+    response.options = { ...err.options, env };
   }
 
   // handle got error
@@ -178,7 +189,7 @@ export function sanitizeValue(
     return value;
   }
 
-  if (is.function_(value)) {
+  if (is.function(value)) {
     return '[function]';
   }
 
@@ -255,7 +266,10 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
       const result =
         streamConfig.type === 'raw'
           ? raw
-          : JSON.stringify(raw, bunyan.safeCycles()).replace(/\n?$/, '\n'); // TODO #12874
+          : JSON.stringify(raw, bunyan.safeCycles()).replace(
+              regEx(/\n?$/),
+              '\n',
+            );
       stream.write(result, enc, cb);
     };
 

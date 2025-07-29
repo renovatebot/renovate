@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../../test/http-mock';
 import { findFirstParentVersion } from './parent-version';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const expressJson = Fixtures.getJson('express.json');
 

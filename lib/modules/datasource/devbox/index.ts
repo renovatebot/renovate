@@ -44,7 +44,6 @@ export class DevboxDatasource extends Datasource {
       res.releases = response.body.releases;
       res.homepage = response.body.homepage;
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode !== 404) {
           throw new ExternalHostError(err);

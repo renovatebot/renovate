@@ -20,6 +20,7 @@ const supportedRules = [
   'local_path_override',
   'single_version_override',
   'git_repository',
+  'new_git_repository',
 ];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 

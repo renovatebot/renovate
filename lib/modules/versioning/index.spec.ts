@@ -21,6 +21,7 @@ describe('modules/versioning/index', () => {
       'getNewValue',
       'getPatch',
       'getSatisfyingVersion',
+      'isBreaking',
       'isCompatible',
       'isGreaterThan',
       'isLessThanRange',
@@ -80,6 +81,7 @@ describe('modules/versioning/index', () => {
       'constructor',
       'hasOwnProperty',
       'isPrototypeOf',
+      'isBreaking',
       'propertyIsEnumerable',
       'should',
       'toLocaleString',
@@ -109,7 +111,6 @@ describe('modules/versioning/index', () => {
     }
 
     for (const supportedScheme of supportedSchemes ?? []) {
-      // eslint-disable-next-line vitest/valid-title
       it(supportedScheme, async () => {
         const schemeKeys = getAllPropertyNames(
           allVersioning.get(supportedScheme),

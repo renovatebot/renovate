@@ -1,6 +1,3 @@
-import AggregateError from 'aggregate-error';
-import * as httpMock from '../../../../test/http-mock';
-import { mocked, partial } from '../../../../test/util';
 import * as _packageCache from '../../../util/cache/package';
 import type { Timestamp } from '../../../util/timestamp';
 import type { GithubGraphqlResponse } from '../../http/github';
@@ -15,9 +12,11 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 vi.mock('../../../util/cache/package');
-const packageCache = mocked(_packageCache);
+const packageCache = vi.mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;
@@ -194,7 +193,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       )) as AggregateError;
 
       expect(res).toBeInstanceOf(AggregateError);
-      expect([...res]).toEqual([
+      expect(res.errors).toEqual([
         new Error('first error'),
         new Error('second error'),
       ]);

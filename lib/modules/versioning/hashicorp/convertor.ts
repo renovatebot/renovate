@@ -1,11 +1,18 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 
+// Taken from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string. Licensed under CC BY 3.0
+// Removed the ^ and $.
+// Made minor and patch versions optional by surrounding them in parentheses followed by a question mark.
+const semverRegex =
+  /(0|[1-9]\d*)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/;
+
 /**
  * This can convert most hashicorp ranges to valid npm syntax
  * The `!=` syntax is currently unsupported as there is no direct
  * equivalent in npm and isn't widely used
- * Also prerelease syntax is less well-defined for hashicorp and will
+ * The version part of the constraint is parsed as a semver but with the minor and patch versions being optional.
+ * The prerelease syntax is less well-defined for hashicorp and will
  * cause issues if it is not semvar compatible as no attempts to convert it
  * are made
  */
@@ -18,7 +25,7 @@ export function hashicorp2npm(input: string): string {
     .map((single) => {
       const r = single.match(
         regEx(
-          /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/,
+          `^\\s*(?<operator>(|=|!=|>|<|>=|<=|~>))\\s*v?(?<version>${semverRegex.source})\\s*$`,
         ),
       );
       if (!r) {
@@ -28,7 +35,7 @@ export function hashicorp2npm(input: string): string {
         );
         throw new Error('Invalid hashicorp constraint');
       }
-      if (r[1] === '!=') {
+      if (r.groups!.operator === '!=') {
         logger.warn(
           { constraint: input, element: single },
           'Unsupported hashicorp constraint',
@@ -36,8 +43,8 @@ export function hashicorp2npm(input: string): string {
         throw new Error('Unsupported hashicorp constraint');
       }
       return {
-        operator: r[1],
-        version: r[2],
+        operator: r.groups!.operator,
+        version: r.groups!.version,
       };
     })
     .map(({ operator, version }) => {
@@ -72,14 +79,16 @@ export function npm2hashicorp(input: string): string {
     .split(' ')
     .map((single) => {
       const r = single.match(
-        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/),
+        regEx(
+          `^(?<operator>(|>|<|>=|<=|~|\\^))v?(?<version>${semverRegex.source})$`,
+        ),
       );
       if (!r) {
         throw new Error('invalid npm constraint');
       }
       return {
-        operator: r[1],
-        version: r[2],
+        operator: r.groups!.operator,
+        version: r.groups!.version,
       };
     })
     .map(({ operator, version }) => {

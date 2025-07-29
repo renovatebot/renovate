@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
 import {
   parseGradle,
   parseJavaToolchainVersion,
@@ -13,6 +11,8 @@ import {
   GRADLE_TEST_SUITES,
   REGISTRY_URLS,
 } from './parser/common';
+import { Fixtures } from '~test/fixtures';
+import { fs, logger } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -123,11 +123,19 @@ describe('modules/manager/gradle/parser', () => {
               buildTools: '30.0.3'
             ],
             kotlin: '1.4.30',
+            'spring-boot': '2.7.3',
             androidx: [
               paging: '2.1.2',
               kotlin: [
                 stdlib: '1.4.20',
                 coroutines: '1.3.7',
+              ],
+            ],
+            'androidx': [
+              'appcompat': '1.6.1',
+              'compose': [
+                'ui': '1.6.0',
+                'runtime': '1.6.0',
               ],
             ],
             espresso: '3.2.0'
@@ -144,6 +152,10 @@ describe('modules/manager/gradle/parser', () => {
             key: 'versions.kotlin',
             value: '1.4.30',
           },
+          'versions.spring-boot': {
+            key: 'versions.spring-boot',
+            value: '2.7.3',
+          },
           'versions.androidx.paging': {
             key: 'versions.androidx.paging',
             value: '2.1.2',
@@ -155,6 +167,18 @@ describe('modules/manager/gradle/parser', () => {
           'versions.androidx.kotlin.coroutines': {
             key: 'versions.androidx.kotlin.coroutines',
             value: '1.3.7',
+          },
+          'versions.androidx.appcompat': {
+            key: 'versions.androidx.appcompat',
+            value: '1.6.1',
+          },
+          'versions.androidx.compose.ui': {
+            key: 'versions.androidx.compose.ui',
+            value: '1.6.0',
+          },
+          'versions.androidx.compose.runtime': {
+            key: 'versions.androidx.compose.runtime',
+            value: '1.6.0',
           },
           'versions.espresso': {
             key: 'versions.espresso',
@@ -362,6 +386,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'"foo:bar:1.2.3"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'"foo:bar:1.2+"'}            | ${{ depName: 'foo:bar', currentValue: '1.2+' }}
         ${'"foo:bar:1.2.3@zip"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+        ${'"foo:bar:1.2.3:docs@jar"'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'jar' }}
         ${'"foo:bar1:1"'}              | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 10 } }}
         ${'"foo:bar:[1.2.3, )"'}       | ${{ depName: 'foo:bar', currentValue: '[1.2.3, )', managerData: { fileReplacePosition: 9 } }}
         ${'"foo:bar:[1.2.3, 1.2.4)"'}  | ${{ depName: 'foo:bar', currentValue: '[1.2.3, 1.2.4)', managerData: { fileReplacePosition: 9 } }}
@@ -771,6 +796,7 @@ describe('modules/manager/gradle/parser', () => {
         expect(urls).toStrictEqual([
           {
             registryUrl: 'https://foo.bar/baz',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'exclude', matcher: 'simple', groupId: 'baz.qux' },
@@ -778,6 +804,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: REGISTRY_URLS.mavenCentral,
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'include', matcher: 'simple', groupId: 'foo.bar' },
@@ -785,6 +812,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: 'https://foo.bar/deps',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               { mode: 'include', matcher: 'subgroup', groupId: 'foo.bar' },
@@ -792,6 +820,7 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             registryUrl: 'https://some.foo',
+            registryType: 'regular',
             scope: 'dep',
             content: [
               {
@@ -882,6 +911,75 @@ describe('modules/manager/gradle/parser', () => {
           );
         });
       });
+    });
+
+    it('exclusiveContent', () => {
+      const input = codeBlock`
+        pluginManagement {
+          repositories {
+            exclusiveContent {
+              forRepository {
+                maven {
+                  name = "some maven registry"
+                  setUrl("https://foo.bar.com/repository/public/")
+                }
+              }
+              filter {
+                includeGroup("com.foo.bar")
+                includeModule("foo", "bar")
+              }
+            }
+            gradlePluginPortal()
+          }
+        }
+        exclusiveContent {
+          filter {
+            includeGroup("foo")
+          }
+          forRepository {
+            mavenCentral()
+          }
+        }
+      `;
+
+      const { urls } = parseGradle(input);
+      expect(urls).toMatchObject([
+        {
+          registryUrl: 'https://foo.bar.com/repository/public/',
+          registryType: 'exclusive',
+          scope: 'plugin',
+          content: [
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'com.foo.bar',
+            },
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'foo',
+              artifactId: 'bar',
+            },
+          ],
+        },
+        {
+          registryUrl: REGISTRY_URLS.gradlePluginPortal,
+          registryType: 'regular',
+          scope: 'plugin',
+        },
+        {
+          registryUrl: REGISTRY_URLS.mavenCentral,
+          registryType: 'exclusive',
+          scope: 'dep',
+          content: [
+            {
+              mode: 'include',
+              matcher: 'simple',
+              groupId: 'foo',
+            },
+          ],
+        },
+      ]);
     });
   });
 

@@ -3,6 +3,7 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
 
 const MAX_LIMIT = 100;
+const MAX_PAGES = 100;
 
 let baseUrl: string;
 export const setBaseUrl = (url: string): void => {
@@ -12,6 +13,7 @@ export const setBaseUrl = (url: string): void => {
 export interface BitbucketServerHttpOptions extends HttpOptions {
   paginate?: boolean;
   limit?: number;
+  maxPages?: number;
 }
 
 interface PagedResult<T = unknown> {
@@ -24,8 +26,8 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
     return baseUrl;
   }
 
-  constructor(options?: HttpOptions) {
-    super('bitbucket-server', options);
+  constructor(type = 'bitbucket-server', options?: BitbucketServerHttpOptions) {
+    super(type, options);
   }
 
   protected override async requestJsonUnsafe<T>(
@@ -50,10 +52,16 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
     );
 
     if (paginate && isPagedResult(result.body)) {
+      if (opts.httpOptions) {
+        delete opts.httpOptions.cacheProvider;
+        opts.httpOptions.memCache = false;
+      }
+
       const collectedValues = [...result.body.values];
       let nextPageStart = result.body.nextPageStart;
 
-      while (nextPageStart) {
+      let maxPages = opts.httpOptions.maxPages ?? MAX_PAGES;
+      while (nextPageStart && --maxPages > 0) {
         resolvedUrl.searchParams.set('start', nextPageStart.toString());
 
         const nextResult = await super.requestJsonUnsafe<PagedResult<T>>(

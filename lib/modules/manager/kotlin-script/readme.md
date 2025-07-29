@@ -17,12 +17,12 @@ println("Hello world!")
 By default, Renovate only scans files with the `.main.kts` extension and not `.kts`.
 This way Renovate avoids ambiguity with Gradle config files that use the `.gradle.kts` extension.
 
-If you want to manage other Kotlin Script files, you may use the `fileMatch` config option to let Renovate update these files:
+If you want to manage other Kotlin Script files, you may use the `managerFilePatterns` config option to let Renovate update these files:
 
 ```json
 {
   "kotlin-script": {
-    "fileMatch": ["^.*\\.kts$"]
+    "managerFilePatterns": ["/^.*\\.kts$/"]
   }
 }
 ```

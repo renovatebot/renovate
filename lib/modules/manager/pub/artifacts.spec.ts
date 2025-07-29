@@ -1,18 +1,17 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../types';
 import * as pub from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/http');
 vi.mock('../../datasource', () => mockDeep());
 
@@ -25,7 +24,7 @@ const depNames = ['dep1', 'dep2', 'dep3'];
 const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
 const depNamesWithSpace = depNames.join(' ');
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),

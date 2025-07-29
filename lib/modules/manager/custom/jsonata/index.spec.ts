@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '../../../../../test/util';
 import type { JsonataExtractConfig } from './types';
 import { defaultConfig, extractPackageFile } from '.';
+import { logger } from '~test/util';
 
 describe('modules/manager/custom/jsonata/index', () => {
   it('has default config', () => {

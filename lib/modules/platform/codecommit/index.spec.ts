@@ -18,17 +18,16 @@ import {
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
 import * as aws4 from 'aws4';
-import { logger } from '../../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { getCodeCommitUrl } from './codecommit-client';
 import type { CodeCommitPr } from './index';
 import { config } from './index';
+import { git, logger } from '~test/util';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 
@@ -110,7 +109,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('initRepos()', () => {
     it('fails to git.initRepo', async () => {
-      vi.spyOn(git, 'initRepo').mockImplementationOnce(() => {
+      git.initRepo.mockImplementationOnce(() => {
         throw new Error('any error');
       });
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
@@ -126,7 +125,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('fails on getRepositoryInfo', async () => {
-      vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient
         .on(GetRepositoryCommand)
         .rejectsOnce(new Error('Could not find repository'));
@@ -136,7 +134,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results', async () => {
-      vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
+      git.initRepo.mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' }),
@@ -144,7 +142,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('getRepositoryInfo returns bad results 2', async () => {
-      vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
         repositoryMetadata: {
           repositoryId: 'id',
@@ -156,7 +153,6 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('initiates repo successfully', async () => {
-      vi.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
       codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
         repositoryMetadata: {
           defaultBranch: 'main',

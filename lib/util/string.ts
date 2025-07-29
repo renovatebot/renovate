@@ -168,3 +168,7 @@ export function stripTemplates(content: string): string {
 
   return result.join('');
 }
+
+export function capitalize(input: string): string {
+  return input[0].toUpperCase() + input.slice(1);
+}

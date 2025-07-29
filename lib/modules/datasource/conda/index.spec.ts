@@ -1,9 +1,10 @@
+import { DateTime } from 'luxon';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 import { CondaDatasource } from './index';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const packageName = 'main/pytest';
 const depUrl = `/${packageName}`;
@@ -88,6 +89,7 @@ describe('modules/datasource/conda/index', () => {
           html_url: 'http://anaconda.org/anaconda/pytest',
           dev_url: 'https://github.com/pytest-dev/pytest/',
           versions: ['2.7.0', '2.5.1', '2.6.0'],
+          files: [],
         });
       const config = {
         registryUrls: [
@@ -110,6 +112,155 @@ describe('modules/datasource/conda/index', () => {
           { version: '2.7.0' },
         ],
         sourceUrl: 'https://github.com/pytest-dev/pytest',
+      });
+    });
+
+    it('supports channel from prefix.dev with null response', async () => {
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .reply(200, { data: { package: { variants: null } } });
+
+      const config = {
+        packageName: 'pytest',
+        registryUrls: ['https://prefix.dev/conda-forge'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+      });
+      expect(res).toBe(null);
+    });
+
+    it('supports channel from prefix.dev with multiple page responses', async () => {
+      // mock files
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .once()
+        .reply(200, {
+          data: {
+            package: {
+              variants: {
+                pages: 2,
+                page: [
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:21Z',
+                    ).toString(),
+                    yankedReason: null,
+                    urls: [{ url: 'https://dev/url', kind: 'DEV' }],
+                  },
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:20.840Z',
+                    ).toString(),
+                    yankedReason: null,
+                    urls: [{ url: 'https://home/url', kind: 'HOME' }],
+                  },
+                  {
+                    version: '0.0.5',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:23Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.56',
+                    createdAt: null,
+                    yankedReason: null,
+                  },
+                ],
+              },
+            },
+          },
+        });
+      httpMock
+        .scope('https://prefix.dev/api/graphql')
+        .post('')
+        .once()
+        .reply(200, {
+          data: {
+            package: {
+              variants: {
+                pages: 2,
+                page: [
+                  {
+                    version: '0.0.7',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:21Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.8',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:20.840Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.10',
+                    createdAt: DateTime.fromISO(
+                      '2020-02-29T01:40:23Z',
+                    ).toString(),
+                    yankedReason: null,
+                  },
+                  {
+                    version: '0.0.560',
+                    createdAt: null,
+                    yankedReason: null,
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+      const config = {
+        packageName: 'pytest',
+        registryUrls: ['https://prefix.dev/conda-forge'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+      });
+      expect(res).toMatchObject({
+        registryUrl: 'https://prefix.dev/conda-forge',
+        homepage: 'https://home/url',
+        sourceUrl: 'https://dev/url',
+        releases: [
+          {
+            isDeprecated: false,
+            releaseTimestamp: '2020-02-29T01:40:21.000Z',
+            version: '0.0.5',
+          },
+          {
+            isDeprecated: false,
+            releaseTimestamp: '2020-02-29T01:40:21.000Z',
+            version: '0.0.7',
+          },
+          {
+            isDeprecated: false,
+            releaseTimestamp: '2020-02-29T01:40:20.840Z',
+            version: '0.0.8',
+          },
+          {
+            isDeprecated: false,
+            releaseTimestamp: '2020-02-29T01:40:23.000Z',
+            version: '0.0.10',
+          },
+          {
+            isDeprecated: false,
+            version: '0.0.56',
+          },
+          {
+            isDeprecated: false,
+            version: '0.0.560',
+          },
+        ],
       });
     });
   });

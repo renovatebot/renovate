@@ -1,7 +1,7 @@
-import type { RenovateConfig } from '../../../../../test/util';
-import { partial } from '../../../../../test/util';
 import type { BranchConfig } from '../../../types';
 import { getExpectedPrList } from './pr-list';
+import type { RenovateConfig } from '~test/util';
+import { partial } from '~test/util';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getExpectedPrList()', () => {

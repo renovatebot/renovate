@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpError } from '../../../util/http';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import { DigestsConfig, ReleasesConfig } from '../schema';
@@ -46,7 +47,11 @@ export class CdnjsDatasource extends Datasource {
 
         const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-        return this.http.getJsonSafe(url, CdnjsAPIVersionResponseSchema);
+        return this.http.getJsonSafe(
+          url,
+          { cacheProvider: memCacheProvider },
+          CdnjsAPIVersionResponseSchema,
+        );
       })
       .transform(({ versions, homepage, repository }): ReleaseResult => {
         const releases: Release[] = versions;

@@ -199,9 +199,7 @@ export function getDep(
 
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
-    if (!dep.replaceString) {
-      dep.replaceString = currentFrom;
-    }
+    dep.replaceString ??= currentFrom;
     dep.autoReplaceStringTemplate =
       '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
   }
@@ -467,9 +465,7 @@ export function extractPackageFile(
     return null;
   }
   for (const d of deps) {
-    if (!d.depType) {
-      d.depType = 'stage';
-    }
+    d.depType ??= 'stage';
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };

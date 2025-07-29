@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 describe('modules/manager/mix/extract', () => {
   beforeEach(() => {

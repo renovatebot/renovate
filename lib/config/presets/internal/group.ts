@@ -54,6 +54,26 @@ const staticGroups = {
       },
     ],
   },
+  apiPlatform: {
+    description: 'Group PHP API Platform packages together.',
+    packageRules: [
+      {
+        groupName: 'api-platform packages',
+        groupSlug: 'api-platform',
+        matchDatasources: ['packagist'],
+        matchPackageNames: [
+          'api-platform/*',
+          '!api-platform/admin-meta',
+          '!api-platform/admin-pack',
+          '!api-platform/api-pack',
+          '!api-platform/api-platform',
+          '!api-platform/parameter-validator',
+          '!api-platform/postman-collection-generator',
+          '!api-platform/schema-generator',
+        ],
+      },
+    ],
+  },
   atlaskit: {
     description: 'Group all Atlassian `@atlaskit` packages together.',
     packageRules: [
@@ -88,6 +108,15 @@ const staticGroups = {
         groupName: '.NET Core Docker containers',
         matchDatasources: ['docker'],
         matchPackageNames: ['mcr.microsoft.com/dotnet/**'],
+      },
+    ],
+  },
+  'drupal-core': {
+    description: 'Group Drupal core updates.',
+    packageRules: [
+      {
+        groupName: 'Drupal core',
+        matchPackageNames: ['drupal/core', 'drupal/core-*'],
       },
     ],
   },
@@ -368,6 +397,7 @@ const staticGroups = {
           '/(?:^|/)node$/', // node or ends with "/node, except those below"
           '!calico/node',
           '!docker.io/calico/node',
+          '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
         ],
       },
@@ -446,6 +476,16 @@ const staticGroups = {
       },
     ],
   },
+  puppeteer: {
+    description: 'Group Puppeteer packages together.',
+    packageRules: [
+      {
+        groupName: 'Puppeteer',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['puppeteer', 'puppeteer-core'],
+      },
+    ],
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
@@ -465,6 +505,7 @@ const staticGroups = {
     extends: [
       'group:nodeJs',
       'group:allApollographql',
+      'group:apiPlatform',
       'group:codemirror',
       'group:flyway',
       'group:fortawesome',
@@ -485,6 +526,7 @@ const staticGroups = {
       'group:micrometer',
       'group:phpstan',
       'group:polymer',
+      'group:puppeteer',
       'group:react',
       'group:remark',
       'group:resilience4j',
@@ -797,7 +839,24 @@ const staticGroups = {
       {
         groupName: 'symfony packages',
         groupSlug: 'symfony',
-        matchPackageNames: ['symfony/**'],
+        matchDatasources: ['packagist'],
+        matchPackageNames: [
+          'symfony/*',
+          '!symfony/*contracts',
+          '!symfony/*pack',
+          '!symfony/flex',
+          '!symfony/maker-bundle',
+          '!symfony/monolog-bundle',
+          '!symfony/panther',
+          '!symfony/polyfill*',
+          '!symfony/proxy-manager-bridge',
+          '!symfony/security-guard',
+          '!symfony/stimulus-bundle',
+          '!symfony/templating',
+          '!symfony/thanks',
+          '!symfony/ux*',
+          '!symfony/webpack-encore-bundle',
+        ],
       },
     ],
   },

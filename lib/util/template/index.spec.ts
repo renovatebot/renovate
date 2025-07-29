@@ -1,11 +1,10 @@
-import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
 import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
 vi.mock('../exec/utils');
 
-const execUtils = mocked(_execUtils);
+const execUtils = vi.mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
@@ -47,6 +46,30 @@ describe('util/template/index', () => {
     const input = { platform: 'github' };
     const output = template.compile(userTemplate, input, false);
     expect(output).toContain('True');
+  });
+
+  it('unless with equals - 1', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+      newName: 'nodemon-new',
+      newNameLinked: 'nodemonNewLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked -> nodemonNewLinked');
+  });
+
+  it('unless with equals - 2', () => {
+    const userTemplate =
+      '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} -> {{{newNameLinked}}}{{/unless}}{{/if}}';
+    const input = {
+      depName: 'nodemon',
+      depNameLinked: 'nodemonLinked',
+    };
+    const output = template.compile(userTemplate, input, false);
+    expect(output).toBe('nodemonLinked');
   });
 
   it('not containsString', () => {
@@ -289,6 +312,30 @@ describe('util/template/index', () => {
 
     it('handles undefined values gracefully', () => {
       const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
+    });
+  });
+
+  describe('base64 decoding', () => {
+    it('decode values', () => {
+      const output = template.compile(
+        '{{{decodeBase64 "QGZzb3V6YS9wcmV0dGllcmQ="}}}',
+        undefined as never,
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{decodeBase64 packageName}}}', {
         packageName: undefined,
       });
       expect(output).toBe('');

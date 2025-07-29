@@ -1,5 +1,5 @@
 import upath from 'upath';
-import type { XmlElement } from 'xmldoc';
+import type { XmlElement, XmlNodeBase } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import {
@@ -82,7 +82,7 @@ export async function getConfiguredRegistries(
   }
 
   for (const child of packageSources.children) {
-    if (child.type === 'element') {
+    if (isXmlElement(child)) {
       if (child.name === 'clear') {
         logger.debug(`clearing registry URLs`);
         registries.length = 0;
@@ -130,7 +130,7 @@ export async function getConfiguredRegistries(
   if (disabledPackageSources) {
     for (const child of disabledPackageSources.children) {
       if (
-        child.type === 'element' &&
+        isXmlElement(child) &&
         child.name === 'add' &&
         child.attr.value === 'true'
       ) {
@@ -141,7 +141,23 @@ export async function getConfiguredRegistries(
     }
   }
 
+  // Deduplicate registries with #procolVersion=3
+  // Keep any which include sourceMappedPackagePatterns
+  const plainRegistryUrls = registries
+    .filter((r) => !r.sourceMappedPackagePatterns)
+    .map((r) => r.url);
+  registries = registries.filter((r) => {
+    return (
+      r.sourceMappedPackagePatterns ??
+      !plainRegistryUrls.includes(`${r.url}#protocolVersion=3`)
+    );
+  });
+
   return registries;
+}
+
+export function isXmlElement(child: XmlNodeBase): child is XmlElement {
+  return child.type === 'element';
 }
 
 export function findVersion(parsedXml: XmlDocument): XmlElement | null {
@@ -197,6 +213,7 @@ export function applyRegistries(
  * Sorts patterns by specificity:
  * 1. Exact match patterns
  * 2. Wildcard match patterns
+ * The longest pattern has precedence.
  */
 function sortPatterns(
   a: [string, Registry[]],
@@ -210,7 +227,10 @@ function sortPatterns(
     return -1;
   }
 
-  return a[0].localeCompare(b[0]) * -1;
+  const aTrim = a[0].slice(0, -1);
+  const bTrim = b[0].slice(0, -1);
+
+  return aTrim.localeCompare(bTrim) * -1;
 }
 
 export async function findGlobalJson(

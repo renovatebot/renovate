@@ -1,10 +1,10 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
 import { AzurePipelinesTask } from './schema';
 import { AzurePipelinesTasksDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const builtinTasksPath =
@@ -96,7 +96,17 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'AzurePowerShell',
       }),
-    ).toEqual({ releases: [{ version: '5.248.3' }] });
+    ).toEqual({
+      releases: [
+        {
+          changelogContent:
+            'Added support for Az Module and cross platform agents.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '5.248.3',
+        },
+      ],
+    });
   });
 
   it('identifies task based on task id', async () => {
@@ -191,8 +201,19 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       }),
     ).toEqual({
       releases: [
-        { isDeprecated: true, version: '1.2.3' },
-        { isDeprecated: undefined, version: '2.247.1' },
+        {
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          isDeprecated: true,
+          version: '1.2.3',
+        },
+        {
+          changelogContent:
+            'Script task consistency. Added support for macOS and Linux.',
+          changelogUrl:
+            'https://github.com/microsoft/azure-pipelines-tasks/releases',
+          version: '2.247.1',
+        },
       ],
     });
   });

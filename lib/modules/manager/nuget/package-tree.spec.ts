@@ -1,18 +1,15 @@
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
+import { Fixtures } from '~test/fixtures';
+import { scm } from '~test/util';
 
 vi.mock('fs-extra', async () =>
   (
-    await vi.importActual<typeof import('../../../../test/fixtures')>(
-      '../../../../test/fixtures',
-    )
+    await vi.importActual<typeof import('~test/fixtures')>('~test/fixtures')
   ).fsExtra(),
 );
-vi.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
   localDir: upath.resolve('/tmp/repo'),

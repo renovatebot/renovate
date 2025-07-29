@@ -91,12 +91,14 @@ export function isAlias(repository: string): boolean {
 export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
-  return Object.entries(registryAliases).map(([alias, url]) => {
-    return {
-      name: alias,
-      repository: url,
-    };
-  });
+  return Object.entries(registryAliases)
+    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .map(([alias, url]) => {
+      return {
+        name: alias,
+        repository: url,
+      };
+    });
 }
 
 export function isFileInDir(dir: string, file: string): boolean {

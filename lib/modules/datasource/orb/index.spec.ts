@@ -1,6 +1,6 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../../test/http-mock';
 import { OrbDatasource } from '.';
+import * as httpMock from '~test/http-mock';
 
 const orbData = {
   data: {

@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { logger } from '../../../../test/util';
 import { extractLockFileEntries } from './locked-version';
+import { Fixtures } from '~test/fixtures';
+import { logger } from '~test/util';
 
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
 const webPackerGemfileLock = Fixtures.get('Gemfile.webpacker.lock');

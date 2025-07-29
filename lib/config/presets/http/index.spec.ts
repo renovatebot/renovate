@@ -1,8 +1,8 @@
-import * as httpMock from '../../../../test/http-mock';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { PRESET_DEP_NOT_FOUND, PRESET_INVALID_JSON } from '../util';
 import * as http from '.';
 import { hostRules } from '~test/host-rules';
+import * as httpMock from '~test/http-mock';
 
 const host = 'https://my.server/';
 const filePath = '/test-preset.json';

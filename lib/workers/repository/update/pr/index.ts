@@ -310,12 +310,10 @@ export async function ensurePr(
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
-    if (!notesSourceUrl) {
-      // TODO: types (#22198)
-      notesSourceUrl = `${upgrade.sourceUrl!}${
-        upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
-      }`;
-    }
+    // TODO: types (#22198)
+    notesSourceUrl ??= `${upgrade.sourceUrl!}${
+      upgrade.sourceDirectory ? `:${upgrade.sourceDirectory}` : ''
+    }`;
 
     if (upgrade.hasReleaseNotes && notesSourceUrl) {
       if (releaseNotesSources.includes(notesSourceUrl)) {
@@ -535,7 +533,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
-      content = platform.massageMarkdown(content);
+      content = platform.massageMarkdown(content, config.rebaseLabel);
       logger.debug('Adding branch automerge failure message to PR');
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);

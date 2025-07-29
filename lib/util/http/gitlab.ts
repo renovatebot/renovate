@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { RequestError, type RetryObject } from 'got';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { getEnv } from '../env';
 import { parseLinkHeader, parseUrl } from '../url';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
@@ -38,6 +39,9 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
     const result = await super.requestJsonUnsafe<T>(method, opts);
     if (opts.httpOptions.paginate && is.array(result.body)) {
+      delete opts.httpOptions.cacheProvider;
+      opts.httpOptions.memCache = false;
+
       // Check if result is paginated
       try {
         const linkHeader = parseLinkHeader(result.headers.link);
@@ -45,7 +49,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           ? parseUrl(linkHeader.next.url)
           : null;
         if (nextUrl) {
-          if (process.env.GITLAB_IGNORE_REPO_URL) {
+          if (getEnv().GITLAB_IGNORE_REPO_URL) {
             const defaultEndpoint = new URL(baseUrl);
             nextUrl.protocol = defaultEndpoint.protocol;
             nextUrl.host = defaultEndpoint.host;

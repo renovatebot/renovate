@@ -19,6 +19,7 @@ const PackageRuleSchema = z.object({
   replacementVersion: z.string().optional(),
   description: z.string().optional(),
   replacementNameTemplate: z.string().optional(),
+  replacementVersionTemplate: z.string().optional(),
 });
 
 const RuleSetSchema = z.object({
@@ -64,3 +65,9 @@ export const SourceUrlsSchema = z
     $schema: z.string(),
   })
   .catchall(z.record(z.string(), z.string().url()));
+
+export const AbandonmentsSchema = z
+  .object({
+    $schema: z.string(),
+  })
+  .catchall(z.record(z.string(), z.string()));

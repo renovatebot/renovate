@@ -1,30 +1,45 @@
-import { mockedFunction, partial } from '../../../../test/util';
 import type { BranchUpgradeConfig } from '../../types';
 import { getChangeLogJSON } from '../update/pr/changelog';
 import { embedChangelogs } from '.';
+import { partial } from '~test/util';
 
 vi.mock('../update/pr/changelog');
 
-mockedFunction(getChangeLogJSON).mockResolvedValue({
+vi.mocked(getChangeLogJSON).mockResolvedValue({
   hasReleaseNotes: true,
 });
 
 describe('workers/repository/changelog/index', () => {
   it('embedChangelogs', async () => {
-    mockedFunction(getChangeLogJSON).mockResolvedValueOnce({
+    vi.mocked(getChangeLogJSON).mockResolvedValueOnce({
       hasReleaseNotes: true,
     });
-    mockedFunction(getChangeLogJSON).mockResolvedValueOnce(null);
+    vi.mocked(getChangeLogJSON).mockResolvedValueOnce(null);
     const branches = [
       partial<BranchUpgradeConfig>({ logJSON: null }),
       partial<BranchUpgradeConfig>(),
       partial<BranchUpgradeConfig>(),
+      partial<BranchUpgradeConfig>({ changelogContent: 'testContent' }),
     ];
     await expect(embedChangelogs(branches)).toResolve();
     expect(branches).toEqual([
       { logJSON: null },
       { logJSON: { hasReleaseNotes: true } },
       { logJSON: null },
+      {
+        changelogContent: 'testContent',
+        logJSON: {
+          hasReleaseNotes: true,
+          project: {},
+          versions: [
+            {
+              releaseNotes: {
+                body: 'testContent',
+              },
+            },
+          ],
+        },
+      },
     ]);
   });
 });

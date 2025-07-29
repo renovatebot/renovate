@@ -1,6 +1,4 @@
 import { mock } from 'vitest-mock-extended';
-import type { RenovateConfig } from '../../../../../test/util';
-import { fs, git, mocked, platform, scm } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
@@ -20,19 +18,20 @@ import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
+import { fs, git, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 const configModule: any = _config;
 
 vi.mock('../../../../util/cache/repository');
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('./config');
 vi.mock('./rebase');
 vi.mock('./onboarding-branch-cache');
 
-const cache = mocked(_cache);
-const rebase = mocked(_rebase);
-const onboardingCache = mocked(_onboardingCache);
+const cache = vi.mocked(_cache);
+const rebase = vi.mocked(_rebase);
+const onboardingCache = vi.mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
@@ -92,6 +91,14 @@ describe('workers/repository/onboarding/branch/index', () => {
             '}\n',
         );
         scm.getFileList.mockResolvedValue(['package.json']);
+        fs.findLocalSiblingOrParent.mockImplementation(
+          (packageFile, configFile): Promise<string | null> => {
+            if (packageFile === 'package.json' && configFile === '.npmrc') {
+              return Promise.resolve('.npmrc');
+            }
+            return Promise.resolve(null);
+          },
+        );
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
         const file = scm.commitAndPush.mock.calls[0][0]
@@ -117,6 +124,14 @@ describe('workers/repository/onboarding/branch/index', () => {
           '}\n',
       );
       scm.getFileList.mockResolvedValue(['package.json']);
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, configFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && configFile === '.npmrc') {
+            return Promise.resolve('.npmrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       const expectConfig = {
@@ -125,6 +140,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         renovateJsonPresent: true,
         warnings: [],
       };
+      delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(

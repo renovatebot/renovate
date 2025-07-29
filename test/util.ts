@@ -1,5 +1,4 @@
 import upath from 'upath';
-import type { MockedFunction } from 'vitest';
 import type { DeepMockProxy } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
@@ -10,14 +9,6 @@ import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
-import { regEx } from '../lib/util/regex';
-
-/**
- * Simple wrapper for getting mocked version of a module
- * @param module module which is mocked by `vi.mock`
- * @deprecated Use `vi.mocked` instead
- */
-export const mocked = vi.mocked;
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -25,17 +16,6 @@ export const mocked = vi.mocked;
  */
 export function mockedExtended<T extends object>(module: T): DeepMockProxy<T> {
   return module as DeepMockProxy<T>;
-}
-
-/**
- * Simple wrapper for getting mocked version of a function
- * @param func function which is mocked by `vi.mock`
- * @deprecated Use `vi.mocked` instead
- */
-export function mockedFunction<T extends (...args: any[]) => any>(
-  func: T,
-): MockedFunction<T> {
-  return func as MockedFunction<T>;
 }
 
 /**
@@ -97,11 +77,4 @@ function getCallerFileName(): string | null {
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
   const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
-}
-
-export function regexMatches(target: string, patterns: string[]): boolean {
-  return patterns.some((patt: string) => {
-    const re = regEx(patt);
-    return re.test(target);
-  });
 }

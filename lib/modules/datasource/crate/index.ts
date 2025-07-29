@@ -4,9 +4,11 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
+import { getChildEnv } from '../../../util/exec/utils';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { toSha256 } from '../../../util/hash';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -58,7 +60,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
+    /* v8 ignore next 6 -- should never happen */
     if (!registryUrl) {
       logger.warn(
         'crate datasource: No registryUrl specified, cannot perform getReleases',
@@ -254,7 +256,7 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    // istanbul ignore if
+    /* v8 ignore next 3 -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -318,7 +320,10 @@ export class CrateDatasource extends Datasource {
           `Cloning private cargo registry`,
         );
 
-        const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
+        const git = Git({
+          ...simpleGitConfig(),
+          maxConcurrentProcesses: 1,
+        }).env(getChildEnv());
         const clonePromise = git.clone(registryFetchUrl, clonePath, {
           '--depth': 1,
         });
@@ -402,6 +407,7 @@ export class CrateDatasource extends Datasource {
     const url = `https://crates.io/api/v1/crates/${packageName}/${release.version}`;
     const { body: releaseTimestamp } = await this.http.getJson(
       url,
+      { cacheProvider: memCacheProvider },
       ReleaseTimestampSchema,
     );
     release.releaseTimestamp = releaseTimestamp;

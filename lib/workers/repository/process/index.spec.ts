@@ -1,5 +1,3 @@
-import type { RenovateConfig } from '../../../../test/util';
-import { git, logger, mocked, platform, scm } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
@@ -8,11 +6,12 @@ import { getCache } from '../../../util/cache/repository';
 import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
+import { git, logger, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
-vi.mock('../../../util/git');
 vi.mock('./extract-update');
 
-const extract = mocked(_extractUpdate).extract;
+const extract = vi.mocked(_extractUpdate).extract;
 
 let config: RenovateConfig;
 
@@ -27,9 +26,9 @@ describe('workers/repository/process/index', () => {
       expect(res).toBeUndefined();
     });
 
-    it('processes baseBranches', async () => {
+    it('processes baseBranchPatterns', async () => {
       extract.mockResolvedValue({} as never);
-      config.baseBranches = ['branch1', 'branch2'];
+      config.baseBranchPatterns = ['branch1', 'branch2'];
       scm.branchExists.mockResolvedValueOnce(false);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(false);
@@ -46,7 +45,7 @@ describe('workers/repository/process/index', () => {
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile.mockResolvedValueOnce({});
-      config.baseBranches = ['master', 'dev'];
+      config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
@@ -62,12 +61,12 @@ describe('workers/repository/process/index', () => {
       );
     });
 
-    it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
+    it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = vi
         .fn()
         .mockResolvedValue({ extends: [':approveMajorUpdates'] });
-      config.baseBranches = ['master', 'dev'];
+      config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
@@ -96,7 +95,7 @@ describe('workers/repository/process/index', () => {
           return {};
         });
       getCache().configFileName = 'renovate.json';
-      config.baseBranches = ['master', 'dev'];
+      config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION,
@@ -105,7 +104,7 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('processes baseBranches dryRun extract', async () => {
+    it('processes baseBranchPatterns dryRun extract', async () => {
       extract.mockResolvedValue({} as never);
       GlobalConfig.set({ dryRun: 'extract' });
       const res = await extractDependencies(config);
@@ -120,7 +119,11 @@ describe('workers/repository/process/index', () => {
 
     it('finds baseBranches via regular expressions', async () => {
       extract.mockResolvedValue({} as never);
-      config.baseBranches = ['/^release\\/.*/i', 'dev', '!/^pre-release\\/.*/'];
+      config.baseBranchPatterns = [
+        '/^release\\/.*/i',
+        'dev',
+        '!/^pre-release\\/.*/',
+      ];
       git.getBranchList.mockReturnValue([
         'dev',
         'pre-release/v0',
@@ -158,7 +161,7 @@ describe('workers/repository/process/index', () => {
 
     it('maps $default to defaultBranch', async () => {
       extract.mockResolvedValue({} as never);
-      config.baseBranches = ['$default'];
+      config.baseBranchPatterns = ['$default'];
       config.defaultBranch = 'master';
       git.getBranchList.mockReturnValue(['dev', 'master']);
       scm.branchExists.mockResolvedValue(true);

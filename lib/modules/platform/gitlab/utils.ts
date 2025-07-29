@@ -11,6 +11,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     state: mr.state === 'opened' ? 'open' : mr.state,
     number: mr.iid,
     title: mr.title,
+    createdAt: mr.created_at,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     bodyStruct: getPrBodyStruct(mr.description),
 

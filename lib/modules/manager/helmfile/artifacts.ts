@@ -94,7 +94,6 @@ export async function updateArtifacts({
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
     await exec(cmd, {
       docker: {},
-      userConfiguredEnv: config.env,
       extraEnv: generateHelmEnvs(),
       toolConstraints,
     });

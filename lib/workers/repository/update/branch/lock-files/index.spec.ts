@@ -1,20 +1,16 @@
-import { fs, git, mocked } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm';
 import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm';
 import * as yarn from '../../../../../modules/manager/npm/post-update/yarn';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types';
-import * as _hostRules from '../../../../../util/host-rules';
+import { fs, git, hostRules } from '~test/util';
 
 const config: PostUpdateConfig = {
   upgrades: [],
   branchName: 'some-branch',
 };
 
-const hostRules = mocked(_hostRules);
-
-vi.mock('../../../../../util/git');
 vi.mock('../../../../../util/fs');
 vi.mock('../../../../../util/host-rules');
 

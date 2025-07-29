@@ -4,16 +4,16 @@ import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { hashStream, toSha256 } from '../../../util/hash';
 import type { GetPkgReleasesConfig } from '../types';
 import { cacheSubDir } from './common';
 import * as fileUtils from './file';
-import { getBaseReleaseUrl } from './url';
+import { getBaseSuiteUrl } from './url';
 import { DebDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { fs } from '~test/util';
 
 const debBaseUrl = 'http://deb.debian.org';
 
@@ -517,7 +517,7 @@ function mockFetchInReleaseContent(
   const mockCall = httpMock
     .scope(debBaseUrl)
     .get(
-      getBaseReleaseUrl(getComponentUrl('', release, component, arch)) +
+      getBaseSuiteUrl(getComponentUrl('', release, component, arch)) +
         '/InRelease',
     );
 

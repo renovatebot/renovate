@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
+import { isHttpUrl } from '../../../util/url';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { ClojureDatasource } from '../../datasource/clojure';
 import { CLOJARS_REPO } from '../../datasource/clojure/common';
@@ -118,7 +119,7 @@ function resolveGitPackageFromEdnVal(
 
   dep.datasource = GitRefsDatasource.id;
   dep.packageName = gitUrl;
-  if (gitUrl.startsWith('https://')) {
+  if (isHttpUrl(gitUrl)) {
     dep.sourceUrl = gitUrl.replace(/\.git$/, '');
   }
 }

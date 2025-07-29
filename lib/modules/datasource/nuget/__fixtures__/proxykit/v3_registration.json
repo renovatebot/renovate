@@ -1,0 +1,235 @@
+{
+  "@id": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/index.json",
+  "@type": [
+    "catalog:CatalogRoot",
+    "PackageRegistration",
+    "catalog:Permalink"
+  ],
+  "commitId": "87fbae2e-a1be-4fd2-ab55-bfa4afb0b86a",
+  "commitTimeStamp": "2024-11-13T10:18:14.1126201+00:00",
+  "count": 1,
+  "items": [
+    {
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/index.json#page/1.0.0-alpha.1/2.3.4",
+      "@type": "catalog:CatalogPage",
+      "commitId": "87fbae2e-a1be-4fd2-ab55-bfa4afb0b86a",
+      "commitTimeStamp": "2024-11-13T10:18:14.1126201+00:00",
+      "count": 24,
+      "items": [
+        {
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/1.0.0.json",
+          "@type": "Package",
+          "commitId": "b8608975-ebf6-4185-8e46-ae676b218a2b",
+          "commitTimeStamp": "2024-11-13T10:16:09.6743205+00:00",
+          "catalogEntry": {
+            "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json",
+            "@type": "PackageDetails",
+            "authors": "Damian Hickey",
+            "dependencyGroups": [
+              {
+                "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#dependencygroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "dependencies": [
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.http",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.Http",
+                    "range": "[2.2.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.http/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.http.extensions",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.Http.Extensions",
+                    "range": "[2.2.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.http.extensions/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.httpoverrides",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.HttpOverrides",
+                    "range": "[2.2.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.httpoverrides/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#dependencygroup/.netstandard2.0/microsoft.extensions.http",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Extensions.Http",
+                    "range": "[2.2.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.extensions.http/index.json"
+                  }
+                ],
+                "targetFramework": ".NETStandard2.0"
+              }
+            ],
+            "deprecation": {
+              "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.1.0.0.json#deprecation",
+              "@type": "deprecation",
+              "reasons": [
+                "Legacy"
+              ]
+            },
+            "description": "An AspNet core middleware toolkit to create proxy servers. Can\n    be used in applications or used as a standalone proxy (i.e. containerised system).",
+            "iconUrl": "",
+            "id": "ProxyKit",
+            "language": "",
+            "licenseExpression": "",
+            "licenseUrl": "https://github.com/damianh/ProxyKit/blob/master/LICENSE",
+            "listed": false,
+            "minClientVersion": "",
+            "packageContent": "https://api.nuget.org/v3-flatcontainer/proxykit/1.0.0/proxykit.1.0.0.nupkg",
+            "projectUrl": "https://github.com/damianh/ProxyKit",
+            "published": "1900-01-01T00:00:00+00:00",
+            "requireLicenseAcceptance": false,
+            "summary": "",
+            "tags": [
+              "aspnetcore",
+              "proxy",
+              "http"
+            ],
+            "title": "",
+            "version": "1.0.0+build.118"
+          },
+          "packageContent": "https://api.nuget.org/v3-flatcontainer/proxykit/1.0.0/proxykit.1.0.0.nupkg",
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/index.json"
+        },
+        {
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/2.3.4.json",
+          "@type": "Package",
+          "commitId": "b8608975-ebf6-4185-8e46-ae676b218a2b",
+          "commitTimeStamp": "2024-11-13T10:16:09.6743205+00:00",
+          "catalogEntry": {
+            "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json",
+            "@type": "PackageDetails",
+            "authors": "Damian Hickey",
+            "dependencyGroups": [
+              {
+                "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netcoreapp3.1",
+                "@type": "PackageDependencyGroup",
+                "targetFramework": ".NETCoreApp3.1"
+              },
+              {
+                "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netstandard2.0",
+                "@type": "PackageDependencyGroup",
+                "dependencies": [
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.http",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.Http",
+                    "range": "[2.1.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.http/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.http.extensions",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.Http.Extensions",
+                    "range": "[2.1.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.http.extensions/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netstandard2.0/microsoft.aspnetcore.httpoverrides",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.AspNetCore.HttpOverrides",
+                    "range": "[2.1.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.aspnetcore.httpoverrides/index.json"
+                  },
+                  {
+                    "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#dependencygroup/.netstandard2.0/microsoft.extensions.http",
+                    "@type": "PackageDependency",
+                    "id": "Microsoft.Extensions.Http",
+                    "range": "[2.1.0, )",
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.extensions.http/index.json"
+                  }
+                ],
+                "targetFramework": ".NETStandard2.0"
+              }
+            ],
+            "deprecation": {
+              "@id": "https://api.nuget.org/v3/catalog0/data/2024.11.13.10.15.11/proxykit.2.3.4.json#deprecation",
+              "@type": "deprecation",
+              "reasons": [
+                "Legacy"
+              ]
+            },
+            "description": "An AspNet core middleware toolkit to create proxy servers. Can be embedded in applications or used as a standalone proxy.",
+            "iconUrl": "https://api.nuget.org/v3-flatcontainer/proxykit/2.3.4/icon",
+            "id": "ProxyKit",
+            "language": "",
+            "licenseExpression": "Apache-2.0",
+            "licenseUrl": "https://www.nuget.org/packages/ProxyKit/2.3.4/license",
+            "listed": false,
+            "minClientVersion": "",
+            "packageContent": "https://api.nuget.org/v3-flatcontainer/proxykit/2.3.4/proxykit.2.3.4.nupkg",
+            "projectUrl": "https://github.com/ProxyKit/ProxyKit",
+            "published": "1900-01-01T00:00:00+00:00",
+            "requireLicenseAcceptance": false,
+            "summary": "",
+            "tags": [
+              "aspnetcore",
+              "proxy",
+              "http"
+            ],
+            "title": "",
+            "version": "2.3.4+build.119"
+          },
+          "packageContent": "https://api.nuget.org/v3-flatcontainer/proxykit/2.3.4/proxykit.2.3.4.nupkg",
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/index.json"
+        }
+      ],
+      "parent": "https://api.nuget.org/v3/registration5-gz-semver2/proxykit/index.json",
+      "lower": "1.0.0-alpha.1",
+      "upper": "2.3.4"
+    }
+  ],
+  "@context": {
+    "@vocab": "http://schema.nuget.org/schema#",
+    "catalog": "http://schema.nuget.org/catalog#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "items": {
+      "@id": "catalog:item",
+      "@container": "@set"
+    },
+    "commitTimeStamp": {
+      "@id": "catalog:commitTimeStamp",
+      "@type": "xsd:dateTime"
+    },
+    "commitId": {
+      "@id": "catalog:commitId"
+    },
+    "count": {
+      "@id": "catalog:count"
+    },
+    "parent": {
+      "@id": "catalog:parent",
+      "@type": "@id"
+    },
+    "tags": {
+      "@id": "tag",
+      "@container": "@set"
+    },
+    "reasons": {
+      "@container": "@set"
+    },
+    "packageTargetFrameworks": {
+      "@id": "packageTargetFramework",
+      "@container": "@set"
+    },
+    "dependencyGroups": {
+      "@id": "dependencyGroup",
+      "@container": "@set"
+    },
+    "dependencies": {
+      "@id": "dependency",
+      "@container": "@set"
+    },
+    "packageContent": {
+      "@type": "@id"
+    },
+    "published": {
+      "@type": "xsd:dateTime"
+    },
+    "registration": {
+      "@type": "@id"
+    }
+  }
+}

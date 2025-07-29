@@ -8,7 +8,7 @@ export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
   // Since any Python file can embed PEP 723 metadata, make the feature opt-in, to avoid parsing all Python files.
-  fileMatch: [],
+  managerFilePatterns: [],
 };
 
 export const supportedDatasources = [PypiDatasource.id];

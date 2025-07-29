@@ -1,4 +1,8 @@
 import { codeBlock } from 'common-tags';
+import { GolangVersionDatasource } from '../../datasource/golang-version';
+import { NodeVersionDatasource } from '../../datasource/node-version';
+import { PythonVersionDatasource } from '../../datasource/python-version';
+import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/devcontainer/extract', () => {
@@ -360,6 +364,86 @@ describe('modules/manager/devcontainer/extract', () => {
             pinDigests: false,
             replaceString:
               'devcontainer.registry.renovate.com/test/feature:1.2.3',
+          },
+        ],
+      });
+    });
+
+    it('parses known tool versions', () => {
+      // Arrange
+      const content = codeBlock`
+      {
+        "features": {
+          "ghcr.io/devcontainers/features/go:1": {"version": "1.24"},
+          "ghcr.io/devcontainers/features/node:1": {"version": "20"},
+          "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
+          "ghcr.io/devcontainers/features/ruby:1": {}
+        }
+      }`;
+      const extractConfig = {
+        registryAliases: {
+          'ghcr.io/devcontainers': 'some-registry.io/mirror',
+        },
+      };
+
+      // Act
+      const result = extractPackageFile(
+        content,
+        'devcontainer.json',
+        extractConfig,
+      );
+
+      // Assert
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '1',
+            datasource: 'docker',
+            depName: 'ghcr.io/devcontainers/features/go',
+            packageName: 'some-registry.io/mirror/features/go',
+            depType: 'feature',
+          },
+          {
+            currentValue: '1.24',
+            datasource: GolangVersionDatasource.id,
+            depName: 'go',
+          },
+          {
+            currentValue: '1',
+            datasource: 'docker',
+            depName: 'ghcr.io/devcontainers/features/node',
+            packageName: 'some-registry.io/mirror/features/node',
+            depType: 'feature',
+          },
+          {
+            currentValue: '20',
+            datasource: NodeVersionDatasource.id,
+            depName: 'node',
+          },
+          {
+            currentValue: '1',
+            datasource: 'docker',
+            depName: 'ghcr.io/devcontainers/features/python',
+            packageName: 'some-registry.io/mirror/features/python',
+            depType: 'feature',
+          },
+          {
+            currentValue: '3.12',
+            datasource: PythonVersionDatasource.id,
+            depName: 'python',
+          },
+          {
+            currentValue: '1',
+            datasource: 'docker',
+            depName: 'ghcr.io/devcontainers/features/ruby',
+            packageName: 'some-registry.io/mirror/features/ruby',
+            depType: 'feature',
+          },
+          {
+            currentValue: undefined,
+            datasource: RubyVersionDatasource.id,
+            depName: 'ruby',
+            skipReason: 'unspecified-version',
           },
         ],
       });

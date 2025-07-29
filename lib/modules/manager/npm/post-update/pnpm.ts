@@ -10,10 +10,18 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../../util/exec/types';
-import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import {
+  deleteLocalFile,
+  ensureCacheDir,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../../util/fs';
 import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants';
+import type { PnpmWorkspaceFile } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
@@ -50,12 +58,20 @@ export async function generateLockFile(
         (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
+    const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);
+    const pnpmConfigStoreDir = await ensureCacheDir(PNPM_STORE_DIR);
     const extraEnv: ExtraEnv = {
+      // those arwe no longer working and it's unclear if they ever worked
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
+      // these are used by pnpm v5 to v10. Maybe earlier versions too
+      npm_config_cache_dir: pnpmConfigCacheDir,
+      npm_config_store_dir: pnpmConfigStoreDir,
+      // pnpm stops reading npm_config_* env vars since v11
+      pnpm_config_cache_dir: pnpmConfigCacheDir,
+      pnpm_config_store_dir: pnpmConfigStoreDir,
     };
     const execOptions: ExecOptions = {
-      userConfiguredEnv: config.env,
       cwdFile: lockFileName,
       extraEnv,
       docker: {},
@@ -70,7 +86,28 @@ export async function generateLockFile(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
-    let args = '--recursive --lockfile-only';
+    const pnpmWorkspaceFilePath = getSiblingFileName(
+      lockFileName,
+      'pnpm-workspace.yaml',
+    );
+
+    let args = '--lockfile-only';
+
+    // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
+    // `--recursive` will install un-wanted project.
+    // we should avoid this.
+    if (await localPathExists(pnpmWorkspaceFilePath)) {
+      const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(
+        (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!,
+      );
+      if (pnpmWorkspace?.packages?.length) {
+        logger.debug(
+          `Found pnpm workspace with ${pnpmWorkspace.packages.length} package definitions`,
+        );
+        // we are in a monorepo, 'pnpm update' needs the '--recursive' flag contrary to 'pnpm install'
+        args += ' --recursive';
+      }
+    }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
@@ -99,7 +136,7 @@ export async function generateLockFile(
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
-      commands.push('pnpm dedupe --config.ignore-scripts=true');
+      commands.push('pnpm dedupe --ignore-scripts');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

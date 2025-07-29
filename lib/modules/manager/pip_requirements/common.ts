@@ -1,4 +1,5 @@
 import { GlobalConfig } from '../../../config/global';
+import { getEnv } from '../../../util/env';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageFileContent } from '../types';
 import type { PipRequirementsManagerData } from './types';
@@ -18,7 +19,7 @@ function cleanRegistryUrls(registryUrls: string[]): string[] {
           .substring(1)
           .replace(regEx(/^{/), '')
           .replace(regEx(/}$/), '');
-        const sub = process.env[envvar];
+        const sub = getEnv()[envvar];
         return sub ?? match;
       },
     );
@@ -55,15 +56,11 @@ export function extractPackageFileFlags(
     res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
   }
   if (additionalRequirementsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
+    res.managerData ??= {};
     res.managerData.requirementsFiles = additionalRequirementsFiles;
   }
   if (additionalConstraintsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
+    res.managerData ??= {};
     res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;

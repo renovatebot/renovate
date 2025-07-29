@@ -1,8 +1,5 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -10,6 +7,9 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs, git, partial } from '~test/util';
 
 process.env.CONTAINERBASE = 'true';
 

@@ -121,7 +121,7 @@ async function generateBranchCache(
       upgrades,
     };
   } catch (error) {
-    const err = error.err || error; // external host error nests err
+    const err = error.err ?? error; // external host error nests err
     const errCodes = [401, 404];
     // istanbul ignore if
     if (errCodes.includes(err.response?.statusCode)) {

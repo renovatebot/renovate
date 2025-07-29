@@ -4,6 +4,7 @@ import {
   mergeChildConfig,
 } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
 import { detectSemanticCommits } from '../../../util/git/semantic';
@@ -88,7 +89,6 @@ export async function flattenUpdates(
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
       const packagePath = packageFile.packageFile?.split('/');
-      // istanbul ignore else: can never happen and would throw
       if (packagePath.length > 0) {
         packagePath.splice(-1, 1);
       }
@@ -180,7 +180,7 @@ export async function flattenUpdates(
         updates.push(lockFileConfig);
       }
       if (get(manager, 'updateLockedDependency')) {
-        for (const lockFile of packageFileConfig.lockFiles || []) {
+        for (const lockFile of packageFileConfig.lockFiles ?? []) {
           const lockfileRemediations = config.remediations as Record<
             string,
             Record<string, any>[]
@@ -217,8 +217,14 @@ export async function flattenUpdates(
       update.semanticCommits = semanticCommits;
     }
   }
-  return updates
-    .filter((update) => update.enabled)
+  const filteredUpdates = updates
+    .filter((update) => update.enabled !== false)
     .map(({ vulnerabilityAlerts, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
+  if (filteredUpdates.length < updates.length) {
+    logger.debug(
+      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
+    );
+  }
+  return filteredUpdates;
 }

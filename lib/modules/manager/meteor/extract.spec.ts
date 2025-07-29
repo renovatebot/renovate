@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const input01Content = Fixtures.get('package-1.js');
 

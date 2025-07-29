@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
-import { fs } from '../../../../test/util';
 import type { Registry } from './types';
 import { bumpPackageVersion } from './update';
 import {
@@ -9,6 +8,7 @@ import {
   findVersion,
   getConfiguredRegistries,
 } from './util';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 
@@ -71,6 +71,27 @@ describe('modules/manager/nuget/util', () => {
           name: 'contoso.com',
           url: 'https://contoso.com/packages/',
           sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
+        },
+      ]);
+    });
+
+    it('deduplicates registries', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          <?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+  </packageSources>
+</configuration>`,
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config');
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json#protocolVersion=3',
         },
       ]);
     });
@@ -240,7 +261,11 @@ describe('modules/manager/nuget/util', () => {
         {
           name: 'contoso.com',
           url: 'https://contoso.com/packages/',
-          sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
+          sourceMappedPackagePatterns: [
+            'Contoso.*',
+            'NuGet.Common',
+            'AdventureWorks*',
+          ],
         },
         {
           name: 'contoso.test',
@@ -250,6 +275,7 @@ describe('modules/manager/nuget/util', () => {
             'Contoso.Test.*',
             'NuGet.*',
             'NuGet.Common*',
+            'AdventureWorks.Test.*',
           ],
         },
       ];
@@ -280,6 +306,16 @@ describe('modules/manager/nuget/util', () => {
         applyRegistries({ depName: 'Contoso.Test.SomePackage' }, registries),
       ).toEqual({
         depName: 'Contoso.Test.SomePackage',
+        registryUrls: ['https://contoso.test/packages/'],
+      });
+
+      expect(
+        applyRegistries(
+          { depName: 'AdventureWorks.Test.SomePackage' },
+          registries,
+        ),
+      ).toEqual({
+        depName: 'AdventureWorks.Test.SomePackage',
         registryUrls: ['https://contoso.test/packages/'],
       });
     });

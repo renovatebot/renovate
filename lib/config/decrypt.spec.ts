@@ -1,4 +1,3 @@
-import { logger } from '../../test/util';
 import {
   decryptConfig,
   getAzureCollection,
@@ -6,6 +5,7 @@ import {
 } from './decrypt';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
+import { logger } from '~test/util';
 
 const repository = 'abc/def';
 

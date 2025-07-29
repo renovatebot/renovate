@@ -1,6 +1,6 @@
-import { partial } from '../../../../../../test/util';
 import type { BranchConfig } from '../../../../types';
 import { GitHubChangeLogSource } from './github/source';
+import { partial } from '~test/util';
 
 const changelogSource = new GitHubChangeLogSource();
 const upgrade = partial<BranchConfig>({

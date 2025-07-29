@@ -1,12 +1,6 @@
 import { codeBlock } from 'common-tags';
-import {
-  fs,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
@@ -38,7 +32,11 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import type { Timestamp } from '../../../../util/timestamp';
 import * as _limits from '../../../global/limits';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+import type {
+  BranchConfig,
+  BranchUpgradeConfig,
+  CacheFingerprintMatchResult,
+} from '../../../types';
 import type { ResultWithPr } from '../pr';
 import * as _prWorker from '../pr';
 import * as _prAutomerge from '../pr/automerge';
@@ -50,6 +48,7 @@ import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
+import { fs, git, partial, platform, scm } from '~test/util';
 
 vi.mock('./get-updated');
 vi.mock('./schedule');
@@ -65,24 +64,23 @@ vi.mock('../../../../util/exec');
 vi.mock('../../../../util/merge-confidence');
 vi.mock('../../../../util/sanitize');
 vi.mock('../../../../util/fs');
-vi.mock('../../../../util/git');
 vi.mock('../../../global/limits');
 vi.mock('../../../../util/cache/repository');
 
-const getUpdated = mocked(_getUpdated);
-const schedule = mocked(_schedule);
-const checkExisting = mocked(_checkExisting);
-const reuse = mocked(_reuse);
-const npmPostExtract = mocked(_npmPostExtract);
-const automerge = mocked(_automerge);
-const commit = mocked(_commit);
-const mergeConfidence = mocked(_mergeConfidence);
-const prAutomerge = mocked(_prAutomerge);
-const prWorker = mocked(_prWorker);
-const exec = mocked(_exec);
-const sanitize = mocked(_sanitize);
-const limits = mocked(_limits);
-const repoCache = mocked(_repoCache);
+const getUpdated = vi.mocked(_getUpdated);
+const schedule = vi.mocked(_schedule);
+const checkExisting = vi.mocked(_checkExisting);
+const reuse = vi.mocked(_reuse);
+const npmPostExtract = vi.mocked(_npmPostExtract);
+const automerge = vi.mocked(_automerge);
+const commit = vi.mocked(_commit);
+const mergeConfidence = vi.mocked(_mergeConfidence);
+const prAutomerge = vi.mocked(_prAutomerge);
+const prWorker = vi.mocked(_prWorker);
+const exec = vi.mocked(_exec);
+const sanitize = vi.mocked(_sanitize);
+const limits = vi.mocked(_limits);
+const repoCache = vi.mocked(_repoCache);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -903,6 +901,38 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it('updates branch when no fingerprint match', async () => {
+      expect.assertions(3);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitBody: '[skip-ci]',
+        fetchChangeLogs: 'branch',
+        cacheFingerprintMatch: 'no-match',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'pending',
+        commitSha: '123test',
+      });
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
     it('ensures PR and comments notice', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1053,7 +1083,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
 
-    it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
+    it('ensures PR and adds lock file error comment with default message if no releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1072,7 +1102,86 @@ describe('workers/repository/update/branch/index', () => {
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining(
+            'You probably do not want to merge this PR as-is',
+          ),
+        }),
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
+    });
+
+    it('ensures PR and adds lock file error comment with user configured message if no releaseTimestamp', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>(),
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const customMessage =
+        'Please check the lock file changes carefully before merging.';
+      const inconfig = {
+        ...config,
+        userStrings: {
+          artifactErrorWarning: customMessage,
+        },
+      };
+      await branchWorker.processBranch(inconfig);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining(customMessage),
+        }),
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
+    });
+
+    it('ensures PR and adds lock file error comment with templated user configured message if no releaseTimestamp', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>(),
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const inconfig = {
+        ...config,
+        userStrings: {
+          artifactErrorWarning:
+            'Lock file error in {{manager}} - please review carefully.',
+        },
+      };
+      await branchWorker.processBranch(inconfig);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining(
+            'Lock file error in some-manager - please review carefully.',
+          ),
+        }),
+      );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -1232,7 +1341,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch({
         ...config,
         baseBranch: 'new_base',
-        skipBranchUpdate: true,
+        cacheFingerprintMatch: 'matched',
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Base branch changed by user, rebasing the branch onto new base',
@@ -1486,7 +1595,7 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefixOld: 'old/',
         commitFingerprint: '111',
         reuseExistingBranch: true,
-        skipBranchUpdate: true,
+        cacheFingerprintMatch: 'matched' as CacheFingerprintMatchResult,
       };
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
@@ -1634,12 +1743,12 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
       const inconfig = {
         ...config,
+        versioning: 'semver',
         postUpgradeTasks: {
           executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1732,7 +1841,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^exit 1$'],
-        allowCommandTemplating: true,
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1816,8 +1924,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{versioning}}}$'],
-        allowCommandTemplating: false,
+        allowedCommands: ['^echo'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -1831,6 +1938,7 @@ describe('workers/repository/update/branch/index', () => {
         upgrades: [
           partial<BranchUpgradeConfig>({
             depName: 'some-dep-name',
+            versioning: 'semver',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
@@ -1847,7 +1955,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
-      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
         cwd: '/localDir',
       });
     });
@@ -1918,8 +2026,7 @@ describe('workers/repository/update/branch/index', () => {
 
       GlobalConfig.set({
         ...adminConfig,
-        allowedCommands: ['^echo {{{depName}}}$'],
-        allowCommandTemplating: true,
+        allowedCommands: ['^echo some'],
         exposeAllEnv: true,
         localDir: '/localDir',
       });
@@ -2069,7 +2176,6 @@ describe('workers/repository/update/branch/index', () => {
       GlobalConfig.set({
         ...adminConfig,
         allowedCommands: ['^echo hardcoded-string$'],
-        allowCommandTemplating: true,
         trustLevel: 'high',
         localDir: '/localDir',
       });
@@ -2134,6 +2240,215 @@ describe('workers/repository/update/branch/index', () => {
           'modified_file',
         ),
       ).toBe('modified file content');
+    });
+
+    it('executes post-upgrade tasks with propagated post-upgrade file path via env variable', async () => {
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      });
+      scm.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        }),
+      );
+
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+        cacheDir,
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const inconfig: BranchConfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo hardcoded-string'],
+          dataFileTemplate:
+            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+          executionMode: 'branch',
+        },
+      };
+
+      try {
+        const result = await branchWorker.processBranch(inconfig);
+        expect(result).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'done',
+          commitSha: null,
+        });
+
+        expect(exec.exec).toHaveBeenCalledTimes(1);
+
+        const execPathParam = exec.exec.mock.calls[0][0];
+        expect(execPathParam).toEqual('echo hardcoded-string');
+
+        const execOptionsParam = exec.exec.mock.calls[0][1];
+        expect(execOptionsParam).toBeDefined();
+        expect(execOptionsParam?.cwd).toEqual('/localDir');
+        const dataFileRegex = new RegExp(
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+        );
+        expect(
+          execOptionsParam?.env?.RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE,
+        ).toMatch(dataFileRegex);
+      } finally {
+        await tmpDir.cleanup();
+      }
+    });
+
+    it('should not propagate post-upgrade file path via env variable if the post-upgrade file creation failed', async () => {
+      const updatedPackageFile: FileChange = {
+        type: 'addition',
+        path: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      });
+      scm.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'rebase!',
+          state: 'open',
+          bodyStruct: {
+            hash: hashBody(`- [x] <!-- rebase-check -->`),
+            rebaseRequested: true,
+          },
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        }),
+      );
+
+      const tmpDir = await dir({ unsafeCleanup: true });
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        ...adminConfig,
+        allowedCommands: ['^echo hardcoded-string$'],
+        trustLevel: 'high',
+        localDir: '/localDir',
+        cacheDir,
+      });
+
+      fs.readLocalFile
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists');
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+      // Fail post-upgrade file creation
+      fs.outputCacheFile.mockRejectedValue(new Error('failed to create file'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const inconfig: BranchConfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo hardcoded-string'],
+          dataFileTemplate:
+            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+          executionMode: 'branch',
+        },
+      };
+
+      try {
+        const result = await branchWorker.processBranch(inconfig);
+        expect(result).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: undefined,
+          result: 'done',
+          commitSha: null,
+        });
+        expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo hardcoded-string', {
+          cwd: '/localDir',
+        });
+        expect(exec.exec).toHaveBeenCalledTimes(1);
+        expect(
+          findFileContent(
+            commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts,
+            'modified_file',
+          ),
+        ).toBe('modified file content');
+      } finally {
+        await tmpDir.cleanup();
+      }
     });
 
     it('returns when rebaseWhen=never', async () => {
@@ -2300,7 +2615,7 @@ describe('workers/repository/update/branch/index', () => {
         }),
       );
       config.reuseExistingBranch = true;
-      config.skipBranchUpdate = true;
+      config.cacheFingerprintMatch = 'matched';
       const inconfig = {
         ...config,
         branchName: 'new/some-branch',

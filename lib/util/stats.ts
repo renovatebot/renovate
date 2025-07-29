@@ -488,3 +488,90 @@ export class HttpCacheStats {
     logger.debug(report, 'HTTP cache statistics');
   }
 }
+
+type ObsoleteCacheStats = Record<
+  string,
+  {
+    count: number;
+  }
+>;
+
+/* v8 ignore start: temporary code */
+export class ObsoleteCacheHitLogger {
+  static getData(): ObsoleteCacheStats {
+    return memCache.get<ObsoleteCacheStats>('obsolete-cache-stats') ?? {};
+  }
+
+  static write(url: string): void {
+    const data = this.getData();
+    if (!data[url]) {
+      data[url] = { count: 0 };
+    }
+    data[url].count++;
+    memCache.set('obsolete-cache-stats', data);
+  }
+
+  static report(): void {
+    const hits = this.getData();
+    logger.debug(
+      { count: Object.keys(hits).length, hits },
+      'Cache fallback URLs',
+    );
+  }
+}
+/* v8 ignore stop: temporary code */
+
+interface AbandonedPackage {
+  datasource: string;
+  packageName: string;
+  mostRecentTimestamp: string;
+}
+
+type AbandonedPackageReport = Record<string, Record<string, string>>;
+
+export class AbandonedPackageStats {
+  static getData(): AbandonedPackage[] {
+    return memCache.get<AbandonedPackage[]>('abandonment-stats') ?? [];
+  }
+
+  private static setData(data: AbandonedPackage[]): void {
+    memCache.set('abandonment-stats', data);
+  }
+
+  static write(
+    datasource: string,
+    packageName: string,
+    mostRecentTimestamp: string,
+  ): void {
+    const data = this.getData();
+    data.push({ datasource, packageName, mostRecentTimestamp });
+    this.setData(data);
+  }
+
+  static getReport(): AbandonedPackageReport {
+    const data = this.getData();
+    const result: AbandonedPackageReport = {};
+
+    for (const { datasource, packageName, mostRecentTimestamp } of data) {
+      result[datasource] ??= {};
+      result[datasource][packageName] = mostRecentTimestamp;
+    }
+
+    const sortedResult: AbandonedPackageReport = {};
+    for (const datasource of Object.keys(result).sort()) {
+      sortedResult[datasource] = {};
+      for (const packageName of Object.keys(result[datasource]).sort()) {
+        sortedResult[datasource][packageName] = result[datasource][packageName];
+      }
+    }
+
+    return sortedResult;
+  }
+
+  static report(): void {
+    const report = this.getReport();
+    if (Object.keys(report).length > 0) {
+      logger.debug(report, 'Abandoned package statistics');
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import { partial } from '../../../test/util';
 import type { Timestamp } from '../../util/timestamp';
+import { GitTagsDatasource } from './git-tags';
 import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
@@ -11,6 +11,8 @@ import {
 import { NpmDatasource } from './npm';
 import { PypiDatasource } from './pypi';
 import type { ReleaseResult } from './types';
+import { hostRules } from '~test/host-rules';
+import { partial } from '~test/util';
 
 describe('modules/datasource/metadata', () => {
   it('Should handle manualChangelogUrls', () => {
@@ -119,6 +121,30 @@ describe('modules/datasource/metadata', () => {
       const dep: ReleaseResult = { sourceUrl, releases: [] };
       const datasource = HelmDatasource.id;
       const packageName = 'some-chart';
+
+      addMetaData(dep, datasource, packageName);
+      expect(dep).toMatchObject({
+        sourceUrl: expectedSourceUrl,
+      });
+    },
+  );
+
+  it.each`
+    sourceUrl                                      | expectedSourceUrl
+    ${'git@gitlab.com:group/sub-group/repo'}       | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@gitlab.com:group/sub-group/repo.git'}   | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@somehost.com:group/sub-group/repo.git'} | ${'https://somehost.com/group/sub-group/repo'}
+  `(
+    'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
+    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+      const dep: ReleaseResult = { sourceUrl, releases: [] };
+      const datasource = GitTagsDatasource.id;
+      const packageName = 'some-dep';
+
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'somehost.com',
+      });
 
       addMetaData(dep, datasource, packageName);
       expect(dep).toMatchObject({

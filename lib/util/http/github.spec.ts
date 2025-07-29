@@ -1,7 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
-import * as httpMock from '../../../test/http-mock';
-import { mocked } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -15,9 +13,11 @@ import type { RepoCacheData } from '../cache/repository/types';
 import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 import type { GraphqlPageCache } from './github';
+import * as httpMock from '~test/http-mock';
+import { logger } from '~test/util';
 
 vi.mock('../cache/repository');
-const repositoryCache = mocked(_repositoryCache);
+const repositoryCache = vi.mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
@@ -307,6 +307,12 @@ describe('util/http/github', () => {
     });
 
     describe('handleGotError', () => {
+      it('should log a once warning for github.com 401', async () => {
+        await expect(
+          fail(401, { message: 'Some unauthorized' }),
+        ).rejects.toThrow('Response code 401 (Some unauthorized)');
+        expect(logger.logger.once.warn).toHaveBeenCalled();
+      });
       async function fail(
         code: number,
         body: any = undefined,

@@ -60,7 +60,7 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = /by Poetry ([\d\\.]+)/.exec(firstLine);
+  const poetryVersionMatch = regEx(/by Poetry ([\d\\.]+)/).exec(firstLine);
   if (poetryVersionMatch?.[1]) {
     const poetryVersion = poetryVersionMatch[1];
     logger.debug(
@@ -225,7 +225,6 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      userConfiguredEnv: config.env,
       toolConstraints: [
         { toolName: 'python', constraint: pythonConstraint },
         { toolName: 'poetry', constraint: poetryConstraint },

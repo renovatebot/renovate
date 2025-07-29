@@ -1,9 +1,8 @@
-import { git } from '../../../test/util';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { scm, setPlatformScmApi } from './scm';
+import { git } from '~test/util';
 
-vi.mock('../../util/git');
 vi.unmock('./scm'); //mocked from test/setup
 
 describe('modules/platform/scm', () => {
@@ -23,6 +22,7 @@ describe('modules/platform/scm', () => {
     'codecommit',
     'bitbucket',
     'bitbucket-server',
+    'forgejo',
     'gitea',
     'github',
     'gitlab',

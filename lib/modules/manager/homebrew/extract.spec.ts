@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const aalib = Fixtures.get('aalib.rb');
 const aap = Fixtures.get('aap.rb');

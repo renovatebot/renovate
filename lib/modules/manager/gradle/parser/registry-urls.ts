@@ -1,4 +1,4 @@
-import type { parser } from 'good-enough-parser';
+import type { lexer, parser } from 'good-enough-parser';
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
@@ -14,11 +14,7 @@ import {
   storeInTokenMap,
   storeVarToken,
 } from './common';
-import {
-  handleCustomRegistryUrl,
-  handlePredefinedRegistryUrl,
-  handleRegistryContent,
-} from './handlers';
+import { handleRegistryContent, handleRegistryUrl } from './handlers';
 import { qPlugins } from './plugins';
 
 const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
@@ -96,7 +92,18 @@ const qUri = q
 // mavenCentral()
 // mavenCentral { ... }
 const qPredefinedRegistries = q
-  .sym(regEx(`^(?:${Object.keys(REGISTRY_URLS).join('|')})$`), storeVarToken)
+  .sym(
+    regEx(`^(?:${Object.keys(REGISTRY_URLS).join('|')})$`),
+    (ctx: Ctx, node: lexer.Token) => {
+      const nodeTransformed: lexer.Token = {
+        ...node,
+        type: 'string-value',
+        value: REGISTRY_URLS[node.value as keyof typeof REGISTRY_URLS],
+      };
+      storeVarToken(ctx, nodeTransformed);
+      return ctx;
+    },
+  )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'))
   .alt(
     q
@@ -113,10 +120,7 @@ const qPredefinedRegistries = q
       endsWith: '}',
       search: q.opt(qRegistryContent),
     }),
-  )
-  .handler(handlePredefinedRegistryUrl)
-  .handler(cleanupTmpContentSpec)
-  .handler(cleanupTempVars);
+  );
 
 // { url = "https://some.repo"; content { ... } }
 const qMavenArtifactRegistry = q.tree({
@@ -144,21 +148,57 @@ const qMavenArtifactRegistry = q.tree({
 // maven(url = uri("https://foo.bar/baz"))
 // maven("https://foo.bar/baz") { content { ... } }
 // maven { name = some; url = "https://foo.bar/${name}" }
-const qCustomRegistryUrl = q
-  .sym<Ctx>('maven')
-  .alt(
-    q
-      .tree<Ctx>({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '(',
-        endsWith: ')',
-        search: q.begin<Ctx>().opt(q.sym<Ctx>('url').op('=')).join(qUri).end(),
-      })
-      .opt(qMavenArtifactRegistry),
-    qMavenArtifactRegistry,
-  )
-  .handler(handleCustomRegistryUrl)
+const qCustomRegistryUrl = q.sym<Ctx>('maven').alt(
+  q
+    .tree<Ctx>({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '(',
+      endsWith: ')',
+      search: q.begin<Ctx>().opt(q.sym<Ctx>('url').op('=')).join(qUri).end(),
+    })
+    .opt(qMavenArtifactRegistry),
+  qMavenArtifactRegistry,
+);
+
+// forRepository { maven { ... } }
+const qForRepository = q.sym<Ctx>('forRepository').tree({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  maxMatches: 1,
+  startsWith: '{',
+  endsWith: '}',
+  search: q.alt<Ctx>(qPredefinedRegistries, qCustomRegistryUrl),
+});
+
+// filter { includeGroup(...); includeModule(...) }
+const qFilter = q.sym<Ctx>('filter').tree({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  startsWith: '{',
+  endsWith: '}',
+  search: qContentDescriptor('include'),
+});
+
+// exclusiveContent { forRepository { ... }; filter { ... } }
+const qExclusiveContent = q
+  .sym<Ctx>('exclusiveContent', storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'registryType'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q.alt<Ctx>(
+      q.join<Ctx>(qForRepository, qFilter),
+      q.join<Ctx>(qFilter, qForRepository),
+    ),
+  });
+
+const qRegistries = q
+  .alt(qExclusiveContent, qPredefinedRegistries, qCustomRegistryUrl)
+  .handler(handleRegistryUrl)
   .handler(cleanupTmpContentSpec)
   .handler(cleanupTempVars);
 
@@ -178,13 +218,7 @@ const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
       }
       return ctx;
     })
-    .alt(
-      qAssignments,
-      qApplyFrom,
-      qPlugins,
-      qPredefinedRegistries,
-      qCustomRegistryUrl,
-    ),
+    .alt(qAssignments, qApplyFrom, qPlugins, qRegistries),
   postHandler: (ctx) => {
     delete ctx.tmpTokenStore.registryScope;
     return ctx;
@@ -194,6 +228,5 @@ const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
 export const qRegistryUrls = q.alt<Ctx>(
   q.sym<Ctx>('publishing').tree(),
   qPluginManagement,
-  qPredefinedRegistries,
-  qCustomRegistryUrl,
+  qRegistries,
 );

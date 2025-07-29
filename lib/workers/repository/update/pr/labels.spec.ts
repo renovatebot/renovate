@@ -1,10 +1,10 @@
-import { platform } from '../../../../../test/util';
 import {
   areLabelsModified,
   getChangedLabels,
   prepareLabels,
   shouldUpdateLabels,
 } from './labels';
+import { platform } from '~test/util';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {

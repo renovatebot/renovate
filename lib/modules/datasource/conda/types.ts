@@ -12,8 +12,6 @@ export interface CondaPackage {
   full_name: string;
   owner: CondaPackageOwner;
   home: string;
-  source_git_url: string;
-  source_git_tag: string;
   app_type: Record<string, unknown>;
   upvoted: number;
   id: string;
@@ -36,7 +34,6 @@ export interface CondaPackage {
   modified_at: string;
   latest_version: CondaVersion;
   summary: string;
-  license_url: string;
   doc_url: string;
 }
 
@@ -58,7 +55,7 @@ export interface CondaRelease {
 }
 
 export interface CondaFile {
-  description: string;
+  description?: string | null;
   basename: string;
   labels: string[];
   dependencies: string[];
@@ -72,20 +69,4 @@ export interface CondaFile {
   version: CondaVersion;
   md5: string;
   type: string;
-  attrs: {
-    build_number: number;
-    name: string;
-    license: string;
-    timestamp: number;
-    source_url: string;
-    platform: string;
-    depends: string[];
-    version: CondaVersion;
-    subdir: string;
-    build: string;
-    sha256: string;
-    arch: string;
-    md5: string;
-    size: number;
-  };
 }

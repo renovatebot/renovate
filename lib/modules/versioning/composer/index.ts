@@ -384,11 +384,16 @@ function isCompatible(version: string): boolean {
   return isVersion(version);
 }
 
+function isBreaking(current: string, version: string): boolean {
+  return npm.isBreaking!(composer2npm(current), composer2npm(version));
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
   getPatch,
+  isBreaking,
   isCompatible,
   isGreaterThan,
   isLessThanRange,

@@ -142,5 +142,50 @@ describe('modules/manager/npm/post-update/rules', () => {
       `,
       );
     });
+
+    it('uses rules without host type', () => {
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'sometoken',
+      });
+      const res = processHostRules();
+      expect(res).toEqual({
+        additionalNpmrcContent: [
+          '//registry.company.com/:_authToken=sometoken',
+        ],
+
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthToken: 'sometoken',
+            },
+          },
+        },
+      });
+    });
+
+    it('deduplicates host rules while prefering npm type ones', () => {
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'donotuseme',
+      });
+      hostRules.add({
+        matchHost: 'registry.company.com',
+        token: 'useme',
+        hostType: 'npm',
+      });
+      const res = processHostRules();
+      expect(res).toEqual({
+        additionalNpmrcContent: ['//registry.company.com/:_authToken=useme'],
+
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthToken: 'useme',
+            },
+          },
+        },
+      });
+    });
   });
 });

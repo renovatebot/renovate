@@ -3,7 +3,7 @@ import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
 import { escapeRegExp, regEx } from '../../../../util/regex';
-import { parse as parseToml } from '../../../../util/toml';
+import { massage, parse as parseToml } from '../../../../util/toml';
 import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
@@ -246,7 +246,7 @@ export function parseCatalog(
   packageFile: string,
   content: string,
 ): PackageDependency<GradleManagerData>[] {
-  const tomlContent = parseToml(content) as GradleCatalog;
+  const tomlContent = parseToml(massage(content)) as GradleCatalog;
   const versions = tomlContent.versions ?? {};
   const libs = tomlContent.libraries ?? {};
   const libStartIndex = content.indexOf('libraries');

@@ -116,9 +116,7 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
     if (!label) {
       continue;
     }
-    if (!issuesMap[label]) {
-      issuesMap[label] = { bugs: [], features: [] };
-    }
+    issuesMap[label] ??= { bugs: [], features: [] };
     switch (type) {
       case 'Bug':
         issuesMap[label]?.bugs.push(item);

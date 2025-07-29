@@ -1,10 +1,10 @@
 import { join } from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
-import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
+import { fs } from '~test/util';
 
 vi.mock('../../../util/fs');
 

@@ -1,13 +1,4 @@
 import { mock } from 'vitest-mock-extended';
-import { Fixtures } from '../../../../../test/fixtures';
-import type { RenovateConfig } from '../../../../../test/util';
-import {
-  git,
-  mockedFunction,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -16,11 +7,13 @@ import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
 import { checkConfigMigrationBranch } from '.';
+import { Fixtures } from '~test/fixtures';
+import { git, partial, platform, scm } from '~test/util';
+import type { RenovateConfig } from '~test/util';
 
 vi.mock('./migrated-data');
 vi.mock('./rebase');
 vi.mock('./create');
-vi.mock('../../../../util/git');
 vi.mock('../../update/branch/handle-existing');
 
 const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
@@ -56,9 +49,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('creates migration branch when migration disabled but checkbox checked', async () => {
-      mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
-        'committed',
-      );
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
       await expect(
         checkConfigMigrationBranch(
           {
@@ -114,7 +105,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         }),
       );
       platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
-      mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
           ...config,
@@ -139,9 +130,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     });
 
     it('creates migration branch when migration enabled but no pr exists', async () => {
-      mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
-        'committed',
-      );
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
           ...config,
@@ -165,7 +154,7 @@ describe('workers/repository/config-migration/branch/index', () => {
     it('updates migration branch & refresh PR when migration enabled and open pr exists', async () => {
       platform.getBranchPr.mockResolvedValue(mock<Pr>());
       platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
-      mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
           ...config,
@@ -193,7 +182,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         dryRun: 'full',
       });
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
           ...config,
@@ -217,9 +206,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       GlobalConfig.set({
         dryRun: 'full',
       });
-      mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
-        'committed',
-      );
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
           ...config,
@@ -265,7 +252,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
         scm.branchExists.mockResolvedValueOnce(true);
-        mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
           'committed',
         );
         const res = await checkConfigMigrationBranch(
@@ -312,7 +299,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
         scm.branchExists.mockResolvedValueOnce(true);
-        mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
           'committed',
         );
         const res = await checkConfigMigrationBranch(

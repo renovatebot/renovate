@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
-import * as httpMock from '../../../../test/http-mock';
 import { GlasskubePackagesDatasource } from '.';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/glasskube-packages/index', () => {
   const customRegistryUrl = 'https://packages.test.example/packages';

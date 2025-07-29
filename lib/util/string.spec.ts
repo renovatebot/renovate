@@ -1,4 +1,10 @@
-import { coerceString, looseEquals, replaceAt, stripTemplates } from './string';
+import {
+  capitalize,
+  coerceString,
+  looseEquals,
+  replaceAt,
+  stripTemplates,
+} from './string';
 
 describe('util/string', () => {
   describe('replaceAt', () => {
@@ -68,6 +74,13 @@ describe('util/string', () => {
       ${'{% entire text %}'}                                       | ${''}
     `('"$input" -> "$expected"', ({ input, expected }) => {
       expect(stripTemplates(input)).toBe(expected);
+    });
+  });
+
+  describe('capitalize', () => {
+    it('capitalizes', () => {
+      expect(capitalize('content')).toBe('Content');
+      expect(capitalize('Content')).toBe('Content');
     });
   });
 });

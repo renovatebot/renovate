@@ -1,20 +1,6 @@
 import os from 'node:os';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import {
-  env,
-  fs,
-  git,
-  logger,
-  mockedFunction,
-  partial,
-  scm,
-} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -23,9 +9,10 @@ import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git, logger, partial, scm } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 
@@ -54,7 +41,7 @@ describe('modules/manager/gradle/artifacts', () => {
     resetPrefetchedImages();
 
     // java
-    mockedFunction(getPkgReleases).mockResolvedValue({
+    vi.mocked(getPkgReleases).mockResolvedValue({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },
@@ -600,6 +587,59 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
     });
 
+    it('updates existing checksums also if verify-checksums is disabled', async () => {
+      const execSnapshots = mockExecAll();
+      scm.getFileList.mockResolvedValue([
+        'gradlew',
+        'build.gradle',
+        'gradle/wrapper/gradle-wrapper.properties',
+        'gradle/verification-metadata.xml',
+      ]);
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['build.gradle', 'gradle/verification-metadata.xml'],
+        }),
+      );
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
+        let content = '';
+        if (fileName === 'gradle/verification-metadata.xml') {
+          content =
+            '<verify-metadata>false</verify-metadata><sha256 value="hash" origin="test data"/>';
+        }
+        return Promise.resolve(content);
+      });
+
+      const res = await updateArtifacts({
+        packageFileName: 'build.gradle',
+        updatedDeps: [
+          { depName: 'org.junit.jupiter:junit-jupiter-api' },
+          { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'gradle/verification-metadata.xml',
+            contents:
+              '<verify-metadata>false</verify-metadata><sha256 value="hash" origin="test data"/>',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          options: {
+            cwd: '/tmp/github/some/repo',
+            stdio: ['pipe', 'ignore', 'pipe'],
+          },
+        },
+      ]);
+    });
+
     it('updates verification metadata and lock file', async () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue([
@@ -755,7 +795,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
     });
 
-    it('does not exec any commands when verification metadata exists, but neither checksum nor signature verification is enabled', async () => {
+    it('does not write verification metadata, when no checksums exist and neither checksum nor signature verification is enabled', async () => {
       const execSnapshots = mockExecAll();
       scm.getFileList.mockResolvedValue([
         'gradlew',
@@ -787,7 +827,7 @@ describe('modules/manager/gradle/artifacts', () => {
         config: {},
       });
 
-      expect(execSnapshots).toMatchObject([]);
+      expect(execSnapshots).toBeEmptyArray();
     });
   });
 });

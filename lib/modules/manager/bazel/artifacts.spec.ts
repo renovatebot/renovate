@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 import { codeBlock } from 'common-tags';
-import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
 import type { UpdateArtifact } from '../types';
 import { updateArtifacts } from '.';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 describe('modules/manager/bazel/artifacts', () => {
   it('updates commit-based http archive', async () => {
@@ -721,6 +721,68 @@ describe('modules/manager/bazel/artifacts', () => {
         `${newValue}/rules_nodejs-core-${newValue}`,
       )
       .replace(inputHash, outputHash);
+
+    const res = await updateArtifacts(
+      partial<UpdateArtifact>({
+        packageFileName: 'WORKSPACE',
+        updatedDeps: [upgrade],
+        newPackageFileContent: input,
+      }),
+    );
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: output,
+          path: 'WORKSPACE',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
+  it('migrates rules_webtesting URL format', async () => {
+    const inputHash =
+      'e9abb7658b6a129740c0b3ef6f5a2370864e102a5ba5ffca2cea565829ed825a';
+    const input = codeBlock`
+      http_archive(
+          name = "io_bazel_rules_webtesting",
+          sha256 = "${inputHash}",
+          urls = ["https://github.com/bazelbuild/rules_webtesting/releases/download/0.3.5/rules_webtesting.tar.gz"],
+      )
+    `;
+
+    const currentValue = '0.3.5';
+    const newValue = '0.4.1';
+    const upgrade = {
+      depName: 'io_bazel_rules_webtesting',
+      depType: 'http_archive',
+      repo: 'bazelbuild/rules_webtesting',
+      managerData: { idx: 0 },
+      currentValue,
+      newValue,
+    };
+
+    const tarContent = Buffer.from('foo');
+    const outputHash = crypto
+      .createHash('sha256')
+      .update(tarContent)
+      .digest('hex');
+
+    const output = codeBlock`
+      http_archive(
+          name = "io_bazel_rules_webtesting",
+          sha256 = "${outputHash}",
+          urls = ["https://github.com/bazelbuild/rules_webtesting/releases/download/0.4.1/rules_webtesting-0.4.1.tar.gz"],
+      )
+    `;
+
+    httpMock
+      .scope('https://github.com')
+      .get(
+        '/bazelbuild/rules_webtesting/releases/download/0.4.1/rules_webtesting-0.4.1.tar.gz',
+      )
+      .reply(200, tarContent);
 
     const res = await updateArtifacts(
       partial<UpdateArtifact>({

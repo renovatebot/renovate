@@ -1,4 +1,3 @@
-import { hostRules } from '../../../test/util';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
@@ -6,6 +5,7 @@ import { OrbDatasource } from '../../modules/datasource/orb';
 import type { HostRule } from '../../types';
 import type { MergeConfidence } from '../merge-confidence/types';
 import { applyPackageRules } from './index';
+import { hostRules } from '~test/util';
 
 type TestConfig = PackageRuleInputConfig & {
   x?: number;

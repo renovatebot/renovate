@@ -3,15 +3,14 @@ import os from 'node:os';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/exec/env');
 vi.mock('../../datasource', () => mockDeep());
 
@@ -45,7 +44,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       LANG: 'en_US.UTF-8',
       LC_ALL: 'en_US',
     });
-    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
       releases: [
         { version: '8.0.1' },
         { version: '11.0.1' },

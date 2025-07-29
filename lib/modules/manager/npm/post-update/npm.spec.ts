@@ -1,10 +1,10 @@
 import upath from 'upath';
-import { envMock, mockExecAll } from '../../../../../test/exec-util';
-import { Fixtures } from '../../../../../test/fixtures';
-import { env, fs, mockedFunction } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getNodeToolConstraint } from './node-version';
 import * as npmHelper from './npm';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { Fixtures } from '~test/fixtures';
+import { env, fs } from '~test/util';
 
 vi.mock('../../../../util/exec/env');
 vi.mock('../../../../util/fs');
@@ -16,7 +16,7 @@ describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });
-    mockedFunction(getNodeToolConstraint).mockResolvedValueOnce({
+    vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
     });
@@ -722,6 +722,83 @@ describe('modules/manager/npm/post-update/npm', () => {
         workspaces: new Set(['docs/a', 'web/b', 'docs/dir.has.period']),
         rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
       });
+    });
+  });
+
+  describe('prevents injections', () => {
+    it('while performing lockfileUpdate (npm-workspaces)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      const skipInstalls = true;
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        [
+          {
+            packageFile: 'some-dir/web/b/package.json',
+            packageName: ' && echo "hi";',
+            depType: 'dependencies',
+            newVersion: '2.2.0',
+            newValue: '^2.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+          {
+            packageFile: 'some-dir/docs/a || date; /package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+        ],
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      expect(res.error).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b ' && echo "hi";@2.2.0'`,
+        },
+        {
+          cmd: `npm install --package-lock-only --no-audit --ignore-scripts --workspace='docs/a || date; ' hello@1.1.1`,
+        },
+      ]);
+    });
+
+    it('while performing lockfileUpdate (npm)', async () => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {},
+        [
+          {
+            depName: 'uuid',
+            currentVersion: '^11.0.0',
+            newVersion: '11.1.0',
+            packageName: '; date; echo ',
+            isLockfileUpdate: true,
+          },
+        ],
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: "npm install --package-lock-only --no-audit --ignore-scripts '; date; echo @11.1.0'",
+        },
+      ]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs';
 import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { id as bazelVersioningId } from '../../versioning/bazel-module';
@@ -40,13 +41,25 @@ export class BazelDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const path = BazelDatasource.packageMetadataPath(packageName);
     const url = joinUrlParts(registryUrl!, path);
-
     const result: ReleaseResult = { releases: [] };
     try {
-      const { body: metadata } = await this.http.getJson(
-        url,
-        BazelModuleMetadata,
-      );
+      let metadata: BazelModuleMetadata;
+      const FILE_PREFIX = 'file://';
+      if (url.startsWith(FILE_PREFIX)) {
+        const filePath = url.slice(FILE_PREFIX.length);
+        if (!isValidLocalPath(filePath)) {
+          return null;
+        }
+        const fileContent = await readLocalFile(filePath, 'utf8');
+        if (!fileContent) {
+          return null;
+        }
+        metadata = BazelModuleMetadata.parse(JSON.parse(fileContent));
+      } else {
+        const response = await this.http.getJson(url, BazelModuleMetadata);
+        metadata = response.body;
+      }
+
       result.releases = metadata.versions
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
@@ -61,7 +74,6 @@ export class BazelDatasource extends Datasource {
         result.homepage = metadata.homepage;
       }
     } catch (err) {
-      // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
         if (err.response?.statusCode === 404) {
           return null;

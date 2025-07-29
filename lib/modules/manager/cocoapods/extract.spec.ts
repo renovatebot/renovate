@@ -1,7 +1,7 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const simplePodfile = Fixtures.get('Podfile.simple');
 const complexPodfile = Fixtures.get('Podfile.complex');

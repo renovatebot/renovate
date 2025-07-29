@@ -1,7 +1,5 @@
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -9,13 +7,14 @@ import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll } from '~test/exec-util';
+import { env, fs, git, partial } from '~test/util';
 
 vi.mock('../../../util/exec/env');
-vi.mock('../../../util/git');
 vi.mock('../../../util/fs');
 vi.mock('../../datasource', () => mockDeep());
 
-const datasource = mocked(_datasource);
+const datasource = vi.mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
 process.env.CONTAINERBASE = 'true';

@@ -1,5 +1,5 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
+import { Fixtures } from '~test/fixtures';
 
 const conanfile1 = Fixtures.get('conanfile.txt');
 const conanfile2 = Fixtures.get('conanfile2.txt');

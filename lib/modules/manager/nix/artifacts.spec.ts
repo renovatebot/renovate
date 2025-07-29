@@ -1,22 +1,16 @@
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import {
-  envMock,
-  mockExecAll,
-  mockExecSequence,
-} from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util';
+import { env, fs, git, hostRules, partial } from '~test/util';
 
 vi.mock('../../../util/exec/env');
 vi.mock('../../../util/fs');
-vi.mock('../../../util/git');
 vi.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
@@ -47,8 +41,6 @@ const lockfileMaintenanceCmd = `nix \
 flake update`;
 
 describe('modules/manager/nix/artifacts', () => {
-  const hostRules = mocked(_hostRules);
-
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,

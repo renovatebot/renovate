@@ -1,8 +1,8 @@
-import { scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { LongCommitSha } from '../../../../util/git/types';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
+import { scm } from '~test/util';
 
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {

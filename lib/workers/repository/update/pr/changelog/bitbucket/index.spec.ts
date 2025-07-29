@@ -1,10 +1,10 @@
 import type { ChangeLogProject, ChangeLogRelease } from '..';
-import { Fixtures } from '../../../../../../../test/fixtures';
-import * as httpMock from '../../../../../../../test/http-mock';
-import { partial } from '../../../../../../../test/util';
 import type { BranchUpgradeConfig } from '../../../../../types';
 import { getReleaseList, getReleaseNotesMdFile } from '../release-notes';
 import { BitbucketChangeLogSource } from './source';
+import { Fixtures } from '~test/fixtures';
+import * as httpMock from '~test/http-mock';
+import { partial } from '~test/util';
 
 const baseUrl = 'https://bitbucket.org/';
 const apiBaseUrl = 'https://api.bitbucket.org/';

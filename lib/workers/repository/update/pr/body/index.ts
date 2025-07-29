@@ -27,57 +27,67 @@ function massageUpdateMetadata(config: BranchConfig): void {
     } = upgrade;
     // TODO: types (#22198)
     let depNameLinked = upgrade.depName!;
+    let newNameLinked = upgrade.newName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
+      newNameLinked = `[${newNameLinked}](${primaryLink})`;
     }
 
-    let sourceRootPath = 'tree';
+    let sourceRootPath = 'tree/HEAD';
     if (sourceUrl) {
       const sourcePlatform = detectPlatform(sourceUrl);
       if (sourcePlatform === 'bitbucket') {
-        sourceRootPath = 'src';
+        sourceRootPath = 'src/HEAD';
+      } else if (sourcePlatform === 'bitbucket-server') {
+        sourceRootPath = 'browse';
       }
     }
 
     const otherLinks = [];
     if (sourceUrl && (!!sourceDirectory || homepage)) {
       otherLinks.push(
-        `[source](${
-          sourceDirectory
-            ? joinUrlParts(sourceUrl, sourceRootPath, 'HEAD', sourceDirectory)
-            : sourceUrl
-        })`,
+        `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );
     }
-    if (changelogUrl) {
-      otherLinks.push(`[changelog](${changelogUrl})`);
+    const templatedChangelogUrl = changelogUrl
+      ? template.compile(changelogUrl, upgrade, true)
+      : undefined;
+    if (templatedChangelogUrl) {
+      otherLinks.push(`[changelog](${templatedChangelogUrl})`);
     }
     if (otherLinks.length) {
       depNameLinked += ` (${otherLinks.join(', ')})`;
     }
     upgrade.depNameLinked = depNameLinked;
+    upgrade.newNameLinked = newNameLinked;
     const references: string[] = [];
     if (homepage) {
       references.push(`[homepage](${homepage})`);
     }
     if (sourceUrl) {
-      let fullUrl = sourceUrl;
-      if (sourceDirectory) {
-        fullUrl = joinUrlParts(
-          sourceUrl,
-          sourceRootPath,
-          'HEAD',
-          sourceDirectory,
-        );
-      }
-      references.push(`[source](${fullUrl})`);
+      references.push(
+        `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
+      );
     }
-    if (changelogUrl) {
-      references.push(`[changelog](${changelogUrl})`);
+    if (templatedChangelogUrl) {
+      references.push(`[changelog](${templatedChangelogUrl})`);
     }
     upgrade.references = references.join(', ');
   });
+}
+
+function getFullSourceUrl(
+  sourceUrl: string,
+  sourceRootPath: string,
+  sourceDirectory?: string,
+): string {
+  let fullUrl = sourceUrl;
+  if (sourceDirectory) {
+    fullUrl = joinUrlParts(sourceUrl, sourceRootPath, sourceDirectory);
+  }
+
+  return fullUrl;
 }
 
 interface PrBodyConfig {
@@ -122,7 +132,7 @@ export function getPrBody(
     prBody = prBody.replace(regEx(/\n\n\n+/g), '\n\n');
     const prDebugData64 = toBase64(JSON.stringify(prBodyConfig.debugData));
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
-    prBody = platform.massageMarkdown(prBody);
+    prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(

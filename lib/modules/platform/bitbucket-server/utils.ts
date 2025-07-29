@@ -88,7 +88,9 @@ function generateUrlFromEndpoint(
     // TODO: types (#22198)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      /* v8 ignore start */
+      url.pathname.endsWith('/') ? '' : '/'
+      /* v8 ignore stop */
     }scm`,
     repository,
   });
