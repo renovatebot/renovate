@@ -501,8 +501,7 @@ describe('workers/repository/init/merge', () => {
     });
   });
 
-  describe('static repository config $suite', () => {
-    const repoStaticConfigKey = 'RENOVATE_STATIC_REPO_CONFIG';
+  describe('static repository config', () => {
     const repoStaticConfigFileKey = 'RENOVATE_X_STATIC_REPO_CONFIG_FILE';
 
     beforeEach(() => {
@@ -522,7 +521,6 @@ describe('workers/repository/init/merge', () => {
     describe('resolveStaticRepoConfig()', () => {
       interface MergeRepoEnvTestCase {
         name: string;
-        env: NodeJS.ProcessEnv;
         currentConfig: AllConfig;
         staticConfig: AllConfig | undefined;
         want: AllConfig;
@@ -531,14 +529,12 @@ describe('workers/repository/init/merge', () => {
       const testCases: MergeRepoEnvTestCase[] = [
         {
           name: 'it does nothing',
-          env: {},
           staticConfig: undefined,
           currentConfig: { repositories: ['some/repo'] },
           want: { repositories: ['some/repo'] },
         },
         {
-          name: 'it merges env with the current config',
-          env: {},
+          name: 'it merges static config with the current config',
           staticConfig: { dependencyDashboard: true },
           currentConfig: { repositories: ['some/repo'] },
           want: {
@@ -546,23 +542,11 @@ describe('workers/repository/init/merge', () => {
             repositories: ['some/repo'],
           },
         },
-        {
-          name: 'it ignores env with other renovate specific configuration options',
-          env: { RENOVATE_CONFIG: '{"dependencyDashboard":true}' },
-          staticConfig: undefined,
-          currentConfig: { repositories: ['some/repo'] },
-          want: { repositories: ['some/repo'] },
-        },
       ];
 
       it.each(testCases)(
         '$name',
-        async ({
-          env,
-          currentConfig,
-          staticConfig,
-          want,
-        }: MergeRepoEnvTestCase) => {
+        async ({ currentConfig, staticConfig, want }: MergeRepoEnvTestCase) => {
           const [exitMock] = mockProcessExitOnce();
           let configFileName: string | undefined;
 
@@ -613,8 +597,6 @@ describe('workers/repository/init/merge', () => {
 
     describe('mergeRenovateConfig() with a static repository config', () => {
       beforeEach(() => {
-        delete process.env[repoStaticConfigKey];
-
         scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       });
 
