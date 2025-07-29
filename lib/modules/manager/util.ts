@@ -14,23 +14,16 @@ export function applyGitSource(
   branch: string | undefined,
 ): void {
   if (tag) {
-    // Try to parse the git URL first to extract source information
-    const parsedGitUrl = parseGitUrl(git);
-    const platform =
-      parsedGitUrl.source === 'github.com'
-        ? 'github'
-        : parsedGitUrl.source === 'gitlab.com'
-          ? 'gitlab'
-          : detectPlatform(git);
-
+    const platform = detectPlatform(git);
     if (platform === 'github' || platform === 'gitlab') {
       dep.datasource =
         platform === 'github'
           ? GithubTagsDatasource.id
           : GitlabTagsDatasource.id;
-      // Always use HTTPS for GitHub/GitLab API endpoints, regardless of git URL protocol
-      dep.registryUrls = [`https://${parsedGitUrl.source}`];
-      dep.packageName = parsedGitUrl.full_name;
+      const { source, full_name } = parseGitUrl(git);
+      // Always use HTTPS for GitHub/GitLab API endpoints, even if the git URL protocol is SSH.
+      dep.registryUrls = [`https://${source}`];
+      dep.packageName = full_name;
     } else {
       dep.datasource = GitTagsDatasource.id;
       dep.packageName = git;
