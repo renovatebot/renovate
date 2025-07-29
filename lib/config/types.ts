@@ -236,7 +236,7 @@ export interface RenovateConfig
   s3PathStyle?: boolean;
   gcsEndpoint?: string;
   reportPath?: string;
-  reportType?: 'logging' | 'file' | 's3' | null;
+  reportType?: 'logging' | 'file' | 's3' | 'gcs' | null;
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];

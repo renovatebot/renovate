@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../config/types';
 import { getProblems, logger } from '../logger';
 import type { BranchCache } from '../util/cache/repository/types';
 import { writeSystemFile } from '../util/fs';
+import { getGcsClient, parseGcsUrl } from '../util/gcs';
 import { getS3Client, parseS3Url } from '../util/s3';
 import type { ExtractResult } from '../workers/repository/process/extract-update';
 import type { LibYearsWithStatus, Report } from './types';
@@ -115,6 +116,27 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
+      logger.debug({ s3Url }, 'Writing report to S3');
+      return;
+    }
+
+    if (config.reportType === 'gcs') {
+      const gcsUrl = parseGcsUrl(config.reportPath!);
+      if (is.nullOrUndefined(gcsUrl)) {
+        logger.warn(
+          { reportPath: config.reportPath },
+          'Failed to parse GCS URL',
+        );
+        return;
+      }
+
+      const client = getGcsClient();
+      const file = client.bucket(gcsUrl.bucket).file(gcsUrl.pathname);
+      await file.save(JSON.stringify(report), {
+        contentType: 'application/json',
+      });
+      logger.debug({ gcsUrl }, 'Writing report to GCS');
+      return;
     }
   } catch (err) {
     logger.warn({ err }, 'Reporting.exportStats() - failure');

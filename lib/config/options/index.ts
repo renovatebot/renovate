@@ -425,7 +425,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     experimental: true,
-    allowedValues: ['logging', 'file', 's3'],
+    allowedValues: ['logging', 'file', 's3', 'gcs'],
   },
   {
     name: 'reportPath',

@@ -1,4 +1,6 @@
 import type { S3Client } from '@aws-sdk/client-s3';
+import type { Storage } from '@google-cloud/storage';
+import { MockStorage } from 'mock-gcs';
 import { mock, mockDeep } from 'vitest-mock-extended';
 import type { RenovateConfig } from '../config/types';
 import type { PackageFile } from '../modules/manager/types';
@@ -13,10 +15,12 @@ import {
   resetReport,
 } from './reporting';
 import type { Report } from './types';
+import { gcs } from '~test/gcs';
 import { s3 } from '~test/s3';
 import { fs, logger } from '~test/util';
 
 vi.mock('../util/fs', () => mockDeep());
+vi.mock('../util/gcs', () => mockDeep());
 vi.mock('../util/s3', () => mockDeep());
 vi.mock('../logger', () => mockDeep());
 
@@ -176,6 +180,53 @@ describe('instrumentation/reporting', () => {
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { reportPath: config.reportPath },
       'Failed to parse s3 URL',
+    );
+  });
+
+  it('send report to a GCS bucket if reportType is gcs', async () => {
+    const mockClient = new MockStorage();
+
+    gcs.parseGcsUrl.mockReturnValue({
+      bucket: 'bucket-name',
+      pathname: 'pathname',
+    });
+    gcs.getGcsClient.mockReturnValue(mockClient as unknown as Storage);
+
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'gcs',
+      reportPath: 'gs://bucket-name/pathname',
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+    expect(
+      await mockClient
+        .bucket('bucket-name')
+        .file('pathname')
+        .download()
+        .then(([c]) => JSON.parse(c.toString())),
+    ).toEqual(expectedReport);
+  });
+
+  it('handle failed parsing of GCS url', async () => {
+    gcs.parseGcsUrl.mockReturnValue(null);
+
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'gcs',
+      reportPath: 'aPath',
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { reportPath: config.reportPath },
+      'Failed to parse GCS URL',
     );
   });
 

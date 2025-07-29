@@ -1207,7 +1207,7 @@ If [`reportType`](#reporttype) is set to `file`, then set `reportPath` to a file
 For example: `/foo/bar.json`.
 
 If the value `s3` is used in [`reportType`](#reporttype), then use a S3 URI.
-For example: `s3://bucket-name/key-name`.
+For example: `s3://bucket-name/key-name`. For `gcs`, provide a GCS URI, e.g. `gs://bucket-name/path`.
 
 ## reportType
 
@@ -1216,7 +1216,8 @@ Defines how the report is exposed:
 - `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
 - `logging` The report will be printed as part of the log messages on `INFO` level
 - `file` The report will be written to a path provided by [`reportPath`](#reportpath)
-- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
+- `s3` The report will be pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option uses [`s3Endpoint`](#s3endpoint) and [`s3PathStyle`](#s3pathstyle)
+- `gcs` The report will be pushed to a GCS bucket defined by [`reportPath`](#reportpath). This option uses [`gcsEndpoint`](#gcsendpoint).
 
 ## repositories
 

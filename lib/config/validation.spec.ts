@@ -2005,6 +2005,31 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
+    it('fails for missing reportPath if reportType is "gcs"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'gcs',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "gcs"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'gcs',
+        reportPath: 'gs://bucket-name/pathname',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
     it('fails for missing reportPath if reportType is "file"', async () => {
       const config: RenovateConfig = {
         reportType: 'file',
