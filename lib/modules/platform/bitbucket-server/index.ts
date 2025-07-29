@@ -44,13 +44,12 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { BbsPrCache } from './pr-cache';
-import {
+import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-  UserSchema,
-  UsersSchema,
 } from './schema';
+import { UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -725,7 +724,7 @@ export async function addReviewers(
  *  2. Fallback to `/users?filter=...` and return slugs of active users with exact match on
  *     email.
  *
- * @param userinfo - A string that could be the user's email, display name, or username.
+ * @param userinfo - A string that could be the user's slug or email-address.
  * @returns List of user slugs for active, matched users.
  */
 async function getUserDetails(userinfo: string): Promise<string[]> {
@@ -739,6 +738,8 @@ async function getUserDetails(userinfo: string): Promise<string[]> {
       logger.debug({ userinfo }, 'Resolved user via slug match');
       return [user.slug];
     }
+    logger.debug({ userinfo }, 'Resolved inactive user');
+    return [];
   } catch (err: any) {
     if (err.statusCode === 404) {
       logger.debug(
@@ -750,7 +751,7 @@ async function getUserDetails(userinfo: string): Promise<string[]> {
     }
   }
 
-  // Step 2: Fallback - filtered search
+  // Step 2: Fallback - filtered search assuming the userInfo is an email-address
   try {
     const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
       config.projectKey
