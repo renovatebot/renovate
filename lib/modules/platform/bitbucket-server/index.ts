@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import ignore from 'ignore';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
@@ -61,7 +62,6 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { getExtraCloneOpts } from './utils';
-import ignore from 'ignore';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
