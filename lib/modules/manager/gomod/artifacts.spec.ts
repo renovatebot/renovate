@@ -2416,29 +2416,40 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   describe('gomodTidyAll', () => {
-    it('calls getTransitiveDependentModules when gomodTidyAll is enabled', async () => {
+    const setupGoModTidyAllTest = () => {
       fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
       fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      return mockExecAll();
+    };
+
+    it('validates gomodTidyAll enabled behavior', async () => {
+      // Setup
+      const execSnapshots = setupGoModTidyAllTest();
+
+      // Mock dependent modules for dependency processing test
       packageTree.getTransitiveDependentModules.mockResolvedValueOnce([
         { name: 'go.mod', isLeaf: true },
       ]);
-      mockExecAll();
+
+      // Mock git status for dependency processing
       git.getRepoStatus
         .mockResolvedValueOnce(
           partial<StatusResult>({
-            modified: ['go.sum'], // Need at least one file modified to continue processing
+            modified: ['go.sum'], // Main module changes
           }),
         )
         .mockResolvedValueOnce(
           partial<StatusResult>({
-            modified: ['go.sum'], // Mock for dependent module tidy
+            modified: ['go.sum'], // Dependent module changes
           }),
         );
-      fs.readLocalFile.mockResolvedValueOnce('Updated go.sum'); // Mock the file read for the modified file
-      fs.readLocalFile.mockResolvedValueOnce(
-        'Updated go.sum after dependent tidy',
-      ); // Mock for dependent module read
 
+      // Mock file reads for results
+      fs.readLocalFile
+        .mockResolvedValueOnce('Updated go.sum')
+        .mockResolvedValueOnce('Updated go.sum after dependent tidy');
+
+      // Execute
       const result = await gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
@@ -2449,11 +2460,10 @@ describe('modules/manager/gomod/artifacts', () => {
         },
       });
 
-      // Should call getTransitiveDependentModules
+      // Verify getTransitiveDependentModules is triggered
       expect(packageTree.getTransitiveDependentModules).toHaveBeenCalledWith(
         'go.mod',
       );
-      // Should return result including dependent module updates
       expect(result).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -2464,82 +2474,42 @@ describe('modules/manager/gomod/artifacts', () => {
           }),
         ]),
       );
-    });
 
-    it('skips root go mod tidy in main processing when gomodTidyAll is enabled', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-      const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValue(
-        partial<StatusResult>({
-          modified: [],
-        }),
-      );
-
-      await gomod.updateArtifacts({
-        packageFileName: 'go.mod',
-        updatedDeps: [],
-        newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidyAll'],
-        },
-      });
-
-      // Should NOT contain "go mod tidy" in root processing (only go get)
+      // Verify root tidy is skipped
       expect(execSnapshots[0].cmd).not.toContain('go mod tidy');
       expect(execSnapshots[0].cmd).toContain('go get');
     });
 
-    it('includes go mod tidy in main processing when gomodTidyAll is NOT enabled', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-      const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValue(
-        partial<StatusResult>({
-          modified: [],
-        }),
-      );
+    it('validates gomodTidyAll disabled behavior', async () => {
+      // Setup
+      const execSnapshots = setupGoModTidyAllTest();
 
-      await gomod.updateArtifacts({
-        packageFileName: 'go.mod',
-        updatedDeps: [],
-        newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidy'],
-        },
-      });
-
-      // Should contain "go mod tidy" when gomodTidyAll is not enabled
-      // go mod tidy commands come after go get
-      const allCommands = execSnapshots.map((s) => s.cmd).join(' ');
-      expect(allCommands).toContain('go mod tidy');
-    });
-
-    it('does not call getTransitiveDependentModules when gomodTidyAll is not enabled', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-      mockExecAll();
+      // Mock git status for normal processing
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['go.sum'],
         }),
       );
-      fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
-      fs.readLocalFile.mockResolvedValueOnce('Updated go.mod');
 
+      // Mock file read for result
+      fs.readLocalFile.mockResolvedValueOnce('Updated go.sum');
+
+      // Execute with gomodTidy (NOT gomodTidyAll)
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          postUpdateOptions: ['gomodTidy'], // Using normal gomodTidy, not gomodTidyAll
+          postUpdateOptions: ['gomodTidy'], // Using gomodTidy, not gomodTidyAll
         },
       });
 
-      // Should NOT call getTransitiveDependentModules when gomodTidyAll is not enabled
+      // Verify root tidy is included
+      const allCommands = execSnapshots.map((s) => s.cmd).join(' ');
+      expect(allCommands).toContain('go mod tidy');
+
+      // Verify dependency processing is NOT triggered
       expect(packageTree.getTransitiveDependentModules).not.toHaveBeenCalled();
     });
 
