@@ -26,7 +26,6 @@ import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
-import { parseAndValidateOrExit } from '../../global/config/parse/env';
 import { migrateAndValidateConfig } from '../../global/config/parse/util';
 import { getOnboardingConfig } from '../onboarding/branch/config';
 import {
@@ -201,7 +200,7 @@ export async function mergeRenovateConfig(
   const configFileParsed = repoConfig?.configFileParsed ?? {};
   const configFileAndEnv = await resolveStaticRepoConfig(
     configFileParsed,
-    process.env,
+    process.env.RENOVATE_X_STATIC_REPO_CONFIG_FILE,
   );
 
   if (is.nonEmptyArray(returnConfig.extends)) {
@@ -344,31 +343,22 @@ export function setNpmTokenInNpmrc(config: RenovateConfig): void {
 
 export async function resolveStaticRepoConfig(
   config: AllConfig,
-  env: NodeJS.ProcessEnv,
+  filename: string | undefined,
 ): Promise<AllConfig> {
-  let fileConfig: AllConfig | undefined;
+  if (!is.nonEmptyString(filename)) {
+    return config;
+  }
+
+  let staticRepoConfig: AllConfig;
 
   try {
-    fileConfig = await tryReadStaticRepoFileConfig(
-      env.RENOVATE_STATIC_REPO_CONFIG_FILE,
-    );
+    staticRepoConfig = await tryReadStaticRepoFileConfig(filename);
   } catch (err) {
     logger.fatal({ err }, 'Failed to load static repository config file');
     process.exit(1);
   }
 
-  const envConfig = await tryLoadStaticRepoEnvConfig(env);
-
-  const staticRepoConfig = fileConfig ?? envConfig;
-
-  if (fileConfig && envConfig) {
-    logger.warn(
-      { fileConfig, envConfig },
-      'Both file and env static repository configs found — using file config',
-    );
-  }
-
-  if (is.nullOrUndefined(staticRepoConfig)) {
+  if (!is.nonEmptyObject(staticRepoConfig)) {
     return config;
   }
 
@@ -376,15 +366,11 @@ export async function resolveStaticRepoConfig(
 }
 
 export async function tryReadStaticRepoFileConfig(
-  staticRepoConfigFile: string | undefined,
-): Promise<AllConfig | undefined> {
-  if (!is.nonEmptyString(staticRepoConfigFile)) {
-    return undefined;
-  }
-
+  staticRepoConfigFile: string,
+): Promise<AllConfig> {
   logger.debug({ staticRepoConfigFile }, 'reading static repo config file');
 
-  let staticRepoConfigRaw: string | undefined;
+  let staticRepoConfigRaw: string;
   try {
     staticRepoConfigRaw = await readSystemFile(staticRepoConfigFile, 'utf8');
   } catch (err) {
@@ -409,21 +395,6 @@ export async function tryReadStaticRepoFileConfig(
   );
 
   return staticRepoConfig;
-}
-
-export async function tryLoadStaticRepoEnvConfig(
-  env: NodeJS.ProcessEnv,
-): Promise<AllConfig | undefined> {
-  const repoEnvConfig = await parseAndValidateOrExit(
-    env,
-    'RENOVATE_STATIC_REPO_CONFIG',
-  );
-
-  if (is.nonEmptyObject(repoEnvConfig)) {
-    return repoEnvConfig;
-  }
-
-  return undefined;
 }
 
 export function mergeStaticConfig(
