@@ -730,7 +730,7 @@ export async function addReviewers(
 async function getUserDetails(userinfo: string): Promise<string[]> {
   // Step 1: Determine whether the user is a userSlug
   try {
-    const directUrl = `./rest/api/latest/users/${userinfo}`;
+    const directUrl = `./rest/api/1.0/users/${userinfo}`;
     const response = await bitbucketServerHttp.getJson(directUrl, UserSchema);
     const user = response.body;
 
