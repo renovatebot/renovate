@@ -27,7 +27,7 @@ function createGetObjectCommandInput(
 ): GetObjectCommandInput {
   const platform = GlobalConfig.get('platform')!;
   return {
-    Bucket: parseS3Url(url)?.Bucket,
+    Bucket: parseS3Url(url)?.bucket,
     Key: `${folder}${platform}/${repository}/cache.json`,
   };
 }
@@ -202,7 +202,7 @@ describe('util/cache/repository/impl/s3', () => {
     expect(cache instanceof RepoCacheS3).toBeTrue();
   });
 
-  it('should persists data locally after uploading to s3', async () => {
+  it('persists data locally after uploading to s3', async () => {
     process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL = 'true';
     const putObjectCommandOutput: PutObjectCommandOutput = {
       $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },

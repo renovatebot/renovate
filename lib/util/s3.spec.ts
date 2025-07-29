@@ -6,14 +6,14 @@ describe('util/s3', () => {
   });
 
   it('parses S3 URLs', () => {
-    expect(parseS3Url('s3://bucket/key/path')).toEqual({
-      Bucket: 'bucket',
-      Key: 'key/path',
+    expect(parseS3Url('s3://bucket/dir1/dir2')).toEqual({
+      bucket: 'bucket',
+      key: 'dir1/dir2',
     });
   });
 
   it('returns null for non-S3 URLs', () => {
-    expect(parseS3Url(new URL('http://example.com/key/path'))).toBeNull();
+    expect(parseS3Url(new URL('http://example.com/dir1/dir2'))).toBeNull();
   });
 
   it('returns null for invalid URLs', () => {

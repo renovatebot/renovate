@@ -732,6 +732,10 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
     Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
+## gcsEndpoint
+
+If set, Renovate will use this string as the `apiEndpoint` option when creating the GCS client instance. Read more about [`Application Default Credentials`](https://cloud.google.com/docs/authentication/application-default-credentials#GAC) to specify which credentials Renovate will use.
+
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
@@ -1242,6 +1246,14 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
 Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
+
+```ts title="Set repositoryCacheType to a GCS URI to enable Google Cloud Storage repository cache"
+{
+  repositoryCacheType: 'gs://my-bucket';
+}
+```
+
+Renovate uses the [GCS Node.js Client](https://www.npmjs.com/package/@google-cloud/storage) to connect to GCS. Read more about how the [Google Auth Library](https://www.npmjs.com/package/google-auth-library) authorizes clients.
 
 <!-- prettier-ignore -->
 !!! tip

@@ -157,6 +157,7 @@ export interface RepoGlobalConfig {
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  gcsEndpoint?: string;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
@@ -233,6 +234,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   s3Endpoint?: string;
   s3PathStyle?: boolean;
+  gcsEndpoint?: string;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;

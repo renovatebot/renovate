@@ -178,7 +178,10 @@ export async function downloadS3Protocol(
   }
 
   return await Result.wrap(() => {
-    const command = new GetObjectCommand(s3Url);
+    const command = new GetObjectCommand({
+      Bucket: s3Url.bucket,
+      Key: s3Url.key,
+    });
     const client = getS3Client();
     return client.send(command);
   })

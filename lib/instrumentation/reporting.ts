@@ -106,8 +106,8 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       }
 
       const s3Params: PutObjectCommandInput = {
-        Bucket: s3Url.Bucket,
-        Key: s3Url.Key,
+        Bucket: s3Url.bucket,
+        Key: s3Url.key,
         Body: JSON.stringify(report),
         ContentType: 'application/json',
       };

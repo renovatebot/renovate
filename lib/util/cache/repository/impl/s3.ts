@@ -15,16 +15,16 @@ import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheS3 extends RepoCacheBase {
-  private readonly s3Client;
-  private readonly bucket;
-  private readonly dir;
+  private readonly s3Client = getS3Client();
+  private readonly bucket: string;
+  private readonly dir: string;
 
   constructor(repository: string, fingerprint: string, url: string) {
     super(repository, fingerprint);
-    const { Bucket, Key } = parseS3Url(url)!;
-    this.dir = this.getCacheFolder(Key);
-    this.bucket = Bucket;
-    this.s3Client = getS3Client();
+
+    const { bucket, key: path } = parseS3Url(url)!;
+    this.dir = this.getCacheFolder(path);
+    this.bucket = bucket;
   }
 
   async read(): Promise<string | null> {

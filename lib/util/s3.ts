@@ -20,24 +20,28 @@ export function getS3Client(
       ...(forcePathStyle && { forcePathStyle: true }),
     });
   }
+
   return s3Instance;
 }
 
 export interface S3UrlParts {
-  Bucket: string;
-  Key: string;
+  bucket: string;
+
+  /**
+   * The pathname without leading slash.
+   */
+  key: string;
 }
 
 export function parseS3Url(rawUrl: URL | string): S3UrlParts | null {
   const parsedUrl = typeof rawUrl === 'string' ? parseUrl(rawUrl) : rawUrl;
-  if (parsedUrl === null) {
+
+  if (parsedUrl?.protocol !== 's3:') {
     return null;
   }
-  if (parsedUrl.protocol !== 's3:') {
-    return null;
-  }
+
   return {
-    Bucket: parsedUrl.host,
-    Key: parsedUrl.pathname.substring(1),
+    bucket: parsedUrl.host,
+    key: parsedUrl.pathname.substring(1),
   };
 }

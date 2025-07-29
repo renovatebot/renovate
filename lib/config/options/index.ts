@@ -673,6 +673,13 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'gcsEndpoint',
+    description:
+      'If set, Renovate will use this string as the `apiEndpoint` option when creating the GCS client instance.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'forkOrg',
     description:
       'The preferred organization to create or find forked repositories, when in fork mode.',

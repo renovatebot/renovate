@@ -137,7 +137,10 @@ describe('instrumentation/reporting', () => {
 
   it('send report to an S3 bucket if reportType is s3', async () => {
     const mockClient = mock<S3Client>();
-    s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
+    s3.parseS3Url.mockReturnValue({
+      bucket: 'bucket-name',
+      key: 'key-name',
+    });
     s3.getS3Client.mockReturnValue(mockClient);
 
     const config: RenovateConfig = {

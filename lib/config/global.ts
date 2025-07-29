@@ -23,6 +23,7 @@ export class GlobalConfig {
     'encryptedWarning',
     'exposeAllEnv',
     'executionTimeout',
+    'gcsEndpoint',
     'githubTokenWarn',
     'localDir',
     'migratePresets',
