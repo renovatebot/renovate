@@ -583,16 +583,31 @@ describe('workers/repository/init/merge', () => {
         },
       );
 
-      it('should terminate when static config is invalid or missing', async () => {
-        const [exitMock, error] = mockProcessExitOnce();
-        fs.readSystemFile.mockRejectedValueOnce('missing');
+      describe('resolveStaticRepoConfig termination cases', () => {
+        it.each([
+          {
+            name: 'should terminate when static config is missing',
+            setup: () => fs.readSystemFile.mockRejectedValueOnce('missing'),
+          },
+          {
+            name: 'should terminate when static config is invalid JSON',
+            setup: () => fs.readSystemFile.mockResolvedValue('invalid json'),
+          },
+          {
+            name: 'should terminate when static config has invalid renovate configuration',
+            setup: () => fs.readSystemFile.mockResolvedValue('{"foo":"bar"}'),
+          },
+        ])('$name', async ({ setup }) => {
+          const [exitMock, error] = mockProcessExitOnce();
+          setup();
 
-        await expect(
-          resolveStaticRepoConfig({}, 'static_config.json'),
-        ).rejects.toThrow(error);
+          await expect(
+            resolveStaticRepoConfig({}, 'static_config.json'),
+          ).rejects.toThrow(error);
 
-        expect(exitMock).toHaveBeenCalledOnce();
-        expect(exitMock).toHaveBeenCalledWith(1);
+          expect(exitMock).toHaveBeenCalledOnce();
+          expect(exitMock).toHaveBeenCalledWith(1);
+        });
       });
     });
 

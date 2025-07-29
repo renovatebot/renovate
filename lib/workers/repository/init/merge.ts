@@ -8,6 +8,7 @@ import { parseFileConfig } from '../../../config/parse';
 import * as presets from '../../../config/presets';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../../config/types';
+import * as configValidation from '../../../config/validation';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -26,7 +27,6 @@ import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import { maskToken } from '../../../util/mask';
 import { regEx } from '../../../util/regex';
-import { migrateAndValidateConfig } from '../../global/config/parse/util';
 import { getOnboardingConfig } from '../onboarding/branch/config';
 import {
   getOnboardingConfigFromCache,
@@ -380,14 +380,23 @@ export async function tryReadStaticRepoFileConfig(
     );
   }
 
-  const parsed = parseJson(
+  const staticRepoConfig = parseJson(
     staticRepoConfigRaw,
     staticRepoConfigFile,
   ) as AllConfig;
-  const staticRepoConfig = await migrateAndValidateConfig(
-    parsed,
-    staticRepoConfigFile,
+
+  const { errors } = await configValidation.validateConfig(
+    'repo',
+    staticRepoConfig,
   );
+
+  if (is.nonEmptyArray(errors)) {
+    logger.fatal(
+      { validationErrors: errors },
+      'static repository config validation errors',
+    );
+    throw new Error('Invalid renovate configuration in static config file');
+  }
 
   logger.debug(
     { staticRepoConfig },
