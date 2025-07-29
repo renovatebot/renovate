@@ -17,12 +17,25 @@ export const PackageManagerSchema = z
   .transform((val) => val.split('@'))
   .transform(([name, ...version]) => ({ name, version: version.join('@') }));
 
+const DevEngineDependency = z.object({
+  name: z.string(),
+  version: z.string().optional(),
+});
+
+const DevEngineSchema = z.object({
+  packageManager: DevEngineDependency.or(
+    z.array(DevEngineDependency),
+  ).optional(),
+});
+
 export const PackageJsonSchema = z.object({
+  devEngines: DevEngineSchema.optional(),
   engines: LooseRecord(z.string()).optional(),
   dependencies: LooseRecord(z.string()).optional(),
   devDependencies: LooseRecord(z.string()).optional(),
   peerDependencies: LooseRecord(z.string()).optional(),
   packageManager: PackageManagerSchema.optional(),
+  volta: LooseRecord(z.string()).optional(),
 });
 
 export type PackageJsonSchema = z.infer<typeof PackageJsonSchema>;

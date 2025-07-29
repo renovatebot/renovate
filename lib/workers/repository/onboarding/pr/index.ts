@@ -23,7 +23,7 @@ import { addParticipants } from '../../update/pr/participants';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
 import {
   OnboardingState,
-  defaultConfigFile,
+  getDefaultConfigFileName,
   getSemanticCommitPrTitle,
 } from '../common';
 import { getBaseBranchDesc } from './base-branch';
@@ -57,6 +57,12 @@ export async function ensureOnboardingPr(
         config.onboardingBranch!,
       )
     ) {
+      if (GlobalConfig.get('dryRun')) {
+        logger.info(
+          'DRY-RUN: Would comment that Onboarding PR is conflicted and needs manual resolving',
+        );
+        return;
+      }
       await ensureComment({
         number: existingPr.number,
         topic: 'Branch Conflicted',
@@ -147,7 +153,7 @@ If you need any further assistance then you can also [request help here](${
 
   logger.trace('prBody:\n' + prBody);
 
-  prBody = platform.massageMarkdown(prBody);
+  prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
@@ -228,7 +234,7 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
 async function getOnboardingConfigHashComment(
   config: RenovateConfig,
 ): Promise<string> {
-  const configFile = defaultConfigFile(config);
+  const configFile = getDefaultConfigFileName(config);
   const existingContents =
     (await getFile(configFile, config.onboardingBranch)) ?? '';
   const hash = toSha256(existingContents);

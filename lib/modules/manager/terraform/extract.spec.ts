@@ -53,7 +53,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts  modules', async () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
-      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps).toHaveLength(23);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
@@ -151,6 +151,34 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
           currentValue: 'v0.1.0',
           datasource: 'github-tags',
+        },
+        {
+          packageName: 'git@git.example.com:group/repo/foo',
+          currentValue: 'v1.0.0',
+          depType: 'module',
+          depName: 'git.example.com:group/repo/foo',
+          datasource: 'git-tags',
+        },
+        {
+          packageName: 'git@git.example.com:group/repo/foo',
+          currentValue: 'v1.0.0',
+          depType: 'module',
+          depName: 'git.example.com:group/repo/foo',
+          datasource: 'git-tags',
+        },
+        {
+          packageName: 'git@git.example.com:group/repo/foo',
+          currentValue: 'bar-v1.0.0',
+          depType: 'module',
+          depName: 'git.example.com:group/repo/foo',
+          datasource: 'git-tags',
+        },
+        {
+          packageName: 'git@git.example.com:group/repo/foo',
+          currentValue: 'bar-v1.0.0',
+          depType: 'module',
+          depName: 'git.example.com:group/repo/foo',
+          datasource: 'git-tags',
         },
         {
           depType: 'module',
@@ -427,7 +455,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(docker, 'docker.tf', {
         registryAliases: { 'hub.proxy.test': 'index.docker.io' },
       });
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toMatchObject([
         {
@@ -483,6 +511,18 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'repo.mycompany.com:8080/foo-service',
           depType: 'docker_service',
           replaceString: 'repo.mycompany.com:8080/foo-service:v1',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'precise',
+          datasource: 'docker',
+          depName: 'ubuntu',
+          depType: 'docker_registry_image',
+          packageName: 'ubuntu',
+          replaceString: 'ubuntu:precise',
+          versioning: 'ubuntu',
         },
       ]);
     });

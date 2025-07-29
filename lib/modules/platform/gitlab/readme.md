@@ -46,16 +46,12 @@ We refer to personal access tokens, project access tokens and group access token
 For real runs, give the access token these scopes:
 
 - `api`
-- `write_repository`
-- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 #### Permissions for access tokens on dry runs
 
 For dry runs, give the access token these scopes:
 
 - `read_api`
-- `read_repository`
-- `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 #### Letting Renovate use your access token
 
@@ -84,7 +80,7 @@ You may also use a dedicated [Deploy Token](https://docs.gitlab.com/ee/user/proj
 
 #### Get colored output
 
-You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
+You may want to set `FORCE_COLOR: 3` to the job, in order to get colored output.
 [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
 
 ## Features awaiting implementation

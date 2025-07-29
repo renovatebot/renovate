@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { getChildEnv } from '../../../util/exec/utils';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import { simpleGitConfig } from '../../../util/git/config';
 import { getRemoteUrlWithToken } from '../../../util/git/url';
@@ -33,12 +34,7 @@ export abstract class GitDatasource extends Datasource {
     const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
       this.id,
     ]);
-    const gitEnv = {
-      // pass all existing env variables
-      ...process.env,
-      // add all known git Variables
-      ...gitSubmoduleAuthEnvironmentVariables,
-    };
+    const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
     const git = simpleGit(simpleGitConfig()).env(gitEnv);
 
     // fetch remote tags

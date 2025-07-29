@@ -88,40 +88,42 @@ export async function extractPackageFile(
   }
 
   let npmrc: string | undefined;
-  const npmrcFileName = getSiblingFileName(packageFile, '.npmrc');
-  let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
-  if (is.string(repoNpmrc)) {
-    if (is.string(config.npmrc) && !config.npmrcMerge) {
-      logger.debug(
-        { npmrcFileName },
-        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
-      );
-      npmrc = config.npmrc;
-    } else {
-      npmrc = config.npmrc ?? '';
-      if (npmrc.length) {
-        if (!npmrc.endsWith('\n')) {
-          npmrc += '\n';
-        }
-      }
-      if (repoNpmrc?.includes('package-lock')) {
-        logger.debug('Stripping package-lock setting from .npmrc');
-        repoNpmrc = repoNpmrc.replace(
-          regEx(/(^|\n)package-lock.*?(\n|$)/g),
-          '\n',
-        );
-      }
-      if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
+  const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
+  if (npmrcFileName) {
+    let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+    if (is.string(repoNpmrc)) {
+      if (is.string(config.npmrc) && !config.npmrcMerge) {
         logger.debug(
           { npmrcFileName },
-          'Stripping .npmrc file of lines with variables',
+          'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
         );
-        repoNpmrc = repoNpmrc
-          .split(newlineRegex)
-          .filter((line) => !line.includes('=${'))
-          .join('\n');
+        npmrc = config.npmrc;
+      } else {
+        npmrc = config.npmrc ?? '';
+        if (npmrc.length) {
+          if (!npmrc.endsWith('\n')) {
+            npmrc += '\n';
+          }
+        }
+        if (repoNpmrc?.includes('package-lock')) {
+          logger.debug('Stripping package-lock setting from .npmrc');
+          repoNpmrc = repoNpmrc.replace(
+            regEx(/(^|\n)package-lock.*?(\n|$)/g),
+            '\n',
+          );
+        }
+        if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
+          logger.debug(
+            { npmrcFileName },
+            'Stripping .npmrc file of lines with variables',
+          );
+          repoNpmrc = repoNpmrc
+            .split(newlineRegex)
+            .filter((line) => !line.includes('=${'))
+            .join('\n');
+        }
+        npmrc += repoNpmrc;
       }
-      npmrc += repoNpmrc;
     }
   } else if (is.string(config.npmrc)) {
     npmrc = config.npmrc;
@@ -211,10 +213,11 @@ export async function extractPackageFile(
       ...res.managerData,
       ...lockFiles,
       yarnZeroInstall,
-      hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager,
-      ),
+      hasPackageManager:
+        is.nonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
+        is.nonEmptyObject(packageJson.devEngines?.packageManager),
       workspacesPackages,
+      npmrcFileName, // store npmrc file name so we can later tell if it came from the workspace or not
     },
     skipInstalls,
     extractedConstraints,
@@ -230,7 +233,7 @@ export async function extractAllPackageFiles(
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      // pnpm workspace files are their own package file, defined via fileMatch.
+      // pnpm workspace files are their own package file, defined via managerFilePatterns.
       // We duck-type the content here, to allow users to rename the file itself.
       const parsedPnpmWorkspaceYaml = tryParsePnpmWorkspaceYaml(content);
       if (parsedPnpmWorkspaceYaml.success) {

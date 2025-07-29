@@ -1,6 +1,7 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -149,9 +150,9 @@ export async function generateLockFile(
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         if (currentWorkspaceUpdates.length) {
-          const updateCmd = `npm install ${cmdOptions} --workspace=${workspace} ${currentWorkspaceUpdates.join(
-            ' ',
-          )}`;
+          const updateCmd = `npm install ${cmdOptions} --workspace=${quote(workspace)} ${currentWorkspaceUpdates
+            .map(quote)
+            .join(' ')}`;
           commands.push(updateCmd);
         }
       }
@@ -159,11 +160,10 @@ export async function generateLockFile(
 
     if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
-      const updateCmd =
-        `npm install ${cmdOptions} ` +
-        lockRootUpdates
-          .map((update) => update.managerData?.packageKey)
-          .join(' ');
+      const updateCmd = `npm install ${cmdOptions} ${lockRootUpdates
+        .map((update) => update.managerData?.packageKey)
+        .map(quote)
+        .join(' ')}`;
       commands.push(updateCmd);
     }
 

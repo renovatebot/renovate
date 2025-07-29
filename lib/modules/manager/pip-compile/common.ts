@@ -388,7 +388,7 @@ export function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('pyproject.toml')) {
     return 'pep621';
   }
-  // naive, could be improved, maybe use pip_requirements.fileMatch
+  // naive, could be improved, maybe use pip_requirements.managerFilePatterns
   if (filename.endsWith('.in') || filename.endsWith('.txt')) {
     return 'pip_requirements';
   }

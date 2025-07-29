@@ -22,10 +22,15 @@ const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
-const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 const gcrUrl = 'https://eu.gcr.io/v2';
 const garUrl = 'https://europe-docker.pkg.dev/v2';
 const dockerHubUrl = 'https://hub.docker.com/v2/repositories';
+const amazonHosts = [
+  { host: '123456789.dkr.ecr.us-east-1.amazonaws.com' },
+  { host: '123456789.dkr.ecr-fips.us-east-1.amazonaws.com' },
+  { host: '123456789.dkr-ecr.us-east-1.on.aws' },
+  { host: '123456789.dkr-ecr-fips.us-east-1.on.aws' },
+];
 
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {},
@@ -212,169 +217,191 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
-    it('passes credentials to ECR client', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(401, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/node/manifests/some-tag')
-        .matchHeader('authorization', 'Basic test_token')
-        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+    it.each(amazonHosts)(
+      'passes credentials to ECR client for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}/v2`)
+          .get('/')
+          .reply(401, '', {
+            'www-authenticate':
+              'Basic realm="My Private Docker Registry Server"',
+          })
+          .head('/node/manifests/some-tag')
+          .matchHeader('authorization', 'Basic test_token')
+          .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test_token' }],
-      });
+        mockEcrAuthResolve({
+          authorizationData: [{ authorizationToken: 'test_token' }],
+        });
 
-      expect(
-        await getDigest(
+        expect(
+          await getDigest(
+            {
+              datasource: 'docker',
+              packageName: `${host}/node`,
+            },
+            'some-tag',
+          ),
+        ).toBe('some-digest');
+
+        const ecr = ecrMock.call(0).thisValue as ECRClient;
+        expect(await ecr.config.region()).toBe('us-east-1');
+        expect(await ecr.config.credentials()).toEqual({
+          $source: {
+            CREDENTIALS_CODE: 'e',
+          },
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+        });
+      },
+    );
+
+    it.each(amazonHosts)(
+      'passes session token to ECR client for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}/v2`)
+          .get('/')
+          .reply(401, '', {
+            'www-authenticate':
+              'Basic realm="My Private Docker Registry Server"',
+          })
+          .head('/node/manifests/some-tag')
+          .matchHeader('authorization', 'Basic test_token')
+          .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+        hostRules.find.mockReturnValue({
+          username: 'some-username',
+          password: 'some-password',
+          token: 'some-session-token',
+        });
+
+        mockEcrAuthResolve({
+          authorizationData: [{ authorizationToken: 'test_token' }],
+        });
+
+        expect(
+          await getDigest(
+            {
+              datasource: 'docker',
+              packageName: `${host}/node`,
+            },
+            'some-tag',
+          ),
+        ).toBe('some-digest');
+
+        const ecr = ecrMock.call(0).thisValue as ECRClient;
+        expect(await ecr.config.region()).toBe('us-east-1');
+        expect(await ecr.config.credentials()).toEqual({
+          $source: {
+            CREDENTIALS_CODE: 'e',
+          },
+          accessKeyId: 'some-username',
+          secretAccessKey: 'some-password',
+          sessionToken: 'some-session-token',
+        });
+      },
+    );
+
+    it.each(amazonHosts)(
+      'supports ECR authentication for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}/v2`)
+          .get('/')
+          .reply(401, '', {
+            'www-authenticate':
+              'Basic realm="My Private Docker Registry Server"',
+          })
+          .head('/node/manifests/some-tag')
+          .matchHeader('authorization', 'Basic test')
+          .reply(200, '', { 'docker-content-digest': 'some-digest' });
+
+        mockEcrAuthResolve({
+          authorizationData: [{ authorizationToken: 'test' }],
+        });
+
+        const res = await getDigest(
           {
             datasource: 'docker',
-            packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+            packageName: `${host}/node`,
           },
           'some-tag',
-        ),
-      ).toBe('some-digest');
+        );
 
-      const ecr = ecrMock.call(0).thisValue as ECRClient;
-      expect(await ecr.config.region()).toBe('us-east-1');
-      expect(await ecr.config.credentials()).toEqual({
-        $source: {
-          CREDENTIALS_CODE: 'e',
-        },
-        accessKeyId: 'some-username',
-        secretAccessKey: 'some-password',
-      });
-    });
+        expect(res).toBe('some-digest');
+      },
+    );
 
-    it('passes session token to ECR client', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(401, '', {
+    it.each(amazonHosts)(
+      'continues without token if ECR authentication could not be extracted for host $host',
+      async ({ host }) => {
+        httpMock.scope(`https://${host}/v2`).get('/').reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/node/manifests/some-tag')
-        .matchHeader('authorization', 'Basic test_token')
-        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+        });
+        mockEcrAuthResolve();
 
-      hostRules.find.mockReturnValue({
-        username: 'some-username',
-        password: 'some-password',
-        token: 'some-session-token',
-      });
-
-      mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test_token' }],
-      });
-
-      expect(
-        await getDigest(
+        const res = await getDigest(
           {
             datasource: 'docker',
-            packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+            packageName: `${host}/node`,
           },
           'some-tag',
-        ),
-      ).toBe('some-digest');
+        );
+        expect(res).toBeNull();
+      },
+    );
 
-      const ecr = ecrMock.call(0).thisValue as ECRClient;
-      expect(await ecr.config.region()).toBe('us-east-1');
-      expect(await ecr.config.credentials()).toEqual({
-        $source: {
-          CREDENTIALS_CODE: 'e',
-        },
-        accessKeyId: 'some-username',
-        secretAccessKey: 'some-password',
-        sessionToken: 'some-session-token',
-      });
-    });
-
-    it('supports ECR authentication', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(401, '', {
+    it.each(amazonHosts)(
+      'continues without token if ECR authentication fails for host $host',
+      async ({ host }) => {
+        hostRules.find.mockReturnValue({});
+        httpMock.scope(`https://${host}/v2`).get('/').reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/node/manifests/some-tag')
-        .matchHeader('authorization', 'Basic test')
-        .reply(200, '', { 'docker-content-digest': 'some-digest' });
+        });
+        mockEcrAuthReject('some error');
+        const res = await getDigest(
+          {
+            datasource: 'docker',
+            packageName: `${host}/node`,
+          },
+          'some-tag',
+        );
+        expect(res).toBeNull();
+      },
+    );
 
-      mockEcrAuthResolve({
-        authorizationData: [{ authorizationToken: 'test' }],
-      });
+    it.each(amazonHosts)(
+      'supports ECR authentication for private repositories for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}/v2`)
+          .get('/')
+          .reply(401, '', {
+            'www-authenticate':
+              'Basic realm="My Private Docker Registry Server"',
+          })
+          .head('/node/manifests/some-tag')
+          .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
+          .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      const res = await getDigest(
-        {
-          datasource: 'docker',
-          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag',
-      );
+        hostRules.find.mockReturnValue({
+          username: 'AWS',
+          password: 'some-password',
+        });
 
-      expect(res).toBe('some-digest');
-    });
+        const res = await getDigest(
+          {
+            datasource: 'docker',
+            packageName: `${host}/node`,
+          },
+          'some-tag',
+        );
 
-    it('continues without token if ECR authentication could not be extracted', async () => {
-      httpMock.scope(amazonUrl).get('/').reply(401, '', {
-        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-      });
-      mockEcrAuthResolve();
-
-      const res = await getDigest(
-        {
-          datasource: 'docker',
-          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag',
-      );
-      expect(res).toBeNull();
-    });
-
-    it('continues without token if ECR authentication fails', async () => {
-      hostRules.find.mockReturnValue({});
-      httpMock.scope(amazonUrl).get('/').reply(401, '', {
-        'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-      });
-      mockEcrAuthReject('some error');
-      const res = await getDigest(
-        {
-          datasource: 'docker',
-          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag',
-      );
-      expect(res).toBeNull();
-    });
-
-    it('supports ECR authentication for private repositories', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/')
-        .reply(401, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/node/manifests/some-tag')
-        .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
-        .reply(200, '', { 'docker-content-digest': 'some-digest' });
-
-      hostRules.find.mockReturnValue({
-        username: 'AWS',
-        password: 'some-password',
-      });
-
-      const res = await getDigest(
-        {
-          datasource: 'docker',
-          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag',
-      );
-
-      expect(res).toBe('some-digest');
-    });
+        expect(res).toBe('some-digest');
+      },
+    );
 
     it('supports Google ADC authentication for gcr', async () => {
       httpMock
@@ -1505,7 +1532,8 @@ describe('modules/datasource/docker/index', () => {
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
-      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
+      const tags3 = [...range(20000, 20050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
@@ -1530,96 +1558,111 @@ describe('modules/datasource/docker/index', () => {
         .reply(
           200,
           { tags: tags2 },
-          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=20000>; rel="next", ',
+          },
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=20000')
+        .reply(
+          200,
+          { tags: tags3 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+          },
         )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/10050.0.0')
+        .get('/virtual-mirror/node/manifests/20050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         packageName: 'org.jfrog.io/virtual-mirror/node',
       });
-      expect(res?.releases).toHaveLength(10050);
+      expect(res?.releases).toHaveLength(20050);
     });
 
-    it('uses lower tag limit for ECR deps', async () => {
-      httpMock
-        .scope(amazonUrl)
-        .get('/node/tags/list?n=1000')
-        .reply(200, '', {})
-        // The  tag limit parameter `n` needs to be limited to 1000 for ECR
-        // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-        .get('/node/tags/list?n=1000')
-        .reply(200, { tags: ['some'] }, {})
-        .get('/')
-        .reply(200, '', {})
-        .get('/node/manifests/some')
-        .reply(200);
-      expect(
-        await getPkgReleases({
-          datasource: DockerDatasource.id,
-          packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        }),
-      ).toEqual({
-        lookupName: 'node',
-        registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
-        releases: [],
-      });
-    });
+    it.each(amazonHosts)(
+      'uses lower tag limit for ECR deps for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}/v2`)
+          .get('/node/tags/list?n=1000')
+          .reply(200, '', {})
+          // The  tag limit parameter `n` needs to be limited to 1000 for ECR
+          // See https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+          .get('/node/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {})
+          .get('/')
+          .reply(200, '', {})
+          .get('/node/manifests/some')
+          .reply(200);
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            packageName: `${host}/node`,
+          }),
+        ).toEqual({
+          lookupName: 'node',
+          registryUrl: `https://${host}`,
+          releases: [],
+        });
+      },
+    );
 
-    it('uses lower tag limit for ECR Public deps', async () => {
-      httpMock
-        .scope('https://public.ecr.aws')
-        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
-        })
-        .get('/token?service=public.ecr.aws&scope=aws')
-        .reply(200, { token: 'test' });
-      httpMock
-        .scope('https://public.ecr.aws', {
-          reqheaders: {
-            authorization: 'Bearer test',
-          },
-        })
-        // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
-        // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
-        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
-        .reply(200, { tags: ['some'] }, {});
+    it.each([{ host: 'public.ecr.aws' }, { host: 'ecr-public.aws.com' }])(
+      'uses lower tag limit for ECR Public deps for host $host',
+      async ({ host }) => {
+        httpMock
+          .scope(`https://${host}`)
+          .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+          .reply(401, '', {
+            'www-authenticate': `Bearer realm="https://${host}/token",service="public.ecr.aws",scope="aws"`,
+          })
+          .get('/token?service=public.ecr.aws&scope=aws')
+          .reply(200, { token: 'test' });
+        httpMock
+          .scope(`https://${host}`, {
+            reqheaders: {
+              authorization: 'Bearer test',
+            },
+          })
+          // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
+          // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+          .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {});
 
-      httpMock
-        .scope('https://public.ecr.aws')
-        .get('/v2/')
-        .reply(401, '', {
-          'www-authenticate':
-            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
-        })
-        .get(
-          '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull',
-        )
-        .reply(200, { token: 'test' });
-      httpMock
-        .scope('https://public.ecr.aws', {
-          reqheaders: {
-            authorization: 'Bearer test',
-          },
-        })
-        .get('/v2/amazonlinux/amazonlinux/manifests/some')
-        .reply(200);
+        httpMock
+          .scope(`https://${host}`)
+          .get('/v2/')
+          .reply(401, '', {
+            'www-authenticate': `Bearer realm="https://${host}/token",service="public.ecr.aws",scope="aws"`,
+          })
+          .get(
+            '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull',
+          )
+          .reply(200, { token: 'test' });
+        httpMock
+          .scope(`https://${host}`, {
+            reqheaders: {
+              authorization: 'Bearer test',
+            },
+          })
+          .get('/v2/amazonlinux/amazonlinux/manifests/some')
+          .reply(200);
 
-      expect(
-        await getPkgReleases({
-          datasource: DockerDatasource.id,
-          packageName: 'public.ecr.aws/amazonlinux/amazonlinux',
-        }),
-      ).toEqual({
-        lookupName: 'amazonlinux/amazonlinux',
-        registryUrl: 'https://public.ecr.aws',
-        releases: [],
-      });
-    });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            packageName: `${host}/amazonlinux/amazonlinux`,
+          }),
+        ).toEqual({
+          lookupName: 'amazonlinux/amazonlinux',
+          registryUrl: `https://${host}`,
+          releases: [],
+        });
+      },
+    );
 
     describe('when making requests that interact with an ECR proxy', () => {
       it('resolves requests to ECR proxy', async () => {

@@ -1,18 +1,6 @@
-import { type ZodEffects, type ZodString, z } from 'zod';
+import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex';
-import { Json } from '../../../util/schema-utils';
-
-const stringIsBoolSchema: ZodEffects<ZodString, boolean, string> = z
-  .string()
-  .transform((value) => {
-    if (value === 'true') {
-      return true;
-    } else if (value === 'false') {
-      return false;
-    } else {
-      return false;
-    }
-  });
+import { Json } from '../../../util/schema-utils/v4';
 
 export const EksAddonsFilterSchema = z.object({
   addonName: z.string().nonempty().regex(regEx('^[a-z0-9][a-z0-9-]*[a-z0-9]$')),
@@ -20,7 +8,9 @@ export const EksAddonsFilterSchema = z.object({
     .string()
     .regex(regEx('^(?<major>\\d+)\\.(?<minor>\\d+)$'))
     .optional(),
-  default: z.oboolean().or(stringIsBoolSchema),
+  default: z
+    .union([z.boolean(), z.string().transform((value) => value === 'true')])
+    .optional(),
   region: z.string().optional(),
   profile: z.string().optional(),
 });

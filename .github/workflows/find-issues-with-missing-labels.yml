@@ -5,6 +5,8 @@ on:
     # Run every Sunday at midnight
     - cron: '0 0 * * 0'
 
+permissions: {}
+
 jobs:
   check-unlabeled-issues:
     runs-on: ubuntu-latest

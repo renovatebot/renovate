@@ -20,3 +20,5 @@ jobs:
       - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:actions/checkout@v2.1.0
       - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:exclude
       - uses: actions-runner-controller/execute-assert-arc-e2e@f1d7c52253b89f0beae60141f8465d9495cdc2cf # actions-runner-controller-0.23.5
+      - uses: grafana/writers-toolkit@4b1248585248751e3b12fd020cf7ac91540ca09c # prettier/v2.0.1
+

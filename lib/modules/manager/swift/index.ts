@@ -10,7 +10,7 @@ export const url = 'https://www.swift.org/package-manager';
 export const categories: Category[] = ['swift'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)Package\\.swift'],
+  managerFilePatterns: ['/(^|/)Package\\.swift/'],
   versioning: swiftVersioning.id,
   pinDigests: false,
 };

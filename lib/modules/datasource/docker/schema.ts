@@ -83,7 +83,7 @@ export type OciImageManifest = z.infer<typeof OciImageManifest>;
  */
 export const OciImageIndexManifest = ManifestObject.extend({
   mediaType: z.literal('application/vnd.oci.image.index.v1+json'),
-  manifests: z.array(
+  manifests: LooseArray(
     Descriptor.extend({
       mediaType: z.enum([
         'application/vnd.oci.image.manifest.v1+json',

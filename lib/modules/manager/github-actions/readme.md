@@ -19,12 +19,17 @@ jobs:
 
 Renovate will update the commit SHA according to the GitHub tag you specified.
 Renovate can update digests that use SHA1 and SHA256 algorithms.
-The GitHub tag is in the format of `(prefix-)(v)1.0.0`, where `prefix` and `v` are optional and `1.0.0` is the version number.
+The GitHub tag is in the format of `<PREFIX><SEPARATOR><VERSION>`.
+_`PREFIX`_ and _`SEPARATOR`_ are optional.
+Valid separators are the ASCII hyphen (`-`) or forward slash (`/`).
+_`VERSION`_ can include the major, minor, and patch components and may optionally include a `v` prefix.
 Here are the examples of valid GitHub tags:
 `1.0.1`, `1.0`, `1`,
 `v1.0.1`, `v1.0`, `v1`,
 `prefix-1.0.1`, `prefix-1.0`, `prefix-1`,
 `prefix-v1.0.1`, `prefix-v1.0`, `prefix-v1`.
+`prefix/1.0.1`, `prefix/1.0`, `prefix/1`,
+`prefix/v1.0.1`, `prefix/v1.0`, `prefix/v1`.
 
 If you want to automatically pin action digests add the `helpers:pinGitHubActionDigests` preset to the `extends` array:
 

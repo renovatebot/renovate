@@ -48,43 +48,43 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  fileMatches: string[],
+  matchedFiles: string[],
 ): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
   const packageFiles = new Map<string, PackageFile>();
   const lockFileSources = new Map<string, PackageFile[]>();
-  for (const fileMatch of fileMatches) {
-    const fileContent = await readLocalFile(fileMatch, 'utf8');
+  for (const matchedFile of matchedFiles) {
+    const fileContent = await readLocalFile(matchedFile, 'utf8');
     if (!fileContent) {
-      logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
+      logger.debug(`pip-compile: no content found for file ${matchedFile}`);
       continue;
     }
     let compileArgs: PipCompileArgs;
     let compileDir: string;
     try {
-      compileArgs = extractHeaderCommand(fileContent, fileMatch);
-      compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
+      compileArgs = extractHeaderCommand(fileContent, matchedFile);
+      compileDir = inferCommandExecDir(matchedFile, compileArgs.outputFile);
     } catch (error) {
       logger.warn(
-        { fileMatch, errorMessage: error.message },
+        { matchedFile, errorMessage: error.message },
         'pip-compile error',
       );
       continue;
     }
-    lockFileArgs.set(fileMatch, compileArgs);
+    lockFileArgs.set(matchedFile, compileArgs);
     for (const constraint of coerceArray(compileArgs.constraintsFiles)) {
       depsBetweenFiles.push({
         sourceFile: constraint,
-        outputFile: fileMatch,
+        outputFile: matchedFile,
         type: 'constraint',
       });
     }
     const lockedDeps = extractRequirementsFile(fileContent)?.deps;
     if (!lockedDeps) {
       logger.debug(
-        { fileMatch },
+        { matchedFile },
         'pip-compile: Failed to extract dependencies from lock file',
       );
       continue;
@@ -98,20 +98,20 @@ export async function extractAllPackageFiles(
         ensureLocalPath(packageFile);
       } catch {
         logger.warn(
-          { fileMatch, packageFile },
+          { matchedFile, packageFile },
           'pip-compile: Source file path outside of repository',
         );
         continue;
       }
       depsBetweenFiles.push({
         sourceFile: packageFile,
-        outputFile: fileMatch,
+        outputFile: matchedFile,
         type: 'requirement',
       });
-      if (fileMatches.includes(packageFile)) {
+      if (matchedFiles.includes(packageFile)) {
         // TODO(not7cd): do something about it
         logger.warn(
-          { sourceFile: packageFile, lockFile: fileMatch },
+          { sourceFile: packageFile, lockFile: matchedFile },
           'pip-compile: lock file acts as source file for another lock file',
         );
         continue;
@@ -121,11 +121,11 @@ export async function extractAllPackageFiles(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
         const existingPackageFile = packageFiles.get(packageFile)!;
-        existingPackageFile.lockFiles!.push(fileMatch);
+        existingPackageFile.lockFiles!.push(matchedFile);
         extendWithIndirectDeps(existingPackageFile, lockedDeps);
-        const source = lockFileSources.get(fileMatch) ?? [];
+        const source = lockFileSources.get(matchedFile) ?? [];
         source.push(existingPackageFile);
-        lockFileSources.set(fileMatch, source);
+        lockFileSources.set(matchedFile, source);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -174,7 +174,7 @@ export async function extractAllPackageFiles(
             dep.lockedVersion = lockedVersion;
           } else {
             logger.warn(
-              { depName: dep.depName, lockFile: fileMatch },
+              { depName: dep.depName, lockFile: matchedFile },
               'pip-compile: dependency not found in lock file',
             );
           }
@@ -182,13 +182,13 @@ export async function extractAllPackageFiles(
         extendWithIndirectDeps(packageFileContent, lockedDeps);
         const newPackageFile: PackageFile = {
           ...packageFileContent,
-          lockFiles: [fileMatch],
+          lockFiles: [matchedFile],
           packageFile,
         };
         packageFiles.set(packageFile, newPackageFile);
-        const source = lockFileSources.get(fileMatch) ?? [];
+        const source = lockFileSources.get(matchedFile) ?? [];
         source.push(newPackageFile);
-        lockFileSources.set(fileMatch, source);
+        lockFileSources.set(matchedFile, source);
       } else {
         logger.warn(
           { packageFile },
@@ -209,7 +209,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of [...result].reverse()) {
     for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
       let sourceFiles: PackageFile[] | undefined = undefined;
-      if (fileMatches.includes(reqFile)) {
+      if (matchedFiles.includes(reqFile)) {
         sourceFiles = lockFileSources.get(reqFile);
       } else if (packageFiles.has(reqFile)) {
         sourceFiles = [packageFiles.get(reqFile)!];

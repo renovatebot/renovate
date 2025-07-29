@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger, withMeta } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
@@ -20,7 +21,7 @@ import { WorkflowSchema } from './schema';
 
 const dockerActionRe = regEx(/^\s+uses\s*: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*-)?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
+  /^\s+-?\s+?uses\s*: (?<replaceString>['"]?(?<depName>(?<registryUrl>https:\/\/[.\w-]+\/)?(?<packageName>[\w-]+\/[.\w-]+))(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:(?<commentWhiteSpaces>\s+)#\s*(((?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+)?)@?(?<tag>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)|(?:ratchet:exclude)))?)/,
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -122,13 +123,18 @@ function detectDatasource(registryUrl: string): PackageDependency {
   const platform = detectPlatform(registryUrl);
 
   switch (platform) {
-    case 'github':
-      return { registryUrls: [registryUrl] };
+    case 'forgejo':
+      return {
+        registryUrls: [registryUrl],
+        datasource: ForgejoTagsDatasource.id,
+      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
         datasource: GiteaTagsDatasource.id,
       };
+    case 'github':
+      return { registryUrls: [registryUrl] };
   }
 
   return {

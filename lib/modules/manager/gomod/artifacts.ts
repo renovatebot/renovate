@@ -6,6 +6,7 @@ import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { getEnv } from '../../../util/env';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { filterMap } from '../../../util/filter-map';
@@ -197,16 +198,17 @@ export async function updateArtifacts({
     await writeLocalFile(goModFileName, massagedGoMod);
 
     const cmd = 'go';
+    const env = getEnv();
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: process.env.GOPROXY,
-        GOPRIVATE: process.env.GOPRIVATE,
-        GONOPROXY: process.env.GONOPROXY,
-        GONOSUMDB: process.env.GONOSUMDB,
-        GOSUMDB: process.env.GOSUMDB,
-        GOINSECURE: process.env.GOINSECURE,
+        GOPROXY: env.GOPROXY,
+        GOPRIVATE: env.GOPRIVATE,
+        GONOPROXY: env.GONOPROXY,
+        GONOSUMDB: env.GONOSUMDB,
+        GOSUMDB: env.GOSUMDB,
+        GOINSECURE: env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,

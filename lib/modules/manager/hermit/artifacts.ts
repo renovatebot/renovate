@@ -222,7 +222,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   // when a name replacement happens, need to uninstall the old package
   if (toUninstall.length > 0) {
-    const packagesToUninstall = toUninstall.join(' ');
+    const packagesToUninstall = toUninstall.map(quote).join(' ');
     const uninstallCommands = `./hermit uninstall ${packagesToUninstall}`;
 
     try {
@@ -242,7 +242,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
     }
   }
 
-  const packagesToInstall = toInstall.join(' ');
+  const packagesToInstall = toInstall.map(quote).join(' ');
 
   const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(

@@ -134,9 +134,6 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = template.compile(update.branchName, update);
     update.branchName = template.compile(update.branchName, update);
   }
-  if (update.updateType === 'minor' && update.separateMultipleMinor) {
-    update.branchName = update.branchName.replace('.x', `.${newMinor}.x`);
-  }
   update.branchName = cleanBranchName(
     update.branchName,
     update.branchPrefix!,

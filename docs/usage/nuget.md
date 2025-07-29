@@ -28,7 +28,6 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either:
-
    - a "changelog" file, or
    - uses GitHub releases
 
@@ -68,6 +67,10 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 !!! warning
     If your project has lockfile(s), for example a `package.lock.json` file, then you must set alternate feed settings in the `NuGet.config` file only.
     `registryUrls` set in other files are **not** passed to the NuGet commands.
+
+<!-- prettier-ignore -->
+!!! note
+    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 

@@ -8,7 +8,7 @@ export const url = 'https://docs.docker.com/compose';
 export const categories: Category[] = ['docker'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)(?:docker-)?compose[^/]*\\.ya?ml$'],
+  managerFilePatterns: ['/(^|/)(?:docker-)?compose[^/]*\\.ya?ml$/'],
 };
 
 export const supportedDatasources = [DockerDatasource.id];

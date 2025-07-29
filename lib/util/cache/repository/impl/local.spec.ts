@@ -61,6 +61,20 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.isModified()).toBeUndefined();
   });
 
+  it('should not load empty repository cache files', async () => {
+    fs.readCacheFile.mockResolvedValue('');
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      'local',
+    );
+    await localRepoCache.load(); // readCacheFile is mocked but has no return value set - therefore returns undefined
+    expect(logger.debug).toHaveBeenCalledWith(
+      'RepoCacheBase.load() - cache file is empty - skipping',
+    );
+    expect(localRepoCache.isModified()).toBeUndefined();
+  });
+
   it('skip when not found', async () => {
     const localRepoCache = CacheFactory.get(
       'some/repo',

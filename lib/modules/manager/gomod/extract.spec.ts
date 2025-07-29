@@ -14,8 +14,8 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(10);
-      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(7);
+      expect(res).toHaveLength(12);
+      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(9);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(2);
       expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(2);
@@ -122,6 +122,26 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
       });
+    });
+
+    // https://go.dev/doc/modules/gomod-ref#exclude
+    it('ignores exclude directives from multi-line and single line', () => {
+      const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        exclude github.com/pravesht/gocql v0.0.0
+
+        exclude (
+              k8s.io/client-go v0.21.9
+              )
+        exclude (
+          k8s.io/cloud-provider v0.17.3
+          k8s.io/cluster-bootstrap v0.17.3 // indirect
+          k8s.io/code-generator v0.17.3
+        )
+      `;
+      const res = extractPackageFile(goMod);
+      expect(res).toBeNull();
     });
 
     it('extracts the toolchain directive', () => {
@@ -295,6 +315,35 @@ describe('modules/manager/gomod/extract', () => {
   it('extracts tool directives with no matching dependencies', () => {
     const goMod = codeBlock`
         tool github.com/foo/bar/sub/cmd/hello
+      `;
+    const res = extractPackageFile(goMod);
+    expect(res).toBeNull();
+  });
+
+  /**
+   *
+   * https://go.dev/doc/modules/gomod-ref#retract
+   * https://go.dev/doc/modules/gomod-ref#godebug
+   */
+  it('ignores directives unrelated to dependencies', () => {
+    const goMod = codeBlock`
+        module github.com/renovate-tests/gomod
+
+        godebug asynctimerchan=0
+
+        godebug (
+          default=go1.21
+          panicnil=1
+        )
+
+        retract v3.0.0
+
+        retract [v2.0.0,v2.0.5] // Build broken on some platforms.
+
+        retract (
+            v1.0.0 // Published accidentally.
+            v1.0.1 // Contains retractions only.
+        )
       `;
     const res = extractPackageFile(goMod);
     expect(res).toBeNull();

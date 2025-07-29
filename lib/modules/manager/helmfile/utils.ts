@@ -47,5 +47,5 @@ export async function generateRegistryLoginCmd(
     }),
   };
 
-  return await generateLoginCmd(repositoryRule, 'helm registry login');
+  return await generateLoginCmd(repositoryRule);
 }

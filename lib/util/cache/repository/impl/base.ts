@@ -58,6 +58,11 @@ export abstract class RepoCacheBase implements RepoCache {
         return;
       }
 
+      if (!is.nonEmptyString(oldCache)) {
+        logger.debug('RepoCacheBase.load() - cache file is empty - skipping');
+        return;
+      }
+
       const cacheV13 = RepoCacheV13.safeParse(oldCache);
       if (cacheV13.success) {
         await this.restore(cacheV13.data);

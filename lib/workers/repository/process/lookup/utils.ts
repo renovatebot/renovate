@@ -31,7 +31,8 @@ export function isReplacementRulesConfigured(
   return (
     is.nonEmptyString(config.replacementName) ||
     is.nonEmptyString(config.replacementNameTemplate) ||
-    is.nonEmptyString(config.replacementVersion)
+    is.nonEmptyString(config.replacementVersion) ||
+    is.nonEmptyString(config.replacementVersionTemplate)
   );
 }
 
@@ -50,18 +51,29 @@ export function determineNewReplacementName(
 export function determineNewReplacementValue(
   config: LookupUpdateConfig,
 ): string | undefined | null {
+  const newVersion = getNewVersion(config);
+  if (!newVersion) {
+    return config.currentValue;
+  }
+
   const versioningApi = allVersioning.get(config.versioning);
   const rangeStrategy = getRangeStrategy(config);
 
-  if (!is.nullOrUndefined(config.replacementVersion)) {
-    return versioningApi.getNewValue({
-      // TODO #22198
-      currentValue: config.currentValue!,
-      newVersion: config.replacementVersion,
-      rangeStrategy: rangeStrategy!,
-      isReplacement: true,
-    });
-  }
+  return versioningApi.getNewValue({
+    // TODO #22198
+    currentValue: config.currentValue!,
+    newVersion,
+    rangeStrategy: rangeStrategy!,
+    isReplacement: true,
+  });
+}
 
-  return config.currentValue;
+function getNewVersion(config: LookupUpdateConfig): string | null {
+  if (!is.nullOrUndefined(config.replacementVersion)) {
+    return config.replacementVersion;
+  }
+  if (!is.nullOrUndefined(config.replacementVersionTemplate)) {
+    return template.compile(config.replacementVersionTemplate, config, true);
+  }
+  return null;
 }
