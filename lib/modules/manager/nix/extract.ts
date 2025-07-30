@@ -6,8 +6,6 @@ import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { NixFlakeLock } from './schema';
 
-const nixpkgsRegex = regEx(/"github:nixos\/nixpkgs(\/(?<ref>[a-z0-9-.]+))?"/i);
-
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
 const lockableHTTPTarballProtocol = regEx(
@@ -22,8 +20,9 @@ const lockableChannelLockedUrl = regEx(
 );
 
 export async function extractPackageFile(
-  content: string,
+  _content: string,
   packageFile: string,
+  config?: Record<string, any>,
 ): Promise<PackageFileContent | null> {
   const packageLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const lockContents = await readLocalFile(packageLockFile, 'utf8');
@@ -31,18 +30,6 @@ export async function extractPackageFile(
   logger.trace(`nix.extractPackageFile(${packageLockFile})`);
 
   const deps: PackageDependency[] = [];
-
-  const nixpkgsMatch = nixpkgsRegex.exec(content)?.groups;
-  if (nixpkgsMatch?.ref) {
-    // only add when we matched a ref
-    deps.push({
-      depName: 'nixpkgs',
-      currentValue: nixpkgsMatch.ref,
-      datasource: GitRefsDatasource.id,
-      packageName: 'https://github.com/NixOS/nixpkgs',
-      versioning: nixpkgsVersioning,
-    });
-  }
 
   const flakeLockParsed = NixFlakeLock.safeParse(lockContents);
   if (!flakeLockParsed.success) {
@@ -106,45 +93,77 @@ export async function extractPackageFile(
       continue;
     }
 
+    // if there's a new digest, pretend we updated it so confirmations pass
+    const currentDigest = config?.currentDigest;
+    const newDigest = config?.newDigest;
+    if (
+      currentDigest &&
+      newDigest &&
+      flakeOriginal.rev &&
+      flakeOriginal.rev === currentDigest
+    ) {
+      flakeOriginal.rev = newDigest;
+    }
+
+    // use nixpkgsVersioning for all nixpkgs inputs
+    if (
+      flakeOriginal.type === 'github' &&
+      flakeOriginal.owner === 'NixOS' &&
+      flakeOriginal.repo === 'nixpkgs'
+    ) {
+      deps.push({
+        depName: 'nixpkgs',
+        currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+        currentDigest: flakeOriginal.rev,
+        lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
+        datasource: GitRefsDatasource.id,
+        packageName: 'https://github.com/NixOS/nixpkgs',
+        versioning: nixpkgsVersioning,
+      });
+      continue;
+    }
+
+    // if the input contains a digest as rev, we can update it
+    // otherwise set lockedVersion so it is at least updated during lock file maintenance
     switch (flakeLocked.type) {
       case 'github':
         deps.push({
           depName,
-          currentValue: flakeOriginal.ref,
-          currentDigest: flakeLocked.rev,
+          currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+          currentDigest: flakeOriginal.rev,
+          lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
-          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'gitlab':
         deps.push({
           depName,
-          currentValue: flakeOriginal.ref,
-          currentDigest: flakeLocked.rev,
+          currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+          currentDigest: flakeOriginal.rev,
+          lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'gitlab.com'}/${decodeURIComponent(flakeOriginal.owner!)}/${flakeOriginal.repo}`,
-          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'git':
         deps.push({
           depName,
-          currentValue: flakeOriginal.ref,
-          currentDigest: flakeLocked.rev,
+          currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+          currentDigest: flakeOriginal.rev,
+          lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: flakeOriginal.url,
-          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'sourcehut':
         deps.push({
           depName,
-          currentValue: flakeOriginal.ref,
-          currentDigest: flakeLocked.rev,
+          currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+          currentDigest: flakeOriginal.rev,
+          lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
           datasource: GitRefsDatasource.id,
           packageName: `https://${flakeOriginal.host ?? 'git.sr.ht'}/${flakeOriginal.owner}/${flakeOriginal.repo}`,
-          rangeStrategy: 'update-lockfile',
         });
         break;
       case 'tarball':
@@ -153,30 +172,29 @@ export async function extractPackageFile(
             lockableChannelOriginalUrl,
             '$<channel>',
           );
-          const rev = flakeLocked.url!.replace(
+          const rev = flakeOriginal.url!.replace(
             lockableChannelLockedUrl,
             '$<ref>',
           );
           deps.push({
             depName,
             currentValue: branch,
-            currentDigest: rev,
+            lockedVersion: rev,
             datasource: GitRefsDatasource.id,
             packageName: 'https://github.com/NixOS/nixpkgs',
-            rangeStrategy: 'update-lockfile',
           });
         } else {
           deps.push({
             depName,
-            currentValue: flakeLocked.ref,
-            currentDigest: flakeLocked.rev,
+            currentValue: flakeOriginal.rev ? flakeOriginal.ref : undefined,
+            currentDigest: flakeOriginal.rev,
+            lockedVersion: flakeOriginal.rev ? undefined : flakeLocked.rev,
             datasource: GitRefsDatasource.id,
             // type tarball always contains this link
             packageName: flakeOriginal.url!.replace(
               lockableHTTPTarballProtocol,
               'https://$<domain>/$<owner>/$<repo>',
             ),
-            rangeStrategy: 'update-lockfile',
           });
         }
         break;

@@ -23,6 +23,7 @@ const OriginalInput = z.object({
   owner: z.string().optional(),
   repo: z.string().optional(),
   ref: z.string().optional(),
+  rev: z.string().optional(),
   type: InputType,
   url: z.string().optional(),
 });
