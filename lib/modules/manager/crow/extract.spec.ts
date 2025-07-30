@@ -217,12 +217,12 @@ describe('modules/manager/crow/extract', () => {
       });
     });
 
-    it('extracts the v.1.0.x version', () => {
+    it('extracts the 1.0.0 version', () => {
       const res = extractPackageFile(
         `
         steps:
           redis:
-            image: quay.io/something/redis:alpine
+            image: quay.io/something/redis:1.0.0
           `,
         '',
         {},
@@ -232,9 +232,9 @@ describe('modules/manager/crow/extract', () => {
           {
             depName: 'quay.io/something/redis',
             packageName: 'quay.io/something/redis',
-            currentValue: 'alpine',
+            currentValue: '1.0.0',
             currentDigest: undefined,
-            replaceString: 'quay.io/something/redis:alpine',
+            replaceString: 'quay.io/something/redis:1.0.0',
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             datasource: 'docker',
