@@ -58,6 +58,13 @@ export class HelmDatasource extends Datasource {
       return null;
     }
 
+    if (!isHttpUrl(helmRepository)) {
+      logger.warn(
+        `Datasource ${this.id} received an invalid URL: ${helmRepository}`,
+      );
+      return null;
+    }
+
     const repositoryData = await this.getRepositoryData(helmRepository);
     const releases = repositoryData[packageName];
     if (!releases) {

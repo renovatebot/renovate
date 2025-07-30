@@ -282,11 +282,7 @@ export abstract class HttpBase<
     }
 
     const parsedUrl = parseUrl(url);
-    if (parsedUrl && !isHttpUrl(parsedUrl)) {
-      logger.warn(
-        { url: requestUrl, baseUrl, resolvedUrl: url },
-        'Request Warning: is not an HTTP URL',
-      );
+    if (!parsedUrl || !isHttpUrl(parsedUrl)) {
     } else if (!parsedUrl) {
       logger.error(
         { url: requestUrl, baseUrl, resolvedUrl: url },
