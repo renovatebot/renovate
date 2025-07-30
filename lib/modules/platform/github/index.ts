@@ -99,7 +99,7 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
-const GitHubMaxPrBodyLen = 60000;
+const GitHubMaxPrBodyLen = 59500;
 
 export function resetConfigs(): void {
   config = {} as never;
