@@ -283,7 +283,7 @@ describe('modules/manager/crow/extract', () => {
       });
     });
 
-    it('return dependency when an plugin-git is cloned', () => {
+    it('return dependency when a plugin-git is cloned', () => {
       const res = extractPackageFile(
         `
         clone:
