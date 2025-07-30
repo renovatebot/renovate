@@ -1,7 +1,12 @@
-import type { RangeConfig } from '../types.ts';
-import { getRangeStrategy } from './index.ts';
+import type { RangeConfig } from '../types';
+import { getRangeStrategy } from '.';
 
-describe('modules/manager/nix/range', () => {
+describe('modules/manager/composer/range', () => {
+  it('returns same if nixpkgs', () => {
+    const config: RangeConfig = { rangeStrategy: 'widen', depName: 'nixpkgs' };
+    expect(getRangeStrategy(config)).toBe('widen');
+  });
+
   it('returns replace if currentValue not null', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
