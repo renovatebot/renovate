@@ -500,7 +500,7 @@ describe('modules/manager/github-actions/extract', () => {
             currentValue: 'v3.1.1',
             replaceString:
               'https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
-            datasource: 'gitea-tags',
+            datasource: 'forgejo-tags',
             registryUrls: ['https://code.forgejo.org/'],
           },
           {

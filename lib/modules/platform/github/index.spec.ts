@@ -1079,6 +1079,93 @@ describe('modules/platform/github/index', () => {
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
       });
     });
+
+    describe('PR author filtering', () => {
+      const renovatePr: GhRestPr = {
+        ...pr1,
+        number: 1,
+        head: {
+          ref: 'renovate-branch',
+          sha: '111' as LongCommitSha,
+          repo: { full_name: 'some/repo' },
+        },
+        title: 'Renovate PR',
+        user: { login: 'renovate-bot' },
+      };
+
+      const otherPr: GhRestPr = {
+        ...pr1,
+        number: 2,
+        head: {
+          ref: 'other-branch',
+          sha: '222' as LongCommitSha,
+          repo: { full_name: 'some/repo' },
+        },
+        title: 'Other PR',
+        user: { login: 'other-user' },
+      };
+
+      it('filters PRs by renovate username when no forkToken or ignorePrAuthor', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(1);
+        expect(res).toMatchObject([{ number: 1, title: 'Renovate PR' }]);
+      });
+
+      it('fetches all PRs when forkToken is set', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        forkInitRepoMock(scope, 'some/repo', false);
+        scope.get('/user').reply(200, {
+          login: 'forked',
+        });
+        scope.post('/repos/some/repo/forks').reply(200, {
+          full_name: 'forked/repo',
+          default_branch: 'master',
+        });
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+          forkToken: 'some-token',
+          forkCreation: true,
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toMatchObject([
+          { number: 2, title: 'Other PR' },
+          { number: 1, title: 'Renovate PR' },
+        ]);
+      });
+
+      it('fetches all PRs when ignorePrAuthor is set', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'renovate-bot',
+          ignorePrAuthor: true,
+        });
+
+        const res = await github.getPrList();
+
+        expect(res).toHaveLength(2);
+        expect(res).toMatchObject([
+          { number: 2, title: 'Other PR' },
+          { number: 1, title: 'Renovate PR' },
+        ]);
+      });
+    });
   });
 
   describe('getBranchPr(branchName)', () => {

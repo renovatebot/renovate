@@ -391,7 +391,7 @@ describe('modules/datasource/nuget/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
-        expect(packageCache.set).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
@@ -461,7 +461,7 @@ describe('modules/datasource/nuget/index', () => {
           packageName: 'NLog',
           registryUrls: ['https://some-registry/v3/index.json'],
         });
-        expect(packageCache.set).toHaveBeenCalledWith(
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
           'datasource-nuget-v3',
           'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
           {
