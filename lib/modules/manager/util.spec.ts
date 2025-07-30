@@ -85,9 +85,9 @@ describe('modules/manager/util', () => {
     });
   });
 
-  it('applies GitHub source for tag with git@ SSH URL', () => {
+  it('applies GitHub source for tag with HTTPS URL', () => {
     const dependency: PackageDependency = {};
-    const git = 'git@github.com:foo/bar.git';
+    const git = 'https://github.com/foo/bar';
     const tag = 'v1.2.3';
 
     applyGitSource(dependency, git, undefined, tag, undefined);
