@@ -26,6 +26,7 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
+import type { MergeFlag } from '../../../../util/git/types';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -34,7 +35,6 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
-import type { MergeFlag } from '../../../../util/git/types';
 import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
