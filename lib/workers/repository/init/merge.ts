@@ -368,7 +368,7 @@ export async function resolveStaticRepoConfig(
 export async function tryReadStaticRepoFileConfig(
   staticRepoConfigFile: string,
 ): Promise<AllConfig> {
-  logger.debug({ staticRepoConfigFile }, 'reading static repo config file');
+  logger.debug(`Reading static repo config file from ${staticRepoConfigFile}`);
 
   let staticRepoConfigRaw: string;
   try {
