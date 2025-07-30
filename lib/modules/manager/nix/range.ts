@@ -1,7 +1,15 @@
-import type { RangeStrategy } from '../../../types/index.ts';
-import type { RangeConfig } from '../types.ts';
+import type { RangeStrategy } from '../../../types';
+import type { RangeConfig } from '../types';
 
-export function getRangeStrategy({ currentValue }: RangeConfig): RangeStrategy {
+export function getRangeStrategy({
+  currentValue,
+  depName,
+  rangeStrategy,
+}: RangeConfig): RangeStrategy {
+  if (depName === 'nixpkgs') {
+    return rangeStrategy;
+  }
+
   if (currentValue) {
     return 'replace';
   }

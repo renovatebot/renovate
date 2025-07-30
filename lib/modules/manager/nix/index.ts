@@ -1,8 +1,8 @@
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 
-export { updateArtifacts } from './artifacts.ts';
-export { extractPackageFile } from './extract.ts';
-export { getRangeStrategy } from './range.ts';
+export { extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts';
+export { getRangeStrategy } from './range';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['flake.lock'];
