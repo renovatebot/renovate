@@ -345,7 +345,7 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
 
-To allow automerges on branches that are behind and green, add `rebaseWhen="conflicted"`. 
+To allow automerges on branches that are behind and green, add `rebaseWhen="conflicted"`.
 Note that this will not merge a conflicted branch.
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
