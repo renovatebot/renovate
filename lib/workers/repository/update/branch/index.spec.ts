@@ -682,7 +682,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
-    it('automerges when branch is behind but not conflicted', async () => {
+    it('automerges when branch is behind but not conflicted and rebaseWhen=conflicted', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -700,6 +700,35 @@ describe('workers/repository/update/branch/index', () => {
       config.rebaseWhen = 'conflicted';
       await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+        expect.any(Object),
+        '--ff',
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('uses --ff-only merge flag when rebaseWhen=auto is not conflicted', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.rebaseWhen = 'auto';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+        expect.any(Object),
+        '--ff-only',
+      );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 

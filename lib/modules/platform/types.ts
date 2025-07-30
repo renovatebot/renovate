@@ -1,6 +1,10 @@
 import type { MergeStrategy } from '../../config/types';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
+import type {
+  CommitFilesConfig,
+  LongCommitSha,
+  MergeFlag,
+} from '../../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -311,6 +315,6 @@ export interface PlatformScm {
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
-  mergeAndPush(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string, mergeFlag: MergeFlag): Promise<void>;
   syncForkWithUpstream?(baseBranch: string): Promise<void>;
 }

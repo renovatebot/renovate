@@ -34,6 +34,7 @@ import {
 import { coerceNumber } from '../../../../util/number';
 import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
+import type { MergeFlag } from '../../../../util/git/types';
 import { getCount, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
@@ -673,7 +674,9 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const mergeStatus = await tryBranchAutomerge(config);
+      const mergeFlag: MergeFlag =
+        config.rebaseWhen === 'conflicted' ? '--ff' : '--ff-only';
+      const mergeStatus = await tryBranchAutomerge(config, mergeFlag);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {

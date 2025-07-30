@@ -460,7 +460,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
-      await git.mergeBranch('renovate/future_branch');
+      await git.mergeBranch('renovate/future_branch', '--ff-only');
       const merged = await Git(origin.path).branch([
         '--verbose',
         '--merged',
@@ -470,7 +470,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toThrow();
+      await expect(git.mergeBranch('not_found', '--ff-only')).rejects.toThrow();
     });
   });
 
