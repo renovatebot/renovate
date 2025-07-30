@@ -741,14 +741,7 @@ async function getUserDetails(userinfo: string): Promise<string[]> {
     logger.debug({ userinfo }, 'Resolved inactive user');
     return [];
   } catch (err: any) {
-    if (err.statusCode === 404) {
-      logger.debug(
-        { userinfo },
-        'Slug not found, falling back to filtered lookup',
-      );
-    } else {
-      logger.debug({ err, userinfo }, 'Slug lookup failed (non-404)');
-    }
+    logger.debug({ err, userinfo }, 'User lookup failed');
   }
 
   // Step 2: Fallback - filtered search assuming the userInfo is an email-address
@@ -768,9 +761,9 @@ async function getUserDetails(userinfo: string): Promise<string[]> {
       .filter((u) => u.active && u.emailAddress === userinfo)
       .map((u) => u.slug);
   } catch (err) {
-    logger.debug({ err, userinfo }, 'Filtered lookup failed');
-    return [];
+    logger.debug({ err, userinfo }, 'Filtered user lookup failed');
   }
+  return [];
 }
 
 async function updatePRAndAddReviewers(

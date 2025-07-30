@@ -1060,7 +1060,19 @@ describe('modules/platform/bitbucket-server/index', () => {
               active: false,
               displayName: 'Not relevant',
               emailAddress: 'notrelevant',
-            });
+            })
+            // Both GetUserDetails lookups error
+            .get(`${urlPath}/rest/api/1.0/users/err%20or`)
+            .reply(404)
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'err or' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(500, []);
 
           await expect(
             bitbucket.addReviewers(5, [
@@ -1068,6 +1080,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               'userName2',
               'test@test.com',
               'inactive',
+              'err or',
             ]),
           ).toResolve();
         });
