@@ -2659,6 +2659,24 @@ Renovate will only add a milestone when it _creates_ the PR.
 }
 ```
 
+## minimumGroupSize
+
+If set to `x` branch/PR creation for that group will be postponed till `x` updates are available.
+
+Example:
+
+```json title="Create a grouped PR when there are 3 or more npm updates"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "groupName": "npm updates",
+      "minimumGroupSize": 3
+    }
+  ]
+}
+```
+
 ## minimumReleaseAge
 
 This feature used to be called `stabilityDays`.

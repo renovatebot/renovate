@@ -5,6 +5,7 @@ import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { Timestamp } from '../../../util/timestamp';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
+import { logger } from '~test/util';
 
 const {
   commitMessage,
@@ -47,6 +48,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
       expect(res.recreateClosed).toBe(false);
+      expect(res.minimumGroupSize).toBe(1);
     });
 
     it('handles lockFileMaintenance', () => {
@@ -72,6 +74,34 @@ describe('workers/repository/updates/generate', () => {
           },
         ],
       });
+    });
+
+    it('sets minimumGroupSize based on upgrades', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 1,
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 2,
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          minimumGroupSize: 3,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.minimumGroupSize).toBe(3);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Multiple minimumGroupSize values found for this branch, using highest.',
+      );
     });
 
     it('handles lockFileUpdate', () => {

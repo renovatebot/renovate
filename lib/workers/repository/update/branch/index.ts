@@ -135,6 +135,21 @@ export async function processBranch(
     }
   }
 
+  if (
+    !branchExists &&
+    branchConfig.minimumGroupSize &&
+    branchConfig.minimumGroupSize > branchConfig.upgrades.length
+  ) {
+    logger.debug(
+      { minimumGroupSize: branchConfig.minimumGroupSize },
+      'Skipping branch creation as minimumGroupSize criteria is not met',
+    );
+    return {
+      branchExists: false,
+      result: 'minimum-group-size-not-met',
+    };
+  }
+
   let branchPr = await platform.getBranchPr(
     config.branchName,
     config.baseBranch,
