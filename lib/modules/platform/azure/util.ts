@@ -131,7 +131,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   }
   addSecretForSanitizing(authValue, 'global');
   return {
-    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
+    '-c': `http.extraHeader=AUTHORIZATION: ${authType} ${authValue}`,
   };
 }
 
