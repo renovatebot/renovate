@@ -164,7 +164,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2021-01-05T17:57:41.000Z',
-          sourceUrl: undefined,
           version: '0.1.2-preview.2',
         },
         {
@@ -173,7 +172,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2021-02-11T19:26:19.000Z',
-          sourceUrl: undefined,
           version: '1.0.0-pre.1',
         },
         {
@@ -183,7 +181,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2024-07-03T15:24:28.000Z',
-          sourceUrl: undefined,
           version: '1.12.0-exp.1',
         },
         {
@@ -194,7 +191,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: true,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2025-04-18T18:06:12.036Z',
-          sourceUrl: undefined,
           version: '1.14.3',
         },
       ],
@@ -242,7 +238,6 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: false,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2024-07-03T15:24:28.000Z',
-          sourceUrl: undefined,
           version: '1.12.0-exp.1',
         },
         {
@@ -251,11 +246,11 @@ describe('modules/datasource/unity3d-packages/index', () => {
           isStable: true,
           registryUrl: 'https://packages.unity.com',
           releaseTimestamp: '2025-04-18T18:06:12.036Z',
-          sourceUrl:
-            'https://github.cds.internal.unity3d.com/unity/xr.sdk.openxr.git',
           version: '1.14.3',
         },
       ],
+      sourceUrl:
+        'https://github.cds.internal.unity3d.com/unity/xr.sdk.openxr.git',
     });
   });
 });

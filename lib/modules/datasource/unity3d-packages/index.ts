@@ -42,6 +42,7 @@ export class Unity3dPackagesDatasource extends Datasource {
       releases: [],
       homepage: versions?.[0]?.documentationUrl,
       registryUrl,
+      sourceUrl: versions?.[0]?.repository?.url,
     };
 
     for (const release of versions) {
@@ -57,7 +58,6 @@ export class Unity3dPackagesDatasource extends Datasource {
           : undefined,
         isStable: Unity3dPackagesVersioning.default.isStable(release.version),
         registryUrl,
-        sourceUrl: release.repository?.url,
       });
     }
 
