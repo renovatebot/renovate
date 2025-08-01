@@ -1004,11 +1004,10 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'updateLockFiles',
-    description: 'Set to `false` to disable lock file updating.',
+    name: 'skipArtifactsUpdate',
+    description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
-    default: true,
-    supportedManagers: ['npm'],
+    default: false,
   },
   {
     name: 'skipInstalls',
