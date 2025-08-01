@@ -60,6 +60,7 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { getExtraCloneOpts } from './utils';
+import { z } from 'zod';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -728,42 +729,28 @@ export async function addReviewers(
  * @returns List of user slugs for active, matched users.
  */
 async function getUserDetails(userinfo: string): Promise<string[]> {
-  // Step 1: Determine whether the user is a userSlug
-  try {
-    const directUrl = `./rest/api/1.0/users/${userinfo}`;
-    const response = await bitbucketServerHttp.getJson(directUrl, UserSchema);
-    const user = response.body;
+  if (z.string().email().safeParse(userinfo).success) {
+    try {
+      const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
+        config.projectKey
+      }&permission.1.repositorySlug=${config.repositorySlug}`;
 
-    if (user.active) {
-      logger.debug({ userinfo }, 'Resolved user via slug match');
-      return [user.slug];
+      const users = await bitbucketServerHttp.getJson(
+        filterUrl,
+        { paginate: true },
+        UsersSchema,
+      );
+
+      // Only return active users with exact match on email-address
+      return users.body
+        .filter((u) => u.active && u.emailAddress === userinfo)
+        .map((u) => u.slug);
+    } catch (err) {
+      logger.debug({ err, userinfo }, 'Filtered user lookup failed');
+      return [];
     }
-    logger.debug({ userinfo }, 'Resolved inactive user');
-    return [];
-  } catch (err: any) {
-    logger.debug({ err, userinfo }, 'User lookup failed');
   }
-
-  // Step 2: Fallback - filtered search assuming the userInfo is an email-address
-  try {
-    const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
-      config.projectKey
-    }&permission.1.repositorySlug=${config.repositorySlug}`;
-
-    const users = await bitbucketServerHttp.getJson(
-      filterUrl,
-      { paginate: true },
-      UsersSchema,
-    );
-
-    // Only return active users with exact match on email-address
-    return users.body
-      .filter((u) => u.active && u.emailAddress === userinfo)
-      .map((u) => u.slug);
-  } catch (err) {
-    logger.debug({ err, userinfo }, 'Filtered user lookup failed');
-  }
-  return [];
+  return [userinfo];
 }
 
 async function updatePRAndAddReviewers(

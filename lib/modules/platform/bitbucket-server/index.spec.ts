@@ -1003,40 +1003,19 @@ describe('modules/platform/bitbucket-server/index', () => {
                 const reviewers = body.reviewers.map(
                   (r: { user: { name: any } }) => r.user.name,
                 );
-                // Expect the resolved usernames to be in the order we provided and without invalid user
-                expect(reviewers).toEqual([
-                  'userName2',
-                  'usernamefoundbyemail',
-                ]);
-                return true;
+                return (
+                  Array.isArray(reviewers) &&
+                  reviewers.length === 3 &&
+                  reviewers.includes('name') &&
+                  reviewers.includes('userName2') &&
+                  reviewers.includes('usernamefoundbyemail')
+                );
               },
             )
             .reply(200);
 
           scope
-            // Not found user by slug nor email, so it should not be added to the PR
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(404)
-            .get(`${urlPath}/rest/api/1.0/users`)
-            .query(
-              (q) =>
-                q.filter === 'name' &&
-                q['permission.1'] === 'REPO_READ' &&
-                q['permission.1.repositorySlug'] === 'repo' &&
-                q['permission.1.projectKey'] === 'SOME',
-            )
-            .reply(200, [])
-            // Found user by slug,
-            .get(`${urlPath}/rest/api/1.0/users/userName2`)
-            .reply(200, {
-              slug: 'userName2',
-              active: true,
-              displayName: 'User name 2',
-              emailAddress: 'user@name2.com',
-            })
             // User by email
-            .get(`${urlPath}/rest/api/1.0/users/test@test.com`)
-            .reply(404)
             .get(`${urlPath}/rest/api/1.0/users`)
             .query(
               (q) =>
@@ -1052,36 +1031,10 @@ describe('modules/platform/bitbucket-server/index', () => {
                 displayName: 'Not relevant',
                 emailAddress: 'test@test.com',
               },
-            ])
-            // Inactive user by slug
-            .get(`${urlPath}/rest/api/1.0/users/inactive`)
-            .reply(200, {
-              slug: 'inactive',
-              active: false,
-              displayName: 'Not relevant',
-              emailAddress: 'notrelevant',
-            })
-            // Both GetUserDetails lookups error
-            .get(`${urlPath}/rest/api/1.0/users/err%20or`)
-            .reply(404)
-            .get(`${urlPath}/rest/api/1.0/users`)
-            .query(
-              (q) =>
-                q.filter === 'err or' &&
-                q['permission.1'] === 'REPO_READ' &&
-                q['permission.1.repositorySlug'] === 'repo' &&
-                q['permission.1.projectKey'] === 'SOME',
-            )
-            .reply(500, []);
+            ]);
 
           await expect(
-            bitbucket.addReviewers(5, [
-              'name',
-              'userName2',
-              'test@test.com',
-              'inactive',
-              'err or',
-            ]),
+            bitbucket.addReviewers(5, ['name', 'userName2', 'test@test.com']),
           ).toResolve();
         });
 
