@@ -227,15 +227,6 @@ const staticGroups = {
       },
     ],
   },
-  hibernateValidator: {
-    description: 'Group Java Hibernate Validator packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate validator',
-        matchPackageNames: ['org.hibernate.validator:**'],
-      },
-    ],
-  },
   illuminate: {
     description: 'Group PHP Illuminate packages together.',
     packageRules: [
@@ -514,7 +505,6 @@ const staticGroups = {
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
-      'group:hibernateValidator',
       'group:hibernateOgm',
       'group:hibernateCommons',
       'group:illuminate',
