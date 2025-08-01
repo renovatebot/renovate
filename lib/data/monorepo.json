@@ -671,6 +671,7 @@
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],
     "apache-camel": "/^org.apache.camel:/",
+    "apache-lucene": "/^org.apache.lucene:/",
     "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
