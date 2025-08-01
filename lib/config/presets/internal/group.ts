@@ -200,15 +200,6 @@ const staticGroups = {
       },
     ],
   },
-  hibernateCommons: {
-    description: 'Group Java Hibernate Commons packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate commons',
-        matchPackageNames: ['org.hibernate.common:**'],
-      },
-    ],
-  },
   hibernateCore: {
     description: 'Group Java Hibernate Core packages.',
     packageRules: [
@@ -496,7 +487,6 @@ const staticGroups = {
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
-      'group:hibernateCommons',
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
