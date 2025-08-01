@@ -459,12 +459,8 @@ export async function processBranch(
       !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
       !dependencyDashboardCheck
     ) {
+      config.reuseExistingBranch = true;
       logger.debug('rebaseWhen=never so skipping branch update check');
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'no-work',
-      };
     }
     // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
     // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
@@ -674,7 +670,8 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const allowBehindBase = config.rebaseWhen === 'conflicted';
+      const allowBehindBase =
+        config.rebaseWhen === 'conflicted' || config.rebaseWhen === 'never';
       const mergeStatus = await tryBranchAutomerge(config, allowBehindBase);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -695,17 +692,6 @@ export async function processBranch(
           result: 'not-scheduled',
           commitSha,
         };
-      }
-      if (
-        mergeStatus === 'stale' &&
-        config.rebaseWhen === 'never' &&
-        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
-      ) {
-        logger.warn(
-          'Branch cannot automerge because it is behind base branch and rebaseWhen=never disallows rebasing - raising a PR instead',
-        );
-        config.forcePr = true;
-        config.branchAutomergeFailureMessage = mergeStatus;
       }
       if (
         mergeStatus === 'automerge aborted - PR exists' ||
