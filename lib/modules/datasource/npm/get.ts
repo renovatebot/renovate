@@ -138,6 +138,8 @@ export async function getDependency(
         gitRef: res.versions?.[version].gitHead,
         dependencies: res.versions?.[version].dependencies,
         devDependencies: res.versions?.[version].devDependencies,
+        attestation:
+          res.versions?.[version].dist?.attestations?.url !== undefined,
       };
       const releaseTimestamp = asTimestamp(res.time?.[version]);
       if (releaseTimestamp) {
