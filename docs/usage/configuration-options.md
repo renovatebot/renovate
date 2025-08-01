@@ -4147,6 +4147,7 @@ Only change this setting if you really need to.
 
 You can use the `registryAliases` object to set registry aliases.
 Renovate applies _all_ `registryAliases` objects, from top to bottom.
+The aliases support variables with default values (using the `:-` syntax) which can be useful for Docker Compose files.
 
 This feature works with the following managers:
 
@@ -4186,6 +4187,18 @@ This feature works with the following managers:
   }
 }
 ```
+
+```json title="Using variables with default values"
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "my-registry.io"
+  }
+}
+```
+
+This example with default values supports both formats:
+- Without slash in the variable: `${CI_REGISTRY:-}/image:1.0`
+- With slash in the variable: `${CI_REGISTRY:-}image:1.0`
 
 ## registryUrls
 
