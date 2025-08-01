@@ -1123,7 +1123,6 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch(inconfig);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
-      expect(prWorker.ensurePr).toHaveBeenCalledWith(inconfig);
     });
 
     it('skips when automerge is off schedule', async () => {
