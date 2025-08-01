@@ -215,7 +215,7 @@ Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migr
           }
           throw error;
         } else {
-          logger.error('Found encrypted data but no privateKey');
+          logger.warn('Found encrypted data but no privateKey');
         }
       }
       delete decryptedConfig.encrypted;
