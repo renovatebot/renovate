@@ -8,7 +8,7 @@ import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
-import type { RenovateConfig } from '../../config/types';
+import type { MergeStrategy, RenovateConfig } from '../../config/types';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -974,7 +974,10 @@ export async function mergeToLocal(refSpecToMerge: string): Promise<void> {
   }
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  mergeStrategy: MergeStrategy,
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -991,7 +994,29 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
+    if (
+      mergeStrategy === 'fast-forward' ||
+      mergeStrategy === 'rebase' ||
+      mergeStrategy === 'auto'
+    ) {
+      logger.debug(
+        `Performing ff-only merge because mergeStrategy=${mergeStrategy}`,
+      );
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
+    } else if (mergeStrategy === 'merge-commit') {
+      logger.debug(
+        `Performing merge commit because mergeStrategy=${mergeStrategy}`,
+      );
+      await gitRetry(() => git.merge(['--no-ff', '--no-edit', branchName]));
+    } else if (mergeStrategy === 'squash') {
+      logger.debug(
+        `Performing squash then merge because mergeStrategy=${mergeStrategy}`,
+      );
+      // Create a squash commit
+      await gitRetry(() => git.merge(['--squash', branchName]));
+      // Commit the squash commit
+      await gitRetry(() => git.raw(['commit', '--no-edit']));
+    }
     await gitRetry(() => git.push('origin', config.currentBranch));
     incLimitedValue('Commits');
   } catch (err) {
