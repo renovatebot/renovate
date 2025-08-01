@@ -178,7 +178,18 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
+    expect(res).toMatchObject({
+      releases: [
+        {
+          version: '0.0.1',
+          attestation: true,
+        },
+        {
+          version: '0.0.2',
+          attestation: true,
+        },
+      ],
+    });
   });
 
   it('should handle foobar', async () => {
