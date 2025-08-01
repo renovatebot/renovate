@@ -357,6 +357,7 @@
     "guava": "https://github.com/google/guava",
     "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
+    "hibernate-orm": "https://github.com/hibernate/hibernate-orm",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "humanizer": "https://github.com/Humanizr/Humanizer",
