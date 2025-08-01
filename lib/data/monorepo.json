@@ -358,6 +358,7 @@
     "happy-dom": "https://github.com/capricorn86/happy-dom",
     "Hangfire": "https://github.com/HangfireIO/Hangfire",
     "hibernate-commons-annotations": "https://github.com/hibernate/hibernate-commons-annotations",
+    "hibernate-models": "https://github.com/hibernate/hibernate-models",
     "hibernate-ogm": "https://github.com/hibernate/hibernate-ogm",
     "hibernate-orm": "https://github.com/hibernate/hibernate-orm",
     "hibernate-search": "https://github.com/hibernate/hibernate-search",
