@@ -200,42 +200,6 @@ const staticGroups = {
       },
     ],
   },
-  hibernateCommons: {
-    description: 'Group Java Hibernate Commons packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate commons',
-        matchPackageNames: ['org.hibernate.common:**'],
-      },
-    ],
-  },
-  hibernateCore: {
-    description: 'Group Java Hibernate Core packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate core',
-        matchPackageNames: ['org.hibernate:**'],
-      },
-    ],
-  },
-  hibernateOgm: {
-    description: 'Group Java Hibernate OGM packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate ogm',
-        matchPackageNames: ['org.hibernate.ogm:**'],
-      },
-    ],
-  },
-  hibernateValidator: {
-    description: 'Group Java Hibernate Validator packages.',
-    packageRules: [
-      {
-        groupName: 'hibernate validator',
-        matchPackageNames: ['org.hibernate.validator:**'],
-      },
-    ],
-  },
   illuminate: {
     description: 'Group PHP Illuminate packages together.',
     packageRules: [
@@ -513,10 +477,6 @@ const staticGroups = {
       'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
-      'group:hibernateCore',
-      'group:hibernateValidator',
-      'group:hibernateOgm',
-      'group:hibernateCommons',
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
