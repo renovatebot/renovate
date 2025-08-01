@@ -2102,7 +2102,14 @@ const options: RenovateOptions[] = [
     description:
       'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
     type: 'string',
-    allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
+    allowedValues: [
+      'auto',
+      'fast-forward',
+      'merge-commit',
+      'rebase',
+      'rebase-merge',
+      'squash',
+    ],
     default: 'auto',
     supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
@@ -3060,6 +3067,7 @@ const options: RenovateOptions[] = [
         'Because you closed this PR without merging, Renovate will ignore this update. You will not get PRs for the `{{{depName}}}` `{{{newDigestShort}}}` update again.',
       ignoreOther:
         'Because you closed this PR without merging, Renovate will ignore this update (`{{{newValue}}}`). You will get a PR once a newer version is released. To ignore this dependency forever, add it to the `ignoreDeps` array of your Renovate config.',
+      artifactErrorWarning: 'You probably do not want to merge this PR as-is.',
     },
   },
   {
