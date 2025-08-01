@@ -1098,7 +1098,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
 
-    it.only('disallows automerge when rebaseWhen=never and branch is behind base', async () => {
+    it('disallows automerge when rebaseWhen=never and branch is behind base', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>(),
       );
