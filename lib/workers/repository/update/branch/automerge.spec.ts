@@ -94,5 +94,18 @@ describe('workers/repository/update/branch/automerge', () => {
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config, false)).toBe('automerged');
     });
+
+    it('returns true if automerge succeeds with allowBehindBase=true', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+
+      const res = await tryBranchAutomerge(config, true);
+
+      expect(res).toBe('automerged');
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.mergeAndPush).toHaveBeenCalledWith(config.branchName, '--ff');
+    });
   });
 });
