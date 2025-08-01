@@ -672,6 +672,19 @@
 
     Thanks, the Renovate team
 
+'auto:more-specific':
+  comment: >
+    Hi there,
+
+
+    To the Discussion creator: please edit and improve the title and/or description of this Discussion to narrow the description to the specific problem you're having.
+
+
+    Try to describe your problem as specifically as possible, and not like "Renovate doesn't work", "npm upgrades failing", "PR not created", etc. Titles like these pollute the repo and make searches by future users less useful and the answers we give harder for them to find.
+
+
+    Thanks, the Renovate team
+
 'auto:disputed-issue':
   comment: >
     Hi there,
