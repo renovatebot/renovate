@@ -702,7 +702,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
         expect.any(Object),
-        '--ff',
+        true,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -727,7 +727,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
         expect.any(Object),
-        '--ff-only',
+        false,
       );
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });

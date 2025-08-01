@@ -26,7 +26,7 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import type { MergeFlag } from '../../../../util/git/types';
+
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -674,9 +674,8 @@ export async function processBranch(
     // skip if we have a non-immediate pr and there is an existing PR,
     // we want to update the PR and skip the Auto merge since status checks aren't done yet
     if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
-      const mergeFlag: MergeFlag =
-        config.rebaseWhen === 'conflicted' ? '--ff' : '--ff-only';
-      const mergeStatus = await tryBranchAutomerge(config, mergeFlag);
+      const allowBehindBase = config.rebaseWhen === 'conflicted';
+      const mergeStatus = await tryBranchAutomerge(config, allowBehindBase);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
