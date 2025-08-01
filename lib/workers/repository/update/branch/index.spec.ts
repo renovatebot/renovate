@@ -707,7 +707,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
-    it('uses --ff-only merge flag when rebaseWhen=auto is not conflicted', async () => {
+    it('auto merge when rebaseWhen=auto is not conflicted', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1098,35 +1098,32 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
 
-    it('warns and forces PR when automerge is stale and rebaseWhen=never', async () => {
+    it.only('disallows automerge when rebaseWhen=never and branch is behind base', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
-        partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>()],
+        partial<PackageFilesResult>(),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce(
+        partial<WriteExistingFilesResult>({
+          artifactErrors: [],
+          updatedArtifacts: [],
         }),
       );
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
-      });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
-      prWorker.ensurePr.mockResolvedValueOnce({
-        type: 'with-pr',
-        pr: partial<Pr>(),
-      });
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const testConfig = {
+      const inconfig = {
         ...config,
         automerge: true,
         rebaseWhen: 'never',
+        keepUpdatedLabel: undefined,
+        ignoreTests: true,
+        dependencyDashboardAllRateLimited: true,
       };
-      await branchWorker.processBranch(testConfig);
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Branch cannot automerge because it is behind base branch and rebaseWhen=never disallows rebasing - raising a PR instead',
-      );
+      await branchWorker.processBranch(inconfig);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledWith(inconfig);
     });
 
     it('skips when automerge is off schedule', async () => {
