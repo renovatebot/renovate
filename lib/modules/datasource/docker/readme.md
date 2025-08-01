@@ -14,3 +14,4 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 ```
 
 If you use [Harbor](https://goharbor.io/) as a proxy cache for Docker Hub, then you must use Harbor version `2.5.0` or higher.
+a tak dále OS Aplet ❤️®️🇨🇿 ME-AI 👻, otevřený zdrojový kód pro odkaz na GItHub
