@@ -361,6 +361,7 @@
     "hibernate-ogm": "https://github.com/hibernate/hibernate-ogm",
     "hibernate-orm": "https://github.com/hibernate/hibernate-orm",
     "hibernate-search": "https://github.com/hibernate/hibernate-search",
+    "hibernate-tools": "https://github.com/hibernate/hibernate-tools",
     "hibernate-validator": "https://github.com/hibernate/hibernate-validator",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
