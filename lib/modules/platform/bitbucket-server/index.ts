@@ -49,7 +49,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema } from './schema';
+import { UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -332,6 +332,7 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
+
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -680,15 +681,89 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 
+/**
+ * Resolves reviewer identifiers (usernames, display names, or email addresses)
+ * to Bitbucket user slugs with REPO_READ permission and adds them to the pull request.
+ *
+ * This function performs user resolution once per reviewer input and filters out
+ * unknown or inactive users before passing them to the PR update logic.
+ *
+ * Retries the update logic up to 3 times if the repository content has changed.
+ *
+ * @param prNo - The pull request number to update.
+ * @param reviewers - List of reviewer identifiers (e.g. email, username).
+ */
 export async function addReviewers(
   prNo: number,
   reviewers: string[],
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
-  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+  const reviewerSlugs = new Set<string>();
+
+  for (const entry of reviewers) {
+    const slugs = await getUserDetails(entry);
+    if (!slugs.length) {
+      logger.debug({ entry }, 'No users found for reviewer');
+      continue;
+    }
+    slugs.forEach((slug) => reviewerSlugs.add(slug));
+  }
+
+  await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
     REPOSITORY_CHANGED,
   ]);
+}
+
+/**
+ * Resolves Bitbucket users by username, display name, or email address (userinfo string),
+ * restricted to users who have REPO_READ permission on the target repository.
+ *
+ * Lookup strategy:
+ *  1. Try exact slug match via `/users/{slug}`.
+ *  2. Fallback to `/users?filter=...` and return slugs of active users with exact match on
+ *     email.
+ *
+ * @param userinfo - A string that could be the user's slug or email-address.
+ * @returns List of user slugs for active, matched users.
+ */
+async function getUserDetails(userinfo: string): Promise<string[]> {
+  // Step 1: Determine whether the user is a userSlug
+  try {
+    const directUrl = `./rest/api/1.0/users/${userinfo}`;
+    const response = await bitbucketServerHttp.getJson(directUrl, UserSchema);
+    const user = response.body;
+
+    if (user.active) {
+      logger.debug({ userinfo }, 'Resolved user via slug match');
+      return [user.slug];
+    }
+    logger.debug({ userinfo }, 'Resolved inactive user');
+    return [];
+  } catch (err: any) {
+    logger.debug({ err, userinfo }, 'User lookup failed');
+  }
+
+  // Step 2: Fallback - filtered search assuming the userInfo is an email-address
+  try {
+    const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
+      config.projectKey
+    }&permission.1.repositorySlug=${config.repositorySlug}`;
+
+    const users = await bitbucketServerHttp.getJson(
+      filterUrl,
+      { paginate: true },
+      UsersSchema,
+    );
+
+    // Only return active users with exact match on email-address
+    return users.body
+      .filter((u) => u.active && u.emailAddress === userinfo)
+      .map((u) => u.slug);
+  } catch (err) {
+    logger.debug({ err, userinfo }, 'Filtered user lookup failed');
+  }
+  return [];
 }
 
 async function updatePRAndAddReviewers(

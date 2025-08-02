@@ -3,7 +3,11 @@ import { z } from 'zod';
 export const UserSchema = z.object({
   displayName: z.string(),
   emailAddress: z.string(),
+  active: z.boolean(),
+  slug: z.string(),
 });
+
+export const UsersSchema = z.array(UserSchema);
 
 export const Files = z.array(z.string());
 
