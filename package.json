@@ -335,7 +335,7 @@
     "lint-staged": "16.1.2",
     "markdownlint-cli2": "0.18.1",
     "memfs": "4.20.0",
-    "nock": "14.0.6",
+    "nock": "14.0.7",
     "npm-run-all2": "8.0.4",
     "nyc": "17.1.0",
     "rimraf": "6.0.1",
