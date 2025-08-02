@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import type { UpdatePackage } from './tool';
 import { getAllPackages, updateAllPackages, updatePackage } from './tool';
 import type { ExecResult } from '~test/exec-util';
 import { exec } from '~test/exec-util';
@@ -72,44 +73,68 @@ describe('modules/manager/paket/tool', () => {
       });
       GlobalConfig.set(adminConfig);
 
-      await updatePackage(packageFilePath);
+      await updatePackage({ filePath: packageFilePath });
 
-      expect(execSnapshots).toEqual(['paket update ']);
+      expect(execSnapshots).toEqual(['paket update']);
     });
-    it('can specify package', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-
-      await updatePackage(packageFilePath, 'FSharp.Core');
-
-      expect(execSnapshots).toEqual(['paket update FSharp.Core']);
-    });
-    it('can specify group', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-
-      await updatePackage(packageFilePath, undefined, 'GroupA');
-
-      expect(execSnapshots).toEqual(['paket update --group GroupA ']);
-    });
-    it('can specify group and package', async () => {
-      const execSnapshots = mockExecAll();
-      GlobalConfig.set(adminConfig);
-
-      await updatePackage(packageFilePath, 'FSharp.Core', 'GroupA');
-
-      expect(execSnapshots).toEqual([
+    test.each([
+      [
+        { filePath: packageFilePath, packageName: 'FSharp.Core' },
+        'paket update FSharp.Core',
+      ],
+      [
+        { filePath: packageFilePath, group: 'GroupA' },
+        'paket update --group GroupA',
+      ],
+      [
+        {
+          filePath: packageFilePath,
+          group: 'GroupA',
+          packageName: 'FSharp.Core',
+        },
         'paket update --group GroupA FSharp.Core',
-      ]);
-    });
+      ],
+      [
+        {
+          filePath: packageFilePath,
+          packageName: 'FSharp.Core',
+          version: '1.2.3',
+        },
+        'paket update --version 1.2.3 FSharp.Core',
+      ],
+      [
+        {
+          filePath: packageFilePath,
+          group: 'GroupA',
+          packageName: 'FSharp.Core',
+          version: '1.2.3',
+        },
+        'paket update --group GroupA --version 1.2.3 FSharp.Core',
+      ],
+    ])(
+      'can specify parameters (%o)',
+      async (command: UpdatePackage, expected) => {
+        const execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+
+        await updatePackage(command);
+
+        expect(execSnapshots).toEqual([expected]);
+      },
+    );
     it('secure parameters (impossible case normally)', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
 
-      await updatePackage(packageFilePath, 'FSharp Core', 'Group A');
+      await updatePackage({
+        filePath: packageFilePath,
+        packageName: 'FSharp Core',
+        group: 'Group A',
+        version: '1 2 3',
+      });
 
       expect(execSnapshots).toEqual([
-        `paket update --group 'Group A' 'FSharp Core'`,
+        `paket update --group 'Group A' --version '1 2 3' 'FSharp Core'`,
       ]);
     });
   });
@@ -121,7 +146,7 @@ describe('modules/manager/paket/tool', () => {
 
       await updateAllPackages(packageFilePath);
 
-      expect(execSnapshots).toEqual(['paket update ']);
+      expect(execSnapshots).toEqual(['paket update']);
     });
     it('can specify group', async () => {
       const execSnapshots = mockExecAll();
@@ -129,7 +154,7 @@ describe('modules/manager/paket/tool', () => {
 
       await updateAllPackages(packageFilePath, 'GroupA');
 
-      expect(execSnapshots).toEqual(['paket update --group GroupA ']);
+      expect(execSnapshots).toEqual(['paket update --group GroupA']);
     });
   });
 
