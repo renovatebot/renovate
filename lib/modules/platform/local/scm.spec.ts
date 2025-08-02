@@ -64,7 +64,9 @@ describe('modules/platform/local/scm', () => {
   });
 
   it('mergeAndPush', async () => {
-    await expect(localFs.mergeAndPush('branchName')).resolves.toBeUndefined();
+    await expect(
+      localFs.mergeAndPush('branchName', '--ff-only'),
+    ).resolves.toBeUndefined();
   });
 
   it('mergeBranch', async () => {

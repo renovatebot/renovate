@@ -123,3 +123,5 @@ export interface AuthenticationRule {
   url: string;
   insteadOf: string;
 }
+
+export type MergeFlag = '--ff-only' | '--ff';

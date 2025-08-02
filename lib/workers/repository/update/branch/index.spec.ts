@@ -682,6 +682,81 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
 
+    it('automerges when branch is behind but not conflicted and rebaseWhen=conflicted', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.rebaseWhen = 'conflicted';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+        expect.any(Object),
+        true,
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('automerges when branch is behind but not conflicted and rebaseWhen=never', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.rebaseWhen = 'never';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+        expect.any(Object),
+        true,
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('auto merge when rebaseWhen=auto is not conflicted', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.rebaseWhen = 'auto';
+      await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledWith(
+        expect.any(Object),
+        false,
+      );
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -2451,22 +2526,6 @@ describe('workers/repository/update/branch/index', () => {
       }
     });
 
-    it('returns when rebaseWhen=never', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        ...updatedPackageFiles,
-      });
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
-      scm.branchExists.mockResolvedValue(true);
-      commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({ ...config, rebaseWhen: 'never' }),
-      ).toMatchObject({ result: 'no-work' });
-      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
-    });
-
     it('continues when rebaseWhen=never and keepUpdatedLabel', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -2492,33 +2551,6 @@ describe('workers/repository/update/branch/index', () => {
         }),
       ).toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
-    });
-
-    it('returns when rebaseWhen=never and keepUpdatedLabel does not match', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        ...updatedPackageFiles,
-      });
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
-      scm.branchExists.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'open',
-          title: '',
-          labels: ['keep-updated'],
-        }),
-      );
-      commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      expect(
-        await branchWorker.processBranch({
-          ...config,
-          rebaseWhen: 'never',
-          keepUpdatedLabel: 'keep-not-updated',
-        }),
-      ).toMatchObject({ result: 'no-work' });
-      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
     it('continues when rebaseWhen=never but checked', async () => {
