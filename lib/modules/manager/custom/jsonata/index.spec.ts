@@ -332,6 +332,33 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
+  it('extracts other matchStrings if one finds no match', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`packages.{ "depName": package }`, `{"depName": "bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        packageFile: 'unused',
+        jsonataQuery: 'packages.{ "depName": package }',
+      },
+      'The jsonata query returned no matches. Possible error, please check your query. Skipping',
+    );
+    expect(res).toMatchObject({
+      ...config,
+      deps: [
+        {
+          depName: 'bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
   it('populates manager config and jsonata manager template fields in extract result', async () => {
     const config = {
       fileFormat: 'json',
