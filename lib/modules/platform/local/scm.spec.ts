@@ -52,6 +52,12 @@ describe('modules/platform/local/scm', () => {
     it('should return file list using git', async () => {
       execSync.mockReturnValueOnce('file1\nfile2');
       expect(await localFs.getFileList()).toHaveLength(2);
+
+      expect(execSync).toHaveBeenCalledOnce();
+      expect(execSync).toHaveBeenCalledWith('git ls-files', {
+        encoding: 'utf-8',
+        maxBuffer: 1024 * 1024 * 10,
+      });
     });
 
     it('should return file list using glob', async () => {
