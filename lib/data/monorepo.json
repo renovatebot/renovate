@@ -378,6 +378,7 @@
     "jasmine": "https://github.com/jasmine/jasmine",
     "javahamcrest": "https://github.com/hamcrest/JavaHamcrest",
     "javascriptengineswitcher": "https://github.com/Taritsyn/JavaScriptEngineSwitcher",
+    "jaxb-ri": "https://github.com/eclipse-ee4j/jaxb-ri",
     "jersey": "https://github.com/eclipse-ee4j/jersey",
     "jest": [
       "https://github.com/facebook/jest",
