@@ -5,7 +5,12 @@ import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import type {
+  ArtifactError,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
 import type { RecordFragment, StringFragment } from './types';
 
@@ -124,6 +129,7 @@ export async function updateArtifacts(
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   const oldContents = updateArtifact.newPackageFileContent;
   let newContents = oldContents;
+  const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
     const { managerData } = upgrade;
     const idx = managerData?.idx as number;
@@ -152,6 +158,12 @@ export async function updateArtifacts(
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
+        if (urlFragments.length >= 1) {
+          artifactErrors.push({
+            fileName: path,
+            stderr: `Could not calculate sha256 for ${upgrade.depName} at ${upgrade.newValue}. Checked URLs: ${urls.join(', ')}`,
+          });
+        }
         continue;
       }
 
@@ -170,6 +182,12 @@ export async function updateArtifacts(
   }
 
   if (oldContents === newContents) {
+    if (artifactErrors.length) {
+      // If we have artifact errors, return them even if we have file changes
+      return artifactErrors.map((error) => ({
+        artifactError: error,
+      }));
+    }
     return null;
   }
 
