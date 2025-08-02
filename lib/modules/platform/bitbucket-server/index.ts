@@ -332,6 +332,7 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
+
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -694,6 +695,7 @@ export async function addReviewers(
 async function updatePRAndAddReviewers(
   prNo: number,
   reviewers: string[],
+  bitbucketInvalidReviewers?: string[],
 ): Promise<void> {
   try {
     const pr = await getPr(prNo);
@@ -703,6 +705,13 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
+
+    // Remove invalidReviewers from set if any
+    if (bitbucketInvalidReviewers?.length) {
+      for (const invalid of bitbucketInvalidReviewers) {
+        reviewersSet.delete(invalid);
+      }
+    }
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -721,14 +730,17 @@ async function updatePRAndAddReviewers(
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (
-      err.statusCode === 409 &&
-      !utils.isInvalidReviewersResponse(err)
-    ) {
-      logger.debug(
-        '409 response to adding reviewers - has repository changed?',
-      );
-      throw new Error(REPOSITORY_CHANGED);
+    } else if (err.statusCode === 409) {
+      if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = utils.getInvalidReviewers(err);
+        await updatePRAndAddReviewers(prNo, reviewers, invalidReviewers);
+      } else {
+        logger.debug(
+          '409 response to adding reviewers - has repository changed?',
+        );
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
       throw err;
     }
