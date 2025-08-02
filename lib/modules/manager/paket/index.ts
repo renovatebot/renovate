@@ -10,8 +10,10 @@ import type {
   PackageFileContent,
   UpdateArtifact,
   UpdateArtifactsResult,
+  UpdateLockedConfig,
+  UpdateLockedResult,
 } from '../types';
-import { getAllPackages, updateAllPackages } from './tool';
+import { getAllPackages, updateAllPackages, updatePackage } from './tool';
 
 export const displayName = 'Paket';
 export const url = 'https://fsprojects.github.io/Paket/';
@@ -33,7 +35,7 @@ export async function extractPackageFile(
   packageFile: string,
   _config: ExtractConfig,
 ): Promise<PackageFileContent> {
-  logger.trace(`paket.extractPackageFile(${packageFile})`);
+  logger.debug(`paket.extractPackageFile(${packageFile})`);
 
   const allPackages = await getAllPackages(packageFile);
 
@@ -44,6 +46,8 @@ export async function extractPackageFile(
       packageName: p.name,
       currentVersion: p.version,
       datasource: NugetDatasource.id,
+      rangeStrategy: 'update-lockfile',
+      lockedVersion: p.version,
     };
   });
 
@@ -58,7 +62,7 @@ export const supportsLockFileMaintenance = true;
 export async function updateArtifacts(
   command: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`nuget.updateArtifacts(${command.packageFileName})`);
+  logger.debug(`paket.updateArtifacts(${command.packageFileName})`);
 
   const lockFileName = getSiblingFileName(
     command.packageFileName,
@@ -66,7 +70,7 @@ export async function updateArtifacts(
   );
   const existingLockFileContentMap = await getFiles([lockFileName]);
 
-  await updateAllPackages(command.packageFileName);
+  await updateAllPackages(lockFileName);
 
   const newLockFileContentMap = await getLocalFiles([lockFileName]);
 
@@ -74,7 +78,7 @@ export async function updateArtifacts(
     existingLockFileContentMap[lockFileName] ===
     newLockFileContentMap[lockFileName]
   ) {
-    logger.trace(`Lock file ${lockFileName} is unchanged`);
+    logger.debug(`Lock file ${lockFileName} is unchanged`);
     return null;
   }
 
@@ -87,4 +91,35 @@ export async function updateArtifacts(
       },
     },
   ];
+}
+
+export async function updateLockedDependency(
+  config: UpdateLockedConfig,
+): Promise<UpdateLockedResult> {
+  logger.debug(
+    `paket.updateLockedDependency(${config.lockFile}, ${JSON.stringify(config)})`,
+  );
+
+  const existingLockFileContentMap = await getFiles([config.lockFile]);
+
+  await updatePackage({
+    filePath: config.lockFile,
+    packageName: config.depName,
+    version: config.newVersion,
+  });
+
+  const newLockFileContentMap = await getLocalFiles([config.lockFile]);
+  const newLockFileContent = newLockFileContentMap[config.lockFile];
+  if (
+    existingLockFileContentMap[config.lockFile] === newLockFileContent ||
+    !newLockFileContent
+  ) {
+    logger.debug(`Lock file ${config.lockFile} is unchanged`);
+    return { status: 'already-updated' };
+  }
+
+  return {
+    status: 'updated',
+    files: { [config.lockFile]: newLockFileContent },
+  };
 }
