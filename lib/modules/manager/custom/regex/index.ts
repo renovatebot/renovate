@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import type { Category } from '../../../../constants';
 import { logger } from '../../../../logger';
+import type { MaybePromise } from '../../../../types';
 import type {
   ExtractConfig,
-  MaybePromise,
   PackageDependency,
   PackageFileContent,
 } from '../../types';

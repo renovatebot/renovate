@@ -556,6 +556,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  mockery: {
+    asdfPluginUrl: 'https://github.com/cabify/asdf-mockery.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'vektra/mockery',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {

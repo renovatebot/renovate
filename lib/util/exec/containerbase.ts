@@ -107,13 +107,13 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
   java: {
     datasource: 'java-version',
-    packageName: 'java',
+    packageName: 'java?system=true',
     versioning: npmVersioningId,
   },
   /* not used in Renovate */
   'java-maven': {
     datasource: 'java-version',
-    packageName: 'java',
+    packageName: 'java?system=true',
     versioning: mavenVersioningId,
   },
   jb: {
