@@ -122,6 +122,8 @@ export async function processBranch(
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
@@ -138,11 +140,11 @@ export async function processBranch(
   if (
     !branchExists &&
     branchConfig.minimumGroupSize &&
-    branchConfig.minimumGroupSize > branchConfig.upgrades.length
+    branchConfig.minimumGroupSize > branchConfig.upgrades.length &&
+    !dependencyDashboardCheck
   ) {
     logger.debug(
-      { minimumGroupSize: branchConfig.minimumGroupSize },
-      'Skipping branch creation as minimumGroupSize criteria is not met',
+      `Skipping branch creation as minimumGroupSize: ${branchConfig.minimumGroupSize} is not met`,
     );
     return {
       branchExists: false,
@@ -155,8 +157,6 @@ export async function processBranch(
     config.baseBranch,
   );
   logger.debug(`branchExists=${branchExists}`);
-  const dependencyDashboardCheck =
-    config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
   if (branchPr) {
     config.rebaseRequested = await rebaseCheck(config, branchPr);

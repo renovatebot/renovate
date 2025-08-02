@@ -2669,8 +2669,9 @@ Example:
 {
   "packageRules": [
     {
-      "matchDatasources": ["npm"],
-      "groupName": "npm updates",
+      "description": "We need to update Node in two places - always wait until both upgrades are available",
+      "matchDepNames": ["node"],
+      "groupName": "Node.js",
       "minimumGroupSize": 3
     }
   ]

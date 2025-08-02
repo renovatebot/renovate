@@ -346,6 +346,17 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
+  const groupSizeNotMet = branches.filter(
+    (branch) => branch.result === 'minimum-group-size-not-met',
+  );
+  if (groupSizeNotMet.length) {
+    issueBody += '## Group Size Not Met\n\n';
+    issueBody += `The following branches have not met their minimum group size. To create them, click on a checkbox below.\n\n`;
+    for (const branch of groupSizeNotMet) {
+      issueBody += getListItem(branch, 'approveGroup');
+    }
+    issueBody += '\n';
+  }
   const awaitingSchedule = branches.filter(
     (branch) => branch.result === 'not-scheduled',
   );
@@ -448,6 +459,7 @@ export async function ensureDependencyDashboard(
     'error',
     'automerged',
     'pr-edited',
+    'minimum-group-size-not-met',
   ];
   let inProgress = branches.filter(
     (branch) =>
