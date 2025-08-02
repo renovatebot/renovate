@@ -299,6 +299,7 @@ export interface ManagerApi extends ModuleApi {
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
+    packageFile?: string,
   ): MaybePromise<string | null>;
 
   updateLockedDependency?(
