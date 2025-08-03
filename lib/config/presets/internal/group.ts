@@ -218,6 +218,15 @@ const staticGroups = {
       },
     ],
   },
+  hibernateOgm: {
+    description: 'Group Java Hibernate OGM packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate ogm',
+        matchPackageNames: ['org.hibernate.ogm:**'],
+      },
+    ],
+  },
   illuminate: {
     description: 'Group PHP Illuminate packages together.',
     packageRules: [
@@ -496,6 +505,7 @@ const staticGroups = {
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
+      'group:hibernateOgm',
       'group:hibernateCommons',
       'group:illuminate',
       'group:jekyllEcosystem',
