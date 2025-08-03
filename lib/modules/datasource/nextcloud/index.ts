@@ -36,7 +36,7 @@ export class NextcloudDatasource extends Datasource {
 
     const response = await this.http.getJson(registryUrl, Applications);
 
-    const application = response.body.find((a) => a.id == packageName);
+    const application = response.body.find((a) => a.id === packageName);
 
     if (!application) {
       return null;
@@ -49,6 +49,9 @@ export class NextcloudDatasource extends Datasource {
     };
 
     for (const release of application.releases) {
+      const changelogContent =
+        release.translations[NextcloudDatasource.defaultTranslationLanguage]
+          .changelog;
       const sourceUrlMatches = NextcloudDatasource.sourceUrlRegex.exec(
         application.website,
       );
@@ -57,10 +60,9 @@ export class NextcloudDatasource extends Datasource {
         version: release.version,
         releaseTimestamp: asTimestamp(release.created),
         changelogContent:
-          release.translations[NextcloudDatasource.defaultTranslationLanguage]
-            .changelog,
+          changelogContent.length > 0 ? changelogContent : undefined,
         changelogUrl: sourceUrlMatches?.groups
-          ? `${sourceUrlMatches.groups['prefix']}-releases${sourceUrlMatches.groups['suffix']}`
+          ? `${sourceUrlMatches.groups.prefix}-releases${sourceUrlMatches.groups.suffix}`
           : application.website,
         isStable: !release.isNightly,
         registryUrl,

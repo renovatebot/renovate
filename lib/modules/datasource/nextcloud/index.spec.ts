@@ -3,6 +3,16 @@ import { NextcloudDatasource } from '.';
 import * as httpMock from '~test/http-mock';
 
 describe('modules/datasource/nextcloud/index', () => {
+  it(`no registryUrl`, async () => {
+    const res = await getPkgReleases({
+      datasource: NextcloudDatasource.id,
+      packageName: 'user_oidc',
+      registryUrls: [],
+    });
+
+    expect(res).toBeNull();
+  });
+
   it(`no package`, async () => {
     const data = '[]';
 
@@ -14,10 +24,7 @@ describe('modules/datasource/nextcloud/index', () => {
       registryUrls: ['https://custom.registry.com'],
     });
 
-    expect(res?.homepage).toBeUndefined();
-    expect(res?.registryUrl).toBe('https://custom.registry.com');
-
-    expect(res?.releases).toBeEmpty();
+    expect(res).toBeNull();
   });
 
   it(`package with no versions`, async () => {
@@ -57,14 +64,25 @@ describe('modules/datasource/nextcloud/index', () => {
     },
   ])(
     'package with website %s returns %s',
-    async (website, expectedChangelogUrl) => {
+    async ({ website, changelogUrl }) => {
       const data = `
       [
         {
           "id": "user_oidc",
           "website": "${website}",
           "created": "2020-05-25T10:51:12.430005Z",
-          "releases": []
+          "releases": [
+            {
+              "version": "7.3.0",
+              "created": "2025-07-25T09:41:26.318411Z",
+              "isNightly": false,
+              "translations": {
+                "en": {
+                  "changelog": "testChangelog"
+                }
+              }
+            }
+          ]
         }
       ]
     `;
@@ -77,10 +95,7 @@ describe('modules/datasource/nextcloud/index', () => {
         registryUrls: ['https://custom.registry.com'],
       });
 
-      expect(res?.homepage).toBeUndefined();
-      expect(res?.registryUrl).toBe('https://custom.registry.com');
-
-      expect(res?.releases).toBeEmpty();
+      expect(res?.releases[0].changelogUrl).toBe(changelogUrl);
     },
   );
 
@@ -93,24 +108,24 @@ describe('modules/datasource/nextcloud/index', () => {
           "created": "2020-05-25T10:51:12.430005Z",
           "releases": [
             {
-              "version: "7.3.0",
+              "version": "7.3.0",
               "created": "2025-07-25T09:41:26.318411Z",
               "isNightly": false,
               "translations": {
                 "en": {
                   "changelog": "testChangelog"
                 }
-              },
+              }
             },
             {
-              "version: "7.2.0",
+              "version": "7.2.0",
               "created": "2025-04-24T09:24:43.232337Z",
               "isNightly": true,
               "translations": {
                 "en": {
                   "changelog": ""
                 }
-              },
+              }
             }
           ]
         }
@@ -126,7 +141,6 @@ describe('modules/datasource/nextcloud/index', () => {
     });
 
     expect(res).toStrictEqual({
-      homepage: 'https://github.com/nextcloud/user_oidc',
       registryUrl: 'https://custom.registry.com',
       releases: [
         {
@@ -134,7 +148,7 @@ describe('modules/datasource/nextcloud/index', () => {
           changelogUrl: 'https://github.com/nextcloud-releases/user_oidc',
           isStable: false,
           registryUrl: 'https://custom.registry.com',
-          releaseTimestamp: '2025-04-24T09:24:43.232337Z',
+          releaseTimestamp: '2025-04-24T09:24:43.232Z',
           version: '7.2.0',
         },
         {
@@ -142,10 +156,11 @@ describe('modules/datasource/nextcloud/index', () => {
           changelogUrl: 'https://github.com/nextcloud-releases/user_oidc',
           isStable: true,
           registryUrl: 'https://custom.registry.com',
-          releaseTimestamp: '2025-07-25T09:41:26.318411Z',
+          releaseTimestamp: '2025-07-25T09:41:26.318Z',
           version: '7.3.0',
         },
       ],
+      sourceUrl: 'https://github.com/nextcloud/user_oidc',
     });
   });
 });
