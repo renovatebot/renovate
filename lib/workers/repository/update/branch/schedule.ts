@@ -127,6 +127,95 @@ export function cronMatches(
   );
 }
 
+export function getNextScheduleTime(
+  config: RenovateConfig,
+  scheduleKey: 'schedule' | 'automergeSchedule' = 'automergeSchedule',
+): Date | null {
+  let configSchedule = config[scheduleKey];
+  logger.debug(
+    `Getting next schedule time for (schedule=${String(configSchedule)}, tz=${config.timezone!})`,
+  );
+  
+  if (
+    !configSchedule ||
+    configSchedule.length === 0 ||
+    configSchedule[0] === '' ||
+    configSchedule[0] === 'at any time'
+  ) {
+    logger.debug('No schedule defined - returning null');
+    return null;
+  }
+  
+  if (!is.array(configSchedule)) {
+    logger.warn(
+      { schedule: configSchedule },
+      'config schedule is not an array',
+    );
+    configSchedule = [configSchedule];
+  }
+  
+  const validSchedule = hasValidSchedule(configSchedule);
+  if (!validSchedule[0]) {
+    logger.warn(validSchedule[1]);
+    return null;
+  }
+  
+  let now: DateTime = DateTime.local();
+  logger.trace(`now=${now.toISO()!}`);
+  
+  // Adjust the time if repo is in a different timezone to renovate
+  if (config.timezone) {
+    logger.debug(`Found timezone: ${config.timezone}`);
+    const validTimezone = hasValidTimezone(config.timezone);
+    if (!validTimezone[0]) {
+      logger.warn(validTimezone[1]);
+      return null;
+    }
+    logger.debug('Adjusting now for timezone');
+    now = now.setZone(config.timezone);
+    logger.trace(`now=${now.toISO()!}`);
+  }
+
+  // later is timezone agnostic (as in, it purely relies on the underlying UTC date/time that is stored in the Date),
+  // which means we have to pass it a Date that has an underlying UTC date/time in the same timezone as the schedule
+  const jsNow = now.setZone('utc', { keepLocalTime: true }).toJSDate();
+
+  // Find the earliest next run time from all schedules
+  let earliestNextRun: Date | null = null;
+
+  for (const scheduleText of configSchedule) {
+    const cronSchedule = parseCron(scheduleText);
+    if (cronSchedule) {
+      // We have Cron syntax
+      const nextRun = cronSchedule.nextRun();
+      if (nextRun && (!earliestNextRun || nextRun < earliestNextRun)) {
+        earliestNextRun = nextRun;
+      }
+    } else {
+      // We have Later syntax
+      const massagedText = scheduleMappings[scheduleText] || scheduleText;
+      const parsedSchedule = later.parse.text(fixShortHours(massagedText));
+      logger.debug({ parsedSchedule }, `Checking schedule "${scheduleText}"`);
+
+      const nextOccurrence = later.schedule(parsedSchedule).next(1, jsNow);
+      if (nextOccurrence && nextOccurrence.length > 0) {
+        const nextRunTime = nextOccurrence[0];
+        if (!earliestNextRun || nextRunTime < earliestNextRun) {
+          earliestNextRun = nextRunTime;
+        }
+      }
+    }
+  }
+
+  if (earliestNextRun) {
+    logger.debug(`Next schedule time: ${earliestNextRun.toISOString()}`);
+    return earliestNextRun;
+  }
+
+  logger.debug('No next schedule time found');
+  return null;
+}
+
 export function isScheduledNow(
   config: RenovateConfig,
   scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule',

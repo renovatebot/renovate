@@ -56,6 +56,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+import { isScheduledNow, getNextScheduleTime } from '../../../workers/repository/update/branch/schedule';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -695,13 +696,35 @@ async function tryPrAutomerge(
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
+          const requestBody: any = {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          };
+
+          // Check if automergeSchedule is defined and if we are currently outside the schedule
+          if (platformPrOptions?.automergeSchedule && platformPrOptions.automergeSchedule.length > 0) {
+            const mockConfig = {
+              automergeSchedule: platformPrOptions.automergeSchedule,
+              timezone: platformPrOptions.timezone,
+            };
+            
+            // If we are not currently in the automerge schedule, set merge_after to the next allowed time
+            if (!isScheduledNow(mockConfig, 'automergeSchedule')) {
+              const nextScheduleTime = getNextScheduleTime(mockConfig, 'automergeSchedule');
+              if (nextScheduleTime) {
+                requestBody.merge_after = nextScheduleTime.toISOString();
+                logger.debug(
+                  { merge_after: requestBody.merge_after },
+                  'Setting merge_after due to automergeSchedule'
+                );
+              }
+            }
+          }
+
           await gitlabApi.putJson(
             `projects/${config.repository}/merge_requests/${pr}/merge`,
             {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
-              },
+              body: requestBody,
             },
           );
           break;
