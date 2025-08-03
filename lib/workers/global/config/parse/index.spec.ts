@@ -275,6 +275,17 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
     });
 
+    // added to ensure fileConfigParser works properly
+    it('does not massage onboardingNoDeps when autodiscover is true', async () => {
+      fileConfigParser.getConfig.mockResolvedValueOnce({
+        onboardingNoDeps: 'auto',
+        autodiscover: true,
+      });
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'auto']]);
+    });
+
     it('apply secrets to global config', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
       const env: NodeJS.ProcessEnv = {
