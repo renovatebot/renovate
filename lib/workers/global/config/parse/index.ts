@@ -48,8 +48,6 @@ export async function parseConfigs(
   const cliConfig = cliParser.getConfig(argv);
   const envConfig = await envParser.getConfig(env);
 
-  // eslint-disable-next-line
-  console.log(fileConfig);
   let config: AllConfig = mergeChildConfig(fileConfig, additionalFileConfig);
   // merge extends from file config and additional file config
   if (is.nonEmptyArray(fileConfig.extends)) {

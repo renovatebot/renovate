@@ -247,6 +247,7 @@ describe('workers/global/config/parse/index', () => {
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
       expect(getParentDir).not.toHaveBeenCalled();
+      vi.doUnmock('../../../../../config.js');
     });
 
     it('massage onboardingNoDeps when autodiscover is false', async () => {
@@ -259,6 +260,7 @@ describe('workers/global/config/parse/index', () => {
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'disabled']]);
+      vi.doUnmock('../../../../../config.js');
     });
 
     it('apply secrets to global config', async () => {
@@ -281,6 +283,7 @@ describe('workers/global/config/parse/index', () => {
           TOKEN: 'secret_token',
         },
       });
+      vi.doUnmock('../../../../../config.js');
     });
 
     it('overrides file config with additional file config', async () => {
@@ -298,6 +301,7 @@ describe('workers/global/config/parse/index', () => {
       };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig.labels).toMatchObject(['additional-file-config']);
+      vi.doUnmock('../../../../../config.js');
     });
 
     it('merges extends from file config with additional file config', async () => {
@@ -318,6 +322,7 @@ describe('workers/global/config/parse/index', () => {
         ':pinDigests',
         'customManagers:azurePipelinesVersions',
       ]);
+      vi.doUnmock('../../../../../config.js');
     });
   });
 });
