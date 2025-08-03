@@ -252,13 +252,13 @@ describe('workers/global/config/parse/index', () => {
     it('massage onboardingNoDeps when autodiscover is false', async () => {
       vi.doMock('../../../../../config.js', () => ({
         default: {
-          onboardingNoDeps: 'auto',
+          onboardingNoDeps: 'disabled',
           autodiscover: false,
         },
       }));
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'disabled']]);
     });
 
     it('apply secrets to global config', async () => {
