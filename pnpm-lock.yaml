@@ -556,8 +556,8 @@ importers:
         specifier: 0.18.1
         version: 0.18.1
       memfs:
-        specifier: 4.22.0
-        version: 4.22.0
+        specifier: 4.22.1
+        version: 4.22.1
       nock:
         specifier: 14.0.7
         version: 14.0.7
@@ -4502,8 +4502,8 @@ packages:
   mdurl@2.0.0:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
-  memfs@4.22.0:
-    resolution: {integrity: sha512-P2NVrS9VrrVYi6jDDvsdVo9Oa9H0VHI0Nj10CsaLZO8VYheo9f4Ur/gEo14UZVwmvnX1EQwTj/lBry3dn/fxhA==}
+  memfs@4.22.1:
+    resolution: {integrity: sha512-uycbtnFiSEgN+bD+UUoM4yjcZGc0N/XGxgvpag+LiHE5AgDPjMq+0n4vQqKAA/dinEWqk0DeYSVZbSearHDYzw==}
     engines: {node: '>= 4.0.0'}
 
   memorystream@0.3.1:
@@ -11350,7 +11350,7 @@ snapshots:
 
   mdurl@2.0.0: {}
 
-  memfs@4.22.0:
+  memfs@4.22.1:
     dependencies:
       '@jsonjoy.com/json-pack': 1.4.0(tslib@2.8.1)
       '@jsonjoy.com/util': 1.8.0(tslib@2.8.1)
