@@ -200,6 +200,15 @@ const staticGroups = {
       },
     ],
   },
+  hibernateCore: {
+    description: 'Group Java Hibernate Core packages.',
+    packageRules: [
+      {
+        groupName: 'hibernate core',
+        matchPackageNames: ['org.hibernate:**'],
+      },
+    ],
+  },
   illuminate: {
     description: 'Group PHP Illuminate packages together.',
     packageRules: [
@@ -477,6 +486,7 @@ const staticGroups = {
       'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
+      'group:hibernateCore',
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
