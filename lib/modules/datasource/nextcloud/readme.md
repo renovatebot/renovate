@@ -6,7 +6,9 @@ For example:
 ```json
 {
   "matchDatasources": ["nextcloud"],
-  "registryUrls": ["https://apps.nextcloud.com/api/v1/platform/30.0.0/apps.json"]
+  "registryUrls": [
+    "https://apps.nextcloud.com/api/v1/platform/30.0.0/apps.json"
+  ]
 }
 ```
 
@@ -18,7 +20,7 @@ For example:
   "customType": "regex",
   "managerFilePatterns": ["/(^|/)renovate.json$/"],
   "matchStrings": [
-      "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>.*)/apps.json"
+    "https://apps.nextcloud.com/api/v1/platform/(?<currentValue>.*)/apps.json"
   ],
   "depNameTemplate": "nextcloud/server",
   "datasourceTemplate": "github-releases"
