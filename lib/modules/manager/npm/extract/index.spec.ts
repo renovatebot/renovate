@@ -1355,7 +1355,7 @@ describe('modules/manager/npm/extract/index', () => {
       ]);
     });
 
-    it('extracts yarnrc.yml and adds it as packageFile and sets pacakgeManager', async () => {
+    it('extracts yarnrc.yml and adds it as packageFile and packageManager to true', async () => {
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
