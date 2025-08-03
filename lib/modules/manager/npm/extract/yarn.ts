@@ -132,6 +132,7 @@ type YarnCatalogs = z.TypeOf<typeof YarnCatalogsSchema>;
 export async function extractYarnCatalogsFromYml(
   catalogs: YarnCatalogs | undefined,
   packageFile: string,
+  hasPackageManager: boolean,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`yarn.extractYarnCatalogsFromYml(${packageFile})`);
 
@@ -150,7 +151,7 @@ export async function extractYarnCatalogsFromYml(
     deps,
     managerData: {
       yarnLock,
-      hasPackageManager: true,
+      hasPackageManager,
     },
   };
 }

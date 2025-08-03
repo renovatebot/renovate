@@ -1,3 +1,4 @@
+import { FargateProfileIssueCode } from '@aws-sdk/client-eks';
 import {
   extractYarnCatalogsFromYml,
   getYarnLock,
@@ -82,7 +83,7 @@ describe('modules/manager/npm/extract/yarn', () => {
   describe('.extractYarnCatalogsFromYml()', () => {
     it('handles empty catalog entries', async () => {
       expect(
-        await extractYarnCatalogsFromYml(undefined, 'package.json'),
+        await extractYarnCatalogsFromYml(undefined, 'package.json', false),
       ).toMatchObject({
         deps: [],
       });
@@ -103,6 +104,7 @@ describe('modules/manager/npm/extract/yarn', () => {
             },
           },
           'package.json',
+          true,
         ),
       ).toMatchObject({
         deps: [
@@ -141,11 +143,12 @@ describe('modules/manager/npm/extract/yarn', () => {
             },
           },
           'package.json',
+          false,
         ),
       ).toMatchObject({
         managerData: {
           yarnLock: 'yarn.lock',
-          hasPackageManager: true,
+          hasPackageManager: false,
         },
       });
     });

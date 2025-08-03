@@ -246,6 +246,16 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
+        debugger;
+        logger.trace({ packageFile }, `Extracting as a package.json file`);
+        const deps = await extractPackageFile(content, packageFile, config);
+        if (deps) {
+          npmFiles.push({
+            ...deps,
+            packageFile,
+          });
+        }
+
         if (packageFile === 'package.json') {
           const yarnrcYmlFileName = await findLocalSiblingOrParent(
             packageFile,
@@ -256,26 +266,18 @@ export async function extractAllPackageFiles(
             await loadYarnRcYml(yarnrcYmlFileName);
 
           if (yarnConfig?.catalogs) {
-            const deps = await extractYarnCatalogsFromYml(
+            const catalogsDeps = await extractYarnCatalogsFromYml(
               yarnConfig.catalogs,
               packageFile,
+              deps?.managerData?.hasPackageManager ?? false,
             );
-            if (deps) {
+            if (catalogsDeps) {
               npmFiles.push({
-                ...deps,
+                ...catalogsDeps,
                 packageFile: '.yarnrc.yml',
               });
             }
           }
-        }
-
-        logger.trace({ packageFile }, `Extracting as a package.json file`);
-        const deps = await extractPackageFile(content, packageFile, config);
-        if (deps) {
-          npmFiles.push({
-            ...deps,
-            packageFile,
-          });
         }
       }
     } else {
