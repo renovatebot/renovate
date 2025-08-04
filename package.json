@@ -347,7 +347,7 @@
     "typescript": "5.8.3",
     "typescript-eslint": "8.38.0",
     "unified": "11.0.5",
-    "vite": "6.3.5",
+    "vite": "7.0.6",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4",
     "vitest-mock-extended": "3.1.0"
