@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { MigrationsService } from './migrations-service';

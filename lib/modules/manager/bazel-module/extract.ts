@@ -1,4 +1,5 @@
-import { dirname } from 'upath';
+import upath from 'upath';
+const { dirname } = upath;
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { LooseArray } from '../../../util/schema-utils';

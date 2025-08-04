@@ -1,5 +1,6 @@
 import os from 'node:os';
-import { dirname, join } from 'upath';
+import upath from 'upath';
+const { dirname, join } = upath;
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import {

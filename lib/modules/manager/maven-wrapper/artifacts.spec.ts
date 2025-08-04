@@ -1,7 +1,8 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import type { StatusResult } from 'simple-git';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';

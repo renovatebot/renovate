@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { GlobalConfig } from '../../../config/global';
 import type { UpdateType } from '../../../config/types';
 import * as terraformLockfile from '../terraform/lockfile';

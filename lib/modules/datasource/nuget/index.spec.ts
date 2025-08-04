@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';

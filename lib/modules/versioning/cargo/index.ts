@@ -1,5 +1,6 @@
 import { major as getMajor, minor as getMinor } from 'semver';
-import { is as isStable } from 'semver-stable';
+import semver_stable from 'semver-stable';
+const { is: isStable } = semver_stable;
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';

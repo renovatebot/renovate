@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
 import { Fixtures } from '~test/fixtures';

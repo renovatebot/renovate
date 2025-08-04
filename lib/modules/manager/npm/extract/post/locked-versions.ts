@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { dirname, relative } from 'upath';
+import upath from 'upath';
+const { dirname, relative } = upath;
 import { logger } from '../../../../../logger';
 import type { PackageFile } from '../../../types';
 import type { NpmManagerData } from '../../types';

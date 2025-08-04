@@ -1,5 +1,6 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';

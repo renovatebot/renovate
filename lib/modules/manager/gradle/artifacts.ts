@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
+const { dirname, join } = upath;
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';

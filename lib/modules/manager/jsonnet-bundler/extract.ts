@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { coerceString } from '../../../util/string';

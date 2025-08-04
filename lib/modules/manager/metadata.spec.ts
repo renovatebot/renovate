@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { customManagerList as customManagers } from './custom';
 
 describe('modules/manager/metadata', () => {

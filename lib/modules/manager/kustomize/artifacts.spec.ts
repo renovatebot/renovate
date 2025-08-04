@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';

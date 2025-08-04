@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';

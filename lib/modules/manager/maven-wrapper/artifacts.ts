@@ -1,7 +1,8 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import is from '@sindresorhus/is';
-import { dirname, join } from 'upath';
+import upath from 'upath';
+const { dirname, join } = upath;
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';

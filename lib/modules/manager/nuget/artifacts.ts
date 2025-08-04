@@ -1,5 +1,6 @@
 import { quote } from 'shlex';
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';

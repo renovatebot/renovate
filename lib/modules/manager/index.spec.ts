@@ -1,4 +1,5 @@
-import { join } from 'upath';
+import upath from 'upath';
+const { join } = upath;
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
 import * as customManager from './custom';
