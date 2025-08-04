@@ -3,12 +3,20 @@ import * as bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { nanoid } from 'nanoid';
 import upath from 'upath';
+import type { Exact } from '../types/exact';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
+import { LOG_CODES } from './error-codes';
 import { RenovateStream } from './pretty-stdout';
 import { RenovateLogger } from './renovate-logger';
-import type { BunyanRecord, Logger } from './types';
+import type {
+  AdditionalFieldsMap,
+  BunyanRecord,
+  ErrorCode,
+  FatalCode,
+  Logger,
+} from './types';
 import {
   ProblemStream,
   getEnv,
@@ -169,4 +177,20 @@ export function getProblems(): BunyanRecord[] {
 
 export function clearProblems(): void {
   return problems.clearProblems();
+}
+
+export function logFatal<C extends FatalCode, A extends AdditionalFieldsMap[C]>(
+  errCode: C,
+  fields: Exact<AdditionalFieldsMap[C], A>, // <-- the new check
+): void {
+  const { message } = LOG_CODES.fatal[errCode];
+  logger.fatal({ errCode, ...fields }, message);
+}
+
+export function logError<C extends ErrorCode, A extends AdditionalFieldsMap[C]>(
+  errCode: C,
+  fields: Exact<AdditionalFieldsMap[C], A>, // <-- the new check
+): void {
+  const { message } = LOG_CODES.error[errCode];
+  logger.error({ errCode, ...fields }, message);
 }
