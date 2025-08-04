@@ -45,13 +45,12 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { BbsPrCache } from './pr-cache';
-import {
+import type {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
-  UserSchema,
-  UsersSchema,
 } from './schema';
+import { UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
