@@ -17,6 +17,7 @@
     "angular-eslint": "https://github.com/angular-eslint/angular-eslint",
     "angularfire": "https://github.com/angular/angularfire",
     "angularjs": "https://github.com/angular/angular.js",
+    "apache-lucene": "https://gitbox.apache.org/repos/asf?p=lucene.git",
     "apollo-server": "https://github.com/apollographql/apollo-server",
     "apolloclient": "https://github.com/apollographql/apollo-client",
     "applicationinsights-dotnet": "https://github.com/Microsoft/ApplicationInsights-dotnet",
@@ -671,7 +672,6 @@
   "patternGroups": {
     "angularmaterial": ["/^@angular/material/", "/^@angular/cdk/"],
     "apache-camel": "/^org.apache.camel:/",
-    "apache-lucene": "/^org.apache.lucene:/",
     "apache-poi": "/^org.apache.poi:/",
     "aws-java-sdk": "/^com.amazonaws:aws-java-sdk-/",
     "aws-java-sdk-v2": "/^software.amazon.awssdk:/",
