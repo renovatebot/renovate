@@ -117,8 +117,13 @@ export async function init(
     pingInterval: 30000, // 30s
   };
   if (clusteredMode) {
+    const parsedUrl = new URL(rewrittenUrl);
     client = createCluster({
       rootNodes: [config],
+      defaults: {
+        username: parsedUrl.username || 'default',
+        password: parsedUrl.password || '',
+      },
     });
   } else {
     client = createClient(config);
