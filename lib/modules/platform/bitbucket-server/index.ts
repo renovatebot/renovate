@@ -735,9 +735,9 @@ async function updatePRAndAddReviewers(
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
         const filteredReviewers = reviewers.filter(
-          (name) => !invalidReviewers.includes(name)
+          (name) => !invalidReviewers.includes(name),
         );
-        await updatePRAndAddReviewers(prNo, reviewers);
+        await updatePRAndAddReviewers(prNo, filteredReviewers);
       } else {
         logger.debug(
           '409 response to adding reviewers - has repository changed?',
