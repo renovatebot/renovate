@@ -271,7 +271,7 @@ describe('workers/global/config/parse/index', () => {
       });
       const env: NodeJS.ProcessEnv = {};
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'disabled']]);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
     });
 
     // added to ensure fileConfigParser works properly
@@ -311,7 +311,7 @@ describe('workers/global/config/parse/index', () => {
         '__fixtures__/additional-config.js',
       );
       fileConfigParser.getConfig.mockResolvedValueOnce({
-        labels: ['file-config']
+        labels: ['file-config'],
       });
       const env: NodeJS.ProcessEnv = {
         RENOVATE_ADDITIONAL_CONFIG_FILE: additionalConfigPath,
@@ -326,7 +326,7 @@ describe('workers/global/config/parse/index', () => {
         '__fixtures__/additional-config.js',
       );
       fileConfigParser.getConfig.mockResolvedValueOnce({
-        extends: [':pinDigests']
+        extends: [':pinDigests'],
       });
       const env: NodeJS.ProcessEnv = {
         RENOVATE_ADDITIONAL_CONFIG_FILE: additionalConfigPath,

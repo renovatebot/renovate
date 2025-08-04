@@ -2,8 +2,7 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { getParsedContent } from './file';
-import { migrateAndValidateConfig } from './util';
+import { getParsedContent, migrateAndValidateConfig } from './util';
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   let config: AllConfig = {};
