@@ -707,8 +707,8 @@ async function updatePRAndAddReviewers(
 
     // Remove invalidReviewers from set if any
     if (bitbucketInvalidReviewers?.length) {
-      for (const invalid of bitbucketInvalidReviewers) {
-        reviewersSet.delete(invalid);
+      for (const invalidReviewer of bitbucketInvalidReviewers) {
+        reviewersSet.delete(invalidReviewer);
       }
     }
 
