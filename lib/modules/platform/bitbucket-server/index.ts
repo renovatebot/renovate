@@ -734,7 +734,10 @@ async function updatePRAndAddReviewers(
       if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
-        await updatePRAndAddReviewers(prNo, reviewers, invalidReviewers);
+        const filteredReviewers = reviewers.filter(
+          (name) => !invalidReviewers.includes(name)
+        );
+        await updatePRAndAddReviewers(prNo, reviewers);
       } else {
         logger.debug(
           '409 response to adding reviewers - has repository changed?',
