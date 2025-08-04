@@ -205,7 +205,6 @@ describe('workers/global/config/parse/index', () => {
         defaultEnv,
         defaultArgv,
       );
-      // vi.doUnmock(defaultConfig);
 
       // Remote preset in globalExtends should be resolved
       expect(parsedConfig).toContainEntries([
