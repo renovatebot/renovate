@@ -131,7 +131,7 @@ async function buildUpdateVerificationMetadataCmd(
     return null;
   }
 
-  return `${baseCmd} --write-verification-metadata ${hashTypes.upath.join(',')} dependencies`;
+  return `${baseCmd} --write-verification-metadata ${hashTypes.join(',')} dependencies`;
 }
 
 export async function updateArtifacts({
@@ -207,7 +207,7 @@ export async function updateArtifacts({
       let lockfileCmd = `${baseCmd} ${subprojects
         .map((project) => `${project}:dependencies`)
         .map(quote)
-        .upath.join(' ')}`;
+        .join(' ')}`;
 
       if (
         config.isLockFileMaintenance === true ||
@@ -222,7 +222,7 @@ export async function updateArtifacts({
 
         lockfileCmd += ` --update-locks ${updatedDepNames
           .map(quote)
-          .upath.join(',')}`;
+          .join(',')}`;
       }
       cmds.push(lockfileCmd);
     }

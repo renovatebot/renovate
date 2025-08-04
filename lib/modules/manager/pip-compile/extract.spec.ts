@@ -23,7 +23,7 @@ function getSimpleRequirementsFile(command: string, deps: string[] = []) {
 #    ${command}
 #
 
-${deps.upath.join('\n')}`;
+${deps.join('\n')}`;
 }
 
 describe('modules/manager/pip-compile/extract', () => {

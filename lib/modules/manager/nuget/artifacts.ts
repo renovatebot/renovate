@@ -184,7 +184,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileNames.upath.join(', '),
+          lockFile: lockFileNames.join(', '),
           // error is written to stdout
           stderr: err.stdout ?? err.message,
         },
