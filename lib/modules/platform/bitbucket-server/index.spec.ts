@@ -1055,6 +1055,138 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
       });
 
+      describe('getUserSlugsByEmail', () => {
+        it('throws when lookup fails', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(500, []);
+
+          await expect(
+            bitbucket.getUserSlugsByEmail('e-mail@test.com'),
+          ).rejects.toThrowErrorMatchingSnapshot();
+        });
+
+        it('return empty array when no results found', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, []);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('return only active users', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: false,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('only returns exact matches', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+              {
+                slug: 'usernamefoundbyemailtoo',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('mail@test.com');
+          expect(actual).toBeEmptyArray();
+        });
+
+        it('returns multiple exact matches', async () => {
+          const scope = await initRepo();
+          scope
+            // User by email
+            .get(`${urlPath}/rest/api/1.0/users`)
+            .query(
+              (q) =>
+                q.filter === 'e-mail@test.com' &&
+                q['permission.1'] === 'REPO_READ' &&
+                q['permission.1.repositorySlug'] === 'repo' &&
+                q['permission.1.projectKey'] === 'SOME',
+            )
+            .reply(200, [
+              {
+                slug: 'usernamefoundbyemail',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+              {
+                slug: 'usernamefoundbyemailtoo',
+                active: true,
+                displayName: 'Not relevant',
+                emailAddress: 'e-mail@test.com',
+              },
+            ]);
+
+          const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
+          expect(actual).toBeArrayOfSize(2);
+          expect(actual).toEqual(
+            expect.arrayContaining([
+              'usernamefoundbyemail',
+              'usernamefoundbyemailtoo',
+            ]),
+          );
+        });
+      });
+
       describe('deleteLAbel()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.deleteLabel(5, 'renovate')).toMatchSnapshot();

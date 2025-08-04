@@ -45,12 +45,13 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { BbsPrCache } from './pr-cache';
-import type {
+import {
   Comment,
   PullRequestActivity,
   PullRequestCommentActivity,
+  UserSchema,
+  UsersSchema,
 } from './schema';
-import { UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -76,7 +77,7 @@ export const id = 'bitbucket-server';
 
 let config: BbsConfig = {} as any;
 
-const bitbucketServerHttp = new BitbucketServerHttp();
+export const bitbucketServerHttp = new BitbucketServerHttp();
 
 const defaults: {
   endpoint?: string;
@@ -703,14 +704,9 @@ export async function addReviewers(
   const reviewerSlugs = new Set<string>();
 
   for (const entry of reviewers) {
-    let slugs;
     // If entry is an email-address, resolve userslugs
     if (z.string().email().safeParse(entry).success) {
-      slugs = await getUserSlugsByEmail(entry);
-      if (!slugs.length) {
-        logger.debug({ entry }, 'No users found for reviewer');
-        continue;
-      }
+      const slugs = await getUserSlugsByEmail(entry);
       slugs.forEach((slug) => reviewerSlugs.add(slug));
     } else {
       reviewerSlugs.add(entry);
@@ -729,11 +725,15 @@ export async function addReviewers(
  * @param emailAddress - A string that could be the user's email-address.
  * @returns List of user slugs for active, matched users.
  */
-async function getUserSlugsByEmail(emailAddress: string): Promise<string[]> {
+export async function getUserSlugsByEmail(
+  emailAddress: string,
+): Promise<string[]> {
   try {
-    const filterUrl = `./rest/api/1.0/users?filter=${emailAddress}&permission.1=REPO_READ&permission.1.projectKey=${
-      config.projectKey
-    }&permission.1.repositorySlug=${config.repositorySlug}`;
+    const filterUrl =
+      `./rest/api/1.0/users?filter=${emailAddress}` +
+      `&permission.1=REPO_READ` +
+      `&permission.1.projectKey=${config.projectKey}` +
+      `&permission.1.repositorySlug=${config.repositorySlug}`;
 
     const users = await bitbucketServerHttp.getJson(
       filterUrl,
@@ -741,16 +741,22 @@ async function getUserSlugsByEmail(emailAddress: string): Promise<string[]> {
       UsersSchema,
     );
 
-    // Only return active users with exact match on email-address
+    if (!users.body.length) {
+      logger.debug(
+        { userinfo: emailAddress },
+        'No users found for email-address',
+      );
+      return [];
+    }
     return users.body
-      .filter((u) => u.active && u.emailAddress === emailAddress)
-      .map((u) => u.slug);
+      .filter(
+        (u: { active: any; emailAddress: string }) =>
+          u.active && u.emailAddress === emailAddress,
+      )
+      .map((u: { slug: any }) => u.slug);
   } catch (err) {
-    logger.debug(
-      { err, userinfo: emailAddress },
-      'Filtered user lookup failed',
-    );
-    return [emailAddress];
+    logger.warn({ err, emailAddress }, `Failed to resolve email to user`);
+    throw err;
   }
 }
 
