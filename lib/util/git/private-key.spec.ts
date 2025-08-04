@@ -9,7 +9,7 @@ import {
   writePrivateKey,
 } from './private-key';
 import { Fixtures } from '~test/fixtures';
-import { mockedExtended } from '~test/util';
+import { logger, mockedExtended } from '~test/util';
 
 vi.mock('fs-extra', async () =>
   (
@@ -28,13 +28,13 @@ describe('util/git/private-key', () => {
     });
 
     it('returns if no private key', async () => {
-      setPrivateKey(undefined);
+      setPrivateKey(undefined, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
 
     it('throws error if failing', async () => {
-      setPrivateKey('some-key');
+      setPrivateKey('some-key', undefined);
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
         .calledWith(
@@ -59,7 +59,7 @@ describe('util/git/private-key', () => {
           stderr: `gpg: key ${publicKey}: secret key imported\nfoo\n`,
           stdout: '',
         });
-      setPrivateKey('some-key');
+      setPrivateKey('some-key', undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
       expect(exec.exec).toHaveBeenCalledWith(
@@ -79,25 +79,89 @@ describe('util/git/private-key', () => {
       await expect(configSigningKey('/tmp/some-repo')).resolves.not.toThrow();
     });
 
-    it('throws error if the private SSH key has a passphrase', async () => {
+    it('throws error if SSH key passphrase decryption fails', async () => {
       const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
+      const passphrase = 'test-passphrase';
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
-        .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
+        .calledWith(
+          `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
+        )
         .mockRejectedValueOnce({
           stderr: `Load key "${privateKeyFile}": incorrect passphrase supplied to decrypt private key`,
           stdout: '',
         });
-      setPrivateKey(`\
+      setPrivateKey(
+        `\
 -----BEGIN OPENSSH PRIVATE KEY-----
 some-private-key with-passphrase
 some-private-key with-passphrase
 -----END OPENSSH PRIVATE KEY-----
-`);
+`,
+        passphrase,
+      );
       await expect(writePrivateKey()).rejects.toThrow();
     });
 
-    it('imports the private SSH key', async () => {
+    it('imports SSH key with passphrase successfully', async () => {
+      const privateKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key with-passphrase
+some-private-key with-passphrase
+-----END OPENSSH PRIVATE KEY-----
+`;
+      const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
+      const publicKey = 'some-public-key';
+      const passphrase = 'test-passphrase';
+      const repoDir = '/tmp/some-repo';
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(
+          `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
+        )
+        .mockResolvedValueOnce({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
+        .mockResolvedValue({
+          stderr: '',
+          stdout: publicKey,
+        });
+
+      setPrivateKey(privateKey, passphrase);
+      await expect(writePrivateKey()).resolves.not.toThrow();
+      await expect(configSigningKey(repoDir)).resolves.not.toThrow();
+
+      expect(exec.exec).toHaveBeenCalledWith(
+        `ssh-keygen -p -f ${privateKeyFile} -P "${passphrase}" -N ""`,
+      );
+      expect(exec.exec).toHaveBeenCalledWith(
+        `git config user.signingkey ${privateKeyFile}`,
+        { cwd: repoDir },
+      );
+    });
+
+    it('warns about GPG key passphrase being ignored', () => {
+      setPrivateKey('some-gpg-key', 'test-passphrase');
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Passphrase is not yet supported for GPG keys, it will be ignored',
+      );
+    });
+
+    it('accepts SSH key constructor with passphrase', () => {
+      const privateKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key with-passphrase
+some-private-key with-passphrase
+-----END OPENSSH PRIVATE KEY-----
+`;
+      const passphrase = 'test-passphrase';
+
+      expect(() => setPrivateKey(privateKey, passphrase)).not.toThrow();
+    });
+
+    it('imports the private SSH key without passphrase', async () => {
       const privateKey = `\
 -----BEGIN OPENSSH PRIVATE KEY-----
 some-private-key
@@ -110,12 +174,12 @@ some-private-key
       const repoDir = '/tmp/some-repo';
       exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
       exec.exec
-        .calledWith(`ssh-keygen -y -P "" -f ${privateKeyFile}`)
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
         .mockResolvedValue({
           stderr: '',
           stdout: publicKey,
         });
-      setPrivateKey(privateKey);
+      setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
       await expect(configSigningKey(repoDir)).resolves.not.toThrow();
       expect(exec.exec).toHaveBeenCalledWith(
@@ -134,9 +198,65 @@ some-private-key
       expect(exec.exec).toHaveBeenCalledWith('git config gpg.format ssh', {
         cwd: repoDir,
       });
-      process.emit('exit', 0);
+
+      // Verify files exist before testing cleanup
+      expect(fs.existsSync(privateKeyFile)).toBeTrue();
+      expect(fs.existsSync(publicKeyFile)).toBeTrue();
+
+      // Test cleanup on exit
+      const exitHandlers: (() => void)[] = [];
+      const originalOn = process.on;
+      vi.spyOn(process, 'on').mockImplementation((event: any, handler: any) => {
+        if (event === 'exit') {
+          exitHandlers.push(handler);
+          return process;
+        }
+        return originalOn(event, handler);
+      });
+
+      // Re-run key import to register exit handlers
+      setPrivateKey(privateKey, undefined);
+      await writePrivateKey();
+
+      // Manually call exit handlers
+      exitHandlers.forEach((handler) => handler());
       expect(fs.existsSync(privateKeyFile)).toBeFalse();
       expect(fs.existsSync(publicKeyFile)).toBeFalse();
+    });
+
+    it('handles SSH key without registering exit handler', async () => {
+      const privateKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key
+some-private-key
+-----END OPENSSH PRIVATE KEY-----
+`;
+      const privateKeyFile = upath.join(os.tmpdir() + '/git-private-ssh.key');
+      const publicKey = 'some-public-key';
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
+        .mockResolvedValue({
+          stderr: '',
+          stdout: publicKey,
+        });
+
+      // Mock process.on to not register any handlers
+      const originalOn = process.on;
+      vi.spyOn(process, 'on').mockImplementation((event: any, handler: any) => {
+        if (event === 'exit') {
+          // Don't register the handler
+          return process;
+        }
+        return originalOn(event, handler);
+      });
+
+      setPrivateKey(privateKey, undefined);
+      await expect(writePrivateKey()).resolves.not.toThrow();
+
+      // Verify file exists since no cleanup handler was registered
+      expect(fs.existsSync(privateKeyFile)).toBeTrue();
     });
   });
 });
