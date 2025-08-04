@@ -56,7 +56,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { isScheduledNow, getNextScheduleTime } from '../../../workers/repository/update/branch/schedule';
+
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -701,24 +701,13 @@ async function tryPrAutomerge(
             merge_when_pipeline_succeeds: true,
           };
 
-          // Check if automergeSchedule is defined and if we are currently outside the schedule
-          if (platformPrOptions?.automergeSchedule && platformPrOptions.automergeSchedule.length > 0) {
-            const mockConfig = {
-              automergeSchedule: platformPrOptions.automergeSchedule,
-              timezone: platformPrOptions.timezone,
-            };
-            
-            // If we are not currently in the automerge schedule, set merge_after to the next allowed time
-            if (!isScheduledNow(mockConfig, 'automergeSchedule')) {
-              const nextScheduleTime = getNextScheduleTime(mockConfig, 'automergeSchedule');
-              if (nextScheduleTime) {
-                requestBody.merge_after = nextScheduleTime.toISOString();
-                logger.debug(
-                  { merge_after: requestBody.merge_after },
-                  'Setting merge_after due to automergeSchedule'
-                );
-              }
-            }
+          // Check if merge_after should be set based on platform options
+          if (platformPrOptions?.merge_after) {
+            requestBody.merge_after = platformPrOptions.merge_after;
+            logger.debug(
+              { merge_after: requestBody.merge_after },
+              'Setting merge_after from platform options',
+            );
           }
 
           await gitlabApi.putJson(

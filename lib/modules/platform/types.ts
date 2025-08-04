@@ -108,6 +108,7 @@ export interface PlatformPrOptions {
   forkModeDisallowMaintainerEdits?: boolean;
   automergeSchedule?: string[];
   timezone?: string;
+  merge_after?: string;
 }
 
 export interface CreatePRConfig {
