@@ -33,6 +33,26 @@ describe('modules/manager/terraform/lockfile/index', () => {
     GlobalConfig.set(adminConfig);
   });
 
+  it('returns artifact error', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+    fs.readLocalFile.mockRejectedValueOnce(new Error('File not found'));
+    expect(
+      await updateArtifacts({
+        packageFileName: 'main.tf',
+        updatedDeps: [{ depName: 'aws' }],
+        newPackageFileContent: '',
+        config,
+      }),
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: '.terraform.lock.hcl',
+          stderr: 'File not found',
+        },
+      },
+    ]);
+  });
+
   it('returns null if no .terraform.lock.hcl found', async () => {
     expect(
       await updateArtifacts({
