@@ -682,18 +682,6 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 
-/**
- * Resolves reviewer identifiers (usernames, display names, or email addresses)
- * to Bitbucket user slugs with REPO_READ permission and adds them to the pull request.
- *
- * This function performs user resolution once per reviewer input and filters out
- * unknown or inactive users before passing them to the PR update logic.
- *
- * Retries the update logic up to 3 times if the repository content has changed.
- *
- * @param prNo - The pull request number to update.
- * @param reviewers - List of reviewer identifiers (e.g. email, username).
- */
 export async function addReviewers(
   prNo: number,
   reviewers: string[],
