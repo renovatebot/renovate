@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
+import { z } from 'zod';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -60,7 +61,6 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { getExtraCloneOpts } from './utils';
-import { z } from 'zod';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -703,12 +703,18 @@ export async function addReviewers(
   const reviewerSlugs = new Set<string>();
 
   for (const entry of reviewers) {
-    const slugs = await getUserDetails(entry);
-    if (!slugs.length) {
-      logger.debug({ entry }, 'No users found for reviewer');
-      continue;
+    let slugs;
+    // If entry is an email-address, resolve userslugs
+    if (z.string().email().safeParse(entry).success) {
+      slugs = await getUserSlugsByEmail(entry);
+      if (!slugs.length) {
+        logger.debug({ entry }, 'No users found for reviewer');
+        continue;
+      }
+      slugs.forEach((slug) => reviewerSlugs.add(slug));
+    } else {
+      reviewerSlugs.add(entry);
     }
-    slugs.forEach((slug) => reviewerSlugs.add(slug));
   }
 
   await retry(updatePRAndAddReviewers, [prNo, Array.from(reviewerSlugs)], 3, [
@@ -717,40 +723,35 @@ export async function addReviewers(
 }
 
 /**
- * Resolves Bitbucket users by username, display name, or email address (userinfo string),
+ * Resolves Bitbucket users by email address,
  * restricted to users who have REPO_READ permission on the target repository.
  *
- * Lookup strategy:
- *  1. Try exact slug match via `/users/{slug}`.
- *  2. Fallback to `/users?filter=...` and return slugs of active users with exact match on
- *     email.
- *
- * @param userinfo - A string that could be the user's slug or email-address.
+ * @param emailAddress - A string that could be the user's email-address.
  * @returns List of user slugs for active, matched users.
  */
-async function getUserDetails(userinfo: string): Promise<string[]> {
-  if (z.string().email().safeParse(userinfo).success) {
-    try {
-      const filterUrl = `./rest/api/1.0/users?filter=${userinfo}&permission.1=REPO_READ&permission.1.projectKey=${
-        config.projectKey
-      }&permission.1.repositorySlug=${config.repositorySlug}`;
+async function getUserSlugsByEmail(emailAddress: string): Promise<string[]> {
+  try {
+    const filterUrl = `./rest/api/1.0/users?filter=${emailAddress}&permission.1=REPO_READ&permission.1.projectKey=${
+      config.projectKey
+    }&permission.1.repositorySlug=${config.repositorySlug}`;
 
-      const users = await bitbucketServerHttp.getJson(
-        filterUrl,
-        { paginate: true },
-        UsersSchema,
-      );
+    const users = await bitbucketServerHttp.getJson(
+      filterUrl,
+      { limit: 100 },
+      UsersSchema,
+    );
 
-      // Only return active users with exact match on email-address
-      return users.body
-        .filter((u) => u.active && u.emailAddress === userinfo)
-        .map((u) => u.slug);
-    } catch (err) {
-      logger.debug({ err, userinfo }, 'Filtered user lookup failed');
-      return [];
-    }
+    // Only return active users with exact match on email-address
+    return users.body
+      .filter((u) => u.active && u.emailAddress === emailAddress)
+      .map((u) => u.slug);
+  } catch (err) {
+    logger.debug(
+      { err, userinfo: emailAddress },
+      'Filtered user lookup failed',
+    );
+    return [emailAddress];
   }
-  return [userinfo];
 }
 
 async function updatePRAndAddReviewers(

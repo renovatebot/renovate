@@ -815,14 +815,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
         });
@@ -839,27 +832,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            });
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
         it('throws not-found 1', async () => {
-          const scope = await initRepo();
-          scope.get(`${urlPath}/rest/api/1.0/users/name`).reply(200, {
-            slug: 'name',
-            active: true,
-            displayName: 'N ame',
-            emailAddress: 'name@name.com',
-          });
-
+          await initRepo();
           await expect(
             bitbucket.addReviewers(null as any, ['name']),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
@@ -868,13 +847,6 @@ describe('modules/platform/bitbucket-server/index', () => {
         it('throws not-found 2', async () => {
           const scope = await initRepo();
           scope
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`,
             )
@@ -892,13 +864,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
@@ -924,14 +889,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            });
+            .reply(200, prMock(url, 'SOME', 'repo'));
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -951,14 +909,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(200, prMock(url, 'SOME', 'repo'))
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            });
+            .reply(200, prMock(url, 'SOME', 'repo'));
           await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
@@ -974,14 +925,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .thrice()
-            .reply(409)
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'N ame',
-              emailAddress: 'name@name.com',
-            });
+            .reply(409);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
             REPOSITORY_CHANGED,
           );
@@ -1048,14 +992,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
-            .reply(405)
-            .get(`${urlPath}/rest/api/1.0/users/name`)
-            .reply(200, {
-              slug: 'name',
-              active: true,
-              displayName: 'Not relevant',
-              emailAddress: 'notrelevant',
-            });
+            .reply(405);
           await expect(
             bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();
