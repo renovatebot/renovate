@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -22,14 +22,14 @@ const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
 const depNames = ['dep1', 'dep2', 'dep3'];
 const depNamesWithSdks = [...depNames, ...['dart', 'flutter']];
-const depNamesWithSpace = depNames.join(' ');
+const depNamesWithSpace = depNames.upath.join(' ');
 
 const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
