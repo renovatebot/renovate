@@ -414,7 +414,7 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'gotestyourself/gotestsum',
             depName: 'gotestsum',
-            extractVersion: '^v(?<version>.+)',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '2.12.0',
