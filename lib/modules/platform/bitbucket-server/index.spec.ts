@@ -931,6 +931,62 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
+        it('deals with invalid reviewers correctly', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .times(3)
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                return (
+                  Array.isArray(body.reviewers) &&
+                  body.reviewers.some(
+                    (r: { user: { name: string } }) => r?.user?.name === 'name',
+                  )
+                );
+              },
+            )
+            .once()
+            .reply(409, {
+              errors: [
+                {
+                  context: 'reviewers',
+                  message:
+                    'Errors encountered while adding some reviewers to this pull request.',
+                  exceptionName:
+                    'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
+                  reviewerErrors: [
+                    {
+                      context: 'name',
+                      message: 'name is not a user.',
+                      exceptionName: null,
+                    },
+                  ],
+                  validReviewers: ['userName2'],
+                },
+              ],
+            })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                return (
+                  Array.isArray(body.reviewers) &&
+                  body.reviewers.every(
+                    (r: { user: { name: string } }) => r?.user?.name !== 'name',
+                  )
+                );
+              },
+            )
+            .once()
+            .reply(200);
+
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
+        });
+
         it('deals correctly with resolving reviewers', async () => {
           const scope = await initRepo();
           scope

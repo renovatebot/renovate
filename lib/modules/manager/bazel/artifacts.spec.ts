@@ -183,7 +183,7 @@ describe('modules/manager/bazel/artifacts', () => {
     ]);
   });
 
-  it('returns null if no urls resolve hashes', async () => {
+  it('throws error if no urls resolve hashes', async () => {
     const inputHash =
       'eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867';
     const input = codeBlock`
@@ -218,7 +218,15 @@ describe('modules/manager/bazel/artifacts', () => {
         newPackageFileContent: input,
       }),
     );
-    expect(res).toBeNull();
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'WORKSPACE',
+          stderr:
+            'Could not calculate sha256 for bazel_skylib at 0.8.0. Checked URLs: https://github.com/bazelbuild/bazel-skyfoo/archive/0.8.0.tar.gz',
+        },
+      },
+    ]);
   });
 
   it('errors for http_archive without urls', async () => {
