@@ -82,6 +82,7 @@ gohugo extended_0.104.3
 golang 1.23.3
 golangci-lint 1.52.2
 gomplate 3.11.7
+gotestsum 1.12.3
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
@@ -407,6 +408,13 @@ dummy 1.2.3
             packageName: 'hairyhenderson/gomplate',
             depName: 'gomplate',
             extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '1.12.3',
+            datasource: 'github-releases',
+            packageName: 'gotestyourself/gotestsum',
+            depName: 'gotestsum',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '2.12.0',
