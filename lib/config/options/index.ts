@@ -1118,6 +1118,14 @@ const options: RenovateOptions[] = [
     stage: 'global',
   },
   {
+    name: 'gitPrivateKeyPassphrase',
+    description: 'Passphrase for the `gitPrivateKey`',
+    type: 'string',
+    cli: false,
+    globalOnly: true,
+    stage: 'global',
+  },
+  {
     name: 'gitIgnoredAuthors',
     description:
       'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
