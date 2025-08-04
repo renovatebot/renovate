@@ -332,7 +332,6 @@ export async function getBranchForceRebase(
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,
