@@ -98,6 +98,10 @@ class SSHKey extends PrivateKey {
     // If there's a passphrase, decrypt the private key and save without passphrase
     if (this.passphrase) {
       await exec(
+        // -p: change passphrase
+        // -f: key file
+        // -P: old passphrase
+        // -N: new passphrase (empty = no passphrase)
         `ssh-keygen -p -f ${keyFileName} -P "${this.passphrase}" -N ""`,
       );
     }
