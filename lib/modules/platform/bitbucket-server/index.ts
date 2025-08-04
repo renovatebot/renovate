@@ -694,7 +694,6 @@ export async function addReviewers(
 async function updatePRAndAddReviewers(
   prNo: number,
   reviewers: string[],
-  bitbucketInvalidReviewers?: string[],
 ): Promise<void> {
   try {
     const pr = await getPr(prNo);
@@ -704,13 +703,6 @@ async function updatePRAndAddReviewers(
 
     // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
-
-    // Remove invalidReviewers from set if any
-    if (bitbucketInvalidReviewers?.length) {
-      for (const invalidReviewer of bitbucketInvalidReviewers) {
-        reviewersSet.delete(invalidReviewer);
-      }
-    }
 
     await bitbucketServerHttp.putJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
@@ -730,7 +722,7 @@ async function updatePRAndAddReviewers(
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+      if (utils.isInvalidReviewersResponse(err)) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
         const filteredReviewers = reviewers.filter(
