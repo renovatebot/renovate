@@ -277,7 +277,7 @@ function containsPlaceholder(str: string): boolean {
 }
 
 function removeKnownPlaceholders(str: string): string {
-  return str.replace(/\/tree\/\${.*?}/,'');
+  return str.replace(regEx(/\/tree\/\${[^}]+}/),'');
 }
 
 export function getMavenUrl(
