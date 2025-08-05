@@ -445,8 +445,8 @@ importers:
         specifier: 4.17.20
         version: 4.17.20
       '@types/luxon':
-        specifier: 3.6.2
-        version: 3.6.2
+        specifier: 3.7.0
+        version: 3.7.0
       '@types/markdown-it':
         specifier: 14.1.2
         version: 14.1.2
@@ -2138,8 +2138,8 @@ packages:
   '@types/lodash@4.17.20':
     resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
 
-  '@types/luxon@3.6.2':
-    resolution: {integrity: sha512-R/BdP7OxEMc44l2Ex5lSXHoIXTB2JLNa3y2QISIbr58U/YcsffyQrYW//hZSdrfxrjRZj3GcUoxMPGdO8gSYuw==}
+  '@types/luxon@3.7.0':
+    resolution: {integrity: sha512-zNduyjkTXTttOp0KUG7ueFORgq6eyFsjbCZ/B8UfrVmfkHD1V9xC9wN/Vk0XUg0R/k/aIX1NeFwZgwe5hsDXfA==}
 
   '@types/markdown-it@14.1.2':
     resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
@@ -8728,7 +8728,7 @@ snapshots:
 
   '@types/lodash@4.17.20': {}
 
-  '@types/luxon@3.6.2': {}
+  '@types/luxon@3.7.0': {}
 
   '@types/markdown-it@14.1.2':
     dependencies:
