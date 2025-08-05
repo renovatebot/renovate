@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
-import { createClient, createCluster, RedisClusterOptions } from 'redis';
+import type { RedisClusterOptions } from 'redis';
+import { createClient, createCluster } from 'redis';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
 import { regEx } from '../../regex';
