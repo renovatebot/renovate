@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
@@ -323,7 +323,7 @@ describe('modules/datasource/nuget/index', () => {
     describe('determine source URL from nupkg', () => {
       beforeEach(() => {
         GlobalConfig.set({
-          cacheDir: join('/tmp/cache'),
+          cacheDir: upath.join('/tmp/cache'),
         });
         process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
       });

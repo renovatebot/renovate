@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
@@ -20,9 +20,9 @@ const config = {
 
 const adminConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 
 const mockHash = vi.mocked(TerraformProviderHash).createHashes;

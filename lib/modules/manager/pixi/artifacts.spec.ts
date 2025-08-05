@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
@@ -50,9 +50,9 @@ process.env.CONTAINERBASE = 'true';
 const datasource = vi.mocked(_datasource);
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 

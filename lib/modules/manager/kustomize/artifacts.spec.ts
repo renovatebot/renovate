@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, partial } from '../../../../test/util';
@@ -19,9 +19,9 @@ vi.mock('../../datasource', () => mockDeep());
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
 };
 
 process.env.CONTAINERBASE = 'true';

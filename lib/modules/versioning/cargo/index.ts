@@ -1,5 +1,5 @@
 import { major as getMajor, minor as getMinor } from 'semver';
-import { is as isStable } from 'semver-stable';
+import semver from 'semver-stable';
 import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
@@ -153,7 +153,7 @@ function getNewValue({
 
 function isBreaking(current: string, version: string): boolean {
   // The change may be breaking if either version is unstable
-  if (!isStable(version) || !isStable(current)) {
+  if (!semver.is(version) || !semver.is(current)) {
     return true;
   }
   const currentMajor = getMajor(current);

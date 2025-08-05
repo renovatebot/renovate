@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -79,8 +79,8 @@ async function getSubProjectList(
 }
 
 async function getGradleVersion(gradlewFile: string): Promise<string | null> {
-  const propertiesFile = join(
-    dirname(gradlewFile),
+  const propertiesFile = upath.join(
+    upath.dirname(gradlewFile),
     'gradle/wrapper/gradle-wrapper.properties',
   );
   const properties = await readLocalFile(propertiesFile, 'utf8');
@@ -155,7 +155,10 @@ export async function updateArtifacts({
   }
 
   const gradlewName = gradleWrapperFileName();
-  const gradlewFile = await findUpLocal(gradlewName, dirname(packageFileName));
+  const gradlewFile = await findUpLocal(
+    gradlewName,
+    upath.dirname(packageFileName),
+  );
   if (!gradlewFile) {
     logger.debug(
       'Found Gradle dependency lockfiles but no gradlew - aborting update',
@@ -166,7 +169,7 @@ export async function updateArtifacts({
   if (
     config.isLockFileMaintenance &&
     (!isGradleBuildFile(packageFileName) ||
-      dirname(packageFileName) !== dirname(gradlewFile))
+      upath.dirname(packageFileName) !== upath.dirname(gradlewFile))
   ) {
     logger.trace(
       'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',

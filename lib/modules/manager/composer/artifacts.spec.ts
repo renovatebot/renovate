@@ -1,4 +1,4 @@
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -30,9 +30,9 @@ const adminConfig: RepoGlobalConfig = {
   allowPlugins: false,
   allowScripts: false,
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
@@ -650,9 +650,9 @@ describe('modules/manager/composer/artifacts', () => {
   });
 
   it('supports vendor directory update', async () => {
-    const foo = join('vendor/foo/Foo.php');
-    const bar = join('vendor/bar/Bar.php');
-    const baz = join('vendor/baz/Baz.php');
+    const foo = upath.join('vendor/foo/Foo.php');
+    const bar = upath.join('vendor/bar/Bar.php');
+    const baz = upath.join('vendor/baz/Baz.php');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
