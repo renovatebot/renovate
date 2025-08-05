@@ -70,62 +70,6 @@ function setupErrorGitMock(): {
   return { mockClone };
 }
 
-function setupErrorShallowGitMock(): {
-  mockClone: MockedFunction<SimpleGit['clone']>;
-} {
-  const mockClone = vi
-    .fn()
-    .mockName('clone')
-    .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-      if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-        return Promise.reject(
-          new Error(
-            'fatal: dumb http transport does not support shallow capabilities',
-          ),
-        );
-      } else {
-        const path = `${clonePath}/my/pk/mypkg`;
-        fs.mkdirSync(dirname(path), { recursive: true });
-        fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-      }
-    });
-
-  const gitMock = partial<SimpleGit>({
-    clone: mockClone,
-  });
-  gitMock.env = () => gitMock;
-  simpleGit.mockReturnValue(gitMock);
-
-  return { mockClone };
-}
-
-function setupErrorShallowRetryErrorGitMock(): {
-  mockClone: MockedFunction<SimpleGit['clone']>;
-} {
-  const mockClone = vi
-    .fn()
-    .mockName('clone')
-    .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-      if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-        return Promise.reject(
-          new Error(
-            'fatal: dumb http transport does not support shallow capabilities',
-          ),
-        );
-      } else {
-        return Promise.reject(new Error('mocked error'));
-      }
-    });
-
-  const gitMock = partial<SimpleGit>({
-    clone: mockClone,
-  });
-  gitMock.env = () => gitMock;
-  simpleGit.mockReturnValue(gitMock);
-
-  return { mockClone };
-}
-
 function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
   httpMock
     .scope(API_BASE_URL)
@@ -438,7 +382,28 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('retries if shallow fails because of dumb http git repo', async () => {
-      const { mockClone } = setupErrorShallowGitMock();
+      const mockClone = vi
+        .fn()
+        .mockName('clone')
+        .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
+          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+            return Promise.reject(
+              new Error(
+                'fatal: dumb http transport does not support shallow capabilities',
+              ),
+            );
+          } else {
+            const path = `${clonePath}/my/pk/mypkg`;
+            fs.mkdirSync(dirname(path), { recursive: true });
+            fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
+          }
+        });
+
+      const gitMock = partial<SimpleGit>({
+        clone: mockClone,
+      });
+      gitMock.env = () => gitMock;
+      simpleGit.mockReturnValue(gitMock);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
@@ -464,7 +429,26 @@ describe('modules/datasource/crate/index', () => {
     });
 
     it('retries if shallow fails but retry can also fail', async () => {
-      const { mockClone } = setupErrorShallowRetryErrorGitMock();
+      const mockClone = vi
+        .fn()
+        .mockName('clone')
+        .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
+          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+            return Promise.reject(
+              new Error(
+                'fatal: dumb http transport does not support shallow capabilities',
+              ),
+            );
+          } else {
+            return Promise.reject(new Error('mocked error'));
+          }
+        });
+
+      const gitMock = partial<SimpleGit>({
+        clone: mockClone,
+      });
+      gitMock.env = () => gitMock;
+      simpleGit.mockReturnValue(gitMock);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
