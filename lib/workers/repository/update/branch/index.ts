@@ -873,8 +873,11 @@ export async function processBranch(
         let content = `Renovate failed to update `;
         content +=
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
-        content +=
-          ' related to this branch. You probably do not want to merge this PR as-is.';
+        content += ' related to this branch. ';
+        content += template.compile(
+          config.userStrings!.artifactErrorWarning,
+          config,
+        );
         content += emojify(
           `\n\n:recycle: Renovate will retry this branch, including artifacts, only when one of the following happens:\n\n`,
         );
