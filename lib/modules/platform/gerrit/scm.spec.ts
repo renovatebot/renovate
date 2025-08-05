@@ -310,7 +310,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE'],
       });
     });
 
@@ -350,7 +351,8 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE,label=Code-Review+2',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
       });
     });
 
@@ -439,7 +441,112 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).toHaveBeenCalledWith({
         files: [],
         sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%notify=NONE,label=Code-Review+2',
+        targetRef: 'refs/for/main',
+        pushOptions: ['notify=NONE', 'label=Code-Review+2'],
+      });
+    });
+
+    it('commitFiles() - create first patch - with labels', async () => {
+      clientMock.findChanges.mockResolvedValueOnce([]);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+
+      expect(
+        await gerritScm.commitAndPush({
+          branchName: 'renovate/dependency-1.x',
+          baseBranch: 'main',
+          message: 'commit msg',
+          files: [],
+          prTitle: 'pr title',
+          autoApprove: true,
+          labels: ['hashtag1', 'hashtag2'],
+        }),
+      ).toBe('commitSha');
+      expect(git.prepareCommit).toHaveBeenCalledWith({
+        baseBranch: 'main',
+        branchName: 'renovate/dependency-1.x',
+        files: [],
+        message: [
+          'pr title',
+          expect.stringMatching(
+            /^Renovate-Branch: renovate\/dependency-1\.x\nChange-Id: I[a-z0-9]{40}$/,
+          ),
+        ],
+        prTitle: 'pr title',
+        autoApprove: true,
+        force: true,
+        labels: ['hashtag1', 'hashtag2'],
+      });
+      expect(git.pushCommit).toHaveBeenCalledWith({
+        files: [],
+        sourceRef: 'renovate/dependency-1.x',
+        targetRef: 'refs/for/main',
+        pushOptions: [
+          'notify=NONE',
+          'label=Code-Review+2',
+          'hashtag=hashtag1',
+          'hashtag=hashtag2',
+        ],
+      });
+    });
+
+    it('commitFiles() - existing change-set with new changes - ensure labels', async () => {
+      const existingChange = partial<GerritChange>({
+        _number: 123456,
+        change_id: '...',
+        current_revision: 'commitSha',
+        revisions: {
+          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
+        },
+      });
+      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+      git.hasDiff.mockResolvedValueOnce(true);
+
+      expect(
+        await gerritScm.commitAndPush({
+          branchName: 'renovate/dependency-1.x',
+          baseBranch: 'main',
+          message: 'commit msg',
+          files: [],
+          prTitle: 'pr title',
+          autoApprove: true,
+          labels: ['hashtag1', 'hashtag2'],
+        }),
+      ).toBe('commitSha');
+      expect(git.prepareCommit).toHaveBeenCalledWith({
+        baseBranch: 'main',
+        branchName: 'renovate/dependency-1.x',
+        files: [],
+        message: [
+          'pr title',
+          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+        ],
+        prTitle: 'pr title',
+        autoApprove: true,
+        force: true,
+        labels: ['hashtag1', 'hashtag2'],
+      });
+      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
+      expect(git.pushCommit).toHaveBeenCalledWith({
+        files: [],
+        sourceRef: 'renovate/dependency-1.x',
+        targetRef: 'refs/for/main',
+        pushOptions: [
+          'notify=NONE',
+          'label=Code-Review+2',
+          'hashtag=hashtag1',
+          'hashtag=hashtag2',
+        ],
       });
     });
   });

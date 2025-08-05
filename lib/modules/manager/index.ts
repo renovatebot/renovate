@@ -1,4 +1,4 @@
-import type { RangeStrategy } from '../../types';
+import type { MaybePromise, RangeStrategy } from '../../types';
 import managers from './api';
 import { customManagerList, isCustomManager } from './custom';
 import customManagers from './custom/api';
@@ -6,7 +6,6 @@ import type {
   ExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
-  MaybePromise,
   PackageFile,
   PackageFileContent,
   RangeConfig,

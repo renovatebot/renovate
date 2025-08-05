@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { join } from 'upath';
+import upath from 'upath';
 import type { RenovateConfig } from '../types';
 import { AbstractMigration } from './base/abstract-migration';
 import { MigrationsService } from './migrations-service';
@@ -102,7 +102,7 @@ describe('config/migrations/migrations-service', () => {
 
   it('includes all defined migration classes in MigrationsService.customMigrations', () => {
     const allDefinedMigrationClasses: string[] = fs
-      .readdirSync(join(__dirname, 'custom'), { withFileTypes: true })
+      .readdirSync(upath.join(__dirname, 'custom'), { withFileTypes: true })
       .map((file) => file.name)
       .filter((name) => !name.includes('spec.ts'));
 

@@ -2,7 +2,7 @@ import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import type { Database, Statement } from 'better-sqlite3';
 import { exists } from 'fs-extra';
-import * as upath from 'upath';
+import upath from 'upath';
 import { sqlite } from '../../../expose.cjs';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';

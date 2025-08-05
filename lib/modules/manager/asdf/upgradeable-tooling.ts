@@ -334,6 +334,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>.+)',
     },
   },
+  gotestsum: {
+    asdfPluginUrl: 'https://github.com/hpcsc/asdf-gotestsum',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'gotestyourself/gotestsum',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   hadolint: {
     asdfPluginUrl: 'https://github.com/looztra/asdf-hadolint.git',
     config: {
@@ -553,6 +561,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes/minikube',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  mockery: {
+    asdfPluginUrl: 'https://github.com/cabify/asdf-mockery.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'vektra/mockery',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

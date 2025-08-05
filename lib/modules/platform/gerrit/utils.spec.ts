@@ -85,6 +85,7 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         created: '2025-04-14 16:33:37.000000000',
+        hashtags: ['hashtag1', 'hashtag2'],
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
         },
@@ -120,6 +121,7 @@ describe('modules/platform/gerrit/utils', () => {
         createdAt: '2025-04-14T16:33:37.000000000',
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
+        labels: ['hashtag1', 'hashtag2'],
         reviewers: ['username'],
         bodyStruct: {
           hash: hashBody('Last PR-Body'),

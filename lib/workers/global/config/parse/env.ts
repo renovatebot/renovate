@@ -43,6 +43,7 @@ const renameKeys = {
   mergeConfidenceApiBaseUrl: 'mergeConfidenceEndpoint',
   mergeConfidenceSupportedDatasources: 'mergeConfidenceDatasources',
   allowedPostUpgradeCommands: 'allowedCommands',
+  baseBranches: 'baseBranchPatterns',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {

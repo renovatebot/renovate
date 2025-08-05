@@ -4,7 +4,7 @@ import type { SimpleGit } from 'simple-git';
 import _simpleGit from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { dirname, join } from 'upath';
+import upath from 'upath';
 import type { MockedFunction } from 'vitest';
 import { getPkgReleases } from '..';
 import { GlobalConfig } from '../../../config/global';
@@ -40,7 +40,7 @@ function setupGitMocks(delayMs?: number): {
         }
 
         const path = `${clonePath}/my/pk/mypkg`;
-        fs.mkdirSync(dirname(path), { recursive: true });
+        fs.mkdirSync(upath.dirname(path), { recursive: true });
         fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
       },
     );
@@ -114,8 +114,8 @@ describe('modules/datasource/crate/index', () => {
       tmpDir = await dir({ unsafeCleanup: true });
 
       adminConfig = {
-        localDir: join(tmpDir.path, 'local'),
-        cacheDir: join(tmpDir.path, 'cache'),
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir: upath.join(tmpDir.path, 'cache'),
       };
       GlobalConfig.set(adminConfig);
 

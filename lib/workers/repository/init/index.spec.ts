@@ -14,6 +14,7 @@ vi.mock('../init/apis');
 vi.mock('../init/config');
 vi.mock('../init/merge');
 vi.mock('../../../config/secrets');
+vi.mock('../../../config/variables');
 vi.mock('../../../modules/platform', () => ({
   platform: { initRepo: vi.fn() },
   getPlatformList: vi.fn(),
@@ -40,7 +41,7 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce(
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       const renovateConfig = await initRepo({});
@@ -55,7 +56,7 @@ describe('workers/repository/init/index', () => {
         expandCodeOwnersGroups: true,
       });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockReturnValueOnce(
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       await initRepo({});

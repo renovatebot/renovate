@@ -18,6 +18,13 @@ The `monorepo.json` file has all the monorepo presets.
 
 Monorepo presets group related packages, so they are updated with a single Renovate PR.
 
+<!-- prettier-ignore -->
+!!! note
+    We only accept monorepos when packages are released together.
+    So they should have all the same version or they strictly need to be merged together.
+    Otherwise those groupings would cause [immortal](https://docs.renovatebot.com/key-concepts/pull-requests/#immortal-prs) PR's.
+    Please add that information with links to source for validation.
+
 ### Ways to group packages
 
 There are three ways to group packages:

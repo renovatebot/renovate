@@ -51,6 +51,19 @@ For example, if you want to use the [Merge Confidence](../../../merge-confidence
 }
 ```
 
+Also, labels in `renovate.json` will be mapped to hashtags in Gerrit. Example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "labels": ["renovate:devDependencies"]
+    }
+  ]
+}
+```
+
 ## Unsupported platform features/concepts
 
 - Creating issues (not a Gerrit concept)

@@ -32,6 +32,10 @@ vi.mock('nanoid', () => ({
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
 
 describe('logger/index', () => {
+  beforeEach(() => {
+    delete process.env.LOG_FILE_LEVEL;
+  });
+
   it('inits', () => {
     expect(logger).toBeDefined();
   });
@@ -202,6 +206,60 @@ describe('logger/index', () => {
         { name: 'logfile' },
       ]);
     });
+
+    it.each([
+      {
+        logFileLevel: null,
+        expectedLogLevel: 'debug',
+      },
+      {
+        logFileLevel: 'warn',
+        expectedLogLevel: 'warn',
+      },
+    ])(
+      'handles log file stream $logFileLevel level',
+      ({ logFileLevel, expectedLogLevel }) => {
+        if (logFileLevel !== null) {
+          process.env.LOG_FILE_LEVEL = logFileLevel?.toString();
+        }
+
+        const streams = createDefaultStreams(
+          'info',
+          new ProblemStream(),
+          'file.log',
+        );
+
+        const logFileStream = streams[2];
+
+        expect(logFileStream.level).toBe(expectedLogLevel);
+      },
+    );
+
+    it.each([
+      {
+        logFileFormat: 'json',
+        expectedType: undefined,
+      },
+      {
+        logFileFormat: 'pretty',
+        expectedType: 'raw',
+      },
+    ])(
+      'handles log file stream $logFileFormat format',
+      ({ logFileFormat, expectedType }) => {
+        process.env.LOG_FILE_FORMAT = logFileFormat;
+
+        const streams = createDefaultStreams(
+          'info',
+          new ProblemStream(),
+          'file.log',
+        );
+
+        const logFileStream = streams[2];
+
+        expect(logFileStream.type).toBe(expectedType);
+      },
+    );
   });
 
   it('sets level', () => {

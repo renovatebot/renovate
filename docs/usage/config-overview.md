@@ -6,7 +6,7 @@ This final config describes what Renovate will do during its run.
 The final config is internal to Renovate, and is _not_ saved or cached for a later run.
 But you can always find the final config in Renovate's logs.
 
-Renovate reads the configuration files in this order (from from top to bottom):
+Renovate reads the configuration files in this order (from top to bottom):
 
 1. Default config
 2. Global config
@@ -125,6 +125,7 @@ Finally, there are some special environment variables that are loaded _before_ c
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
 - `LOG_FILE`: used to enable file logging and specify the log file path
+- `LOG_FILE_FORMAT`: defaults to "json", but can be changed to a "pretty" human-readable output
 - `LOG_FILE_LEVEL`: log file logging level, defaults to `debug`
 - `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
 - `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging

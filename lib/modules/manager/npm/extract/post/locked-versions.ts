@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { dirname, relative } from 'upath';
+import upath from 'upath';
 import { logger } from '../../../../../logger';
 import type { PackageFile } from '../../../types';
 import type { NpmManagerData } from '../../types';
@@ -118,9 +118,9 @@ export async function getLockedVersions(
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
       }
 
-      const packageDir = dirname(packageFile.packageFile);
-      const pnpmRootDir = dirname(pnpmShrinkwrap);
-      const relativeDir = relative(pnpmRootDir, packageDir) || '.';
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const pnpmRootDir = upath.dirname(pnpmShrinkwrap);
+      const relativeDir = upath.relative(pnpmRootDir, packageDir) || '.';
 
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;

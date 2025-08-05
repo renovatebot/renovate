@@ -1,52 +1,8 @@
-import { pathToFileURL } from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import upath from 'upath';
-import type { AllConfig, RenovateConfig } from '../../../../config/types';
+import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { parseJson } from '../../../../util/common';
-import { readSystemFile } from '../../../../util/fs';
-import { parseSingleYaml } from '../../../../util/yaml';
-import { migrateAndValidateConfig } from './util';
-
-export async function getParsedContent(file: string): Promise<RenovateConfig> {
-  if (upath.basename(file) === '.renovaterc') {
-    return parseJson(
-      await readSystemFile(file, 'utf8'),
-      file,
-    ) as RenovateConfig;
-  }
-  switch (upath.extname(file)) {
-    case '.yaml':
-    case '.yml':
-      return parseSingleYaml(await readSystemFile(file, 'utf8'));
-    case '.json5':
-    case '.json':
-      return parseJson(
-        await readSystemFile(file, 'utf8'),
-        file,
-      ) as RenovateConfig;
-    case '.cjs':
-    case '.mjs':
-    case '.js': {
-      const absoluteFilePath = upath.isAbsolute(file)
-        ? file
-        : `${process.cwd()}/${file}`;
-      // use file url paths to avoid issues with windows paths
-      // typescript does not support file URL for import
-      const tmpConfig = await import(pathToFileURL(absoluteFilePath).href);
-      /* v8 ignore next -- not testable */
-      let config = tmpConfig.default ?? tmpConfig;
-      // Allow the config to be a function
-      if (is.function(config)) {
-        config = config();
-      }
-      return config;
-    }
-    default:
-      throw new Error('Unsupported file type');
-  }
-}
+import { getParsedContent, migrateAndValidateConfig } from './util';
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
   const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';

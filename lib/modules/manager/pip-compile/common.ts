@@ -127,6 +127,7 @@ const pipOptionsWithArguments = [
 const uvOptionsWithArguments = [
   '--constraints',
   '--python-version',
+  '--no-emit-package',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
