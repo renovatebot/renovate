@@ -56,6 +56,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
+
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -695,13 +696,24 @@ async function tryPrAutomerge(
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
+          const requestBody: any = {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          };
+
+          // Check if merge_after should be set based on platform options
+          if (platformPrOptions?.merge_after) {
+            requestBody.merge_after = platformPrOptions.merge_after;
+            logger.debug(
+              { merge_after: requestBody.merge_after },
+              'Setting merge_after from platform options',
+            );
+          }
+
           await gitlabApi.putJson(
             `projects/${config.repository}/merge_requests/${pr}/merge`,
             {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
-              },
+              body: requestBody,
             },
           );
           break;

@@ -34,6 +34,7 @@ import type {
   PrBlockedBy,
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
+import { getNextScheduleTime, isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
@@ -54,7 +55,7 @@ export function getPlatformPrOptions(
       config.platformAutomerge,
   );
 
-  return {
+  const options: PlatformPrOptions = {
     autoApprove: !!config.autoApprove,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
@@ -63,7 +64,25 @@ export function getPlatformPrOptions(
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
+    automergeSchedule: config.automergeSchedule,
+    timezone: config.timezone,
   };
+
+  // Handle automergeSchedule for GitLab merge_after parameter
+  if (
+    usePlatformAutomerge &&
+    config.automergeSchedule &&
+    config.automergeSchedule.length > 0
+  ) {
+    if (!isScheduledNow(config)) {
+      const nextScheduleTime = getNextScheduleTime(config);
+      if (nextScheduleTime) {
+        options.merge_after = nextScheduleTime.toISOString();
+      }
+    }
+  }
+
+  return options;
 }
 
 export interface ResultWithPr {
