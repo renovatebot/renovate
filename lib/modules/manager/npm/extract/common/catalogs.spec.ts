@@ -84,7 +84,7 @@ describe('modules/manager/npm/extract/common/catalogs', () => {
     );
     const resultYarn = extractCatalogDeps(
       [{ name: 'yarn.catalog.empty', dependencies: {} }],
-      'pnpm',
+      'yarn',
     );
     expect(result).toEqual([]);
     expect(resultYarn).toEqual([]);
