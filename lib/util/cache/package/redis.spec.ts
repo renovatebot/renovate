@@ -90,7 +90,7 @@ describe('util/cache/package/redis', () => {
       });
     });
 
-    it('calls createCluster with default username and password', async () => {
+    it('calls createCluster with no username or password if not supplied', async () => {
       const url = 'redis+cluster://localhost:6379';
       await init(url, '');
       expect(createCluster).toHaveBeenCalledWith({
@@ -99,9 +99,35 @@ describe('util/cache/package/redis', () => {
             url: 'redis://localhost:6379',
           }),
         ],
+      });
+    });
+
+    it('calls createCluster with username if supplied', async () => {
+      const url = 'redis+cluster://user@localhost:6379';
+      await init(url, '');
+      expect(createCluster).toHaveBeenCalledWith({
+        rootNodes: [
+          expect.objectContaining({
+            url: 'redis://user@localhost:6379',
+          }),
+        ],
         defaults: {
-          username: 'default',
-          password: '',
+          username: 'user',
+        },
+      });
+    });
+
+    it('calls createCluster with password if supplied', async () => {
+      const url = 'redis+cluster://:password@localhost:6379';
+      await init(url, '');
+      expect(createCluster).toHaveBeenCalledWith({
+        rootNodes: [
+          expect.objectContaining({
+            url: 'redis://:password@localhost:6379',
+          }),
+        ],
+        defaults: {
+          password: 'password',
         },
       });
     });

@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { createClient, createCluster } from 'redis';
+import { createClient, createCluster, RedisClusterOptions } from 'redis';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
 import { regEx } from '../../regex';
@@ -117,14 +117,24 @@ export async function init(
     pingInterval: 30000, // 30s
   };
   if (clusteredMode) {
+    const clusterConfig: RedisClusterOptions = { rootNodes: [config] };
+
+    // only add defaults if username or password are present in the URL
     const parsedUrl = new URL(rewrittenUrl);
-    client = createCluster({
-      rootNodes: [config],
-      defaults: {
-        username: parsedUrl.username || 'default',
-        password: parsedUrl.password || '',
-      },
-    });
+    if (parsedUrl.username) {
+      clusterConfig.defaults = {
+        username: parsedUrl.username,
+      };
+    }
+
+    if (parsedUrl.password) {
+      clusterConfig.defaults = {
+        ...clusterConfig.defaults,
+        password: parsedUrl.password,
+      };
+    }
+
+    client = createCluster(clusterConfig);
   } else {
     client = createClient(config);
   }
