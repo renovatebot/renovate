@@ -394,7 +394,7 @@ describe('modules/datasource/crate/index', () => {
             );
           } else {
             const path = `${clonePath}/my/pk/mypkg`;
-            fs.mkdirSync(dirname(path), { recursive: true });
+            fs.mkdirSync(upath.dirname(path), { recursive: true });
             fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
           }
         });
