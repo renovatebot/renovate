@@ -246,7 +246,6 @@ export async function extractAllPackageFiles(
           });
         }
       } else {
-        debugger;
         logger.trace({ packageFile }, `Extracting as a package.json file`);
         const deps = await extractPackageFile(content, packageFile, config);
         if (deps) {
@@ -284,6 +283,7 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, `No content found`);
     }
   }
+
   await postExtract(npmFiles);
   return npmFiles;
 }
