@@ -55,7 +55,7 @@ export interface PnpmWorkspaceFile {
  * A pnpm catalog is either the default catalog (catalog:, catalogs:default), or
  * a named one (catalogs:<name>)
  */
-export interface PnpmCatalog {
+export interface Catalog {
   name: string;
   dependencies: NpmPackageDependency;
 }
