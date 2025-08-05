@@ -51,15 +51,15 @@ function getMarkdownComment(comment: string): string {
 }
 
 function isBoxChecked(issueBody: string, type: string): boolean {
-  return issueBody.includes(' - [x] ' + getMarkdownComment(type));
+  return issueBody.includes(getCheckbox(type, true));
 }
 
 function isBoxUnchecked(issueBody: string, type: string): boolean {
-  return issueBody.includes(getUncheckedBox(type));
+  return issueBody.includes(getCheckbox(type));
 }
 
-function getUncheckedBox(type: string): string {
-  return ' - [ ] ' + getMarkdownComment(type);
+function getCheckbox(type: string, checked = false): string {
+  return ` - [${checked ? 'x' : ' '}] ${getMarkdownComment(type)}`;
 }
 
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
@@ -185,7 +185,7 @@ export async function readDashboardBody(
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
-  let item = getUncheckedBox(`${type}-branch=${branch.branchName}`);
+  let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
     item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
@@ -326,7 +326,7 @@ export async function ensureDependencyDashboard(
   } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      getUncheckedBox(createConfigMigrationPr) +
+      getCheckbox(createConfigMigrationPr) +
       ' Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
   }
@@ -366,7 +366,7 @@ export async function ensureDependencyDashboard(
       issueBody += getListItem(branch, 'approve');
     }
     if (pendingApprovals.length > 1) {
-      issueBody += getUncheckedBox(approveAllPendingPrs);
+      issueBody += getCheckbox(approveAllPendingPrs);
       issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
     }
     issueBody += '\n';
@@ -397,7 +397,7 @@ export async function ensureDependencyDashboard(
       issueBody += getListItem(branch, 'unlimit');
     }
     if (rateLimited.length > 1) {
-      issueBody += getUncheckedBox(createAllRateLimitedPrs);
+      issueBody += getCheckbox(createAllRateLimitedPrs);
       issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
@@ -501,7 +501,7 @@ export async function ensureDependencyDashboard(
       issueBody += getListItem(branch, 'rebase');
     }
     if (inProgress.length > 2) {
-      issueBody += getUncheckedBox(rebaseAllOpenPrs);
+      issueBody += getCheckbox(rebaseAllOpenPrs);
       issueBody += '**Click on this checkbox to rebase all open PRs at once**';
       issueBody += '\n';
     }
@@ -561,7 +561,7 @@ export async function ensureDependencyDashboard(
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
-        const checkText = getUncheckedBox(
+        const checkText = getCheckbox(
           `${dependencyDashboardChecks[branchName]}-branch=${branchName}`,
         );
         issueBody = issueBody.replace(
