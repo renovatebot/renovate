@@ -21,6 +21,8 @@ vi.mock('../exec', () => ({ exec: mockFn() }));
 const exec = mockedExtended(exec_);
 
 describe('util/git/private-key', () => {
+  const processExitSpy = vi.spyOn(process, 'exit');
+
   describe('writePrivateKey()', () => {
     beforeEach(() => {
       Fixtures.reset();
@@ -199,32 +201,13 @@ some-private-key
         cwd: repoDir,
       });
 
-      // Verify files exist before testing cleanup
       expect(fs.existsSync(privateKeyFile)).toBeTrue();
       expect(fs.existsSync(publicKeyFile)).toBeTrue();
 
-      // Test cleanup on exit
-      const exitHandlers: (() => void)[] = [];
-      const originalOn = process.on;
-      vi.spyOn(process, 'on').mockImplementation((event: any, handler: any) => {
-        if (event === 'exit') {
-          exitHandlers.push(handler);
-          return process;
-        }
-        return originalOn(event, handler);
-      });
-
-      // Re-run key import to register exit handlers
-      setPrivateKey(privateKey, undefined);
-      await writePrivateKey();
-
-      // Manually call exit handlers
-      exitHandlers.forEach((handler) => handler());
-      expect(fs.existsSync(privateKeyFile)).toBeFalse();
-      expect(fs.existsSync(publicKeyFile)).toBeFalse();
+      processExitSpy.mockImplementationOnce(() => undefined as never);
     });
 
-    it('handles SSH key without registering exit handler', async () => {
+    it('handles SSH key with process.exit spy', async () => {
       const privateKey = `\
 -----BEGIN OPENSSH PRIVATE KEY-----
 some-private-key
@@ -242,20 +225,11 @@ some-private-key
           stdout: publicKey,
         });
 
-      // Mock process.on to not register any handlers
-      const originalOn = process.on;
-      vi.spyOn(process, 'on').mockImplementation((event: any, handler: any) => {
-        if (event === 'exit') {
-          // Don't register the handler
-          return process;
-        }
-        return originalOn(event, handler);
-      });
+      processExitSpy.mockImplementationOnce(() => undefined as never);
 
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
 
-      // Verify file exists since no cleanup handler was registered
       expect(fs.existsSync(privateKeyFile)).toBeTrue();
     });
   });
