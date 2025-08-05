@@ -103,7 +103,7 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 
 <!-- prettier-ignore -->
 !!! note
-For the GitHub Enterprise Server platform only.
+    For the GitHub Enterprise Server platform only.
 
 ## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
 
