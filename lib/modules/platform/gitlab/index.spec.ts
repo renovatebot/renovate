@@ -485,7 +485,7 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('getBranchForceRebase', () => {
-    it('should return false', async () => {
+    it('should return false for merge_method=merge', async () => {
       await initRepo(
         {
           repository: 'some/repo/project',
@@ -499,7 +499,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(await gitlab.getBranchForceRebase()).toBeFalse();
     });
 
-    it('should return true', async () => {
+    it('should return true for merge_method=ff', async () => {
       await initRepo(
         {
           repository: 'some/repo/project',
@@ -511,6 +511,21 @@ describe('modules/platform/gitlab/index', () => {
         },
       );
       expect(await gitlab.getBranchForceRebase()).toBeTrue();
+    });
+
+    it('should return false when merge trains are enabled', async () => {
+      await initRepo(
+        {
+          repository: 'some/repo/project',
+        },
+        {
+          default_branch: 'master',
+          http_url_to_repo: null,
+          merge_method: 'ff',
+          merge_trains_enabled: true,
+        },
+      );
+      expect(await gitlab.getBranchForceRebase()).toBeFalse();
     });
   });
 

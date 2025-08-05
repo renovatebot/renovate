@@ -7,7 +7,7 @@ describe('config/migrations/custom/base-branch-migration', () => {
         baseBranch: 'test',
       },
       {
-        baseBranches: ['test'],
+        baseBranchPatterns: ['test'],
       },
     );
   });
@@ -18,7 +18,19 @@ describe('config/migrations/custom/base-branch-migration', () => {
         baseBranch: ['test'],
       } as any,
       {
-        baseBranches: ['test'],
+        baseBranchPatterns: ['test'],
+      },
+    );
+  });
+
+  it('should push to existing bassBranchPatterns', () => {
+    expect(BaseBranchMigration).toMigrate(
+      {
+        baseBranch: ['test'],
+        baseBranchPatterns: ['base'],
+      } as any,
+      {
+        baseBranchPatterns: ['base', 'test'],
       },
     );
   });
