@@ -1,6 +1,6 @@
-import { PackageDependency } from '../../../types';
-import { NpmManagerData } from '../../types';
-import { Catalog } from '../types';
+import { type PackageDependency } from '../../../types';
+import { type NpmManagerData } from '../../types';
+import { type Catalog } from '../types';
 import { extractDependency, parseDepName } from './dependency';
 
 export const PNPM_CATALOG_DEPENDENCY = 'pnpm.catalog';
