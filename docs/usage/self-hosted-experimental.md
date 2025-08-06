@@ -116,14 +116,12 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 ## `RENOVATE_X_STATIC_REPO_CONFIG_FILE`
 
-If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be
-applied to the repository config before resolving the actual configuration file within the repository.
+If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
 
 !!! warning If the file is missing or contains invalid configuration, the scan will be aborted.
 
 !!! note
-You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s
-normal configuration resolution process.
+You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
