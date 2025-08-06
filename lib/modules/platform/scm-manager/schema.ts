@@ -16,12 +16,12 @@ export const LinkSchema = z.object({
   name: z.string().optional().nullable(),
   templated: z.boolean().optional().nullable(),
 });
+export type Link = z.infer<typeof LinkSchema>;
 
 export const LinksSchema = z.record(
   z.string(),
   z.union([LinkSchema, z.array(LinkSchema)]),
 );
-export type Link = z.infer<typeof LinkSchema>;
 export type Links = z.infer<typeof LinksSchema>;
 
 export const PrStateSchema = z.enum(['DRAFT', 'OPEN', 'REJECTED', 'MERGED']);
