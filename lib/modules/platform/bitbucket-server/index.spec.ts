@@ -1072,7 +1072,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
           await expect(
             bitbucket.getUserSlugsByEmail('e-mail@test.com'),
-          ).rejects.toThrowErrorMatchingSnapshot();
+          ).rejects.toThrow('Response code 500 (Internal Server Error)');
         });
 
         it('return empty array when no results found', async () => {
@@ -1177,13 +1177,10 @@ describe('modules/platform/bitbucket-server/index', () => {
             ]);
 
           const actual = await bitbucket.getUserSlugsByEmail('e-mail@test.com');
-          expect(actual).toBeArrayOfSize(2);
-          expect(actual).toEqual(
-            expect.arrayContaining([
-              'usernamefoundbyemail',
-              'usernamefoundbyemailtoo',
-            ]),
-          );
+          expect(actual).toStrictEqual([
+            'usernamefoundbyemail',
+            'usernamefoundbyemailtoo',
+          ]);
         });
       });
 

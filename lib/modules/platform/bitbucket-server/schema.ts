@@ -34,3 +34,8 @@ export const PullRequestActivity = z.union([
 ]);
 
 export type PullRequestActivity = z.infer<typeof PullRequestActivity>;
+
+const EmailSchema = z.string().email();
+
+export const isEmail = (value: string): boolean =>
+  EmailSchema.safeParse(value).success;

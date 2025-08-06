@@ -148,8 +148,6 @@ exports[`modules/platform/bitbucket-server/index > endpoint with no path > getPr
 ]
 `;
 
-exports[`modules/platform/bitbucket-server/index > endpoint with no path > getUserSlugsByEmail > throws when lookup fails 1`] = `[HTTPError: Response code 500 (Internal Server Error)]`;
-
 exports[`modules/platform/bitbucket-server/index > endpoint with no path > initPlatform() > should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
@@ -354,8 +352,6 @@ exports[`modules/platform/bitbucket-server/index > endpoint with path > getPrLis
   },
 ]
 `;
-
-exports[`modules/platform/bitbucket-server/index > endpoint with path > getUserSlugsByEmail > throws when lookup fails 1`] = `[HTTPError: Response code 500 (Internal Server Error)]`;
 
 exports[`modules/platform/bitbucket-server/index > endpoint with path > initPlatform() > should init 1`] = `
 {

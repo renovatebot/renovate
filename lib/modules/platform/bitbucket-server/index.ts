@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
-import { z } from 'zod';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -50,7 +49,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { UserSchema, UsersSchema } from './schema';
+import { isEmail, UserSchema, UsersSchema } from './schema';
 import type {
   BbsConfig,
   BbsPr,
@@ -76,7 +75,7 @@ export const id = 'bitbucket-server';
 
 let config: BbsConfig = {} as any;
 
-export const bitbucketServerHttp = new BitbucketServerHttp();
+const bitbucketServerHttp = new BitbucketServerHttp();
 
 const defaults: {
   endpoint?: string;
@@ -692,9 +691,11 @@ export async function addReviewers(
 
   for (const entry of reviewers) {
     // If entry is an email-address, resolve userslugs
-    if (z.string().email().safeParse(entry).success) {
+    if (isEmail(entry)) {
       const slugs = await getUserSlugsByEmail(entry);
-      slugs.forEach((slug) => reviewerSlugs.add(slug));
+      for (const slug of slugs) {
+        reviewerSlugs.add(slug);
+      }
     } else {
       reviewerSlugs.add(entry);
     }
@@ -728,23 +729,20 @@ export async function getUserSlugsByEmail(
       UsersSchema,
     );
 
-    if (!users.body.length) {
-      logger.debug(
-        { userinfo: emailAddress },
-        'No users found for email-address',
-      );
-      return [];
+    if (users.body.length) {
+      return users.body
+        .filter((u) => u.active && u.emailAddress === emailAddress)
+        .map((u) => u.slug);
     }
-    return users.body
-      .filter(
-        (u: { active: any; emailAddress: string }) =>
-          u.active && u.emailAddress === emailAddress,
-      )
-      .map((u: { slug: any }) => u.slug);
   } catch (err) {
-    logger.warn({ err, emailAddress }, `Failed to resolve email to user`);
+    logger.warn(
+      { err, emailAddress },
+      `Failed to resolve email address to user slug`,
+    );
     throw err;
   }
+  logger.debug({ userinfo: emailAddress }, 'No users found for email-address');
+  return [];
 }
 
 async function updatePRAndAddReviewers(
