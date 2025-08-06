@@ -1,7 +1,7 @@
 import type { MergeStrategy } from '../../config/types';
+import type { AzurePolicyType } from '../../constants';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import type { AzurePolicyType } from './azure/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;

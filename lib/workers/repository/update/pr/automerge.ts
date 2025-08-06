@@ -11,7 +11,7 @@ import { scm } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
-import { getPlatformPrOptions } from './index';
+import { getPlatformPrOptions } from './';
 
 export type PrAutomergeBlockReason =
   | 'BranchModified'

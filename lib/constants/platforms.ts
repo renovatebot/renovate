@@ -58,3 +58,18 @@ export const BITBUCKET_SERVER_API_USING_HOST_TYPES = [
   'bitbucket-server-changelog',
   'bitbucket-server-tags',
 ];
+
+export const AZURE_POLICY_TYPES = {
+  RequiredReviewers: 'fd2167ab-b0be-447a-8ec8-39368250530e',
+  RequireAMergeStrategy: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+  MinimumNumberOfReviewers: 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd',
+  Build: '0609b952-1397-4640-95ec-e00a01b2c241',
+  WorkItemLinking: '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e',
+} as const;
+
+export type AzurePolicyTypeUuid =
+  (typeof AZURE_POLICY_TYPES)[keyof typeof AZURE_POLICY_TYPES];
+
+export type AzurePolicyType =
+  | keyof typeof AZURE_POLICY_TYPES
+  | AzurePolicyTypeUuid;

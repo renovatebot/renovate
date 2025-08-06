@@ -19,6 +19,7 @@ import {
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
+import { AZURE_POLICY_TYPES } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -27,7 +28,7 @@ import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
-import { AzurePolicyTypes, AzurePrVote } from './types';
+import { AzurePrVote } from './types';
 import { partial } from '~test/util';
 
 vi.mock('./azure-got-wrapper', () => mockDeep());
@@ -1939,7 +1940,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AzurePolicyTypes.MinimumNumberOfReviewers,
+                  id: AZURE_POLICY_TYPES.MinimumNumberOfReviewers,
                 },
               },
               status: PolicyEvaluationStatus.Queued,
@@ -2008,7 +2009,7 @@ describe('modules/platform/azure/index', () => {
                 isEnabled: true,
                 isBlocking: true,
                 type: {
-                  id: AzurePolicyTypes.Build,
+                  id: AZURE_POLICY_TYPES.Build,
                 },
               },
               status: PolicyEvaluationStatus.Queued,

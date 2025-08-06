@@ -14,6 +14,7 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { AZURE_POLICY_TYPES } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -49,7 +50,7 @@ import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import type { AzurePr } from './types';
-import { AzurePolicyTypes, AzurePrVote } from './types';
+import { AzurePrVote } from './types';
 import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
@@ -803,7 +804,7 @@ export async function mergePr({
   const bypassPolicyTypeUuids =
     platformOptions?.azureBypassPolicyTypes?.map(
       (policyType) =>
-        AzurePolicyTypes[policyType as keyof typeof AzurePolicyTypes] ??
+        AZURE_POLICY_TYPES[policyType as keyof typeof AZURE_POLICY_TYPES] ??
         policyType,
     ) ?? [];
 

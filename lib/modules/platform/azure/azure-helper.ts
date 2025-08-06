@@ -4,12 +4,12 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { AZURE_POLICY_TYPES } from '../../../constants';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
 import * as azureApi from './azure-got-wrapper';
 import { WrappedExceptionSchema } from './schema';
-import { AzurePolicyTypes } from './types';
 import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
@@ -154,7 +154,7 @@ export async function getMergeMethod(
     ).getPolicyConfigurations(
       project,
       undefined,
-      AzurePolicyTypes.RequireAMergeStrategy,
+      AZURE_POLICY_TYPES.RequireAMergeStrategy,
     )
   )
     .filter((p) => p.settings.scope.some(isRelevantScope))
