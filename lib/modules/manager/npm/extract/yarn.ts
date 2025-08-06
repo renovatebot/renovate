@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { miscUtils, structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
-import z from 'zod';
+import { z } from 'zod';
 import { logger } from '../../../../logger';
 import {
   getSiblingFileName,
