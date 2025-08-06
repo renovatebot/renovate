@@ -1,12 +1,11 @@
 import type { NapiConfig, SgNode } from '@ast-grep/napi';
-import { codeBlock } from 'common-tags';
 import { parseSingleYaml } from './yaml';
 
 export function rule(
   strings: TemplateStringsArray,
   ...values: any[]
 ): NapiConfig {
-  return parseSingleYaml<NapiConfig>(codeBlock(strings, ...values));
+  return parseSingleYaml<NapiConfig>(strings[0]);
 }
 
 export function extractMatches(
