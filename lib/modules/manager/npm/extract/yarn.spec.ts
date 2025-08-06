@@ -1,4 +1,3 @@
-import { FargateProfileIssueCode } from '@aws-sdk/client-eks';
 import {
   extractYarnCatalogsFromYml,
   getYarnLock,
