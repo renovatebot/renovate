@@ -193,7 +193,7 @@ export async function createPr({
     status: draftPR ? 'DRAFT' : 'OPEN',
   });
 
-  logger.info(
+  logger.debug(
     `PR created with title '${createdPr.title}' from source '${createdPr.source}' to target '${createdPr.target}'`,
   );
 
@@ -214,7 +214,7 @@ export async function updatePr({
     status: mapPrState(state),
   });
 
-  logger.info(`Updated PR #${number} with title ${prTitle}`);
+  logger.debug(`Updated PR #${number} with title ${prTitle}`);
 }
 
 export function mergePr(config: MergePRConfig): Promise<boolean> {
