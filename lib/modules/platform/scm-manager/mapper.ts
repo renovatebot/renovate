@@ -1,6 +1,6 @@
+import is from '@sindresorhus/is';
 import type { Pr } from '../types';
 import type { PullRequest } from './schema';
-import is from '@sindresorhus/is';
 
 export function mapPrFromScmToRenovate(pr: PullRequest): Pr {
   return {

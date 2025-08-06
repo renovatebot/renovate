@@ -1,6 +1,6 @@
+import { ensureTrailingSlash } from '../url';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types';
-import { ensureTrailingSlash } from '../url';
 
 let baseUrl: string;
 export const setBaseUrl = (newBaseUrl: string): void => {
