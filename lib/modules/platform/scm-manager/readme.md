@@ -11,7 +11,7 @@ This platform is considered experimental.
 
 ## Set correct platform
 
-You must set the [`platform`](../../../self-hosted-configuration.md#platform) config option to `scm-manager` in your Renovate config file.
+You must set the [`platform`](../../../self-hosted-configuration.md#platform) config option to `scm-manager` in your admin config file.
 
 ## Set permissions
 
