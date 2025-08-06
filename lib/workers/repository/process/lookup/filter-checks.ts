@@ -19,7 +19,7 @@ import { getUpdateType } from './update-type';
 export interface InternalChecksResult {
   release?: Release;
   pendingChecks: boolean;
-  pendingReleases?: Release[];
+  pendingReleases: Release[];
 }
 
 export async function filterInternalChecks(

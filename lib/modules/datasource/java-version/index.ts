@@ -7,8 +7,8 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import {
   datasource,
   defaultRegistryUrl,
-  getImageType,
   pageSize,
+  parsePackage,
 } from './common';
 import type { AdoptiumJavaResponse } from './types';
 
@@ -55,20 +55,25 @@ export class JavaVersionDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#22198)
-      `${registryUrl!}:${getImageType(packageName)}`,
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const imageType = getImageType(packageName);
+    const pkgConfig = parsePackage(packageName);
     logger.trace(
-      { registryUrl, packageName, imageType },
+      { registryUrl, packageName, pkgConfig },
       'fetching java release',
     );
-    // TODO: types (#22198)
-    const url = `${registryUrl!}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    let url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+
+    if (pkgConfig.architecture) {
+      url += `&architecture=${pkgConfig.architecture}`;
+    }
+    if (pkgConfig.os) {
+      url += `&os=${pkgConfig.os}`;
+    }
 
     const result: ReleaseResult = {
       homepage: 'https://adoptium.net',

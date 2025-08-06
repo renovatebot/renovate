@@ -1,5 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -23,9 +23,9 @@ const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const processor = new UvProcessor();
@@ -286,6 +286,11 @@ describe('modules/manager/pep621/processors/uv', () => {
 
     const dependencies = [
       {
+        depName: 'python',
+        packageName: 'python',
+        depType: 'requires-python',
+      },
+      {
         depName: 'dep1',
         packageName: 'dep1',
       },
@@ -298,6 +303,11 @@ describe('modules/manager/pep621/processors/uv', () => {
     const result = processor.process(pyproject, dependencies);
 
     expect(result).toEqual([
+      {
+        depName: 'python',
+        depType: 'requires-python',
+        packageName: 'python',
+      },
       {
         depName: 'dep1',
         registryUrls: ['https://foo.com/simple'],

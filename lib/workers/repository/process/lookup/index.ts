@@ -522,9 +522,8 @@ export async function lookupUpdates(
           update.pendingChecks = pendingChecks;
         }
 
-        // TODO #22198
-        if (pendingReleases!.length) {
-          update.pendingVersions = pendingReleases!.map((r) => r.version);
+        if (pendingReleases.length) {
+          update.pendingVersions = pendingReleases.map((r) => r.version);
         }
         if (!update.newValue || update.newValue === compareValue) {
           if (!config.lockedVersion) {

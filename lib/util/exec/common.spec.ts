@@ -1,6 +1,7 @@
 import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
+import { regEx } from '../regex';
 import { exec } from './common';
 import type { DataListener, RawExecOptions } from './types';
 import { partial } from '~test/util';
@@ -139,7 +140,7 @@ function getSpawnStub(args: StubArgs): any {
 
   return {
     on,
-    spawnargs: cmd.split(/\s+/),
+    spawnargs: cmd.split(regEx(/\s+/)),
     stdout: stdoutStream,
     stderr: stderrStream,
     emit,

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { regEx } from '../util/regex';
 import prepareError from './utils';
 
 Error.stackTraceLimit = 20;
@@ -12,7 +13,7 @@ export default function errSerializer(err: Error): any {
     const val = response[field];
     if (is.string(val)) {
       response[field] = val.replace(
-        /https:\/\/[^@]*?@/g, // TODO #12874
+        regEx(/https:\/\/[^@]*?@/g),
         'https://**redacted**@',
       );
     }

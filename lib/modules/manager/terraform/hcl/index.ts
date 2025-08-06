@@ -7,7 +7,7 @@ export async function parseHCL(
 ): Promise<TerraformDefinitionFile | null> {
   try {
     return await parse(fileName, content);
-  } catch /* istanbul ignore next */ {
+  } catch {
     return null;
   }
 }

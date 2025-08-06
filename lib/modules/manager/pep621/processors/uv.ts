@@ -58,6 +58,10 @@ export class UvProcessor implements PyProjectProcessor {
           continue;
         }
 
+        if (dep.depType === 'requires-python') {
+          continue;
+        }
+
         // Using `packageName` as it applies PEP 508 normalization, which is
         // also applied by uv when matching a source to a dependency.
         const depSource = uv.sources?.[dep.packageName];

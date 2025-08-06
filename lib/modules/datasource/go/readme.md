@@ -19,7 +19,7 @@ If the `@latest` endpoint returns a pseudo-version, and the release list is empt
 When a Go proxy is queried for `@v/list` it returns only versions for v0 or v1 of a package.
 Therefore Renovate will also query `@v2/list` just in case there also exists a v2 of the package.
 Similarly, if the dependency is already on a higher version such as `v5`, Renovate will check in case higher major versions exist.
-You do not need to be worried about any 404 responses which result from such checks - they are the only way for Renovate to know if newer major releases exist.
+You do not need to be worried about any 403/404 responses which result from such checks - they are the only way for Renovate to know if newer major releases exist.
 
 ## Fallback to direct lookups
 

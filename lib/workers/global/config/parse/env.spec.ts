@@ -87,12 +87,13 @@ describe('workers/global/config/parse/env', () => {
     });
 
     test.each`
-      envArg                                   | config
-      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}  | ${{ recreateWhen: 'always' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'false' }} | ${{ recreateWhen: 'auto' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}    | ${{ recreateWhen: 'auto' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'always' }}  | ${{ recreateWhen: 'always' }}
-      ${{ RENOVATE_RECREATE_WHEN: 'never' }}   | ${{ recreateWhen: 'never' }}
+      envArg                                           | config
+      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}          | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'false' }}         | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}            | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'always' }}          | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'never' }}           | ${{ recreateWhen: 'never' }}
+      ${{ RENOVATE_BASE_BRANCHES: '["main", "dev"]' }} | ${{ baseBranchPatterns: ['main', 'dev'] }}
     `('"$envArg" -> $config', async ({ envArg, config }) => {
       expect(await env.getConfig(envArg)).toMatchObject(config);
     });

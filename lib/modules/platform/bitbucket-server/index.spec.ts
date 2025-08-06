@@ -929,16 +929,26 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('throws on invalid reviewers', async () => {
+        it('deals with invalid reviewers correctly', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
+            .times(3)
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                return (
+                  Array.isArray(body.reviewers) &&
+                  body.reviewers.some(
+                    (r: { user: { name: string } }) => r?.user?.name === 'name',
+                  )
+                );
+              },
             )
+            .once()
             .reply(409, {
               errors: [
                 {
@@ -954,14 +964,25 @@ describe('modules/platform/bitbucket-server/index', () => {
                       exceptionName: null,
                     },
                   ],
-                  validReviewers: [],
+                  validReviewers: ['userName2'],
                 },
               ],
-            });
+            })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => {
+                return (
+                  Array.isArray(body.reviewers) &&
+                  body.reviewers.every(
+                    (r: { user: { name: string } }) => r?.user?.name !== 'name',
+                  )
+                );
+              },
+            )
+            .once()
+            .reply(200);
 
-          await expect(
-            bitbucket.addReviewers(5, ['name']),
-          ).rejects.toThrowErrorMatchingSnapshot();
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
         });
 
         it('throws', async () => {

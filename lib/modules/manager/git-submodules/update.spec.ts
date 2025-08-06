@@ -2,7 +2,7 @@ import type { SimpleGit } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
-import { join } from 'upath';
+import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -37,7 +37,7 @@ describe('modules/manager/git-submodules/update', () => {
       upgrade = { depName: 'renovate' };
 
       tmpDir = await dir({ unsafeCleanup: true });
-      adminConfig = { localDir: join(tmpDir.path) };
+      adminConfig = { localDir: upath.join(tmpDir.path) };
       GlobalConfig.set(adminConfig);
     });
 

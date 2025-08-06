@@ -721,14 +721,20 @@ async function updatePRAndAddReviewers(
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (
-      err.statusCode === 409 &&
-      !utils.isInvalidReviewersResponse(err)
-    ) {
-      logger.debug(
-        '409 response to adding reviewers - has repository changed?',
-      );
-      throw new Error(REPOSITORY_CHANGED);
+    } else if (err.statusCode === 409) {
+      if (utils.isInvalidReviewersResponse(err)) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = utils.getInvalidReviewers(err);
+        const filteredReviewers = reviewers.filter(
+          (name) => !invalidReviewers.includes(name),
+        );
+        await updatePRAndAddReviewers(prNo, filteredReviewers);
+      } else {
+        logger.debug(
+          '409 response to adding reviewers - has repository changed?',
+        );
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
       throw err;
     }

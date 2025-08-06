@@ -89,6 +89,9 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
+      httpCache.timestamp = new Date().toISOString();
+      await this.persist(url, httpCache);
+
       HttpCacheStats.incRemoteHits(url);
       const cachedResp = copyResponse(
         httpCache.httpResponse as HttpResponse<T>,

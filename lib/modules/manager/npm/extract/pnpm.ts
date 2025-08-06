@@ -11,17 +11,13 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
-import type {
-  PackageDependency,
-  PackageFile,
-  PackageFileContent,
-} from '../../types';
+import type { PackageFile, PackageFileContent } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { PnpmCatalogsSchema } from '../schema';
 import { PnpmWorkspaceFileSchema } from '../schema';
 import type { NpmManagerData } from '../types';
-import { extractDependency, parseDepName } from './common/dependency';
-import type { LockFile, PnpmCatalog, PnpmWorkspaceFile } from './types';
+import { extractCatalogDeps } from './common/catalogs';
+import type { Catalog, LockFile, PnpmWorkspaceFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
   return is.plainObject(obj) && 'lockfileVersion' in obj;
@@ -279,7 +275,7 @@ export async function extractPnpmWorkspaceFile(
 
   const pnpmCatalogs = pnpmCatalogsToArray(catalogs);
 
-  const deps = extractPnpmCatalogDeps(pnpmCatalogs);
+  const deps = extractCatalogDeps(pnpmCatalogs);
 
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
@@ -296,42 +292,11 @@ export async function extractPnpmWorkspaceFile(
   };
 }
 
-/**
- * In order to facilitate matching on specific catalogs, we structure the
- * depType as `pnpm.catalog.default`, `pnpm.catalog.react17`, and so on.
- */
-function getCatalogDepType(name: string): string {
-  const CATALOG_DEPENDENCY = 'pnpm.catalog';
-  return `${CATALOG_DEPENDENCY}.${name}`;
-}
-
-function extractPnpmCatalogDeps(
-  catalogs: PnpmCatalog[],
-): PackageDependency<NpmManagerData>[] {
-  const deps: PackageDependency<NpmManagerData>[] = [];
-
-  for (const catalog of catalogs) {
-    for (const [key, val] of Object.entries(catalog.dependencies)) {
-      const depType = getCatalogDepType(catalog.name);
-      const depName = parseDepName(depType, key);
-      const dep: PackageDependency<NpmManagerData> = {
-        depType,
-        depName,
-        ...extractDependency(depType, depName, val!),
-        prettyDepType: depType,
-      };
-      deps.push(dep);
-    }
-  }
-
-  return deps;
-}
-
 function pnpmCatalogsToArray({
   catalog: defaultCatalogDeps,
   catalogs: namedCatalogs,
-}: PnpmCatalogs): PnpmCatalog[] {
-  const result: PnpmCatalog[] = [];
+}: PnpmCatalogs): Catalog[] {
+  const result: Catalog[] = [];
 
   if (defaultCatalogDeps !== undefined) {
     result.push({ name: 'default', dependencies: defaultCatalogDeps });
