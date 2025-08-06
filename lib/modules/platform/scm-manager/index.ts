@@ -51,11 +51,11 @@ export async function initPlatform({
   token,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
-    throw new Error('SCM-Manager endpoint not configured');
+    throw new Error('Init: SCM-Manager endpoint not configured');
   }
 
   if (!token) {
-    throw new Error('SCM-Manager API token not configured');
+    throw new Error('Init: SCM-Manager API token not configured');
   }
 
   setBaseUrl(endpoint);
@@ -66,13 +66,13 @@ export async function initPlatform({
     const gitAuthor = `${me.displayName} <${me.mail}>`;
     const result = { endpoint, gitAuthor };
 
-    logger.debug({ result }, 'Plattform result');
+    logger.debug({ result }, 'Platform result');
 
     return result;
   } catch (err) {
     logger.debug(
       { err },
-      'Error authenticating with SCM-Manager. Check your token',
+      'Init: Error authenticating with SCM-Manager. Check your token',
     );
     throw new Error('Init: Authentication failure');
   }
@@ -104,7 +104,7 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(config.repository, getBaseUrl()),
   };
 
-  logger.trace({ result }, `Repo initialized`);
+  logger.debug({ result }, `Repo initialized`);
 
   return result;
 }
@@ -132,11 +132,11 @@ export async function findPr({
   );
 
   if (result) {
-    logger.trace({ result }, `Found PR`);
+    logger.debug({ result }, `Found PR`);
     return result;
   }
 
-  logger.trace(
+  logger.debug(
     `Could not find PR with source branch ${branchName} and title ${
       prTitle ?? ''
     } and state ${state}`,
@@ -150,13 +150,13 @@ export async function getPr(number: number): Promise<Pr | null> {
   const cachedPr = inProgressPrs.find((pr) => pr.number === number);
 
   if (cachedPr) {
-    logger.trace('Returning from cached PRs');
+    logger.debug('Returning from cached PRs');
     return cachedPr;
   }
 
   try {
     const result = await getRepoPr(config.repository, number);
-    logger.trace('Returning PR from API');
+    logger.debug('Returning PR from API');
     return mapPrFromScmToRenovate(result);
   } catch (error) {
     logger.error({ error }, `Can not find a PR with id ${number}`);
