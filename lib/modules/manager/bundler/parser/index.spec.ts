@@ -198,7 +198,6 @@ describe('modules/manager/bundler/parser/index', () => {
               datasource: 'rubygems',
               depName,
               currentValue: version,
-              skipReason: 'unknown-registry',
               ...(depTypes && { depTypes }),
             },
           ],
@@ -224,7 +223,6 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'foo',
             currentValue: '1.0.0',
             depTypes: ['test'],
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -243,7 +241,6 @@ describe('modules/manager/bundler/parser/index', () => {
             datasource: 'rubygems',
             depName: 'foo',
             currentValue: "'>= 1.0.0', '< 2.0.0'",
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -263,7 +260,6 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'foo',
             currentValue: '1.0.0',
             depTypes: ['test', 'development'],
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -287,7 +283,6 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'foo',
             currentValue: '1.0.0',
             depTypes: ['test'],
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -310,14 +305,12 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'foo',
             currentValue: '1.0.0',
             depTypes: ['test'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'bar',
             currentValue: '2.0.0',
             depTypes: ['test'],
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -351,35 +344,30 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'gem-1',
             currentValue: '1',
             depTypes: ['foo'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'gem-2',
             currentValue: '2',
             depTypes: ['foo', 'bar', 'baz'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'gem-3',
             currentValue: '3',
             depTypes: ['foo', 'bar', 'baz', 'qux'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'gem-4',
             currentValue: '4',
             depTypes: ['foo', 'bar', 'baz'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'gem-5',
             currentValue: '5',
             depTypes: ['foo'],
-            skipReason: 'unknown-registry',
           },
         ],
       });
@@ -400,14 +388,12 @@ describe('modules/manager/bundler/parser/index', () => {
             depName: 'foo',
             currentValue: '1.0.0',
             depTypes: ['test', 'development', 'foo'],
-            skipReason: 'unknown-registry',
           },
           {
             datasource: 'rubygems',
             depName: 'bar',
             currentValue: '2.0.0',
             depTypes: ['test', 'development', 'bar', 'baz'],
-            skipReason: 'unknown-registry',
           },
         ],
       });

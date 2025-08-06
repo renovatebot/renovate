@@ -313,13 +313,11 @@ describe('modules/manager/bundler/extract', () => {
           currentValue: '>= 3.0.5',
           datasource: 'rubygems',
           depName: 'gem_with_one_value',
-          skipReason: 'unknown-registry',
         },
         {
           currentValue: '">= 3.0.5", "< 3.2"',
           datasource: 'rubygems',
           depName: 'gem_with_multiple_values',
-          skipReason: 'unknown-registry',
         },
       ],
       lockFiles: ['Gemfile.lock'],

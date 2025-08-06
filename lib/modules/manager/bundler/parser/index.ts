@@ -53,7 +53,6 @@ function getRegistryUrlsData(
   gemDef: SgNode,
   gemRegistryUrls: KvArgs[string] | undefined | null,
   blockRegistryUrls: string[],
-  globalRegistryUrls: string[],
 ): RegistryUrlsData {
   const urls = [...blockRegistryUrls];
 
@@ -71,8 +70,6 @@ function getRegistryUrlsData(
 
   if (urls.length !== 0) {
     return { registryUrls: uniq(urls) };
-  } else if (globalRegistryUrls.length === 0) {
-    return { skipReason: 'unknown-registry' };
   }
 
   return {};
@@ -145,7 +142,6 @@ export async function parseGemfile(
       gemDef,
       gemRegistryUrls,
       blockRegistryUrls,
-      globalRegistryUrls,
     );
     mergeData(dep, registryUrlsData);
 
