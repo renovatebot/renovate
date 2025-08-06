@@ -11,7 +11,7 @@
   <name>Generic Package</name>
   <description>Generic Maven Package</description>
   <scm>
-    <url>scm:https://github.com/example/test</url>
+    <url>scm:https://github.com/example/test/tree/${project.scm.tag}</url>
     <connection>scm:git@github.com:example/test.git</connection>
     <developerConnection>scm:git@github.com:example/test.git</developerConnection>
   </scm>
