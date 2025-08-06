@@ -147,7 +147,7 @@
   },
   "dependencies": {
     "@ast-grep/lang-ruby": "0.0.3",
-    "@ast-grep/napi": "0.39.1",
+    "@ast-grep/napi": "0.39.3",
     "@aws-sdk/client-codecommit": "3.858.0",
     "@aws-sdk/client-ec2": "3.858.0",
     "@aws-sdk/client-ecr": "3.858.0",

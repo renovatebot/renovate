@@ -15,8 +15,8 @@ importers:
         specifier: 0.0.3
         version: 0.0.3(tree-sitter-cli@0.25.6)
       '@ast-grep/napi':
-        specifier: 0.39.1
-        version: 0.39.1
+        specifier: 0.39.3
+        version: 0.39.3
       '@aws-sdk/client-codecommit':
         specifier: 3.858.0
         version: 3.858.0
@@ -643,62 +643,62 @@ packages:
       tree-sitter-cli:
         optional: true
 
-  '@ast-grep/napi-darwin-arm64@0.39.1':
-    resolution: {integrity: sha512-g+Bf940b/k6/yrLwWTCXDaZ4Nt5NjUM30MJcwnBbTXsmlRIYnoFIktR8X7kS33DSCu7knT22QdF3B393mHoyVg==}
+  '@ast-grep/napi-darwin-arm64@0.39.3':
+    resolution: {integrity: sha512-XfTqyDOOyYzAJo0ZOLowrWKnwIB2q6PpFJG1EZFWLkMB54nHub+XDseLxA33uy3O4TpereMaJwUYBDFmOlDqtg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@ast-grep/napi-darwin-x64@0.39.1':
-    resolution: {integrity: sha512-jPtuBBnQT7BC+oA0UudC2nGUcIUQF//f1CKnz4DnEj3AebgsW8RAkIUTSw20Y6uhPTjbSQ9fx9AjDvbQZe/I5A==}
+  '@ast-grep/napi-darwin-x64@0.39.3':
+    resolution: {integrity: sha512-uncDaz0wJWPHRSB76cllFzVVqJJoN2KisbJKvoBoX7yTCtQtOloWpLf+V+RM7KLzk9sruhDZeWqV2929MgUGTw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@ast-grep/napi-linux-arm64-gnu@0.39.1':
-    resolution: {integrity: sha512-N7wH7ExECtYLeXe6Q1/s7NZFCDGJQrkmQaYa2vooSFYZB1i4BAtFu92K3IzpTlMXxbwqrGIEZGPcRmZOYW68cA==}
+  '@ast-grep/napi-linux-arm64-gnu@0.39.3':
+    resolution: {integrity: sha512-ciNe9s54JUtttFtsdkBmexdZroX0WwgYgj8CE0qscGs5u1fjaEaQghgwR8l9DnckAm556S6KpszFhscTj69vNA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@ast-grep/napi-linux-arm64-musl@0.39.1':
-    resolution: {integrity: sha512-mc2yJV3mFVth1hwRwz3UTnAEVykRQhGMz8pfjC0GEistHqe6a18KYTIUwYFmQD300O/rLTCLvgV64ICzqD8k4A==}
+  '@ast-grep/napi-linux-arm64-musl@0.39.3':
+    resolution: {integrity: sha512-K5rXJmaQ06H5PGCeSRTTiqszkFcEgRSryJYVs/5r/xj5scZwM7Xme+D6gc7FD/x2CuQ5cPQAJeH698zGbPV2Zg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@ast-grep/napi-linux-x64-gnu@0.39.1':
-    resolution: {integrity: sha512-xvIINrydi0WTU8yS48UhfHNv/xawF0Cjob2Km+UyVKgNZc5HDlAnn/BxXnTgvV6gla1ynC1FVmxHKmixoUnA3A==}
+  '@ast-grep/napi-linux-x64-gnu@0.39.3':
+    resolution: {integrity: sha512-5xHCVTYj2sOsv0FriSpymrNx9FX5qOxjFKYkDwmJsTiAiENmmFyELNyfAN3ONeEpsV3kBJAZ0BBmd1KcBVOwRQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@ast-grep/napi-linux-x64-musl@0.39.1':
-    resolution: {integrity: sha512-ehAce6LVhZPS612lVH0unXgmSP2kyNI1hs7vXpboJTbZkuNTNn+vWBICSP6XaInsV1BqZ6VejAIgA42iH6BrqQ==}
+  '@ast-grep/napi-linux-x64-musl@0.39.3':
+    resolution: {integrity: sha512-6sD1YRKhios38r0muRX2AMIZDinaiRfF31rE4L2gMP0IeJm5s4uJKqVa6eoBAMyGgZlhne1ySNwJ06HBxgIqRw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@ast-grep/napi-win32-arm64-msvc@0.39.1':
-    resolution: {integrity: sha512-HWl/jX3RT69XR/2JNdv2L1Rh7YeXHvuwq8GVBJcWhNtj3wFT9h5h8MSzfWgPLLmB6VAhjulPrG1iU7LAjvWaYQ==}
+  '@ast-grep/napi-win32-arm64-msvc@0.39.3':
+    resolution: {integrity: sha512-3f5jrd6ar7RfD+djCxgf4QCRjVVOsyuU4lnwzFpdEcuZPVdI6jTzCoXg7D5bDkHeml8ZO6ojezkty74PbJZm4g==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@ast-grep/napi-win32-ia32-msvc@0.39.1':
-    resolution: {integrity: sha512-fivsR5Et5/UHQ/BArzQgeTV05J49JcB+vjZSi0H/6uiNoq2+GOcwPkdlEGGM3HdDH64olaeXgRku0L9993r1Qw==}
+  '@ast-grep/napi-win32-ia32-msvc@0.39.3':
+    resolution: {integrity: sha512-h5qtHRnV8KaAFRQWff1PkRctFueRTEDSrBnr18xQTShbRdUEzQApoEPsGRWnpuOJzBDgTYkkX3XDEQy8tVFJyg==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
 
-  '@ast-grep/napi-win32-x64-msvc@0.39.1':
-    resolution: {integrity: sha512-e7+eTU2aTDgE6c+vrkCkiJLxvzHm2Keirp/cHOx69KgZSYVWbfGrPj8VpLBIUHHapI58BKzLd4j+yFdD51fryg==}
+  '@ast-grep/napi-win32-x64-msvc@0.39.3':
+    resolution: {integrity: sha512-syA3xRMS25RiSCJ1JWP5D00UwFvJSoQgHP4O5BGreouRqRpQlJr4CD4Sdf+UuHHwGbDYb652SoEKsi1rHo0M/Q==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@ast-grep/napi@0.39.1':
-    resolution: {integrity: sha512-omVL1aWHuc/gCMqtJRHLKJMM1VFRnaHU18IxL0tKeQHQJGVRU15I6MKi6z8RAeey4CFVw26l+HlXdfHMWMIyWQ==}
+  '@ast-grep/napi@0.39.3':
+    resolution: {integrity: sha512-Y+16O9AbeR+yr5qnVpXHXHv/3EG2IPGCIbvxYo4MZpFSAmUBYibiLP0GljK5TWkQz6y4u5eHso3F13evyww4rw==}
     engines: {node: '>= 10'}
 
   '@ast-grep/setup-lang@0.0.3':
@@ -6564,44 +6564,44 @@ snapshots:
     optionalDependencies:
       tree-sitter-cli: 0.25.6
 
-  '@ast-grep/napi-darwin-arm64@0.39.1':
+  '@ast-grep/napi-darwin-arm64@0.39.3':
     optional: true
 
-  '@ast-grep/napi-darwin-x64@0.39.1':
+  '@ast-grep/napi-darwin-x64@0.39.3':
     optional: true
 
-  '@ast-grep/napi-linux-arm64-gnu@0.39.1':
+  '@ast-grep/napi-linux-arm64-gnu@0.39.3':
     optional: true
 
-  '@ast-grep/napi-linux-arm64-musl@0.39.1':
+  '@ast-grep/napi-linux-arm64-musl@0.39.3':
     optional: true
 
-  '@ast-grep/napi-linux-x64-gnu@0.39.1':
+  '@ast-grep/napi-linux-x64-gnu@0.39.3':
     optional: true
 
-  '@ast-grep/napi-linux-x64-musl@0.39.1':
+  '@ast-grep/napi-linux-x64-musl@0.39.3':
     optional: true
 
-  '@ast-grep/napi-win32-arm64-msvc@0.39.1':
+  '@ast-grep/napi-win32-arm64-msvc@0.39.3':
     optional: true
 
-  '@ast-grep/napi-win32-ia32-msvc@0.39.1':
+  '@ast-grep/napi-win32-ia32-msvc@0.39.3':
     optional: true
 
-  '@ast-grep/napi-win32-x64-msvc@0.39.1':
+  '@ast-grep/napi-win32-x64-msvc@0.39.3':
     optional: true
 
-  '@ast-grep/napi@0.39.1':
+  '@ast-grep/napi@0.39.3':
     optionalDependencies:
-      '@ast-grep/napi-darwin-arm64': 0.39.1
-      '@ast-grep/napi-darwin-x64': 0.39.1
-      '@ast-grep/napi-linux-arm64-gnu': 0.39.1
-      '@ast-grep/napi-linux-arm64-musl': 0.39.1
-      '@ast-grep/napi-linux-x64-gnu': 0.39.1
-      '@ast-grep/napi-linux-x64-musl': 0.39.1
-      '@ast-grep/napi-win32-arm64-msvc': 0.39.1
-      '@ast-grep/napi-win32-ia32-msvc': 0.39.1
-      '@ast-grep/napi-win32-x64-msvc': 0.39.1
+      '@ast-grep/napi-darwin-arm64': 0.39.3
+      '@ast-grep/napi-darwin-x64': 0.39.3
+      '@ast-grep/napi-linux-arm64-gnu': 0.39.3
+      '@ast-grep/napi-linux-arm64-musl': 0.39.3
+      '@ast-grep/napi-linux-x64-gnu': 0.39.3
+      '@ast-grep/napi-linux-x64-musl': 0.39.3
+      '@ast-grep/napi-win32-arm64-msvc': 0.39.3
+      '@ast-grep/napi-win32-ia32-msvc': 0.39.3
+      '@ast-grep/napi-win32-x64-msvc': 0.39.3
 
   '@ast-grep/setup-lang@0.0.3': {}
 
