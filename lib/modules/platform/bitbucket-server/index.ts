@@ -49,7 +49,7 @@ import type {
   PullRequestActivity,
   PullRequestCommentActivity,
 } from './schema';
-import { isEmail, UserSchema, UsersSchema } from './schema';
+import { UserSchema, UsersSchema, isEmail } from './schema';
 import type {
   BbsConfig,
   BbsPr,
