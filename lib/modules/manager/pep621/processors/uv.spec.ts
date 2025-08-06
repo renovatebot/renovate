@@ -1,5 +1,5 @@
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
-import { join } from 'upath';
+import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
@@ -23,9 +23,9 @@ const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
 const adminConfig: RepoGlobalConfig = {
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/cache'),
-  containerbaseDir: join('/tmp/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/cache'),
+  containerbaseDir: upath.join('/tmp/cache/containerbase'),
 };
 
 const processor = new UvProcessor();
