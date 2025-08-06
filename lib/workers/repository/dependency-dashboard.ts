@@ -25,43 +25,67 @@ interface DependencyDashboard {
 }
 
 const rateLimitedRe = regEx(
-  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  ` - \\[ \\] ${getMarkdownComment('unlimit-branch=([^\\s]+)')}`,
   'g',
 );
 const pendingApprovalRe = regEx(
-  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  ` - \\[ \\] ${getMarkdownComment('approve-branch=([^\\s]+)')}`,
   'g',
 );
-const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const generalBranchRe = regEx(
+  ` ${getMarkdownComment('([a-zA-Z]+)-branch=([^\\s]+)')}`,
+);
 const markedBranchesRe = regEx(
-  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  ` - \\[x\\] ${getMarkdownComment('([a-zA-Z]+)-branch=([^\\s]+)')}`,
   'g',
 );
 
+const approveAllPendingPrs = 'approve-all-pending-prs';
+const createAllRateLimitedPrs = 'create-all-rate-limited-prs';
+const createConfigMigrationPr = 'create-config-migration-pr';
+const configMigrationPrInfo = 'config-migration-pr-info';
+const rebaseAllOpenPrs = 'rebase-all-open-prs';
+
+function getMarkdownComment(comment: string): string {
+  return `<!-- ${comment} -->`;
+}
+
+function isBoxChecked(issueBody: string, type: string): boolean {
+  return issueBody.includes(getCheckbox(type, true));
+}
+
+function isBoxUnchecked(issueBody: string, type: string): boolean {
+  return issueBody.includes(getCheckbox(type));
+}
+
+function getCheckbox(type: string, checked = false): string {
+  return ` - [${checked ? 'x' : ' '}] ${getMarkdownComment(type)}`;
+}
+
 function checkOpenAllRateLimitedPR(issueBody: string): boolean {
-  return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
+  return isBoxChecked(issueBody, createAllRateLimitedPrs);
 }
 
 function checkApproveAllPendingPR(issueBody: string): boolean {
-  return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
+  return isBoxChecked(issueBody, approveAllPendingPrs);
 }
 
 function checkRebaseAll(issueBody: string): boolean {
-  return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
+  return isBoxChecked(issueBody, rebaseAllOpenPrs);
 }
 
 function getConfigMigrationCheckboxState(
   issueBody: string,
 ): 'no-checkbox' | 'checked' | 'unchecked' | 'migration-pr-exists' {
-  if (issueBody.includes('<!-- config-migration-pr-info -->')) {
+  if (issueBody.includes(getMarkdownComment(configMigrationPrInfo))) {
     return 'migration-pr-exists';
   }
 
-  if (issueBody.includes(' - [x] <!-- create-config-migration-pr -->')) {
+  if (isBoxChecked(issueBody, createConfigMigrationPr)) {
     return 'checked';
   }
 
-  if (issueBody.includes(' - [ ] <!-- create-config-migration-pr -->')) {
+  if (isBoxUnchecked(issueBody, createConfigMigrationPr)) {
     return 'unchecked';
   }
 
@@ -161,8 +185,7 @@ export async function readDashboardBody(
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
-  let item = ' - [ ] ';
-  item += `<!-- ${type}-branch=${branch.branchName} -->`;
+  let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
     item += `[${branch.prTitle!}](../pull/${branch.prNo})`;
@@ -293,15 +316,18 @@ export async function ensureDependencyDashboard(
   if (configMigrationRes.result === 'pr-exists') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      `<!-- config-migration-pr-info --> See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      getMarkdownComment(configMigrationPrInfo) +
+      ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
     issueBody +=
       '## Config Migration Needed (error)\n\n' +
-      `<!-- config-migration-pr-info --> The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+      getMarkdownComment(configMigrationPrInfo) +
+      ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
     issueBody +=
       '## Config Migration Needed\n\n' +
-      ' - [ ] <!-- create-config-migration-pr --> Select this checkbox to let Renovate create an automated Config Migration PR.' +
+      getCheckbox(createConfigMigrationPr) +
+      ' Select this checkbox to let Renovate create an automated Config Migration PR.' +
       '\n\n';
   }
 
@@ -335,13 +361,12 @@ export async function ensureDependencyDashboard(
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
-    issueBody += `These branches will be created by Renovate only once you click their checkbox below.\n\n`;
+    issueBody += `The following branches are pending approval. To create them, click on a checkbox below.\n\n`;
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
     }
     if (pendingApprovals.length > 1) {
-      issueBody += ' - [ ] ';
-      issueBody += '<!-- approve-all-pending-prs -->';
+      issueBody += getCheckbox(approveAllPendingPrs);
       issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
     }
     issueBody += '\n';
@@ -352,7 +377,7 @@ export async function ensureDependencyDashboard(
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
     issueBody +=
-      'These updates are awaiting their schedule. Click on a checkbox to get an update now.\n\n';
+      'The following updates are awaiting their schedule. To get an update now, click on a checkbox below.\n\n';
     for (const branch of awaitingSchedule) {
       issueBody += getListItem(branch, 'unschedule');
     }
@@ -367,13 +392,12 @@ export async function ensureDependencyDashboard(
   if (rateLimited.length) {
     issueBody += '## Rate-Limited\n\n';
     issueBody +=
-      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
+      'The following updates are currently rate-limited. To force their creation now, click on a checkbox below.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
     }
     if (rateLimited.length > 1) {
-      issueBody += ' - [ ] ';
-      issueBody += '<!-- create-all-rate-limited-prs -->';
+      issueBody += getCheckbox(createAllRateLimitedPrs);
       issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
     }
     issueBody += '\n';
@@ -382,7 +406,7 @@ export async function ensureDependencyDashboard(
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
-      'These updates encountered an error and will be retried. Click on a checkbox below to force a retry now.\n\n';
+      'The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.\n\n';
     for (const branch of errorList) {
       issueBody += getListItem(branch, 'retry');
     }
@@ -394,7 +418,7 @@ export async function ensureDependencyDashboard(
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
     issueBody +=
-      "These branches exist but PRs won't be created until you approve them by clicking on a checkbox.\n\n";
+      'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.\n\n';
     for (const branch of awaitingPr) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -403,7 +427,7 @@ export async function ensureDependencyDashboard(
   const prEdited = branches.filter((branch) => branch.result === 'pr-edited');
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
-    issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.\n\n`;
+    issueBody += `The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.\n\n`;
     for (const branch of prEdited) {
       issueBody += getListItem(branch, 'rebase');
     }
@@ -412,7 +436,7 @@ export async function ensureDependencyDashboard(
   const prPending = branches.filter((branch) => branch.result === 'pending');
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
-    issueBody += `These updates await pending status checks. To force their creation now, click the checkbox below.\n\n`;
+    issueBody += `The following updates await pending status checks. To force their creation now, click on a checkbox below.\n\n`;
     for (const branch of prPending) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -423,7 +447,7 @@ export async function ensureDependencyDashboard(
   );
   if (prPendingBranchAutomerge.length) {
     issueBody += '## Pending Branch Automerge\n\n';
-    issueBody += `These updates await pending status checks before automerging. Click on a checkbox to abort the branch automerge, and create a PR instead.\n\n`;
+    issueBody += `The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.\n\n`;
     for (const branch of prPendingBranchAutomerge) {
       issueBody += getListItem(branch, 'approvePr');
     }
@@ -460,7 +484,7 @@ export async function ensureDependencyDashboard(
   // istanbul ignore if
   if (otherBranches.length) {
     issueBody += '## Other Branches\n\n';
-    issueBody += `These updates are pending. To force PRs open, click the checkbox below.\n\n`;
+    issueBody += `The following updates are pending. To force the creation of a PR, click on a checkbox below.\n\n`;
     for (const branch of otherBranches) {
       issueBody += getListItem(branch, 'other');
     }
@@ -472,13 +496,12 @@ export async function ensureDependencyDashboard(
   if (inProgress.length) {
     issueBody += '## Open\n\n';
     issueBody +=
-      'These updates have all been created already. Click a checkbox below to force a retry/rebase of any.\n\n';
+      'The following updates have all been created. To force a retry/rebase of any, click on a checkbox below.\n\n';
     for (const branch of inProgress) {
       issueBody += getListItem(branch, 'rebase');
     }
     if (inProgress.length > 2) {
-      issueBody += ' - [ ] ';
-      issueBody += '<!-- rebase-all-open-prs -->';
+      issueBody += getCheckbox(rebaseAllOpenPrs);
       issueBody += '**Click on this checkbox to rebase all open PRs at once**';
       issueBody += '\n';
     }
@@ -490,7 +513,7 @@ export async function ensureDependencyDashboard(
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
-      'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
+      'The following updates are blocked by an existing closed PR. To recreate the PR, click on a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
       issueBody += getListItem(branch, 'recreate');
     }
@@ -538,7 +561,9 @@ export async function ensureDependencyDashboard(
         delete dependencyDashboardChecks[branchName];
       }
       for (const branchName of Object.keys(dependencyDashboardChecks)) {
-        const checkText = `- [ ] <!-- ${dependencyDashboardChecks[branchName]}-branch=${branchName} -->`;
+        const checkText = getCheckbox(
+          `${dependencyDashboardChecks[branchName]}-branch=${branchName}`,
+        );
         issueBody = issueBody.replace(
           checkText,
           checkText.replace('[ ]', '[x]'),

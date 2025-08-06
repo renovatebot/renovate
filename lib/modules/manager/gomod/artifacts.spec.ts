@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { join } from 'upath';
+import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -57,9 +57,9 @@ const gomod1 = codeBlock`
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  localDir: upath.join('/tmp/github/some/repo'),
+  cacheDir: upath.join('/tmp/renovate/cache'),
+  containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
@@ -293,9 +293,9 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('supports vendor directory update', async () => {
-    const foo = join('vendor/github.com/foo/foo/go.mod');
-    const bar = join('vendor/github.com/bar/bar/go.mod');
-    const baz = join('vendor/github.com/baz/baz/go.mod');
+    const foo = upath.join('vendor/github.com/foo/foo/go.mod');
+    const bar = upath.join('vendor/github.com/bar/bar/go.mod');
+    const baz = upath.join('vendor/github.com/baz/baz/go.mod');
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
@@ -382,9 +382,9 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('skips vendor directory update with gomodSkipVendor', async () => {
-    const foo = join('vendor/github.com/foo/foo/go.mod');
-    const bar = join('vendor/github.com/bar/bar/go.mod');
-    const baz = join('vendor/github.com/baz/baz/go.mod');
+    const foo = upath.join('vendor/github.com/foo/foo/go.mod');
+    const bar = upath.join('vendor/github.com/bar/bar/go.mod');
+    const baz = upath.join('vendor/github.com/baz/baz/go.mod');
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     const execSnapshots = mockExecAll();
@@ -432,9 +432,9 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   it('supports vendor directory update with go.work', async () => {
-    const foo = join('vendor/github.com/foo/foo/go.mod');
-    const bar = join('vendor/github.com/bar/bar/go.mod');
-    const baz = join('vendor/github.com/baz/baz/go.mod');
+    const foo = upath.join('vendor/github.com/foo/foo/go.mod');
+    const bar = upath.join('vendor/github.com/bar/bar/go.mod');
+    const baz = upath.join('vendor/github.com/baz/baz/go.mod');
 
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
